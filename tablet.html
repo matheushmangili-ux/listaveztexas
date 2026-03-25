@@ -62,37 +62,75 @@
     position: relative;
   }
 
-  /* Footer */
+  /* Footer — Vendedores */
   .t-footer {
     grid-column: 1 / -1;
     display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
     background: var(--bg-surface);
     border-top: 1px solid var(--border-subtle);
     overflow-x: auto;
+    min-height: 64px;
   }
+  .t-footer::-webkit-scrollbar { height: 0; }
+  .t-footer.drop-highlight { border-top: 2px solid var(--danger); background: var(--danger-bg); }
 
-  /* Status toggle pill */
-  .status-pill {
+  .footer-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    min-width: 80px;
+    cursor: grab;
+    border-right: 1px solid var(--border-subtle);
+    transition: background .15s, opacity .15s;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    position: relative;
+  }
+  .footer-card:last-child { border-right: none; }
+  .footer-card:hover { background: var(--bg-hover); }
+  .footer-card:active { opacity: .7; }
+  .footer-card .fc-name {
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    color: var(--text-primary);
+  }
+  .footer-card .fc-status {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-top: 2px;
+    white-space: nowrap;
+  }
+  .footer-card .fc-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    position: absolute;
+    top: 6px; right: 6px;
+  }
+  .footer-card.in-queue { opacity: .35; pointer-events: none; }
+  .footer-end-all {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    border-radius: 20px;
+    justify-content: center;
+    padding: 8px 16px;
+    min-width: 56px;
+    cursor: pointer;
+    color: var(--danger);
     font-size: 11px;
     font-weight: 700;
-    border: 1px solid var(--border-subtle);
-    background: var(--bg-card);
-    cursor: pointer;
     white-space: nowrap;
-    transition: all .2s;
-    -webkit-tap-highlight-color: transparent;
-    min-height: 40px;
+    transition: background .15s;
+    border-left: 1px solid var(--border-subtle);
+    flex-shrink: 0;
   }
-  .status-pill:hover { border-color: var(--border-medium); }
-  .status-pill .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .footer-end-all:hover { background: var(--danger-bg); }
 
   /* Active service card */
   .active-service {
@@ -312,13 +350,6 @@
       </div>
     </div>
 
-    <!-- Botão Finalizar Todos -->
-    <div style="width:100%;max-width:500px;margin-bottom:12px">
-      <button class="btn btn-ghost" style="width:100%;min-height:40px;font-size:12px;color:var(--danger)" id="btnFinalizarTodos" onclick="finalizarTodos()">
-        <i class="fa-solid fa-users-slash" style="font-size:10px"></i> Finalizar Todos
-      </button>
-    </div>
-
     <!-- Atendimentos ativos (múltiplos simultâneos) -->
     <div id="activeList" style="width:100%;max-width:500px;display:flex;flex-direction:column;gap:10px">
       <p id="activeLabel" style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;display:none">
@@ -327,9 +358,8 @@
     </div>
   </main>
 
-  <!-- FOOTER: status toggles -->
+  <!-- FOOTER: vendedores -->
   <footer class="t-footer" id="statusFooter">
-    <span style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-right:8px;white-space:nowrap">Status:</span>
     <!-- Populated dynamically -->
   </footer>
 </div>
@@ -608,12 +638,6 @@ function renderQueue() {
   // Pausa
   pausa.forEach(v => { html += renderQueueItem(v, null, false); });
 
-  // Fora — mostrar como "Disponíveis para entrar" com drag habilitado
-  if (fora.length > 0) {
-    html += '<div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;padding:12px 8px 4px"><i class="fa-solid fa-user-plus" style="margin-right:4px"></i>Toque ou arraste para a fila</div>';
-    fora.forEach(v => { html += renderQueueItem(v, null, false, true); });
-  }
-
   list.innerHTML = html;
   initDragAndDrop();
 }
@@ -621,9 +645,7 @@ function renderQueue() {
 function renderQueueItem(v, pos, isActive, draggable) {
   const cfg = STATUS_CONFIG[v.status] || STATUS_CONFIG.fora;
   const ini = initials(v.apelido || v.nome);
-  const isFora = v.status === 'fora' || (v.status === 'disponivel' && v.posicao_fila == null);
-  const tapAction = isFora ? `onclick="quickAddToQueue('${v.id}')"` : '';
-  const dragAttr = draggable ? `draggable="true" ondragstart="onDragStart(event)" ontouchstart="onTouchDragStart(event)" ${tapAction}` : '';
+  const dragAttr = draggable ? 'draggable="true" ondragstart="onDragStart(event)" ontouchstart="onTouchDragStart(event)"' : '';
   const dragStyle = draggable ? 'cursor:grab;' : '';
   const posHtml = pos ? `<div class="queue-position" style="background:${cfg.bg};color:${cfg.color}">${pos}</div>` : `<div class="queue-position" style="background:${cfg.bg};color:${cfg.color}"><i class="fa-solid ${cfg.icon}" style="font-size:11px"></i></div>`;
 
@@ -649,11 +671,6 @@ function renderQueueItem(v, pos, isActive, draggable) {
     ${timerHtml}
   </div>`;
 }
-
-// ─── Quick add (tap to join queue) ───
-window.quickAddToQueue = async function(vendedorId) {
-  await addToQueue(vendedorId);
-};
 
 // ─── Drag and Drop (desktop + touch) ───
 let draggedId = null;
@@ -837,40 +854,79 @@ window.finalizarTodos = async function() {
   await loadVendedores();
 };
 
-// ─── Render footer (drop zone for removal) ───
+// ─── Render footer (vendedores com status) ───
 function renderFooter() {
   const footer = document.getElementById('statusFooter');
-  const pills = vendedores.map(v => {
-    let dotColor, tooltip;
-    if (v.status === 'em_atendimento') {
+  const SAIDA_LABELS = {
+    almoco: { label: 'Em almoço', color: '#f59e0b' },
+    banheiro: { label: 'Banheiro', color: '#60a5fa' },
+    reuniao: { label: 'Em reunião', color: '#a78bfa' },
+    finalizar: { label: 'Encerrou', color: '#f87171' },
+    outro: { label: 'Fora', color: '#64748b' }
+  };
+
+  const cards = vendedores.map(v => {
+    const inQueue = v.status === 'disponivel' && v.posicao_fila != null;
+    const atendendo = v.status === 'em_atendimento';
+    let statusLabel, statusColor, dotColor;
+
+    if (atendendo) {
+      statusLabel = 'Atendendo';
+      statusColor = 'var(--info)';
       dotColor = STATUS_CONFIG.em_atendimento.color;
-      tooltip = 'Atendendo';
-    } else if (v.status === 'disponivel' && v.posicao_fila != null) {
+    } else if (inQueue) {
+      statusLabel = 'Na fila (#' + v.posicao_fila + ')';
+      statusColor = 'var(--success)';
       dotColor = STATUS_CONFIG.disponivel.color;
-      tooltip = 'Na fila';
+    } else if (v.status === 'pausa') {
+      const m = saidaMotivos[v.id];
+      const sl = SAIDA_LABELS[m] || SAIDA_LABELS.outro;
+      statusLabel = sl.label;
+      statusColor = sl.color;
+      dotColor = sl.color;
     } else {
-      const motivo = saidaMotivos[v.id];
-      const sc = SAIDA_COLORS[motivo] || SAIDA_COLORS.outro;
-      dotColor = sc.color;
-      tooltip = sc.label;
+      const m = saidaMotivos[v.id];
+      const sl = SAIDA_LABELS[m] || { label: 'Disponível', color: '#64748b' };
+      statusLabel = sl.label;
+      statusColor = sl.color;
+      dotColor = sl.color;
     }
-    return `<div class="status-pill" onclick="handleFooterTap('${v.id}')" title="${v.apelido || v.nome}: ${tooltip}">
-      <div class="dot" style="background:${dotColor}"></div>
-      <span>${v.apelido || v.nome.split(' ')[0]}</span>
+
+    const inQueueClass = inQueue || atendendo ? ' in-queue' : '';
+    const dragAttr = !inQueue && !atendendo ? 'draggable="true" ondragstart="onFooterDragStart(event)"' : '';
+
+    return `<div class="footer-card${inQueueClass}" data-id="${v.id}" ${dragAttr} onclick="handleFooterTap('${v.id}')">
+      <div class="fc-dot" style="background:${dotColor}"></div>
+      <span class="fc-name">${v.apelido || v.nome.split(' ')[0]}</span>
+      <span class="fc-status" style="color:${statusColor}">${statusLabel}</span>
     </div>`;
   }).join('');
-  footer.innerHTML = '<span style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-right:8px;white-space:nowrap">Status:</span>' + pills;
 
-  // Footer as drop zone for removing from queue
-  footer.addEventListener('dragover', e => { e.preventDefault(); footer.style.borderTopColor = 'var(--danger)'; footer.style.background = 'var(--danger-bg)'; });
-  footer.addEventListener('dragleave', () => { footer.style.borderTopColor = ''; footer.style.background = ''; });
-  footer.addEventListener('drop', e => {
+  const endAllBtn = `<div class="footer-end-all" onclick="finalizarTodos()" title="Encerrar todos">
+    <i class="fa-solid fa-power-off" style="font-size:14px"></i>
+  </div>`;
+
+  footer.innerHTML = cards + endAllBtn;
+
+  // Footer como drop zone — arrastar DA fila PARA footer = popup motivo
+  footer.ondragover = e => { e.preventDefault(); footer.classList.add('drop-highlight'); };
+  footer.ondragleave = () => { footer.classList.remove('drop-highlight'); };
+  footer.ondrop = e => {
     e.preventDefault();
-    footer.style.borderTopColor = '';
-    footer.style.background = '';
+    footer.classList.remove('drop-highlight');
     if (draggedId) { openSaida(draggedId); draggedId = null; }
-  });
+  };
 }
+
+// ─── Footer drag start (arrastar do footer para sidebar) ───
+window.onFooterDragStart = function(e) {
+  const card = e.target.closest('.footer-card');
+  if (!card) return;
+  draggedId = card.dataset.id;
+  e.dataTransfer.effectAllowed = 'move';
+  card.style.opacity = '0.4';
+  setTimeout(() => { if (card) card.style.opacity = ''; }, 200);
+};
 
 // ─── Quick stats ───
 async function updateQuickStats() {
@@ -1100,20 +1156,18 @@ window.confirmMotivo = function() {
   finalize('nao_convertido', pendingOutcome, detalhe, produto, pendingAtendimentoId);
 };
 
-// ─── Footer pill tap ───
+// ─── Footer card tap ───
 window.handleFooterTap = async function(vendedorId) {
   const v = vendedores.find(x => x.id === vendedorId);
-  if (!v || v.status === 'em_atendimento') return;
-
-  if (v.status === 'disponivel' && v.posicao_fila != null) {
-    // Na fila → abrir popup de saída
-    openSaida(vendedorId);
-  } else {
-    // Fora/pausa → voltar pra fila
-    delete saidaMotivos[vendedorId];
-    sb.rpc('registrar_retorno', { p_vendedor_id: vendedorId }).catch(() => {});
-    await addToQueue(vendedorId);
-  }
+  if (!v) return;
+  // Em atendimento ou na fila → ignorar (card fica opaco)
+  if (v.status === 'em_atendimento') return;
+  if (v.status === 'disponivel' && v.posicao_fila != null) return;
+  // Fora/pausa → toque = entra na fila
+  if (!currentTurno) { toast('Abra o turno primeiro', 'warning'); return; }
+  delete saidaMotivos[vendedorId];
+  sb.rpc('registrar_retorno', { p_vendedor_id: vendedorId }).catch(() => {});
+  await addToQueue(vendedorId);
 };
 
 // ─── Logout ───
