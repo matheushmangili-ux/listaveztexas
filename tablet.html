@@ -30,9 +30,17 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 20px;
+    padding: 10px 12px;
     background: var(--bg-surface);
     border-bottom: 1px solid var(--border-subtle);
+    gap: 8px;
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+  @media (max-width: 600px) {
+    .t-header { padding: 8px 10px; }
+    .t-header .header-title { display: none; }
+    .t-header .header-turno-label { display: none; }
   }
 
   /* Queue panel (left) */
@@ -245,24 +253,22 @@
 <div class="tablet-layout">
   <!-- HEADER -->
   <header class="t-header">
-    <div style="display:flex;align-items:center;gap:12px">
-      <div style="width:32px;height:32px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg-elevated)">
-        <img src="assets/logo-tc.png" alt="TC" style="width:26px;height:26px;object-fit:contain;filter:brightness(0) invert(.85)">
+    <div style="display:flex;align-items:center;gap:8px;min-width:0;flex-shrink:1">
+      <div style="width:28px;height:28px;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg-elevated);flex-shrink:0">
+        <img src="assets/logo-tc.png" alt="TC" style="width:22px;height:22px;object-fit:contain;filter:brightness(0) invert(.85)">
       </div>
-      <div>
-        <span style="font-family:var(--font-mono);font-weight:700;font-size:14px">Lista da Vez</span>
-        <span id="turnoLabel" style="font-size:11px;color:var(--text-muted);margin-left:8px">Turno não iniciado</span>
-      </div>
+      <span class="header-title" style="font-family:var(--font-mono);font-weight:700;font-size:13px;white-space:nowrap">Lista da Vez</span>
+      <span class="header-turno-label" id="turnoLabel" style="font-size:10px;color:var(--text-muted);white-space:nowrap">Turno não iniciado</span>
     </div>
-    <div style="display:flex;align-items:center;gap:16px">
-      <span class="live-clock" id="clock">--:--</span>
-      <button class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px" id="btnTurno" onclick="toggleTurno()">
-        <i class="fa-solid fa-play" style="font-size:10px"></i> Abrir Turno
+    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+      <span class="live-clock" id="clock" style="font-size:12px">--:--</span>
+      <button class="btn btn-ghost" style="min-height:36px;padding:0 10px;font-size:11px" id="btnTurno" onclick="toggleTurno()">
+        <i class="fa-solid fa-play" style="font-size:10px"></i> <span class="header-title">Abrir Turno</span>
       </button>
-      <button class="btn btn-ghost" style="min-height:36px;padding:0 10px;font-size:11px" onclick="window._toggleTheme()" title="Modo claro/escuro">
+      <button class="btn btn-ghost" style="min-height:36px;padding:0 8px;font-size:11px" onclick="window._toggleTheme()" title="Modo claro/escuro">
         <i class="fa-solid fa-circle-half-stroke"></i>
       </button>
-      <button class="btn btn-ghost" style="min-height:36px;padding:0 10px;font-size:11px" onclick="handleLogout()" title="Sair">
+      <button class="btn btn-ghost" style="min-height:36px;padding:0 8px;font-size:11px" onclick="handleLogout()" title="Sair">
         <i class="fa-solid fa-right-from-bracket"></i>
       </button>
     </div>
