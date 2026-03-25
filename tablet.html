@@ -30,15 +30,14 @@ window.addEventListener('error', function(e) {
 <style>
   .tablet-layout {
     display: grid;
-    grid-template-columns: 320px 1fr;
+    grid-template-columns: 1fr 1fr;
     grid-template-rows: auto 1fr auto;
     height: 100vh;
     gap: 0;
   }
-  @media (max-width: 768px) {
+  @media (max-width: 600px) {
     .tablet-layout { grid-template-columns: 1fr; }
-    .queue-panel { display: none; }
-    .queue-panel.mobile-show { display: block; position: fixed; inset: 0; z-index: 50; background: var(--bg-deep); overflow-y: auto; }
+    .service-panel { display: none; }
   }
 
   /* Header */
@@ -60,12 +59,14 @@ window.addEventListener('error', function(e) {
     .t-header .header-turno-label { display: none; }
   }
 
-  /* Queue panel (left) */
+  /* Queue panel (left — Fila de Espera) */
   .queue-panel {
     background: var(--bg-surface);
     border-right: 1px solid var(--border-subtle);
     overflow-y: auto;
     padding: 12px;
+    display: flex;
+    flex-direction: column;
   }
   .queue-list { display: flex; flex-direction: column; gap: 4px; }
   .queue-item {
@@ -85,35 +86,66 @@ window.addEventListener('error', function(e) {
     border-radius: var(--radius-sm) var(--radius-sm) 8px 8px;
   }
 
-  /* Setor tabs */
+  /* Setor tabs (ícones compactos) */
   .setor-tab {
     flex: 1;
-    padding: 6px 8px;
+    padding: 6px 4px;
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
     background: var(--bg-card);
     color: var(--text-muted);
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 16px;
     cursor: pointer;
     text-align: center;
     transition: all .15s;
+    line-height: 1;
   }
+  .setor-tab .tab-label { font-size: 8px; font-weight: 700; display: block; margin-top: 2px; text-transform: uppercase; letter-spacing: .05em; }
   .setor-tab.active {
     background: var(--accent);
     color: #fff;
     border-color: var(--accent);
+    box-shadow: 0 2px 8px rgba(124,141,181,.3);
   }
   .setor-tab:not(.active):hover { background: var(--bg-hover); }
 
-  /* Service panel (right) */
+  /* Service panel (right — Em Atendimento) */
   .service-panel {
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    position: relative;
+    overflow-y: auto;
+    background: var(--bg-deep);
+  }
+  .service-panel.drop-active {
+    outline: 2px dashed var(--success);
+    outline-offset: -4px;
+    background: rgba(34,197,94,.03);
+  }
+  .service-panel .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding: 0 4px;
+  }
+  .service-panel .panel-header span {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+  }
+  .service-empty {
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 32px;
-    position: relative;
+    color: var(--text-muted);
+    font-size: 12px;
+    opacity: .5;
   }
 
   /* Footer — Vendedores */
@@ -137,62 +169,49 @@ window.addEventListener('error', function(e) {
 
   .footer-card {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    min-width: 100px;
+    gap: 4px;
+    padding: 6px 8px;
+    min-width: 56px;
+    max-width: 72px;
     cursor: grab;
-    border: 1px solid var(--border-subtle);
-    border-radius: 12px;
-    background: var(--bg-card);
+    border-radius: 10px;
+    background: transparent;
     transition: background .15s, opacity .15s, transform .1s;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     position: relative;
     flex-shrink: 0;
   }
-  .footer-card:hover { background: var(--bg-hover); transform: translateY(-1px); }
-  .footer-card:active { opacity: .7; transform: scale(.97); }
+  .footer-card:hover { background: var(--bg-hover); }
+  .footer-card:active { transform: scale(.93); }
   .footer-card .fc-avatar {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    background: var(--bg-hover);
+    width: 38px; height: 38px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 800;
-    color: var(--text-muted);
+    color: #fff;
     flex-shrink: 0;
     overflow: hidden;
+    transition: background .2s, box-shadow .2s;
   }
   .footer-card .fc-avatar img { width: 100%; height: 100%; object-fit: cover; }
-  .footer-card .fc-info { display: flex; flex-direction: column; min-width: 0; }
   .footer-card .fc-name {
-    font-size: 12px;
+    font-size: 9px;
     font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--text-primary);
+    color: var(--text-muted);
+    max-width: 64px;
+    text-align: center;
   }
-  .footer-card .fc-status {
-    font-size: 9px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    margin-top: 1px;
-    white-space: nowrap;
-  }
-  .footer-card .fc-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    position: absolute;
-    top: -2px; right: -2px;
-    border: 2px solid var(--bg-surface);
-  }
-  .footer-card.in-queue { opacity: .3; pointer-events: none; }
+  .footer-card.in-queue { opacity: .25; pointer-events: none; }
+  .footer-card.in-queue .fc-avatar { box-shadow: 0 0 0 2px var(--success); }
   .footer-end-all {
     display: flex;
     align-items: center;
@@ -376,6 +395,11 @@ window.addEventListener('error', function(e) {
       <span class="header-title" style="font-family:var(--font-mono);font-weight:700;font-size:13px;white-space:nowrap">Lista da Vez</span>
       <span class="header-turno-label" id="turnoLabel" style="font-size:10px;color:var(--text-muted);white-space:nowrap">Turno não iniciado</span>
     </div>
+    <div id="headerKpis" style="display:flex;align-items:center;gap:12px;font-family:var(--font-mono);font-size:11px;font-weight:700">
+      <span style="color:var(--text-muted)"><span id="statAtend" style="color:var(--text-primary)">0</span> atend</span>
+      <span style="color:var(--text-muted)"><span id="statVendas" style="color:var(--success)">0</span> vendas</span>
+      <span style="color:var(--text-muted)"><span id="statConv" style="color:var(--gold)">0%</span></span>
+    </div>
     <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
       <span class="live-clock" id="clock" style="font-size:12px">--:--</span>
       <button class="btn btn-ghost" style="min-height:36px;padding:0 10px;font-size:11px" id="btnTurno" onclick="toggleTurno()">
@@ -393,9 +417,9 @@ window.addEventListener('error', function(e) {
   <!-- QUEUE PANEL (left) -->
   <aside class="queue-panel" id="queuePanel">
     <div id="setorTabs" style="display:flex;gap:4px;margin-bottom:10px;padding:0 2px">
-      <button class="setor-tab active" data-setor="loja" onclick="setSetor('loja')">👔 Vest.</button>
-      <button class="setor-tab" data-setor="chapelaria" onclick="setSetor('chapelaria')">🤠 Chap.</button>
-      <button class="setor-tab" data-setor="selaria" onclick="setSetor('selaria')">🐴 Sel.</button>
+      <button class="setor-tab active" data-setor="loja" onclick="setSetor('loja')">👔<span class="tab-label">Loja</span></button>
+      <button class="setor-tab" data-setor="chapelaria" onclick="setSetor('chapelaria')">🤠<span class="tab-label">Chap</span></button>
+      <button class="setor-tab" data-setor="selaria" onclick="setSetor('selaria')">🐴<span class="tab-label">Sel</span></button>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:0 4px">
       <span style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em">Fila</span>
@@ -409,32 +433,15 @@ window.addEventListener('error', function(e) {
     </div>
   </aside>
 
-  <!-- SERVICE PANEL (right) -->
-  <main class="service-panel" id="servicePanel" style="justify-content:flex-start;padding-top:20px">
-    <!-- Botão Próximo Cliente (sempre visível) -->
-    <div style="width:100%;max-width:500px;margin-bottom:24px">
-      <button class="btn btn-success btn-xl" style="width:100%" id="btnProximo" onclick="handleProximoCliente()" disabled>
-        <i class="fa-solid fa-arrow-right"></i>
-        Próximo Cliente
-      </button>
-      <div class="quick-stats" id="quickStats" style="margin-top:16px">
-        <div class="quick-stat">
-          <div class="val" style="color:var(--text-primary)" id="statAtend">0</div>
-          <div class="lbl">Atendimentos</div>
-        </div>
-        <div class="quick-stat">
-          <div class="val" style="color:var(--success)" id="statVendas">0</div>
-          <div class="lbl">Vendas</div>
-        </div>
-        <div class="quick-stat">
-          <div class="val" style="color:var(--gold)" id="statConv">0%</div>
-          <div class="lbl">Conversão</div>
-        </div>
-      </div>
+  <!-- SERVICE PANEL (right — Em Atendimento) -->
+  <main class="service-panel" id="servicePanel">
+    <div class="panel-header">
+      <span><i class="fa-solid fa-headset" style="margin-right:4px"></i>Em Atendimento</span>
+      <span id="activeCount" style="font-size:10px;color:var(--text-muted)">0 ativos</span>
     </div>
 
     <!-- Atendimentos ativos (múltiplos simultâneos) -->
-    <div id="activeList" style="width:100%;max-width:500px;display:flex;flex-direction:column;gap:10px">
+    <div id="activeList" style="display:flex;flex-direction:column;gap:10px;flex:1">
       <p id="activeLabel" style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;display:none">
         <i class="fa-solid fa-headset" style="margin-right:4px"></i> Atendimentos em andamento
       </p>
@@ -904,6 +911,37 @@ async function addToQueueAt(vendedorId, beforeId) {
   toast((v?.apelido || v?.nome || 'Vendedor') + ' entrou na fila', 'success', 1500);
 }
 
+// Service panel como drop zone (desktop drag)
+(function initServiceDrop() {
+  const sp = document.getElementById('servicePanel');
+  if (!sp) return;
+  sp.addEventListener('dragover', e => { e.preventDefault(); sp.classList.add('drop-active'); });
+  sp.addEventListener('dragleave', () => sp.classList.remove('drop-active'));
+  sp.addEventListener('drop', async e => {
+    e.preventDefault();
+    sp.classList.remove('drop-active');
+    const id = draggedId;
+    draggedId = null;
+    if (!id || !currentTurno) return;
+    const v = vendedores.find(x => x.id === id);
+    if (!v || v.status !== 'disponivel' || v.posicao_fila == null) return;
+    // Iniciar atendimento direto
+    try {
+      markLocal();
+      const { data, error } = await sb.rpc('proximo_cliente', { p_turno_id: currentTurno.id, p_setor: v.setor || 'loja' });
+      if (error) throw error;
+      const atend = Array.isArray(data) ? data[0] : data;
+      activeAtendimentos.push(atend);
+      renderActiveAtendimentos();
+      playSound('atendimento');
+      await loadVendedores();
+      toast((v.apelido || v.nome) + ' iniciou atendimento', 'info', 1500);
+    } catch (err) {
+      toast('Erro: ' + (err.message || 'falha ao iniciar'), 'error');
+    }
+  });
+})();
+
 // Touch drag fluido (ghost card segue o dedo)
 let touchDragEl = null;
 let touchDragId = null;
@@ -1011,6 +1049,22 @@ window.onTouchDragStart = function(e) {
       const afterId = afterEl?.dataset.id || null;
       if (isInQueue) { await reorderInQueue(touchDragId, afterId); }
       else { await addToQueueAt(touchDragId, afterId); }
+    } else if (dropEl && (dropEl.id === 'servicePanel' || dropEl.closest('#servicePanel') || dropEl.closest('#activeList'))) {
+      // Soltar no painel de atendimento = iniciar atendimento
+      const v = vendedores.find(x => x.id === touchDragId);
+      if (v && v.status === 'disponivel' && v.posicao_fila != null && currentTurno) {
+        try {
+          markLocal();
+          const { data, error } = await sb.rpc('proximo_cliente', { p_turno_id: currentTurno.id, p_setor: v.setor || 'loja' });
+          if (error) throw error;
+          const atend = Array.isArray(data) ? data[0] : data;
+          activeAtendimentos.push(atend);
+          renderActiveAtendimentos();
+          playSound('atendimento');
+          await loadVendedores();
+          toast((v.apelido || v.nome) + ' iniciou atendimento', 'info', 1500);
+        } catch (err) { toast('Erro: ' + (err.message || ''), 'error'); }
+      }
     } else if (dropEl && (dropEl.id === 'statusFooter' || dropEl.closest('#statusFooter'))) {
       openSaida(touchDragId);
     }
@@ -1142,13 +1196,15 @@ function renderFooter() {
       ? `<img src="${v.foto_url}" alt="${v.apelido || v.nome}">`
       : ini;
 
+    // Avatar color by status
+    let avatarBg = '#4b5563'; // cinza = fora
+    if (atendendo) avatarBg = '#3b82f6'; // azul
+    else if (inQueue) avatarBg = '#22c55e'; // verde
+    else if (v.status === 'pausa') avatarBg = statusColor;
+
     return `<div class="footer-card${inQueueClass}" data-id="${v.id}" ${dragAttr} onclick="handleFooterTap('${v.id}')">
-      <div class="fc-dot" style="background:${dotColor}"></div>
-      <div class="fc-avatar">${avatarContent}</div>
-      <div class="fc-info">
-        <span class="fc-name">${v.apelido || v.nome.split(' ')[0]}</span>
-        <span class="fc-status" style="color:${statusColor}">${statusLabel}</span>
-      </div>
+      <div class="fc-avatar" style="background:${avatarBg}">${avatarContent}</div>
+      <span class="fc-name">${v.apelido || v.nome.split(' ')[0]}</span>
     </div>`;
   }).join('');
 
@@ -1253,10 +1309,22 @@ function renderActiveAtendimentos() {
   const label = document.getElementById('activeLabel');
   list.querySelectorAll('.atend-card').forEach(c => c.remove());
 
+  const countEl = document.getElementById('activeCount');
+  if (countEl) countEl.textContent = activeAtendimentos.length + ' ativo' + (activeAtendimentos.length !== 1 ? 's' : '');
+
   if (activeAtendimentos.length === 0) {
     label.style.display = 'none';
+    // Mostrar empty state
+    const existing = list.querySelector('.service-empty');
+    if (!existing) {
+      const empty = document.createElement('div');
+      empty.className = 'service-empty';
+      empty.innerHTML = '<i class="fa-solid fa-arrow-left" style="font-size:24px;margin-bottom:8px;opacity:.3"></i>Arraste vendedores da fila para iniciar atendimento';
+      list.appendChild(empty);
+    }
     return;
   }
+  list.querySelectorAll('.service-empty').forEach(e => e.remove());
   label.style.display = 'block';
 
   activeAtendimentos.forEach(atend => {
