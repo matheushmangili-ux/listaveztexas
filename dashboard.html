@@ -172,14 +172,10 @@
   .led-track {
     display: flex;
     gap: 32px;
-    animation: ledScroll 20s linear infinite;
+    animation: marquee 20s linear infinite;
     width: max-content;
   }
   .led-track:hover { animation-play-state: paused; }
-  @keyframes ledScroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
   .led-item {
     display: flex;
     align-items: center;
@@ -264,6 +260,7 @@
   </div>
   <style>
     @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
     #statusMarquee:hover #marqueeTrack { animation-play-state: paused; }
     .marquee-pill {
       display:inline-flex;align-items:center;gap:6px;
@@ -494,7 +491,7 @@ function getPrevRange() {
   return { start: prevStart.toISOString(), end: prevEnd.toISOString() };
 }
 
-function renderCompare(elId, current, previous, suffix = '', invertGood = false) {
+function renderCompare(elId, current, previous, invertGood = false) {
   const el = document.getElementById(elId);
   if (!el) return;
   if (previous === 0 || previous == null) { el.innerHTML = '<span class="neutral">—</span>'; return; }
@@ -511,7 +508,8 @@ async function loadAll() {
   const range = getRange();
   const prevRange = getPrevRange();
   // Cachear ranking RPC (usado por 3 funções)
-  const { data: rankingData } = await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end });
+  const { data: rankingData, error: rankErr } = await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end });
+  if (rankErr) { toast('Erro ao carregar ranking: ' + rankErr.message, 'error'); }
   const cachedRanking = rankingData || [];
   await Promise.all([
     loadKPIs(range, prevRange),
@@ -544,14 +542,15 @@ async function loadKPIs(range, prevRange) {
   document.getElementById('kpiTicket').textContent = ticket > 0 ? 'R$ ' + ticket.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '—';
   renderCompare('kpiTotalCmp', d.total_atendimentos || 0, p.total_atendimentos || 0);
   renderCompare('kpiConvCmp', d.taxa_conversao || 0, p.taxa_conversao || 0);
-  renderCompare('kpiLossCmp', d.total_nao_convertido || 0, p.total_nao_convertido || 0, '', true);
-  renderCompare('kpiTimeCmp', d.tempo_medio_min || 0, p.tempo_medio_min || 0, '', true);
+  renderCompare('kpiLossCmp', d.total_nao_convertido || 0, p.total_nao_convertido || 0, true);
+  renderCompare('kpiTimeCmp', d.tempo_medio_min || 0, p.tempo_medio_min || 0, true);
   if (ticket > 0 || pTicket > 0) renderCompare('kpiTicketCmp', ticket, pTicket);
 }
 
 // ─── Motivos chart ───
 async function loadMotivos(range) {
-  const { data } = await sb.rpc('get_loss_reasons', { p_inicio: range.start, p_fim: range.end });
+  const { data, error } = await sb.rpc('get_loss_reasons', { p_inicio: range.start, p_fim: range.end });
+  if (error) { toast('Erro ao carregar motivos: ' + error.message, 'error'); return; }
   const ctx = document.getElementById('chartMotivos');
   if (charts.motivos) charts.motivos.destroy();
 
@@ -578,7 +577,8 @@ async function loadMotivos(range) {
 
 // ─── Hourly flow chart ───
 async function loadHourly(range) {
-  const { data } = await sb.rpc('get_hourly_flow', { p_inicio: range.start, p_fim: range.end });
+  const { data, error } = await sb.rpc('get_hourly_flow', { p_inicio: range.start, p_fim: range.end });
+  if (error) { toast('Erro ao carregar fluxo: ' + error.message, 'error'); return; }
   const ctx = document.getElementById('chartHourly');
   if (charts.hourly) charts.hourly.destroy();
 
@@ -637,7 +637,8 @@ async function loadRanking(range, cachedData) {
 
 // ─── Ruptures ───
 async function loadRuptures(range) {
-  const { data } = await sb.rpc('get_rupture_log', { p_inicio: range.start, p_fim: range.end });
+  const { data, error } = await sb.rpc('get_rupture_log', { p_inicio: range.start, p_fim: range.end });
+  if (error) { toast('Erro ao carregar rupturas: ' + error.message, 'error'); return; }
   const el = document.getElementById('ruptureList');
   if (!data || data.length === 0) {
     el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px"><i class="fa-solid fa-check-circle" style="font-size:20px;margin-bottom:8px;display:block;color:var(--success);opacity:.4"></i>Nenhuma ruptura registrada</div>';
@@ -654,7 +655,8 @@ async function loadRuptures(range) {
 
 // ─── Floor (who's on now) — LED marquee ───
 async function loadFloor() {
-  const { data } = await sb.from('vendedores').select('*').eq('ativo', true).order('nome');
+  const { data, error } = await sb.from('vendedores').select('*').eq('ativo', true).order('nome');
+  if (error) { toast('Erro ao carregar equipe: ' + error.message, 'error'); return; }
   const el = document.getElementById('floorList');
   if (!data || data.length === 0) {
     el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum vendedor cadastrado</div>';
@@ -829,7 +831,7 @@ async function uploadFoto(vendedorId, file) {
   const ext = file.name.split('.').pop();
   const path = `vendedores/${vendedorId}.${ext}`;
   const { error } = await sb.storage.from('Sellers').upload(path, file, { upsert: true });
-  if (error) { console.warn('Upload foto falhou:', error.message); return null; }
+  if (error) return null;
   const { data } = sb.storage.from('Sellers').getPublicUrl(path);
   return data?.publicUrl || null;
 }
@@ -877,6 +879,7 @@ window.saveVendedor = async function() {
 
   if (id) {
     const update = { nome, apelido, setor };
+    if (pin) update.pin = pin;
     if (fotoFile) {
       const url = await uploadFoto(id, fotoFile);
       if (url) update.foto_url = url;
@@ -885,7 +888,9 @@ window.saveVendedor = async function() {
     if (error) { toast('Erro ao atualizar: ' + error.message, 'error'); savingVendedor = false; return; }
     toast('Vendedor atualizado', 'success');
   } else {
-    const { data: inserted, error } = await sb.from('vendedores').insert({ nome, apelido, setor }).select().single();
+    const insertObj = { nome, apelido, setor };
+    if (pin) insertObj.pin = pin;
+    const { data: inserted, error } = await sb.from('vendedores').insert(insertObj).select().single();
     if (error) { toast('Erro ao cadastrar: ' + error.message, 'error'); savingVendedor = false; return; }
     if (fotoFile && inserted) {
       const url = await uploadFoto(inserted.id, fotoFile);
@@ -930,7 +935,8 @@ window.deleteVendedor = async function(id, nome) {
 // ─── Export Report (CSV) ───
 window.exportReport = async function() {
   const range = getRange();
-  const { data: ranking } = await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end });
+  const { data: ranking, error } = await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end });
+  if (error) { toast('Erro ao exportar: ' + error.message, 'error'); return; }
   if (!ranking || ranking.length === 0) { toast('Sem dados para exportar', 'warning'); return; }
 
   const period = currentPeriod === 'hoje' ? 'Hoje' : currentPeriod === 'semana' ? 'Semana' : 'Mês';

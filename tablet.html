@@ -675,7 +675,8 @@ setInterval(updateClock, 15000);
 
 // ─── Load vendedores ───
 async function loadVendedores() {
-  const { data } = await sb.from('vendedores').select('*').eq('ativo', true).order('posicao_fila', { ascending: true, nullsFirst: false });
+  const { data, error } = await sb.from('vendedores').select('*').eq('ativo', true).order('posicao_fila', { ascending: true, nullsFirst: false });
+  if (error) { toast('Erro ao carregar vendedores', 'error'); return; }
   vendedores = data || [];
   renderQueue();
   renderFooter();
@@ -1010,12 +1011,8 @@ window.confirmSaida = async function(motivo) {
   if (!pendingSaidaId) return;
   const newStatus = motivo === 'banheiro' || motivo === 'reuniao' ? 'pausa' : 'fora';
   saidaMotivos[pendingSaidaId] = motivo;
-  await sb.from('vendedores').update({ status: newStatus, posicao_fila: null }).eq('id', pendingSaidaId);
-  // Log pausa no histórico
-  if (currentTurno) {
-    // TODO: registrar_pausa quando pausas_log for criada
-    // sb.rpc('registrar_pausa', { p_vendedor_id: pendingSaidaId, p_turno_id: currentTurno.id, p_motivo: motivo });
-  }
+  const { error } = await sb.from('vendedores').update({ status: newStatus, posicao_fila: null }).eq('id', pendingSaidaId);
+  if (error) { toast('Erro ao registrar saída', 'error'); closeSaida(); return; }
   toast(SAIDA_COLORS[motivo]?.label || 'Saiu da fila', 'info', 2000);
   closeSaida();
   await loadVendedores();
@@ -1027,7 +1024,8 @@ window.finalizarTodos = async function() {
   if (naFila.length === 0) { toast('Nenhum vendedor na fila', 'warning'); return; }
   if (!confirm('Remover todos os ' + naFila.length + ' vendedores da fila?')) return;
   const ids = naFila.map(v => v.id);
-  await sb.from('vendedores').update({ status: 'fora', posicao_fila: null }).in('id', ids);
+  const { error } = await sb.from('vendedores').update({ status: 'fora', posicao_fila: null }).in('id', ids);
+  if (error) { toast('Erro ao remover vendedores', 'error'); return; }
   toast('Todos removidos da fila', 'info');
   await loadVendedores();
 };
@@ -1132,8 +1130,9 @@ async function updateQuickStats() {
 window.toggleTurno = async function() {
   if (currentTurno) {
     // Fechar turno: tirar todos da fila
-    await sb.from('vendedores').update({ status: 'fora', posicao_fila: null }).eq('ativo', true);
-    await sb.from('turnos').update({ fechamento: new Date().toISOString() }).eq('id', currentTurno.id);
+    const { error: e1 } = await sb.from('vendedores').update({ status: 'fora', posicao_fila: null }).eq('ativo', true);
+    const { error: e2 } = await sb.from('turnos').update({ fechamento: new Date().toISOString() }).eq('id', currentTurno.id);
+    if (e1 || e2) { toast('Erro ao fechar turno', 'error'); return; }
     currentTurno = null;
     document.getElementById('turnoLabel').textContent = 'Turno encerrado';
     document.getElementById('btnTurno').innerHTML = '<i class="fa-solid fa-play" style="font-size:10px"></i> Abrir Turno';
@@ -1141,7 +1140,8 @@ window.toggleTurno = async function() {
     toast('Turno encerrado', 'info');
   } else {
     // Abrir turno: vendedores ficam "fora" até serem arrastados para a fila
-    const { data } = await sb.from('turnos').insert({ data: new Date().toISOString().split('T')[0] }).select().single();
+    const { data, error } = await sb.from('turnos').insert({ data: new Date().toISOString().split('T')[0] }).select().single();
+    if (error) { toast('Erro ao abrir turno', 'error'); return; }
     currentTurno = data;
     document.getElementById('turnoLabel').textContent = 'Turno aberto';
     document.getElementById('btnTurno').innerHTML = '<i class="fa-solid fa-stop" style="font-size:10px"></i> Fechar Turno';
@@ -1343,12 +1343,8 @@ window.submitValorVenda = function(atendId) {
   const input = document.getElementById('valorVendaInput');
   const valor = input ? parseFloat(input.value) || null : null;
   document.getElementById('valorOverlay')?.remove();
-  finalizeWithValue('venda', null, null, null, atendId, valor);
+  finalize('venda', null, null, null, atendId, valor);
 };
-
-async function finalizeWithValue(resultado, motivo, detalhe, produto, atendId, valor) {
-  return finalize(resultado, motivo, detalhe, produto, atendId, valor);
-}
 
 async function finalize(resultado, motivo, detalhe, produto, atendId, valor) {
   const id = atendId || pendingAtendimentoId;
@@ -1427,13 +1423,14 @@ window.handleFooterTap = async function(vendedorId) {
 };
 
 // Mini-menu do footer: entrar na fila ou registrar saída
+let _footerMenuOutsideHandler = null;
+
 function openFooterMenu(vendedorId) {
   const v = vendedores.find(x => x.id === vendedorId);
   const nome = v ? (v.apelido || v.nome) : 'Vendedor';
 
   // Remover menu anterior se existir
-  const prev = document.getElementById('footerMenu');
-  if (prev) prev.remove();
+  closeFooterMenu();
 
   const menu = document.createElement('div');
   menu.id = 'footerMenu';
@@ -1454,9 +1451,10 @@ function openFooterMenu(vendedorId) {
 
   // Fechar ao clicar fora
   setTimeout(() => {
-    document.addEventListener('click', function closeOnOutside(e) {
-      if (!menu.contains(e.target)) { closeFooterMenu(); document.removeEventListener('click', closeOnOutside); }
-    });
+    _footerMenuOutsideHandler = function(e) {
+      if (!menu.contains(e.target)) closeFooterMenu();
+    };
+    document.addEventListener('click', _footerMenuOutsideHandler);
   }, 100);
 }
 
@@ -1464,7 +1462,6 @@ window.footerMenuAction = async function(action, vendedorId) {
   closeFooterMenu();
   if (action === 'fila') {
     delete saidaMotivos[vendedorId];
-    // TODO: registrar_retorno quando pausas_log for criada
     await addToQueue(vendedorId);
   } else {
     openSaida(vendedorId);
@@ -1472,6 +1469,10 @@ window.footerMenuAction = async function(action, vendedorId) {
 };
 
 function closeFooterMenu() {
+  if (_footerMenuOutsideHandler) {
+    document.removeEventListener('click', _footerMenuOutsideHandler);
+    _footerMenuOutsideHandler = null;
+  }
   const m = document.getElementById('footerMenu');
   if (m) m.remove();
 }
