@@ -628,12 +628,9 @@ function renderQueue() {
   // Atendendo
   atendendo.forEach(v => { html += renderQueueItem(v, null, true); });
 
-  // Na fila (drop zone)
-  html += '<div class="queue-dropzone" id="dropFila" style="min-height:40px;border:1px dashed var(--border-medium);border-radius:var(--radius-sm);padding:4px;margin:4px 0">';
-  html += '<div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;padding:4px 8px;margin-bottom:2px"><i class="fa-solid fa-list-ol" style="margin-right:4px"></i>Na fila — arraste para ordenar</div>';
+  // Na fila (sidebar inteiro é drop zone via initDragAndDrop)
   inQueue.forEach((v, i) => { html += renderQueueItem(v, i + 1, false, true); });
-  if (inQueue.length === 0) html += '<div style="text-align:center;padding:12px;color:var(--text-muted);font-size:11px;opacity:.5">Arraste vendedores aqui</div>';
-  html += '</div>';
+  if (inQueue.length === 0) html += '<div style="text-align:center;padding:20px 12px;color:var(--text-muted);font-size:11px;opacity:.5"><i class="fa-solid fa-arrow-up-from-bracket" style="display:block;font-size:18px;margin-bottom:6px;opacity:.3"></i>Arraste vendedores do footer para cá</div>';
 
   // Pausa
   pausa.forEach(v => { html += renderQueueItem(v, null, false); });
@@ -681,26 +678,24 @@ window.onDragStart = function(e) {
 };
 
 function initDragAndDrop() {
-  const dropzone = document.getElementById('dropFila');
+  const dropzone = document.getElementById('queueList');
   if (!dropzone) return;
 
-  // Drop na zona da fila: adicionar ou reordenar
   dropzone.addEventListener('dragover', e => {
     e.preventDefault();
-    dropzone.style.borderColor = 'var(--success)';
-    // Highlight insert position
+    dropzone.style.background = 'rgba(34,197,94,.05)';
     const items = [...dropzone.querySelectorAll('.queue-item')];
     items.forEach(el => el.style.borderTop = '');
     const after = getDragAfterElement(dropzone, e.clientY);
     if (after) after.style.borderTop = '2px solid var(--success)';
   });
   dropzone.addEventListener('dragleave', () => {
-    dropzone.style.borderColor = 'var(--border-medium)';
+    dropzone.style.background = '';
     dropzone.querySelectorAll('.queue-item').forEach(el => el.style.borderTop = '');
   });
   dropzone.addEventListener('drop', async e => {
     e.preventDefault();
-    dropzone.style.borderColor = 'var(--border-medium)';
+    dropzone.style.background = '';
     dropzone.querySelectorAll('.queue-item').forEach(el => el.style.borderTop = '');
     if (!draggedId) return;
 
@@ -710,10 +705,8 @@ function initDragAndDrop() {
     const afterId = afterEl?.dataset.id || null;
 
     if (isInQueue) {
-      // Reorder within queue
       await reorderInQueue(draggedId, afterId);
     } else {
-      // Add to queue at specific position
       await addToQueueAt(draggedId, afterId);
     }
     draggedId = null;
@@ -779,10 +772,10 @@ window.onTouchDragStart = function(e) {
     document.removeEventListener('touchend', onEnd);
     const touch = ev.changedTouches[0];
     const dropEl = document.elementFromPoint(touch.clientX, touch.clientY);
-    if (dropEl && (dropEl.id === 'dropFila' || dropEl.closest('#dropFila'))) {
+    if (dropEl && (dropEl.id === 'queueList' || dropEl.closest('#queueList'))) {
       const v = vendedores.find(x => x.id === touchDragId);
       const isInQueue = v && v.status === 'disponivel' && v.posicao_fila != null;
-      const afterEl = getDragAfterElement(document.getElementById('dropFila'), touch.clientY);
+      const afterEl = getDragAfterElement(document.getElementById('queueList'), touch.clientY);
       const afterId = afterEl?.dataset.id || null;
       if (isInQueue) { await reorderInQueue(touchDragId, afterId); }
       else { await addToQueueAt(touchDragId, afterId); }
@@ -1057,7 +1050,74 @@ window.handleOutcome = function(resultado, atendId) {
     openValorVenda(atendId);
     return;
   }
+  if (resultado === 'troca') {
+    openTrocaDiferenca(atendId);
+    return;
+  }
   finalize(resultado, null, null, null, atendId);
+};
+
+// ─── Troca com diferença ───
+function openTrocaDiferenca(atendId) {
+  const overlay = document.createElement('div');
+  overlay.id = 'trocaOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center';
+  overlay.innerHTML = `
+    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:360px;text-align:center">
+      <i class="fa-solid fa-rotate" style="font-size:28px;color:var(--warning);margin-bottom:12px"></i>
+      <h3 style="font-family:var(--font-mono);font-size:14px;font-weight:700;margin-bottom:4px">Troca</h3>
+      <p style="font-size:11px;color:var(--text-muted);margin-bottom:16px">Houve diferença de valor na troca?</p>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button id="btnTrocaSem" class="btn" style="flex:1;min-height:44px;background:var(--bg-hover);color:var(--text-primary);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);font-weight:700;cursor:pointer" onclick="submitTroca('${atendId}',false)">
+          Sem diferença
+        </button>
+        <button id="btnTrocaCom" class="btn" style="flex:1;min-height:44px;background:var(--warning);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer" onclick="showTrocaValor('${atendId}')">
+          Com diferença
+        </button>
+      </div>
+      <div id="trocaValorBox" style="display:none">
+        <input id="trocaValorInput" type="number" inputmode="decimal" placeholder="R$ valor da diferença" step="0.01" min="0"
+          style="width:100%;padding:14px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);color:var(--text-primary);font-family:var(--font-mono);font-size:20px;font-weight:700;text-align:center;margin-bottom:8px">
+        <p style="font-size:10px;color:var(--text-muted);margin-bottom:10px">Acima de R$ 1.000 o vendedor volta para o 1º da fila</p>
+        <button class="btn" style="width:100%;min-height:44px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer" onclick="submitTroca('${atendId}',true)">
+          <i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+window.showTrocaValor = function(atendId) {
+  document.getElementById('trocaValorBox').style.display = '';
+  setTimeout(() => document.getElementById('trocaValorInput')?.focus(), 100);
+};
+
+window.submitTroca = async function(atendId, comDiferenca) {
+  let valor = null;
+  if (comDiferenca) {
+    const input = document.getElementById('trocaValorInput');
+    valor = input ? parseFloat(input.value) || 0 : 0;
+  }
+  document.getElementById('trocaOverlay')?.remove();
+
+  // Buscar vendedor do atendimento ANTES de finalizar
+  const atend = activeAtendimentos.find(a => a.id === atendId);
+  const vendedorId = atend?.vendedor_id;
+
+  await finalize('troca', null, null, null, atendId, valor);
+
+  // Se diferença >= R$1.000, vendedor volta pro PRIMEIRO da fila
+  if (comDiferenca && valor >= 1000 && vendedorId) {
+    // Shift everyone down by 1, put this vendor at position 1
+    const inQueue = vendedores.filter(v => v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
+    const updates = inQueue.map((v, i) =>
+      sb.from('vendedores').update({ posicao_fila: i + 2 }).eq('id', v.id)
+    );
+    updates.push(sb.from('vendedores').update({ status: 'disponivel', posicao_fila: 1 }).eq('id', vendedorId));
+    await Promise.all(updates);
+    await loadVendedores();
+    toast('Troca com diferença! Vendedor voltou para 1º da fila.', 'success');
+  }
 };
 
 function openValorVenda(atendId) {
@@ -1160,15 +1220,66 @@ window.confirmMotivo = function() {
 window.handleFooterTap = async function(vendedorId) {
   const v = vendedores.find(x => x.id === vendedorId);
   if (!v) return;
-  // Em atendimento ou na fila → ignorar (card fica opaco)
   if (v.status === 'em_atendimento') return;
-  if (v.status === 'disponivel' && v.posicao_fila != null) return;
-  // Fora/pausa → toque = entra na fila
+  // Na fila → abrir popup de saída (arrastar para fora)
+  if (v.status === 'disponivel' && v.posicao_fila != null) {
+    openSaida(vendedorId);
+    return;
+  }
+  // Fora/pausa → mostrar mini-menu com opções
   if (!currentTurno) { toast('Abra o turno primeiro', 'warning'); return; }
-  delete saidaMotivos[vendedorId];
-  sb.rpc('registrar_retorno', { p_vendedor_id: vendedorId }).catch(() => {});
-  await addToQueue(vendedorId);
+  openFooterMenu(vendedorId);
 };
+
+// Mini-menu do footer: entrar na fila ou registrar saída
+function openFooterMenu(vendedorId) {
+  const v = vendedores.find(x => x.id === vendedorId);
+  const nome = v ? (v.apelido || v.nome) : 'Vendedor';
+
+  // Remover menu anterior se existir
+  const prev = document.getElementById('footerMenu');
+  if (prev) prev.remove();
+
+  const menu = document.createElement('div');
+  menu.id = 'footerMenu';
+  menu.style.cssText = 'position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);border:1px solid var(--border-medium);border-radius:12px;padding:12px;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,.5);min-width:220px;text-align:center';
+
+  menu.innerHTML = `
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin-bottom:10px">${nome}</div>
+    <button onclick="footerMenuAction('fila','${vendedorId}')" style="display:block;width:100%;padding:10px;margin-bottom:6px;border:none;border-radius:8px;background:var(--success);color:#fff;font-weight:700;font-size:13px;cursor:pointer">
+      <i class="fa-solid fa-list-ol" style="margin-right:6px"></i>Entrar na Fila
+    </button>
+    <button onclick="footerMenuAction('saida','${vendedorId}')" style="display:block;width:100%;padding:10px;border:none;border-radius:8px;background:var(--danger);color:#fff;font-weight:700;font-size:13px;cursor:pointer">
+      <i class="fa-solid fa-door-open" style="margin-right:6px"></i>Registrar Saída
+    </button>
+    <button onclick="closeFooterMenu()" style="display:block;width:100%;padding:8px;margin-top:6px;border:none;border-radius:8px;background:var(--bg-hover);color:var(--text-muted);font-weight:600;font-size:11px;cursor:pointer">Cancelar</button>
+  `;
+
+  document.body.appendChild(menu);
+
+  // Fechar ao clicar fora
+  setTimeout(() => {
+    document.addEventListener('click', function closeOnOutside(e) {
+      if (!menu.contains(e.target)) { closeFooterMenu(); document.removeEventListener('click', closeOnOutside); }
+    });
+  }, 100);
+}
+
+window.footerMenuAction = async function(action, vendedorId) {
+  closeFooterMenu();
+  if (action === 'fila') {
+    delete saidaMotivos[vendedorId];
+    sb.rpc('registrar_retorno', { p_vendedor_id: vendedorId }).catch(() => {});
+    await addToQueue(vendedorId);
+  } else {
+    openSaida(vendedorId);
+  }
+};
+
+function closeFooterMenu() {
+  const m = document.getElementById('footerMenu');
+  if (m) m.remove();
+}
 
 // ─── Logout ───
 window.handleLogout = function() { logout(); };
