@@ -1302,23 +1302,23 @@ window.submitTroca = async function(atendId, comDiferenca) {
   }
   document.getElementById('trocaOverlay')?.remove();
 
-  // Buscar vendedor do atendimento ANTES de finalizar
   const atend = activeAtendimentos.find(a => a.id === atendId);
   const vendedorId = atend?.vendedor_id;
 
-  await finalize('troca', null, null, null, atendId, valor);
-
-  // Se diferença >= R$1.000, vendedor volta pro PRIMEIRO da fila
-  if (comDiferenca && valor >= 1000 && vendedorId) {
-    // Shift everyone down by 1, put this vendor at position 1
-    const inQueue = vendedores.filter(v => v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
-    const updates = inQueue.map((v, i) =>
-      sb.from('vendedores').update({ posicao_fila: i + 2 }).eq('id', v.id)
-    );
-    updates.push(sb.from('vendedores').update({ status: 'disponivel', posicao_fila: 1 }).eq('id', vendedorId));
-    await Promise.all(updates);
-    await loadVendedores();
-    toast('Troca com diferença! Vendedor voltou para 1º da fila.', 'success');
+  // Se diferença >= R$1.000, volta pro 1º da fila (sem perguntar continuar)
+  if (comDiferenca && valor >= 1000) {
+    await finalize('troca', null, null, null, atendId, valor, false);
+    if (vendedorId) {
+      const setor = vendedores.find(v => v.id === vendedorId)?.setor || 'loja';
+      const inQueue = vendedores.filter(v => (v.setor || 'loja') === setor && v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
+      const updates = inQueue.map((v, i) => sb.from('vendedores').update({ posicao_fila: i + 2 }).eq('id', v.id));
+      updates.push(sb.from('vendedores').update({ status: 'disponivel', posicao_fila: 1 }).eq('id', vendedorId));
+      await Promise.all(updates);
+      await loadVendedores();
+      toast('Troca com diferença! Vendedor voltou para 1º da fila.', 'success');
+    }
+  } else {
+    askContinuar(atendId, () => finalize('troca', null, null, null, atendId, valor, false), () => finalize('troca', null, null, null, atendId, valor, true));
   }
 };
 
@@ -1334,7 +1334,7 @@ function openValorVenda(atendId) {
       <input id="valorVendaInput" type="number" inputmode="decimal" placeholder="R$ 0,00" step="0.01" min="0"
         style="width:100%;padding:14px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);color:var(--text-primary);font-family:var(--font-mono);font-size:20px;font-weight:700;text-align:center;margin-bottom:16px">
       <div style="display:flex;gap:8px">
-        <button class="btn btn-ghost" style="flex:1;min-height:44px" onclick="document.getElementById('valorOverlay').remove();finalize('venda',null,null,null,'${atendId}')">
+        <button class="btn btn-ghost" style="flex:1;min-height:44px" onclick="document.getElementById('valorOverlay').remove();askContinuar('${atendId}',()=>finalize('venda',null,null,null,'${atendId}',null,false),()=>finalize('venda',null,null,null,'${atendId}',null,true))">
           Pular
         </button>
         <button class="btn" style="flex:1;min-height:44px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer" onclick="submitValorVenda('${atendId}')">
@@ -1350,13 +1350,54 @@ window.submitValorVenda = function(atendId) {
   const input = document.getElementById('valorVendaInput');
   const valor = input ? parseFloat(input.value) || null : null;
   document.getElementById('valorOverlay')?.remove();
-  finalize('venda', null, null, null, atendId, valor);
+  askContinuar(atendId, () => finalize('venda', null, null, null, atendId, valor, false), () => finalize('venda', null, null, null, atendId, valor, true));
 };
 
-async function finalize(resultado, motivo, detalhe, produto, atendId, valor) {
+// ─── Popup "Continuar atendendo?" ───
+let _continuarCallbacks = { onNo: null, onYes: null };
+
+function askContinuar(atendId, onNo, onYes) {
+  const atend = activeAtendimentos.find(a => a.id === atendId);
+  const v = atend?.vendedores;
+  const nome = v ? (v.apelido || v.nome) : 'Vendedor';
+  _continuarCallbacks = { onNo, onYes };
+
+  document.getElementById('continuarOverlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'continuarOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:1001;display:flex;align-items:center;justify-content:center';
+  overlay.innerHTML = `
+    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:340px;text-align:center">
+      <i class="fa-solid fa-rotate-right" style="font-size:28px;color:var(--info);margin-bottom:12px"></i>
+      <h3 style="font-family:var(--font-mono);font-size:14px;font-weight:700;margin-bottom:4px">${nome}</h3>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px">Continuar atendendo outro cliente?</p>
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="flex:1;min-height:48px;background:var(--bg-hover);color:var(--text-primary);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);font-weight:700;font-size:13px;cursor:pointer" onclick="answerContinuar(false)">
+          <i class="fa-solid fa-list-ol" style="margin-right:4px"></i>Voltar à fila
+        </button>
+        <button class="btn" style="flex:1;min-height:48px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;font-size:13px;cursor:pointer" onclick="answerContinuar(true)">
+          <i class="fa-solid fa-arrow-right" style="margin-right:4px"></i>Continuar
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+window.answerContinuar = function(continuar) {
+  document.getElementById('continuarOverlay')?.remove();
+  const cb = continuar ? _continuarCallbacks.onYes : _continuarCallbacks.onNo;
+  _continuarCallbacks = { onNo: null, onYes: null };
+  if (cb) cb();
+};
+
+async function finalize(resultado, motivo, detalhe, produto, atendId, valor, continuar) {
   const id = atendId || pendingAtendimentoId;
   if (!id) return;
   try {
+    // Guardar info do vendedor antes de finalizar
+    const atendInfo = activeAtendimentos.find(a => a.id === id);
+    const vendedorId = atendInfo?.vendedor_id;
+
     const { error } = await sb.rpc('finalizar_atendimento', {
       p_atendimento_id: id,
       p_resultado: resultado,
@@ -1372,6 +1413,22 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor) {
     if (resultado === 'venda') { playSound('venda'); fireConfetti(); }
     removeAtendimento(id);
     pendingAtendimentoId = null;
+
+    if (continuar && vendedorId && currentTurno) {
+      // Criar novo atendimento imediato para o mesmo vendedor
+      await sb.from('vendedores').update({ status: 'em_atendimento', posicao_fila: null }).eq('id', vendedorId);
+      const { data: novoAtend, error: errNovo } = await sb.from('atendimentos').insert({
+        turno_id: currentTurno.id,
+        vendedor_id: vendedorId,
+        inicio: new Date().toISOString()
+      }).select('*, vendedores(nome, apelido)').single();
+      if (!errNovo && novoAtend) {
+        activeAtendimentos.push(novoAtend);
+        renderActiveAtendimentos();
+        toast('Novo atendimento iniciado', 'info', 1500);
+      }
+    }
+
     await loadVendedores();
     updateQuickStats();
   } catch (e) {
@@ -1410,8 +1467,9 @@ window.confirmMotivo = function() {
   if (!pendingOutcome || !pendingAtendimentoId) return;
   const produto = pendingOutcome === 'ruptura' ? document.getElementById('rupturaInput').value.trim() : null;
   const detalhe = pendingOutcome === 'outro' ? document.getElementById('outroInput').value.trim() : null;
+  const atendId = pendingAtendimentoId;
   closeMotivos();
-  finalize('nao_convertido', pendingOutcome, detalhe, produto, pendingAtendimentoId);
+  askContinuar(atendId, () => finalize('nao_convertido', pendingOutcome, detalhe, produto, atendId, null, false), () => finalize('nao_convertido', pendingOutcome, detalhe, produto, atendId, null, true));
 };
 
 // ─── Footer card tap ───
