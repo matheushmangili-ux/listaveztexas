@@ -15,7 +15,9 @@ if ('serviceWorker' in navigator) {
   caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
 }
 window.addEventListener('error', function(e) {
-  document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:system-ui;color:#94a3b8;text-align:center;padding:24px"><p style="font-size:14px;font-weight:700">Recarregando...</p></div>';
+  const lastReload = parseInt(sessionStorage.getItem('lastErrorReload') || '0');
+  if (Date.now() - lastReload < 60000) return;
+  sessionStorage.setItem('lastErrorReload', Date.now().toString());
   setTimeout(() => location.reload(), 2000);
 });
 </script>

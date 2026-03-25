@@ -15,8 +15,11 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
   caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
 }
+// Error recovery (max 1 reload por minuto)
 window.addEventListener('error', function(e) {
-  document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:system-ui;color:#94a3b8;text-align:center;padding:24px"><i class="fa-solid fa-rotate" style="font-size:32px;margin-bottom:16px;animation:spin 1s linear infinite"></i><p style="font-size:14px;font-weight:700">Recarregando...</p></div>';
+  const lastReload = parseInt(sessionStorage.getItem('lastErrorReload') || '0');
+  if (Date.now() - lastReload < 60000) return; // Já recarregou há menos de 1 min
+  sessionStorage.setItem('lastErrorReload', Date.now().toString());
   setTimeout(() => location.reload(), 2000);
 });
 </script>
