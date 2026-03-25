@@ -608,6 +608,12 @@ function renderQueue() {
   // Pausa
   pausa.forEach(v => { html += renderQueueItem(v, null, false); });
 
+  // Fora — mostrar como "Disponíveis para entrar" com drag habilitado
+  if (fora.length > 0) {
+    html += '<div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;padding:12px 8px 4px"><i class="fa-solid fa-user-plus" style="margin-right:4px"></i>Toque ou arraste para a fila</div>';
+    fora.forEach(v => { html += renderQueueItem(v, null, false, true); });
+  }
+
   list.innerHTML = html;
   initDragAndDrop();
 }
@@ -615,7 +621,9 @@ function renderQueue() {
 function renderQueueItem(v, pos, isActive, draggable) {
   const cfg = STATUS_CONFIG[v.status] || STATUS_CONFIG.fora;
   const ini = initials(v.apelido || v.nome);
-  const dragAttr = draggable ? 'draggable="true" ondragstart="onDragStart(event)" ontouchstart="onTouchDragStart(event)"' : '';
+  const isFora = v.status === 'fora' || (v.status === 'disponivel' && v.posicao_fila == null);
+  const tapAction = isFora ? `onclick="quickAddToQueue('${v.id}')"` : '';
+  const dragAttr = draggable ? `draggable="true" ondragstart="onDragStart(event)" ontouchstart="onTouchDragStart(event)" ${tapAction}` : '';
   const dragStyle = draggable ? 'cursor:grab;' : '';
   const posHtml = pos ? `<div class="queue-position" style="background:${cfg.bg};color:${cfg.color}">${pos}</div>` : `<div class="queue-position" style="background:${cfg.bg};color:${cfg.color}"><i class="fa-solid ${cfg.icon}" style="font-size:11px"></i></div>`;
 
@@ -641,6 +649,11 @@ function renderQueueItem(v, pos, isActive, draggable) {
     ${timerHtml}
   </div>`;
 }
+
+// ─── Quick add (tap to join queue) ───
+window.quickAddToQueue = async function(vendedorId) {
+  await addToQueue(vendedorId);
+};
 
 // ─── Drag and Drop (desktop + touch) ───
 let draggedId = null;
