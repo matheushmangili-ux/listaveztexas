@@ -1157,28 +1157,9 @@ window.handleProximoCliente = async function() {
   const btn = document.getElementById('btnProximo');
   btn.disabled = true;
   try {
-    // Filtrar pelo setor ativo
-    const setorVendedores = vendedores.filter(v => (v.setor || 'loja') === currentSetor && v.status === 'disponivel' && v.posicao_fila != null);
-    setorVendedores.sort((a, b) => a.posicao_fila - b.posicao_fila);
-    const proximo = setorVendedores[0];
-    if (!proximo) throw new Error('Nenhum vendedor na fila de ' + currentSetor);
-
-    // Criar atendimento e atualizar vendedor
-    const { data: atend, error } = await sb.from('atendimentos').insert({
-      turno_id: currentTurno.id,
-      vendedor_id: proximo.id,
-      inicio: new Date().toISOString()
-    }).select('*, vendedores(nome, apelido)').single();
+    const { data, error } = await sb.rpc('proximo_cliente', { p_turno_id: currentTurno.id, p_setor: currentSetor });
     if (error) throw error;
-
-    // Atualizar status do vendedor
-    await sb.from('vendedores').update({ status: 'em_atendimento', posicao_fila: null }).eq('id', proximo.id);
-
-    // Reordenar posições restantes
-    const remaining = vendedores.filter(v => (v.setor || 'loja') === currentSetor && v.status === 'disponivel' && v.posicao_fila != null && v.id !== proximo.id).sort((a, b) => a.posicao_fila - b.posicao_fila);
-    const updates = remaining.map((v, i) => sb.from('vendedores').update({ posicao_fila: i + 1 }).eq('id', v.id));
-    await Promise.all(updates);
-
+    const { data: atend } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('id', data).single();
     activeAtendimentos.push(atend);
     renderActiveAtendimentos();
     playSound('atendimento');
