@@ -3,8 +3,8 @@
 // ============================================
 // Preencha com as credenciais do seu projeto Supabase
 
-const SUPABASE_URL = 'SUA_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'SUA_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://cnpnviaigrdmnixnqjqp.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_0AJbQVEVFsL71gAGtks6rw_V1rYn3Ne';
 
 let _supabase = null;
 
