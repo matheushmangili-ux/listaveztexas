@@ -176,6 +176,47 @@
   .outcome-btn.exchange { border-color: rgba(251,191,36,.2); color: var(--warning); }
   .outcome-btn.exchange:hover { background: var(--warning-bg); border-color: var(--warning); }
 
+  /* Active atendimento card */
+  .atend-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--info);
+    background: var(--info-bg);
+    animation: fadeIn .3s ease;
+  }
+  .atend-card .atend-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-weight: 800; font-size: 14px;
+    color: var(--bg-deep); flex-shrink: 0;
+  }
+  .atend-card .atend-info { flex: 1; min-width: 0; }
+  .atend-card .atend-name { font-weight: 700; font-size: 14px; }
+  .atend-card .atend-timer {
+    font-family: var(--font-mono); font-weight: 700; font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .atend-card .atend-timer.warning { color: var(--warning); }
+  .atend-card .atend-timer.danger { color: var(--danger); }
+  .atend-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .atend-actions button {
+    min-width: 44px; min-height: 44px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle); background: var(--bg-card);
+    color: var(--text-muted); cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s; -webkit-tap-highlight-color: transparent;
+  }
+  .atend-actions .btn-sale { color: var(--success); }
+  .atend-actions .btn-sale:hover { background: var(--success-bg); border-color: var(--success); }
+  .atend-actions .btn-nosale { color: var(--danger); }
+  .atend-actions .btn-nosale:hover { background: var(--danger-bg); border-color: var(--danger); }
+  .atend-actions .btn-exchange { color: var(--warning); }
+  .atend-actions .btn-exchange:hover { background: var(--warning-bg); border-color: var(--warning); }
+
   /* Live clock */
   .live-clock {
     font-family: var(--font-mono);
@@ -226,23 +267,14 @@
   </aside>
 
   <!-- SERVICE PANEL (right) -->
-  <main class="service-panel" id="servicePanel">
-    <!-- Idle state (default) -->
-    <div class="idle-state" id="idleState">
-      <div class="idle-icon animate-breathe">
-        <i class="fa-solid fa-bell-concierge"></i>
-      </div>
-      <h2 style="font-family:var(--font-mono);font-size:20px;font-weight:700;margin-bottom:8px">
-        Pronto para atender
-      </h2>
-      <p style="font-size:14px;color:var(--text-secondary);margin-bottom:32px">
-        Clique no botão abaixo quando o próximo cliente chegar
-      </p>
-      <button class="btn btn-success btn-xl" style="width:100%;max-width:420px" id="btnProximo" onclick="handleProximoCliente()" disabled>
+  <main class="service-panel" id="servicePanel" style="justify-content:flex-start;padding-top:20px">
+    <!-- Botão Próximo Cliente (sempre visível) -->
+    <div style="width:100%;max-width:500px;margin-bottom:24px">
+      <button class="btn btn-success btn-xl" style="width:100%" id="btnProximo" onclick="handleProximoCliente()" disabled>
         <i class="fa-solid fa-arrow-right"></i>
         Próximo Cliente
       </button>
-      <div class="quick-stats" id="quickStats">
+      <div class="quick-stats" id="quickStats" style="margin-top:16px">
         <div class="quick-stat">
           <div class="val" style="color:var(--text-primary)" id="statAtend">0</div>
           <div class="lbl">Atendimentos</div>
@@ -258,26 +290,11 @@
       </div>
     </div>
 
-    <!-- Active service state (hidden until active) -->
-    <div class="active-service" id="activeState" style="display:none">
-      <div class="seller-avatar" id="activeSeller">--</div>
-      <h2 id="activeSellerName" style="font-family:var(--font-mono);font-size:22px;font-weight:700;margin-bottom:4px">---</h2>
-      <p style="font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:24px">Em atendimento</p>
-      <div class="timer-display" id="activeTimer">00:00</div>
-      <div class="outcome-row">
-        <button class="outcome-btn sale" onclick="handleOutcome('venda')">
-          <i class="fa-solid fa-check-circle"></i>
-          Venda
-        </button>
-        <button class="outcome-btn no-sale" onclick="handleOutcome('nao_convertido')">
-          <i class="fa-solid fa-times-circle"></i>
-          Não Converteu
-        </button>
-        <button class="outcome-btn exchange" onclick="handleOutcome('troca')">
-          <i class="fa-solid fa-rotate"></i>
-          Troca
-        </button>
-      </div>
+    <!-- Atendimentos ativos (múltiplos simultâneos) -->
+    <div id="activeList" style="width:100%;max-width:500px;display:flex;flex-direction:column;gap:10px">
+      <p id="activeLabel" style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;display:none">
+        <i class="fa-solid fa-headset" style="margin-right:4px"></i> Atendimentos em andamento
+      </p>
     </div>
   </main>
 
@@ -363,7 +380,7 @@ const user = await requireRole(['recepcionista', 'gerente', 'admin']);
 if (!user) throw new Error('Unauthorized');
 
 let currentTurno = null;
-let activeAtendimento = null;
+let activeAtendimentos = []; // Múltiplos simultâneos
 let timerInterval = null;
 let vendedores = [];
 
@@ -478,66 +495,96 @@ window.toggleTurno = async function() {
 
 // ─── Próximo cliente ───
 window.handleProximoCliente = async function() {
-  if (!currentTurno || activeAtendimento) return;
+  if (!currentTurno) return;
   const btn = document.getElementById('btnProximo');
   btn.disabled = true;
   try {
     const { data, error } = await sb.rpc('proximo_cliente', { p_turno_id: currentTurno.id });
     if (error) throw error;
-    activeAtendimento = data; // UUID do atendimento
-    // Buscar detalhes
     const { data: atend } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('id', data).single();
-    showActiveService(atend);
+    activeAtendimentos.push(atend);
+    renderActiveAtendimentos();
     await loadVendedores();
   } catch (e) {
     toast(e.message || 'Nenhum vendedor disponível', 'warning');
-    btn.disabled = false;
   }
+  btn.disabled = !currentTurno;
 };
 
-function showActiveService(atend) {
-  const v = atend.vendedores;
-  document.getElementById('idleState').style.display = 'none';
-  document.getElementById('activeState').style.display = 'block';
-  document.getElementById('activeSeller').textContent = initials(v.apelido || v.nome);
-  document.getElementById('activeSellerName').textContent = v.apelido || v.nome;
+function renderActiveAtendimentos() {
+  const list = document.getElementById('activeList');
+  const label = document.getElementById('activeLabel');
+  // Remove cards antigos (mantém o label)
+  list.querySelectorAll('.atend-card').forEach(c => c.remove());
 
-  // Start timer
-  const startTime = new Date(atend.inicio).getTime();
+  if (activeAtendimentos.length === 0) {
+    label.style.display = 'none';
+    return;
+  }
+  label.style.display = 'block';
+
+  activeAtendimentos.forEach(atend => {
+    const v = atend.vendedores;
+    const nome = v.apelido || v.nome;
+    const card = document.createElement('div');
+    card.className = 'atend-card';
+    card.id = 'atend-' + atend.id;
+    card.innerHTML = `
+      <div class="atend-avatar">${initials(nome)}</div>
+      <div class="atend-info">
+        <div class="atend-name">${nome}</div>
+        <div class="atend-timer" id="timer-${atend.id}">00:00</div>
+      </div>
+      <div class="atend-actions">
+        <button class="btn-sale" title="Venda" onclick="handleOutcome('venda','${atend.id}')"><i class="fa-solid fa-check"></i></button>
+        <button class="btn-nosale" title="Não converteu" onclick="handleOutcome('nao_convertido','${atend.id}')"><i class="fa-solid fa-xmark"></i></button>
+        <button class="btn-exchange" title="Troca" onclick="handleOutcome('troca','${atend.id}')"><i class="fa-solid fa-rotate"></i></button>
+      </div>`;
+    list.appendChild(card);
+  });
+
+  // Timer global para todos os atendimentos
   clearInterval(timerInterval);
   timerInterval = setInterval(() => {
-    const elapsed = (Date.now() - startTime) / 1000;
-    const timerEl = document.getElementById('activeTimer');
-    timerEl.textContent = formatTime(elapsed);
-    timerEl.className = 'timer-display' + (elapsed > 600 ? ' danger' : elapsed > 300 ? ' warning' : '');
+    activeAtendimentos.forEach(atend => {
+      const el = document.getElementById('timer-' + atend.id);
+      if (!el) return;
+      const elapsed = (Date.now() - new Date(atend.inicio).getTime()) / 1000;
+      el.textContent = formatTime(elapsed);
+      el.className = 'atend-timer' + (elapsed > 600 ? ' danger' : elapsed > 300 ? ' warning' : '');
+    });
   }, 1000);
 }
 
-function hideActiveService() {
-  clearInterval(timerInterval);
-  document.getElementById('idleState').style.display = 'block';
-  document.getElementById('activeState').style.display = 'none';
-  document.getElementById('btnProximo').disabled = !currentTurno;
-  activeAtendimento = null;
+function removeAtendimento(atendId) {
+  activeAtendimentos = activeAtendimentos.filter(a => a.id !== atendId);
+  const card = document.getElementById('atend-' + atendId);
+  if (card) card.remove();
+  if (activeAtendimentos.length === 0) {
+    clearInterval(timerInterval);
+    document.getElementById('activeLabel').style.display = 'none';
+  }
 }
 
 // ─── Outcomes ───
 let pendingOutcome = null;
+let pendingAtendimentoId = null;
 
-window.handleOutcome = function(resultado) {
-  if (!activeAtendimento) return;
+window.handleOutcome = function(resultado, atendId) {
+  pendingAtendimentoId = atendId;
   if (resultado === 'nao_convertido') {
     openMotivos();
     return;
   }
-  // Venda ou Troca: finalizar direto
-  finalize(resultado);
+  finalize(resultado, null, null, null, atendId);
 };
 
-async function finalize(resultado, motivo, detalhe, produto) {
+async function finalize(resultado, motivo, detalhe, produto, atendId) {
+  const id = atendId || pendingAtendimentoId;
+  if (!id) return;
   try {
     const { error } = await sb.rpc('finalizar_atendimento', {
-      p_atendimento_id: activeAtendimento,
+      p_atendimento_id: id,
       p_resultado: resultado,
       p_motivo: motivo || null,
       p_motivo_detalhe: detalhe || null,
@@ -548,7 +595,8 @@ async function finalize(resultado, motivo, detalhe, produto) {
     const msg = resultado === 'venda' ? 'Venda registrada!' : resultado === 'troca' ? 'Troca registrada.' : 'Não conversão registrada.';
     const type = resultado === 'venda' ? 'success' : 'warning';
     toast(msg, type);
-    hideActiveService();
+    removeAtendimento(id);
+    pendingAtendimentoId = null;
     await loadVendedores();
     updateQuickStats();
   } catch (e) {
@@ -584,11 +632,11 @@ window.selectMotivo = function(el) {
 };
 
 window.confirmMotivo = function() {
-  if (!pendingOutcome) return;
+  if (!pendingOutcome || !pendingAtendimentoId) return;
   const produto = pendingOutcome === 'ruptura' ? document.getElementById('rupturaInput').value.trim() : null;
   const detalhe = pendingOutcome === 'outro' ? document.getElementById('outroInput').value.trim() : null;
   closeMotivos();
-  finalize('nao_convertido', pendingOutcome, detalhe, produto);
+  finalize('nao_convertido', pendingOutcome, detalhe, produto, pendingAtendimentoId);
 };
 
 // ─── Cycle status (footer pills) ───
@@ -637,20 +685,20 @@ async function checkExistingTurno() {
   }
 }
 
-// ─── Check for active atendimento ───
-async function checkActiveAtendimento() {
+// ─── Check for active atendimentos (múltiplos) ───
+async function checkActiveAtendimentos() {
   if (!currentTurno) return;
-  const { data } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('turno_id', currentTurno.id).eq('resultado', 'em_andamento').limit(1);
+  const { data } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('turno_id', currentTurno.id).eq('resultado', 'em_andamento').order('inicio');
   if (data && data.length > 0) {
-    activeAtendimento = data[0].id;
-    showActiveService(data[0]);
+    activeAtendimentos = data;
+    renderActiveAtendimentos();
   }
 }
 
 // ─── Init ───
 await checkExistingTurno();
 await loadVendedores();
-await checkActiveAtendimento();
+await checkActiveAtendimentos();
 </script>
 </body>
 </html>
