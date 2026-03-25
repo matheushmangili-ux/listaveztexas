@@ -763,14 +763,17 @@ window.editVendedor = function(id, nome, apelido) {
   openVendedorModal('Editar Vendedor');
 };
 
+let savingVendedor = false;
 window.saveVendedor = async function() {
+  if (savingVendedor) return;
+  savingVendedor = true;
   const id = document.getElementById('vendedorEditId').value;
   const nome = document.getElementById('vendedorNome').value.trim();
   const apelido = document.getElementById('vendedorApelido').value.trim() || null;
   const pin = document.getElementById('vendedorPin').value.trim();
   const fotoFile = document.getElementById('vendedorFoto')?.files[0] || null;
-  if (!nome) { toast('Preencha o nome', 'warning'); return; }
-  if (pin && (pin.length !== 4 || !/^\d{4}$/.test(pin))) { toast('PIN deve ter exatamente 4 dígitos', 'warning'); return; }
+  if (!nome) { toast('Preencha o nome', 'warning'); savingVendedor = false; return; }
+  if (pin && (pin.length !== 4 || !/^\d{4}$/.test(pin))) { toast('PIN deve ter exatamente 4 dígitos', 'warning'); savingVendedor = false; return; }
 
   if (id) {
     const update = { nome, apelido };
@@ -779,11 +782,11 @@ window.saveVendedor = async function() {
       if (url) update.foto_url = url;
     }
     const { error } = await sb.from('vendedores').update(update).eq('id', id);
-    if (error) { toast('Erro ao atualizar: ' + error.message, 'error'); return; }
+    if (error) { toast('Erro ao atualizar: ' + error.message, 'error'); savingVendedor = false; return; }
     toast('Vendedor atualizado', 'success');
   } else {
     const { data: inserted, error } = await sb.from('vendedores').insert({ nome, apelido }).select().single();
-    if (error) { toast('Erro ao cadastrar: ' + error.message, 'error'); return; }
+    if (error) { toast('Erro ao cadastrar: ' + error.message, 'error'); savingVendedor = false; return; }
     if (fotoFile && inserted) {
       const url = await uploadFoto(inserted.id, fotoFile);
       if (url) await sb.from('vendedores').update({ foto_url: url }).eq('id', inserted.id);
@@ -791,7 +794,8 @@ window.saveVendedor = async function() {
     toast('Vendedor cadastrado', 'success');
   }
   closeVendedorModal();
-  loadVendedores();
+  savingVendedor = false;
+  await loadVendedores();
   loadFloor();
 };
 
@@ -805,10 +809,20 @@ window.toggleVendedor = async function(id, isAtivo) {
 
 window.deleteVendedor = async function(id, nome) {
   if (!confirm('Excluir "' + nome + '"? Esta ação não pode ser desfeita.')) return;
+
+  // Limpar referências primeiro (pausas, atendimentos)
+  await sb.from('pausas_log').delete().eq('vendedor_id', id);
+  await sb.from('atendimentos').delete().eq('vendedor_id', id);
+
   const { error } = await sb.from('vendedores').delete().eq('id', id);
-  if (error) { toast('Erro ao excluir: ' + error.message, 'error'); return; }
-  toast('Vendedor excluído', 'success');
-  loadVendedores();
+  if (error) {
+    // Fallback: se ainda falhar por FK, desativar em vez de excluir
+    await sb.from('vendedores').update({ ativo: false }).eq('id', id);
+    toast('Vendedor desativado (possui histórico)', 'warning');
+  } else {
+    toast('Vendedor excluído', 'success');
+  }
+  await loadVendedores();
   loadFloor();
 };
 
