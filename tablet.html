@@ -649,15 +649,21 @@ function renderQueue() {
 
   let html = '';
 
-  // Atendendo
-  atendendo.forEach(v => { html += renderQueueItem(v, null, true); });
-
-  // Na fila (sidebar inteiro é drop zone via initDragAndDrop)
+  // Na fila primeiro (drop zone)
   inQueue.forEach((v, i) => { html += renderQueueItem(v, i + 1, false, true); });
   if (inQueue.length === 0) html += '<div style="text-align:center;padding:20px 12px;color:var(--text-muted);font-size:11px;opacity:.5"><i class="fa-solid fa-arrow-up-from-bracket" style="display:block;font-size:18px;margin-bottom:6px;opacity:.3"></i>Arraste vendedores do footer para cá</div>';
 
+  // Atendendo abaixo da fila
+  if (atendendo.length > 0) {
+    html += '<div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px;border-top:1px solid var(--border-subtle);margin-top:4px"><i class="fa-solid fa-headset" style="margin-right:4px"></i>Em atendimento</div>';
+    atendendo.forEach(v => { html += renderQueueItem(v, null, true); });
+  }
+
   // Pausa
-  pausa.forEach(v => { html += renderQueueItem(v, null, false); });
+  if (pausa.length > 0) {
+    html += '<div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px;border-top:1px solid var(--border-subtle);margin-top:4px"><i class="fa-solid fa-pause" style="margin-right:4px"></i>Em pausa</div>';
+    pausa.forEach(v => { html += renderQueueItem(v, null, false); });
+  }
 
   list.innerHTML = html;
   initDragAndDrop();
@@ -778,37 +784,117 @@ async function addToQueueAt(vendedorId, beforeId) {
   toast((v?.apelido || v?.nome || 'Vendedor') + ' entrou na fila', 'success', 1500);
 }
 
-// Touch drag (para tablet)
+// Touch drag fluido (ghost card segue o dedo)
 let touchDragEl = null;
 let touchDragId = null;
+let touchGhost = null;
+let touchStartX = 0, touchStartY = 0;
+let touchDragging = false;
 
 window.onTouchDragStart = function(e) {
-  const item = e.target.closest('.queue-item');
+  const item = e.target.closest('.queue-item') || e.target.closest('.footer-card');
   if (!item) return;
   touchDragId = item.dataset.id;
   touchDragEl = item;
-  item.style.opacity = '0.5';
+  touchDragging = false;
 
-  const onMove = (ev) => { ev.preventDefault(); };
+  const touch = e.touches[0];
+  touchStartX = touch.clientX;
+  touchStartY = touch.clientY;
+
+  const onMove = (ev) => {
+    ev.preventDefault();
+    const t = ev.touches[0];
+    const dx = t.clientX - touchStartX;
+    const dy = t.clientY - touchStartY;
+
+    // Só inicia drag se mover > 8px (evita taps acidentais)
+    if (!touchDragging && Math.abs(dx) + Math.abs(dy) > 8) {
+      touchDragging = true;
+      item.style.opacity = '0.3';
+
+      // Criar ghost card
+      touchGhost = item.cloneNode(true);
+      touchGhost.style.cssText = `
+        position:fixed;z-index:9999;pointer-events:none;
+        transform:scale(1.05);opacity:.9;
+        box-shadow:0 8px 32px rgba(0,0,0,.3);
+        border:2px solid var(--success);border-radius:12px;
+        background:var(--bg-card);
+        width:${item.offsetWidth}px;
+        left:${t.clientX - item.offsetWidth/2}px;
+        top:${t.clientY - 30}px;
+        transition:none;
+      `;
+      document.body.appendChild(touchGhost);
+    }
+
+    if (touchDragging && touchGhost) {
+      touchGhost.style.left = (t.clientX - item.offsetWidth/2) + 'px';
+      touchGhost.style.top = (t.clientY - 30) + 'px';
+
+      // Highlight drop zone
+      const queueList = document.getElementById('queueList');
+      const footer = document.getElementById('statusFooter');
+      const elUnder = document.elementFromPoint(t.clientX, t.clientY);
+
+      if (elUnder && (elUnder.id === 'queueList' || elUnder.closest('#queueList'))) {
+        queueList.style.background = 'rgba(34,197,94,.08)';
+        footer?.classList.remove('drop-highlight');
+        // Mostrar indicador de posição
+        const items = [...queueList.querySelectorAll('.queue-item')];
+        items.forEach(el => { el.style.borderTop = ''; el.style.borderBottom = ''; });
+        const after = getDragAfterElement(queueList, t.clientY);
+        if (after) after.style.borderTop = '3px solid var(--success)';
+        else if (items.length > 0) items[items.length-1].style.borderBottom = '3px solid var(--success)';
+      } else if (elUnder && (elUnder.id === 'statusFooter' || elUnder.closest('#statusFooter'))) {
+        footer?.classList.add('drop-highlight');
+        queueList.style.background = '';
+        queueList.querySelectorAll('.queue-item').forEach(el => { el.style.borderTop = ''; el.style.borderBottom = ''; });
+      } else {
+        queueList.style.background = '';
+        footer?.classList.remove('drop-highlight');
+        queueList.querySelectorAll('.queue-item').forEach(el => { el.style.borderTop = ''; el.style.borderBottom = ''; });
+      }
+    }
+  };
+
   const onEnd = async (ev) => {
-    item.style.opacity = '1';
     document.removeEventListener('touchmove', onMove);
     document.removeEventListener('touchend', onEnd);
+
+    // Limpar visual
+    if (touchGhost) { touchGhost.remove(); touchGhost = null; }
+    if (touchDragEl) touchDragEl.style.opacity = '1';
+    const queueList = document.getElementById('queueList');
+    const footer = document.getElementById('statusFooter');
+    queueList.style.background = '';
+    footer?.classList.remove('drop-highlight');
+    queueList.querySelectorAll('.queue-item').forEach(el => { el.style.borderTop = ''; el.style.borderBottom = ''; });
+
+    if (!touchDragging) {
+      // Foi um tap, não drag — não fazer nada (o onclick cuida)
+      touchDragId = null; touchDragEl = null;
+      return;
+    }
+
     const touch = ev.changedTouches[0];
     const dropEl = document.elementFromPoint(touch.clientX, touch.clientY);
+
     if (dropEl && (dropEl.id === 'queueList' || dropEl.closest('#queueList'))) {
       const v = vendedores.find(x => x.id === touchDragId);
       const isInQueue = v && v.status === 'disponivel' && v.posicao_fila != null;
-      const afterEl = getDragAfterElement(document.getElementById('queueList'), touch.clientY);
+      const afterEl = getDragAfterElement(queueList, touch.clientY);
       const afterId = afterEl?.dataset.id || null;
       if (isInQueue) { await reorderInQueue(touchDragId, afterId); }
       else { await addToQueueAt(touchDragId, afterId); }
     } else if (dropEl && (dropEl.id === 'statusFooter' || dropEl.closest('#statusFooter'))) {
       openSaida(touchDragId);
     }
-    touchDragId = null;
-    touchDragEl = null;
+
+    touchDragId = null; touchDragEl = null; touchDragging = false;
   };
+
   document.addEventListener('touchmove', onMove, { passive: false });
   document.addEventListener('touchend', onEnd);
 };
@@ -911,7 +997,7 @@ function renderFooter() {
     }
 
     const inQueueClass = inQueue || atendendo ? ' in-queue' : '';
-    const dragAttr = !inQueue && !atendendo ? 'draggable="true" ondragstart="onFooterDragStart(event)"' : '';
+    const dragAttr = !inQueue && !atendendo ? 'draggable="true" ondragstart="onFooterDragStart(event)" ontouchstart="onTouchDragStart(event)"' : '';
 
     const ini = (v.apelido || v.nome).split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
     const avatarContent = v.foto_url
