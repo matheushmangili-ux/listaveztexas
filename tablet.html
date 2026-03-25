@@ -723,9 +723,11 @@ window.onDragStart = function(e) {
   e.dataTransfer.effectAllowed = 'move';
 };
 
+let dragDropInitialized = false;
 function initDragAndDrop() {
   const dropzone = document.getElementById('queueList');
-  if (!dropzone) return;
+  if (!dropzone || dragDropInitialized) return;
+  dragDropInitialized = true;
 
   dropzone.addEventListener('dragover', e => {
     e.preventDefault();
@@ -820,7 +822,7 @@ window.onTouchDragStart = function(e) {
   touchStartY = touch.clientY;
 
   const onMove = (ev) => {
-    ev.preventDefault();
+    if (touchDragging) ev.preventDefault();
     const t = ev.touches[0];
     const dx = t.clientX - touchStartX;
     const dy = t.clientY - touchStartY;
@@ -1116,9 +1118,9 @@ window.handleProximoCliente = async function() {
 };
 
 function renderActiveAtendimentos() {
+  clearInterval(timerInterval);
   const list = document.getElementById('activeList');
   const label = document.getElementById('activeLabel');
-  // Remove cards antigos (mantém o label)
   list.querySelectorAll('.atend-card').forEach(c => c.remove());
 
   if (activeAtendimentos.length === 0) {
@@ -1129,6 +1131,7 @@ function renderActiveAtendimentos() {
 
   activeAtendimentos.forEach(atend => {
     const v = atend.vendedores;
+    if (!v) return;
     const nome = v.apelido || v.nome;
     const card = document.createElement('div');
     card.className = 'atend-card';
@@ -1304,7 +1307,7 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor) {
       p_motivo: motivo || null,
       p_motivo_detalhe: detalhe || null,
       p_produto_ruptura: produto || null,
-      p_valor_venda: valor || null
+      p_valor_venda: valor ?? null
     });
     if (error) throw error;
     const msg = resultado === 'venda' ? 'Venda registrada!' : resultado === 'troca' ? 'Troca registrada.' : 'Não conversão registrada.';
@@ -1424,10 +1427,18 @@ function closeFooterMenu() {
 window.handleLogout = function() { logout(); };
 window._toggleTheme = function() { toggleTheme(); };
 
-// ─── Realtime ───
+// ─── Realtime (debounced) ───
+let _rtVendTimer = null;
+let _rtAtendTimer = null;
 sb.channel('tablet-sync')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'vendedores' }, () => loadVendedores())
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos' }, () => updateQuickStats())
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vendedores' }, () => {
+    clearTimeout(_rtVendTimer);
+    _rtVendTimer = setTimeout(loadVendedores, 300);
+  })
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos' }, () => {
+    clearTimeout(_rtAtendTimer);
+    _rtAtendTimer = setTimeout(() => { updateQuickStats(); checkActiveAtendimentos(); }, 300);
+  })
   .subscribe();
 
 // ─── Visibility: refetch on return ───
