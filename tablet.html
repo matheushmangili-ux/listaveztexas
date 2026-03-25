@@ -562,8 +562,16 @@ import { STATUS_CONFIG, MOTIVOS, formatTime, initials, toast, elapsedSince, init
 initTheme();
 
 const sb = getSupabase();
-const user = await requireRole(['recepcionista', 'gerente', 'admin']);
-if (!user) { /* requireRole já redireciona pro login */ return; }
+let user;
+try {
+  user = await requireRole(['recepcionista', 'gerente', 'admin']);
+} catch(e) { /* auth error */ }
+if (!user) {
+  // Não fazer nada — requireRole já redireciona pro login
+  // Mas garantir que botões básicos funcionem
+  window.handleLogout = () => { window.location.href = '/index.html'; };
+  window._toggleTheme = () => { toggleTheme(); };
+}
 
 let currentTurno = null;
 let activeAtendimentos = [];

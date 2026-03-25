@@ -439,8 +439,12 @@ import { STATUS_CONFIG, MOTIVOS, todayRange, weekRange, monthRange, initials, to
 initTheme();
 
 const sb = getSupabase();
-const user = await requireRole(['gerente', 'admin']);
-if (!user) { return; }
+let user;
+try { user = await requireRole(['gerente', 'admin']); } catch(e) {}
+if (!user) {
+  window.handleLogout = () => { window.location.href = '/index.html'; };
+  window.toggleTheme = () => { document.documentElement.classList.toggle('light'); };
+}
 
 let charts = {};
 let currentPeriod = 'hoje';
