@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lista da Vez — Dashboard</title>
 <link rel="stylesheet" href="css/styles.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#7c8db5">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
@@ -42,6 +45,15 @@
     padding: 20px;
     overflow: hidden;
   }
+  .kpi-compare {
+    font-size: 10px;
+    font-weight: 600;
+    margin-top: 4px;
+    min-height: 14px;
+  }
+  .kpi-compare .up { color: var(--success); }
+  .kpi-compare .down { color: var(--danger); }
+  .kpi-compare .neutral { color: var(--text-muted); }
   .chart-card h3 {
     font-size: 11px;
     font-weight: 700;
@@ -190,6 +202,9 @@
         <button onclick="setPeriod('semana')">Semana</button>
         <button onclick="setPeriod('mes')">Mês</button>
       </div>
+      <button class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px" onclick="exportReport()">
+        <i class="fa-solid fa-file-export" style="font-size:10px"></i> Exportar
+      </button>
       <a href="tablet.html" class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px">
         <i class="fa-solid fa-tablet-screen-button" style="font-size:10px"></i> Tablet
       </a>
@@ -207,18 +222,27 @@
     <div class="kpi-card" style="--accent:var(--text-primary)">
       <div class="kpi-label">Total Atendimentos</div>
       <div class="kpi-value" id="kpiTotal" style="color:var(--text-primary)">—</div>
+      <div class="kpi-compare" id="kpiTotalCmp"></div>
     </div>
     <div class="kpi-card" style="--accent:var(--success)">
       <div class="kpi-label">Taxa de Conversão</div>
       <div class="kpi-value" id="kpiConv" style="color:var(--success)">—</div>
+      <div class="kpi-compare" id="kpiConvCmp"></div>
     </div>
     <div class="kpi-card" style="--accent:var(--danger)">
       <div class="kpi-label">Não Convertidos</div>
       <div class="kpi-value" id="kpiLoss" style="color:var(--danger)">—</div>
+      <div class="kpi-compare" id="kpiLossCmp"></div>
     </div>
     <div class="kpi-card" style="--accent:var(--info)">
       <div class="kpi-label">Tempo Médio</div>
       <div class="kpi-value" id="kpiTime" style="color:var(--info)">—</div>
+      <div class="kpi-compare" id="kpiTimeCmp"></div>
+    </div>
+    <div class="kpi-card" style="--accent:var(--warning)">
+      <div class="kpi-label">Ticket Médio</div>
+      <div class="kpi-value" id="kpiTicket" style="color:var(--warning)">—</div>
+      <div class="kpi-compare" id="kpiTicketCmp"></div>
     </div>
   </div>
 
@@ -231,6 +255,18 @@
     <div class="chart-card">
       <h3><i class="fa-solid fa-chart-bar" style="margin-right:6px;color:var(--accent-dim)"></i>Fluxo por Hora</h3>
       <div class="chart-box"><canvas id="chartHourly"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Second charts row: Scatter + Tempo vs Meta -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3><i class="fa-solid fa-chart-scatter" style="margin-right:6px;color:var(--accent-dim)"></i>Volume × Conversão por Vendedor</h3>
+      <div class="chart-box"><canvas id="chartScatter"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3><i class="fa-solid fa-stopwatch" style="margin-right:6px;color:var(--accent-dim)"></i>Tempo Médio vs Meta (15min)</h3>
+      <div class="chart-box"><canvas id="chartTempoMeta"></canvas></div>
     </div>
   </div>
 
@@ -303,6 +339,16 @@
     <input type="text" id="vendedorNome" placeholder="Ex: Luiz Alberto">
     <label>Apelido (exibido na fila)</label>
     <input type="text" id="vendedorApelido" placeholder="Ex: Luiz">
+    <label>Foto (opcional)</label>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div id="vendedorFotoPreview" style="width:48px;height:48px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid var(--border-subtle)">
+        <i class="fa-solid fa-user" style="color:var(--text-muted);font-size:18px"></i>
+      </div>
+      <label style="cursor:pointer;padding:6px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);font-size:11px;font-weight:600;color:var(--text-secondary);margin:0">
+        <i class="fa-solid fa-camera" style="margin-right:4px"></i>Escolher foto
+        <input type="file" id="vendedorFoto" accept="image/*" style="display:none" onchange="previewFoto(this)">
+      </label>
+    </div>
     <label>PIN Rápido (4 dígitos)</label>
     <input type="text" id="vendedorPin" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="Ex: 1234" style="letter-spacing:8px;font-family:var(--font-mono);font-weight:700">
     <p style="font-size:10px;color:var(--text-muted);margin-top:-8px;margin-bottom:12px">Opcional. Permite login rápido pelo PIN na tela inicial.</p>
@@ -346,28 +392,67 @@ window.setPeriod = function(p) {
   loadAll();
 };
 
+// ─── Previous period range (for comparison) ───
+function getPrevRange() {
+  const r = getRange();
+  const start = new Date(r.start);
+  const end = new Date(r.end);
+  const duration = end - start;
+  const prevEnd = new Date(start);
+  const prevStart = new Date(start.getTime() - duration);
+  return { start: prevStart.toISOString(), end: prevEnd.toISOString() };
+}
+
+function renderCompare(elId, current, previous, suffix = '', invertGood = false) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (previous === 0 || previous == null) { el.innerHTML = '<span class="neutral">—</span>'; return; }
+  const diff = ((current - previous) / previous * 100);
+  const isUp = diff > 0;
+  const isGood = invertGood ? !isUp : isUp;
+  const cls = Math.abs(diff) < 1 ? 'neutral' : isGood ? 'up' : 'down';
+  const arrow = isUp ? '↑' : '↓';
+  el.innerHTML = `<span class="${cls}">${arrow} ${Math.abs(diff).toFixed(0)}% vs anterior</span>`;
+}
+
 // ─── Load all data ───
 async function loadAll() {
   const range = getRange();
+  const prevRange = getPrevRange();
   await Promise.all([
-    loadKPIs(range),
+    loadKPIs(range, prevRange),
     loadMotivos(range),
     loadHourly(range),
     loadRanking(range),
     loadRuptures(range),
-    loadFloor()
+    loadFloor(),
+    loadScatter(range),
+    loadTempoMeta(range)
   ]);
 }
 
 // ─── KPIs ───
-async function loadKPIs(range) {
-  const { data, error } = await sb.rpc('get_conversion_stats', { p_inicio: range.start, p_fim: range.end });
-  if (error || !data || data.length === 0) return;
-  const d = data[0];
+async function loadKPIs(range, prevRange) {
+  const [curr, prev] = await Promise.all([
+    sb.rpc('get_conversion_stats', { p_inicio: range.start, p_fim: range.end }),
+    sb.rpc('get_conversion_stats', { p_inicio: prevRange.start, p_fim: prevRange.end })
+  ]);
+  if (curr.error || !curr.data || curr.data.length === 0) return;
+  const d = curr.data[0];
+  const p = prev.data?.[0] || {};
   document.getElementById('kpiTotal').textContent = d.total_atendimentos || 0;
   document.getElementById('kpiConv').textContent = (d.taxa_conversao || 0) + '%';
   document.getElementById('kpiLoss').textContent = d.total_nao_convertido || 0;
   document.getElementById('kpiTime').textContent = (d.tempo_medio_min || 0) + 'min';
+  // Ticket médio
+  const ticket = d.ticket_medio || 0;
+  const pTicket = p.ticket_medio || 0;
+  document.getElementById('kpiTicket').textContent = ticket > 0 ? 'R$ ' + ticket.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '—';
+  renderCompare('kpiTotalCmp', d.total_atendimentos || 0, p.total_atendimentos || 0);
+  renderCompare('kpiConvCmp', d.taxa_conversao || 0, p.taxa_conversao || 0);
+  renderCompare('kpiLossCmp', d.total_nao_convertido || 0, p.total_nao_convertido || 0, '', true);
+  renderCompare('kpiTimeCmp', d.tempo_medio_min || 0, p.tempo_medio_min || 0, '', true);
+  if (ticket > 0 || pTicket > 0) renderCompare('kpiTicketCmp', ticket, pTicket);
 }
 
 // ─── Motivos chart ───
@@ -491,6 +576,89 @@ async function loadFloor() {
   }).join('');
 }
 
+// ─── Scatter: Volume × Conversão ───
+async function loadScatter(range) {
+  const { data } = await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end });
+  const ctx = document.getElementById('chartScatter');
+  if (charts.scatter) charts.scatter.destroy();
+  if (!data || data.length === 0) { charts.scatter = null; return; }
+
+  const points = data.map(r => ({
+    x: r.total_atendimentos || 0,
+    y: r.taxa_conversao || 0,
+    label: r.nome
+  }));
+
+  charts.scatter = new Chart(ctx, {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label: 'Vendedores',
+        data: points,
+        backgroundColor: points.map(p => p.y >= 50 ? 'rgba(74,222,128,.6)' : p.y >= 30 ? 'rgba(251,191,36,.6)' : 'rgba(248,113,113,.6)'),
+        borderColor: points.map(p => p.y >= 50 ? '#22c55e' : p.y >= 30 ? '#f59e0b' : '#ef4444'),
+        borderWidth: 2,
+        pointRadius: 8,
+        pointHoverRadius: 11
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: c => {
+              const p = c.raw;
+              return p.label + ': ' + p.x + ' atend. / ' + p.y + '% conv.';
+            }
+          }
+        }
+      },
+      scales: {
+        x: { title: { display: true, text: 'Atendimentos', font: { size: 10, weight: 600 } }, grid: { color: 'rgba(148,163,184,.06)' }, ticks: { font: { size: 10 } } },
+        y: { title: { display: true, text: 'Conversão %', font: { size: 10, weight: 600 } }, grid: { color: 'rgba(148,163,184,.06)' }, ticks: { font: { size: 10 } }, beginAtZero: true, max: 100 }
+      }
+    }
+  });
+}
+
+// ─── Tempo Médio vs Meta ───
+async function loadTempoMeta(range) {
+  const { data } = await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end });
+  const ctx = document.getElementById('chartTempoMeta');
+  if (charts.tempoMeta) charts.tempoMeta.destroy();
+  if (!data || data.length === 0) { charts.tempoMeta = null; return; }
+
+  const META_MIN = 15;
+  const names = data.map(r => r.nome?.split(' ')[0] || '?');
+  const tempos = data.map(r => r.tempo_medio_min || 0);
+  const colors = tempos.map(t => t <= META_MIN ? 'rgba(74,222,128,.7)' : t <= META_MIN * 1.3 ? 'rgba(251,191,36,.7)' : 'rgba(248,113,113,.7)');
+  const borders = tempos.map(t => t <= META_MIN ? '#22c55e' : t <= META_MIN * 1.3 ? '#f59e0b' : '#ef4444');
+
+  charts.tempoMeta = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: names,
+      datasets: [
+        { label: 'Tempo Médio (min)', data: tempos, backgroundColor: colors, borderColor: borders, borderWidth: 1.5, borderRadius: 4, barPercentage: 0.7 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        annotation: { annotations: { metaLine: { type: 'line', xMin: META_MIN, xMax: META_MIN, borderColor: 'rgba(248,113,113,.5)', borderWidth: 2, borderDash: [6, 3], label: { display: true, content: 'Meta ' + META_MIN + 'min', position: 'start', font: { size: 9, weight: 700 }, color: 'var(--danger)' } } } }
+      },
+      scales: {
+        x: { beginAtZero: true, grid: { color: 'rgba(148,163,184,.06)' }, ticks: { font: { size: 10 }, callback: v => v + 'min' } },
+        y: { grid: { display: false }, ticks: { font: { size: 11, weight: 600 } } }
+      }
+    }
+  });
+}
+
 window.handleLogout = function() { logout(); };
 window.toggleTheme = toggleTheme;
 
@@ -517,6 +685,27 @@ async function loadVendedores() {
       </div>
     </div>
   `).join('');
+}
+
+// Photo preview
+window.previewFoto = function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('vendedorFotoPreview').innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover">`;
+  };
+  reader.readAsDataURL(file);
+};
+
+async function uploadFoto(vendedorId, file) {
+  if (!file) return null;
+  const ext = file.name.split('.').pop();
+  const path = `vendedores/${vendedorId}.${ext}`;
+  const { error } = await sb.storage.from('avatars').upload(path, file, { upsert: true });
+  if (error) { console.warn('Upload foto falhou:', error.message); return null; }
+  const { data } = sb.storage.from('avatars').getPublicUrl(path);
+  return data?.publicUrl || null;
 }
 
 window.openVendedorModal = function(title) {
@@ -546,16 +735,26 @@ window.saveVendedor = async function() {
   const nome = document.getElementById('vendedorNome').value.trim();
   const apelido = document.getElementById('vendedorApelido').value.trim() || null;
   const pin = document.getElementById('vendedorPin').value.trim();
+  const fotoFile = document.getElementById('vendedorFoto')?.files[0] || null;
   if (!nome) { toast('Preencha o nome', 'warning'); return; }
   if (pin && (pin.length !== 4 || !/^\d{4}$/.test(pin))) { toast('PIN deve ter exatamente 4 dígitos', 'warning'); return; }
 
   if (id) {
-    const { error } = await sb.from('vendedores').update({ nome, apelido }).eq('id', id);
+    const update = { nome, apelido };
+    if (fotoFile) {
+      const url = await uploadFoto(id, fotoFile);
+      if (url) update.foto_url = url;
+    }
+    const { error } = await sb.from('vendedores').update(update).eq('id', id);
     if (error) { toast('Erro ao atualizar: ' + error.message, 'error'); return; }
     toast('Vendedor atualizado', 'success');
   } else {
-    const { error } = await sb.from('vendedores').insert({ nome, apelido });
+    const { data: inserted, error } = await sb.from('vendedores').insert({ nome, apelido }).select().single();
     if (error) { toast('Erro ao cadastrar: ' + error.message, 'error'); return; }
+    if (fotoFile && inserted) {
+      const url = await uploadFoto(inserted.id, fotoFile);
+      if (url) await sb.from('vendedores').update({ foto_url: url }).eq('id', inserted.id);
+    }
     toast('Vendedor cadastrado', 'success');
   }
   closeVendedorModal();
@@ -578,6 +777,37 @@ window.deleteVendedor = async function(id, nome) {
   toast('Vendedor excluído', 'success');
   loadVendedores();
   loadFloor();
+};
+
+// ─── Export Report (CSV) ───
+window.exportReport = async function() {
+  const range = getRange();
+  const { data: ranking } = await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end });
+  if (!ranking || ranking.length === 0) { toast('Sem dados para exportar', 'warning'); return; }
+
+  const period = currentPeriod === 'hoje' ? 'Hoje' : currentPeriod === 'semana' ? 'Semana' : 'Mês';
+  let csv = '\uFEFF'; // BOM for UTF-8
+  csv += 'Relatório Lista da Vez — ' + period + '\n';
+  csv += 'Gerado em: ' + new Date().toLocaleString('pt-BR') + '\n\n';
+  csv += 'Vendedor,Atendimentos,Vendas,Conversão %,Tempo Médio (min)\n';
+  ranking.forEach(r => {
+    csv += `"${r.nome}",${r.total_atendimentos||0},${r.total_vendas||0},${r.taxa_conversao||0},${r.tempo_medio_min||0}\n`;
+  });
+
+  // Totals
+  const totAtend = ranking.reduce((s, r) => s + (r.total_atendimentos||0), 0);
+  const totVendas = ranking.reduce((s, r) => s + (r.total_vendas||0), 0);
+  const avgConv = totAtend > 0 ? Math.round(totVendas / totAtend * 100) : 0;
+  csv += `\n"TOTAL",${totAtend},${totVendas},${avgConv},—\n`;
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'relatorio-listavez-' + currentPeriod + '-' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Relatório exportado!', 'success');
 };
 
 // ─── Init ───

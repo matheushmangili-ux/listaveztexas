@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Lista da Vez — Fila</title>
 <link rel="stylesheet" href="css/styles.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#7c8db5">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -610,6 +613,18 @@ function renderQueueItem(v, pos, isActive, draggable) {
   const dragStyle = draggable ? 'cursor:grab;' : '';
   const posHtml = pos ? `<div class="queue-position" style="background:${cfg.bg};color:${cfg.color}">${pos}</div>` : `<div class="queue-position" style="background:${cfg.bg};color:${cfg.color}"><i class="fa-solid ${cfg.icon}" style="font-size:11px"></i></div>`;
 
+  // Timer para quem está atendendo
+  let timerHtml = '';
+  if (v.status === 'em_atendimento') {
+    const atend = activeAtendimentos.find(a => a.vendedor_id === v.id);
+    if (atend) {
+      const elapsed = (Date.now() - new Date(atend.inicio).getTime()) / 1000;
+      const cls = elapsed > 600 ? 'danger' : elapsed > 300 ? 'warning' : '';
+      const clr = elapsed > 600 ? 'var(--danger)' : elapsed > 300 ? 'var(--warning)' : 'var(--info)';
+      timerHtml = `<span data-sidebar-timer="${atend.id}" style="font-family:var(--font-mono);font-weight:700;font-size:11px;color:${clr};margin-left:auto;flex-shrink:0">${formatTime(elapsed)}</span>`;
+    }
+  }
+
   return `<div class="queue-item ${v.status}${isActive ? ' active' : ''}" data-id="${v.id}" ${dragAttr} style="${dragStyle}">
     ${draggable ? '<i class="fa-solid fa-grip-vertical" style="color:var(--text-muted);font-size:10px;opacity:.4;margin-right:2px"></i>' : ''}
     ${posHtml}
@@ -617,6 +632,7 @@ function renderQueueItem(v, pos, isActive, draggable) {
       <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.apelido || v.nome}</div>
       <div style="font-size:10px;color:${cfg.color};font-weight:600;text-transform:uppercase;letter-spacing:.05em">${cfg.short}</div>
     </div>
+    ${timerHtml}
   </div>`;
 }
 
@@ -632,15 +648,81 @@ function initDragAndDrop() {
   const dropzone = document.getElementById('dropFila');
   if (!dropzone) return;
 
-  dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.style.borderColor = 'var(--success)'; });
-  dropzone.addEventListener('dragleave', () => { dropzone.style.borderColor = 'var(--border-medium)'; });
+  // Drop na zona da fila: adicionar ou reordenar
+  dropzone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropzone.style.borderColor = 'var(--success)';
+    // Highlight insert position
+    const items = [...dropzone.querySelectorAll('.queue-item')];
+    items.forEach(el => el.style.borderTop = '');
+    const after = getDragAfterElement(dropzone, e.clientY);
+    if (after) after.style.borderTop = '2px solid var(--success)';
+  });
+  dropzone.addEventListener('dragleave', () => {
+    dropzone.style.borderColor = 'var(--border-medium)';
+    dropzone.querySelectorAll('.queue-item').forEach(el => el.style.borderTop = '');
+  });
   dropzone.addEventListener('drop', async e => {
     e.preventDefault();
     dropzone.style.borderColor = 'var(--border-medium)';
+    dropzone.querySelectorAll('.queue-item').forEach(el => el.style.borderTop = '');
     if (!draggedId) return;
-    await addToQueue(draggedId);
+
+    const v = vendedores.find(x => x.id === draggedId);
+    const isInQueue = v && v.status === 'disponivel' && v.posicao_fila != null;
+    const afterEl = getDragAfterElement(dropzone, e.clientY);
+    const afterId = afterEl?.dataset.id || null;
+
+    if (isInQueue) {
+      // Reorder within queue
+      await reorderInQueue(draggedId, afterId);
+    } else {
+      // Add to queue at specific position
+      await addToQueueAt(draggedId, afterId);
+    }
     draggedId = null;
   });
+}
+
+function getDragAfterElement(container, y) {
+  const items = [...container.querySelectorAll('.queue-item:not([style*="opacity: 0.5"])')];
+  return items.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) return { offset, element: child };
+    return closest;
+  }, { offset: Number.NEGATIVE_INFINITY }).element || null;
+}
+
+async function reorderInQueue(movedId, beforeId) {
+  const inQueue = vendedores.filter(v => v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
+  const ordered = inQueue.filter(v => v.id !== movedId);
+  const beforeIdx = beforeId ? ordered.findIndex(v => v.id === beforeId) : ordered.length;
+  const moved = inQueue.find(v => v.id === movedId);
+  if (!moved) return;
+  ordered.splice(beforeIdx >= 0 ? beforeIdx : ordered.length, 0, moved);
+
+  const updates = ordered.map((v, i) => sb.from('vendedores').update({ posicao_fila: i + 1 }).eq('id', v.id));
+  await Promise.all(updates);
+  await loadVendedores();
+  toast('Fila reordenada', 'info', 1500);
+}
+
+async function addToQueueAt(vendedorId, beforeId) {
+  const inQueue = vendedores.filter(v => v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
+  const beforeIdx = beforeId ? inQueue.findIndex(v => v.id === beforeId) : inQueue.length;
+  const insertAt = beforeIdx >= 0 ? beforeIdx : inQueue.length;
+
+  // Shift positions down from insertAt
+  const updates = [];
+  for (let i = inQueue.length - 1; i >= insertAt; i--) {
+    updates.push(sb.from('vendedores').update({ posicao_fila: i + 2 }).eq('id', inQueue[i].id));
+  }
+  updates.push(sb.from('vendedores').update({ status: 'disponivel', posicao_fila: insertAt + 1 }).eq('id', vendedorId));
+  await Promise.all(updates);
+  await loadVendedores();
+  const v = vendedores.find(x => x.id === vendedorId);
+  toast((v?.apelido || v?.nome || 'Vendedor') + ' entrou na fila', 'success', 1500);
 }
 
 // Touch drag (para tablet)
@@ -662,7 +744,12 @@ window.onTouchDragStart = function(e) {
     const touch = ev.changedTouches[0];
     const dropEl = document.elementFromPoint(touch.clientX, touch.clientY);
     if (dropEl && (dropEl.id === 'dropFila' || dropEl.closest('#dropFila'))) {
-      await addToQueue(touchDragId);
+      const v = vendedores.find(x => x.id === touchDragId);
+      const isInQueue = v && v.status === 'disponivel' && v.posicao_fila != null;
+      const afterEl = getDragAfterElement(document.getElementById('dropFila'), touch.clientY);
+      const afterId = afterEl?.dataset.id || null;
+      if (isInQueue) { await reorderInQueue(touchDragId, afterId); }
+      else { await addToQueueAt(touchDragId, afterId); }
     } else if (dropEl && (dropEl.id === 'statusFooter' || dropEl.closest('#statusFooter'))) {
       openSaida(touchDragId);
     }
@@ -711,6 +798,10 @@ window.confirmSaida = async function(motivo) {
   const newStatus = motivo === 'banheiro' || motivo === 'reuniao' ? 'pausa' : 'fora';
   saidaMotivos[pendingSaidaId] = motivo;
   await sb.from('vendedores').update({ status: newStatus, posicao_fila: null }).eq('id', pendingSaidaId);
+  // Log pausa no histórico
+  if (currentTurno) {
+    sb.rpc('registrar_pausa', { p_vendedor_id: pendingSaidaId, p_turno_id: currentTurno.id, p_motivo: motivo }).catch(() => {});
+  }
   toast(SAIDA_COLORS[motivo]?.label || 'Saiu da fila', 'info', 2000);
   closeSaida();
   await loadVendedores();
@@ -849,15 +940,20 @@ function renderActiveAtendimentos() {
     list.appendChild(card);
   });
 
-  // Timer global para todos os atendimentos
+  // Timer global para todos os atendimentos (painel + sidebar)
   clearInterval(timerInterval);
   timerInterval = setInterval(() => {
     activeAtendimentos.forEach(atend => {
-      const el = document.getElementById('timer-' + atend.id);
-      if (!el) return;
       const elapsed = (Date.now() - new Date(atend.inicio).getTime()) / 1000;
-      el.textContent = formatTime(elapsed);
-      el.className = 'atend-timer' + (elapsed > 600 ? ' danger' : elapsed > 300 ? ' warning' : '');
+      const timeStr = formatTime(elapsed);
+      const cls = elapsed > 600 ? ' danger' : elapsed > 300 ? ' warning' : '';
+      const clr = elapsed > 600 ? 'var(--danger)' : elapsed > 300 ? 'var(--warning)' : 'var(--info)';
+      // Main panel timer
+      const el = document.getElementById('timer-' + atend.id);
+      if (el) { el.textContent = timeStr; el.className = 'atend-timer' + cls; }
+      // Sidebar timer
+      const sideEl = document.querySelector(`[data-sidebar-timer="${atend.id}"]`);
+      if (sideEl) { sideEl.textContent = timeStr; sideEl.style.color = clr; }
     });
   }, 1000);
 }
@@ -882,10 +978,49 @@ window.handleOutcome = function(resultado, atendId) {
     openMotivos();
     return;
   }
+  if (resultado === 'venda') {
+    openValorVenda(atendId);
+    return;
+  }
   finalize(resultado, null, null, null, atendId);
 };
 
-async function finalize(resultado, motivo, detalhe, produto, atendId) {
+function openValorVenda(atendId) {
+  const overlay = document.createElement('div');
+  overlay.id = 'valorOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center';
+  overlay.innerHTML = `
+    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:360px;text-align:center">
+      <i class="fa-solid fa-dollar-sign" style="font-size:28px;color:var(--success);margin-bottom:12px"></i>
+      <h3 style="font-family:var(--font-mono);font-size:14px;font-weight:700;margin-bottom:4px">Valor da Venda</h3>
+      <p style="font-size:11px;color:var(--text-muted);margin-bottom:16px">Opcional — deixe vazio se não souber</p>
+      <input id="valorVendaInput" type="number" inputmode="decimal" placeholder="R$ 0,00" step="0.01" min="0"
+        style="width:100%;padding:14px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);color:var(--text-primary);font-family:var(--font-mono);font-size:20px;font-weight:700;text-align:center;margin-bottom:16px">
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" style="flex:1;min-height:44px" onclick="document.getElementById('valorOverlay').remove();finalize('venda',null,null,null,'${atendId}')">
+          Pular
+        </button>
+        <button class="btn" style="flex:1;min-height:44px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer" onclick="submitValorVenda('${atendId}')">
+          <i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(() => document.getElementById('valorVendaInput')?.focus(), 100);
+}
+
+window.submitValorVenda = function(atendId) {
+  const input = document.getElementById('valorVendaInput');
+  const valor = input ? parseFloat(input.value) || null : null;
+  document.getElementById('valorOverlay')?.remove();
+  finalizeWithValue('venda', null, null, null, atendId, valor);
+};
+
+async function finalizeWithValue(resultado, motivo, detalhe, produto, atendId, valor) {
+  return finalize(resultado, motivo, detalhe, produto, atendId, valor);
+}
+
+async function finalize(resultado, motivo, detalhe, produto, atendId, valor) {
   const id = atendId || pendingAtendimentoId;
   if (!id) return;
   try {
@@ -895,7 +1030,7 @@ async function finalize(resultado, motivo, detalhe, produto, atendId) {
       p_motivo: motivo || null,
       p_motivo_detalhe: detalhe || null,
       p_produto_ruptura: produto || null,
-      p_valor_venda: null
+      p_valor_venda: valor || null
     });
     if (error) throw error;
     const msg = resultado === 'venda' ? 'Venda registrada!' : resultado === 'troca' ? 'Troca registrada.' : 'Não conversão registrada.';
@@ -957,6 +1092,7 @@ window.handleFooterTap = async function(vendedorId) {
   } else {
     // Fora/pausa → voltar pra fila
     delete saidaMotivos[vendedorId];
+    sb.rpc('registrar_retorno', { p_vendedor_id: vendedorId }).catch(() => {});
     await addToQueue(vendedorId);
   }
 };
