@@ -702,9 +702,9 @@ async function uploadFoto(vendedorId, file) {
   if (!file) return null;
   const ext = file.name.split('.').pop();
   const path = `vendedores/${vendedorId}.${ext}`;
-  const { error } = await sb.storage.from('avatars').upload(path, file, { upsert: true });
+  const { error } = await sb.storage.from('Sellers').upload(path, file, { upsert: true });
   if (error) { console.warn('Upload foto falhou:', error.message); return null; }
-  const { data } = sb.storage.from('avatars').getPublicUrl(path);
+  const { data } = sb.storage.from('Sellers').getPublicUrl(path);
   return data?.publicUrl || null;
 }
 
