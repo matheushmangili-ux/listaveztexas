@@ -1065,12 +1065,14 @@ window.confirmSaida = async function(motivo) {
 
 // ─── Finalizar Todos ───
 window.finalizarTodos = async function() {
-  const naFila = vendedores.filter(v => v.status === 'disponivel' && v.posicao_fila != null);
-  if (naFila.length === 0) { toast('Nenhum vendedor na fila', 'warning'); return; }
-  if (!confirm('Remover todos os ' + naFila.length + ' vendedores da fila?')) return;
-  const ids = naFila.map(v => v.id);
+  const ativos = vendedores.filter(v => v.status !== 'fora' && v.status !== 'em_atendimento');
+  if (ativos.length === 0) { toast('Nenhum vendedor na fila', 'warning'); return; }
+  if (!confirm('Remover todos os ' + ativos.length + ' vendedores da fila?')) return;
+  const ids = ativos.map(v => v.id);
   const { error } = await sb.from('vendedores').update({ status: 'fora', posicao_fila: null }).in('id', ids);
   if (error) { toast('Erro ao remover vendedores', 'error'); return; }
+  // Limpar motivos de saída
+  ids.forEach(id => delete saidaMotivos[id]);
   toast('Todos removidos da fila', 'info');
   await loadVendedores();
 };
@@ -1256,6 +1258,7 @@ function renderActiveAtendimentos() {
         <button class="btn-sale" title="Venda" onclick="handleOutcome('venda','${atend.id}')"><i class="fa-solid fa-check"></i></button>
         <button class="btn-nosale" title="Não converteu" onclick="handleOutcome('nao_convertido','${atend.id}')"><i class="fa-solid fa-xmark"></i></button>
         <button class="btn-exchange" title="Troca" onclick="handleOutcome('troca','${atend.id}')"><i class="fa-solid fa-rotate"></i></button>
+        <button class="btn-cancel" title="Cancelar" onclick="cancelarAtendimento('${atend.id}')" style="background:var(--bg-hover);color:var(--text-muted);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px"><i class="fa-solid fa-arrow-rotate-left"></i></button>
       </div>`;
     list.appendChild(card);
   });
@@ -1287,6 +1290,36 @@ function removeAtendimento(atendId) {
     document.getElementById('activeLabel').style.display = 'none';
   }
 }
+
+// ─── Cancelar atendimento (voltar vendedor à posição original) ───
+window.cancelarAtendimento = async function(atendId) {
+  if (!confirm('Cancelar este atendimento? O vendedor volta para a posição dele na fila.')) return;
+  try {
+    const atend = activeAtendimentos.find(a => a.id === atendId);
+    if (!atend) return;
+    const vendedorId = atend.vendedor_id;
+
+    // Deletar atendimento (foi engano, não conta)
+    await sb.from('atendimentos').delete().eq('id', atendId);
+
+    // Devolver vendedor à posição 1 da fila do setor dele
+    const v = vendedores.find(x => x.id === vendedorId);
+    const setor = v?.setor || 'loja';
+    const inQueue = vendedores.filter(x => (x.setor || 'loja') === setor && x.status === 'disponivel' && x.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
+
+    // Empurrar todo mundo uma posição pra frente
+    const updates = inQueue.map((x, i) => sb.from('vendedores').update({ posicao_fila: i + 2 }).eq('id', x.id));
+    updates.push(sb.from('vendedores').update({ status: 'disponivel', posicao_fila: 1 }).eq('id', vendedorId));
+    await Promise.all(updates);
+
+    removeAtendimento(atendId);
+    await loadVendedores();
+    updateQuickStats();
+    toast('Atendimento cancelado — vendedor voltou ao 1º da fila', 'info');
+  } catch (e) {
+    toast('Erro ao cancelar: ' + e.message, 'error');
+  }
+};
 
 // ─── Outcomes ───
 let pendingOutcome = null;
@@ -1408,7 +1441,8 @@ let _continuarCallbacks = { onNo: null, onYes: null };
 
 function askContinuar(atendId, onNo, onYes) {
   const atend = activeAtendimentos.find(a => a.id === atendId);
-  const v = atend?.vendedores;
+  const vendedorId = atend?.vendedor_id;
+  const v = vendedorId ? vendedores.find(x => x.id === vendedorId) : (atend?.vendedores || null);
   const nome = v ? (v.apelido || v.nome) : 'Vendedor';
   _continuarCallbacks = { onNo, onYes };
 
