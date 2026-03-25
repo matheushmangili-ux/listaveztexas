@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>ListaVez Texas — Fila</title>
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .tablet-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    grid-template-rows: auto 1fr auto;
+    height: 100vh;
+    gap: 0;
+  }
+  @media (max-width: 768px) {
+    .tablet-layout { grid-template-columns: 1fr; }
+    .queue-panel { display: none; }
+    .queue-panel.mobile-show { display: block; position: fixed; inset: 0; z-index: 50; background: var(--bg-deep); overflow-y: auto; }
+  }
+
+  /* Header */
+  .t-header {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  /* Queue panel (left) */
+  .queue-panel {
+    background: var(--bg-surface);
+    border-right: 1px solid var(--border-subtle);
+    overflow-y: auto;
+    padding: 12px;
+  }
+  .queue-list { display: flex; flex-direction: column; gap: 6px; }
+
+  /* Service panel (right) */
+  .service-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    position: relative;
+  }
+
+  /* Footer */
+  .t-footer {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-subtle);
+    overflow-x: auto;
+  }
+
+  /* Status toggle pill */
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .2s;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 40px;
+  }
+  .status-pill:hover { border-color: var(--border-medium); }
+  .status-pill .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Active service card */
+  .active-service {
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+  }
+  .active-service .seller-avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-family: var(--font-mono);
+    font-weight: 800;
+    font-size: 28px;
+    color: var(--bg-deep);
+    box-shadow: 0 8px 32px rgba(196,162,101,.25);
+  }
+
+  /* Idle state */
+  .idle-state {
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+  }
+  .idle-icon {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: var(--success-bg);
+    border: 2px solid rgba(74,222,128,.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+  }
+  .idle-icon i { font-size: 36px; color: var(--success); }
+
+  /* Quick stats bar */
+  .quick-stats {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 24px;
+  }
+  .quick-stat {
+    text-align: center;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+  }
+  .quick-stat .val { font-family: var(--font-mono); font-weight: 700; font-size: 18px; }
+  .quick-stat .lbl { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; margin-top: 2px; }
+
+  /* Outcome buttons */
+  .outcome-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-top: 32px;
+    width: 100%;
+  }
+  .outcome-btn {
+    min-height: 64px;
+    border: 2px solid var(--border-subtle);
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .outcome-btn:active { transform: scale(.96); }
+  .outcome-btn i { font-size: 18px; }
+  .outcome-btn.sale { border-color: rgba(74,222,128,.25); color: var(--success); }
+  .outcome-btn.sale:hover { background: var(--success-bg); border-color: var(--success); }
+  .outcome-btn.no-sale { border-color: rgba(248,113,113,.2); color: var(--danger); }
+  .outcome-btn.no-sale:hover { background: var(--danger-bg); border-color: var(--danger); }
+  .outcome-btn.exchange { border-color: rgba(251,191,36,.2); color: var(--warning); }
+  .outcome-btn.exchange:hover { background: var(--warning-bg); border-color: var(--warning); }
+
+  /* Live clock */
+  .live-clock {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<div class="tablet-layout">
+  <!-- HEADER -->
+  <header class="t-header">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center">
+        <span style="font-family:var(--font-mono);font-weight:800;font-size:12px;color:var(--bg-deep)">LV</span>
+      </div>
+      <div>
+        <span style="font-family:var(--font-mono);font-weight:700;font-size:14px">ListaVez</span>
+        <span id="turnoLabel" style="font-size:11px;color:var(--text-muted);margin-left:8px">Turno não iniciado</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <span class="live-clock" id="clock">--:--</span>
+      <button class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px" id="btnTurno" onclick="toggleTurno()">
+        <i class="fa-solid fa-play" style="font-size:10px"></i> Abrir Turno
+      </button>
+      <button class="btn btn-ghost" style="min-height:36px;padding:0 10px;font-size:11px" onclick="handleLogout()" title="Sair">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- QUEUE PANEL (left) -->
+  <aside class="queue-panel" id="queuePanel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:0 4px">
+      <span style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em">Fila</span>
+      <span id="queueCount" style="font-size:11px;font-weight:600;color:var(--text-muted)">0 na fila</span>
+    </div>
+    <div class="queue-list" id="queueList">
+      <div style="text-align:center;padding:40px 0;color:var(--text-muted);font-size:13px">
+        <i class="fa-solid fa-users-slash" style="font-size:24px;margin-bottom:8px;display:block;opacity:.3"></i>
+        Abra o turno para iniciar
+      </div>
+    </div>
+  </aside>
+
+  <!-- SERVICE PANEL (right) -->
+  <main class="service-panel" id="servicePanel">
+    <!-- Idle state (default) -->
+    <div class="idle-state" id="idleState">
+      <div class="idle-icon animate-breathe">
+        <i class="fa-solid fa-bell-concierge"></i>
+      </div>
+      <h2 style="font-family:var(--font-mono);font-size:20px;font-weight:700;margin-bottom:8px">
+        Pronto para atender
+      </h2>
+      <p style="font-size:14px;color:var(--text-secondary);margin-bottom:32px">
+        Clique no botão abaixo quando o próximo cliente chegar
+      </p>
+      <button class="btn btn-success btn-xl" style="width:100%;max-width:420px" id="btnProximo" onclick="handleProximoCliente()" disabled>
+        <i class="fa-solid fa-arrow-right"></i>
+        Próximo Cliente
+      </button>
+      <div class="quick-stats" id="quickStats">
+        <div class="quick-stat">
+          <div class="val" style="color:var(--text-primary)" id="statAtend">0</div>
+          <div class="lbl">Atendimentos</div>
+        </div>
+        <div class="quick-stat">
+          <div class="val" style="color:var(--success)" id="statVendas">0</div>
+          <div class="lbl">Vendas</div>
+        </div>
+        <div class="quick-stat">
+          <div class="val" style="color:var(--gold)" id="statConv">0%</div>
+          <div class="lbl">Conversão</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active service state (hidden until active) -->
+    <div class="active-service" id="activeState" style="display:none">
+      <div class="seller-avatar" id="activeSeller">--</div>
+      <h2 id="activeSellerName" style="font-family:var(--font-mono);font-size:22px;font-weight:700;margin-bottom:4px">---</h2>
+      <p style="font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:24px">Em atendimento</p>
+      <div class="timer-display" id="activeTimer">00:00</div>
+      <div class="outcome-row">
+        <button class="outcome-btn sale" onclick="handleOutcome('venda')">
+          <i class="fa-solid fa-check-circle"></i>
+          Venda
+        </button>
+        <button class="outcome-btn no-sale" onclick="handleOutcome('nao_convertido')">
+          <i class="fa-solid fa-times-circle"></i>
+          Não Converteu
+        </button>
+        <button class="outcome-btn exchange" onclick="handleOutcome('troca')">
+          <i class="fa-solid fa-rotate"></i>
+          Troca
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER: status toggles -->
+  <footer class="t-footer" id="statusFooter">
+    <span style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-right:8px;white-space:nowrap">Status:</span>
+    <!-- Populated dynamically -->
+  </footer>
+</div>
+
+<!-- Bottom Sheet: Motivos de Não Conversão -->
+<div class="bottom-sheet-overlay" id="motivoOverlay" onclick="closeMotivos()"></div>
+<div class="bottom-sheet" id="motivoSheet">
+  <div class="bottom-sheet-handle"></div>
+  <h3 style="font-family:var(--font-mono);font-size:16px;font-weight:700;margin-bottom:4px">Motivo da não conversão</h3>
+  <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px">Selecione o motivo principal</p>
+
+  <div style="display:flex;flex-direction:column;gap:8px" id="motivoList">
+    <div class="motivo-option" data-motivo="preco" onclick="selectMotivo(this)">
+      <i class="fa-solid fa-tag" style="color:#f59e0b"></i>
+      <div>
+        <div style="font-weight:700;font-size:14px">Preço</div>
+        <div style="font-size:11px;color:var(--text-muted)">Cliente achou caro</div>
+      </div>
+    </div>
+    <div class="motivo-option" data-motivo="ruptura" onclick="selectMotivo(this)">
+      <i class="fa-solid fa-box-open" style="color:#ef4444"></i>
+      <div>
+        <div style="font-weight:700;font-size:14px">Ruptura</div>
+        <div style="font-size:11px;color:var(--text-muted)">Produto em falta / sem estoque</div>
+      </div>
+    </div>
+    <div class="motivo-option" data-motivo="indecisao" onclick="selectMotivo(this)">
+      <i class="fa-solid fa-face-meh" style="color:#8b5cf6"></i>
+      <div>
+        <div style="font-weight:700;font-size:14px">Indecisão</div>
+        <div style="font-size:11px;color:var(--text-muted)">Cliente vai pensar / voltar depois</div>
+      </div>
+    </div>
+    <div class="motivo-option" data-motivo="so_olhando" onclick="selectMotivo(this)">
+      <i class="fa-solid fa-eye" style="color:#6b7280"></i>
+      <div>
+        <div style="font-weight:700;font-size:14px">Só olhando</div>
+        <div style="font-size:11px;color:var(--text-muted)">Sem intenção de compra</div>
+      </div>
+    </div>
+    <div class="motivo-option" data-motivo="outro" onclick="selectMotivo(this)">
+      <i class="fa-solid fa-ellipsis" style="color:#374151"></i>
+      <div>
+        <div style="font-weight:700;font-size:14px">Outro</div>
+        <div style="font-size:11px;color:var(--text-muted)">Motivo diferente</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ruptura: campo produto (hidden) -->
+  <div id="rupturaField" style="display:none;margin-top:16px">
+    <label style="display:block;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Qual produto?</label>
+    <input id="rupturaInput" class="input" type="text" placeholder="Ex: Chapéu Pralana 6X" autocomplete="off">
+  </div>
+
+  <!-- Outro: campo detalhe (hidden) -->
+  <div id="outroField" style="display:none;margin-top:16px">
+    <label style="display:block;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Descreva o motivo</label>
+    <input id="outroInput" class="input" type="text" placeholder="Ex: Cliente errou de loja" autocomplete="off">
+  </div>
+
+  <button class="btn btn-danger" style="width:100%;margin-top:20px" id="btnConfirmMotivo" onclick="confirmMotivo()" disabled>
+    <i class="fa-solid fa-check"></i>
+    Confirmar
+  </button>
+</div>
+
+<div id="toastContainer"></div>
+
+<script type="module">
+import { getSupabase } from './js/supabase-config.js';
+import { requireRole, logout } from './js/auth.js';
+import { STATUS_CONFIG, MOTIVOS, formatTime, initials, toast, elapsedSince } from './js/utils.js';
+
+const sb = getSupabase();
+const user = await requireRole(['recepcionista', 'gerente', 'admin']);
+if (!user) throw new Error('Unauthorized');
+
+let currentTurno = null;
+let activeAtendimento = null;
+let timerInterval = null;
+let vendedores = [];
+
+// ─── Clock ───
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+}
+updateClock();
+setInterval(updateClock, 15000);
+
+// ─── Load vendedores ───
+async function loadVendedores() {
+  const { data } = await sb.from('vendedores').select('*').eq('ativo', true).order('posicao_fila', { ascending: true, nullsFirst: false });
+  vendedores = data || [];
+  renderQueue();
+  renderFooter();
+  updateQuickStats();
+}
+
+// ─── Render queue ───
+function renderQueue() {
+  const list = document.getElementById('queueList');
+  const inQueue = vendedores.filter(v => v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
+  const atendendo = vendedores.filter(v => v.status === 'em_atendimento');
+  const pausa = vendedores.filter(v => v.status === 'pausa');
+
+  document.getElementById('queueCount').textContent = inQueue.length + ' na fila';
+
+  if (!currentTurno) {
+    list.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text-muted);font-size:13px"><i class="fa-solid fa-users-slash" style="font-size:24px;margin-bottom:8px;display:block;opacity:.3"></i>Abra o turno para iniciar</div>';
+    return;
+  }
+
+  let html = '';
+
+  atendendo.forEach(v => {
+    html += renderQueueItem(v, null, true);
+  });
+
+  inQueue.forEach((v, i) => {
+    html += renderQueueItem(v, i + 1, false);
+  });
+
+  pausa.forEach(v => {
+    html += renderQueueItem(v, null, false);
+  });
+
+  list.innerHTML = html || '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px">Nenhum vendedor na fila</div>';
+}
+
+function renderQueueItem(v, pos, isActive) {
+  const cfg = STATUS_CONFIG[v.status] || STATUS_CONFIG.fora;
+  const ini = initials(v.apelido || v.nome);
+  const posHtml = pos ? `<div class="queue-position" style="background:${cfg.bg};color:${cfg.color}">${pos}</div>` : `<div class="queue-position" style="background:${cfg.bg};color:${cfg.color}"><i class="fa-solid ${cfg.icon}" style="font-size:11px"></i></div>`;
+
+  return `<div class="queue-item ${v.status}${isActive ? ' active' : ''}" data-id="${v.id}">
+    ${posHtml}
+    <div style="flex:1;min-width:0">
+      <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.apelido || v.nome}</div>
+      <div style="font-size:10px;color:${cfg.color};font-weight:600;text-transform:uppercase;letter-spacing:.05em">${cfg.short}</div>
+    </div>
+  </div>`;
+}
+
+// ─── Render footer status pills ───
+function renderFooter() {
+  const footer = document.getElementById('statusFooter');
+  const pills = vendedores.map(v => {
+    const cfg = STATUS_CONFIG[v.status] || STATUS_CONFIG.fora;
+    return `<div class="status-pill" onclick="cycleStatus('${v.id}')" title="${v.nome}: ${cfg.label}">
+      <div class="dot" style="background:${cfg.color}"></div>
+      <span>${v.apelido || v.nome.split(' ')[0]}</span>
+    </div>`;
+  }).join('');
+  footer.innerHTML = '<span style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-right:8px;white-space:nowrap">Status:</span>' + pills;
+}
+
+// ─── Quick stats ───
+async function updateQuickStats() {
+  if (!currentTurno) return;
+  const { data } = await sb.from('atendimentos').select('resultado').eq('turno_id', currentTurno.id);
+  if (!data) return;
+  const total = data.filter(a => a.resultado !== 'em_andamento').length;
+  const vendas = data.filter(a => a.resultado === 'venda').length;
+  const conv = total > 0 ? Math.round(vendas / total * 100) : 0;
+  document.getElementById('statAtend').textContent = total;
+  document.getElementById('statVendas').textContent = vendas;
+  document.getElementById('statConv').textContent = conv + '%';
+}
+
+// ─── Turno ───
+window.toggleTurno = async function() {
+  if (currentTurno) {
+    await sb.from('turnos').update({ fechamento: new Date().toISOString() }).eq('id', currentTurno.id);
+    currentTurno = null;
+    document.getElementById('turnoLabel').textContent = 'Turno encerrado';
+    document.getElementById('btnTurno').innerHTML = '<i class="fa-solid fa-play" style="font-size:10px"></i> Abrir Turno';
+    document.getElementById('btnProximo').disabled = true;
+    toast('Turno encerrado', 'info');
+  } else {
+    const { data } = await sb.from('turnos').insert({ data: new Date().toISOString().split('T')[0] }).select().single();
+    currentTurno = data;
+    document.getElementById('turnoLabel').textContent = 'Turno aberto';
+    document.getElementById('btnTurno').innerHTML = '<i class="fa-solid fa-stop" style="font-size:10px"></i> Fechar Turno';
+    document.getElementById('btnProximo').disabled = false;
+    toast('Turno aberto!', 'success');
+  }
+  loadVendedores();
+};
+
+// ─── Próximo cliente ───
+window.handleProximoCliente = async function() {
+  if (!currentTurno || activeAtendimento) return;
+  const btn = document.getElementById('btnProximo');
+  btn.disabled = true;
+  try {
+    const { data, error } = await sb.rpc('proximo_cliente', { p_turno_id: currentTurno.id });
+    if (error) throw error;
+    activeAtendimento = data; // UUID do atendimento
+    // Buscar detalhes
+    const { data: atend } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('id', data).single();
+    showActiveService(atend);
+    await loadVendedores();
+  } catch (e) {
+    toast(e.message || 'Nenhum vendedor disponível', 'warning');
+    btn.disabled = false;
+  }
+};
+
+function showActiveService(atend) {
+  const v = atend.vendedores;
+  document.getElementById('idleState').style.display = 'none';
+  document.getElementById('activeState').style.display = 'block';
+  document.getElementById('activeSeller').textContent = initials(v.apelido || v.nome);
+  document.getElementById('activeSellerName').textContent = v.apelido || v.nome;
+
+  // Start timer
+  const startTime = new Date(atend.inicio).getTime();
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    const elapsed = (Date.now() - startTime) / 1000;
+    const timerEl = document.getElementById('activeTimer');
+    timerEl.textContent = formatTime(elapsed);
+    timerEl.className = 'timer-display' + (elapsed > 600 ? ' danger' : elapsed > 300 ? ' warning' : '');
+  }, 1000);
+}
+
+function hideActiveService() {
+  clearInterval(timerInterval);
+  document.getElementById('idleState').style.display = 'block';
+  document.getElementById('activeState').style.display = 'none';
+  document.getElementById('btnProximo').disabled = !currentTurno;
+  activeAtendimento = null;
+}
+
+// ─── Outcomes ───
+let pendingOutcome = null;
+
+window.handleOutcome = function(resultado) {
+  if (!activeAtendimento) return;
+  if (resultado === 'nao_convertido') {
+    openMotivos();
+    return;
+  }
+  // Venda ou Troca: finalizar direto
+  finalize(resultado);
+};
+
+async function finalize(resultado, motivo, detalhe, produto) {
+  try {
+    const { error } = await sb.rpc('finalizar_atendimento', {
+      p_atendimento_id: activeAtendimento,
+      p_resultado: resultado,
+      p_motivo: motivo || null,
+      p_motivo_detalhe: detalhe || null,
+      p_produto_ruptura: produto || null,
+      p_valor_venda: null
+    });
+    if (error) throw error;
+    const msg = resultado === 'venda' ? 'Venda registrada!' : resultado === 'troca' ? 'Troca registrada.' : 'Não conversão registrada.';
+    const type = resultado === 'venda' ? 'success' : 'warning';
+    toast(msg, type);
+    hideActiveService();
+    await loadVendedores();
+    updateQuickStats();
+  } catch (e) {
+    toast('Erro: ' + e.message, 'error');
+  }
+}
+
+// ─── Motivos bottom sheet ───
+function openMotivos() {
+  document.getElementById('motivoOverlay').classList.add('open');
+  document.getElementById('motivoSheet').classList.add('open');
+  document.querySelectorAll('.motivo-option').forEach(o => o.classList.remove('selected'));
+  document.getElementById('rupturaField').style.display = 'none';
+  document.getElementById('outroField').style.display = 'none';
+  document.getElementById('btnConfirmMotivo').disabled = true;
+  pendingOutcome = null;
+}
+
+window.closeMotivos = function() {
+  document.getElementById('motivoOverlay').classList.remove('open');
+  document.getElementById('motivoSheet').classList.remove('open');
+};
+
+window.selectMotivo = function(el) {
+  document.querySelectorAll('.motivo-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  pendingOutcome = el.dataset.motivo;
+  document.getElementById('rupturaField').style.display = pendingOutcome === 'ruptura' ? 'block' : 'none';
+  document.getElementById('outroField').style.display = pendingOutcome === 'outro' ? 'block' : 'none';
+  document.getElementById('btnConfirmMotivo').disabled = false;
+  if (pendingOutcome === 'ruptura') document.getElementById('rupturaInput').focus();
+  if (pendingOutcome === 'outro') document.getElementById('outroInput').focus();
+};
+
+window.confirmMotivo = function() {
+  if (!pendingOutcome) return;
+  const produto = pendingOutcome === 'ruptura' ? document.getElementById('rupturaInput').value.trim() : null;
+  const detalhe = pendingOutcome === 'outro' ? document.getElementById('outroInput').value.trim() : null;
+  closeMotivos();
+  finalize('nao_convertido', pendingOutcome, detalhe, produto);
+};
+
+// ─── Cycle status (footer pills) ───
+window.cycleStatus = async function(vendedorId) {
+  const v = vendedores.find(x => x.id === vendedorId);
+  if (!v || v.status === 'em_atendimento') return; // Can't change while serving
+
+  const cycle = { disponivel: 'pausa', pausa: 'fora', fora: 'disponivel' };
+  const newStatus = cycle[v.status] || 'disponivel';
+
+  let posicao = null;
+  if (newStatus === 'disponivel') {
+    const maxPos = Math.max(0, ...vendedores.filter(x => x.posicao_fila != null).map(x => x.posicao_fila));
+    posicao = maxPos + 1;
+  }
+
+  await sb.from('vendedores').update({ status: newStatus, posicao_fila: posicao }).eq('id', vendedorId);
+  await loadVendedores();
+  const cfg = STATUS_CONFIG[newStatus];
+  toast(`${v.apelido || v.nome}: ${cfg.label}`, 'info', 2000);
+};
+
+// ─── Logout ───
+window.handleLogout = function() { logout(); };
+
+// ─── Realtime ───
+sb.channel('tablet-sync')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vendedores' }, () => loadVendedores())
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos' }, () => updateQuickStats())
+  .subscribe();
+
+// ─── Visibility: refetch on return ───
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) { loadVendedores(); updateQuickStats(); }
+});
+
+// ─── Check for existing open turno ───
+async function checkExistingTurno() {
+  const today = new Date().toISOString().split('T')[0];
+  const { data } = await sb.from('turnos').select('*').eq('data', today).is('fechamento', null).order('abertura', { ascending: false }).limit(1);
+  if (data && data.length > 0) {
+    currentTurno = data[0];
+    document.getElementById('turnoLabel').textContent = 'Turno aberto';
+    document.getElementById('btnTurno').innerHTML = '<i class="fa-solid fa-stop" style="font-size:10px"></i> Fechar Turno';
+    document.getElementById('btnProximo').disabled = false;
+  }
+}
+
+// ─── Check for active atendimento ───
+async function checkActiveAtendimento() {
+  if (!currentTurno) return;
+  const { data } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('turno_id', currentTurno.id).eq('resultado', 'em_andamento').limit(1);
+  if (data && data.length > 0) {
+    activeAtendimento = data[0].id;
+    showActiveService(data[0]);
+  }
+}
+
+// ─── Init ───
+await checkExistingTurno();
+await loadVendedores();
+await checkActiveAtendimento();
+</script>
+</body>
+</html>

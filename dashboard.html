@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ListaVez Texas — Dashboard</title>
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  .dash-layout {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  .dash-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 768px) { .charts-grid { grid-template-columns: 1fr; } }
+  .chart-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    padding: 20px;
+    overflow: hidden;
+  }
+  .chart-card h3 {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  .chart-box { position: relative; height: 260px; }
+  .ranking-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .ranking-table thead th {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text-muted);
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .ranking-table tbody td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-subtle);
+    font-weight: 500;
+  }
+  .ranking-table tbody tr:hover { background: var(--bg-hover); }
+  .ranking-table .mono { font-family: var(--font-mono); font-weight: 700; }
+  .period-tabs {
+    display: flex;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 3px;
+  }
+  .period-tabs button {
+    padding: 8px 16px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .period-tabs button.active {
+    background: var(--bg-elevated);
+    color: var(--gold-bright);
+  }
+  .rupture-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .rupture-item:last-child { border-bottom: none; }
+  .rupture-count {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--danger);
+    min-width: 36px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="dash-layout">
+  <!-- Header -->
+  <div class="dash-header">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center">
+        <span style="font-family:var(--font-mono);font-weight:800;font-size:14px;color:var(--bg-deep)">LV</span>
+      </div>
+      <div>
+        <h1 style="font-family:var(--font-mono);font-size:18px;font-weight:800;letter-spacing:-.5px">Dashboard</h1>
+        <p style="font-size:11px;color:var(--text-muted);font-weight:500">ListaVez Texas — Visão Gerencial</p>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="period-tabs" id="periodTabs">
+        <button class="active" onclick="setPeriod('hoje')">Hoje</button>
+        <button onclick="setPeriod('semana')">Semana</button>
+        <button onclick="setPeriod('mes')">Mês</button>
+      </div>
+      <a href="tablet.html" class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px">
+        <i class="fa-solid fa-tablet-screen-button" style="font-size:10px"></i> Tablet
+      </a>
+      <button class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px" onclick="handleLogout()">
+        <i class="fa-solid fa-right-from-bracket" style="font-size:10px"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid" id="kpiGrid">
+    <div class="kpi-card" style="--accent:var(--text-primary)">
+      <div class="kpi-label">Total Atendimentos</div>
+      <div class="kpi-value" id="kpiTotal" style="color:var(--text-primary)">—</div>
+    </div>
+    <div class="kpi-card" style="--accent:var(--success)">
+      <div class="kpi-label">Taxa de Conversão</div>
+      <div class="kpi-value" id="kpiConv" style="color:var(--success)">—</div>
+    </div>
+    <div class="kpi-card" style="--accent:var(--danger)">
+      <div class="kpi-label">Não Convertidos</div>
+      <div class="kpi-value" id="kpiLoss" style="color:var(--danger)">—</div>
+    </div>
+    <div class="kpi-card" style="--accent:var(--info)">
+      <div class="kpi-label">Tempo Médio</div>
+      <div class="kpi-value" id="kpiTime" style="color:var(--info)">—</div>
+    </div>
+  </div>
+
+  <!-- Charts row -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3><i class="fa-solid fa-chart-pie" style="margin-right:6px;color:var(--gold-dim)"></i>Motivos de Perda</h3>
+      <div class="chart-box"><canvas id="chartMotivos"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3><i class="fa-solid fa-chart-bar" style="margin-right:6px;color:var(--gold-dim)"></i>Fluxo por Hora</h3>
+      <div class="chart-box"><canvas id="chartHourly"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Ranking Table -->
+  <div class="chart-card" style="margin-bottom:24px">
+    <h3><i class="fa-solid fa-ranking-star" style="margin-right:6px;color:var(--gold-dim)"></i>Ranking Vendedores</h3>
+    <div style="overflow-x:auto">
+      <table class="ranking-table" id="rankingTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Vendedor</th>
+            <th>Atendimentos</th>
+            <th>Vendas</th>
+            <th>Conversão</th>
+            <th>Tempo Médio</th>
+          </tr>
+        </thead>
+        <tbody id="rankingBody">
+          <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Bottom row: Ruptures + quick info -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3><i class="fa-solid fa-box-open" style="margin-right:6px;color:var(--danger)"></i>Rupturas — Produtos em Falta</h3>
+      <div id="ruptureList">
+        <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">
+          <i class="fa-solid fa-check-circle" style="font-size:20px;margin-bottom:8px;display:block;color:var(--success);opacity:.4"></i>
+          Nenhuma ruptura registrada
+        </div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3><i class="fa-solid fa-users" style="margin-right:6px;color:var(--gold-dim)"></i>Equipe no Salão — Agora</h3>
+      <div id="floorList">
+        <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer style="text-align:center;margin-top:32px;padding:16px 0;border-top:1px solid var(--border-subtle)">
+    <p style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);letter-spacing:.15em;text-transform:uppercase">ListaVez Texas v1.0</p>
+  </footer>
+</div>
+
+<div id="toastContainer"></div>
+
+<script type="module">
+import { getSupabase } from './js/supabase-config.js';
+import { requireRole, logout } from './js/auth.js';
+import { STATUS_CONFIG, MOTIVOS, todayRange, weekRange, monthRange, initials, toast } from './js/utils.js';
+
+const sb = getSupabase();
+const user = await requireRole(['gerente', 'admin']);
+if (!user) throw new Error('Unauthorized');
+
+let charts = {};
+let currentPeriod = 'hoje';
+
+Chart.defaults.font.family = "'Outfit', system-ui";
+Chart.defaults.color = '#6b6354';
+
+function getRange() {
+  if (currentPeriod === 'semana') return weekRange();
+  if (currentPeriod === 'mes') return monthRange();
+  return todayRange();
+}
+
+// ─── Period tabs ───
+window.setPeriod = function(p) {
+  currentPeriod = p;
+  document.querySelectorAll('#periodTabs button').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase().includes(p)));
+  loadAll();
+};
+
+// ─── Load all data ───
+async function loadAll() {
+  const range = getRange();
+  await Promise.all([
+    loadKPIs(range),
+    loadMotivos(range),
+    loadHourly(range),
+    loadRanking(range),
+    loadRuptures(range),
+    loadFloor()
+  ]);
+}
+
+// ─── KPIs ───
+async function loadKPIs(range) {
+  const { data, error } = await sb.rpc('get_conversion_stats', { p_inicio: range.start, p_fim: range.end });
+  if (error || !data || data.length === 0) return;
+  const d = data[0];
+  document.getElementById('kpiTotal').textContent = d.total_atendimentos || 0;
+  document.getElementById('kpiConv').textContent = (d.taxa_conversao || 0) + '%';
+  document.getElementById('kpiLoss').textContent = d.total_nao_convertido || 0;
+  document.getElementById('kpiTime').textContent = (d.tempo_medio_min || 0) + 'min';
+}
+
+// ─── Motivos chart ───
+async function loadMotivos(range) {
+  const { data } = await sb.rpc('get_loss_reasons', { p_inicio: range.start, p_fim: range.end });
+  const ctx = document.getElementById('chartMotivos');
+  if (charts.motivos) charts.motivos.destroy();
+
+  const labels = (data || []).map(d => MOTIVOS[d.motivo]?.label || d.motivo);
+  const values = (data || []).map(d => d.total);
+  const colors = (data || []).map(d => MOTIVOS[d.motivo]?.color || '#6b7280');
+
+  charts.motivos = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data: values, backgroundColor: colors.map(c => c + 'cc'), borderColor: colors, borderWidth: 2, cutout: '60%' }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, font: { size: 11, weight: 600 } } },
+        tooltip: { callbacks: { label: c => c.label + ': ' + c.parsed + ' (' + Math.round(c.parsed / values.reduce((a, b) => a + b, 0) * 100) + '%)' } }
+      }
+    }
+  });
+}
+
+// ─── Hourly flow chart ───
+async function loadHourly(range) {
+  const { data } = await sb.rpc('get_hourly_flow', { p_inicio: range.start, p_fim: range.end });
+  const ctx = document.getElementById('chartHourly');
+  if (charts.hourly) charts.hourly.destroy();
+
+  const hours = (data || []).map(d => d.hora + 'h');
+  const atend = (data || []).map(d => d.atendimentos);
+  const vendas = (data || []).map(d => d.vendas);
+
+  charts.hourly = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: hours,
+      datasets: [
+        { label: 'Atendimentos', data: atend, backgroundColor: 'rgba(196,162,101,.3)', borderColor: '#c4a265', borderWidth: 1.5, borderRadius: 4, barPercentage: 0.7 },
+        { label: 'Vendas', data: vendas, backgroundColor: 'rgba(74,222,128,.3)', borderColor: '#4ade80', borderWidth: 1.5, borderRadius: 4, barPercentage: 0.7 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 12, font: { size: 10, weight: 600 } } }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(196,162,101,.05)' }, ticks: { font: { size: 10, weight: 600 } } },
+        y: { beginAtZero: true, grid: { color: 'rgba(196,162,101,.05)' }, ticks: { font: { size: 10 }, stepSize: 1 } }
+      }
+    }
+  });
+}
+
+// ─── Ranking table ───
+async function loadRanking(range) {
+  const { data } = await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end });
+  const body = document.getElementById('rankingBody');
+  if (!data || data.length === 0) {
+    body.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">Sem dados no período</td></tr>';
+    return;
+  }
+
+  body.innerHTML = data.map((r, i) => {
+    const convColor = (r.taxa_conversao || 0) >= 50 ? 'var(--success)' : (r.taxa_conversao || 0) >= 30 ? 'var(--warning)' : 'var(--danger)';
+    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+    return `<tr>
+      <td style="font-size:16px;text-align:center;width:40px">${medal}</td>
+      <td><div style="display:flex;align-items:center;gap:10px">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:11px;color:var(--gold);flex-shrink:0">${initials(r.nome)}</div>
+        <span style="font-weight:600">${r.nome}</span>
+      </div></td>
+      <td class="mono">${r.total_atendimentos || 0}</td>
+      <td class="mono" style="color:var(--success)">${r.total_vendas || 0}</td>
+      <td class="mono" style="color:${convColor}">${r.taxa_conversao || 0}%</td>
+      <td class="mono" style="color:var(--info)">${r.tempo_medio_min || 0}min</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── Ruptures ───
+async function loadRuptures(range) {
+  const { data } = await sb.rpc('get_rupture_log', { p_inicio: range.start, p_fim: range.end });
+  const el = document.getElementById('ruptureList');
+  if (!data || data.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px"><i class="fa-solid fa-check-circle" style="font-size:20px;margin-bottom:8px;display:block;color:var(--success);opacity:.4"></i>Nenhuma ruptura registrada</div>';
+    return;
+  }
+  el.innerHTML = data.map(r => `<div class="rupture-item">
+    <div>
+      <div style="font-weight:600;font-size:13px">${r.produto}</div>
+      <div style="font-size:10px;color:var(--text-muted)">${r.total} ${r.total === 1 ? 'registro' : 'registros'}</div>
+    </div>
+    <div class="rupture-count">${r.total}</div>
+  </div>`).join('');
+}
+
+// ─── Floor (who's on now) ───
+async function loadFloor() {
+  const { data } = await sb.from('vendedores').select('*').eq('ativo', true).order('nome');
+  const el = document.getElementById('floorList');
+  if (!data || data.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum vendedor cadastrado</div>';
+    return;
+  }
+  el.innerHTML = data.map(v => {
+    const cfg = STATUS_CONFIG[v.status] || STATUS_CONFIG.fora;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-subtle)">
+      <div style="width:8px;height:8px;border-radius:50%;background:${cfg.color};flex-shrink:0"></div>
+      <span style="font-weight:600;font-size:13px;flex:1">${v.apelido || v.nome}</span>
+      <span style="font-size:10px;color:${cfg.color};font-weight:700;text-transform:uppercase;letter-spacing:.05em">${cfg.short}</span>
+    </div>`;
+  }).join('');
+}
+
+window.handleLogout = function() { logout(); };
+
+// ─── Init ───
+await loadAll();
+
+// Auto-refresh every 60s
+setInterval(loadAll, 60000);
+</script>
+</body>
+</html>
