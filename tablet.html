@@ -65,39 +65,62 @@
   /* Footer — Vendedores */
   .t-footer {
     grid-column: 1 / -1;
+    position: sticky;
+    bottom: 0;
+    z-index: 50;
     display: flex;
-    align-items: stretch;
-    gap: 0;
-    padding: 0;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
     background: var(--bg-surface);
     border-top: 1px solid var(--border-subtle);
     overflow-x: auto;
-    min-height: 64px;
+    min-height: 72px;
+    flex-shrink: 0;
   }
   .t-footer::-webkit-scrollbar { height: 0; }
   .t-footer.drop-highlight { border-top: 2px solid var(--danger); background: var(--danger-bg); }
 
   .footer-card {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
-    padding: 8px 14px;
-    min-width: 80px;
+    gap: 8px;
+    padding: 8px 12px;
+    min-width: 100px;
     cursor: grab;
-    border-right: 1px solid var(--border-subtle);
-    transition: background .15s, opacity .15s;
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    background: var(--bg-card);
+    transition: background .15s, opacity .15s, transform .1s;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     position: relative;
+    flex-shrink: 0;
   }
-  .footer-card:last-child { border-right: none; }
-  .footer-card:hover { background: var(--bg-hover); }
-  .footer-card:active { opacity: .7; }
+  .footer-card:hover { background: var(--bg-hover); transform: translateY(-1px); }
+  .footer-card:active { opacity: .7; transform: scale(.97); }
+  .footer-card .fc-avatar {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: var(--bg-hover);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .footer-card .fc-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .footer-card .fc-info { display: flex; flex-direction: column; min-width: 0; }
   .footer-card .fc-name {
     font-size: 12px;
     font-weight: 700;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     color: var(--text-primary);
   }
   .footer-card .fc-status {
@@ -105,16 +128,17 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: .05em;
-    margin-top: 2px;
+    margin-top: 1px;
     white-space: nowrap;
   }
   .footer-card .fc-dot {
-    width: 6px; height: 6px;
+    width: 8px; height: 8px;
     border-radius: 50%;
     position: absolute;
-    top: 6px; right: 6px;
+    top: -2px; right: -2px;
+    border: 2px solid var(--bg-surface);
   }
-  .footer-card.in-queue { opacity: .35; pointer-events: none; }
+  .footer-card.in-queue { opacity: .3; pointer-events: none; }
   .footer-end-all {
     display: flex;
     align-items: center;
@@ -829,7 +853,8 @@ window.confirmSaida = async function(motivo) {
   await sb.from('vendedores').update({ status: newStatus, posicao_fila: null }).eq('id', pendingSaidaId);
   // Log pausa no histórico
   if (currentTurno) {
-    sb.rpc('registrar_pausa', { p_vendedor_id: pendingSaidaId, p_turno_id: currentTurno.id, p_motivo: motivo }).catch(() => {});
+    // TODO: registrar_pausa quando pausas_log for criada
+    // sb.rpc('registrar_pausa', { p_vendedor_id: pendingSaidaId, p_turno_id: currentTurno.id, p_motivo: motivo });
   }
   toast(SAIDA_COLORS[motivo]?.label || 'Saiu da fila', 'info', 2000);
   closeSaida();
@@ -888,10 +913,18 @@ function renderFooter() {
     const inQueueClass = inQueue || atendendo ? ' in-queue' : '';
     const dragAttr = !inQueue && !atendendo ? 'draggable="true" ondragstart="onFooterDragStart(event)"' : '';
 
+    const ini = (v.apelido || v.nome).split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    const avatarContent = v.foto_url
+      ? `<img src="${v.foto_url}" alt="${v.apelido || v.nome}">`
+      : ini;
+
     return `<div class="footer-card${inQueueClass}" data-id="${v.id}" ${dragAttr} onclick="handleFooterTap('${v.id}')">
       <div class="fc-dot" style="background:${dotColor}"></div>
-      <span class="fc-name">${v.apelido || v.nome.split(' ')[0]}</span>
-      <span class="fc-status" style="color:${statusColor}">${statusLabel}</span>
+      <div class="fc-avatar">${avatarContent}</div>
+      <div class="fc-info">
+        <span class="fc-name">${v.apelido || v.nome.split(' ')[0]}</span>
+        <span class="fc-status" style="color:${statusColor}">${statusLabel}</span>
+      </div>
     </div>`;
   }).join('');
 
@@ -1269,7 +1302,7 @@ window.footerMenuAction = async function(action, vendedorId) {
   closeFooterMenu();
   if (action === 'fila') {
     delete saidaMotivos[vendedorId];
-    sb.rpc('registrar_retorno', { p_vendedor_id: vendedorId }).catch(() => {});
+    // TODO: registrar_retorno quando pausas_log for criada
     await addToQueue(vendedorId);
   } else {
     openSaida(vendedorId);
