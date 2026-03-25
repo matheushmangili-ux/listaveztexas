@@ -92,11 +92,11 @@ export function debounce(fn, ms) {
 export function toast(msg, type = 'info', duration = 4000) {
   const container = document.getElementById('toastContainer');
   if (!container) return;
-  const colors = {
-    success: 'border-emerald-500/30 bg-emerald-950 text-emerald-300',
-    error: 'border-red-500/30 bg-red-950 text-red-300',
-    warning: 'border-amber-500/30 bg-amber-950 text-amber-300',
-    info: 'border-sky-500/30 bg-sky-950 text-sky-300'
+  const styles = {
+    success: { border: 'rgba(34,197,94,.3)', bg: '#052e16', text: '#86efac' },
+    error:   { border: 'rgba(239,68,68,.3)', bg: '#450a0a', text: '#fca5a5' },
+    warning: { border: 'rgba(245,158,11,.3)', bg: '#451a03', text: '#fcd34d' },
+    info:    { border: 'rgba(96,165,250,.3)', bg: '#172554', text: '#93c5fd' }
   };
   const icons = {
     success: 'fa-circle-check',
@@ -104,9 +104,9 @@ export function toast(msg, type = 'info', duration = 4000) {
     warning: 'fa-triangle-exclamation',
     info: 'fa-circle-info'
   };
+  const s = styles[type] || styles.info;
   const el = document.createElement('div');
-  el.className = `flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium shadow-2xl ${colors[type] || colors.info}`;
-  el.style.cssText = 'animation:toastIn .35s cubic-bezier(.16,1,.3,1) forwards;min-width:260px;max-width:400px';
+  el.style.cssText = `display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid ${s.border};background:${s.bg};color:${s.text};font-size:13px;font-weight:600;font-family:var(--font-body);box-shadow:0 8px 32px rgba(0,0,0,.4);animation:toastIn .35s cubic-bezier(.16,1,.3,1) forwards;min-width:260px;max-width:400px`;
   el.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i><span>${msg}</span>`;
   container.appendChild(el);
   setTimeout(() => {
