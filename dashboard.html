@@ -160,6 +160,42 @@
   }
   .badge-ativo.on { background: rgba(74,222,128,.15); color: var(--success); }
   .badge-ativo.off { background: rgba(239,68,68,.1); color: var(--danger); }
+  /* ─── LED Marquee (equipe no salão) ─── */
+  .led-marquee {
+    overflow: hidden;
+    position: relative;
+    background: var(--bg-deep);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 10px 0;
+  }
+  .led-track {
+    display: flex;
+    gap: 32px;
+    animation: ledScroll 20s linear infinite;
+    width: max-content;
+  }
+  .led-track:hover { animation-play-state: paused; }
+  @keyframes ledScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .led-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    padding: 4px 0;
+  }
+  .led-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 6px currentColor;
+  }
+  .led-name { font-weight: 700; font-size: 13px; }
+  .led-status { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+
   /* ─── Modal ─── */
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,.5); backdrop-filter: blur(4px);
@@ -591,7 +627,7 @@ async function loadRuptures(range) {
   </div>`).join('');
 }
 
-// ─── Floor (who's on now) ───
+// ─── Floor (who's on now) — LED marquee ───
 async function loadFloor() {
   const { data } = await sb.from('vendedores').select('*').eq('ativo', true).order('nome');
   const el = document.getElementById('floorList');
@@ -599,14 +635,23 @@ async function loadFloor() {
     el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum vendedor cadastrado</div>';
     return;
   }
-  el.innerHTML = data.map(v => {
+
+  const items = data.map(v => {
     const cfg = STATUS_CONFIG[v.status] || STATUS_CONFIG.fora;
-    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-subtle)">
-      <div style="width:8px;height:8px;border-radius:50%;background:${cfg.color};flex-shrink:0"></div>
-      <span style="font-weight:600;font-size:13px;flex:1">${v.apelido || v.nome}</span>
-      <span style="font-size:10px;color:${cfg.color};font-weight:700;text-transform:uppercase;letter-spacing:.05em">${cfg.short}</span>
+    return `<div class="led-item">
+      <div class="led-dot" style="background:${cfg.color};color:${cfg.color}"></div>
+      <span class="led-name" style="color:var(--text-primary)">${v.apelido || v.nome}</span>
+      <span class="led-status" style="color:${cfg.color}">${cfg.short}</span>
     </div>`;
   }).join('');
+
+  // Duplicar para loop contínuo
+  const speed = Math.max(12, data.length * 3);
+  el.innerHTML = `<div class="led-marquee">
+    <div class="led-track" style="animation-duration:${speed}s">
+      ${items}${items}
+    </div>
+  </div>`;
 }
 
 // ─── Scatter: Volume × Conversão ───
