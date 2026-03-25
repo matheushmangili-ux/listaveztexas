@@ -5,12 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Lista da Vez — Texas Center</title>
 <link rel="stylesheet" href="css/styles.css">
-<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#7c8db5">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+  caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+}
+</script>
 <style>
   .login-container {
     min-height: 100vh;
@@ -309,10 +314,8 @@ document.getElementById('passInput')?.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') handleEmailLogin();
 });
 
-// Register service worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
-}
+// SW desabilitado — causa problemas de cache no tablet
+// Quando o app estabilizar, reativar com network-first strategy
 </script>
 </body>
 </html>

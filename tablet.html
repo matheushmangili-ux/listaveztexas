@@ -5,11 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Lista da Vez — Fila</title>
 <link rel="stylesheet" href="css/styles.css">
-<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#7c8db5">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// Auto-limpeza de Service Workers antigos + error recovery
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+  caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+}
+window.addEventListener('error', function(e) {
+  document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:system-ui;color:#94a3b8;text-align:center;padding:24px"><i class="fa-solid fa-rotate" style="font-size:32px;margin-bottom:16px;animation:spin 1s linear infinite"></i><p style="font-size:14px;font-weight:700">Recarregando...</p></div>';
+  setTimeout(() => location.reload(), 2000);
+});
+</script>
 <style>
   .tablet-layout {
     display: grid;
@@ -676,8 +686,21 @@ setInterval(updateClock, 15000);
 // ─── Load vendedores ───
 async function loadVendedores() {
   const { data, error } = await sb.from('vendedores').select('*').eq('ativo', true).order('posicao_fila', { ascending: true, nullsFirst: false });
-  if (error) { toast('Erro ao carregar vendedores', 'error'); return; }
+  if (error) {
+    // Fallback: usar backup local se o banco falhar
+    const backup = localStorage.getItem('listavez_vendedores');
+    if (backup) {
+      vendedores = JSON.parse(backup);
+      toast('Offline — usando dados locais', 'warning');
+    } else {
+      toast('Erro ao carregar vendedores', 'error');
+    }
+    renderQueue(); renderFooter(); updateQuickStats();
+    return;
+  }
   vendedores = data || [];
+  // Salvar backup local sempre que carregar com sucesso
+  try { localStorage.setItem('listavez_vendedores', JSON.stringify(vendedores)); } catch(e) {}
   renderQueue();
   renderFooter();
   updateQuickStats();
