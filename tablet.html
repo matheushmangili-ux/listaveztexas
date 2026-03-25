@@ -243,8 +243,8 @@
   <!-- HEADER -->
   <header class="t-header">
     <div style="display:flex;align-items:center;gap:12px">
-      <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent-dim),var(--accent));display:flex;align-items:center;justify-content:center">
-        <span style="font-family:var(--font-mono);font-weight:800;font-size:12px;color:#fff">TC</span>
+      <div style="width:32px;height:32px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg-elevated)">
+        <img src="assets/logo-tc.png" alt="TC" style="width:26px;height:26px;object-fit:contain;filter:brightness(0) invert(.85)"
       </div>
       <div>
         <span style="font-family:var(--font-mono);font-weight:700;font-size:14px">Lista da Vez</span>
@@ -599,12 +599,6 @@ function renderQueue() {
   // Pausa
   pausa.forEach(v => { html += renderQueueItem(v, null, false); });
 
-  // Fora (pool para arrastar)
-  if (fora.length > 0) {
-    html += '<div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;padding:8px 8px 4px"><i class="fa-solid fa-door-open" style="margin-right:4px"></i>Fora da fila</div>';
-    fora.forEach(v => { html += renderQueueItem(v, null, false, true); });
-  }
-
   list.innerHTML = html;
   initDragAndDrop();
 }
@@ -687,6 +681,14 @@ async function addToQueue(vendedorId) {
 }
 
 // ─── Remover da fila (com motivo) ───
+const SAIDA_COLORS = {
+  almoco: { color: '#f59e0b', label: 'Almoço' },
+  banheiro: { color: '#60a5fa', label: 'Banheiro' },
+  reuniao: { color: '#a78bfa', label: 'Reunião' },
+  finalizar: { color: '#f87171', label: 'Finalizou' },
+  outro: { color: '#64748b', label: 'Fora' }
+};
+const saidaMotivos = {}; // vendedorId → motivo key
 let pendingSaidaId = null;
 
 function openSaida(vendedorId) {
@@ -707,9 +709,9 @@ window.closeSaida = function() {
 window.confirmSaida = async function(motivo) {
   if (!pendingSaidaId) return;
   const newStatus = motivo === 'banheiro' || motivo === 'reuniao' ? 'pausa' : 'fora';
+  saidaMotivos[pendingSaidaId] = motivo;
   await sb.from('vendedores').update({ status: newStatus, posicao_fila: null }).eq('id', pendingSaidaId);
-  const labels = { almoco: 'Almoço', banheiro: 'Banheiro', reuniao: 'Reunião', finalizar: 'Finalizou o dia', outro: 'Saiu da fila' };
-  toast(labels[motivo] || 'Saiu da fila', 'info', 2000);
+  toast(SAIDA_COLORS[motivo]?.label || 'Saiu da fila', 'info', 2000);
   closeSaida();
   await loadVendedores();
 };
@@ -729,9 +731,21 @@ window.finalizarTodos = async function() {
 function renderFooter() {
   const footer = document.getElementById('statusFooter');
   const pills = vendedores.map(v => {
-    const cfg = STATUS_CONFIG[v.status] || STATUS_CONFIG.fora;
-    return `<div class="status-pill" onclick="cycleStatus('${v.id}')" title="${v.nome}: ${cfg.label}">
-      <div class="dot" style="background:${cfg.color}"></div>
+    let dotColor, tooltip;
+    if (v.status === 'em_atendimento') {
+      dotColor = STATUS_CONFIG.em_atendimento.color;
+      tooltip = 'Atendendo';
+    } else if (v.status === 'disponivel' && v.posicao_fila != null) {
+      dotColor = STATUS_CONFIG.disponivel.color;
+      tooltip = 'Na fila';
+    } else {
+      const motivo = saidaMotivos[v.id];
+      const sc = SAIDA_COLORS[motivo] || SAIDA_COLORS.outro;
+      dotColor = sc.color;
+      tooltip = sc.label;
+    }
+    return `<div class="status-pill" onclick="handleFooterTap('${v.id}')" title="${v.apelido || v.nome}: ${tooltip}">
+      <div class="dot" style="background:${dotColor}"></div>
       <span>${v.apelido || v.nome.split(' ')[0]}</span>
     </div>`;
   }).join('');
@@ -932,24 +946,19 @@ window.confirmMotivo = function() {
   finalize('nao_convertido', pendingOutcome, detalhe, produto, pendingAtendimentoId);
 };
 
-// ─── Cycle status (footer pills) ───
-window.cycleStatus = async function(vendedorId) {
+// ─── Footer pill tap ───
+window.handleFooterTap = async function(vendedorId) {
   const v = vendedores.find(x => x.id === vendedorId);
-  if (!v || v.status === 'em_atendimento') return; // Can't change while serving
+  if (!v || v.status === 'em_atendimento') return;
 
-  const cycle = { disponivel: 'pausa', pausa: 'fora', fora: 'disponivel' };
-  const newStatus = cycle[v.status] || 'disponivel';
-
-  let posicao = null;
-  if (newStatus === 'disponivel') {
-    const maxPos = Math.max(0, ...vendedores.filter(x => x.posicao_fila != null).map(x => x.posicao_fila));
-    posicao = maxPos + 1;
+  if (v.status === 'disponivel' && v.posicao_fila != null) {
+    // Na fila → abrir popup de saída
+    openSaida(vendedorId);
+  } else {
+    // Fora/pausa → voltar pra fila
+    delete saidaMotivos[vendedorId];
+    await addToQueue(vendedorId);
   }
-
-  await sb.from('vendedores').update({ status: newStatus, posicao_fila: posicao }).eq('id', vendedorId);
-  await loadVendedores();
-  const cfg = STATUS_CONFIG[newStatus];
-  toast(`${v.apelido || v.nome}: ${cfg.label}`, 'info', 2000);
 };
 
 // ─── Logout ───
