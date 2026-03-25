@@ -68,6 +68,27 @@
     border-radius: var(--radius-sm) var(--radius-sm) 8px 8px;
   }
 
+  /* Setor tabs */
+  .setor-tab {
+    flex: 1;
+    padding: 6px 8px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: all .15s;
+  }
+  .setor-tab.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .setor-tab:not(.active):hover { background: var(--bg-hover); }
+
   /* Service panel (right) */
   .service-panel {
     display: flex;
@@ -354,7 +375,12 @@
 
   <!-- QUEUE PANEL (left) -->
   <aside class="queue-panel" id="queuePanel">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:0 4px">
+    <div id="setorTabs" style="display:flex;gap:4px;margin-bottom:10px;padding:0 2px">
+      <button class="setor-tab active" data-setor="loja" onclick="setSetor('loja')">🏪 Loja</button>
+      <button class="setor-tab" data-setor="chapelaria" onclick="setSetor('chapelaria')">🤠 Chap.</button>
+      <button class="setor-tab" data-setor="selaria" onclick="setSetor('selaria')">🐴 Sel.</button>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:0 4px">
       <span style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em">Fila</span>
       <span id="queueCount" style="font-size:11px;font-weight:600;color:var(--text-muted)">0 na fila</span>
     </div>
@@ -530,6 +556,14 @@ let currentTurno = null;
 let activeAtendimentos = [];
 let timerInterval = null;
 let vendedores = [];
+let currentSetor = 'loja';
+
+window.setSetor = function(setor) {
+  currentSetor = setor;
+  document.querySelectorAll('.setor-tab').forEach(t => t.classList.toggle('active', t.dataset.setor === setor));
+  renderQueue();
+  renderFooter();
+};
 
 // ─── Sound effects (Web Audio API) ───
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -651,10 +685,11 @@ async function loadVendedores() {
 // ─── Render queue ───
 function renderQueue() {
   const list = document.getElementById('queueList');
-  const inQueue = vendedores.filter(v => v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
-  const atendendo = vendedores.filter(v => v.status === 'em_atendimento');
-  const fora = vendedores.filter(v => v.status === 'fora' || (v.status === 'disponivel' && v.posicao_fila == null));
-  const pausa = vendedores.filter(v => v.status === 'pausa');
+  const setorVendedores = vendedores.filter(v => (v.setor || 'loja') === currentSetor);
+  const inQueue = setorVendedores.filter(v => v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
+  const atendendo = setorVendedores.filter(v => v.status === 'em_atendimento');
+  const fora = setorVendedores.filter(v => v.status === 'fora' || (v.status === 'disponivel' && v.posicao_fila == null));
+  const pausa = setorVendedores.filter(v => v.status === 'pausa');
 
   document.getElementById('queueCount').textContent = inQueue.length + ' na fila';
 
@@ -1008,7 +1043,8 @@ function renderFooter() {
     outro: { label: 'Fora', color: '#64748b' }
   };
 
-  const cards = vendedores.map(v => {
+  const setorVendedores = vendedores.filter(v => (v.setor || 'loja') === currentSetor);
+  const cards = setorVendedores.map(v => {
     const inQueue = v.status === 'disponivel' && v.posicao_fila != null;
     const atendendo = v.status === 'em_atendimento';
     let statusLabel, statusColor, dotColor;
@@ -1121,9 +1157,28 @@ window.handleProximoCliente = async function() {
   const btn = document.getElementById('btnProximo');
   btn.disabled = true;
   try {
-    const { data, error } = await sb.rpc('proximo_cliente', { p_turno_id: currentTurno.id });
+    // Filtrar pelo setor ativo
+    const setorVendedores = vendedores.filter(v => (v.setor || 'loja') === currentSetor && v.status === 'disponivel' && v.posicao_fila != null);
+    setorVendedores.sort((a, b) => a.posicao_fila - b.posicao_fila);
+    const proximo = setorVendedores[0];
+    if (!proximo) throw new Error('Nenhum vendedor na fila de ' + currentSetor);
+
+    // Criar atendimento e atualizar vendedor
+    const { data: atend, error } = await sb.from('atendimentos').insert({
+      turno_id: currentTurno.id,
+      vendedor_id: proximo.id,
+      inicio: new Date().toISOString()
+    }).select('*, vendedores(nome, apelido)').single();
     if (error) throw error;
-    const { data: atend } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('id', data).single();
+
+    // Atualizar status do vendedor
+    await sb.from('vendedores').update({ status: 'em_atendimento', posicao_fila: null }).eq('id', proximo.id);
+
+    // Reordenar posições restantes
+    const remaining = vendedores.filter(v => (v.setor || 'loja') === currentSetor && v.status === 'disponivel' && v.posicao_fila != null && v.id !== proximo.id).sort((a, b) => a.posicao_fila - b.posicao_fila);
+    const updates = remaining.map((v, i) => sb.from('vendedores').update({ posicao_fila: i + 1 }).eq('id', v.id));
+    await Promise.all(updates);
+
     activeAtendimentos.push(atend);
     renderActiveAtendimentos();
     playSound('atendimento');
