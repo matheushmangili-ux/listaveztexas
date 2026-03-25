@@ -79,6 +79,19 @@ export function initials(name) {
   return (name || '??').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
 }
 
+// Theme toggle (light/dark)
+export function initTheme() {
+  const saved = localStorage.getItem('lv-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+}
+export function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('lv-theme', next);
+  return next;
+}
+
 // Debounce for button protection
 export function debounce(fn, ms) {
   let timer;
@@ -86,6 +99,19 @@ export function debounce(fn, ms) {
     clearTimeout(timer);
     timer = setTimeout(() => fn.apply(this, args), ms);
   };
+}
+
+// Texas Flag Loader HTML
+export function texasLoaderHTML(text) {
+  return `<div class="texas-loader">
+    <svg viewBox="0 0 64 44">
+      <rect class="flag-outline" x="1" y="1" width="62" height="42" rx="3"/>
+      <line class="flag-lines" x1="20" y1="1" x2="20" y2="43"/>
+      <line class="flag-lines" x1="20" y1="22" x2="63" y2="22"/>
+      <polygon class="flag-star" points="10,14 11.8,19.5 17.5,19.5 12.8,23 14.7,28.5 10,25 5.3,28.5 7.2,23 2.5,19.5 8.2,19.5"/>
+    </svg>
+    ${text ? '<span class="texas-loader-text">' + text + '</span>' : ''}
+  </div>`;
 }
 
 // Toast notification

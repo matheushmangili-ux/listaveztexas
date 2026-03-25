@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ListaVez Texas — Dashboard</title>
+<title>Lista da Vez — Dashboard</title>
 <link rel="stylesheet" href="css/styles.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -176,12 +176,12 @@
   <!-- Header -->
   <div class="dash-header">
     <div style="display:flex;align-items:center;gap:14px">
-      <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center">
-        <span style="font-family:var(--font-mono);font-weight:800;font-size:14px;color:var(--bg-deep)">LV</span>
+      <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--accent-dim),var(--accent));display:flex;align-items:center;justify-content:center">
+        <span style="font-family:var(--font-mono);font-weight:800;font-size:14px;color:#fff">TC</span>
       </div>
       <div>
         <h1 style="font-family:var(--font-mono);font-size:18px;font-weight:800;letter-spacing:-.5px">Dashboard</h1>
-        <p style="font-size:11px;color:var(--text-muted);font-weight:500">ListaVez Texas — Visão Gerencial</p>
+        <p style="font-size:11px;color:var(--text-muted);font-weight:500">Lista da Vez — Visão Gerencial</p>
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:12px">
@@ -193,6 +193,9 @@
       <a href="tablet.html" class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px">
         <i class="fa-solid fa-tablet-screen-button" style="font-size:10px"></i> Tablet
       </a>
+      <button class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px" onclick="toggleTheme()">
+        <i class="fa-solid fa-circle-half-stroke" style="font-size:10px"></i>
+      </button>
       <button class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px" onclick="handleLogout()">
         <i class="fa-solid fa-right-from-bracket" style="font-size:10px"></i>
       </button>
@@ -222,18 +225,18 @@
   <!-- Charts row -->
   <div class="charts-grid">
     <div class="chart-card">
-      <h3><i class="fa-solid fa-chart-pie" style="margin-right:6px;color:var(--gold-dim)"></i>Motivos de Perda</h3>
+      <h3><i class="fa-solid fa-chart-pie" style="margin-right:6px;color:var(--accent-dim)"></i>Motivos de Perda</h3>
       <div class="chart-box"><canvas id="chartMotivos"></canvas></div>
     </div>
     <div class="chart-card">
-      <h3><i class="fa-solid fa-chart-bar" style="margin-right:6px;color:var(--gold-dim)"></i>Fluxo por Hora</h3>
+      <h3><i class="fa-solid fa-chart-bar" style="margin-right:6px;color:var(--accent-dim)"></i>Fluxo por Hora</h3>
       <div class="chart-box"><canvas id="chartHourly"></canvas></div>
     </div>
   </div>
 
   <!-- Ranking Table -->
   <div class="chart-card" style="margin-bottom:24px">
-    <h3><i class="fa-solid fa-ranking-star" style="margin-right:6px;color:var(--gold-dim)"></i>Ranking Vendedores</h3>
+    <h3><i class="fa-solid fa-ranking-star" style="margin-right:6px;color:var(--accent-dim)"></i>Ranking Vendedores</h3>
     <div style="overflow-x:auto">
       <table class="ranking-table" id="rankingTable">
         <thead>
@@ -265,7 +268,7 @@
       </div>
     </div>
     <div class="chart-card">
-      <h3><i class="fa-solid fa-users" style="margin-right:6px;color:var(--gold-dim)"></i>Equipe no Salão — Agora</h3>
+      <h3><i class="fa-solid fa-users" style="margin-right:6px;color:var(--accent-dim)"></i>Equipe no Salão — Agora</h3>
       <div id="floorList">
         <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>
       </div>
@@ -275,7 +278,7 @@
   <!-- Gestão de Vendedores -->
   <div class="chart-card" style="margin-bottom:24px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
-      <h3 style="margin-bottom:0"><i class="fa-solid fa-user-gear" style="margin-right:6px;color:var(--gold-dim)"></i>Gestão de Vendedores</h3>
+      <h3 style="margin-bottom:0"><i class="fa-solid fa-user-gear" style="margin-right:6px;color:var(--accent-dim)"></i>Gestão de Vendedores</h3>
       <button class="btn btn-gold" style="min-height:34px;padding:0 14px;font-size:11px" onclick="openVendedorModal()">
         <i class="fa-solid fa-plus" style="font-size:9px;margin-right:4px"></i> Novo Vendedor
       </button>
@@ -287,7 +290,7 @@
 
   <!-- Footer -->
   <footer style="text-align:center;margin-top:32px;padding:16px 0;border-top:1px solid var(--border-subtle)">
-    <p style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);letter-spacing:.15em;text-transform:uppercase">ListaVez Texas v1.0</p>
+    <p style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);letter-spacing:.15em;text-transform:uppercase">Lista da Vez v1.0</p>
   </footer>
 </div>
 
@@ -300,6 +303,9 @@
     <input type="text" id="vendedorNome" placeholder="Ex: Luiz Alberto">
     <label>Apelido (exibido na fila)</label>
     <input type="text" id="vendedorApelido" placeholder="Ex: Luiz">
+    <label>PIN Rápido (4 dígitos)</label>
+    <input type="text" id="vendedorPin" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="Ex: 1234" style="letter-spacing:8px;font-family:var(--font-mono);font-weight:700">
+    <p style="font-size:10px;color:var(--text-muted);margin-top:-8px;margin-bottom:12px">Opcional. Permite login rápido pelo PIN na tela inicial.</p>
     <div class="modal-actions">
       <button class="btn btn-ghost" style="min-height:36px;padding:0 16px;font-size:12px" onclick="closeVendedorModal()">Cancelar</button>
       <button class="btn btn-gold" style="min-height:36px;padding:0 16px;font-size:12px" onclick="saveVendedor()">
@@ -314,7 +320,8 @@
 <script type="module">
 import { getSupabase } from './js/supabase-config.js';
 import { requireRole, logout } from './js/auth.js';
-import { STATUS_CONFIG, MOTIVOS, todayRange, weekRange, monthRange, initials, toast } from './js/utils.js';
+import { STATUS_CONFIG, MOTIVOS, todayRange, weekRange, monthRange, initials, toast, initTheme, toggleTheme } from './js/utils.js';
+initTheme();
 
 const sb = getSupabase();
 const user = await requireRole(['gerente', 'admin']);
@@ -522,12 +529,14 @@ window.closeVendedorModal = function() {
   document.getElementById('vendedorEditId').value = '';
   document.getElementById('vendedorNome').value = '';
   document.getElementById('vendedorApelido').value = '';
+  document.getElementById('vendedorPin').value = '';
 };
 
 window.editVendedor = function(id, nome, apelido) {
   document.getElementById('vendedorEditId').value = id;
   document.getElementById('vendedorNome').value = nome;
   document.getElementById('vendedorApelido').value = apelido || '';
+  document.getElementById('vendedorPin').value = '';
   openVendedorModal('Editar Vendedor');
 };
 
@@ -535,7 +544,9 @@ window.saveVendedor = async function() {
   const id = document.getElementById('vendedorEditId').value;
   const nome = document.getElementById('vendedorNome').value.trim();
   const apelido = document.getElementById('vendedorApelido').value.trim() || null;
+  const pin = document.getElementById('vendedorPin').value.trim();
   if (!nome) { toast('Preencha o nome', 'warning'); return; }
+  if (pin && (pin.length !== 4 || !/^\d{4}$/.test(pin))) { toast('PIN deve ter exatamente 4 dígitos', 'warning'); return; }
 
   if (id) {
     const { error } = await sb.from('vendedores').update({ nome, apelido }).eq('id', id);

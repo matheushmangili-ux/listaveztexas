@@ -5,20 +5,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap');
 
 :root {
-  --bg-deep: #0c0b09;
-  --bg-surface: #151412;
-  --bg-card: #1c1a17;
-  --bg-elevated: #242220;
-  --bg-hover: #2e2b27;
-  --border-subtle: rgba(196,162,101,.08);
-  --border-medium: rgba(196,162,101,.15);
-  --border-strong: rgba(196,162,101,.25);
-  --text-primary: #e8dcc8;
-  --text-secondary: #a39880;
-  --text-muted: #6b6354;
-  --gold: #c4a265;
-  --gold-bright: #dbb978;
-  --gold-dim: #8b7348;
+  --bg-deep: #0d1117;
+  --bg-surface: #151b23;
+  --bg-card: #1c2333;
+  --bg-elevated: #253040;
+  --bg-hover: #2d3a4d;
+  --border-subtle: rgba(148,163,184,.1);
+  --border-medium: rgba(148,163,184,.18);
+  --border-strong: rgba(148,163,184,.28);
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent: #7c8db5;
+  --accent-bright: #94a8d0;
+  --accent-dim: #5a6a8a;
+  --gold: #7c8db5;
+  --gold-bright: #94a8d0;
+  --gold-dim: #5a6a8a;
   --success: #4ade80;
   --success-bg: rgba(74,222,128,.08);
   --warning: #fbbf24;
@@ -33,6 +36,27 @@
   --radius-sm: 8px;
   --radius-lg: 16px;
   --touch-min: 56px;
+}
+
+/* ─── Light Mode ─── */
+[data-theme="light"] {
+  --bg-deep: #f1f5f9;
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-elevated: #f8fafc;
+  --bg-hover: #e2e8f0;
+  --border-subtle: rgba(51,65,85,.08);
+  --border-medium: rgba(51,65,85,.15);
+  --border-strong: rgba(51,65,85,.25);
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --accent: #4a6fa5;
+  --accent-bright: #3b5998;
+  --accent-dim: #6b8cba;
+  --gold: #4a6fa5;
+  --gold-bright: #3b5998;
+  --gold-dim: #6b8cba;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -97,10 +121,10 @@ body {
 .btn:disabled { opacity: .4; pointer-events: none; }
 
 .btn-primary {
-  background: var(--gold);
-  color: var(--bg-deep);
+  background: var(--accent);
+  color: #fff;
 }
-.btn-primary:hover { background: var(--gold-bright); }
+.btn-primary:hover { background: var(--accent-bright); }
 
 .btn-success {
   background: var(--success);
@@ -121,11 +145,11 @@ body {
 .btn-warning:hover { background: #fcd34d; }
 
 .btn-gold {
-  background: var(--bg-elevated);
-  color: var(--text-primary);
-  border: 1px solid var(--border-medium);
+  background: var(--accent-dim);
+  color: #fff;
+  border: 1px solid transparent;
 }
-.btn-gold:hover { background: var(--bg-hover); border-color: var(--border-strong); }
+.btn-gold:hover { background: var(--accent); }
 
 .btn-ghost {
   background: transparent;
@@ -180,12 +204,12 @@ body {
   background: var(--bg-surface);
   border: 2px solid var(--border-subtle);
   border-radius: var(--radius);
-  color: var(--gold-bright);
+  color: var(--accent-bright);
   outline: none;
-  caret-color: var(--gold);
+  caret-color: var(--accent);
   transition: border-color .2s;
 }
-.pin-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(196,162,101,.1); }
+.pin-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,141,181,.15); }
 
 /* ─── Queue Item ─── */
 .queue-item {
@@ -352,16 +376,69 @@ body {
 .animate-slide { animation: slideUp .5s cubic-bezier(.16,1,.3,1) forwards; }
 .animate-breathe { animation: breathe 3s ease-in-out infinite; }
 
-/* ─── Loading ─── */
+/* ─── Loading: Texas Flag line draw ─── */
 .spinner {
   width: 20px;
   height: 20px;
   border: 2px solid var(--border-subtle);
-  border-top-color: var(--gold);
+  border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin .6s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+.texas-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.texas-loader svg {
+  width: 64px;
+  height: 44px;
+}
+.texas-loader .flag-outline {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 300;
+  stroke-dashoffset: 300;
+  animation: drawFlag 1.8s ease-in-out infinite;
+}
+.texas-loader .flag-star {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: drawFlag 1.8s ease-in-out infinite .4s;
+}
+.texas-loader .flag-lines {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1;
+  opacity: .4;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: drawFlag 1.8s ease-in-out infinite .2s;
+}
+@keyframes drawFlag {
+  0% { stroke-dashoffset: 300; opacity: .3; }
+  50% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: -300; opacity: .3; }
+}
+.texas-loader-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
 
 /* ─── Toast container ─── */
 #toastContainer {

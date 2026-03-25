@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>ListaVez Texas — Fila</title>
+<title>Lista da Vez — Fila</title>
 <link rel="stylesheet" href="css/styles.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -93,7 +93,7 @@
     width: 88px;
     height: 88px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+    background: linear-gradient(135deg, var(--accent-dim), var(--accent));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -101,8 +101,8 @@
     font-family: var(--font-mono);
     font-weight: 800;
     font-size: 28px;
-    color: var(--bg-deep);
-    box-shadow: 0 8px 32px rgba(196,162,101,.25);
+    color: #fff;
+    box-shadow: 0 8px 32px rgba(124,141,181,.25);
   }
 
   /* Idle state */
@@ -189,10 +189,10 @@
   }
   .atend-card .atend-avatar {
     width: 44px; height: 44px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+    background: linear-gradient(135deg, var(--accent-dim), var(--accent));
     display: flex; align-items: center; justify-content: center;
     font-family: var(--font-mono); font-weight: 800; font-size: 14px;
-    color: var(--bg-deep); flex-shrink: 0;
+    color: #fff; flex-shrink: 0;
   }
   .atend-card .atend-info { flex: 1; min-width: 0; }
   .atend-card .atend-name { font-weight: 700; font-size: 14px; }
@@ -233,11 +233,11 @@
   <!-- HEADER -->
   <header class="t-header">
     <div style="display:flex;align-items:center;gap:12px">
-      <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center">
-        <span style="font-family:var(--font-mono);font-weight:800;font-size:12px;color:var(--bg-deep)">LV</span>
+      <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent-dim),var(--accent));display:flex;align-items:center;justify-content:center">
+        <span style="font-family:var(--font-mono);font-weight:800;font-size:12px;color:#fff">TC</span>
       </div>
       <div>
-        <span style="font-family:var(--font-mono);font-weight:700;font-size:14px">ListaVez</span>
+        <span style="font-family:var(--font-mono);font-weight:700;font-size:14px">Lista da Vez</span>
         <span id="turnoLabel" style="font-size:11px;color:var(--text-muted);margin-left:8px">Turno não iniciado</span>
       </div>
     </div>
@@ -245,6 +245,9 @@
       <span class="live-clock" id="clock">--:--</span>
       <button class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px" id="btnTurno" onclick="toggleTurno()">
         <i class="fa-solid fa-play" style="font-size:10px"></i> Abrir Turno
+      </button>
+      <button class="btn btn-ghost" style="min-height:36px;padding:0 10px;font-size:11px" onclick="window._toggleTheme()" title="Modo claro/escuro">
+        <i class="fa-solid fa-circle-half-stroke"></i>
       </button>
       <button class="btn btn-ghost" style="min-height:36px;padding:0 10px;font-size:11px" onclick="handleLogout()" title="Sair">
         <i class="fa-solid fa-right-from-bracket"></i>
@@ -373,7 +376,8 @@
 <script type="module">
 import { getSupabase } from './js/supabase-config.js';
 import { requireRole, logout } from './js/auth.js';
-import { STATUS_CONFIG, MOTIVOS, formatTime, initials, toast, elapsedSince } from './js/utils.js';
+import { STATUS_CONFIG, MOTIVOS, formatTime, initials, toast, elapsedSince, initTheme, toggleTheme } from './js/utils.js';
+initTheme();
 
 const sb = getSupabase();
 const user = await requireRole(['recepcionista', 'gerente', 'admin']);
@@ -407,6 +411,7 @@ function renderQueue() {
   const list = document.getElementById('queueList');
   const inQueue = vendedores.filter(v => v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
   const atendendo = vendedores.filter(v => v.status === 'em_atendimento');
+  const fora = vendedores.filter(v => v.status === 'fora' || (v.status === 'disponivel' && v.posicao_fila == null));
   const pausa = vendedores.filter(v => v.status === 'pausa');
 
   document.getElementById('queueCount').textContent = inQueue.length + ' na fila';
@@ -418,33 +423,103 @@ function renderQueue() {
 
   let html = '';
 
-  atendendo.forEach(v => {
-    html += renderQueueItem(v, null, true);
-  });
+  // Atendendo
+  atendendo.forEach(v => { html += renderQueueItem(v, null, true); });
 
-  inQueue.forEach((v, i) => {
-    html += renderQueueItem(v, i + 1, false);
-  });
+  // Na fila (drop zone)
+  html += '<div class="queue-dropzone" id="dropFila" style="min-height:40px;border:1px dashed var(--border-medium);border-radius:var(--radius-sm);padding:4px;margin:4px 0">';
+  html += '<div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;padding:4px 8px;margin-bottom:2px"><i class="fa-solid fa-list-ol" style="margin-right:4px"></i>Na fila — arraste para ordenar</div>';
+  inQueue.forEach((v, i) => { html += renderQueueItem(v, i + 1, false, true); });
+  if (inQueue.length === 0) html += '<div style="text-align:center;padding:12px;color:var(--text-muted);font-size:11px;opacity:.5">Arraste vendedores aqui</div>';
+  html += '</div>';
 
-  pausa.forEach(v => {
-    html += renderQueueItem(v, null, false);
-  });
+  // Pausa
+  pausa.forEach(v => { html += renderQueueItem(v, null, false); });
 
-  list.innerHTML = html || '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px">Nenhum vendedor na fila</div>';
+  // Fora (pool para arrastar)
+  if (fora.length > 0) {
+    html += '<div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;padding:8px 8px 4px"><i class="fa-solid fa-door-open" style="margin-right:4px"></i>Fora da fila</div>';
+    fora.forEach(v => { html += renderQueueItem(v, null, false, true); });
+  }
+
+  list.innerHTML = html;
+  initDragAndDrop();
 }
 
-function renderQueueItem(v, pos, isActive) {
+function renderQueueItem(v, pos, isActive, draggable) {
   const cfg = STATUS_CONFIG[v.status] || STATUS_CONFIG.fora;
   const ini = initials(v.apelido || v.nome);
+  const dragAttr = draggable ? 'draggable="true" ondragstart="onDragStart(event)" ontouchstart="onTouchDragStart(event)"' : '';
+  const dragStyle = draggable ? 'cursor:grab;' : '';
   const posHtml = pos ? `<div class="queue-position" style="background:${cfg.bg};color:${cfg.color}">${pos}</div>` : `<div class="queue-position" style="background:${cfg.bg};color:${cfg.color}"><i class="fa-solid ${cfg.icon}" style="font-size:11px"></i></div>`;
 
-  return `<div class="queue-item ${v.status}${isActive ? ' active' : ''}" data-id="${v.id}">
+  return `<div class="queue-item ${v.status}${isActive ? ' active' : ''}" data-id="${v.id}" ${dragAttr} style="${dragStyle}">
+    ${draggable ? '<i class="fa-solid fa-grip-vertical" style="color:var(--text-muted);font-size:10px;opacity:.4;margin-right:2px"></i>' : ''}
     ${posHtml}
     <div style="flex:1;min-width:0">
       <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.apelido || v.nome}</div>
       <div style="font-size:10px;color:${cfg.color};font-weight:600;text-transform:uppercase;letter-spacing:.05em">${cfg.short}</div>
     </div>
   </div>`;
+}
+
+// ─── Drag and Drop (desktop + touch) ───
+let draggedId = null;
+
+window.onDragStart = function(e) {
+  draggedId = e.target.closest('.queue-item')?.dataset.id;
+  e.dataTransfer.effectAllowed = 'move';
+};
+
+function initDragAndDrop() {
+  const dropzone = document.getElementById('dropFila');
+  if (!dropzone) return;
+
+  dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.style.borderColor = 'var(--success)'; });
+  dropzone.addEventListener('dragleave', () => { dropzone.style.borderColor = 'var(--border-medium)'; });
+  dropzone.addEventListener('drop', async e => {
+    e.preventDefault();
+    dropzone.style.borderColor = 'var(--border-medium)';
+    if (!draggedId) return;
+    await addToQueue(draggedId);
+    draggedId = null;
+  });
+}
+
+// Touch drag (para tablet)
+let touchDragEl = null;
+let touchDragId = null;
+
+window.onTouchDragStart = function(e) {
+  const item = e.target.closest('.queue-item');
+  if (!item) return;
+  touchDragId = item.dataset.id;
+  touchDragEl = item;
+  item.style.opacity = '0.5';
+
+  const onMove = (ev) => { ev.preventDefault(); };
+  const onEnd = async (ev) => {
+    item.style.opacity = '1';
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend', onEnd);
+    // Check if dropped on fila zone
+    const touch = ev.changedTouches[0];
+    const dropEl = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (dropEl && (dropEl.id === 'dropFila' || dropEl.closest('#dropFila'))) {
+      await addToQueue(touchDragId);
+    }
+    touchDragId = null;
+    touchDragEl = null;
+  };
+  document.addEventListener('touchmove', onMove, { passive: false });
+  document.addEventListener('touchend', onEnd);
+};
+
+async function addToQueue(vendedorId) {
+  const maxPos = Math.max(0, ...vendedores.filter(x => x.posicao_fila != null).map(x => x.posicao_fila));
+  await sb.from('vendedores').update({ status: 'disponivel', posicao_fila: maxPos + 1 }).eq('id', vendedorId);
+  toast('Adicionado à fila', 'success', 1500);
+  await loadVendedores();
 }
 
 // ─── Render footer status pills ───
@@ -476,6 +551,8 @@ async function updateQuickStats() {
 // ─── Turno ───
 window.toggleTurno = async function() {
   if (currentTurno) {
+    // Fechar turno: tirar todos da fila
+    await sb.from('vendedores').update({ status: 'fora', posicao_fila: null }).eq('ativo', true);
     await sb.from('turnos').update({ fechamento: new Date().toISOString() }).eq('id', currentTurno.id);
     currentTurno = null;
     document.getElementById('turnoLabel').textContent = 'Turno encerrado';
@@ -483,12 +560,13 @@ window.toggleTurno = async function() {
     document.getElementById('btnProximo').disabled = true;
     toast('Turno encerrado', 'info');
   } else {
+    // Abrir turno: vendedores ficam "fora" até serem arrastados para a fila
     const { data } = await sb.from('turnos').insert({ data: new Date().toISOString().split('T')[0] }).select().single();
     currentTurno = data;
     document.getElementById('turnoLabel').textContent = 'Turno aberto';
     document.getElementById('btnTurno').innerHTML = '<i class="fa-solid fa-stop" style="font-size:10px"></i> Fechar Turno';
     document.getElementById('btnProximo').disabled = false;
-    toast('Turno aberto!', 'success');
+    toast('Turno aberto! Arraste vendedores para a fila.', 'success');
   }
   loadVendedores();
 };
@@ -661,6 +739,7 @@ window.cycleStatus = async function(vendedorId) {
 
 // ─── Logout ───
 window.handleLogout = function() { logout(); };
+window._toggleTheme = function() { toggleTheme(); };
 
 // ─── Realtime ───
 sb.channel('tablet-sync')
