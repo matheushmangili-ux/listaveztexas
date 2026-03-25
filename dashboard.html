@@ -855,7 +855,8 @@ window.toggleVendedor = async function(id, isAtivo) {
 window.deleteVendedor = async function(id, nome) {
   if (!confirm('Excluir "' + nome + '"? Esta ação não pode ser desfeita.')) return;
 
-  // Limpar referências primeiro (pausas, atendimentos)
+  // Limpar referências primeiro (turno_vendedores, pausas, atendimentos)
+  await sb.from('turno_vendedores').delete().eq('vendedor_id', id);
   await sb.from('pausas_log').delete().eq('vendedor_id', id);
   await sb.from('atendimentos').delete().eq('vendedor_id', id);
 

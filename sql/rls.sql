@@ -17,7 +17,7 @@ CREATE POLICY "vendedores_insert" ON vendedores FOR INSERT TO authenticated WITH
     (auth.jwt() -> 'user_metadata' ->> 'user_role') IN ('gerente', 'admin')
 );
 CREATE POLICY "vendedores_delete" ON vendedores FOR DELETE TO authenticated USING (
-    (auth.jwt() -> 'user_metadata' ->> 'user_role') = 'admin'
+    (auth.jwt() -> 'user_metadata' ->> 'user_role') IN ('gerente', 'admin')
 );
 
 -- Turnos: todos autenticados podem ler; recep e gerente podem criar/atualizar
@@ -40,6 +40,11 @@ CREATE POLICY "config_select" ON configuracoes FOR SELECT TO authenticated USING
 CREATE POLICY "config_upsert" ON configuracoes FOR ALL TO authenticated USING (
     (auth.jwt() -> 'user_metadata' ->> 'user_role') IN ('gerente', 'admin')
 );
+
+-- DELETE policies para limpeza de FKs ao excluir vendedores
+CREATE POLICY "turno_vend_delete" ON turno_vendedores FOR DELETE TO authenticated USING (true);
+CREATE POLICY "atendimentos_delete" ON atendimentos FOR DELETE TO authenticated USING (true);
+CREATE POLICY "pausas_delete" ON pausas_log FOR DELETE TO authenticated USING (true);
 
 -- Habilitar Realtime nas tabelas que o tablet precisa
 ALTER PUBLICATION supabase_realtime ADD TABLE vendedores;
