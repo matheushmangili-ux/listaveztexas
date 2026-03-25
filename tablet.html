@@ -675,10 +675,19 @@ function renderQueue() {
     atendendo.forEach(v => { html += renderQueueItem(v, null, true); });
   }
 
-  // Pausa
+  // Pausa (clicável para voltar à fila)
   if (pausa.length > 0) {
     html += '<div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px;border-top:1px solid var(--border-subtle);margin-top:4px"><i class="fa-solid fa-pause" style="margin-right:4px"></i>Em pausa</div>';
-    pausa.forEach(v => { html += renderQueueItem(v, null, false); });
+    pausa.forEach(v => {
+      html += `<div class="queue-item pausa" data-id="${v.id}" style="cursor:pointer;opacity:.7" onclick="returnFromPause('${v.id}')">
+        <div class="queue-position" style="background:${STATUS_CONFIG.pausa.bg};color:${STATUS_CONFIG.pausa.color}"><i class="fa-solid ${STATUS_CONFIG.pausa.icon}" style="font-size:11px"></i></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.apelido || v.nome}</div>
+          <div style="font-size:10px;color:${STATUS_CONFIG.pausa.color};font-weight:600;text-transform:uppercase;letter-spacing:.05em">${saidaMotivos[v.id] ? (SAIDA_COLORS[saidaMotivos[v.id]]?.label || 'Pausa') : 'Pausa'}</div>
+        </div>
+        <i class="fa-solid fa-arrow-rotate-left" style="color:var(--success);font-size:12px;opacity:.6" title="Voltar à fila"></i>
+      </div>`;
+    });
   }
 
   list.innerHTML = html;
@@ -927,6 +936,14 @@ async function addToQueue(vendedorId) {
   toast('Adicionado à fila', 'success', 1500);
   await loadVendedores();
 }
+
+// ─── Retornar da pausa ───
+window.returnFromPause = async function(vendedorId) {
+  delete saidaMotivos[vendedorId];
+  await addToQueue(vendedorId);
+  const v = vendedores.find(x => x.id === vendedorId);
+  toast((v?.apelido || v?.nome || 'Vendedor') + ' voltou à fila', 'success', 1500);
+};
 
 // ─── Remover da fila (com motivo) ───
 const SAIDA_COLORS = {
