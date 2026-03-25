@@ -293,6 +293,13 @@
       </div>
     </div>
 
+    <!-- Botão Finalizar Todos -->
+    <div style="width:100%;max-width:500px;margin-bottom:12px">
+      <button class="btn btn-ghost" style="width:100%;min-height:40px;font-size:12px;color:var(--danger)" id="btnFinalizarTodos" onclick="finalizarTodos()">
+        <i class="fa-solid fa-users-slash" style="font-size:10px"></i> Finalizar Todos
+      </button>
+    </div>
+
     <!-- Atendimentos ativos (múltiplos simultâneos) -->
     <div id="activeList" style="width:100%;max-width:500px;display:flex;flex-direction:column;gap:10px">
       <p id="activeLabel" style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;display:none">
@@ -369,6 +376,52 @@
     <i class="fa-solid fa-check"></i>
     Confirmar
   </button>
+</div>
+
+<!-- Bottom Sheet: Motivo de Saída da Fila -->
+<div class="bottom-sheet-overlay" id="saidaOverlay" onclick="closeSaida()"></div>
+<div class="bottom-sheet" id="saidaSheet">
+  <div class="bottom-sheet-handle"></div>
+  <h3 style="font-family:var(--font-mono);font-size:16px;font-weight:700;margin-bottom:4px">Saindo da fila</h3>
+  <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px" id="saidaNome">Selecione o motivo</p>
+
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div class="motivo-option" onclick="confirmSaida('almoco')">
+      <i class="fa-solid fa-utensils" style="color:#f59e0b"></i>
+      <div>
+        <div style="font-weight:700;font-size:14px">Almoço</div>
+        <div style="font-size:11px;color:var(--text-muted)">Saiu para almoçar</div>
+      </div>
+    </div>
+    <div class="motivo-option" onclick="confirmSaida('banheiro')">
+      <i class="fa-solid fa-restroom" style="color:#60a5fa"></i>
+      <div>
+        <div style="font-weight:700;font-size:14px">Banheiro</div>
+        <div style="font-size:11px;color:var(--text-muted)">Pausa rápida</div>
+      </div>
+    </div>
+    <div class="motivo-option" onclick="confirmSaida('reuniao')">
+      <i class="fa-solid fa-people-group" style="color:#a78bfa"></i>
+      <div>
+        <div style="font-weight:700;font-size:14px">Reunião</div>
+        <div style="font-size:11px;color:var(--text-muted)">Chamado para reunião interna</div>
+      </div>
+    </div>
+    <div class="motivo-option" onclick="confirmSaida('finalizar')">
+      <i class="fa-solid fa-door-open" style="color:#f87171"></i>
+      <div>
+        <div style="font-weight:700;font-size:14px">Finalizar o dia</div>
+        <div style="font-size:11px;color:var(--text-muted)">Encerrou o expediente</div>
+      </div>
+    </div>
+    <div class="motivo-option" onclick="confirmSaida('outro')">
+      <i class="fa-solid fa-ellipsis" style="color:#64748b"></i>
+      <div>
+        <div style="font-weight:700;font-size:14px">Outro motivo</div>
+        <div style="font-size:11px;color:var(--text-muted)">Motivo diferente</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div id="toastContainer"></div>
@@ -502,11 +555,12 @@ window.onTouchDragStart = function(e) {
     item.style.opacity = '1';
     document.removeEventListener('touchmove', onMove);
     document.removeEventListener('touchend', onEnd);
-    // Check if dropped on fila zone
     const touch = ev.changedTouches[0];
     const dropEl = document.elementFromPoint(touch.clientX, touch.clientY);
     if (dropEl && (dropEl.id === 'dropFila' || dropEl.closest('#dropFila'))) {
       await addToQueue(touchDragId);
+    } else if (dropEl && (dropEl.id === 'statusFooter' || dropEl.closest('#statusFooter'))) {
+      openSaida(touchDragId);
     }
     touchDragId = null;
     touchDragEl = null;
@@ -522,7 +576,46 @@ async function addToQueue(vendedorId) {
   await loadVendedores();
 }
 
-// ─── Render footer status pills ───
+// ─── Remover da fila (com motivo) ───
+let pendingSaidaId = null;
+
+function openSaida(vendedorId) {
+  pendingSaidaId = vendedorId;
+  const v = vendedores.find(x => x.id === vendedorId);
+  const nome = v ? (v.apelido || v.nome) : 'Vendedor';
+  document.getElementById('saidaNome').textContent = nome + ' — selecione o motivo';
+  document.getElementById('saidaOverlay').classList.add('open');
+  document.getElementById('saidaSheet').classList.add('open');
+}
+
+window.closeSaida = function() {
+  document.getElementById('saidaOverlay').classList.remove('open');
+  document.getElementById('saidaSheet').classList.remove('open');
+  pendingSaidaId = null;
+};
+
+window.confirmSaida = async function(motivo) {
+  if (!pendingSaidaId) return;
+  const newStatus = motivo === 'banheiro' || motivo === 'reuniao' ? 'pausa' : 'fora';
+  await sb.from('vendedores').update({ status: newStatus, posicao_fila: null }).eq('id', pendingSaidaId);
+  const labels = { almoco: 'Almoço', banheiro: 'Banheiro', reuniao: 'Reunião', finalizar: 'Finalizou o dia', outro: 'Saiu da fila' };
+  toast(labels[motivo] || 'Saiu da fila', 'info', 2000);
+  closeSaida();
+  await loadVendedores();
+};
+
+// ─── Finalizar Todos ───
+window.finalizarTodos = async function() {
+  const naFila = vendedores.filter(v => v.status === 'disponivel' && v.posicao_fila != null);
+  if (naFila.length === 0) { toast('Nenhum vendedor na fila', 'warning'); return; }
+  if (!confirm('Remover todos os ' + naFila.length + ' vendedores da fila?')) return;
+  const ids = naFila.map(v => v.id);
+  await sb.from('vendedores').update({ status: 'fora', posicao_fila: null }).in('id', ids);
+  toast('Todos removidos da fila', 'info');
+  await loadVendedores();
+};
+
+// ─── Render footer (drop zone for removal) ───
 function renderFooter() {
   const footer = document.getElementById('statusFooter');
   const pills = vendedores.map(v => {
@@ -533,6 +626,16 @@ function renderFooter() {
     </div>`;
   }).join('');
   footer.innerHTML = '<span style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-right:8px;white-space:nowrap">Status:</span>' + pills;
+
+  // Footer as drop zone for removing from queue
+  footer.addEventListener('dragover', e => { e.preventDefault(); footer.style.borderTopColor = 'var(--danger)'; footer.style.background = 'var(--danger-bg)'; });
+  footer.addEventListener('dragleave', () => { footer.style.borderTopColor = ''; footer.style.background = ''; });
+  footer.addEventListener('drop', e => {
+    e.preventDefault();
+    footer.style.borderTopColor = '';
+    footer.style.background = '';
+    if (draggedId) { openSaida(draggedId); draggedId = null; }
+  });
 }
 
 // ─── Quick stats ───
