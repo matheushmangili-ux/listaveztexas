@@ -582,6 +582,12 @@ let activeAtendimentos = [];
 let timerInterval = null;
 let vendedores = [];
 let currentSetor = 'loja';
+let _localAction = false; // Flag: ignora realtime quando ação é local
+let _localActionTimer = null;
+let _renderPending = false; // Debounce render
+
+// Marcar que uma ação local está em andamento (evita re-render do realtime)
+function markLocal() { _localAction = true; clearTimeout(_localActionTimer); _localActionTimer = setTimeout(() => { _localAction = false; }, 2000); }
 
 window.setSetor = function(setor) {
   currentSetor = setor;
@@ -649,7 +655,7 @@ function fireConfetti() {
   const colors = ['#4ade80', '#fbbf24', '#60a5fa', '#f87171', '#a78bfa', '#fb923c', '#e879f9'];
   const particles = [];
 
-  for (let i = 0; i < 120; i++) {
+  for (let i = 0; i < 40; i++) {
     particles.push({
       x: Math.random() * canvas.width,
       y: -20 - Math.random() * 200,
@@ -683,7 +689,7 @@ function fireConfetti() {
       ctx.restore();
     });
     frame++;
-    if (alive && frame < 180) requestAnimationFrame(animate);
+    if (alive && frame < 90) requestAnimationFrame(animate);
     else ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
   requestAnimationFrame(animate);
@@ -702,7 +708,6 @@ setInterval(updateClock, 15000);
 async function loadVendedores() {
   const { data, error } = await sb.from('vendedores').select('*').eq('ativo', true).order('posicao_fila', { ascending: true, nullsFirst: false });
   if (error) {
-    // Fallback: usar backup local se o banco falhar
     const backup = localStorage.getItem('listavez_vendedores');
     if (backup) {
       vendedores = JSON.parse(backup);
@@ -710,15 +715,24 @@ async function loadVendedores() {
     } else {
       toast('Erro ao carregar vendedores', 'error');
     }
-    renderQueue(); renderFooter(); updateQuickStats();
+    scheduleRender();
     return;
   }
   vendedores = data || [];
-  // Salvar backup local sempre que carregar com sucesso
   try { localStorage.setItem('listavez_vendedores', JSON.stringify(vendedores)); } catch(e) {}
-  renderQueue();
-  renderFooter();
-  updateQuickStats();
+  scheduleRender();
+}
+
+// Batch render — evita múltiplos re-renders no mesmo frame
+function scheduleRender() {
+  if (_renderPending) return;
+  _renderPending = true;
+  requestAnimationFrame(() => {
+    _renderPending = false;
+    renderQueue();
+    renderFooter();
+    updateQuickStats();
+  });
 }
 
 // ─── Render queue ───
@@ -1013,6 +1027,7 @@ async function addToQueue(vendedorId) {
   const setor = v?.setor || 'loja';
   const setorQueue = vendedores.filter(x => (x.setor || 'loja') === setor && x.posicao_fila != null);
   const maxPos = Math.max(0, ...setorQueue.map(x => x.posicao_fila));
+  markLocal();
   await sb.from('vendedores').update({ status: 'disponivel', posicao_fila: maxPos + 1 }).eq('id', vendedorId);
   toast('Adicionado à fila', 'success', 1500);
   await loadVendedores();
@@ -1056,6 +1071,7 @@ window.confirmSaida = async function(motivo) {
   if (!pendingSaidaId) return;
   const newStatus = motivo === 'banheiro' || motivo === 'reuniao' ? 'pausa' : 'fora';
   saidaMotivos[pendingSaidaId] = motivo;
+  markLocal();
   const { error } = await sb.from('vendedores').update({ status: newStatus, posicao_fila: null }).eq('id', pendingSaidaId);
   if (error) { toast('Erro ao registrar saída', 'error'); closeSaida(); return; }
   toast(SAIDA_COLORS[motivo]?.label || 'Saiu da fila', 'info', 2000);
@@ -1069,6 +1085,7 @@ window.finalizarTodos = async function() {
   if (ativos.length === 0) { toast('Nenhum vendedor na fila', 'warning'); return; }
   if (!confirm('Remover todos os ' + ativos.length + ' vendedores da fila?')) return;
   const ids = ativos.map(v => v.id);
+  markLocal();
   const { error } = await sb.from('vendedores').update({ status: 'fora', posicao_fila: null }).in('id', ids);
   if (error) { toast('Erro ao remover vendedores', 'error'); return; }
   // Limpar motivos de saída
@@ -1176,6 +1193,7 @@ async function updateQuickStats() {
 
 // ─── Turno ───
 window.toggleTurno = async function() {
+  markLocal();
   if (currentTurno) {
     // Confirmação antes de fechar
     const activeCount = activeAtendimentos.length;
@@ -1300,6 +1318,7 @@ window.cancelarAtendimento = async function(atendId) {
     const vendedorId = atend.vendedor_id;
 
     // Deletar atendimento (foi engano, não conta)
+    markLocal();
     await sb.from('atendimentos').delete().eq('id', atendId);
 
     // Devolver vendedor à posição 1 da fila do setor dele
@@ -1477,6 +1496,7 @@ window.answerContinuar = function(continuar) {
 async function finalize(resultado, motivo, detalhe, produto, atendId, valor, continuar) {
   const id = atendId || pendingAtendimentoId;
   if (!id) return;
+  markLocal();
   try {
     // Guardar info do vendedor antes de finalizar
     const atendInfo = activeAtendimentos.find(a => a.id === id);
@@ -1630,17 +1650,19 @@ function closeFooterMenu() {
 window.handleLogout = function() { logout(); };
 window._toggleTheme = function() { toggleTheme(); };
 
-// ─── Realtime (debounced) ───
+// ─── Realtime (debounced, ignora ação local) ───
 let _rtVendTimer = null;
 let _rtAtendTimer = null;
 sb.channel('tablet-sync')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vendedores' }, () => {
+    if (_localAction) return; // Ação local já fez o render
     clearTimeout(_rtVendTimer);
-    _rtVendTimer = setTimeout(loadVendedores, 300);
+    _rtVendTimer = setTimeout(loadVendedores, 500);
   })
   .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos' }, () => {
+    if (_localAction) return;
     clearTimeout(_rtAtendTimer);
-    _rtAtendTimer = setTimeout(() => { updateQuickStats(); checkActiveAtendimentos(); }, 300);
+    _rtAtendTimer = setTimeout(() => { updateQuickStats(); checkActiveAtendimentos(); }, 500);
   })
   .subscribe();
 
