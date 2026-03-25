@@ -15,12 +15,16 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
   caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
 }
-// Error recovery (max 1 reload por minuto)
+// Error logging (sem auto-reload para evitar loops)
 window.addEventListener('error', function(e) {
-  const lastReload = parseInt(sessionStorage.getItem('lastErrorReload') || '0');
-  if (Date.now() - lastReload < 60000) return; // Já recarregou há menos de 1 min
-  sessionStorage.setItem('lastErrorReload', Date.now().toString());
-  setTimeout(() => location.reload(), 2000);
+  const el = document.getElementById('toastContainer');
+  if (el) {
+    const d = document.createElement('div');
+    d.style.cssText = 'background:#dc2626;color:#fff;padding:8px 16px;border-radius:8px;margin:4px;font-size:12px;max-width:300px';
+    d.textContent = 'Erro: ' + (e.message || 'desconhecido');
+    el.appendChild(d);
+    setTimeout(() => d.remove(), 5000);
+  }
 });
 </script>
 <style>
@@ -720,7 +724,8 @@ async function loadVendedores() {
 // ─── Render queue ───
 function renderQueue() {
   const list = document.getElementById('queueList');
-  const setorVendedores = vendedores.filter(v => (v.setor || 'loja') === currentSetor);
+  const allVendedores = vendedores || [];
+  const setorVendedores = allVendedores.filter(v => (v.setor || 'loja') === currentSetor);
   const inQueue = setorVendedores.filter(v => v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
   const atendendo = setorVendedores.filter(v => v.status === 'em_atendimento');
   const fora = setorVendedores.filter(v => v.status === 'fora' || (v.status === 'disponivel' && v.posicao_fila == null));
@@ -1082,7 +1087,8 @@ function renderFooter() {
     outro: { label: 'Fora', color: '#64748b' }
   };
 
-  const setorVendedores = vendedores.filter(v => (v.setor || 'loja') === currentSetor);
+  const allV = vendedores || [];
+  const setorVendedores = allV.filter(v => (v.setor || 'loja') === currentSetor);
   const cards = setorVendedores.map(v => {
     const inQueue = v.status === 'disponivel' && v.posicao_fila != null;
     const atendendo = v.status === 'em_atendimento';
