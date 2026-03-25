@@ -51,6 +51,31 @@
     padding: 12px;
   }
   .queue-list { display: flex; flex-direction: column; gap: 6px; }
+  .queue-item { transition: transform .15s ease, margin .15s ease, box-shadow .15s ease; }
+  .queue-item.drag-above { transform: translateY(6px); margin-top: 28px; }
+  .queue-item.drag-above::before {
+    content: '';
+    position: absolute;
+    top: -18px;
+    left: 8px;
+    right: 8px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--success);
+    box-shadow: 0 0 8px rgba(34,197,94,.4);
+  }
+  .queue-item.drag-below { transform: translateY(-6px); margin-bottom: 28px; }
+  .queue-item.drag-below::after {
+    content: '';
+    position: absolute;
+    bottom: -18px;
+    left: 8px;
+    right: 8px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--success);
+    box-shadow: 0 0 8px rgba(34,197,94,.4);
+  }
 
   /* Service panel (right) */
   .service-panel {
@@ -715,18 +740,19 @@ function initDragAndDrop() {
     e.preventDefault();
     dropzone.style.background = 'rgba(34,197,94,.05)';
     const items = [...dropzone.querySelectorAll('.queue-item')];
-    items.forEach(el => el.style.borderTop = '');
+    items.forEach(el => el.classList.remove('drag-above', 'drag-below'));
     const after = getDragAfterElement(dropzone, e.clientY);
-    if (after) after.style.borderTop = '2px solid var(--success)';
+    if (after) after.classList.add('drag-above');
+    else if (items.length > 0) items[items.length-1].classList.add('drag-below');
   });
   dropzone.addEventListener('dragleave', () => {
     dropzone.style.background = '';
-    dropzone.querySelectorAll('.queue-item').forEach(el => el.style.borderTop = '');
+    dropzone.querySelectorAll('.queue-item').forEach(el => el.classList.remove('drag-above', 'drag-below'));
   });
   dropzone.addEventListener('drop', async e => {
     e.preventDefault();
     dropzone.style.background = '';
-    dropzone.querySelectorAll('.queue-item').forEach(el => el.style.borderTop = '');
+    dropzone.querySelectorAll('.queue-item').forEach(el => el.classList.remove('drag-above', 'drag-below'));
     if (!draggedId) return;
 
     const v = vendedores.find(x => x.id === draggedId);
@@ -838,23 +864,26 @@ window.onTouchDragStart = function(e) {
       const footer = document.getElementById('statusFooter');
       const elUnder = document.elementFromPoint(t.clientX, t.clientY);
 
+      // Limpar todas as classes de drag
+      const allItems = [...queueList.querySelectorAll('.queue-item')];
+      allItems.forEach(el => { el.classList.remove('drag-above', 'drag-below'); });
+
       if (elUnder && (elUnder.id === 'queueList' || elUnder.closest('#queueList'))) {
-        queueList.style.background = 'rgba(34,197,94,.08)';
+        queueList.style.background = 'rgba(34,197,94,.05)';
         footer?.classList.remove('drop-highlight');
-        // Mostrar indicador de posição
-        const items = [...queueList.querySelectorAll('.queue-item')];
-        items.forEach(el => { el.style.borderTop = ''; el.style.borderBottom = ''; });
+        // Animar cards abrindo espaço
         const after = getDragAfterElement(queueList, t.clientY);
-        if (after) after.style.borderTop = '3px solid var(--success)';
-        else if (items.length > 0) items[items.length-1].style.borderBottom = '3px solid var(--success)';
+        if (after) {
+          after.classList.add('drag-above');
+        } else if (allItems.length > 0) {
+          allItems[allItems.length-1].classList.add('drag-below');
+        }
       } else if (elUnder && (elUnder.id === 'statusFooter' || elUnder.closest('#statusFooter'))) {
         footer?.classList.add('drop-highlight');
         queueList.style.background = '';
-        queueList.querySelectorAll('.queue-item').forEach(el => { el.style.borderTop = ''; el.style.borderBottom = ''; });
       } else {
         queueList.style.background = '';
         footer?.classList.remove('drop-highlight');
-        queueList.querySelectorAll('.queue-item').forEach(el => { el.style.borderTop = ''; el.style.borderBottom = ''; });
       }
     }
   };
@@ -870,7 +899,7 @@ window.onTouchDragStart = function(e) {
     const footer = document.getElementById('statusFooter');
     queueList.style.background = '';
     footer?.classList.remove('drop-highlight');
-    queueList.querySelectorAll('.queue-item').forEach(el => { el.style.borderTop = ''; el.style.borderBottom = ''; });
+    queueList.querySelectorAll('.queue-item').forEach(el => { el.classList.remove('drag-above', 'drag-below'); });
 
     if (!touchDragging) {
       // Foi um tap, não drag — não fazer nada (o onclick cuida)
