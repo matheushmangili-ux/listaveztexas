@@ -50,31 +50,22 @@
     overflow-y: auto;
     padding: 12px;
   }
-  .queue-list { display: flex; flex-direction: column; gap: 6px; }
-  .queue-item { transition: transform .15s ease, margin .15s ease, box-shadow .15s ease; }
-  .queue-item.drag-above { transform: translateY(6px); margin-top: 28px; }
-  .queue-item.drag-above::before {
-    content: '';
-    position: absolute;
-    top: -18px;
-    left: 8px;
-    right: 8px;
-    height: 3px;
-    border-radius: 2px;
-    background: var(--success);
-    box-shadow: 0 0 8px rgba(34,197,94,.4);
+  .queue-list { display: flex; flex-direction: column; gap: 4px; }
+  .queue-item {
+    position: relative;
+    transition: transform .2s cubic-bezier(.2,.8,.3,1), padding .2s ease;
   }
-  .queue-item.drag-below { transform: translateY(-6px); margin-bottom: 28px; }
-  .queue-item.drag-below::after {
-    content: '';
-    position: absolute;
-    bottom: -18px;
-    left: 8px;
-    right: 8px;
-    height: 3px;
-    border-radius: 2px;
-    background: var(--success);
-    box-shadow: 0 0 8px rgba(34,197,94,.4);
+  .queue-item.drag-above {
+    transform: translateY(4px);
+    padding-top: 6px;
+    border-top: 2px solid var(--success);
+    border-radius: 8px 8px var(--radius-sm) var(--radius-sm);
+  }
+  .queue-item.drag-below {
+    transform: translateY(-4px);
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--success);
+    border-radius: var(--radius-sm) var(--radius-sm) 8px 8px;
   }
 
   /* Service panel (right) */

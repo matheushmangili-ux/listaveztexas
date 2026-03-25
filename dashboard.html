@@ -397,6 +397,12 @@
     <input type="text" id="vendedorNome" placeholder="Ex: Luiz Alberto">
     <label>Apelido (exibido na fila)</label>
     <input type="text" id="vendedorApelido" placeholder="Ex: Luiz">
+    <label>Departamento</label>
+    <select id="vendedorSetor" style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);color:var(--text-primary);font-size:13px;font-weight:600;margin-bottom:12px;font-family:var(--font-body)">
+      <option value="loja">🏪 Loja</option>
+      <option value="chapelaria">🤠 Chapelaria</option>
+      <option value="selaria">🐴 Selaria</option>
+    </select>
     <label>Foto (opcional)</label>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
       <div id="vendedorFotoPreview" style="width:48px;height:48px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid var(--border-subtle)">
@@ -788,16 +794,18 @@ async function loadVendedores() {
     el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum vendedor cadastrado</div>';
     return;
   }
+  const setorLabels = { loja: '🏪 Loja', chapelaria: '🤠 Chapelaria', selaria: '🐴 Selaria' };
   el.innerHTML = data.map(v => `
     <div class="vendedor-row">
       <div class="vendedor-avatar">${initials(v.nome)}</div>
       <div class="vendedor-info">
         <div class="vendedor-name">${v.nome}</div>
         ${v.apelido ? '<div class="vendedor-nick">' + v.apelido + '</div>' : ''}
+        <div style="font-size:9px;color:var(--text-muted);font-weight:600;margin-top:1px">${setorLabels[v.setor] || '🏪 Loja'}</div>
       </div>
       <span class="badge-ativo ${v.ativo ? 'on' : 'off'}">${v.ativo ? 'Ativo' : 'Inativo'}</span>
       <div class="vendedor-actions">
-        <button title="Editar" onclick="editVendedor('${v.id}','${v.nome.replace(/'/g,"\\'")}','${(v.apelido||'').replace(/'/g,"\\'")}')"><i class="fa-solid fa-pen"></i></button>
+        <button title="Editar" onclick="editVendedor('${v.id}','${v.nome.replace(/'/g,"\\'")}','${(v.apelido||'').replace(/'/g,"\\'")}','${v.setor||'loja'}')"><i class="fa-solid fa-pen"></i></button>
         <button title="${v.ativo ? 'Desativar' : 'Ativar'}" onclick="toggleVendedor('${v.id}',${v.ativo})"><i class="fa-solid fa-${v.ativo ? 'toggle-on' : 'toggle-off'}"></i></button>
         <button title="Excluir" class="btn-danger" onclick="deleteVendedor('${v.id}','${v.nome.replace(/'/g,"\\'")}')"><i class="fa-solid fa-trash"></i></button>
       </div>
@@ -838,13 +846,15 @@ window.closeVendedorModal = function() {
   document.getElementById('vendedorNome').value = '';
   document.getElementById('vendedorApelido').value = '';
   document.getElementById('vendedorPin').value = '';
+  document.getElementById('vendedorSetor').value = 'loja';
 };
 
-window.editVendedor = function(id, nome, apelido) {
+window.editVendedor = function(id, nome, apelido, setor) {
   document.getElementById('vendedorEditId').value = id;
   document.getElementById('vendedorNome').value = nome;
   document.getElementById('vendedorApelido').value = apelido || '';
   document.getElementById('vendedorPin').value = '';
+  document.getElementById('vendedorSetor').value = setor || 'loja';
   openVendedorModal('Editar Vendedor');
 };
 
@@ -855,13 +865,14 @@ window.saveVendedor = async function() {
   const id = document.getElementById('vendedorEditId').value;
   const nome = document.getElementById('vendedorNome').value.trim();
   const apelido = document.getElementById('vendedorApelido').value.trim() || null;
+  const setor = document.getElementById('vendedorSetor').value || 'loja';
   const pin = document.getElementById('vendedorPin').value.trim();
   const fotoFile = document.getElementById('vendedorFoto')?.files[0] || null;
   if (!nome) { toast('Preencha o nome', 'warning'); savingVendedor = false; return; }
   if (pin && (pin.length !== 4 || !/^\d{4}$/.test(pin))) { toast('PIN deve ter exatamente 4 dígitos', 'warning'); savingVendedor = false; return; }
 
   if (id) {
-    const update = { nome, apelido };
+    const update = { nome, apelido, setor };
     if (fotoFile) {
       const url = await uploadFoto(id, fotoFile);
       if (url) update.foto_url = url;
@@ -870,7 +881,7 @@ window.saveVendedor = async function() {
     if (error) { toast('Erro ao atualizar: ' + error.message, 'error'); savingVendedor = false; return; }
     toast('Vendedor atualizado', 'success');
   } else {
-    const { data: inserted, error } = await sb.from('vendedores').insert({ nome, apelido }).select().single();
+    const { data: inserted, error } = await sb.from('vendedores').insert({ nome, apelido, setor }).select().single();
     if (error) { toast('Erro ao cadastrar: ' + error.message, 'error'); savingVendedor = false; return; }
     if (fotoFile && inserted) {
       const url = await uploadFoto(inserted.id, fotoFile);
