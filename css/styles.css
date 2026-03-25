@@ -121,10 +121,11 @@ body {
 .btn-warning:hover { background: #fcd34d; }
 
 .btn-gold {
-  background: linear-gradient(135deg, var(--gold-dim), var(--gold));
-  color: var(--bg-deep);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border-medium);
 }
-.btn-gold:hover { background: linear-gradient(135deg, var(--gold), var(--gold-bright)); }
+.btn-gold:hover { background: var(--bg-hover); border-color: var(--border-strong); }
 
 .btn-ghost {
   background: transparent;
