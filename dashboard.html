@@ -440,7 +440,7 @@ initTheme();
 
 const sb = getSupabase();
 const user = await requireRole(['gerente', 'admin']);
-if (!user) throw new Error('Unauthorized');
+if (!user) { return; }
 
 let charts = {};
 let currentPeriod = 'hoje';

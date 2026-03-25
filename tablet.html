@@ -563,7 +563,7 @@ initTheme();
 
 const sb = getSupabase();
 const user = await requireRole(['recepcionista', 'gerente', 'admin']);
-if (!user) throw new Error('Unauthorized');
+if (!user) { /* requireRole já redireciona pro login */ return; }
 
 let currentTurno = null;
 let activeAtendimentos = [];
