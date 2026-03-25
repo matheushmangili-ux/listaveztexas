@@ -256,6 +256,25 @@
     </div>
   </div>
 
+  <!-- Status Marquee -->
+  <div id="statusMarquee" style="overflow:hidden;white-space:nowrap;margin-bottom:16px;background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:8px 0;position:relative">
+    <div id="marqueeTrack" style="display:inline-flex;gap:16px;animation:marquee 25s linear infinite;padding-left:100%">
+    </div>
+  </div>
+  <style>
+    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    #statusMarquee:hover #marqueeTrack { animation-play-state: paused; }
+    .marquee-pill {
+      display:inline-flex;align-items:center;gap:6px;
+      padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;
+      white-space:nowrap;flex-shrink:0;
+      background:var(--bg-card);border:1px solid var(--border-subtle);
+    }
+    .marquee-pill .mp-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
+    .marquee-pill .mp-name { color:var(--text-primary); }
+    .marquee-pill .mp-status { font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.03em; }
+  </style>
+
   <!-- KPI Cards -->
   <div class="kpi-grid" id="kpiGrid">
     <div class="kpi-card" style="--accent:var(--text-primary)">
@@ -652,6 +671,27 @@ async function loadFloor() {
       ${items}${items}
     </div>
   </div>`;
+
+  // Atualizar marquee do header
+  renderHeaderMarquee(data);
+}
+
+function renderHeaderMarquee(vendedoresData) {
+  const track = document.getElementById('marqueeTrack');
+  if (!track) return;
+  const pills = vendedoresData.map(v => {
+    const cfg = STATUS_CONFIG[v.status] || STATUS_CONFIG.fora;
+    const pos = v.posicao_fila ? ` #${v.posicao_fila}` : '';
+    return `<div class="marquee-pill">
+      <div class="mp-dot" style="background:${cfg.color}"></div>
+      <span class="mp-name">${v.apelido || v.nome.split(' ')[0]}</span>
+      <span class="mp-status" style="color:${cfg.color}">${cfg.short}${pos}</span>
+    </div>`;
+  }).join('');
+  // Duplicar para loop
+  track.innerHTML = pills + pills;
+  const speed = Math.max(15, vendedoresData.length * 2.5);
+  track.style.animationDuration = speed + 's';
 }
 
 // ─── Scatter: Volume × Conversão ───
