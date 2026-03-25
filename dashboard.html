@@ -393,7 +393,7 @@
     <input type="text" id="vendedorApelido" placeholder="Ex: Luiz">
     <label>Departamento</label>
     <select id="vendedorSetor" style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);color:var(--text-primary);font-size:13px;font-weight:600;margin-bottom:12px;font-family:var(--font-body)">
-      <option value="loja">🏪 Loja</option>
+      <option value="loja">👔 Vestuário</option>
       <option value="chapelaria">🤠 Chapelaria</option>
       <option value="selaria">🐴 Selaria</option>
     </select>
@@ -796,14 +796,14 @@ async function loadVendedores() {
     el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum vendedor cadastrado</div>';
     return;
   }
-  const setorLabels = { loja: '🏪 Loja', chapelaria: '🤠 Chapelaria', selaria: '🐴 Selaria' };
+  const setorLabels = { loja: '👔 Vestuário', chapelaria: '🤠 Chapelaria', selaria: '🐴 Selaria' };
   el.innerHTML = data.map(v => `
     <div class="vendedor-row">
       <div class="vendedor-avatar">${initials(v.nome)}</div>
       <div class="vendedor-info">
         <div class="vendedor-name">${v.nome}</div>
         ${v.apelido ? '<div class="vendedor-nick">' + v.apelido + '</div>' : ''}
-        <div style="font-size:9px;color:var(--text-muted);font-weight:600;margin-top:1px">${setorLabels[v.setor] || '🏪 Loja'}</div>
+        <div style="font-size:9px;color:var(--text-muted);font-weight:600;margin-top:1px">${setorLabels[v.setor] || '👔 Vestuário'}</div>
       </div>
       <span class="badge-ativo ${v.ativo ? 'on' : 'off'}">${v.ativo ? 'Ativo' : 'Inativo'}</span>
       <div class="vendedor-actions">

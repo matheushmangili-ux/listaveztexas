@@ -376,7 +376,7 @@
   <!-- QUEUE PANEL (left) -->
   <aside class="queue-panel" id="queuePanel">
     <div id="setorTabs" style="display:flex;gap:4px;margin-bottom:10px;padding:0 2px">
-      <button class="setor-tab active" data-setor="loja" onclick="setSetor('loja')">🏪 Loja</button>
+      <button class="setor-tab active" data-setor="loja" onclick="setSetor('loja')">👔 Vest.</button>
       <button class="setor-tab" data-setor="chapelaria" onclick="setSetor('chapelaria')">🤠 Chap.</button>
       <button class="setor-tab" data-setor="selaria" onclick="setSetor('selaria')">🐴 Sel.</button>
     </div>
@@ -818,7 +818,9 @@ function getDragAfterElement(container, y) {
 }
 
 async function reorderInQueue(movedId, beforeId) {
-  const inQueue = vendedores.filter(v => v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
+  const moved = vendedores.find(v => v.id === movedId);
+  const setor = moved?.setor || 'loja';
+  const inQueue = vendedores.filter(v => (v.setor || 'loja') === setor && v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
   const ordered = inQueue.filter(v => v.id !== movedId);
   const beforeIdx = beforeId ? ordered.findIndex(v => v.id === beforeId) : ordered.length;
   const moved = inQueue.find(v => v.id === movedId);
@@ -832,7 +834,9 @@ async function reorderInQueue(movedId, beforeId) {
 }
 
 async function addToQueueAt(vendedorId, beforeId) {
-  const inQueue = vendedores.filter(v => v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
+  const target = vendedores.find(x => x.id === vendedorId);
+  const setor = target?.setor || 'loja';
+  const inQueue = vendedores.filter(v => (v.setor || 'loja') === setor && v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
   const beforeIdx = beforeId ? inQueue.findIndex(v => v.id === beforeId) : inQueue.length;
   const insertAt = beforeIdx >= 0 ? beforeIdx : inQueue.length;
 
@@ -967,7 +971,10 @@ window.onTouchDragStart = function(e) {
 };
 
 async function addToQueue(vendedorId) {
-  const maxPos = Math.max(0, ...vendedores.filter(x => x.posicao_fila != null).map(x => x.posicao_fila));
+  const v = vendedores.find(x => x.id === vendedorId);
+  const setor = v?.setor || 'loja';
+  const setorQueue = vendedores.filter(x => (x.setor || 'loja') === setor && x.posicao_fila != null);
+  const maxPos = Math.max(0, ...setorQueue.map(x => x.posicao_fila));
   await sb.from('vendedores').update({ status: 'disponivel', posicao_fila: maxPos + 1 }).eq('id', vendedorId);
   toast('Adicionado à fila', 'success', 1500);
   await loadVendedores();
