@@ -1175,11 +1175,22 @@ async function updateQuickStats() {
 // ─── Turno ───
 window.toggleTurno = async function() {
   if (currentTurno) {
+    // Confirmação antes de fechar
+    const activeCount = activeAtendimentos.length;
+    const inQueueCount = vendedores.filter(v => v.status === 'disponivel' && v.posicao_fila != null).length;
+    let msg = 'Tem certeza que deseja FECHAR o turno?';
+    if (activeCount > 0) msg += `\n\n⚠️ ${activeCount} atendimento(s) em andamento serão perdidos!`;
+    if (inQueueCount > 0) msg += `\n${inQueueCount} vendedor(es) na fila serão removidos.`;
+    msg += '\n\nEssa ação não pode ser desfeita facilmente.';
+    if (!confirm(msg)) return;
+
     // Fechar turno: tirar todos da fila
     const { error: e1 } = await sb.from('vendedores').update({ status: 'fora', posicao_fila: null }).eq('ativo', true);
     const { error: e2 } = await sb.from('turnos').update({ fechamento: new Date().toISOString() }).eq('id', currentTurno.id);
     if (e1 || e2) { toast('Erro ao fechar turno', 'error'); return; }
     currentTurno = null;
+    activeAtendimentos = [];
+    renderActiveAtendimentos();
     document.getElementById('turnoLabel').textContent = 'Turno encerrado';
     document.getElementById('btnTurno').innerHTML = '<i class="fa-solid fa-play" style="font-size:10px"></i> Abrir Turno';
     document.getElementById('btnProximo').disabled = true;
