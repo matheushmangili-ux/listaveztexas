@@ -862,7 +862,6 @@ async function reorderInQueue(movedId, beforeId) {
   const inQueue = vendedores.filter(v => (v.setor || 'loja') === setor && v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
   const ordered = inQueue.filter(v => v.id !== movedId);
   const beforeIdx = beforeId ? ordered.findIndex(v => v.id === beforeId) : ordered.length;
-  const moved = inQueue.find(v => v.id === movedId);
   if (!moved) return;
   ordered.splice(beforeIdx >= 0 ? beforeIdx : ordered.length, 0, moved);
 
