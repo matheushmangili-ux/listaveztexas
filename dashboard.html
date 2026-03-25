@@ -193,7 +193,7 @@
       </div>
       <div>
         <h1 style="font-family:var(--font-mono);font-size:18px;font-weight:800;letter-spacing:-.5px">Dashboard</h1>
-        <p style="font-size:11px;color:var(--text-muted);font-weight:500">Lista da Vez — Visão Gerencial</p>
+        <p style="font-size:11px;color:var(--text-muted);font-weight:500">Lista da Vez — <span id="dashDate"></span></p>
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:12px">
@@ -201,7 +201,10 @@
         <button class="active" onclick="setPeriod('hoje')">Hoje</button>
         <button onclick="setPeriod('semana')">Semana</button>
         <button onclick="setPeriod('mes')">Mês</button>
+        <button onclick="setPeriod('custom')"><i class="fa-solid fa-calendar-day" style="font-size:10px"></i></button>
       </div>
+      <input type="date" id="dashDatePicker" style="display:none;font-size:11px;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);color:var(--text-primary);font-family:var(--font-body);font-weight:600" onchange="applyCustomDate()"
+      >
       <button class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px" onclick="exportReport()">
         <i class="fa-solid fa-file-export" style="font-size:10px"></i> Exportar
       </button>
@@ -380,15 +383,45 @@ Chart.defaults.font.family = "'Outfit', system-ui";
 Chart.defaults.color = '#6b6354';
 
 function getRange() {
+  if (currentPeriod === 'custom' && customDate) {
+    const start = new Date(customDate + 'T00:00:00');
+    const end = new Date(customDate + 'T23:59:59');
+    return { start: start.toISOString(), end: end.toISOString() };
+  }
   if (currentPeriod === 'semana') return weekRange();
   if (currentPeriod === 'mes') return monthRange();
   return todayRange();
 }
 
 // ─── Period tabs ───
+let customDate = null;
+
 window.setPeriod = function(p) {
+  const picker = document.getElementById('dashDatePicker');
+  if (p === 'custom') {
+    picker.style.display = 'inline-block';
+    picker.focus();
+    picker.showPicker?.();
+    return;
+  }
+  picker.style.display = 'none';
+  customDate = null;
   currentPeriod = p;
-  document.querySelectorAll('#periodTabs button').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase().includes(p)));
+  document.querySelectorAll('#periodTabs button').forEach(b => {
+    const txt = b.textContent.toLowerCase();
+    b.classList.toggle('active', txt.includes(p));
+  });
+  loadAll();
+};
+
+window.applyCustomDate = function() {
+  const picker = document.getElementById('dashDatePicker');
+  if (!picker.value) return;
+  customDate = picker.value;
+  currentPeriod = 'custom';
+  document.querySelectorAll('#periodTabs button').forEach(b => {
+    b.classList.toggle('active', b.querySelector('i.fa-calendar-day') !== null);
+  });
   loadAll();
 };
 
@@ -811,6 +844,7 @@ window.exportReport = async function() {
 };
 
 // ─── Init ───
+document.getElementById('dashDate').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
 await Promise.all([loadAll(), loadVendedores()]);
 
 // Auto-refresh every 60s
