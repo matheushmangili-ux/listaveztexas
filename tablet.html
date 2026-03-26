@@ -1212,7 +1212,7 @@ setInterval(updateClock, 15000);
 
 // ─── Load vendedores ───
 async function loadVendedores() {
-  const { data, error } = await sb.from('vendedores').select('id,nome,apelido,status,posicao_fila,setor,ativo,foto_url').eq('ativo', true).order('posicao_fila', { ascending: true, nullsFirst: false });
+  const { data, error } = await sb.from('vendedores').select('*').eq('ativo', true).order('posicao_fila', { ascending: true, nullsFirst: false });
   if (error) {
     const backup = localStorage.getItem('listavez_vendedores');
     if (backup) {
@@ -2777,7 +2777,7 @@ document.addEventListener('visibilitychange', () => {
 // ─── Check for existing open turno ───
 async function checkExistingTurno() {
   const today = new Date().toISOString().split('T')[0];
-  const { data } = await sb.from('turnos').select('id,data,abertura').eq('data', today).is('fechamento', null).order('abertura', { ascending: false }).limit(1);
+  const { data } = await sb.from('turnos').select('*').eq('data', today).is('fechamento', null).order('abertura', { ascending: false }).limit(1);
   if (data && data.length > 0) {
     currentTurno = data[0];
     document.getElementById('turnoLabel').textContent = 'Turno aberto';
