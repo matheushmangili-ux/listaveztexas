@@ -77,19 +77,16 @@ window.addEventListener('error', function(e) {
   .queue-list { display: flex; flex-direction: column; gap: 4px; }
   .queue-item {
     position: relative;
-    transition: transform .2s cubic-bezier(.2,.8,.3,1), padding .2s ease;
+    transition: transform .15s ease;
+    will-change: transform;
   }
   .queue-item.drag-above {
-    transform: translateY(4px);
-    padding-top: 6px;
-    border-top: 2px solid var(--success);
-    border-radius: var(--radius-sm) var(--radius-sm) var(--radius-sm) var(--radius-sm);
+    transform: translateY(6px);
+    box-shadow: 0 -2px 0 0 var(--success);
   }
   .queue-item.drag-below {
-    transform: translateY(-4px);
-    padding-bottom: 6px;
-    border-bottom: 2px solid var(--success);
-    border-radius: var(--radius-sm) var(--radius-sm) var(--radius-sm) var(--radius-sm);
+    transform: translateY(-6px);
+    box-shadow: 0 2px 0 0 var(--success);
   }
 
   /* Setor tabs (ícones compactos) */
@@ -1436,7 +1433,6 @@ window.sendToAtendimento = async function(vendedorId) {
     const { data: atend } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('id', data).single();
     activeAtendimentos.push(atend);
     renderActiveAtendimentos();
-    playSound('atendimento');
     await loadVendedores();
     const prefLabel = isPreferencial ? ' (preferencial)' : '';
     toast((v.apelido || v.nome) + ' iniciou atendimento' + prefLabel, 'info', 2000);
@@ -1451,6 +1447,9 @@ let touchDragId = null;
 let touchGhost = null;
 let touchStartX = 0, touchStartY = 0;
 let touchDragging = false;
+let _ghostInitX = 0, _ghostInitY = 0;
+let _dragRafId = null;
+let _lastDropCheck = 0;
 
 window.onTouchDragStart = function(e) {
   const item = e.target.closest('.queue-item') || e.target.closest('.footer-card');
@@ -1463,6 +1462,12 @@ window.onTouchDragStart = function(e) {
   touchStartX = touch.clientX;
   touchStartY = touch.clientY;
 
+  // Cache do layout para evitar reflows durante drag
+  const itemW = item.offsetWidth;
+  const queueList = document.getElementById('queueList');
+  const footer = document.getElementById('statusFooter');
+  let _prevAfter = null;
+
   const onMove = (ev) => {
     if (touchDragging) ev.preventDefault();
     const t = ev.touches[0];
@@ -1474,51 +1479,54 @@ window.onTouchDragStart = function(e) {
       touchDragging = true;
       item.style.opacity = '0.3';
 
-      // Criar ghost card
+      _ghostInitX = t.clientX - itemW / 2;
+      _ghostInitY = t.clientY - 30;
+
+      // Criar ghost card com transform (GPU accelerated)
       touchGhost = item.cloneNode(true);
       touchGhost.style.cssText = `
         position:fixed;z-index:9999;pointer-events:none;
-        transform:scale(1.05);opacity:.9;
+        opacity:.9;will-change:transform;
         box-shadow:0 4px 16px rgba(0,0,0,.3);
-        border:1px solid var(--success);border-radius:var(--radius-sm);
+        border:1px solid var(--success);border-radius:10px;
         background:var(--bg-card);
-        width:${item.offsetWidth}px;
-        left:${t.clientX - item.offsetWidth/2}px;
-        top:${t.clientY - 30}px;
-        transition:none;
+        width:${itemW}px;
+        left:0;top:0;
+        transform:translate(${_ghostInitX}px,${_ghostInitY}px) scale(1.05);
       `;
       document.body.appendChild(touchGhost);
     }
 
     if (touchDragging && touchGhost) {
-      touchGhost.style.left = (t.clientX - item.offsetWidth/2) + 'px';
-      touchGhost.style.top = (t.clientY - 30) + 'px';
+      // Mover ghost via transform (sem reflow)
+      const gx = t.clientX - itemW / 2;
+      const gy = t.clientY - 30;
+      touchGhost.style.transform = `translate(${gx}px,${gy}px) scale(1.05)`;
 
-      // Highlight drop zone
-      const queueList = document.getElementById('queueList');
-      const footer = document.getElementById('statusFooter');
+      // Throttle drop zone detection (~60ms)
+      const now = performance.now();
+      if (now - _lastDropCheck < 60) return;
+      _lastDropCheck = now;
+
       const elUnder = document.elementFromPoint(t.clientX, t.clientY);
-
-      // Limpar todas as classes de drag
-      const allItems = [...queueList.querySelectorAll('.queue-item')];
-      allItems.forEach(el => { el.classList.remove('drag-above', 'drag-below'); });
 
       if (elUnder && (elUnder.id === 'queueList' || elUnder.closest('#queueList'))) {
         queueList.style.background = 'rgba(34,197,94,.05)';
         footer?.classList.remove('drop-highlight');
-        // Animar cards abrindo espaço
         const after = getDragAfterElement(queueList, t.clientY);
-        if (after) {
-          after.classList.add('drag-above');
-        } else if (allItems.length > 0) {
-          allItems[allItems.length-1].classList.add('drag-below');
+        if (after !== _prevAfter) {
+          queueList.querySelectorAll('.queue-item').forEach(el => { el.classList.remove('drag-above', 'drag-below'); });
+          if (after) after.classList.add('drag-above');
+          _prevAfter = after;
         }
       } else if (elUnder && (elUnder.id === 'statusFooter' || elUnder.closest('#statusFooter'))) {
         footer?.classList.add('drop-highlight');
         queueList.style.background = '';
+        if (_prevAfter) { queueList.querySelectorAll('.queue-item').forEach(el => { el.classList.remove('drag-above', 'drag-below'); }); _prevAfter = null; }
       } else {
         queueList.style.background = '';
         footer?.classList.remove('drop-highlight');
+        if (_prevAfter) { queueList.querySelectorAll('.queue-item').forEach(el => { el.classList.remove('drag-above', 'drag-below'); }); _prevAfter = null; }
       }
     }
   };
@@ -1892,7 +1900,6 @@ window.handleProximoCliente = async function() {
     const { data: atend } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('id', data).single();
     activeAtendimentos.push(atend);
     renderActiveAtendimentos();
-    playSound('atendimento');
     await loadVendedores();
   } catch (e) {
     toast(e.message || 'Nenhum vendedor disponível', 'warning');
