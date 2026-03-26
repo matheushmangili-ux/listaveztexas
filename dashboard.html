@@ -262,6 +262,7 @@ window.addEventListener('error', function(e) {
     <div style="display:flex;align-items:center;gap:12px">
       <div class="period-tabs" id="periodTabs">
         <button class="active" onclick="setPeriod('hoje')">Hoje</button>
+        <button onclick="setPeriod('ontem')">Ontem</button>
         <button onclick="setPeriod('semana')">Semana</button>
         <button onclick="setPeriod('mes')">Mês</button>
         <button onclick="setPeriod('custom')"><i class="fa-solid fa-calendar-day" style="font-size:10px"></i></button>
@@ -469,7 +470,7 @@ window.addEventListener('error', function(e) {
 <script type="module">
 import { getSupabase } from './js/supabase-config.js';
 import { requireRole, logout } from './js/auth.js';
-import { STATUS_CONFIG, MOTIVOS, todayRange, weekRange, monthRange, initials, toast, initTheme, toggleTheme } from './js/utils.js';
+import { STATUS_CONFIG, MOTIVOS, todayRange, yesterdayRange, weekRange, monthRange, initials, toast, initTheme, toggleTheme } from './js/utils.js';
 initTheme();
 
 const sb = getSupabase();
@@ -507,6 +508,7 @@ function getRange() {
     const end = new Date(customDate + 'T23:59:59');
     return { start: start.toISOString(), end: end.toISOString() };
   }
+  if (currentPeriod === 'ontem') return yesterdayRange();
   if (currentPeriod === 'semana') return weekRange();
   if (currentPeriod === 'mes') return monthRange();
   return todayRange();
@@ -1165,7 +1167,7 @@ async function getExportData() {
 }
 
 function getPeriodLabel() {
-  return currentPeriod === 'hoje' ? 'Hoje' : currentPeriod === 'semana' ? 'Semana' : currentPeriod === 'mes' ? 'Mês' : customDate;
+  return currentPeriod === 'hoje' ? 'Hoje' : currentPeriod === 'ontem' ? 'Ontem' : currentPeriod === 'semana' ? 'Semana' : currentPeriod === 'mes' ? 'Mês' : customDate;
 }
 
 // ─── Export CSV ───

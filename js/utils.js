@@ -54,6 +54,14 @@ export function todayRange() {
   return { start: start.toISOString(), end: end.toISOString() };
 }
 
+export function yesterdayRange() {
+  const now = new Date();
+  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const start = new Date(end);
+  start.setDate(start.getDate() - 1);
+  return { start: start.toISOString(), end: end.toISOString() };
+}
+
 export function weekRange() {
   const now = new Date();
   const day = now.getDay();

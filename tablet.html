@@ -955,56 +955,49 @@ function playSound(type) {
     osc2.start(audioCtx.currentTime + 0.15);
     osc2.stop(audioCtx.currentTime + 0.5);
   } else if (type === 'venda') {
-    // Modern cash register: layered chord + shimmer + sub bass hit
+    // Berrante boiadeiro! 🐂
     const t0 = audioCtx.currentTime;
 
-    // Sub bass hit (punch)
-    const sub = audioCtx.createOscillator();
-    const subG = audioCtx.createGain();
-    sub.connect(subG); subG.connect(audioCtx.destination);
-    sub.type = 'sine'; sub.frequency.value = 80;
-    sub.frequency.exponentialRampToValueAtTime(40, t0 + 0.15);
-    subG.gain.setValueAtTime(0.2, t0);
-    subG.gain.exponentialRampToValueAtTime(0.001, t0 + 0.2);
-    sub.start(t0); sub.stop(t0 + 0.2);
+    // Nota principal do berrante (sawtooth = timbre nasal/metálico)
+    const berrante = audioCtx.createOscillator();
+    const bG = audioCtx.createGain();
+    berrante.connect(bG); bG.connect(audioCtx.destination);
+    berrante.type = 'sawtooth';
+    berrante.frequency.setValueAtTime(220, t0);
+    berrante.frequency.linearRampToValueAtTime(294, t0 + 0.3);
+    berrante.frequency.setValueAtTime(294, t0 + 0.3);
+    berrante.frequency.linearRampToValueAtTime(330, t0 + 0.6);
+    berrante.frequency.setValueAtTime(330, t0 + 0.6);
+    berrante.frequency.linearRampToValueAtTime(294, t0 + 1.0);
+    bG.gain.setValueAtTime(0, t0);
+    bG.gain.linearRampToValueAtTime(0.12, t0 + 0.05);
+    bG.gain.setValueAtTime(0.12, t0 + 0.8);
+    bG.gain.exponentialRampToValueAtTime(0.001, t0 + 1.4);
+    berrante.start(t0); berrante.stop(t0 + 1.4);
 
-    // Rising chord (C5-E5-G5-C6) with stagger
-    const notes = [523, 659, 784, 1047];
-    notes.forEach((freq, i) => {
-      const o = audioCtx.createOscillator();
-      const g = audioCtx.createGain();
-      o.connect(g); g.connect(audioCtx.destination);
-      o.type = 'triangle';
-      o.frequency.value = freq;
-      const start = t0 + i * 0.06;
-      g.gain.setValueAtTime(0, start);
-      g.gain.linearRampToValueAtTime(0.12, start + 0.04);
-      g.gain.exponentialRampToValueAtTime(0.001, start + 0.6);
-      o.start(start); o.stop(start + 0.6);
-    });
+    // Vibrato (tremolo no berrante real)
+    const vibrato = audioCtx.createOscillator();
+    const vibG = audioCtx.createGain();
+    vibrato.connect(vibG); vibG.connect(berrante.frequency);
+    vibrato.type = 'sine';
+    vibrato.frequency.value = 6;
+    vibG.gain.value = 8;
+    vibrato.start(t0); vibrato.stop(t0 + 1.4);
 
-    // High shimmer (sparkle effect)
-    const shimmer = audioCtx.createOscillator();
-    const shimG = audioCtx.createGain();
-    shimmer.connect(shimG); shimG.connect(audioCtx.destination);
-    shimmer.type = 'sine';
-    shimmer.frequency.setValueAtTime(2093, t0 + 0.25);
-    shimmer.frequency.exponentialRampToValueAtTime(3136, t0 + 0.55);
-    shimG.gain.setValueAtTime(0, t0 + 0.25);
-    shimG.gain.linearRampToValueAtTime(0.06, t0 + 0.3);
-    shimG.gain.exponentialRampToValueAtTime(0.001, t0 + 0.7);
-    shimmer.start(t0 + 0.25); shimmer.stop(t0 + 0.7);
-
-    // Final resolve note (octave C6 sustain)
-    const resolve = audioCtx.createOscillator();
-    const resG = audioCtx.createGain();
-    resolve.connect(resG); resG.connect(audioCtx.destination);
-    resolve.type = 'sine';
-    resolve.frequency.value = 1047;
-    resG.gain.setValueAtTime(0, t0 + 0.35);
-    resG.gain.linearRampToValueAtTime(0.1, t0 + 0.4);
-    resG.gain.exponentialRampToValueAtTime(0.001, t0 + 1.2);
-    resolve.start(t0 + 0.35); resolve.stop(t0 + 1.2);
+    // Harmônico agudo (dá o brilho do berrante)
+    const harm = audioCtx.createOscillator();
+    const hG = audioCtx.createGain();
+    harm.connect(hG); hG.connect(audioCtx.destination);
+    harm.type = 'square';
+    harm.frequency.setValueAtTime(440, t0);
+    harm.frequency.linearRampToValueAtTime(588, t0 + 0.3);
+    harm.frequency.linearRampToValueAtTime(660, t0 + 0.6);
+    harm.frequency.linearRampToValueAtTime(588, t0 + 1.0);
+    hG.gain.setValueAtTime(0, t0);
+    hG.gain.linearRampToValueAtTime(0.04, t0 + 0.05);
+    hG.gain.setValueAtTime(0.04, t0 + 0.8);
+    hG.gain.exponentialRampToValueAtTime(0.001, t0 + 1.3);
+    harm.start(t0); harm.stop(t0 + 1.3);
   } else if (type === 'fail') {
     // Sad trombone "wah wah wah wahhh"
     const t0 = audioCtx.currentTime;
