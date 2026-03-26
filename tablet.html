@@ -2036,20 +2036,17 @@ window.cancelarAtendimento = async function(atendId) {
     markLocal();
     await sb.from('atendimentos').delete().eq('id', atendId);
 
-    // Devolver vendedor à posição 1 da fila do setor dele
+    // Devolver vendedor ao ÚLTIMO da fila do setor dele
     const v = vendedores.find(x => x.id === vendedorId);
     const setor = v?.setor || 'loja';
-    const inQueue = vendedores.filter(x => (x.setor || 'loja') === setor && x.status === 'disponivel' && x.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
-
-    // Empurrar todo mundo uma posição pra frente
-    const updates = inQueue.map((x, i) => sb.from('vendedores').update({ posicao_fila: i + 2 }).eq('id', x.id));
-    updates.push(sb.from('vendedores').update({ status: 'disponivel', posicao_fila: 1 }).eq('id', vendedorId));
-    await Promise.all(updates);
+    const inQueue = vendedores.filter(x => (x.setor || 'loja') === setor && x.status === 'disponivel' && x.posicao_fila != null);
+    const maxPos = Math.max(0, ...inQueue.map(x => x.posicao_fila));
+    await sb.from('vendedores').update({ status: 'disponivel', posicao_fila: maxPos + 1 }).eq('id', vendedorId);
 
     removeAtendimento(atendId);
     await loadVendedores();
     updateQuickStats();
-    toast('Atendimento cancelado — vendedor voltou ao 1º da fila', 'info');
+    toast('Atendimento cancelado — vendedor voltou ao último da fila', 'info');
   } catch (e) {
     toast('Erro ao cancelar: ' + e.message, 'error');
   }
@@ -2326,11 +2323,7 @@ window.submitTroca = async function(atendId, comDiferenca) {
     await finalize('troca', null, null, null, atendId, valor, false);
     if (vendedorId) {
       const v2 = vendedores.find(v => v.id === vendedorId);
-      const setor = v2?.setor || 'loja';
-      const inQueue = vendedores.filter(v => (v.setor || 'loja') === setor && v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
-      const updates = inQueue.map((v, i) => sb.from('vendedores').update({ posicao_fila: i + 2 }).eq('id', v.id));
-      updates.push(sb.from('vendedores').update({ status: 'disponivel', posicao_fila: 1 }).eq('id', vendedorId));
-      await Promise.all(updates);
+      // Vendedor já voltou ao último da fila via RPC finalizar_atendimento
       await loadVendedores();
       // EPIC achievement animation!
       fireEpicTrocaAnimation(v2?.apelido || v2?.nome || 'Vendedor', valor);
