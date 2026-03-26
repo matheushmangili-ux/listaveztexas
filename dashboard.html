@@ -5,14 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lista da Vez — Dashboard</title>
 <link rel="stylesheet" href="css/styles.css">
-<meta name="theme-color" content="#7c8db5">
+<meta name="theme-color" content="#09090B">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
-  caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
 }
 window.addEventListener('error', function(e) {
   const lastReload = parseInt(sessionStorage.getItem('lastErrorReload') || '0');
@@ -54,7 +53,6 @@ window.addEventListener('error', function(e) {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius);
     padding: 20px;
-    overflow: hidden;
   }
   .kpi-compare {
     font-size: 10px;
@@ -107,17 +105,17 @@ window.addEventListener('error', function(e) {
     padding: 8px 16px;
     background: transparent;
     border: none;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     font-family: var(--font-body);
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--text-muted);
     cursor: pointer;
-    transition: all .2s;
+    transition: all 150ms ease;
   }
   .period-tabs button.active {
     background: var(--bg-elevated);
-    color: var(--gold-bright);
+    color: var(--accent);
   }
   .rupture-item {
     display: flex;
@@ -147,18 +145,18 @@ window.addEventListener('error', function(e) {
   .vendedor-row:hover { background: var(--bg-hover); }
   .vendedor-row:last-child { border-bottom: none; }
   .vendedor-avatar {
-    width: 36px; height: 36px; border-radius: 50%;
+    width: 36px; height: 36px; border-radius: var(--radius-sm);
     background: var(--bg-elevated);
     display: flex; align-items: center; justify-content: center;
     font-family: var(--font-mono); font-weight: 700; font-size: 12px;
-    color: var(--gold); flex-shrink: 0;
+    color: var(--accent); flex-shrink: 0;
   }
   .vendedor-info { flex: 1; min-width: 0; }
   .vendedor-name { font-weight: 600; font-size: 13px; }
   .vendedor-nick { font-size: 10px; color: var(--text-muted); }
   .vendedor-actions { display: flex; gap: 6px; }
   .vendedor-actions button {
-    width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border-subtle);
+    width: 30px; height: 30px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);
     background: var(--bg-surface); color: var(--text-muted); cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     font-size: 11px; transition: all .15s;
@@ -166,11 +164,11 @@ window.addEventListener('error', function(e) {
   .vendedor-actions button:hover { background: var(--bg-elevated); color: var(--text-primary); }
   .vendedor-actions button.btn-danger:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
   .badge-ativo {
-    font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
-    text-transform: uppercase; letter-spacing: .05em;
+    font-size: 9px; font-weight: 600; padding: 2px 8px; border-radius: var(--radius-sm);
+    text-transform: uppercase; letter-spacing: .04em;
   }
-  .badge-ativo.on { background: rgba(74,222,128,.15); color: var(--success); }
-  .badge-ativo.off { background: rgba(239,68,68,.1); color: var(--danger); }
+  .badge-ativo.on { background: rgba(52,211,153,.1); color: var(--success); }
+  .badge-ativo.off { background: rgba(248,113,113,.08); color: var(--danger); }
   /* ─── LED Marquee (equipe no salão) ─── */
   .led-marquee {
     overflow: hidden;
@@ -195,23 +193,22 @@ window.addEventListener('error', function(e) {
     padding: 4px 0;
   }
   .led-dot {
-    width: 8px; height: 8px;
+    width: 6px; height: 6px;
     border-radius: 50%;
     flex-shrink: 0;
-    box-shadow: 0 0 6px currentColor;
   }
-  .led-name { font-weight: 700; font-size: 13px; }
-  .led-status { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+  .led-name { font-weight: 600; font-size: 13px; }
+  .led-status { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: .04em; }
 
   /* ─── Modal ─── */
   .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,.5); backdrop-filter: blur(4px);
+    position: fixed; inset: 0; background: rgba(0,0,0,.5); backdrop-filter: blur(2px);
     display: flex; align-items: center; justify-content: center;
     z-index: 1000; opacity: 0; pointer-events: none; transition: opacity .2s;
   }
   .modal-overlay.open { opacity: 1; pointer-events: auto; }
   .modal-box {
-    background: var(--bg-card); border: 1px solid var(--border-subtle);
+    background: var(--bg-card); border: 1px solid var(--border-medium);
     border-radius: var(--radius); padding: 24px; width: 90%; max-width: 400px;
   }
   .modal-box h3 { font-family: var(--font-mono); font-size: 14px; font-weight: 700; margin-bottom: 16px; }
@@ -231,11 +228,11 @@ window.addEventListener('error', function(e) {
   <!-- Header -->
   <div class="dash-header">
     <div style="display:flex;align-items:center;gap:14px">
-      <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg-elevated)">
+      <div style="width:40px;height:40px;border-radius:var(--radius-sm);overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg-elevated)">
         <img src="assets/logo-tc.png" alt="TC" style="width:32px;height:32px;object-fit:contain;filter:brightness(0) invert(.85)">
       </div>
       <div>
-        <h1 style="font-family:var(--font-mono);font-size:18px;font-weight:800;letter-spacing:-.5px">Dashboard</h1>
+        <h1 style="font-family:var(--font-mono);font-size:18px;font-weight:700;letter-spacing:-.025em">Dashboard</h1>
         <p style="font-size:11px;color:var(--text-muted);font-weight:500">Lista da Vez — <span id="dashDate"></span></p>
       </div>
     </div>
@@ -275,11 +272,11 @@ window.addEventListener('error', function(e) {
     #statusMarquee:hover #marqueeTrack { animation-play-state: paused; }
     .marquee-pill {
       display:inline-flex;align-items:center;gap:6px;
-      padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;
+      padding:4px 10px;border-radius:var(--radius-sm);font-size:11px;font-weight:600;
       white-space:nowrap;flex-shrink:0;
       background:var(--bg-card);border:1px solid var(--border-subtle);
     }
-    .marquee-pill .mp-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
+    .marquee-pill .mp-dot { width:6px;height:6px;border-radius:50%;flex-shrink:0; }
     .marquee-pill .mp-name { color:var(--text-primary); }
     .marquee-pill .mp-status { font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.03em; }
   </style>
@@ -362,7 +359,7 @@ window.addEventListener('error', function(e) {
     </div>
   </div>
 
-  <!-- Bottom row: Ruptures + quick info -->
+  <!-- Bottom row: Ruptures + Pausas -->
   <div class="charts-grid">
     <div class="chart-card">
       <h3><i class="fa-solid fa-box-open" style="margin-right:6px;color:var(--danger)"></i>Rupturas — Produtos em Falta</h3>
@@ -373,9 +370,14 @@ window.addEventListener('error', function(e) {
         </div>
       </div>
     </div>
-    <!-- Removido: card Equipe no Salão (agora só no header On Time) -->
-    <div id="floorList" style="display:none"></div>
+    <div class="chart-card">
+      <h3><i class="fa-solid fa-mug-hot" style="margin-right:6px;color:var(--warning)"></i>Pausas — Saídas da Fila</h3>
+      <div id="pauseStatsList">
+        <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>
+      </div>
+    </div>
   </div>
+  <div id="floorList" style="display:none"></div>
 
   <!-- Gestão de Vendedores -->
   <div class="chart-card" style="margin-bottom:24px">
@@ -413,7 +415,7 @@ window.addEventListener('error', function(e) {
     </select>
     <label>Foto (opcional)</label>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-      <div id="vendedorFotoPreview" style="width:48px;height:48px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid var(--border-subtle)">
+      <div id="vendedorFotoPreview" style="width:48px;height:48px;border-radius:var(--radius-sm);background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid var(--border-subtle)">
         <i class="fa-solid fa-user" style="color:var(--text-muted);font-size:18px"></i>
       </div>
       <label style="cursor:pointer;padding:6px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);font-size:11px;font-weight:600;color:var(--text-secondary);margin:0">
@@ -452,8 +454,8 @@ if (!user) {
 let charts = {};
 let currentPeriod = 'hoje';
 
-Chart.defaults.font.family = "'Outfit', system-ui";
-Chart.defaults.color = '#6b6354';
+Chart.defaults.font.family = "'Inter', system-ui";
+Chart.defaults.color = '#71717A';
 
 function getRange() {
   if (currentPeriod === 'custom' && customDate) {
@@ -535,6 +537,7 @@ async function loadAll() {
     loadHourly(range),
     loadRanking(range, cachedRanking),
     loadRuptures(range),
+    loadPauseStats(range),
     loadFloor(),
     loadScatter(range, cachedRanking),
     loadTempoMeta(range, cachedRanking)
@@ -606,8 +609,8 @@ async function loadHourly(range) {
 
   // Sparklines nos KPI cards
   const losses = (data || []).map(d => (d.atendimentos || 0) - (d.vendas || 0));
-  drawSparkline('sparkAtend', atend, 'rgb(196,162,101)');
-  drawSparkline('sparkConv', vendas.map((v, i) => atend[i] > 0 ? Math.round(v / atend[i] * 100) : 0), 'rgb(74,222,128)');
+  drawSparkline('sparkAtend', atend, 'rgb(245,158,11)');
+  drawSparkline('sparkConv', vendas.map((v, i) => atend[i] > 0 ? Math.round(v / atend[i] * 100) : 0), 'rgb(52,211,153)');
   drawSparkline('sparkLoss', losses, 'rgb(248,113,113)');
 
   charts.hourly = new Chart(ctx, {
@@ -615,8 +618,8 @@ async function loadHourly(range) {
     data: {
       labels: hours,
       datasets: [
-        { label: 'Atendimentos', data: atend, backgroundColor: 'rgba(196,162,101,.3)', borderColor: '#c4a265', borderWidth: 1.5, borderRadius: 4, barPercentage: 0.7 },
-        { label: 'Vendas', data: vendas, backgroundColor: 'rgba(74,222,128,.3)', borderColor: '#4ade80', borderWidth: 1.5, borderRadius: 4, barPercentage: 0.7 }
+        { label: 'Atendimentos', data: atend, backgroundColor: 'rgba(245,158,11,.2)', borderColor: '#F59E0B', borderWidth: 1.5, borderRadius: 3, barPercentage: 0.7 },
+        { label: 'Vendas', data: vendas, backgroundColor: 'rgba(52,211,153,.2)', borderColor: '#34D399', borderWidth: 1.5, borderRadius: 3, barPercentage: 0.7 }
       ]
     },
     options: {
@@ -626,8 +629,8 @@ async function loadHourly(range) {
         legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 12, font: { size: 10, weight: 600 } } }
       },
       scales: {
-        x: { grid: { color: 'rgba(196,162,101,.05)' }, ticks: { font: { size: 10, weight: 600 } } },
-        y: { beginAtZero: true, grid: { color: 'rgba(196,162,101,.05)' }, ticks: { font: { size: 10 }, stepSize: 1 } }
+        x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { font: { size: 10, weight: 500 } } },
+        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.04)' }, ticks: { font: { size: 10 }, stepSize: 1 } }
       }
     }
   });
@@ -684,13 +687,22 @@ async function loadRanking(range, cachedData) {
     return;
   }
 
+  // Buscar fotos dos vendedores
+  const { data: vendedoresData } = await sb.from('vendedores').select('id, foto_url, apelido').eq('ativo', true);
+  const fotoMap = {};
+  (vendedoresData || []).forEach(v => { fotoMap[v.id] = v.foto_url; });
+
   body.innerHTML = data.map((r, i) => {
     const convColor = (r.taxa_conversao || 0) >= 50 ? 'var(--success)' : (r.taxa_conversao || 0) >= 30 ? 'var(--warning)' : 'var(--danger)';
     const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+    const foto = fotoMap[r.vendedor_id];
+    const avatarContent = foto
+      ? `<img src="${foto}" style="width:100%;height:100%;object-fit:cover">`
+      : initials(r.nome);
     return `<tr>
       <td style="font-size:16px;text-align:center;width:40px">${medal}</td>
       <td><div style="display:flex;align-items:center;gap:10px">
-        <div style="width:32px;height:32px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:11px;color:var(--gold);flex-shrink:0">${initials(r.nome)}</div>
+        <div style="width:32px;height:32px;border-radius:var(--radius-sm);background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:11px;color:var(--accent);flex-shrink:0;overflow:hidden">${avatarContent}</div>
         <span style="font-weight:600">${r.nome}</span>
       </div></td>
       <td class="mono">${r.total_atendimentos || 0}</td>
@@ -716,6 +728,25 @@ async function loadRuptures(range) {
       <div style="font-size:10px;color:var(--text-muted)">${r.total} ${r.total === 1 ? 'registro' : 'registros'}</div>
     </div>
     <div class="rupture-count">${r.total}</div>
+  </div>`).join('');
+}
+
+// ─── Pause Stats ───
+async function loadPauseStats(range) {
+  const { data, error } = await sb.rpc('get_pause_stats', { p_inicio: range.start, p_fim: range.end });
+  const el = document.getElementById('pauseStatsList');
+  if (!el) return;
+  if (error || !data || data.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px"><i class="fa-solid fa-check-circle" style="font-size:20px;margin-bottom:8px;display:block;color:var(--success);opacity:.4"></i>Nenhuma pausa registrada</div>';
+    return;
+  }
+  const motivoLabels = { almoco: 'Almoço', banheiro: 'Banheiro', reuniao: 'Reunião', finalizar: 'Fim do dia', outro: 'Outro' };
+  el.innerHTML = data.map(r => `<div class="rupture-item">
+    <div>
+      <div style="font-weight:600;font-size:13px">${r.nome}</div>
+      <div style="font-size:10px;color:var(--text-muted)">${r.total_pausas} pausa${r.total_pausas !== 1 ? 's' : ''} · ${Math.round(r.tempo_total_min || 0)}min total · ${motivoLabels[r.motivo_mais_comum] || r.motivo_mais_comum || '—'}</div>
+    </div>
+    <div class="rupture-count" style="color:var(--warning)">${Math.round(r.tempo_total_min || 0)}<span style="font-size:9px;font-weight:600">min</span></div>
   </div>`).join('');
 }
 
@@ -808,8 +839,8 @@ async function loadScatter(range, cachedData) {
         }
       },
       scales: {
-        x: { title: { display: true, text: 'Atendimentos', font: { size: 10, weight: 600 } }, grid: { color: 'rgba(148,163,184,.06)' }, ticks: { font: { size: 10 } } },
-        y: { title: { display: true, text: 'Conversão %', font: { size: 10, weight: 600 } }, grid: { color: 'rgba(148,163,184,.06)' }, ticks: { font: { size: 10 } }, beginAtZero: true, max: 100 }
+        x: { title: { display: true, text: 'Atendimentos', font: { size: 10, weight: 600 } }, grid: { color: 'rgba(255,255,255,.04)' }, ticks: { font: { size: 10 } } },
+        y: { title: { display: true, text: 'Conversão %', font: { size: 10, weight: 600 } }, grid: { color: 'rgba(255,255,255,.04)' }, ticks: { font: { size: 10 } }, beginAtZero: true, max: 100 }
       }
     }
   });
@@ -844,7 +875,7 @@ async function loadTempoMeta(range, cachedData) {
         annotation: { annotations: { metaLine: { type: 'line', xMin: META_MIN, xMax: META_MIN, borderColor: 'rgba(248,113,113,.5)', borderWidth: 2, borderDash: [6, 3], label: { display: true, content: 'Meta ' + META_MIN + 'min', position: 'start', font: { size: 9, weight: 700 }, color: 'var(--danger)' } } } }
       },
       scales: {
-        x: { beginAtZero: true, grid: { color: 'rgba(148,163,184,.06)' }, ticks: { font: { size: 10 }, callback: v => v + 'min' } },
+        x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.04)' }, ticks: { font: { size: 10 }, callback: v => v + 'min' } },
         y: { grid: { display: false }, ticks: { font: { size: 11, weight: 600 } } }
       }
     }
@@ -863,9 +894,12 @@ async function loadVendedores() {
     return;
   }
   const setorLabels = { loja: '👔 Vestuário', chapelaria: '🤠 Chapelaria', selaria: '🐴 Selaria' };
-  el.innerHTML = data.map(v => `
-    <div class="vendedor-row">
-      <div class="vendedor-avatar">${initials(v.nome)}</div>
+  el.innerHTML = data.map(v => {
+    const avatarContent = v.foto_url
+      ? `<img src="${v.foto_url}" style="width:100%;height:100%;object-fit:cover">`
+      : initials(v.nome);
+    return `<div class="vendedor-row">
+      <div class="vendedor-avatar" style="overflow:hidden">${avatarContent}</div>
       <div class="vendedor-info">
         <div class="vendedor-name">${v.nome}</div>
         ${v.apelido ? '<div class="vendedor-nick">' + v.apelido + '</div>' : ''}
@@ -877,8 +911,8 @@ async function loadVendedores() {
         <button title="${v.ativo ? 'Desativar' : 'Ativar'}" onclick="toggleVendedor('${v.id}',${v.ativo})"><i class="fa-solid fa-${v.ativo ? 'toggle-on' : 'toggle-off'}"></i></button>
         <button title="Excluir" class="btn-danger" onclick="deleteVendedor('${v.id}','${v.nome.replace(/'/g,"\\'")}')"><i class="fa-solid fa-trash"></i></button>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 // Photo preview
@@ -1030,12 +1064,31 @@ window.exportReport = async function() {
   toast('Relatório exportado!', 'success');
 };
 
+// ─── Session timeout (30min inactivity) ───
+let _lastActivity = Date.now();
+['click','keydown','touchstart','scroll'].forEach(evt => {
+  document.addEventListener(evt, () => { _lastActivity = Date.now(); }, { passive: true });
+});
+setInterval(() => {
+  if (Date.now() - _lastActivity > 30 * 60 * 1000) {
+    toast('Sessão expirada por inatividade', 'warning');
+    setTimeout(() => logout(), 1500);
+  }
+}, 60000);
+
+// ─── Realtime dashboard updates ───
+sb.channel('dashboard-sync')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vendedores' }, () => {
+    loadFloor();
+  })
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos' }, () => {
+    loadAll();
+  })
+  .subscribe();
+
 // ─── Init ───
 document.getElementById('dashDate').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
 await Promise.all([loadAll(), loadVendedores()]);
-
-// Auto-refresh every 60s
-setInterval(loadAll, 60000);
 </script>
 </body>
 </html>

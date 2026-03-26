@@ -5,16 +5,16 @@
 export const MOTIVOS = {
   preco: { label: 'Preço', icon: 'fa-tag', color: '#f59e0b' },
   ruptura: { label: 'Ruptura', icon: 'fa-box-open', color: '#ef4444' },
-  indecisao: { label: 'Indecisão', icon: 'fa-face-meh', color: '#8b5cf6' },
-  so_olhando: { label: 'Só olhando', icon: 'fa-eye', color: '#6b7280' },
-  outro: { label: 'Outro', icon: 'fa-ellipsis', color: '#374151' }
+  indecisao: { label: 'Indecisão', icon: 'fa-face-meh', color: '#A1A1AA' },
+  so_olhando: { label: 'Só olhando', icon: 'fa-eye', color: '#71717A' },
+  outro: { label: 'Outro', icon: 'fa-ellipsis', color: '#52525B' }
 };
 
 export const STATUS_CONFIG = {
-  disponivel: { label: 'Disponível', short: 'LIVRE', color: '#22c55e', bg: 'rgba(34,197,94,.12)', icon: 'fa-circle-check' },
-  em_atendimento: { label: 'Em atendimento', short: 'ATENDENDO', color: '#3b82f6', bg: 'rgba(59,130,246,.12)', icon: 'fa-comments' },
-  pausa: { label: 'Em pausa', short: 'PAUSA', color: '#f59e0b', bg: 'rgba(245,158,11,.12)', icon: 'fa-mug-hot' },
-  fora: { label: 'Fora', short: 'FORA', color: '#6b7280', bg: 'rgba(107,114,128,.12)', icon: 'fa-door-open' }
+  disponivel: { label: 'Disponível', short: 'LIVRE', color: '#34D399', bg: 'rgba(52,211,153,.1)', icon: 'fa-circle-check' },
+  em_atendimento: { label: 'Em atendimento', short: 'ATENDENDO', color: '#60A5FA', bg: 'rgba(96,165,250,.1)', icon: 'fa-comments' },
+  pausa: { label: 'Em pausa', short: 'PAUSA', color: '#FBBF24', bg: 'rgba(251,191,36,.1)', icon: 'fa-mug-hot' },
+  fora: { label: 'Fora', short: 'FORA', color: '#71717A', bg: 'rgba(113,113,122,.1)', icon: 'fa-door-open' }
 };
 
 export function formatTime(seconds) {
@@ -132,7 +132,7 @@ export function toast(msg, type = 'info', duration = 4000) {
   };
   const s = styles[type] || styles.info;
   const el = document.createElement('div');
-  el.style.cssText = `display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid ${s.border};background:${s.bg};color:${s.text};font-size:13px;font-weight:600;font-family:var(--font-body);box-shadow:0 8px 32px rgba(0,0,0,.4);animation:toastIn .35s cubic-bezier(.16,1,.3,1) forwards;min-width:260px;max-width:400px`;
+  el.style.cssText = `display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:6px;border:1px solid ${s.border};background:${s.bg};color:${s.text};font-size:13px;font-weight:600;font-family:var(--font-body);box-shadow:0 4px 12px rgba(0,0,0,.3);animation:toastIn .25s ease forwards;min-width:260px;max-width:400px`;
   el.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i><span>${msg}</span>`;
   container.appendChild(el);
   setTimeout(() => {

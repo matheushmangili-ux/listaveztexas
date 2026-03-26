@@ -5,22 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Lista da Vez — Fila</title>
 <link rel="stylesheet" href="css/styles.css">
-<meta name="theme-color" content="#7c8db5">
+<meta name="theme-color" content="#09090B">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// Auto-limpeza de Service Workers antigos + error recovery
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
-  caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
 }
 // Error logging (sem auto-reload para evitar loops)
 window.addEventListener('error', function(e) {
   const el = document.getElementById('toastContainer');
   if (el) {
     const d = document.createElement('div');
-    d.style.cssText = 'background:#dc2626;color:#fff;padding:8px 16px;border-radius:8px;margin:4px;font-size:12px;max-width:300px';
+    d.style.cssText = 'background:#dc2626;color:#fff;padding:8px 16px;border-radius:4px;margin:4px;font-size:12px;max-width:300px';
     d.textContent = 'Erro: ' + (e.message || 'desconhecido');
     el.appendChild(d);
     setTimeout(() => d.remove(), 5000);
@@ -77,13 +75,13 @@ window.addEventListener('error', function(e) {
     transform: translateY(4px);
     padding-top: 6px;
     border-top: 2px solid var(--success);
-    border-radius: 8px 8px var(--radius-sm) var(--radius-sm);
+    border-radius: var(--radius-sm) var(--radius-sm) var(--radius-sm) var(--radius-sm);
   }
   .queue-item.drag-below {
     transform: translateY(-4px);
     padding-bottom: 6px;
     border-bottom: 2px solid var(--success);
-    border-radius: var(--radius-sm) var(--radius-sm) 8px 8px;
+    border-radius: var(--radius-sm) var(--radius-sm) var(--radius-sm) var(--radius-sm);
   }
 
   /* Setor tabs (ícones compactos) */
@@ -91,21 +89,20 @@ window.addEventListener('error', function(e) {
     flex: 1;
     padding: 6px 4px;
     border: 1px solid var(--border-subtle);
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     background: var(--bg-card);
     color: var(--text-muted);
     font-size: 16px;
     cursor: pointer;
     text-align: center;
-    transition: all .15s;
+    transition: all 150ms ease;
     line-height: 1;
   }
-  .setor-tab .tab-label { font-size: 8px; font-weight: 700; display: block; margin-top: 2px; text-transform: uppercase; letter-spacing: .05em; }
+  .setor-tab .tab-label { font-size: 8px; font-weight: 600; display: block; margin-top: 2px; text-transform: uppercase; letter-spacing: .05em; }
   .setor-tab.active {
     background: var(--accent);
-    color: #fff;
+    color: #09090B;
     border-color: var(--accent);
-    box-shadow: 0 2px 8px rgba(124,141,181,.3);
   }
   .setor-tab:not(.active):hover { background: var(--bg-hover); }
 
@@ -176,9 +173,9 @@ window.addEventListener('error', function(e) {
     min-width: 56px;
     max-width: 72px;
     cursor: grab;
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     background: transparent;
-    transition: background .15s, opacity .15s, transform .1s;
+    transition: background 150ms ease, opacity 150ms ease, transform 100ms ease;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     position: relative;
@@ -188,7 +185,7 @@ window.addEventListener('error', function(e) {
   .footer-card:active { transform: scale(.93); }
   .footer-card .fc-avatar {
     width: 38px; height: 38px;
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -236,19 +233,18 @@ window.addEventListener('error', function(e) {
     width: 100%;
   }
   .active-service .seller-avatar {
-    width: 88px;
-    height: 88px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent-dim), var(--accent));
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-lg);
+    background: var(--accent);
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 20px;
     font-family: var(--font-mono);
-    font-weight: 800;
-    font-size: 28px;
-    color: #fff;
-    box-shadow: 0 8px 32px rgba(124,141,181,.25);
+    font-weight: 700;
+    font-size: 24px;
+    color: #09090B;
   }
 
   /* Idle state */
@@ -258,11 +254,11 @@ window.addEventListener('error', function(e) {
     width: 100%;
   }
   .idle-icon {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-lg);
     background: var(--success-bg);
-    border: 2px solid rgba(74,222,128,.15);
+    border: 1px solid rgba(52,211,153,.1);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -296,9 +292,9 @@ window.addEventListener('error', function(e) {
     width: 100%;
   }
   .outcome-btn {
-    min-height: 64px;
-    border: 2px solid var(--border-subtle);
-    border-radius: var(--radius);
+    min-height: 56px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
     background: var(--bg-card);
     color: var(--text-primary);
     font-family: var(--font-body);
@@ -315,11 +311,11 @@ window.addEventListener('error', function(e) {
   }
   .outcome-btn:active { transform: scale(.96); }
   .outcome-btn i { font-size: 18px; }
-  .outcome-btn.sale { border-color: rgba(74,222,128,.25); color: var(--success); }
+  .outcome-btn.sale { border-color: rgba(52,211,153,.15); color: var(--success); }
   .outcome-btn.sale:hover { background: var(--success-bg); border-color: var(--success); }
-  .outcome-btn.no-sale { border-color: rgba(248,113,113,.2); color: var(--danger); }
+  .outcome-btn.no-sale { border-color: rgba(248,113,113,.12); color: var(--danger); }
   .outcome-btn.no-sale:hover { background: var(--danger-bg); border-color: var(--danger); }
-  .outcome-btn.exchange { border-color: rgba(251,191,36,.2); color: var(--warning); }
+  .outcome-btn.exchange { border-color: rgba(251,191,36,.12); color: var(--warning); }
   .outcome-btn.exchange:hover { background: var(--warning-bg); border-color: var(--warning); }
 
   /* Active atendimento card */
@@ -334,11 +330,11 @@ window.addEventListener('error', function(e) {
     animation: fadeIn .3s ease;
   }
   .atend-card .atend-avatar {
-    width: 44px; height: 44px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent-dim), var(--accent));
+    width: 40px; height: 40px; border-radius: var(--radius-sm);
+    background: var(--accent);
     display: flex; align-items: center; justify-content: center;
-    font-family: var(--font-mono); font-weight: 800; font-size: 14px;
-    color: #fff; flex-shrink: 0;
+    font-family: var(--font-mono); font-weight: 700; font-size: 13px;
+    color: #09090B; flex-shrink: 0;
   }
   .atend-card .atend-info { flex: 1; min-width: 0; }
   .atend-card .atend-name { font-weight: 700; font-size: 14px; }
@@ -389,7 +385,7 @@ window.addEventListener('error', function(e) {
   <!-- HEADER -->
   <header class="t-header">
     <div style="display:flex;align-items:center;gap:8px;min-width:0;flex-shrink:1">
-      <div style="width:28px;height:28px;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg-elevated);flex-shrink:0">
+      <div style="width:28px;height:28px;border-radius:var(--radius-sm);overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg-elevated);flex-shrink:0">
         <img src="assets/logo-tc.png" alt="TC" style="width:22px;height:22px;object-fit:contain;filter:brightness(0) invert(.85)">
       </div>
       <span class="header-title" style="font-family:var(--font-mono);font-weight:700;font-size:13px;white-space:nowrap">Lista da Vez</span>
@@ -477,7 +473,7 @@ window.addEventListener('error', function(e) {
       </div>
     </div>
     <div class="motivo-option" data-motivo="indecisao" onclick="selectMotivo(this)">
-      <i class="fa-solid fa-face-meh" style="color:#8b5cf6"></i>
+      <i class="fa-solid fa-face-meh" style="color:#A1A1AA"></i>
       <div>
         <div style="font-weight:700;font-size:14px">Indecisão</div>
         <div style="font-size:11px;color:var(--text-muted)">Cliente vai pensar / voltar depois</div>
@@ -540,7 +536,7 @@ window.addEventListener('error', function(e) {
       </div>
     </div>
     <div class="motivo-option" onclick="confirmSaida('reuniao')">
-      <i class="fa-solid fa-people-group" style="color:#a78bfa"></i>
+      <i class="fa-solid fa-people-group" style="color:#A1A1AA"></i>
       <div>
         <div style="font-weight:700;font-size:14px">Reunião</div>
         <div style="font-size:11px;color:var(--text-muted)">Chamado para reunião interna</div>
@@ -976,8 +972,8 @@ window.onTouchDragStart = function(e) {
       touchGhost.style.cssText = `
         position:fixed;z-index:9999;pointer-events:none;
         transform:scale(1.05);opacity:.9;
-        box-shadow:0 8px 32px rgba(0,0,0,.3);
-        border:2px solid var(--success);border-radius:12px;
+        box-shadow:0 4px 16px rgba(0,0,0,.3);
+        border:1px solid var(--success);border-radius:var(--radius-sm);
         background:var(--bg-card);
         width:${item.offsetWidth}px;
         left:${t.clientX - item.offsetWidth/2}px;
@@ -1090,6 +1086,8 @@ async function addToQueue(vendedorId) {
 // ─── Retornar da pausa ───
 window.returnFromPause = async function(vendedorId) {
   delete saidaMotivos[vendedorId];
+  // Registrar retorno no log
+  sb.rpc('registrar_retorno', { p_vendedor_id: vendedorId }).catch(() => {});
   await addToQueue(vendedorId);
   const v = vendedores.find(x => x.id === vendedorId);
   toast((v?.apelido || v?.nome || 'Vendedor') + ' voltou à fila', 'success', 1500);
@@ -1097,11 +1095,11 @@ window.returnFromPause = async function(vendedorId) {
 
 // ─── Remover da fila (com motivo) ───
 const SAIDA_COLORS = {
-  almoco: { color: '#f59e0b', label: 'Almoço' },
-  banheiro: { color: '#60a5fa', label: 'Banheiro' },
-  reuniao: { color: '#a78bfa', label: 'Reunião' },
-  finalizar: { color: '#f87171', label: 'Finalizou' },
-  outro: { color: '#64748b', label: 'Fora' }
+  almoco: { color: '#FBBF24', label: 'Almoço' },
+  banheiro: { color: '#60A5FA', label: 'Banheiro' },
+  reuniao: { color: '#A1A1AA', label: 'Reunião' },
+  finalizar: { color: '#F87171', label: 'Finalizou' },
+  outro: { color: '#71717A', label: 'Fora' }
 };
 const saidaMotivos = {}; // vendedorId → motivo key
 let pendingSaidaId = null;
@@ -1128,6 +1126,10 @@ window.confirmSaida = async function(motivo) {
   markLocal();
   const { error } = await sb.from('vendedores').update({ status: newStatus, posicao_fila: null }).eq('id', pendingSaidaId);
   if (error) { toast('Erro ao registrar saída', 'error'); closeSaida(); return; }
+  // Registrar pausa no log
+  if (currentTurno) {
+    sb.rpc('registrar_pausa', { p_vendedor_id: pendingSaidaId, p_turno_id: currentTurno.id, p_motivo: motivo }).catch(() => {});
+  }
   toast(SAIDA_COLORS[motivo]?.label || 'Saiu da fila', 'info', 2000);
   closeSaida();
   await loadVendedores();
@@ -1152,11 +1154,11 @@ window.finalizarTodos = async function() {
 function renderFooter() {
   const footer = document.getElementById('statusFooter');
   const SAIDA_LABELS = {
-    almoco: { label: 'Em almoço', color: '#f59e0b' },
-    banheiro: { label: 'Banheiro', color: '#60a5fa' },
-    reuniao: { label: 'Em reunião', color: '#a78bfa' },
-    finalizar: { label: 'Encerrou', color: '#f87171' },
-    outro: { label: 'Fora', color: '#64748b' }
+    almoco: { label: 'Em almoço', color: '#FBBF24' },
+    banheiro: { label: 'Banheiro', color: '#60A5FA' },
+    reuniao: { label: 'Em reunião', color: '#A1A1AA' },
+    finalizar: { label: 'Encerrou', color: '#F87171' },
+    outro: { label: 'Fora', color: '#71717A' }
   };
 
   const allV = vendedores || [];
@@ -1433,7 +1435,7 @@ window.handleOutcome = function(resultado, atendId) {
 function openTrocaDiferenca(atendId) {
   const overlay = document.createElement('div');
   overlay.id = 'trocaOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);z-index:1000;display:flex;align-items:center;justify-content:center';
   overlay.innerHTML = `
     <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:360px;text-align:center">
       <i class="fa-solid fa-rotate" style="font-size:28px;color:var(--warning);margin-bottom:12px"></i>
@@ -1495,7 +1497,7 @@ window.submitTroca = async function(atendId, comDiferenca) {
 function openValorVenda(atendId) {
   const overlay = document.createElement('div');
   overlay.id = 'valorOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);z-index:1000;display:flex;align-items:center;justify-content:center';
   overlay.innerHTML = `
     <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:360px;text-align:center">
       <i class="fa-solid fa-dollar-sign" style="font-size:28px;color:var(--success);margin-bottom:12px"></i>
@@ -1536,7 +1538,7 @@ function askContinuar(atendId, onNo, onYes) {
   document.getElementById('continuarOverlay')?.remove();
   const overlay = document.createElement('div');
   overlay.id = 'continuarOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:1001;display:flex;align-items:center;justify-content:center';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);z-index:1001;display:flex;align-items:center;justify-content:center';
   overlay.innerHTML = `
     <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:340px;text-align:center">
       <i class="fa-solid fa-rotate-right" style="font-size:28px;color:var(--info);margin-bottom:12px"></i>
@@ -1671,17 +1673,17 @@ function openFooterMenu(vendedorId) {
 
   const menu = document.createElement('div');
   menu.id = 'footerMenu';
-  menu.style.cssText = 'position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);border:1px solid var(--border-medium);border-radius:12px;padding:12px;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,.5);min-width:220px;text-align:center';
+  menu.style.cssText = 'position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);border:1px solid var(--border-medium);border-radius:var(--radius);padding:12px;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.4);min-width:220px;text-align:center';
 
   menu.innerHTML = `
     <div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin-bottom:10px">${nome}</div>
-    <button onclick="footerMenuAction('fila','${vendedorId}')" style="display:block;width:100%;padding:10px;margin-bottom:6px;border:none;border-radius:8px;background:var(--success);color:#fff;font-weight:700;font-size:13px;cursor:pointer">
+    <button onclick="footerMenuAction('fila','${vendedorId}')" style="display:block;width:100%;padding:10px;margin-bottom:6px;border:none;border-radius:var(--radius-sm);background:var(--success);color:#09090B;font-weight:600;font-size:13px;cursor:pointer">
       <i class="fa-solid fa-list-ol" style="margin-right:6px"></i>Entrar na Fila
     </button>
-    <button onclick="footerMenuAction('saida','${vendedorId}')" style="display:block;width:100%;padding:10px;border:none;border-radius:8px;background:var(--danger);color:#fff;font-weight:700;font-size:13px;cursor:pointer">
+    <button onclick="footerMenuAction('saida','${vendedorId}')" style="display:block;width:100%;padding:10px;border:none;border-radius:var(--radius-sm);background:var(--danger);color:#09090B;font-weight:600;font-size:13px;cursor:pointer">
       <i class="fa-solid fa-door-open" style="margin-right:6px"></i>Registrar Saída
     </button>
-    <button onclick="closeFooterMenu()" style="display:block;width:100%;padding:8px;margin-top:6px;border:none;border-radius:8px;background:var(--bg-hover);color:var(--text-muted);font-weight:600;font-size:11px;cursor:pointer">Cancelar</button>
+    <button onclick="closeFooterMenu()" style="display:block;width:100%;padding:8px;margin-top:6px;border:none;border-radius:var(--radius-sm);background:var(--bg-hover);color:var(--text-muted);font-weight:500;font-size:11px;cursor:pointer">Cancelar</button>
   `;
 
   document.body.appendChild(menu);
@@ -1717,6 +1719,18 @@ function closeFooterMenu() {
 // ─── Logout ───
 window.handleLogout = function() { logout(); };
 window._toggleTheme = function() { toggleTheme(); };
+
+// ─── Session timeout (30min inactivity) ───
+let _lastActivity = Date.now();
+['click','keydown','touchstart','scroll'].forEach(evt => {
+  document.addEventListener(evt, () => { _lastActivity = Date.now(); }, { passive: true });
+});
+setInterval(() => {
+  if (Date.now() - _lastActivity > 30 * 60 * 1000) {
+    toast('Sessão expirada por inatividade', 'warning');
+    setTimeout(() => logout(), 1500);
+  }
+}, 60000);
 
 // ─── Realtime (debounced, ignora ação local) ───
 let _rtVendTimer = null;
