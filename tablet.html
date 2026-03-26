@@ -858,7 +858,7 @@ window.addEventListener('error', function(e) {
       </div>
     </div>
     <div class="motivo-option" onclick="confirmSaida('operacional')">
-      <i class="fa-solid fa-clipboard-list" style="color:#8b5cf6"></i>
+      <i class="fa-solid fa-wrench" style="color:#8b5cf6"></i>
       <div>
         <div style="font-weight:700;font-size:14px">Operacional</div>
         <div style="font-size:11px;color:var(--text-muted)">Demanda solicitada pela gerência</div>
@@ -953,20 +953,56 @@ function playSound(type) {
     osc2.start(audioCtx.currentTime + 0.15);
     osc2.stop(audioCtx.currentTime + 0.5);
   } else if (type === 'venda') {
-    // Triumphant three-note chime
-    [523, 659, 784].forEach((freq, i) => {
+    // Modern cash register: layered chord + shimmer + sub bass hit
+    const t0 = audioCtx.currentTime;
+
+    // Sub bass hit (punch)
+    const sub = audioCtx.createOscillator();
+    const subG = audioCtx.createGain();
+    sub.connect(subG); subG.connect(audioCtx.destination);
+    sub.type = 'sine'; sub.frequency.value = 80;
+    sub.frequency.exponentialRampToValueAtTime(40, t0 + 0.15);
+    subG.gain.setValueAtTime(0.2, t0);
+    subG.gain.exponentialRampToValueAtTime(0.001, t0 + 0.2);
+    sub.start(t0); sub.stop(t0 + 0.2);
+
+    // Rising chord (C5-E5-G5-C6) with stagger
+    const notes = [523, 659, 784, 1047];
+    notes.forEach((freq, i) => {
       const o = audioCtx.createOscillator();
       const g = audioCtx.createGain();
-      o.connect(g);
-      g.connect(audioCtx.destination);
+      o.connect(g); g.connect(audioCtx.destination);
+      o.type = 'triangle';
       o.frequency.value = freq;
-      o.type = 'sine';
-      const t = audioCtx.currentTime + i * 0.12;
-      g.gain.setValueAtTime(0.18, t);
-      g.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
-      o.start(t);
-      o.stop(t + 0.4);
+      const start = t0 + i * 0.06;
+      g.gain.setValueAtTime(0, start);
+      g.gain.linearRampToValueAtTime(0.12, start + 0.04);
+      g.gain.exponentialRampToValueAtTime(0.001, start + 0.6);
+      o.start(start); o.stop(start + 0.6);
     });
+
+    // High shimmer (sparkle effect)
+    const shimmer = audioCtx.createOscillator();
+    const shimG = audioCtx.createGain();
+    shimmer.connect(shimG); shimG.connect(audioCtx.destination);
+    shimmer.type = 'sine';
+    shimmer.frequency.setValueAtTime(2093, t0 + 0.25);
+    shimmer.frequency.exponentialRampToValueAtTime(3136, t0 + 0.55);
+    shimG.gain.setValueAtTime(0, t0 + 0.25);
+    shimG.gain.linearRampToValueAtTime(0.06, t0 + 0.3);
+    shimG.gain.exponentialRampToValueAtTime(0.001, t0 + 0.7);
+    shimmer.start(t0 + 0.25); shimmer.stop(t0 + 0.7);
+
+    // Final resolve note (octave C6 sustain)
+    const resolve = audioCtx.createOscillator();
+    const resG = audioCtx.createGain();
+    resolve.connect(resG); resG.connect(audioCtx.destination);
+    resolve.type = 'sine';
+    resolve.frequency.value = 1047;
+    resG.gain.setValueAtTime(0, t0 + 0.35);
+    resG.gain.linearRampToValueAtTime(0.1, t0 + 0.4);
+    resG.gain.exponentialRampToValueAtTime(0.001, t0 + 1.2);
+    resolve.start(t0 + 0.35); resolve.stop(t0 + 1.2);
   }
 }
 
@@ -1169,7 +1205,7 @@ function renderQueue() {
         <div class="queue-position" style="background:${STATUS_CONFIG.pausa.bg};color:${STATUS_CONFIG.pausa.color}"><i class="fa-solid ${STATUS_CONFIG.pausa.icon}" style="font-size:11px"></i></div>
         <div style="flex:1;min-width:0">
           <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.apelido || v.nome}</div>
-          <div style="font-size:10px;color:${STATUS_CONFIG.pausa.color};font-weight:600;text-transform:uppercase;letter-spacing:.05em">${saidaMotivos[v.id] ? (SAIDA_COLORS[saidaMotivos[v.id]]?.label || 'Pausa') : 'Pausa'}</div>
+          <div style="font-size:10px;color:${saidaMotivos[v.id] ? (SAIDA_COLORS[saidaMotivos[v.id]]?.color || STATUS_CONFIG.pausa.color) : STATUS_CONFIG.pausa.color};font-weight:600;text-transform:uppercase;letter-spacing:.05em">${saidaMotivos[v.id] ? (SAIDA_COLORS[saidaMotivos[v.id]]?.label || 'Pausa') : 'Pausa'}</div>
         </div>
         <i class="fa-solid fa-arrow-rotate-left" style="color:var(--success);font-size:12px;opacity:.6" title="Voltar à fila"></i>
       </div>`;
