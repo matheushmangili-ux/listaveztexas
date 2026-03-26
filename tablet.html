@@ -293,6 +293,50 @@ window.addEventListener('error', function(e) {
       0 0 12px rgba(52,211,153,.4);
   }
 
+  /* Check-in items */
+  .checkin-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+    cursor: pointer;
+    transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .checkin-item:hover { border-color: var(--border-medium); }
+  .checkin-item.checked {
+    border-color: var(--success);
+    background: rgba(52,211,153,.06);
+  }
+  .checkin-switch {
+    width: 40px; height: 22px;
+    border-radius: 11px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border-medium);
+    position: relative;
+    transition: all .2s;
+    flex-shrink: 0;
+  }
+  .checkin-switch-thumb {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 16px; height: 16px;
+    border-radius: 8px;
+    background: var(--text-muted);
+    transition: all .2s cubic-bezier(.4,0,.2,1);
+  }
+  .checkin-item.checked .checkin-switch {
+    background: rgba(52,211,153,.2);
+    border-color: var(--success);
+  }
+  .checkin-item.checked .checkin-switch-thumb {
+    transform: translateX(18px);
+    background: var(--success);
+  }
+
   .t-footer::-webkit-scrollbar { height: 0; }
   .t-footer.drop-highlight { border-top: 2px solid var(--danger); background: var(--danger-bg); }
 
@@ -767,6 +811,21 @@ window.addEventListener('error', function(e) {
     <i class="fa-solid fa-check"></i>
     Confirmar
   </button>
+</div>
+
+<!-- Check-in Overlay (abertura de turno) -->
+<div class="bottom-sheet-overlay" id="checkinOverlay" onclick="closeCheckin()"></div>
+<div class="bottom-sheet" id="checkinSheet" style="max-height:90vh">
+  <div class="bottom-sheet-handle"></div>
+  <h3 style="font-family:var(--font-mono);font-size:16px;font-weight:700;margin-bottom:4px">Check-in do Turno</h3>
+  <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">Selecione os vendedores presentes</p>
+  <div id="checkinList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px"></div>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-ghost" style="flex:1" onclick="closeCheckin()">Cancelar</button>
+    <button class="btn btn-success" style="flex:1" id="btnCheckin" onclick="confirmCheckin()">
+      <i class="fa-solid fa-check" style="margin-right:4px"></i>Iniciar Turno
+    </button>
+  </div>
 </div>
 
 <!-- Bottom Sheet: Motivo de Saída da Fila -->
@@ -1660,16 +1719,76 @@ window.toggleTurno = async function() {
     // btnProximo removido — controle via switch
     toast('Turno encerrado', 'info');
   } else {
-    // Abrir turno: vendedores ficam "fora" até serem arrastados para a fila
-    const { data, error } = await sb.from('turnos').insert({ data: new Date().toISOString().split('T')[0] }).select().single();
-    if (error) { toast('Erro ao abrir turno', 'error'); return; }
-    currentTurno = data;
-    document.getElementById('turnoLabel').textContent = 'Turno aberto';
-    updateTurnoSwitch(true);
-    // btnProximo removido — controle via switch
-    toast('Turno aberto! Arraste vendedores para a fila.', 'success');
+    // Abrir turno: mostrar check-in
+    openCheckin();
   }
-  loadVendedores();
+};
+
+// ─── Check-in de abertura ───
+function openCheckin() {
+  const allV = vendedores.filter(v => (v.setor || 'loja') === currentSetor);
+  const list = document.getElementById('checkinList');
+  list.innerHTML = allV.map(v => {
+    const ini = (v.apelido || v.nome).split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    const nome = v.apelido || v.nome;
+    return `<label class="checkin-item" data-id="${v.id}">
+      <div style="display:flex;align-items:center;gap:12px;flex:1">
+        <div style="width:36px;height:36px;border-radius:var(--radius-sm);background:var(--bg-hover);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:12px;color:var(--text-secondary);flex-shrink:0">${ini}</div>
+        <span style="font-weight:600;font-size:14px">${nome}</span>
+      </div>
+      <input type="checkbox" class="checkin-toggle" value="${v.id}" style="display:none">
+      <div class="checkin-switch">
+        <div class="checkin-switch-thumb"></div>
+      </div>
+    </label>`;
+  }).join('');
+
+  // Toggle visual
+  list.querySelectorAll('.checkin-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const cb = item.querySelector('.checkin-toggle');
+      cb.checked = !cb.checked;
+      item.classList.toggle('checked', cb.checked);
+    });
+  });
+
+  document.getElementById('checkinOverlay').classList.add('open');
+  document.getElementById('checkinSheet').classList.add('open');
+}
+
+window.closeCheckin = function() {
+  document.getElementById('checkinOverlay').classList.remove('open');
+  document.getElementById('checkinSheet').classList.remove('open');
+};
+
+window.confirmCheckin = async function() {
+  const checked = [...document.querySelectorAll('.checkin-toggle:checked')].map(cb => cb.value);
+  if (checked.length === 0) { toast('Selecione pelo menos um vendedor', 'warning'); return; }
+
+  const btn = document.getElementById('btnCheckin');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Abrindo...';
+
+  // Criar turno
+  const { data, error } = await sb.from('turnos').insert({ data: new Date().toISOString().split('T')[0] }).select().single();
+  if (error) { toast('Erro ao abrir turno', 'error'); btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-check" style="margin-right:4px"></i>Iniciar Turno'; return; }
+  currentTurno = data;
+
+  // Colocar vendedores selecionados na fila
+  markLocal();
+  const updates = checked.map((id, i) =>
+    sb.from('vendedores').update({ status: 'disponivel', posicao_fila: i + 1 }).eq('id', id)
+  );
+  await Promise.all(updates);
+
+  document.getElementById('turnoLabel').textContent = 'Turno aberto';
+  updateTurnoSwitch(true);
+  closeCheckin();
+  await loadVendedores();
+  toast(`Turno aberto com ${checked.length} vendedor${checked.length > 1 ? 'es' : ''}!`, 'success');
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fa-solid fa-check" style="margin-right:4px"></i>Iniciar Turno';
 };
 
 // ─── Próximo cliente ───
