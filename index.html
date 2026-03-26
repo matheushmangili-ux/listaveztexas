@@ -28,6 +28,7 @@ if ('serviceWorker' in navigator) {
     position: relative;
     overflow: hidden;
   }
+  /* Logo watermark */
   .login-container::before {
     content: '';
     position: absolute;
@@ -40,6 +41,40 @@ if ('serviceWorker' in navigator) {
     opacity: .03;
     pointer-events: none;
     z-index: 0;
+  }
+  /* Red glow pulse */
+  .login-container::after {
+    content: '';
+    position: absolute;
+    top: -200px; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(225,29,72,.12) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    animation: heroGlow 4s ease-in-out infinite alternate;
+  }
+  @keyframes heroGlow {
+    0% { opacity: .4; transform: translateX(-50%) scale(1); }
+    100% { opacity: .8; transform: translateX(-50%) scale(1.15); }
+  }
+  /* Floating particles */
+  .particles-bg {
+    position: fixed; inset: 0; z-index: 0;
+    pointer-events: none; overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: var(--accent, #E11D48);
+    border-radius: 50%;
+    opacity: 0;
+    animation: particleUp linear infinite;
+  }
+  @keyframes particleUp {
+    0% { opacity: 0; transform: translateY(100vh) scale(0); }
+    10% { opacity: .35; }
+    90% { opacity: .35; }
+    100% { opacity: 0; transform: translateY(-10vh) scale(1); }
   }
   [data-theme="light"] .login-container::before {
     opacity: .05;
@@ -114,6 +149,7 @@ if ('serviceWorker' in navigator) {
 </head>
 <body>
 
+<div class="particles-bg" id="particles"></div>
 <div class="login-container">
   <div class="login-box">
     <!-- Brand -->
@@ -279,6 +315,23 @@ window.handleEmailLogin = async function() {
 document.getElementById('passInput')?.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') handleEmailLogin();
 });
+
+// Floating particles
+(function initParticles() {
+  const c = document.getElementById('particles');
+  if (!c) return;
+  const n = window.innerWidth < 768 ? 12 : 22;
+  for (let i = 0; i < n; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (8 + Math.random() * 14) + 's';
+    p.style.animationDelay = Math.random() * 8 + 's';
+    p.style.width = p.style.height = (1 + Math.random() * 2) + 'px';
+    if (Math.random() > 0.75) p.style.background = 'var(--success, #34D399)';
+    c.appendChild(p);
+  }
+})();
 </script>
 </body>
 </html>
