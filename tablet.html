@@ -335,9 +335,23 @@ window.addEventListener('error', function(e) {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     max-width: 64px;
     text-align: center;
+    line-height: 1.1;
+  }
+  .footer-card .fc-status {
+    font-size: 7px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 64px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    line-height: 1;
+    opacity: .8;
   }
   .footer-card.in-queue { opacity: .25; pointer-events: none; }
   .footer-card.in-queue .fc-avatar { box-shadow: 0 0 0 2px var(--success); }
@@ -534,16 +548,21 @@ window.addEventListener('error', function(e) {
     gap: 14px;
     padding: 14px 16px;
     border-radius: var(--radius);
-    border: 1px solid var(--info);
-    background: var(--info-bg);
-    animation: popIn .3s cubic-bezier(.2,.8,.3,1) both;
+    border: 1px solid var(--border-medium);
+    background: var(--bg-card);
+    animation: slideUp .25s ease both;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .atend-card:hover {
+    border-color: var(--border-strong);
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
   }
   .atend-card .atend-avatar {
     width: 40px; height: 40px; border-radius: var(--radius-sm);
     background: var(--accent);
     display: flex; align-items: center; justify-content: center;
     font-family: var(--font-mono); font-weight: 700; font-size: 13px;
-    color: #09090B; flex-shrink: 0;
+    color: #fff; flex-shrink: 0;
   }
   .atend-card .atend-info { flex: 1; min-width: 0; }
   .atend-card .atend-name { font-weight: 700; font-size: 14px; }
@@ -1083,12 +1102,6 @@ function renderQueue() {
   inQueue.forEach((v, i) => { html += renderQueueItem(v, i + 1, false, true); });
   if (inQueue.length === 0) html += '<div style="text-align:center;padding:20px 12px;color:var(--text-muted);font-size:11px;opacity:.5"><i class="fa-solid fa-arrow-up-from-bracket" style="display:block;font-size:18px;margin-bottom:6px;opacity:.3"></i>Arraste vendedores do footer para cá</div>';
 
-  // Atendendo abaixo da fila
-  if (atendendo.length > 0) {
-    html += '<div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px;border-top:1px solid var(--border-subtle);margin-top:4px"><i class="fa-solid fa-headset" style="margin-right:4px"></i>Em atendimento</div>';
-    atendendo.forEach(v => { html += renderQueueItem(v, null, true); });
-  }
-
   // Pausa (clicável para voltar à fila)
   if (pausa.length > 0) {
     html += '<div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px;border-top:1px solid var(--border-subtle);margin-top:4px"><i class="fa-solid fa-pause" style="margin-right:4px"></i>Em pausa</div>';
@@ -1543,9 +1556,12 @@ function renderFooter() {
     else if (inQueue) avatarBg = '#22c55e'; // verde
     else if (v.status === 'pausa') avatarBg = statusColor;
 
+    const firstName = (v.apelido || v.nome.split(' ')[0]);
+
     return `<div class="footer-card${inQueueClass}" data-id="${v.id}" ${dragAttr} onclick="handleFooterTap('${v.id}')">
       <div class="fc-avatar" style="background:${avatarBg}">${avatarContent}</div>
-      <span class="fc-name">${v.apelido || v.nome.split(' ')[0]}</span>
+      <span class="fc-name">${firstName}</span>
+      <span class="fc-status" style="color:${statusColor}">${statusLabel}</span>
     </div>`;
   }).join('');
 
