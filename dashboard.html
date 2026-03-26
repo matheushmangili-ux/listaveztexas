@@ -335,11 +335,13 @@ window.addEventListener('error', function(e) {
       <div class="kpi-label">Tempo Médio</div>
       <div class="kpi-value" id="kpiTime" style="color:#fff">—</div>
       <div class="kpi-compare" id="kpiTimeCmp"></div>
+      <canvas id="sparkTime" style="width:100%;height:24px;margin-top:4px"></canvas>
     </div>
     <div class="kpi-card" style="--accent:var(--accent)">
       <div class="kpi-label">Ticket Médio</div>
       <div class="kpi-value" id="kpiTicket" style="color:#fff">—</div>
       <div class="kpi-compare" id="kpiTicketCmp"></div>
+      <canvas id="sparkTicket" style="width:100%;height:24px;margin-top:4px"></canvas>
     </div>
   </div>
 
@@ -565,7 +567,7 @@ function renderCompare(elId, current, previous, invertGood = false) {
   const isUp = diff > 0;
   const isGood = invertGood ? !isUp : isUp;
   const cls = Math.abs(diff) < 1 ? 'neutral' : isGood ? 'up' : 'down';
-  const sign = isUp ? '+' : '-';
+  const sign = isUp ? '+' : '−';
   const arrow = isUp ? '↑' : '↓';
   el.innerHTML = `<span class="${cls}">${arrow} ${sign}${Math.abs(diff).toFixed(0)}% vs anterior</span>`;
 }
@@ -578,8 +580,9 @@ async function loadAll() {
   const { data: rankingData, error: rankErr } = await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end });
   if (rankErr) { toast('Erro ao carregar ranking: ' + rankErr.message, 'error'); }
   const cachedRanking = rankingData || [];
+  // KPIs primeiro (comparativos precisam estar no DOM para sparklines)
+  await loadKPIs(range, prevRange);
   await Promise.all([
-    loadKPIs(range, prevRange),
     loadMotivos(range),
     loadHourly(range),
     loadRanking(range, cachedRanking),
@@ -697,11 +700,11 @@ async function loadHourly(range) {
   const atend = (data || []).map(d => d.atendimentos);
   const vendas = (data || []).map(d => d.vendas);
 
-  // Sparklines nos KPI cards
+  // Sparklines nos KPI cards (cor dinâmica via comparativo)
   const losses = (data || []).map(d => (d.atendimentos || 0) - (d.vendas || 0));
-  drawSparkline('sparkAtend', atend, 'rgb(225,29,72)');
-  drawSparkline('sparkConv', vendas.map((v, i) => atend[i] > 0 ? Math.round(v / atend[i] * 100) : 0), 'rgb(52,211,153)');
-  drawSparkline('sparkLoss', losses, 'rgb(248,113,113)');
+  drawSparkline('sparkAtend', atend, getCompareColor('kpiTotalCmp'));
+  drawSparkline('sparkConv', vendas.map((v, i) => atend[i] > 0 ? Math.round(v / atend[i] * 100) : 0), getCompareColor('kpiConvCmp'));
+  drawSparkline('sparkLoss', losses, getCompareColor('kpiLossCmp'));
 
   charts.hourly = new Chart(ctx, {
     type: 'bar',
@@ -751,6 +754,16 @@ async function loadHourly(range) {
 }
 
 // ─── Sparklines (mini gráficos nos KPI cards) ───
+function getCompareColor(elId) {
+  const el = document.getElementById(elId);
+  if (!el) return 'rgb(225,29,72)';
+  const span = el.querySelector('span');
+  if (!span) return 'rgb(161,161,170)'; // neutral gray
+  if (span.classList.contains('up')) return 'rgb(52,211,153)';
+  if (span.classList.contains('down')) return 'rgb(248,113,113)';
+  return 'rgb(161,161,170)';
+}
+
 function drawSparkline(canvasId, dataPoints, color) {
   const canvas = document.getElementById(canvasId);
   if (!canvas || !dataPoints || dataPoints.length < 2) { if (canvas) canvas.style.display = 'none'; return; }
@@ -805,6 +818,12 @@ async function loadRanking(range, cachedData) {
   const { data: vendedoresData } = await sb.from('vendedores').select('id, foto_url, apelido').eq('ativo', true);
   const fotoMap = {};
   (vendedoresData || []).forEach(v => { fotoMap[v.id] = v.foto_url; });
+
+  // Sparklines de Tempo e Ticket (por vendedor)
+  const temposSpark = data.map(r => r.tempo_medio_min || 0).filter(v => v > 0);
+  const ticketsSpark = data.map(r => r.ticket_medio || 0).filter(v => v > 0);
+  drawSparkline('sparkTime', temposSpark, getCompareColor('kpiTimeCmp'));
+  drawSparkline('sparkTicket', ticketsSpark, getCompareColor('kpiTicketCmp'));
 
   body.innerHTML = data.map((r, i) => {
     const convColor = (r.taxa_conversao || 0) >= 50 ? 'var(--success)' : (r.taxa_conversao || 0) >= 30 ? 'var(--warning)' : 'var(--danger)';
