@@ -545,6 +545,13 @@ window.addEventListener('error', function(e) {
         <div style="font-size:11px;color:var(--text-muted)">Chamado para reunião interna</div>
       </div>
     </div>
+    <div class="motivo-option" onclick="confirmSaida('operacional')">
+      <i class="fa-solid fa-clipboard-list" style="color:#8b5cf6"></i>
+      <div>
+        <div style="font-weight:700;font-size:14px">Operacional</div>
+        <div style="font-size:11px;color:var(--text-muted)">Demanda solicitada pela gerência</div>
+      </div>
+    </div>
     <div class="motivo-option" onclick="confirmSaida('finalizar')">
       <i class="fa-solid fa-door-open" style="color:#f87171"></i>
       <div>
@@ -808,6 +815,12 @@ function renderQueueItem(v, pos, isActive, draggable) {
     }
   }
 
+  // Botão de ação rápida: na fila → pode ir ao atendimento
+  let actionHtml = '';
+  if (draggable && currentTurno) {
+    actionHtml = `<button onclick="event.stopPropagation();sendToAtendimento('${v.id}')" style="padding:4px 8px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-hover);color:var(--info);font-size:9px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font-body);transition:all .15s" title="Enviar ao atendimento"><i class="fa-solid fa-arrow-right" style="font-size:8px"></i></button>`;
+  }
+
   return `<div class="queue-item ${v.status}${isActive ? ' active' : ''}" data-id="${v.id}" ${dragAttr} style="${dragStyle}">
     ${draggable ? '<i class="fa-solid fa-grip-vertical" style="color:var(--text-muted);font-size:10px;opacity:.4;margin-right:2px"></i>' : ''}
     ${posHtml}
@@ -816,6 +829,7 @@ function renderQueueItem(v, pos, isActive, draggable) {
       <div style="font-size:10px;color:${cfg.color};font-weight:600;text-transform:uppercase;letter-spacing:.05em">${cfg.short}</div>
     </div>
     ${timerHtml}
+    ${actionHtml}
   </div>`;
 }
 
@@ -940,6 +954,26 @@ async function addToQueueAt(vendedorId, beforeId) {
     }
   });
 })();
+
+// ─── Enviar vendedor da fila direto ao atendimento (click) ───
+window.sendToAtendimento = async function(vendedorId) {
+  if (!currentTurno) { toast('Abra o turno primeiro', 'warning'); return; }
+  const v = vendedores.find(x => x.id === vendedorId);
+  if (!v || v.status !== 'disponivel' || v.posicao_fila == null) return;
+  try {
+    markLocal();
+    const { data, error } = await sb.rpc('proximo_cliente', { p_turno_id: currentTurno.id, p_setor: v.setor || 'loja' });
+    if (error) throw error;
+    const { data: atend } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('id', data).single();
+    activeAtendimentos.push(atend);
+    renderActiveAtendimentos();
+    playSound('atendimento');
+    await loadVendedores();
+    toast((v.apelido || v.nome) + ' iniciou atendimento', 'info', 1500);
+  } catch (err) {
+    toast('Erro: ' + (err.message || 'falha ao iniciar'), 'error');
+  }
+};
 
 // Touch drag fluido (ghost card segue o dedo)
 let touchDragEl = null;
@@ -1101,6 +1135,7 @@ const SAIDA_COLORS = {
   almoco: { color: '#FBBF24', label: 'Almoço' },
   banheiro: { color: '#60A5FA', label: 'Banheiro' },
   reuniao: { color: '#A1A1AA', label: 'Reunião' },
+  operacional: { color: '#8b5cf6', label: 'Operacional' },
   finalizar: { color: '#F87171', label: 'Finalizou' },
   outro: { color: '#71717A', label: 'Fora' }
 };
@@ -1124,7 +1159,7 @@ window.closeSaida = function() {
 
 window.confirmSaida = async function(motivo) {
   if (!pendingSaidaId) return;
-  const newStatus = motivo === 'banheiro' || motivo === 'reuniao' ? 'pausa' : 'fora';
+  const newStatus = motivo === 'banheiro' || motivo === 'reuniao' || motivo === 'operacional' ? 'pausa' : 'fora';
   saidaMotivos[pendingSaidaId] = motivo;
   markLocal();
   const { error } = await sb.from('vendedores').update({ status: newStatus, posicao_fila: null }).eq('id', pendingSaidaId);
@@ -1160,6 +1195,7 @@ function renderFooter() {
     almoco: { label: 'Em almoço', color: '#FBBF24' },
     banheiro: { label: 'Banheiro', color: '#60A5FA' },
     reuniao: { label: 'Em reunião', color: '#A1A1AA' },
+    operacional: { label: 'Operacional', color: '#8b5cf6' },
     finalizar: { label: 'Encerrou', color: '#F87171' },
     outro: { label: 'Fora', color: '#71717A' }
   };
@@ -1217,7 +1253,9 @@ function renderFooter() {
     <i class="fa-solid fa-power-off" style="font-size:14px"></i>
   </div>`;
 
-  footer.innerHTML = cards + endAllBtn;
+  const footerTitle = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:56px;padding:4px 6px;flex-shrink:0"><span style="font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);white-space:nowrap">Vendedores</span><span style="font-size:10px;font-weight:700;color:var(--text-secondary);font-family:var(--font-mono)">${setorVendedores.length}</span></div>`;
+
+  footer.innerHTML = footerTitle + cards + endAllBtn;
 
   // Footer como drop zone — arrastar DA fila PARA footer = popup motivo
   footer.ondragover = e => { e.preventDefault(); footer.classList.add('drop-highlight'); };
@@ -1660,66 +1698,58 @@ window.handleFooterTap = async function(vendedorId) {
   const v = vendedores.find(x => x.id === vendedorId);
   if (!v) return;
   if (v.status === 'em_atendimento') return;
-  // Na fila → abrir popup de saída (arrastar para fora)
+  // Na fila → abrir popup de saída
   if (v.status === 'disponivel' && v.posicao_fila != null) {
     openSaida(vendedorId);
     return;
   }
-  // Fora/pausa → mostrar mini-menu com opções
+  // Fora/pausa → confirmar entrada na fila
   if (!currentTurno) { toast('Abra o turno primeiro', 'warning'); return; }
-  openFooterMenu(vendedorId);
+  openConfirmFila(vendedorId);
 };
 
-// Mini-menu do footer: entrar na fila ou registrar saída
-let _footerMenuOutsideHandler = null;
+// Popup de confirmação para entrar na fila
+let _confirmFilaOutsideHandler = null;
 
-function openFooterMenu(vendedorId) {
+function openConfirmFila(vendedorId) {
   const v = vendedores.find(x => x.id === vendedorId);
   const nome = v ? (v.apelido || v.nome) : 'Vendedor';
-
-  // Remover menu anterior se existir
-  closeFooterMenu();
+  closeConfirmFila();
 
   const menu = document.createElement('div');
   menu.id = 'footerMenu';
-  menu.style.cssText = 'position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);border:1px solid var(--border-medium);border-radius:var(--radius);padding:12px;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.4);min-width:220px;text-align:center';
+  menu.style.cssText = 'position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);border:1px solid var(--border-medium);border-radius:var(--radius);padding:16px;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.4);min-width:240px;text-align:center';
 
   menu.innerHTML = `
-    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin-bottom:10px">${nome}</div>
-    <button onclick="footerMenuAction('fila','${vendedorId}')" style="display:block;width:100%;padding:10px;margin-bottom:6px;border:none;border-radius:var(--radius-sm);background:var(--success);color:#09090B;font-weight:600;font-size:13px;cursor:pointer">
-      <i class="fa-solid fa-list-ol" style="margin-right:6px"></i>Entrar na Fila
-    </button>
-    <button onclick="footerMenuAction('saida','${vendedorId}')" style="display:block;width:100%;padding:10px;border:none;border-radius:var(--radius-sm);background:var(--danger);color:#09090B;font-weight:600;font-size:13px;cursor:pointer">
-      <i class="fa-solid fa-door-open" style="margin-right:6px"></i>Registrar Saída
-    </button>
-    <button onclick="closeFooterMenu()" style="display:block;width:100%;padding:8px;margin-top:6px;border:none;border-radius:var(--radius-sm);background:var(--bg-hover);color:var(--text-muted);font-weight:500;font-size:11px;cursor:pointer">Cancelar</button>
+    <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:4px">${nome}</div>
+    <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px">Colocar na fila de atendimento?</div>
+    <div style="display:flex;gap:8px">
+      <button onclick="closeConfirmFila()" style="flex:1;padding:10px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-hover);color:var(--text-muted);font-weight:600;font-size:12px;cursor:pointer;font-family:var(--font-body)">Cancelar</button>
+      <button onclick="confirmAddToQueue('${vendedorId}')" style="flex:1;padding:10px;border:none;border-radius:var(--radius-sm);background:var(--success);color:#09090B;font-weight:700;font-size:12px;cursor:pointer;font-family:var(--font-body)">
+        <i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar
+      </button>
+    </div>
   `;
 
   document.body.appendChild(menu);
-
-  // Fechar ao clicar fora
   setTimeout(() => {
-    _footerMenuOutsideHandler = function(e) {
-      if (!menu.contains(e.target)) closeFooterMenu();
+    _confirmFilaOutsideHandler = function(e) {
+      if (!menu.contains(e.target)) closeConfirmFila();
     };
-    document.addEventListener('click', _footerMenuOutsideHandler);
+    document.addEventListener('click', _confirmFilaOutsideHandler);
   }, 100);
 }
 
-window.footerMenuAction = async function(action, vendedorId) {
-  closeFooterMenu();
-  if (action === 'fila') {
-    delete saidaMotivos[vendedorId];
-    await addToQueue(vendedorId);
-  } else {
-    openSaida(vendedorId);
-  }
+window.confirmAddToQueue = async function(vendedorId) {
+  closeConfirmFila();
+  delete saidaMotivos[vendedorId];
+  await addToQueue(vendedorId);
 };
 
-function closeFooterMenu() {
-  if (_footerMenuOutsideHandler) {
-    document.removeEventListener('click', _footerMenuOutsideHandler);
-    _footerMenuOutsideHandler = null;
+function closeConfirmFila() {
+  if (_confirmFilaOutsideHandler) {
+    document.removeEventListener('click', _confirmFilaOutsideHandler);
+    _confirmFilaOutsideHandler = null;
   }
   const m = document.getElementById('footerMenu');
   if (m) m.remove();

@@ -335,9 +335,9 @@ window.addEventListener('error', function(e) {
       <div class="kpi-value" id="kpiTime" style="color:var(--info)">—</div>
       <div class="kpi-compare" id="kpiTimeCmp"></div>
     </div>
-    <div class="kpi-card" style="--accent:var(--warning)">
+    <div class="kpi-card" style="--accent:var(--accent)">
       <div class="kpi-label">Ticket Médio</div>
-      <div class="kpi-value" id="kpiTicket" style="color:var(--warning)">—</div>
+      <div class="kpi-value" id="kpiTicket" style="color:var(--accent)">—</div>
       <div class="kpi-compare" id="kpiTicketCmp"></div>
     </div>
   </div>
@@ -683,7 +683,7 @@ async function loadHourly(range) {
 
   // Sparklines nos KPI cards
   const losses = (data || []).map(d => (d.atendimentos || 0) - (d.vendas || 0));
-  drawSparkline('sparkAtend', atend, 'rgb(245,158,11)');
+  drawSparkline('sparkAtend', atend, 'rgb(225,29,72)');
   drawSparkline('sparkConv', vendas.map((v, i) => atend[i] > 0 ? Math.round(v / atend[i] * 100) : 0), 'rgb(52,211,153)');
   drawSparkline('sparkLoss', losses, 'rgb(248,113,113)');
 
@@ -694,7 +694,7 @@ async function loadHourly(range) {
       datasets: [
         {
           label: 'Atendimentos', data: atend,
-          backgroundColor: 'rgba(245,158,11,.25)', borderColor: '#F59E0B',
+          backgroundColor: 'rgba(225,29,72,.25)', borderColor: '#E11D48',
           borderWidth: { top: 2, right: 0, bottom: 0, left: 0 },
           borderRadius: { topLeft: 4, topRight: 4 },
           barPercentage: 0.65, categoryPercentage: 0.8
@@ -717,7 +717,7 @@ async function loadHourly(range) {
         datalabels: {
           display: ctx2 => ctx2.dataset.data[ctx2.dataIndex] > 0,
           anchor: 'end', align: 'top', offset: 2,
-          color: ctx2 => ctx2.datasetIndex === 0 ? '#F59E0B' : '#34D399',
+          color: ctx2 => ctx2.datasetIndex === 0 ? '#E11D48' : '#34D399',
           font: { weight: 800, size: 10 }
         }
       },
@@ -833,7 +833,7 @@ async function loadPauseStats(range) {
     el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px"><i class="fa-solid fa-check-circle" style="font-size:20px;margin-bottom:8px;display:block;color:var(--success);opacity:.4"></i>Nenhuma pausa registrada</div>';
     return;
   }
-  const motivoLabels = { almoco: 'Almoço', banheiro: 'Banheiro', reuniao: 'Reunião', finalizar: 'Fim do dia', outro: 'Outro' };
+  const motivoLabels = { almoco: 'Almoço', banheiro: 'Banheiro', reuniao: 'Reunião', operacional: 'Operacional', finalizar: 'Fim do dia', outro: 'Outro' };
   el.innerHTML = data.map(r => `<div class="rupture-item">
     <div>
       <div style="font-weight:600;font-size:13px">${r.nome}</div>
@@ -1235,14 +1235,14 @@ window.exportPDF = async function() {
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',sans-serif;background:#fff;color:#18181B;padding:40px}
-.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:16px;border-bottom:3px solid #F59E0B}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:16px;border-bottom:3px solid #E11D48}
 .header h1{font-size:22px;font-weight:800;letter-spacing:-.02em}
 .header .sub{font-size:11px;color:#71717A;font-weight:600}
 .kpi-row{display:flex;gap:16px;margin-bottom:28px}
 .kpi{flex:1;background:#FAFAFA;border:1px solid #E4E4E7;border-radius:6px;padding:16px;text-align:center}
 .kpi .label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#71717A;margin-bottom:4px}
 .kpi .value{font-size:28px;font-weight:800;letter-spacing:-.02em}
-.kpi .value.green{color:#16a34a} .kpi .value.red{color:#dc2626} .kpi .value.blue{color:#2563eb} .kpi .value.amber{color:#d97706}
+.kpi .value.green{color:#16a34a} .kpi .value.red{color:#dc2626} .kpi .value.blue{color:#2563eb} .kpi .value.amber{color:#E11D48}
 table{width:100%;border-collapse:collapse;margin-bottom:24px;font-size:12px}
 th{background:#18181B;color:#FAFAFA;padding:10px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 td{padding:10px 12px;border-bottom:1px solid #E4E4E7;font-weight:500}

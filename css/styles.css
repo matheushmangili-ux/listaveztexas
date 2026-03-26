@@ -16,12 +16,12 @@
   --text-primary: #FAFAFA;
   --text-secondary: #A1A1AA;
   --text-muted: #71717A;
-  --accent: #F59E0B;
-  --accent-bright: #FBBF24;
-  --accent-dim: #D97706;
-  --gold: #F59E0B;
-  --gold-bright: #FBBF24;
-  --gold-dim: #B45309;
+  --accent: #E11D48;
+  --accent-bright: #FB7185;
+  --accent-dim: #BE123C;
+  --gold: #E11D48;
+  --gold-bright: #FB7185;
+  --gold-dim: #9F1239;
   --success: #34D399;
   --success-bg: rgba(52,211,153,.08);
   --warning: #FBBF24;
@@ -52,12 +52,12 @@
   --text-primary: #18181B;
   --text-secondary: #52525B;
   --text-muted: #A1A1AA;
-  --accent: #D97706;
-  --accent-bright: #B45309;
-  --accent-dim: #F59E0B;
-  --gold: #D97706;
-  --gold-bright: #B45309;
-  --gold-dim: #F59E0B;
+  --accent: #BE123C;
+  --accent-bright: #9F1239;
+  --accent-dim: #E11D48;
+  --gold: #BE123C;
+  --gold-bright: #9F1239;
+  --gold-dim: #E11D48;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
