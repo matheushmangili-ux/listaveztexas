@@ -101,7 +101,7 @@ window.addEventListener('error', function(e) {
     font-size: 16px;
     cursor: pointer;
     text-align: center;
-    transition: all 150ms ease;
+    transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
     line-height: 1;
   }
   .setor-tab .tab-label { font-size: 8px; font-weight: 600; display: block; margin-top: 2px; text-transform: uppercase; letter-spacing: .05em; }
@@ -302,7 +302,7 @@ window.addEventListener('error', function(e) {
     border: 1px solid var(--border-subtle);
     background: var(--bg-surface);
     cursor: pointer;
-    transition: all .15s;
+    transition: background .15s, border-color .15s;
     -webkit-tap-highlight-color: transparent;
   }
   .checkin-item:hover { border-color: var(--border-medium); }
@@ -316,7 +316,7 @@ window.addEventListener('error', function(e) {
     background: var(--bg-hover);
     border: 1px solid var(--border-medium);
     position: relative;
-    transition: all .2s;
+    transition: background .2s, border-color .2s;
     flex-shrink: 0;
   }
   .checkin-switch-thumb {
@@ -325,7 +325,7 @@ window.addEventListener('error', function(e) {
     width: 16px; height: 16px;
     border-radius: 8px;
     background: var(--text-muted);
-    transition: all .2s cubic-bezier(.4,0,.2,1);
+    transition: transform .2s cubic-bezier(.4,0,.2,1), background .2s;
   }
   .checkin-item.checked .checkin-switch {
     background: rgba(52,211,153,.2);
@@ -494,7 +494,7 @@ window.addEventListener('error', function(e) {
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
-    transition: all .2s;
+    transition: background .2s, border-color .2s, transform .15s;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -560,9 +560,6 @@ window.addEventListener('error', function(e) {
   .footer-card.new-item {
     animation: slideUp .2s ease both;
   }
-  .footer-card:hover { background: var(--bg-hover); transform: scale(1.04); }
-  .footer-card:active { transform: scale(.93); }
-
   .atend-actions button:hover { transform: scale(1.08); }
   .atend-actions button:active { transform: scale(.92); }
 
@@ -1086,7 +1083,7 @@ function fireEpicTrocaAnimation(nome, valor) {
   playSound('venda'); // reuse triumph sound
 
   const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);backdrop-filter:blur(4px)';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.75)';
 
   // Particle canvas behind the card
   const cvs = document.createElement('canvas');
@@ -1767,7 +1764,11 @@ function animateValue(el, start, end, duration = 400, suffix = '') {
 
 // ─── Quick stats ───
 let _prevStats = { total: 0, vendas: 0, conv: 0 };
+let _statsThrottle = 0;
 async function updateQuickStats() {
+  const now = Date.now();
+  if (now - _statsThrottle < 2000) return; // Max 1 query / 2s
+  _statsThrottle = now;
   if (!currentTurno) return;
   const { data } = await sb.from('atendimentos').select('resultado').eq('turno_id', currentTurno.id);
   if (!data) return;
@@ -2064,7 +2065,7 @@ function showMultiStep() {
   }
   const overlay = document.createElement('div');
   overlay.id = 'multiOutcomeOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);z-index:1002;display:flex;align-items:center;justify-content:center';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1002;display:flex;align-items:center;justify-content:center';
   overlay.innerHTML = `
     <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:92%;max-width:400px;text-align:center;animation:popIn .25s cubic-bezier(.2,.8,.3,1) both">
       <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">
@@ -2234,7 +2235,7 @@ async function finalizeMultiOutcome() {
 function openTrocaDiferenca(atendId) {
   const overlay = document.createElement('div');
   overlay.id = 'trocaOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);z-index:1000;display:flex;align-items:center;justify-content:center';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center';
   overlay.innerHTML = `
     <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:360px;text-align:center">
       <i class="fa-solid fa-rotate" style="font-size:28px;color:var(--warning);margin-bottom:12px"></i>
@@ -2302,7 +2303,7 @@ window.submitTroca = async function(atendId, comDiferenca) {
 function openValorVenda(atendId) {
   const overlay = document.createElement('div');
   overlay.id = 'valorOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);z-index:1000;display:flex;align-items:center;justify-content:center';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center';
   overlay.innerHTML = `
     <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:360px;text-align:center;animation:popIn .25s cubic-bezier(.2,.8,.3,1) both">
       <i class="fa-solid fa-dollar-sign" style="font-size:28px;color:var(--success);margin-bottom:12px"></i>
@@ -2365,7 +2366,7 @@ function askContinuar(atendId, onNo, onYes) {
   document.getElementById('continuarOverlay')?.remove();
   const overlay = document.createElement('div');
   overlay.id = 'continuarOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);z-index:1001;display:flex;align-items:center;justify-content:center';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1001;display:flex;align-items:center;justify-content:center';
   overlay.innerHTML = `
     <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:380px;text-align:center;animation:popIn .25s cubic-bezier(.2,.8,.3,1) both">
       <i class="fa-solid fa-rotate-right" style="font-size:28px;color:var(--info);margin-bottom:12px"></i>
@@ -2588,12 +2589,12 @@ sb.channel('tablet-sync')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vendedores' }, () => {
     if (_localAction) return; // Ação local já fez o render
     clearTimeout(_rtVendTimer);
-    _rtVendTimer = setTimeout(loadVendedores, 500);
+    _rtVendTimer = setTimeout(loadVendedores, 300);
   })
   .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos' }, () => {
     if (_localAction) return;
     clearTimeout(_rtAtendTimer);
-    _rtAtendTimer = setTimeout(() => { updateQuickStats(); checkActiveAtendimentos(); }, 500);
+    _rtAtendTimer = setTimeout(() => { updateQuickStats(); checkActiveAtendimentos(); }, 300);
   })
   .subscribe();
 
