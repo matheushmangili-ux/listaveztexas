@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Lista da Vez — Fila</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 <meta name="theme-color" content="#09090B">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1262,7 +1265,13 @@ window.toggleTurno = async function() {
     msg += '\n\nEssa ação não pode ser desfeita facilmente.';
     if (!confirm(msg)) return;
 
-    // Fechar turno: tirar todos da fila
+    // Fechar turno: finalizar atendimentos abertos + tirar todos da fila
+    const { error: eAtend } = await sb.from('atendimentos')
+      .update({ resultado: 'nao_convertido', fim: new Date().toISOString() })
+      .eq('turno_id', currentTurno.id)
+      .eq('resultado', 'em_andamento');
+    if (eAtend) console.warn('Erro ao finalizar atendimentos abertos:', eAtend.message);
+
     const { error: e1 } = await sb.from('vendedores').update({ status: 'fora', posicao_fila: null }).eq('ativo', true);
     const { error: e2 } = await sb.from('turnos').update({ fechamento: new Date().toISOString() }).eq('id', currentTurno.id);
     if (e1 || e2) { toast('Erro ao fechar turno', 'error'); return; }

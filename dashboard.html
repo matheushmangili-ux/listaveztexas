@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lista da Vez — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 <meta name="theme-color" content="#09090B">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,6 +24,7 @@ window.addEventListener('error', function(e) {
 });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <style>
   .dash-layout {
     max-width: 1280px;
@@ -200,6 +204,25 @@ window.addEventListener('error', function(e) {
   .led-name { font-weight: 600; font-size: 13px; }
   .led-status { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: .04em; }
 
+  /* ─── Export Menu ─── */
+  .export-menu {
+    position: absolute; top: 100%; right: 0; margin-top: 4px;
+    background: var(--bg-card); border: 1px solid var(--border-medium);
+    border-radius: var(--radius); padding: 4px; min-width: 180px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.3); z-index: 100;
+    display: none;
+  }
+  .export-menu.open { display: block; animation: fadeIn .15s ease; }
+  .export-menu button {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    padding: 10px 14px; border: none; border-radius: var(--radius-sm);
+    background: transparent; color: var(--text-primary);
+    font-family: var(--font-body); font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: background .15s;
+  }
+  .export-menu button:hover { background: var(--bg-hover); }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
   /* ─── Modal ─── */
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,.5); backdrop-filter: blur(2px);
@@ -245,9 +268,15 @@ window.addEventListener('error', function(e) {
       </div>
       <input type="date" id="dashDatePicker" style="display:none;font-size:11px;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);color:var(--text-primary);font-family:var(--font-body);font-weight:600" onchange="applyCustomDate()"
       >
-      <button class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px" onclick="exportReport()">
-        <i class="fa-solid fa-file-export" style="font-size:10px"></i> Exportar
-      </button>
+      <div style="position:relative;display:inline-block" id="exportDropdown">
+        <button class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px" onclick="document.getElementById('exportMenu').classList.toggle('open')">
+          <i class="fa-solid fa-file-export" style="font-size:10px"></i> Exportar <i class="fa-solid fa-chevron-down" style="font-size:8px;margin-left:2px"></i>
+        </button>
+        <div id="exportMenu" class="export-menu">
+          <button onclick="exportCSV();document.getElementById('exportMenu').classList.remove('open')"><i class="fa-solid fa-file-csv" style="color:var(--success)"></i> Exportar CSV</button>
+          <button onclick="exportPDF();document.getElementById('exportMenu').classList.remove('open')"><i class="fa-solid fa-file-pdf" style="color:var(--danger)"></i> Exportar PDF</button>
+        </div>
+      </div>
       <a href="tablet.html" class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px">
         <i class="fa-solid fa-tablet-screen-button" style="font-size:10px"></i> Tablet
       </a>
@@ -454,8 +483,23 @@ if (!user) {
 let charts = {};
 let currentPeriod = 'hoje';
 
-Chart.defaults.font.family = "'Inter', system-ui";
+Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+Chart.defaults.font.weight = 500;
 Chart.defaults.color = '#71717A';
+Chart.defaults.borderColor = 'rgba(255,255,255,.04)';
+Chart.defaults.plugins.tooltip.backgroundColor = '#18181B';
+Chart.defaults.plugins.tooltip.borderColor = 'rgba(255,255,255,.1)';
+Chart.defaults.plugins.tooltip.borderWidth = 1;
+Chart.defaults.plugins.tooltip.cornerRadius = 4;
+Chart.defaults.plugins.tooltip.titleFont = { weight: 700, size: 12 };
+Chart.defaults.plugins.tooltip.bodyFont = { weight: 600, size: 11 };
+Chart.defaults.plugins.tooltip.padding = 10;
+Chart.defaults.plugins.tooltip.displayColors = true;
+Chart.defaults.plugins.tooltip.boxWidth = 8;
+Chart.defaults.plugins.tooltip.boxHeight = 8;
+Chart.defaults.plugins.tooltip.boxPadding = 4;
+// Disable datalabels globally, enable per-chart
+Chart.defaults.plugins.datalabels = { display: false };
 
 function getRange() {
   if (currentPeriod === 'custom' && customDate) {
@@ -579,18 +623,48 @@ async function loadMotivos(range) {
   const values = (data || []).map(d => d.total);
   const colors = (data || []).map(d => MOTIVOS[d.motivo]?.color || '#6b7280');
 
+  const totalMotivos = values.reduce((a, b) => a + b, 0);
   charts.motivos = new Chart(ctx, {
     type: 'doughnut',
     data: {
       labels,
-      datasets: [{ data: values, backgroundColor: colors.map(c => c + 'cc'), borderColor: colors, borderWidth: 2, cutout: '60%' }]
+      datasets: [{
+        data: values,
+        backgroundColor: colors.map(c => c + 'cc'),
+        borderColor: 'rgba(24,24,27,1)',
+        borderWidth: 3,
+        cutout: '65%',
+        hoverOffset: 6
+      }]
     },
+    plugins: [ChartDataLabels, {
+      id: 'centerText',
+      afterDraw(chart) {
+        const { ctx: c, width, height } = chart;
+        c.save();
+        c.font = "800 28px 'Inter'";
+        c.fillStyle = '#FAFAFA';
+        c.textAlign = 'center';
+        c.textBaseline = 'middle';
+        c.fillText(totalMotivos, width / 2, height / 2 - 8);
+        c.font = "600 10px 'Inter'";
+        c.fillStyle = '#71717A';
+        c.fillText('TOTAL', width / 2, height / 2 + 14);
+        c.restore();
+      }
+    }],
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, font: { size: 11, weight: 600 } } },
-        tooltip: { callbacks: { label: c => { const total = values.reduce((a, b) => a + b, 0); return c.label + ': ' + c.parsed + ' (' + (total > 0 ? Math.round(c.parsed / total * 100) : 0) + '%)'; } } }
+        legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'rectRounded', padding: 16, font: { size: 11, weight: 600 } } },
+        tooltip: { callbacks: { label: c => c.label + ': ' + c.parsed + ' (' + (totalMotivos > 0 ? Math.round(c.parsed / totalMotivos * 100) : 0) + '%)' } },
+        datalabels: {
+          display: ctx2 => ctx2.dataset.data[ctx2.dataIndex] > 0,
+          color: '#fff',
+          font: { weight: 800, size: 12 },
+          formatter: (val) => totalMotivos > 0 ? Math.round(val / totalMotivos * 100) + '%' : ''
+        }
       }
     }
   });
@@ -618,19 +692,38 @@ async function loadHourly(range) {
     data: {
       labels: hours,
       datasets: [
-        { label: 'Atendimentos', data: atend, backgroundColor: 'rgba(245,158,11,.2)', borderColor: '#F59E0B', borderWidth: 1.5, borderRadius: 3, barPercentage: 0.7 },
-        { label: 'Vendas', data: vendas, backgroundColor: 'rgba(52,211,153,.2)', borderColor: '#34D399', borderWidth: 1.5, borderRadius: 3, barPercentage: 0.7 }
+        {
+          label: 'Atendimentos', data: atend,
+          backgroundColor: 'rgba(245,158,11,.25)', borderColor: '#F59E0B',
+          borderWidth: { top: 2, right: 0, bottom: 0, left: 0 },
+          borderRadius: { topLeft: 4, topRight: 4 },
+          barPercentage: 0.65, categoryPercentage: 0.8
+        },
+        {
+          label: 'Vendas', data: vendas,
+          backgroundColor: 'rgba(52,211,153,.25)', borderColor: '#34D399',
+          borderWidth: { top: 2, right: 0, bottom: 0, left: 0 },
+          borderRadius: { topLeft: 4, topRight: 4 },
+          barPercentage: 0.65, categoryPercentage: 0.8
+        }
       ]
     },
+    plugins: [ChartDataLabels],
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 12, font: { size: 10, weight: 600 } } }
+        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'rectRounded', padding: 16, font: { size: 10, weight: 700 } } },
+        datalabels: {
+          display: ctx2 => ctx2.dataset.data[ctx2.dataIndex] > 0,
+          anchor: 'end', align: 'top', offset: 2,
+          color: ctx2 => ctx2.datasetIndex === 0 ? '#F59E0B' : '#34D399',
+          font: { weight: 800, size: 10 }
+        }
       },
       scales: {
-        x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { font: { size: 10, weight: 500 } } },
-        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.04)' }, ticks: { font: { size: 10 }, stepSize: 1 } }
+        x: { grid: { display: false }, ticks: { font: { size: 10, weight: 600 }, color: '#A1A1AA' } },
+        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.04)', drawBorder: false }, ticks: { font: { size: 10, weight: 500 }, stepSize: 1, padding: 8 } }
       }
     }
   });
@@ -818,29 +911,42 @@ async function loadScatter(range, cachedData) {
       datasets: [{
         label: 'Vendedores',
         data: points,
-        backgroundColor: points.map(p => p.y >= 50 ? 'rgba(74,222,128,.6)' : p.y >= 30 ? 'rgba(251,191,36,.6)' : 'rgba(248,113,113,.6)'),
+        backgroundColor: points.map(p => p.y >= 50 ? 'rgba(74,222,128,.7)' : p.y >= 30 ? 'rgba(251,191,36,.7)' : 'rgba(248,113,113,.7)'),
         borderColor: points.map(p => p.y >= 50 ? '#22c55e' : p.y >= 30 ? '#f59e0b' : '#ef4444'),
         borderWidth: 2,
-        pointRadius: 8,
-        pointHoverRadius: 11
+        pointRadius: 10,
+        pointHoverRadius: 13,
+        pointStyle: 'rectRounded'
       }]
     },
+    plugins: [ChartDataLabels],
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: {
-          callbacks: {
-            label: c => {
-              const p = c.raw;
-              return p.label + ': ' + p.x + ' atend. / ' + p.y + '% conv.';
-            }
-          }
+          callbacks: { label: c => { const p = c.raw; return p.label + ': ' + p.x + ' atend. / ' + p.y + '% conv.'; } }
+        },
+        datalabels: {
+          display: true,
+          color: '#FAFAFA',
+          font: { weight: 700, size: 9 },
+          anchor: 'end', align: 'top', offset: 4,
+          formatter: (val, ctx2) => ctx2.dataset.data[ctx2.dataIndex].label
         }
       },
       scales: {
-        x: { title: { display: true, text: 'Atendimentos', font: { size: 10, weight: 600 } }, grid: { color: 'rgba(255,255,255,.04)' }, ticks: { font: { size: 10 } } },
-        y: { title: { display: true, text: 'Conversão %', font: { size: 10, weight: 600 } }, grid: { color: 'rgba(255,255,255,.04)' }, ticks: { font: { size: 10 } }, beginAtZero: true, max: 100 }
+        x: {
+          title: { display: true, text: 'ATENDIMENTOS', font: { size: 9, weight: 800 }, color: '#71717A', padding: 4 },
+          grid: { color: 'rgba(255,255,255,.04)', drawBorder: false },
+          ticks: { font: { size: 10, weight: 600 } }
+        },
+        y: {
+          title: { display: true, text: 'CONVERSÃO %', font: { size: 9, weight: 800 }, color: '#71717A', padding: 4 },
+          grid: { color: 'rgba(255,255,255,.04)', drawBorder: false },
+          ticks: { font: { size: 10, weight: 600 }, callback: v => v + '%' },
+          beginAtZero: true, max: 100
+        }
       }
     }
   });
@@ -859,24 +965,63 @@ async function loadTempoMeta(range, cachedData) {
   const colors = tempos.map(t => t <= META_MIN ? 'rgba(74,222,128,.7)' : t <= META_MIN * 1.3 ? 'rgba(251,191,36,.7)' : 'rgba(248,113,113,.7)');
   const borders = tempos.map(t => t <= META_MIN ? '#22c55e' : t <= META_MIN * 1.3 ? '#f59e0b' : '#ef4444');
 
+  // Draw meta line as a plugin since annotation plugin isn't loaded
+  const metaLinePlugin = {
+    id: 'metaLine',
+    afterDraw(chart) {
+      const xScale = chart.scales.x;
+      const metaX = xScale.getPixelForValue(META_MIN);
+      const { ctx: c, chartArea: { top, bottom } } = chart;
+      c.save();
+      c.beginPath();
+      c.setLineDash([6, 4]);
+      c.strokeStyle = 'rgba(248,113,113,.6)';
+      c.lineWidth = 2;
+      c.moveTo(metaX, top);
+      c.lineTo(metaX, bottom);
+      c.stroke();
+      c.setLineDash([]);
+      c.font = "700 9px 'Inter'";
+      c.fillStyle = '#F87171';
+      c.textAlign = 'center';
+      c.fillText('META ' + META_MIN + 'min', metaX, top - 6);
+      c.restore();
+    }
+  };
+
   charts.tempoMeta = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: names,
-      datasets: [
-        { label: 'Tempo Médio (min)', data: tempos, backgroundColor: colors, borderColor: borders, borderWidth: 1.5, borderRadius: 4, barPercentage: 0.7 }
-      ]
+      datasets: [{
+        label: 'Tempo Médio (min)', data: tempos,
+        backgroundColor: colors, borderColor: borders,
+        borderWidth: { top: 0, right: 2, bottom: 0, left: 0 },
+        borderRadius: { topRight: 4, bottomRight: 4 },
+        barPercentage: 0.65
+      }]
     },
+    plugins: [metaLinePlugin, ChartDataLabels],
     options: {
       responsive: true, maintainAspectRatio: false,
       indexAxis: 'y',
+      layout: { padding: { top: 16 } },
       plugins: {
         legend: { display: false },
-        annotation: { annotations: { metaLine: { type: 'line', xMin: META_MIN, xMax: META_MIN, borderColor: 'rgba(248,113,113,.5)', borderWidth: 2, borderDash: [6, 3], label: { display: true, content: 'Meta ' + META_MIN + 'min', position: 'start', font: { size: 9, weight: 700 }, color: 'var(--danger)' } } } }
+        datalabels: {
+          display: true,
+          anchor: 'end', align: 'end', offset: 4,
+          color: ctx2 => {
+            const v = ctx2.dataset.data[ctx2.dataIndex];
+            return v <= META_MIN ? '#22c55e' : v <= META_MIN * 1.3 ? '#f59e0b' : '#ef4444';
+          },
+          font: { weight: 800, size: 11 },
+          formatter: v => v + 'min'
+        }
       },
       scales: {
-        x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.04)' }, ticks: { font: { size: 10 }, callback: v => v + 'min' } },
-        y: { grid: { display: false }, ticks: { font: { size: 11, weight: 600 } } }
+        x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.04)', drawBorder: false }, ticks: { font: { size: 10, weight: 500 }, callback: v => v + 'min', padding: 4 } },
+        y: { grid: { display: false }, ticks: { font: { size: 11, weight: 700 }, color: '#A1A1AA' } }
       }
     }
   });
@@ -1032,37 +1177,125 @@ window.deleteVendedor = async function(id, nome) {
   loadFloor();
 };
 
-// ─── Export Report (CSV) ───
-window.exportReport = async function() {
+// ─── Export helpers ───
+async function getExportData() {
   const range = getRange();
-  const { data: ranking, error } = await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end });
-  if (error) { toast('Erro ao exportar: ' + error.message, 'error'); return; }
-  if (!ranking || ranking.length === 0) { toast('Sem dados para exportar', 'warning'); return; }
+  const [rankRes, statsRes, motivosRes] = await Promise.all([
+    sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end }),
+    sb.rpc('get_conversion_stats', { p_inicio: range.start, p_fim: range.end }),
+    sb.rpc('get_loss_reasons', { p_inicio: range.start, p_fim: range.end })
+  ]);
+  if (rankRes.error) { toast('Erro ao exportar: ' + rankRes.error.message, 'error'); return null; }
+  if (!rankRes.data || rankRes.data.length === 0) { toast('Sem dados para exportar', 'warning'); return null; }
+  return { ranking: rankRes.data, stats: statsRes.data?.[0] || {}, motivos: motivosRes.data || [] };
+}
 
-  const period = currentPeriod === 'hoje' ? 'Hoje' : currentPeriod === 'semana' ? 'Semana' : 'Mês';
-  let csv = '\uFEFF'; // BOM for UTF-8
+function getPeriodLabel() {
+  return currentPeriod === 'hoje' ? 'Hoje' : currentPeriod === 'semana' ? 'Semana' : currentPeriod === 'mes' ? 'Mês' : customDate;
+}
+
+// ─── Export CSV ───
+window.exportCSV = async function() {
+  const d = await getExportData();
+  if (!d) return;
+  const period = getPeriodLabel();
+  let csv = '\uFEFF';
   csv += 'Relatório Lista da Vez — ' + period + '\n';
   csv += 'Gerado em: ' + new Date().toLocaleString('pt-BR') + '\n\n';
   csv += 'Vendedor,Atendimentos,Vendas,Conversão %,Tempo Médio (min)\n';
-  ranking.forEach(r => {
+  d.ranking.forEach(r => {
     csv += `"${r.nome}",${r.total_atendimentos||0},${r.total_vendas||0},${r.taxa_conversao||0},${r.tempo_medio_min||0}\n`;
   });
-
-  // Totals
-  const totAtend = ranking.reduce((s, r) => s + (r.total_atendimentos||0), 0);
-  const totVendas = ranking.reduce((s, r) => s + (r.total_vendas||0), 0);
+  const totAtend = d.ranking.reduce((s, r) => s + (r.total_atendimentos||0), 0);
+  const totVendas = d.ranking.reduce((s, r) => s + (r.total_vendas||0), 0);
   const avgConv = totAtend > 0 ? Math.round(totVendas / totAtend * 100) : 0;
   csv += `\n"TOTAL",${totAtend},${totVendas},${avgConv},—\n`;
 
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = 'relatorio-listavez-' + currentPeriod + '-' + new Date().toISOString().split('T')[0] + '.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-  toast('Relatório exportado!', 'success');
+  a.href = url; a.download = 'relatorio-listavez-' + currentPeriod + '-' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click(); URL.revokeObjectURL(url);
+  toast('CSV exportado!', 'success');
 };
+
+// ─── Export PDF ───
+window.exportPDF = async function() {
+  const d = await getExportData();
+  if (!d) return;
+  const period = getPeriodLabel();
+  const now = new Date().toLocaleString('pt-BR');
+  const totAtend = d.ranking.reduce((s, r) => s + (r.total_atendimentos||0), 0);
+  const totVendas = d.ranking.reduce((s, r) => s + (r.total_vendas||0), 0);
+  const avgConv = totAtend > 0 ? Math.round(totVendas / totAtend * 100) : 0;
+  const motivoLabels = { preco: 'Preço', ruptura: 'Ruptura', indecisao: 'Indecisão', so_olhando: 'Só olhando', outro: 'Outro' };
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#fff;color:#18181B;padding:40px}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:16px;border-bottom:3px solid #F59E0B}
+.header h1{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.header .sub{font-size:11px;color:#71717A;font-weight:600}
+.kpi-row{display:flex;gap:16px;margin-bottom:28px}
+.kpi{flex:1;background:#FAFAFA;border:1px solid #E4E4E7;border-radius:6px;padding:16px;text-align:center}
+.kpi .label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#71717A;margin-bottom:4px}
+.kpi .value{font-size:28px;font-weight:800;letter-spacing:-.02em}
+.kpi .value.green{color:#16a34a} .kpi .value.red{color:#dc2626} .kpi .value.blue{color:#2563eb} .kpi .value.amber{color:#d97706}
+table{width:100%;border-collapse:collapse;margin-bottom:24px;font-size:12px}
+th{background:#18181B;color:#FAFAFA;padding:10px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+td{padding:10px 12px;border-bottom:1px solid #E4E4E7;font-weight:500}
+tr:nth-child(even){background:#FAFAFA}
+.medal{font-size:16px;text-align:center}
+.conv-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-weight:700;font-size:11px}
+.conv-high{background:#dcfce7;color:#16a34a} .conv-mid{background:#fef9c3;color:#a16207} .conv-low{background:#fee2e2;color:#dc2626}
+.section-title{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#71717A;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #E4E4E7}
+.motivos{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+.motivo-tag{padding:6px 14px;border-radius:4px;font-size:11px;font-weight:700;background:#F4F4F5;border:1px solid #E4E4E7}
+.footer{margin-top:32px;padding-top:12px;border-top:1px solid #E4E4E7;font-size:9px;color:#A1A1AA;text-align:center;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+@media print{body{padding:24px}@page{margin:1cm;size:A4}}
+</style></head><body>
+<div class="header">
+  <div><h1>Lista da Vez</h1><div class="sub">Texas Center — Relatório ${period}</div></div>
+  <div style="text-align:right"><div class="sub">${now}</div></div>
+</div>
+<div class="kpi-row">
+  <div class="kpi"><div class="label">Atendimentos</div><div class="value">${totAtend}</div></div>
+  <div class="kpi"><div class="label">Vendas</div><div class="value green">${totVendas}</div></div>
+  <div class="kpi"><div class="label">Conversão</div><div class="value amber">${avgConv}%</div></div>
+  <div class="kpi"><div class="label">Tempo Médio</div><div class="value blue">${d.stats.tempo_medio_min||0}min</div></div>
+  ${d.stats.ticket_medio ? `<div class="kpi"><div class="label">Ticket Médio</div><div class="value amber">R$ ${Number(d.stats.ticket_medio).toLocaleString('pt-BR')}</div></div>` : ''}
+</div>
+<div class="section-title">Ranking de Vendedores</div>
+<table>
+  <thead><tr><th>#</th><th>Vendedor</th><th>Atendimentos</th><th>Vendas</th><th>Conversão</th><th>Tempo Médio</th></tr></thead>
+  <tbody>${d.ranking.map((r,i) => {
+    const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+    const conv = r.taxa_conversao||0;
+    const cls = conv>=50?'conv-high':conv>=30?'conv-mid':'conv-low';
+    return `<tr><td class="medal">${medal}</td><td style="font-weight:700">${r.nome}</td><td>${r.total_atendimentos||0}</td><td style="color:#16a34a;font-weight:700">${r.total_vendas||0}</td><td><span class="conv-badge ${cls}">${conv}%</span></td><td>${r.tempo_medio_min||0}min</td></tr>`;
+  }).join('')}
+  <tr style="font-weight:800;background:#F4F4F5"><td></td><td>TOTAL</td><td>${totAtend}</td><td style="color:#16a34a">${totVendas}</td><td><span class="conv-badge ${avgConv>=50?'conv-high':avgConv>=30?'conv-mid':'conv-low'}">${avgConv}%</span></td><td>—</td></tr>
+  </tbody>
+</table>
+${d.motivos.length > 0 ? `<div class="section-title">Motivos de Perda</div><div class="motivos">${d.motivos.map(m => `<div class="motivo-tag">${motivoLabels[m.motivo]||m.motivo}: <strong>${m.total}</strong></div>`).join('')}</div>` : ''}
+<div class="footer">Lista da Vez v1.0 — Texas Center — Gerado automaticamente</div>
+</body></html>`;
+
+  const printWin = window.open('', '_blank');
+  printWin.document.write(html);
+  printWin.document.close();
+  printWin.onload = () => { printWin.print(); };
+  toast('PDF pronto para impressão!', 'success');
+};
+
+// Close export dropdown on outside click
+document.addEventListener('click', e => {
+  const dd = document.getElementById('exportDropdown');
+  const menu = document.getElementById('exportMenu');
+  if (dd && menu && !dd.contains(e.target)) menu.classList.remove('open');
+});
 
 // ─── Session timeout (30min inactivity) ───
 let _lastActivity = Date.now();
