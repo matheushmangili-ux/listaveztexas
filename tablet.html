@@ -2323,7 +2323,12 @@ window.submitTroca = async function(atendId, comDiferenca) {
     await finalize('troca', null, null, null, atendId, valor, false);
     if (vendedorId) {
       const v2 = vendedores.find(v => v.id === vendedorId);
-      // Vendedor já voltou ao último da fila via RPC finalizar_atendimento
+      const setor = v2?.setor || 'loja';
+      // Troca >= R$1.000 → vendedor volta pro 1º da fila (premiação)
+      const inQueue = vendedores.filter(v => (v.setor || 'loja') === setor && v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
+      const updates = inQueue.map((v, i) => sb.from('vendedores').update({ posicao_fila: i + 2 }).eq('id', v.id));
+      updates.push(sb.from('vendedores').update({ status: 'disponivel', posicao_fila: 1 }).eq('id', vendedorId));
+      await Promise.all(updates);
       await loadVendedores();
       // EPIC achievement animation!
       fireEpicTrocaAnimation(v2?.apelido || v2?.nome || 'Vendedor', valor);
@@ -2361,17 +2366,23 @@ function openValorVenda(atendId) {
   setTimeout(() => document.getElementById('valorVendaInput')?.focus(), 100);
 }
 
-// Currency formatting: accepts comma and dot as decimal separator
+// Currency formatting: formato brasileiro R$ 1.234,56
 window.formatCurrencyInput = function(input) {
-  let v = input.value.replace(/[^\d,\.]/g, '');
-  // Replace comma with dot for internal, but display with comma
-  v = v.replace(/\.(?=.*[,\.])/g, ''); // keep only last separator
-  input.value = v;
+  // Extrair só dígitos
+  let digits = input.value.replace(/\D/g, '');
+  if (!digits) { input.value = ''; return; }
+  // Converter para centavos (últimos 2 dígitos = decimais)
+  let cents = parseInt(digits, 10);
+  let reais = (cents / 100).toFixed(2);
+  // Formatar com separadores brasileiros
+  let [intPart, decPart] = reais.split('.');
+  intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  input.value = intPart + ',' + decPart;
 };
 
 function parseCurrency(str) {
   if (!str) return null;
-  // Accept both comma and dot as decimal separator
+  // Formato brasileiro: 1.234,56 → 1234.56
   const cleaned = str.replace(/\./g, '').replace(',', '.');
   const val = parseFloat(cleaned);
   return isNaN(val) ? null : val;
