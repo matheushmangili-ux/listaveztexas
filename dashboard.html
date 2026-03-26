@@ -565,8 +565,9 @@ function renderCompare(elId, current, previous, invertGood = false) {
   const isUp = diff > 0;
   const isGood = invertGood ? !isUp : isUp;
   const cls = Math.abs(diff) < 1 ? 'neutral' : isGood ? 'up' : 'down';
+  const sign = isUp ? '+' : '-';
   const arrow = isUp ? '↑' : '↓';
-  el.innerHTML = `<span class="${cls}">${arrow} ${Math.abs(diff).toFixed(0)}% vs anterior</span>`;
+  el.innerHTML = `<span class="${cls}">${arrow} ${sign}${Math.abs(diff).toFixed(0)}% vs anterior</span>`;
 }
 
 // ─── Load all data ───
