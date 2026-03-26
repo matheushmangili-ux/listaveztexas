@@ -315,30 +315,30 @@ window.addEventListener('error', function(e) {
   <div class="kpi-grid" id="kpiGrid">
     <div class="kpi-card" style="--accent:var(--text-primary)">
       <div class="kpi-label">Total Atendimentos</div>
-      <div class="kpi-value" id="kpiTotal" style="color:var(--text-primary)">—</div>
+      <div class="kpi-value" id="kpiTotal" style="color:#fff">—</div>
       <div class="kpi-compare" id="kpiTotalCmp"></div>
       <canvas id="sparkAtend" style="width:100%;height:24px;margin-top:4px"></canvas>
     </div>
     <div class="kpi-card" style="--accent:var(--success)">
       <div class="kpi-label">Taxa de Conversão</div>
-      <div class="kpi-value" id="kpiConv" style="color:var(--success)">—</div>
+      <div class="kpi-value" id="kpiConv" style="color:#fff">—</div>
       <div class="kpi-compare" id="kpiConvCmp"></div>
       <canvas id="sparkConv" style="width:100%;height:24px;margin-top:4px"></canvas>
     </div>
     <div class="kpi-card" style="--accent:var(--danger)">
       <div class="kpi-label">Não Convertidos</div>
-      <div class="kpi-value" id="kpiLoss" style="color:var(--danger)">—</div>
+      <div class="kpi-value" id="kpiLoss" style="color:#fff">—</div>
       <div class="kpi-compare" id="kpiLossCmp"></div>
       <canvas id="sparkLoss" style="width:100%;height:24px;margin-top:4px"></canvas>
     </div>
     <div class="kpi-card" style="--accent:var(--info)">
       <div class="kpi-label">Tempo Médio</div>
-      <div class="kpi-value" id="kpiTime" style="color:var(--info)">—</div>
+      <div class="kpi-value" id="kpiTime" style="color:#fff">—</div>
       <div class="kpi-compare" id="kpiTimeCmp"></div>
     </div>
     <div class="kpi-card" style="--accent:var(--accent)">
       <div class="kpi-label">Ticket Médio</div>
-      <div class="kpi-value" id="kpiTicket" style="color:var(--accent)">—</div>
+      <div class="kpi-value" id="kpiTicket" style="color:#fff">—</div>
       <div class="kpi-compare" id="kpiTicketCmp"></div>
     </div>
   </div>
@@ -592,15 +592,28 @@ async function loadAll() {
 
 // ─── KPIs ───
 async function loadKPIs(range, prevRange) {
-  const [curr, prev] = await Promise.all([
+  const [curr, prev, currTrocas, prevTrocas] = await Promise.all([
     sb.rpc('get_conversion_stats', { p_inicio: range.start, p_fim: range.end }),
-    sb.rpc('get_conversion_stats', { p_inicio: prevRange.start, p_fim: prevRange.end })
+    sb.rpc('get_conversion_stats', { p_inicio: prevRange.start, p_fim: prevRange.end }),
+    sb.from('atendimentos').select('valor_venda').eq('resultado', 'troca').gte('inicio', range.start).lt('inicio', range.end),
+    sb.from('atendimentos').select('valor_venda').eq('resultado', 'troca').gte('inicio', prevRange.start).lt('inicio', prevRange.end)
   ]);
   if (curr.error || !curr.data || curr.data.length === 0) return;
   const d = curr.data[0];
   const p = prev.data?.[0] || {};
+
+  // Recalcular taxa de conversão: vendas + trocas com valor > 0
+  function calcConv(stats, trocasData) {
+    const vendas = stats.total_vendas || 0;
+    const trocasComValor = (trocasData || []).filter(t => t.valor_venda && t.valor_venda > 0).length;
+    const total = stats.total_atendimentos || 0;
+    return total > 0 ? Math.round((vendas + trocasComValor) / total * 1000) / 10 : 0;
+  }
+  const convAtual = calcConv(d, currTrocas.data);
+  const convAnterior = calcConv(p, prevTrocas.data);
+
   document.getElementById('kpiTotal').textContent = d.total_atendimentos || 0;
-  document.getElementById('kpiConv').textContent = (d.taxa_conversao || 0) + '%';
+  document.getElementById('kpiConv').textContent = convAtual + '%';
   document.getElementById('kpiLoss').textContent = d.total_nao_convertido || 0;
   document.getElementById('kpiTime').textContent = (d.tempo_medio_min || 0) + 'min';
   // Ticket médio
@@ -608,7 +621,7 @@ async function loadKPIs(range, prevRange) {
   const pTicket = p.ticket_medio || 0;
   document.getElementById('kpiTicket').textContent = ticket > 0 ? 'R$ ' + ticket.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '—';
   renderCompare('kpiTotalCmp', d.total_atendimentos || 0, p.total_atendimentos || 0);
-  renderCompare('kpiConvCmp', d.taxa_conversao || 0, p.taxa_conversao || 0);
+  renderCompare('kpiConvCmp', convAtual, convAnterior);
   renderCompare('kpiLossCmp', d.total_nao_convertido || 0, p.total_nao_convertido || 0, true);
   renderCompare('kpiTimeCmp', d.tempo_medio_min || 0, p.tempo_medio_min || 0, true);
   if (ticket > 0 || pTicket > 0) renderCompare('kpiTicketCmp', ticket, pTicket);
