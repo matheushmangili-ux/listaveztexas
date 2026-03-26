@@ -1241,7 +1241,7 @@ function renderQueue() {
       const motivoKey = saidaMotivos[v.id];
       const motivoColor = motivoKey ? (SAIDA_COLORS[motivoKey]?.color || STATUS_CONFIG.pausa.color) : STATUS_CONFIG.pausa.color;
       const motivoLabel = motivoKey ? (SAIDA_COLORS[motivoKey]?.label || 'Pausa') : 'Pausa';
-      html += `<div class="queue-item" data-id="${v.id}" style="cursor:pointer;opacity:.8;border-left:3px solid ${motivoColor}" onclick="returnFromPause('${v.id}')">
+      html += `<div class="queue-item" data-id="${v.id}" draggable="true" ondragstart="onDragStart(event)" ontouchstart="onTouchDragStart(event)" style="cursor:grab;opacity:.8;border-left:3px solid ${motivoColor}" onclick="returnFromPause('${v.id}')">
         <div class="queue-position" style="background:${motivoColor}20;color:${motivoColor}"><i class="fa-solid ${STATUS_CONFIG.pausa.icon}" style="font-size:11px"></i></div>
         <div style="flex:1;min-width:0">
           <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.apelido || v.nome}</div>
@@ -1366,6 +1366,7 @@ async function reorderInQueue(movedId, beforeId) {
 }
 
 async function addToQueueAt(vendedorId, beforeId) {
+  delete saidaMotivos[vendedorId];
   const target = vendedores.find(x => x.id === vendedorId);
   const setor = target?.setor || 'loja';
   const inQueue = vendedores.filter(v => (v.setor || 'loja') === setor && v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
@@ -1574,7 +1575,7 @@ async function addToQueue(vendedorId) {
 window.returnFromPause = async function(vendedorId) {
   delete saidaMotivos[vendedorId];
   // Registrar retorno no log
-  sb.rpc('registrar_retorno', { p_vendedor_id: vendedorId }).catch(() => {});
+  try { sb.rpc('registrar_retorno', { p_vendedor_id: vendedorId }); } catch(e) {}
   await addToQueue(vendedorId);
   const v = vendedores.find(x => x.id === vendedorId);
   toast((v?.apelido || v?.nome || 'Vendedor') + ' voltou à fila', 'success', 1500);
