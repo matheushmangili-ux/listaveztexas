@@ -2123,7 +2123,8 @@ function showMultiStep() {
   overlay.id = 'multiOutcomeOverlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1002;display:flex;align-items:center;justify-content:center';
   overlay.innerHTML = `
-    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:92%;max-width:400px;text-align:center;animation:popIn .25s cubic-bezier(.2,.8,.3,1) both">
+    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:92%;max-width:400px;text-align:center;animation:popIn .25s cubic-bezier(.2,.8,.3,1) both;position:relative">
+      <button onclick="document.getElementById('multiOutcomeOverlay')?.remove()" style="position:absolute;top:8px;right:10px;background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;padding:4px 8px;line-height:1" title="Fechar">&times;</button>
       <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">
         <span style="background:var(--info);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px">${_multiCurrent} de ${_multiTotal}</span>
       </div>
@@ -2292,8 +2293,10 @@ function openTrocaDiferenca(atendId) {
   const overlay = document.createElement('div');
   overlay.id = 'trocaOverlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center';
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   overlay.innerHTML = `
-    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:360px;text-align:center">
+    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:360px;text-align:center;position:relative;animation:popIn .25s cubic-bezier(.2,.8,.3,1) both">
+      <button onclick="document.getElementById('trocaOverlay')?.remove()" style="position:absolute;top:8px;right:10px;background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;padding:4px 8px;line-height:1" title="Fechar">&times;</button>
       <i class="fa-solid fa-rotate" style="font-size:28px;color:var(--warning);margin-bottom:12px"></i>
       <h3 style="font-family:var(--font-mono);font-size:14px;font-weight:700;margin-bottom:4px">Troca</h3>
       <p style="font-size:11px;color:var(--text-muted);margin-bottom:16px">Houve diferença de valor na troca?</p>
@@ -2360,8 +2363,10 @@ function openValorVenda(atendId) {
   const overlay = document.createElement('div');
   overlay.id = 'valorOverlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center';
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   overlay.innerHTML = `
-    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:360px;text-align:center;animation:popIn .25s cubic-bezier(.2,.8,.3,1) both">
+    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:360px;text-align:center;animation:popIn .25s cubic-bezier(.2,.8,.3,1) both;position:relative">
+      <button onclick="document.getElementById('valorOverlay')?.remove()" style="position:absolute;top:8px;right:10px;background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;padding:4px 8px;line-height:1" title="Fechar">&times;</button>
       <i class="fa-solid fa-dollar-sign" style="font-size:28px;color:var(--success);margin-bottom:12px"></i>
       <h3 style="font-family:var(--font-mono);font-size:14px;font-weight:700;margin-bottom:4px">Valor da Venda</h3>
       <p style="font-size:11px;color:var(--text-muted);margin-bottom:16px">Opcional — deixe vazio se não souber</p>
@@ -2385,17 +2390,26 @@ function openValorVenda(atendId) {
 }
 
 // Currency formatting: formato brasileiro R$ 1.234,56
+// Aceita digitação livre com vírgula como decimal e ponto como milhar
 window.formatCurrencyInput = function(input) {
-  // Extrair só dígitos
-  let digits = input.value.replace(/\D/g, '');
-  if (!digits) { input.value = ''; return; }
-  // Converter para centavos (últimos 2 dígitos = decimais)
-  let cents = parseInt(digits, 10);
-  let reais = (cents / 100).toFixed(2);
-  // Formatar com separadores brasileiros
-  let [intPart, decPart] = reais.split('.');
-  intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  input.value = intPart + ',' + decPart;
+  const cursorPos = input.selectionStart;
+  const oldLen = input.value.length;
+  // Permitir apenas dígitos, vírgula e ponto
+  let v = input.value.replace(/[^\d,\.]/g, '');
+  // Manter apenas a última vírgula como decimal
+  const parts = v.split(',');
+  if (parts.length > 2) {
+    v = parts.slice(0, -1).join('') + ',' + parts[parts.length - 1];
+  }
+  // Separar parte inteira e decimal
+  const [intRaw, dec] = v.split(',');
+  // Remover pontos da parte inteira e reformatar com separador de milhar
+  const intClean = (intRaw || '').replace(/\./g, '');
+  const intFormatted = intClean.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  input.value = dec !== undefined ? intFormatted + ',' + dec.substring(0, 2) : intFormatted;
+  // Manter posição do cursor razoável
+  const diff = input.value.length - oldLen;
+  input.setSelectionRange(cursorPos + diff, cursorPos + diff);
 };
 
 function parseCurrency(str) {
@@ -2429,8 +2443,10 @@ function askContinuar(atendId, onNo, onYes) {
   const overlay = document.createElement('div');
   overlay.id = 'continuarOverlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1001;display:flex;align-items:center;justify-content:center';
+  overlay.addEventListener('click', e => { if (e.target === overlay) { overlay.remove(); const cb = _continuarCallbacks.onNo; _continuarCallbacks = { onNo: null, onYes: null }; if (cb) cb(); } });
   overlay.innerHTML = `
-    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:380px;text-align:center;animation:popIn .25s cubic-bezier(.2,.8,.3,1) both">
+    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:380px;text-align:center;animation:popIn .25s cubic-bezier(.2,.8,.3,1) both;position:relative">
+      <button onclick="answerContinuar(false)" style="position:absolute;top:8px;right:10px;background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;padding:4px 8px;line-height:1" title="Fechar">&times;</button>
       <i class="fa-solid fa-rotate-right" style="font-size:28px;color:var(--info);margin-bottom:12px"></i>
       <h3 style="font-family:var(--font-mono);font-size:14px;font-weight:700;margin-bottom:4px">${nome}</h3>
       <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px">Continuar atendendo?</p>
