@@ -1609,7 +1609,7 @@ window.confirmSaida = async function(motivo) {
   if (error) { toast('Erro ao registrar saída', 'error'); closeSaida(); return; }
   // Registrar pausa no log — aguardar antes de recarregar vendedores
   if (currentTurno) {
-    await sb.rpc('registrar_pausa', { p_vendedor_id: pendingSaidaId, p_turno_id: currentTurno.id, p_motivo: motivo }).catch(() => {});
+    try { await sb.rpc('registrar_pausa', { p_vendedor_id: pendingSaidaId, p_turno_id: currentTurno.id, p_motivo: motivo }); } catch(e) {}
   }
   toast(SAIDA_COLORS[motivo]?.label || 'Saiu da fila', 'info', 2000);
   closeSaida();
