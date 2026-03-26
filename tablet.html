@@ -563,6 +563,37 @@ window.addEventListener('error', function(e) {
   .atend-actions button:hover { transform: scale(1.08); }
   .atend-actions button:active { transform: scale(.92); }
 
+  /* ─── Modal helpers ─── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,.5);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-box {
+    background: var(--bg-card); border: 1px solid var(--border-subtle);
+    border-radius: var(--radius); padding: 24px;
+    width: 90%; max-width: 360px; text-align: center;
+    position: relative;
+    animation: popIn .25s cubic-bezier(.2,.8,.3,1) both;
+  }
+  .modal-close {
+    position: absolute; top: 8px; right: 10px;
+    background: none; border: none; color: var(--text-muted);
+    font-size: 18px; cursor: pointer; padding: 4px 8px; line-height: 1;
+  }
+  .modal-close:active { transform: scale(.85); }
+  .currency-wrap { position: relative; margin-bottom: 8px; }
+  .currency-wrap .currency-prefix {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    font-family: var(--font-mono); font-size: 16px; font-weight: 700; color: var(--text-muted);
+  }
+  .currency-wrap input {
+    width: 100%; padding: 14px 14px 14px 44px;
+    border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
+    background: var(--bg-surface); color: var(--text-primary);
+    font-family: var(--font-mono); font-size: 20px; font-weight: 700; text-align: left;
+  }
+
   .setor-tab:hover:not(.active) { transform: scale(1.04); }
   .setor-tab:active { transform: scale(.95); }
 
@@ -1645,12 +1676,12 @@ window.returnFromPause = async function(vendedorId) {
 
 // ─── Remover da fila (com motivo) ───
 const SAIDA_COLORS = {
-  almoco: { color: '#FBBF24', label: 'Almoço' },
-  banheiro: { color: '#60A5FA', label: 'Banheiro' },
-  reuniao: { color: '#A1A1AA', label: 'Reunião' },
-  operacional: { color: '#8b5cf6', label: 'Operacional' },
-  finalizar: { color: '#F87171', label: 'Finalizou' },
-  outro: { color: '#71717A', label: 'Fora' }
+  almoco: { color: '#FBBF24', label: 'Almoço', labelFull: 'Em almoço' },
+  banheiro: { color: '#60A5FA', label: 'Banheiro', labelFull: 'Banheiro' },
+  reuniao: { color: '#A1A1AA', label: 'Reunião', labelFull: 'Em reunião' },
+  operacional: { color: '#8b5cf6', label: 'Operacional', labelFull: 'Operacional' },
+  finalizar: { color: '#F87171', label: 'Finalizou', labelFull: 'Encerrou' },
+  outro: { color: '#71717A', label: 'Fora', labelFull: 'Fora' }
 };
 const saidaMotivos = {}; // vendedorId → motivo key
 let pendingSaidaId = null;
@@ -1709,14 +1740,6 @@ window.finalizarTodos = async function() {
 // ─── Render footer (vendedores com status) ───
 function renderFooter() {
   const footer = document.getElementById('statusFooter');
-  const SAIDA_LABELS = {
-    almoco: { label: 'Em almoço', color: '#FBBF24' },
-    banheiro: { label: 'Banheiro', color: '#60A5FA' },
-    reuniao: { label: 'Em reunião', color: '#A1A1AA' },
-    operacional: { label: 'Operacional', color: '#8b5cf6' },
-    finalizar: { label: 'Encerrou', color: '#F87171' },
-    outro: { label: 'Fora', color: '#71717A' }
-  };
 
   const allV = vendedores || [];
   const setorVendedores = allV.filter(v => (v.setor || 'loja') === currentSetor);
@@ -1735,28 +1758,26 @@ function renderFooter() {
       dotColor = STATUS_CONFIG.disponivel.color;
     } else if (v.status === 'pausa') {
       const m = saidaMotivos[v.id];
-      const sl = SAIDA_LABELS[m] || SAIDA_LABELS.outro;
-      statusLabel = sl.label;
-      statusColor = sl.color;
-      dotColor = sl.color;
+      const sc = SAIDA_COLORS[m] || SAIDA_COLORS.outro;
+      statusLabel = sc.labelFull;
+      statusColor = sc.color;
+      dotColor = sc.color;
     } else if (v.status === 'disponivel') {
-      // Disponível mas fora da fila
       statusLabel = 'Disponível';
       statusColor = '#64748b';
       dotColor = '#64748b';
     } else {
-      // Fora / outro status
       const m = saidaMotivos[v.id];
-      const sl = SAIDA_LABELS[m] || { label: 'Fora', color: '#71717A' };
-      statusLabel = sl.label;
-      statusColor = sl.color;
-      dotColor = sl.color;
+      const sc = SAIDA_COLORS[m] || SAIDA_COLORS.outro;
+      statusLabel = sc.labelFull;
+      statusColor = sc.color;
+      dotColor = sc.color;
     }
 
     const inQueueClass = inQueue || atendendo ? ' in-queue' : '';
     const dragAttr = !inQueue && !atendendo ? 'draggable="true" ondragstart="onFooterDragStart(event)" ontouchstart="onTouchDragStart(event)"' : '';
 
-    const ini = (v.apelido || v.nome).split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    const ini = initials(v.apelido || v.nome);
     const avatarContent = v.foto_url
       ? `<img src="${v.foto_url}" alt="${v.apelido || v.nome}">`
       : ini;
@@ -1892,7 +1913,7 @@ function openCheckin() {
   const allV = vendedores.filter(v => (v.setor || 'loja') === currentSetor);
   const list = document.getElementById('checkinList');
   list.innerHTML = allV.map(v => {
-    const ini = (v.apelido || v.nome).split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    const ini = initials(v.apelido || v.nome);
     const nome = v.apelido || v.nome;
     return `<label class="checkin-item" data-id="${v.id}">
       <div style="display:flex;align-items:center;gap:12px;flex:1">
@@ -2133,31 +2154,25 @@ function showMultiStep() {
     finalizeMultiOutcome();
     return;
   }
-  const overlay = document.createElement('div');
-  overlay.id = 'multiOutcomeOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1002;display:flex;align-items:center;justify-content:center';
-  overlay.innerHTML = `
-    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:92%;max-width:400px;text-align:center;animation:popIn .25s cubic-bezier(.2,.8,.3,1) both;position:relative">
-      <button onclick="document.getElementById('multiOutcomeOverlay')?.remove()" style="position:absolute;top:8px;right:10px;background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;padding:4px 8px;line-height:1" title="Fechar">&times;</button>
-      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">
-        <span style="background:var(--info);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px">${_multiCurrent} de ${_multiTotal}</span>
-      </div>
-      <h3 style="font-family:var(--font-mono);font-size:15px;font-weight:700;margin-bottom:4px">Cliente ${_multiCurrent}</h3>
-      <p style="font-size:11px;color:var(--text-muted);margin-bottom:20px">Qual foi o resultado?</p>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
-        <button onclick="multiPickOutcome('venda')" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-surface);color:var(--text-primary);cursor:pointer;font-family:var(--font-body);font-size:13px;font-weight:600;transition:all .15s;text-align:left" onmouseenter="this.style.borderColor='var(--success)';this.style.background='rgba(34,197,94,.06)'" onmouseleave="this.style.borderColor='var(--border-subtle)';this.style.background='var(--bg-surface)'">
-          <i class="fa-solid fa-check" style="color:var(--success);width:20px;text-align:center;font-size:16px"></i>Venda
-        </button>
-        <button onclick="multiPickOutcome('nao_convertido')" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-surface);color:var(--text-primary);cursor:pointer;font-family:var(--font-body);font-size:13px;font-weight:600;transition:all .15s;text-align:left" onmouseenter="this.style.borderColor='var(--danger)';this.style.background='rgba(248,113,113,.06)'" onmouseleave="this.style.borderColor='var(--border-subtle)';this.style.background='var(--bg-surface)'">
-          <i class="fa-solid fa-xmark" style="color:var(--danger);width:20px;text-align:center;font-size:16px"></i>Não converteu
-        </button>
-        <button onclick="multiPickOutcome('troca')" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-surface);color:var(--text-primary);cursor:pointer;font-family:var(--font-body);font-size:13px;font-weight:600;transition:all .15s;text-align:left" onmouseenter="this.style.borderColor='var(--warning)';this.style.background='rgba(251,191,36,.06)'" onmouseleave="this.style.borderColor='var(--border-subtle)';this.style.background='var(--bg-surface)'">
-          <i class="fa-solid fa-rotate" style="color:var(--warning);width:20px;text-align:center;font-size:16px"></i>Troca
-        </button>
-      </div>
-      <div id="multiDetailBox" style="display:none"></div>
-    </div>`;
-  document.body.appendChild(overlay);
+  createModal('multiOutcomeOverlay', `
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">
+      <span style="background:var(--info);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px">${_multiCurrent} de ${_multiTotal}</span>
+    </div>
+    <h3 style="font-family:var(--font-mono);font-size:15px;font-weight:700;margin-bottom:4px">Cliente ${_multiCurrent}</h3>
+    <p style="font-size:11px;color:var(--text-muted);margin-bottom:20px">Qual foi o resultado?</p>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+      <button onclick="multiPickOutcome('venda')" class="motivo-option" style="min-height:48px">
+        <i class="fa-solid fa-check" style="color:var(--success);font-size:16px"></i><span style="font-weight:600;font-size:13px">Venda</span>
+      </button>
+      <button onclick="multiPickOutcome('nao_convertido')" class="motivo-option" style="min-height:48px">
+        <i class="fa-solid fa-xmark" style="color:var(--danger);font-size:16px"></i><span style="font-weight:600;font-size:13px">Não converteu</span>
+      </button>
+      <button onclick="multiPickOutcome('troca')" class="motivo-option" style="min-height:48px">
+        <i class="fa-solid fa-rotate" style="color:var(--warning);font-size:16px"></i><span style="font-weight:600;font-size:13px">Troca</span>
+      </button>
+    </div>
+    <div id="multiDetailBox" style="display:none"></div>
+  `, { zIndex: 1002, maxWidth: '400px' });
 }
 
 window.multiPickOutcome = function(resultado) {
@@ -2168,15 +2183,10 @@ window.multiPickOutcome = function(resultado) {
     box.innerHTML = `
       <div style="border-top:1px solid var(--border-subtle);padding-top:12px;margin-top:4px">
         <p style="font-size:10px;color:var(--text-muted);margin-bottom:6px;font-weight:600">Valor da venda (opcional)</p>
-        <div style="position:relative;margin-bottom:8px">
-          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--text-muted)">R$</span>
-          <input id="multiValorInput" type="text" inputmode="decimal" placeholder="0,00"
-            style="width:100%;padding:12px 12px 12px 44px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);color:var(--text-primary);font-family:var(--font-mono);font-size:18px;font-weight:700"
-            oninput="formatCurrencyInput(this)">
-        </div>
-        <div style="display:flex;gap:8px">
-          <button onclick="multiSubmitVenda(true)" class="btn" style="flex:1;min-height:40px;background:var(--bg-hover);color:var(--text-primary);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);font-weight:700;font-size:12px;cursor:pointer">Pular</button>
-          <button onclick="multiSubmitVenda(false)" class="btn" style="flex:1;min-height:40px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;font-size:12px;cursor:pointer"><i class="fa-solid fa-check" style="margin-right:4px"></i>OK</button>
+        ${currencyInputHTML('multiValorInput')}
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button onclick="multiSubmitVenda(true)" class="btn btn-ghost" style="flex:1;min-height:40px;font-size:12px">Pular</button>
+          <button onclick="multiSubmitVenda(false)" class="btn btn-success" style="flex:1;min-height:40px;font-size:12px"><i class="fa-solid fa-check" style="margin-right:4px"></i>OK</button>
         </div>
       </div>`;
     setTimeout(() => document.getElementById('multiValorInput')?.focus(), 100);
@@ -2190,15 +2200,10 @@ window.multiPickOutcome = function(resultado) {
     box.innerHTML = `
       <div style="border-top:1px solid var(--border-subtle);padding-top:12px;margin-top:4px">
         <p style="font-size:10px;color:var(--text-muted);margin-bottom:6px;font-weight:600">Diferença de valor (opcional)</p>
-        <div style="position:relative;margin-bottom:8px">
-          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--text-muted)">R$</span>
-          <input id="multiTrocaInput" type="text" inputmode="decimal" placeholder="0,00"
-            style="width:100%;padding:12px 12px 12px 44px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);color:var(--text-primary);font-family:var(--font-mono);font-size:18px;font-weight:700"
-            oninput="formatCurrencyInput(this)">
-        </div>
-        <div style="display:flex;gap:8px">
-          <button onclick="multiSubmitTroca(true)" class="btn" style="flex:1;min-height:40px;background:var(--bg-hover);color:var(--text-primary);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);font-weight:700;font-size:12px;cursor:pointer">Sem diferença</button>
-          <button onclick="multiSubmitTroca(false)" class="btn" style="flex:1;min-height:40px;background:var(--warning);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;font-size:12px;cursor:pointer"><i class="fa-solid fa-check" style="margin-right:4px"></i>OK</button>
+        ${currencyInputHTML('multiTrocaInput')}
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button onclick="multiSubmitTroca(true)" class="btn btn-ghost" style="flex:1;min-height:40px;font-size:12px">Sem diferença</button>
+          <button onclick="multiSubmitTroca(false)" class="btn btn-warning" style="flex:1;min-height:40px;font-size:12px"><i class="fa-solid fa-check" style="margin-right:4px"></i>OK</button>
         </div>
       </div>`;
     setTimeout(() => document.getElementById('multiTrocaInput')?.focus(), 100);
@@ -2304,38 +2309,26 @@ async function finalizeMultiOutcome() {
 
 // ─── Troca com diferença ───
 function openTrocaDiferenca(atendId) {
-  const overlay = document.createElement('div');
-  overlay.id = 'trocaOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center';
-  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
-  overlay.innerHTML = `
-    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:360px;text-align:center;position:relative;animation:popIn .25s cubic-bezier(.2,.8,.3,1) both">
-      <button onclick="document.getElementById('trocaOverlay')?.remove()" style="position:absolute;top:8px;right:10px;background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;padding:4px 8px;line-height:1" title="Fechar">&times;</button>
-      <i class="fa-solid fa-rotate" style="font-size:28px;color:var(--warning);margin-bottom:12px"></i>
-      <h3 style="font-family:var(--font-mono);font-size:14px;font-weight:700;margin-bottom:4px">Troca</h3>
-      <p style="font-size:11px;color:var(--text-muted);margin-bottom:16px">Houve diferença de valor na troca?</p>
-      <div style="display:flex;gap:8px;margin-bottom:12px">
-        <button id="btnTrocaSem" class="btn" style="flex:1;min-height:44px;background:var(--bg-hover);color:var(--text-primary);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);font-weight:700;cursor:pointer" onclick="submitTroca('${atendId}',false)">
-          Sem diferença
-        </button>
-        <button id="btnTrocaCom" class="btn" style="flex:1;min-height:44px;background:var(--warning);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer" onclick="showTrocaValor('${atendId}')">
-          Com diferença
-        </button>
-      </div>
-      <div id="trocaValorBox" style="display:none">
-        <div style="position:relative;margin-bottom:8px">
-          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--text-muted)">R$</span>
-          <input id="trocaValorInput" type="text" inputmode="decimal" placeholder="0,00"
-            style="width:100%;padding:14px 14px 14px 44px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);color:var(--text-primary);font-family:var(--font-mono);font-size:20px;font-weight:700;text-align:left"
-            oninput="formatCurrencyInput(this)">
-        </div>
-        <p style="font-size:10px;color:var(--text-muted);margin-bottom:10px">Acima de R$ 1.000 o vendedor volta para o 1º da fila</p>
-        <button class="btn" style="width:100%;min-height:44px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer" onclick="submitTroca('${atendId}',true)">
-          <i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar
-        </button>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
+  createModal('trocaOverlay', `
+    <i class="fa-solid fa-rotate" style="font-size:28px;color:var(--warning);margin-bottom:12px"></i>
+    <h3 style="font-family:var(--font-mono);font-size:14px;font-weight:700;margin-bottom:4px">Troca</h3>
+    <p style="font-size:11px;color:var(--text-muted);margin-bottom:16px">Houve diferença de valor na troca?</p>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn" style="flex:1;min-height:44px;background:var(--bg-hover);color:var(--text-primary);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);font-weight:700;cursor:pointer" onclick="submitTroca('${atendId}',false)">
+        Sem diferença
+      </button>
+      <button class="btn" style="flex:1;min-height:44px;background:var(--warning);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer" onclick="showTrocaValor('${atendId}')">
+        Com diferença
+      </button>
+    </div>
+    <div id="trocaValorBox" style="display:none">
+      ${currencyInputHTML('trocaValorInput')}
+      <p style="font-size:10px;color:var(--text-muted);margin-bottom:10px">Acima de R$ 1.000 o vendedor volta para o 1º da fila</p>
+      <button class="btn" style="width:100%;min-height:44px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer" onclick="submitTroca('${atendId}',true)">
+        <i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar
+      </button>
+    </div>
+  `);
 }
 
 window.showTrocaValor = function(atendId) {
@@ -2375,33 +2368,46 @@ window.submitTroca = async function(atendId, comDiferenca) {
 };
 
 function openValorVenda(atendId) {
-  const overlay = document.createElement('div');
-  overlay.id = 'valorOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center';
-  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
-  overlay.innerHTML = `
-    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:360px;text-align:center;animation:popIn .25s cubic-bezier(.2,.8,.3,1) both;position:relative">
-      <button onclick="document.getElementById('valorOverlay')?.remove()" style="position:absolute;top:8px;right:10px;background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;padding:4px 8px;line-height:1" title="Fechar">&times;</button>
-      <i class="fa-solid fa-dollar-sign" style="font-size:28px;color:var(--success);margin-bottom:12px"></i>
-      <h3 style="font-family:var(--font-mono);font-size:14px;font-weight:700;margin-bottom:4px">Valor da Venda</h3>
-      <p style="font-size:11px;color:var(--text-muted);margin-bottom:16px">Opcional — deixe vazio se não souber</p>
-      <div style="position:relative;margin-bottom:16px">
-        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--text-muted)">R$</span>
-        <input id="valorVendaInput" type="text" inputmode="decimal" placeholder="0,00"
-          style="width:100%;padding:14px 14px 14px 44px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);color:var(--text-primary);font-family:var(--font-mono);font-size:20px;font-weight:700;text-align:left"
-          oninput="formatCurrencyInput(this)">
-      </div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-ghost" style="flex:1;min-height:44px;transition:transform .15s" onmouseenter="this.style.transform='scale(1.03)'" onmouseleave="this.style.transform=''" onclick="document.getElementById('valorOverlay').remove();askContinuar('${atendId}',()=>finalize('venda',null,null,null,'${atendId}',null,false),()=>finalize('venda',null,null,null,'${atendId}',null,true))">
-          Pular
-        </button>
-        <button class="btn" style="flex:1;min-height:44px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;transition:transform .15s" onmouseenter="this.style.transform='scale(1.03)'" onmouseleave="this.style.transform=''" onclick="submitValorVenda('${atendId}')">
-          <i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar
-        </button>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
+  createModal('valorOverlay', `
+    <i class="fa-solid fa-dollar-sign" style="font-size:28px;color:var(--success);margin-bottom:12px"></i>
+    <h3 style="font-family:var(--font-mono);font-size:14px;font-weight:700;margin-bottom:4px">Valor da Venda</h3>
+    <p style="font-size:11px;color:var(--text-muted);margin-bottom:16px">Opcional — deixe vazio se não souber</p>
+    ${currencyInputHTML('valorVendaInput')}
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-ghost" style="flex:1;min-height:44px" onclick="document.getElementById('valorOverlay').remove();askContinuar('${atendId}',()=>finalize('venda',null,null,null,'${atendId}',null,false),()=>finalize('venda',null,null,null,'${atendId}',null,true))">
+        Pular
+      </button>
+      <button class="btn" style="flex:1;min-height:44px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer" onclick="submitValorVenda('${atendId}')">
+        <i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar
+      </button>
+    </div>
+  `);
   setTimeout(() => document.getElementById('valorVendaInput')?.focus(), 100);
+}
+
+// ─── Modal helper ───
+function createModal(id, content, { zIndex = 1000, maxWidth = '360px', onClose } = {}) {
+  document.getElementById(id)?.remove();
+  const overlay = document.createElement('div');
+  overlay.id = id;
+  overlay.className = 'modal-overlay';
+  if (zIndex !== 1000) overlay.style.zIndex = zIndex;
+  const closeFn = () => { overlay.remove(); if (onClose) onClose(); };
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeFn(); });
+  overlay.innerHTML = `<div class="modal-box" style="max-width:${maxWidth}">
+    <button class="modal-close" data-modal-close title="Fechar">&times;</button>
+    ${content}
+  </div>`;
+  overlay.querySelector('[data-modal-close]').addEventListener('click', closeFn);
+  document.body.appendChild(overlay);
+  return overlay;
+}
+
+function currencyInputHTML(id, placeholder = '0,00') {
+  return `<div class="currency-wrap">
+    <span class="currency-prefix">R$</span>
+    <input id="${id}" type="text" inputmode="decimal" placeholder="${placeholder}" oninput="formatCurrencyInput(this)">
+  </div>`;
 }
 
 // Currency formatting: formato brasileiro R$ 1.234,56
@@ -2454,33 +2460,25 @@ function askContinuar(atendId, onNo, onYes) {
   const nome = v ? (v.apelido || v.nome) : 'Vendedor';
   _continuarCallbacks = { onNo, onYes, atendId, vendedorId };
 
-  document.getElementById('continuarOverlay')?.remove();
-  const overlay = document.createElement('div');
-  overlay.id = 'continuarOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1001;display:flex;align-items:center;justify-content:center';
-  overlay.addEventListener('click', e => { if (e.target === overlay) { overlay.remove(); const cb = _continuarCallbacks.onNo; _continuarCallbacks = { onNo: null, onYes: null }; if (cb) cb(); } });
-  overlay.innerHTML = `
-    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:380px;text-align:center;animation:popIn .25s cubic-bezier(.2,.8,.3,1) both;position:relative">
-      <button onclick="answerContinuar(false)" style="position:absolute;top:8px;right:10px;background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;padding:4px 8px;line-height:1" title="Fechar">&times;</button>
-      <i class="fa-solid fa-rotate-right" style="font-size:28px;color:var(--info);margin-bottom:12px"></i>
-      <h3 style="font-family:var(--font-mono);font-size:14px;font-weight:700;margin-bottom:4px">${nome}</h3>
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px">Continuar atendendo?</p>
-      <div style="display:flex;gap:8px;margin-bottom:12px">
-        <button class="btn" style="flex:1;min-height:48px;background:var(--bg-hover);color:var(--text-primary);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);font-weight:700;font-size:13px;cursor:pointer;transition:transform .15s" onmouseenter="this.style.transform='scale(1.03)'" onmouseleave="this.style.transform=''" onclick="answerContinuar(false)">
-          <i class="fa-solid fa-list-ol" style="margin-right:4px"></i>Voltar à fila
-        </button>
-        <button class="btn" style="flex:1;min-height:48px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;font-size:13px;cursor:pointer;transition:transform .15s" onmouseenter="this.style.transform='scale(1.03)'" onmouseleave="this.style.transform=''" onclick="showMultiAtend()">
-          <i class="fa-solid fa-arrow-right" style="margin-right:4px"></i>Continuar
-        </button>
+  createModal('continuarOverlay', `
+    <i class="fa-solid fa-rotate-right" style="font-size:28px;color:var(--info);margin-bottom:12px"></i>
+    <h3 style="font-family:var(--font-mono);font-size:14px;font-weight:700;margin-bottom:4px">${nome}</h3>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px">Continuar atendendo?</p>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn btn-ghost" style="flex:1;min-height:48px;font-size:13px;font-weight:700" onclick="answerContinuar(false)">
+        <i class="fa-solid fa-list-ol" style="margin-right:4px"></i>Voltar à fila
+      </button>
+      <button class="btn btn-success" style="flex:1;min-height:48px;font-size:13px;font-weight:700" onclick="showMultiAtend()">
+        <i class="fa-solid fa-arrow-right" style="margin-right:4px"></i>Continuar
+      </button>
+    </div>
+    <div id="multiAtendBox" style="display:none">
+      <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;font-weight:600">Quantos atendimentos simultâneos?</p>
+      <div style="display:flex;gap:6px;justify-content:center">
+        ${[1,2,3,4].map(n => `<button onclick="answerContinuar(true,${n})" style="width:48px;height:48px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-family:var(--font-mono);font-size:18px;font-weight:800;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center" onmouseenter="this.style.background='var(--success)';this.style.color='#fff';this.style.transform='scale(1.1)';this.style.borderColor='var(--success)'" onmouseleave="this.style.background='var(--bg-elevated)';this.style.color='var(--text-primary)';this.style.transform='';this.style.borderColor='var(--border-subtle)'">${n}</button>`).join('')}
       </div>
-      <div id="multiAtendBox" style="display:none">
-        <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;font-weight:600">Quantos atendimentos simultâneos?</p>
-        <div style="display:flex;gap:6px;justify-content:center">
-          ${[1,2,3,4].map(n => `<button onclick="answerContinuar(true,${n})" style="width:48px;height:48px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-family:var(--font-mono);font-size:18px;font-weight:800;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center" onmouseenter="this.style.background='var(--success)';this.style.color='#fff';this.style.transform='scale(1.1)';this.style.borderColor='var(--success)'" onmouseleave="this.style.background='var(--bg-elevated)';this.style.color='var(--text-primary)';this.style.transform='';this.style.borderColor='var(--border-subtle)'">${n}</button>`).join('')}
-        </div>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
+    </div>
+  `, { zIndex: 1001, maxWidth: '380px', onClose: () => answerContinuar(false) });
 }
 
 window.showMultiAtend = function() {
