@@ -355,11 +355,12 @@ window.addEventListener('error', function(e) {
     border-radius: 12px;
     background: var(--bg-card);
     box-shadow: 0 1px 3px rgba(0,0,0,.2), 0 1px 2px rgba(0,0,0,.15);
-    transition: background 150ms ease, opacity 150ms ease, transform 100ms ease, box-shadow 150ms ease;
+    transition: opacity 150ms ease, transform 100ms ease;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     position: relative;
     flex-shrink: 0;
+    transform: translateZ(0);
   }
   .footer-card:hover { background: var(--bg-hover); }
   .footer-card:active { transform: scale(.93); }
@@ -554,10 +555,10 @@ window.addEventListener('error', function(e) {
     to { transform: scale(1.05); }
   }
 
-  .queue-item {
+  .queue-item.new-item {
     animation: slideIn .25s ease both;
   }
-  .footer-card {
+  .footer-card.new-item {
     animation: slideUp .2s ease both;
   }
   .footer-card:hover { background: var(--bg-hover); transform: scale(1.04); }
@@ -579,14 +580,14 @@ window.addEventListener('error', function(e) {
     background: var(--success-bg) !important;
   }
 
-  /* Stagger animation delay for footer cards */
-  .footer-card:nth-child(2) { animation-delay: .03s; }
-  .footer-card:nth-child(3) { animation-delay: .06s; }
-  .footer-card:nth-child(4) { animation-delay: .09s; }
-  .footer-card:nth-child(5) { animation-delay: .12s; }
-  .footer-card:nth-child(6) { animation-delay: .15s; }
-  .footer-card:nth-child(7) { animation-delay: .18s; }
-  .footer-card:nth-child(8) { animation-delay: .21s; }
+  /* Stagger animation only for new items */
+  .footer-card.new-item:nth-child(2) { animation-delay: .03s; }
+  .footer-card.new-item:nth-child(3) { animation-delay: .06s; }
+  .footer-card.new-item:nth-child(4) { animation-delay: .09s; }
+  .footer-card.new-item:nth-child(5) { animation-delay: .12s; }
+  .footer-card.new-item:nth-child(6) { animation-delay: .15s; }
+  .footer-card.new-item:nth-child(7) { animation-delay: .18s; }
+  .footer-card.new-item:nth-child(8) { animation-delay: .21s; }
 
   /* Active atendimento card */
   .atend-card {
@@ -597,8 +598,10 @@ window.addEventListener('error', function(e) {
     border-radius: var(--radius);
     border: 1px solid var(--border-medium);
     background: var(--bg-card);
-    animation: slideUp .25s ease both;
     transition: border-color .2s, box-shadow .2s;
+  }
+  .atend-card.new-item {
+    animation: slideUp .25s ease both;
   }
   .atend-card:hover {
     border-color: var(--border-strong);
@@ -1188,14 +1191,19 @@ async function loadVendedores() {
   }
   vendedores = data || [];
   try { localStorage.setItem('listavez_vendedores', JSON.stringify(vendedores)); } catch(e) {}
-  // Carregar motivos de pausa ativos do banco para restaurar saidaMotivos
-  const pausados = vendedores.filter(v => v.status === 'pausa');
-  if (pausados.length > 0) {
-    const { data: pausas } = await sb.from('pausas').select('vendedor_id, motivo').is('fim', null).in('vendedor_id', pausados.map(v => v.id));
+  // Carregar motivos de pausa do banco apenas para vendedores sem motivo local
+  const pausadosSemMotivo = vendedores.filter(v => v.status === 'pausa' && !saidaMotivos[v.id]);
+  if (pausadosSemMotivo.length > 0) {
+    const { data: pausas } = await sb.from('pausas').select('vendedor_id, motivo').is('fim', null).in('vendedor_id', pausadosSemMotivo.map(v => v.id));
     if (pausas) {
       pausas.forEach(p => { saidaMotivos[p.vendedor_id] = p.motivo; });
     }
   }
+  // Limpar motivos de vendedores que não estão mais em pausa
+  Object.keys(saidaMotivos).forEach(id => {
+    const v = vendedores.find(x => x.id === id);
+    if (!v || (v.status !== 'pausa' && v.status !== 'fora')) delete saidaMotivos[id];
+  });
   scheduleRender();
 }
 

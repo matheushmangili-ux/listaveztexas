@@ -222,7 +222,7 @@ body {
   border: 1px solid var(--border-subtle);
   background: var(--bg-card);
   box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.08);
-  transition: all var(--transition);
+  transition: border-color var(--transition), opacity var(--transition);
   cursor: default;
 }
 .queue-item.active {
@@ -281,8 +281,7 @@ body {
 .bottom-sheet-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.6);
-  backdrop-filter: blur(2px);
+  background: rgba(0,0,0,.65);
   z-index: 10000;
   opacity: 0;
   pointer-events: none;
