@@ -6,10 +6,11 @@
 <title>Lista da Vez — Fila</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 <meta name="theme-color" content="#09090B">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -79,8 +80,8 @@ window.addEventListener('error', function(e) {
   .queue-item {
     position: relative;
     transition: transform .15s ease;
-    will-change: transform;
   }
+  .queue-list.dragging .queue-item { will-change: transform; }
   .queue-item.drag-above {
     transform: translateY(6px);
     box-shadow: 0 -2px 0 0 var(--success);
@@ -359,7 +360,6 @@ window.addEventListener('error', function(e) {
     user-select: none;
     position: relative;
     flex-shrink: 0;
-    transform: translateZ(0);
   }
   .footer-card:hover { background: var(--bg-hover); }
   .footer-card:active { transform: scale(.93); }
@@ -942,6 +942,13 @@ let _localActionTimer = null;
 let _renderPending = false; // Debounce render
 let _actionLock = false; // Previne double-tap em ações críticas
 
+// Cached DOM refs (evita querySelector repetido)
+const _queuePanel = document.querySelector('.queue-panel');
+const _servicePanel = document.querySelector('.service-panel');
+const _queueList = document.getElementById('queueList');
+const _statusFooter = document.getElementById('statusFooter');
+let _reconnectTimer = null; // Previne empilhamento de timeouts de reconexão
+
 // Lock para ações críticas (previne double-tap)
 async function withLock(fn) {
   if (_actionLock) return;
@@ -955,6 +962,7 @@ function markLocal() { _localAction = true; clearTimeout(_localActionTimer); _lo
 window.setSetor = function(setor) {
   currentSetor = setor;
   document.querySelectorAll('.setor-tab').forEach(t => t.classList.toggle('active', t.dataset.setor === setor));
+  _lastQueueKey = ''; _lastFooterKey = ''; // Forçar re-render no novo setor
   renderQueue();
   renderFooter();
 };
@@ -1151,7 +1159,7 @@ function fireEpicTrocaAnimation(nome, valor) {
   ctx.scale(dpr, dpr);
   const sparkles = [];
   const sparkColors = ['#a78bfa', '#e879f9', '#f472b6', '#c4b5fd', '#fbbf24', '#f0abfc'];
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 30; i++) {
     sparkles.push({
       x: Math.random() * window.innerWidth,
       y: Math.random() * window.innerHeight,
@@ -1204,7 +1212,7 @@ setInterval(updateClock, 15000);
 
 // ─── Load vendedores ───
 async function loadVendedores() {
-  const { data, error } = await sb.from('vendedores').select('*').eq('ativo', true).order('posicao_fila', { ascending: true, nullsFirst: false });
+  const { data, error } = await sb.from('vendedores').select('id,nome,apelido,status,posicao_fila,setor,ativo,foto_url').eq('ativo', true).order('posicao_fila', { ascending: true, nullsFirst: false });
   if (error) {
     const backup = localStorage.getItem('listavez_vendedores');
     if (backup) {
@@ -1246,37 +1254,53 @@ function scheduleRender() {
   });
 }
 
-// ─── Render queue ───
+// ─── Render queue (incremental DOM diff) ───
+let _lastQueueKey = ''; // Cache key para skip se nada mudou
 function renderQueue() {
-  const list = document.getElementById('queueList');
+  const list = _queueList;
   const allVendedores = vendedores || [];
   const setorVendedores = allVendedores.filter(v => (v.setor || 'loja') === currentSetor);
   const inQueue = setorVendedores.filter(v => v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
-  const atendendo = setorVendedores.filter(v => v.status === 'em_atendimento');
-  const fora = setorVendedores.filter(v => v.status === 'fora' || (v.status === 'disponivel' && v.posicao_fila == null));
   const pausa = setorVendedores.filter(v => v.status === 'pausa');
 
   document.getElementById('queueCount').textContent = inQueue.length + ' na fila';
+
+  // Build key para detectar mudanças reais
+  const queueKey = (currentTurno ? '1' : '0') + '|' + inQueue.map(v => v.id).join(',') + '|' + pausa.map(v => v.id + ':' + (saidaMotivos[v.id] || '')).join(',');
+  if (queueKey === _lastQueueKey) return; // nada mudou
+  _lastQueueKey = queueKey;
 
   if (!currentTurno) {
     list.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text-muted);font-size:13px"><i class="fa-solid fa-users-slash" style="font-size:24px;margin-bottom:8px;display:block;opacity:.3"></i>Abra o turno para iniciar</div>';
     return;
   }
 
-  let html = '';
+  // Build new HTML via DocumentFragment (1 reflow instead of N)
+  const frag = document.createDocumentFragment();
 
-  // Na fila primeiro (drop zone)
-  inQueue.forEach((v, i) => { html += renderQueueItem(v, i + 1, false, true); });
-  if (inQueue.length === 0) html += '<div style="text-align:center;padding:20px 12px;color:var(--text-muted);font-size:11px;opacity:.5"><i class="fa-solid fa-arrow-up-from-bracket" style="display:block;font-size:18px;margin-bottom:6px;opacity:.3"></i>Arraste vendedores do footer para cá</div>';
+  inQueue.forEach((v, i) => {
+    const div = document.createElement('div');
+    div.innerHTML = renderQueueItem(v, i + 1, false, true);
+    frag.appendChild(div.firstElementChild);
+  });
+  if (inQueue.length === 0) {
+    const empty = document.createElement('div');
+    empty.style.cssText = 'text-align:center;padding:20px 12px;color:var(--text-muted);font-size:11px;opacity:.5';
+    empty.innerHTML = '<i class="fa-solid fa-arrow-up-from-bracket" style="display:block;font-size:18px;margin-bottom:6px;opacity:.3"></i>Arraste vendedores do footer para cá';
+    frag.appendChild(empty);
+  }
 
-  // Pausa (clicável para voltar à fila)
   if (pausa.length > 0) {
-    html += '<div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px;border-top:1px solid var(--border-subtle);margin-top:4px"><i class="fa-solid fa-pause" style="margin-right:4px"></i>Em pausa</div>';
+    const header = document.createElement('div');
+    header.style.cssText = 'font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px;border-top:1px solid var(--border-subtle);margin-top:4px';
+    header.innerHTML = '<i class="fa-solid fa-pause" style="margin-right:4px"></i>Em pausa';
+    frag.appendChild(header);
     pausa.forEach(v => {
       const motivoKey = saidaMotivos[v.id];
       const motivoColor = motivoKey ? (SAIDA_COLORS[motivoKey]?.color || STATUS_CONFIG.pausa.color) : STATUS_CONFIG.pausa.color;
       const motivoLabel = motivoKey ? (SAIDA_COLORS[motivoKey]?.label || 'Pausa') : 'Pausa';
-      html += `<div class="queue-item" data-id="${v.id}" draggable="true" ondragstart="onDragStart(event)" ontouchstart="onTouchDragStart(event)" style="cursor:grab;opacity:.8;border-left:3px solid ${motivoColor}" onclick="returnFromPause('${v.id}')">
+      const div = document.createElement('div');
+      div.innerHTML = `<div class="queue-item" data-id="${v.id}" data-action="return-pause" draggable="true" style="cursor:grab;opacity:.8;border-left:3px solid ${motivoColor}">
         <div class="queue-position" style="background:${motivoColor}20;color:${motivoColor}"><i class="fa-solid ${STATUS_CONFIG.pausa.icon}" style="font-size:11px"></i></div>
         <div style="flex:1;min-width:0">
           <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.apelido || v.nome}</div>
@@ -1284,17 +1308,19 @@ function renderQueue() {
         </div>
         <i class="fa-solid fa-arrow-rotate-left" style="color:var(--success);font-size:12px;opacity:.6" title="Voltar à fila"></i>
       </div>`;
+      frag.appendChild(div.firstElementChild);
     });
   }
 
-  list.innerHTML = html;
+  list.innerHTML = '';
+  list.appendChild(frag);
   initDragAndDrop();
 }
 
 function renderQueueItem(v, pos, isActive, draggable) {
   const cfg = STATUS_CONFIG[v.status] || STATUS_CONFIG.fora;
   const ini = initials(v.apelido || v.nome);
-  const dragAttr = draggable ? 'draggable="true" ondragstart="onDragStart(event)" ontouchstart="onTouchDragStart(event)"' : '';
+  const dragAttr = draggable ? 'draggable="true"' : '';
   const dragStyle = draggable ? 'cursor:grab;' : '';
   const posHtml = pos ? `<div class="queue-position" style="background:${cfg.bg};color:${cfg.color}">${pos}</div>` : `<div class="queue-position" style="background:${cfg.bg};color:${cfg.color}"><i class="fa-solid ${cfg.icon}" style="font-size:11px"></i></div>`;
 
@@ -1312,7 +1338,7 @@ function renderQueueItem(v, pos, isActive, draggable) {
   // Botão de ação rápida: na fila → pode ir ao atendimento
   let actionHtml = '';
   if (draggable && currentTurno) {
-    actionHtml = `<button onclick="event.stopPropagation();sendToAtendimento('${v.id}')" style="padding:4px 8px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-hover);color:var(--info);font-size:9px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font-body);transition:all .15s" title="Enviar ao atendimento"><i class="fa-solid fa-arrow-right" style="font-size:8px"></i></button>`;
+    actionHtml = `<button data-action="send-atend" data-vid="${v.id}" style="padding:4px 8px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-hover);color:var(--info);font-size:9px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font-body);transition:all .15s" title="Enviar ao atendimento"><i class="fa-solid fa-arrow-right" style="font-size:8px"></i></button>`;
   }
 
   return `<div class="queue-item ${v.status}${isActive ? ' active' : ''}" data-id="${v.id}" ${dragAttr} style="${dragStyle}">
@@ -1330,16 +1356,29 @@ function renderQueueItem(v, pos, isActive, draggable) {
 // ─── Drag and Drop (desktop + touch) ───
 let draggedId = null;
 
-window.onDragStart = function(e) {
-  draggedId = e.target.closest('.queue-item')?.dataset.id;
-  e.dataTransfer.effectAllowed = 'move';
-};
-
 let dragDropInitialized = false;
 function initDragAndDrop() {
-  const dropzone = document.getElementById('queueList');
+  const dropzone = _queueList;
   if (!dropzone || dragDropInitialized) return;
   dragDropInitialized = true;
+
+  // ─── Event delegation: clicks + drags no queue list (1 listener em vez de N) ───
+  dropzone.addEventListener('click', e => {
+    const actionBtn = e.target.closest('[data-action="send-atend"]');
+    if (actionBtn) { e.stopPropagation(); sendToAtendimento(actionBtn.dataset.vid); return; }
+    const pauseItem = e.target.closest('[data-action="return-pause"]');
+    if (pauseItem) { returnFromPause(pauseItem.dataset.id); return; }
+  });
+  dropzone.addEventListener('dragstart', e => {
+    const item = e.target.closest('.queue-item');
+    if (!item) return;
+    draggedId = item.dataset.id;
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  dropzone.addEventListener('touchstart', e => {
+    const item = e.target.closest('.queue-item');
+    if (item) onTouchDragStart(e);
+  }, { passive: true });
 
   // Helper para limpar indicadores de drag (evita querySelectorAll repetido)
   let _cachedQueueItems = null;
@@ -1352,6 +1391,7 @@ function initDragAndDrop() {
   let _prevDragAfter = null;
   dropzone.addEventListener('dragover', e => {
     e.preventDefault();
+    dropzone.classList.add('dragging');
     dropzone.style.background = 'rgba(34,197,94,.05)';
     const after = getDragAfterElement(dropzone, e.clientY);
     if (after !== _prevDragAfter) {
@@ -1362,12 +1402,14 @@ function initDragAndDrop() {
     }
   });
   dropzone.addEventListener('dragleave', () => {
+    dropzone.classList.remove('dragging');
     dropzone.style.background = '';
     clearDragIndicators();
     _prevDragAfter = null;
   });
   dropzone.addEventListener('drop', async e => {
     e.preventDefault();
+    dropzone.classList.remove('dragging');
     dropzone.style.background = '';
     clearDragIndicators();
     _prevDragAfter = null;
@@ -1522,9 +1564,13 @@ window.onTouchDragStart = function(e) {
 
   // Cache do layout para evitar reflows durante drag
   const itemW = item.offsetWidth;
-  const queueList = document.getElementById('queueList');
-  const footer = document.getElementById('statusFooter');
+  const queueList = _queueList;
+  const footer = _statusFooter;
   let _prevAfter = null;
+  let _markedEl = null;
+  const _clearTouchIndicators = () => {
+    if (_markedEl) { _markedEl.classList.remove('drag-above', 'drag-below'); _markedEl = null; }
+  };
 
   const onMove = (ev) => {
     if (touchDragging) ev.preventDefault();
@@ -1536,11 +1582,12 @@ window.onTouchDragStart = function(e) {
     if (!touchDragging && Math.abs(dx) + Math.abs(dy) > 8) {
       touchDragging = true;
       item.style.opacity = '0.3';
+      queueList.classList.add('dragging'); // Ativa will-change nos items
 
       // Travar scroll durante drag
       document.body.style.overflow = 'hidden';
-      document.querySelector('.queue-panel')?.style.setProperty('overflow', 'hidden');
-      document.querySelector('.service-panel')?.style.setProperty('overflow', 'hidden');
+      _queuePanel?.style.setProperty('overflow', 'hidden');
+      _servicePanel?.style.setProperty('overflow', 'hidden');
       // Pre-cachear rects (scroll travado = rects estáveis)
       cacheDragRects(queueList);
 
@@ -1575,12 +1622,6 @@ window.onTouchDragStart = function(e) {
 
       const elUnder = document.elementFromPoint(t.clientX, t.clientY);
 
-      // Rastrear elemento marcado para limpar sem querySelectorAll
-      let _markedEl = null;
-      const _clearTouchIndicators = () => {
-        if (_markedEl) { _markedEl.classList.remove('drag-above', 'drag-below'); _markedEl = null; }
-      };
-
       if (elUnder && (elUnder.id === 'queueList' || elUnder.closest('#queueList'))) {
         queueList.style.background = 'rgba(34,197,94,.05)';
         footer?.classList.remove('drop-highlight');
@@ -1608,18 +1649,17 @@ window.onTouchDragStart = function(e) {
 
     // Destravar scroll
     document.body.style.overflow = '';
-    document.querySelector('.queue-panel')?.style.setProperty('overflow', '');
-    document.querySelector('.service-panel')?.style.setProperty('overflow', '');
+    _queuePanel?.style.setProperty('overflow', '');
+    _servicePanel?.style.setProperty('overflow', '');
 
     // Limpar visual + cache
     _dragRectsCache = null;
+    queueList.classList.remove('dragging');
+    _clearTouchIndicators();
     if (touchGhost) { touchGhost.remove(); touchGhost = null; }
     if (touchDragEl) touchDragEl.style.opacity = '1';
-    const queueList = document.getElementById('queueList');
-    const footer = document.getElementById('statusFooter');
     queueList.style.background = '';
     footer?.classList.remove('drop-highlight');
-    queueList.querySelectorAll('.queue-item.drag-above,.queue-item.drag-below').forEach(el => { el.classList.remove('drag-above', 'drag-below'); });
 
     if (!touchDragging) {
       // Foi um tap, não drag — não fazer nada (o onclick cuida)
@@ -1738,11 +1778,16 @@ window.finalizarTodos = async function() {
 };
 
 // ─── Render footer (vendedores com status) ───
+let _lastFooterKey = '';
 function renderFooter() {
-  const footer = document.getElementById('statusFooter');
+  const footer = _statusFooter;
 
   const allV = vendedores || [];
   const setorVendedores = allV.filter(v => (v.setor || 'loja') === currentSetor);
+  // Skip if nada mudou
+  const footerKey = setorVendedores.map(v => v.id + ':' + v.status + ':' + (v.posicao_fila || '') + ':' + (saidaMotivos[v.id] || '')).join('|');
+  if (footerKey === _lastFooterKey) return;
+  _lastFooterKey = footerKey;
   const cards = setorVendedores.map(v => {
     const inQueue = v.status === 'disponivel' && v.posicao_fila != null;
     const atendendo = v.status === 'em_atendimento';
@@ -1775,11 +1820,11 @@ function renderFooter() {
     }
 
     const inQueueClass = inQueue || atendendo ? ' in-queue' : '';
-    const dragAttr = !inQueue && !atendendo ? 'draggable="true" ondragstart="onFooterDragStart(event)" ontouchstart="onTouchDragStart(event)"' : '';
+    const dragAttr = !inQueue && !atendendo ? 'draggable="true"' : '';
 
     const ini = initials(v.apelido || v.nome);
     const avatarContent = v.foto_url
-      ? `<img src="${v.foto_url}" alt="${v.apelido || v.nome}">`
+      ? `<img src="${v.foto_url}" alt="${v.apelido || v.nome}" loading="lazy" width="38" height="38">`
       : ini;
 
     // Avatar color by status
@@ -1790,7 +1835,7 @@ function renderFooter() {
 
     const firstName = (v.apelido || v.nome.split(' ')[0]);
 
-    return `<div class="footer-card${inQueueClass}" data-id="${v.id}" ${dragAttr} onclick="handleFooterTap('${v.id}')">
+    return `<div class="footer-card${inQueueClass}" data-id="${v.id}" ${dragAttr}>
       <div class="fc-avatar" style="background:${avatarBg}">${avatarContent}</div>
       <span class="fc-name">${firstName}</span>
       <span class="fc-status" style="color:${statusColor}">${statusLabel}</span>
@@ -1802,10 +1847,11 @@ function renderFooter() {
   footer.innerHTML = footerTitle + cards;
 }
 
-// Footer drop zone — inicializar UMA vez (não recria a cada render)
-(function initFooterDropZone() {
-  const footer = document.getElementById('statusFooter');
+// Footer — inicializar UMA vez (delegação de eventos: click, drag, touch)
+(function initFooterEvents() {
+  const footer = _statusFooter;
   if (!footer) return;
+  // Drop zone
   footer.addEventListener('dragover', e => { e.preventDefault(); footer.classList.add('drop-highlight'); });
   footer.addEventListener('dragleave', () => { footer.classList.remove('drop-highlight'); });
   footer.addEventListener('drop', e => {
@@ -1813,17 +1859,26 @@ function renderFooter() {
     footer.classList.remove('drop-highlight');
     if (draggedId) { openSaida(draggedId); draggedId = null; }
   });
+  // Click delegation
+  footer.addEventListener('click', e => {
+    const card = e.target.closest('.footer-card[data-id]');
+    if (card) handleFooterTap(card.dataset.id);
+  });
+  // Drag start delegation
+  footer.addEventListener('dragstart', e => {
+    const card = e.target.closest('.footer-card[draggable="true"]');
+    if (!card) return;
+    draggedId = card.dataset.id;
+    e.dataTransfer.effectAllowed = 'move';
+    card.style.opacity = '0.4';
+    setTimeout(() => { if (card) card.style.opacity = ''; }, 200);
+  });
+  // Touch start delegation
+  footer.addEventListener('touchstart', e => {
+    const card = e.target.closest('.footer-card[data-id]');
+    if (card) onTouchDragStart(e);
+  }, { passive: true });
 })();
-
-// ─── Footer drag start (arrastar do footer para sidebar) ───
-window.onFooterDragStart = function(e) {
-  const card = e.target.closest('.footer-card');
-  if (!card) return;
-  draggedId = card.dataset.id;
-  e.dataTransfer.effectAllowed = 'move';
-  card.style.opacity = '0.4';
-  setTimeout(() => { if (card) card.style.opacity = ''; }, 200);
-};
 
 // ─── Animated counter ───
 function animateValue(el, start, end, duration = 400, suffix = '') {
@@ -2097,8 +2152,7 @@ window.cancelarAtendimento = async function(atendId) {
     await sb.from('vendedores').update({ status: 'disponivel', posicao_fila: maxPos + 1 }).eq('id', vendedorId);
 
     removeAtendimento(atendId);
-    await loadVendedores();
-    updateQuickStats();
+    await loadVendedores(); // scheduleRender inclui updateQuickStats
     toast('Atendimento cancelado — vendedor voltou ao último da fila', 'info');
   } catch (e) {
     toast('Erro ao cancelar: ' + e.message, 'error');
@@ -2284,7 +2338,7 @@ async function finalizeMultiOutcome() {
 
     // Perguntar se quer continuar
     askContinuar(atendId,
-      async () => { await loadVendedores(); updateQuickStats(); },
+      async () => { await loadVendedores(); },
       async () => {
         if (vendedorId && currentTurno) {
           await sb.from('vendedores').update({ status: 'em_atendimento', posicao_fila: null }).eq('id', vendedorId);
@@ -2298,7 +2352,6 @@ async function finalizeMultiOutcome() {
           }
         }
         await loadVendedores();
-        updateQuickStats();
       }
     );
   } catch (e) {
@@ -2554,7 +2607,6 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor, con
     }
 
     await loadVendedores();
-    updateQuickStats();
   } catch (e) {
     toast('Erro: ' + e.message, 'error');
   } finally {
@@ -2566,7 +2618,7 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor, con
 function openMotivos() {
   document.getElementById('motivoOverlay').classList.add('open');
   document.getElementById('motivoSheet').classList.add('open');
-  document.querySelectorAll('.motivo-option').forEach(o => o.classList.remove('selected'));
+  document.getElementById('motivoList')?.querySelectorAll('.motivo-option').forEach(o => o.classList.remove('selected'));
   document.getElementById('rupturaField').style.display = 'none';
   document.getElementById('outroField').style.display = 'none';
   document.getElementById('btnConfirmMotivo').disabled = true;
@@ -2579,7 +2631,7 @@ window.closeMotivos = function() {
 };
 
 window.selectMotivo = function(el) {
-  document.querySelectorAll('.motivo-option').forEach(o => o.classList.remove('selected'));
+  document.getElementById('motivoList')?.querySelectorAll('.motivo-option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
   pendingOutcome = el.dataset.motivo;
   document.getElementById('rupturaField').style.display = pendingOutcome === 'ruptura' ? 'block' : 'none';
@@ -2692,8 +2744,9 @@ sb.channel('tablet-sync')
   })
   .subscribe((status) => {
     if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-      // Reconectar após perda de conexão
-      setTimeout(() => { sb.channel('tablet-sync').subscribe(); }, 3000);
+      // Reconectar após perda de conexão (previne empilhamento de timeouts)
+      clearTimeout(_reconnectTimer);
+      _reconnectTimer = setTimeout(() => { sb.channel('tablet-sync').subscribe(); }, 3000);
       toast('Reconectando...', 'warning', 2000);
     }
   });
@@ -2708,8 +2761,8 @@ document.addEventListener('visibilitychange', () => {
       if (touchGhost) { touchGhost.remove(); touchGhost = null; }
       if (touchDragEl) touchDragEl.style.opacity = '1';
       document.body.style.overflow = '';
-      document.querySelector('.queue-panel')?.style.setProperty('overflow', '');
-      document.querySelector('.service-panel')?.style.setProperty('overflow', '');
+      _queuePanel?.style.setProperty('overflow', '');
+      _servicePanel?.style.setProperty('overflow', '');
       touchDragging = false; touchDragId = null; touchDragEl = null;
       _dragRectsCache = null;
     }
@@ -2724,7 +2777,7 @@ document.addEventListener('visibilitychange', () => {
 // ─── Check for existing open turno ───
 async function checkExistingTurno() {
   const today = new Date().toISOString().split('T')[0];
-  const { data } = await sb.from('turnos').select('*').eq('data', today).is('fechamento', null).order('abertura', { ascending: false }).limit(1);
+  const { data } = await sb.from('turnos').select('id,data,abertura').eq('data', today).is('fechamento', null).order('abertura', { ascending: false }).limit(1);
   if (data && data.length > 0) {
     currentTurno = data[0];
     document.getElementById('turnoLabel').textContent = 'Turno aberto';
