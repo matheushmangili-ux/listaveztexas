@@ -909,6 +909,14 @@ let currentSetor = 'loja';
 let _localAction = false; // Flag: ignora realtime quando ação é local
 let _localActionTimer = null;
 let _renderPending = false; // Debounce render
+let _actionLock = false; // Previne double-tap em ações críticas
+
+// Lock para ações críticas (previne double-tap)
+async function withLock(fn) {
+  if (_actionLock) return;
+  _actionLock = true;
+  try { await fn(); } finally { setTimeout(() => { _actionLock = false; }, 300); }
+}
 
 // Marcar que uma ação local está em andamento (evita re-render do realtime)
 function markLocal() { _localAction = true; clearTimeout(_localActionTimer); _localActionTimer = setTimeout(() => { _localAction = false; }, 2000); }
@@ -1381,7 +1389,8 @@ async function reorderInQueue(movedId, beforeId) {
 
   // Batch: 1 RPC em vez de N queries individuais
   const ids = ordered.map(v => v.id);
-  await sb.rpc('reordenar_fila', { p_ids: ids });
+  const { error } = await sb.rpc('reordenar_fila', { p_ids: ids });
+  if (error) { toast('Erro ao reordenar: ' + error.message, 'error'); return; }
   await loadVendedores();
   toast('Fila reordenada', 'info', 1500);
 }
@@ -1400,7 +1409,8 @@ async function addToQueueAt(vendedorId, beforeId) {
   const ids = newOrder.map(v => v.id);
 
   // Batch: 1 RPC (seta status='disponivel' + posicao_fila para todos)
-  await sb.rpc('reordenar_fila', { p_ids: ids });
+  const { error } = await sb.rpc('reordenar_fila', { p_ids: ids });
+  if (error) { toast('Erro ao adicionar: ' + error.message, 'error'); return; }
   await loadVendedores();
   const v = vendedores.find(x => x.id === vendedorId);
   toast((v?.apelido || v?.nome || 'Vendedor') + ' entrou na fila', 'success', 1500);
@@ -1424,6 +1434,7 @@ async function addToQueueAt(vendedorId, beforeId) {
 
 // ─── Enviar vendedor específico ao atendimento (click ou drag) ───
 window.sendToAtendimento = async function(vendedorId) {
+  if (_actionLock) return;
   if (!currentTurno) { toast('Abra o turno primeiro', 'warning'); return; }
   let v = vendedores.find(x => x.id === vendedorId);
   if (!v) return;
@@ -1928,7 +1939,8 @@ window.confirmCheckin = async function() {
 
   // Colocar vendedores selecionados na fila (1 RPC batch)
   markLocal();
-  await sb.rpc('reordenar_fila', { p_ids: checked });
+  const { error: errFila } = await sb.rpc('reordenar_fila', { p_ids: checked });
+  if (errFila) { toast('Erro ao montar fila', 'error'); return; }
 
   document.getElementById('turnoLabel').textContent = 'Turno aberto';
   updateTurnoSwitch(true);
@@ -2045,6 +2057,7 @@ function removeAtendimento(atendId) {
 
 // ─── Cancelar atendimento (voltar vendedor à posição original) ───
 window.cancelarAtendimento = async function(atendId) {
+  if (_actionLock) return;
   if (!confirm('Cancelar este atendimento? O vendedor volta para a posição dele na fila.')) return;
   try {
     const atend = activeAtendimentos.find(a => a.id === atendId);
@@ -2076,6 +2089,7 @@ let pendingOutcome = null;
 let pendingAtendimentoId = null;
 
 window.handleOutcome = function(resultado, atendId) {
+  if (_actionLock) return;
   const atend = activeAtendimentos.find(a => a.id === atendId);
   // Multi-client: abrir popup de resultado para cada cliente
   if (atend && atend._clientCount && atend._clientCount > 1) {
@@ -2349,7 +2363,8 @@ window.submitTroca = async function(atendId, comDiferenca) {
       // Troca >= R$1.000 → vendedor volta pro 1º da fila (premiação) — 1 RPC batch
       const inQueue = vendedores.filter(v => (v.setor || 'loja') === setor && v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
       const newOrder = [vendedorId, ...inQueue.filter(v => v.id !== vendedorId).map(v => v.id)];
-      await sb.rpc('reordenar_fila', { p_ids: newOrder });
+      const { error: errReorder } = await sb.rpc('reordenar_fila', { p_ids: newOrder });
+      if (errReorder) { toast('Erro ao reordenar', 'error'); }
       await loadVendedores();
       // EPIC achievement animation!
       fireEpicTrocaAnimation(v2?.apelido || v2?.nome || 'Vendedor', valor);
@@ -2500,7 +2515,8 @@ window.answerContinuar = async function(continuar, count) {
 
 async function finalize(resultado, motivo, detalhe, produto, atendId, valor, continuar) {
   const id = atendId || pendingAtendimentoId;
-  if (!id) return;
+  if (!id || _actionLock) return;
+  _actionLock = true;
   markLocal();
   try {
     // Guardar info do vendedor antes de finalizar
@@ -2543,6 +2559,8 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor, con
     updateQuickStats();
   } catch (e) {
     toast('Erro: ' + e.message, 'error');
+  } finally {
+    setTimeout(() => { _actionLock = false; }, 300);
   }
 }
 
@@ -2674,11 +2692,35 @@ sb.channel('tablet-sync')
     clearTimeout(_rtAtendTimer);
     _rtAtendTimer = setTimeout(() => { updateQuickStats(); checkActiveAtendimentos(); }, 300);
   })
-  .subscribe();
+  .subscribe((status) => {
+    if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+      // Reconectar após perda de conexão
+      setTimeout(() => { sb.channel('tablet-sync').subscribe(); }, 3000);
+      toast('Reconectando...', 'warning', 2000);
+    }
+  });
 
-// ─── Visibility: refetch on return ───
+// ─── Visibility: pause timer when hidden, refetch on return ───
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) { loadVendedores(); updateQuickStats(); }
+  if (document.hidden) {
+    // Pausar timer para economizar bateria do tablet
+    clearInterval(timerInterval);
+    // Limpar drag state caso tab mude no meio de um drag
+    if (touchDragging) {
+      if (touchGhost) { touchGhost.remove(); touchGhost = null; }
+      if (touchDragEl) touchDragEl.style.opacity = '1';
+      document.body.style.overflow = '';
+      document.querySelector('.queue-panel')?.style.setProperty('overflow', '');
+      document.querySelector('.service-panel')?.style.setProperty('overflow', '');
+      touchDragging = false; touchDragId = null; touchDragEl = null;
+      _dragRectsCache = null;
+    }
+  } else {
+    // Refetch e reconectar timer
+    loadVendedores();
+    updateQuickStats();
+    if (activeAtendimentos.length > 0) renderActiveAtendimentos(); // Re-cria timer
+  }
 });
 
 // ─── Check for existing open turno ───
