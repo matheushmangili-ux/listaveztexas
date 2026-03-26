@@ -330,7 +330,7 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 .motivo-option:hover { border-color: var(--border-medium); background: var(--bg-hover); }
-.motivo-option.selected { border-color: var(--accent); background: rgba(245,158,11,.06); }
+.motivo-option.selected { border-color: var(--accent); background: rgba(225,29,72,.06); }
 .motivo-option i { font-size: 18px; width: 24px; text-align: center; }
 
 /* ─── KPI Card (Dashboard) ─── */

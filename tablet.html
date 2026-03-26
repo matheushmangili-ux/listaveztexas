@@ -14,7 +14,12 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  // Limpar caches antigos e forçar SW novo
+  if (caches) caches.keys().then(ks => ks.forEach(k => { if (k !== 'listavez-v4') caches.delete(k); }));
+  navigator.serviceWorker.register('/sw.js').then(reg => {
+    reg.update();
+    if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+  }).catch(() => {});
 }
 // Error logging (sem auto-reload para evitar loops)
 window.addEventListener('error', function(e) {
@@ -168,35 +173,66 @@ window.addEventListener('error', function(e) {
   .turno-switch {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     padding: 4px;
   }
   .turno-switch:active .turno-switch-thumb {
-    width: 24px;
+    width: 26px;
   }
   .turno-switch-track {
     position: relative;
-    width: 44px;
-    height: 24px;
-    border-radius: 12px;
-    background: var(--bg-hover);
-    border: 1px solid var(--border-medium);
-    transition: background .25s cubic-bezier(.4,0,.2,1), border-color .25s;
+    width: 48px;
+    height: 26px;
+    border-radius: 13px;
+    background: linear-gradient(180deg, #1a1a1f 0%, #27272A 100%);
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow:
+      inset 0 2px 4px rgba(0,0,0,.5),
+      inset 0 1px 2px rgba(0,0,0,.3),
+      0 1px 0 rgba(255,255,255,.04);
+    transition: all .3s cubic-bezier(.4,0,.2,1);
     flex-shrink: 0;
+    overflow: hidden;
+  }
+  .turno-switch-track::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 13px;
+    background: radial-gradient(ellipse at 30% 50%, rgba(52,211,153,.0) 0%, transparent 70%);
+    transition: background .3s;
+    pointer-events: none;
   }
   .turno-switch-thumb {
     position: absolute;
     top: 2px;
     left: 2px;
-    width: 18px;
-    height: 18px;
-    border-radius: 9px;
-    background: #71717A;
-    transition: transform .25s cubic-bezier(.4,0,.2,1), width .15s, background .25s;
-    box-shadow: 0 1px 3px rgba(0,0,0,.3);
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background: linear-gradient(180deg, #8a8a8f 0%, #5a5a60 50%, #4a4a50 100%);
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1), width .15s, background .3s, box-shadow .3s;
+    box-shadow:
+      0 2px 4px rgba(0,0,0,.4),
+      0 1px 1px rgba(0,0,0,.2),
+      inset 0 1px 0 rgba(255,255,255,.25),
+      inset 0 -1px 0 rgba(0,0,0,.15);
+    z-index: 1;
+  }
+  .turno-switch-thumb::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, rgba(255,255,255,.3) 0%, rgba(255,255,255,.08) 100%);
+    transition: background .3s;
   }
   .turno-switch-label {
     font-family: var(--font-mono);
@@ -204,25 +240,57 @@ window.addEventListener('error', function(e) {
     font-weight: 800;
     letter-spacing: .06em;
     color: var(--text-muted);
-    transition: color .25s;
+    transition: color .3s;
     min-width: 24px;
   }
+  /* ON state */
   .turno-switch.on .turno-switch-track {
-    background: rgba(52,211,153,.15);
-    border-color: rgba(52,211,153,.3);
+    background: linear-gradient(180deg, #0d3326 0%, #134e37 60%, #166d4a 100%);
+    border-color: rgba(52,211,153,.2);
+    box-shadow:
+      inset 0 2px 4px rgba(0,0,0,.3),
+      inset 0 1px 2px rgba(0,0,0,.2),
+      0 0 12px rgba(52,211,153,.15),
+      0 1px 0 rgba(255,255,255,.04);
+  }
+  .turno-switch.on .turno-switch-track::after {
+    background: radial-gradient(ellipse at 70% 50%, rgba(52,211,153,.2) 0%, transparent 70%);
   }
   .turno-switch.on .turno-switch-thumb {
-    transform: translateX(20px);
-    background: var(--success);
+    transform: translateX(22px);
+    background: linear-gradient(180deg, #5fe8b3 0%, #34D399 40%, #22b07e 100%);
+    box-shadow:
+      0 2px 6px rgba(52,211,153,.4),
+      0 1px 2px rgba(0,0,0,.2),
+      inset 0 1px 0 rgba(255,255,255,.4),
+      inset 0 -1px 0 rgba(0,0,0,.1),
+      0 0 8px rgba(52,211,153,.3);
+  }
+  .turno-switch.on .turno-switch-thumb::after {
+    background: linear-gradient(180deg, rgba(255,255,255,.5) 0%, rgba(255,255,255,.15) 100%);
   }
   .turno-switch.on .turno-switch-label {
     color: var(--success);
+    text-shadow: 0 0 8px rgba(52,211,153,.3);
   }
   .turno-switch:hover .turno-switch-track {
-    border-color: var(--border-strong);
+    border-color: rgba(255,255,255,.14);
   }
   .turno-switch.on:hover .turno-switch-track {
-    border-color: rgba(52,211,153,.5);
+    border-color: rgba(52,211,153,.35);
+    box-shadow:
+      inset 0 2px 4px rgba(0,0,0,.3),
+      inset 0 1px 2px rgba(0,0,0,.2),
+      0 0 16px rgba(52,211,153,.2),
+      0 1px 0 rgba(255,255,255,.04);
+  }
+  .turno-switch.on:hover .turno-switch-thumb {
+    box-shadow:
+      0 2px 8px rgba(52,211,153,.5),
+      0 1px 2px rgba(0,0,0,.2),
+      inset 0 1px 0 rgba(255,255,255,.4),
+      inset 0 -1px 0 rgba(0,0,0,.1),
+      0 0 12px rgba(52,211,153,.4);
   }
 
   .t-footer::-webkit-scrollbar { height: 0; }
@@ -382,6 +450,83 @@ window.addEventListener('error', function(e) {
   .outcome-btn.exchange { border-color: rgba(251,191,36,.12); color: var(--warning); }
   .outcome-btn.exchange:hover { background: var(--warning-bg); border-color: var(--warning); }
 
+  /* ─── Micro-interactions ─── */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes popIn {
+    0% { opacity: 0; transform: scale(.85); }
+    60% { transform: scale(1.03); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes celebratePulse {
+    0% { box-shadow: 0 0 0 0 rgba(52,211,153,.4); }
+    50% { box-shadow: 0 0 0 12px rgba(52,211,153,0); }
+    100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
+  }
+  @keyframes vendaGlow {
+    0% { background-position: 200% center; }
+    100% { background-position: -200% center; }
+  }
+
+  @keyframes epicCardIn {
+    0% { opacity: 0; transform: scale(.5) rotateY(30deg); }
+    60% { transform: scale(1.05) rotateY(-3deg); }
+    100% { opacity: 1; transform: scale(1) rotateY(0); }
+  }
+  @keyframes epicGlow {
+    from { text-shadow: 0 0 8px rgba(167,139,250,.3); }
+    to { text-shadow: 0 0 20px rgba(167,139,250,.6); }
+  }
+  @keyframes epicBounce {
+    0% { opacity: 0; transform: scale(0) rotate(-20deg); }
+    60% { transform: scale(1.3) rotate(5deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0); }
+  }
+  @keyframes epicPulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.05); }
+  }
+
+  .queue-item {
+    animation: slideIn .25s ease both;
+  }
+  .footer-card {
+    animation: slideUp .2s ease both;
+  }
+  .footer-card:hover { background: var(--bg-hover); transform: scale(1.04); }
+  .footer-card:active { transform: scale(.93); }
+
+  .atend-actions button:hover { transform: scale(1.08); }
+  .atend-actions button:active { transform: scale(.92); }
+
+  .setor-tab:hover:not(.active) { transform: scale(1.04); }
+  .setor-tab:active { transform: scale(.95); }
+
+  .motivo-option:hover { transform: scale(1.02); }
+  .motivo-option:active { transform: scale(.97); }
+
+  /* Venda celebration: green pulse ring */
+  .atend-card.venda-celebrate {
+    animation: celebratePulse .6s ease 3;
+    border-color: var(--success) !important;
+    background: var(--success-bg) !important;
+  }
+
+  /* Stagger animation delay for footer cards */
+  .footer-card:nth-child(2) { animation-delay: .03s; }
+  .footer-card:nth-child(3) { animation-delay: .06s; }
+  .footer-card:nth-child(4) { animation-delay: .09s; }
+  .footer-card:nth-child(5) { animation-delay: .12s; }
+  .footer-card:nth-child(6) { animation-delay: .15s; }
+  .footer-card:nth-child(7) { animation-delay: .18s; }
+  .footer-card:nth-child(8) { animation-delay: .21s; }
+
   /* Active atendimento card */
   .atend-card {
     display: flex;
@@ -391,7 +536,7 @@ window.addEventListener('error', function(e) {
     border-radius: var(--radius);
     border: 1px solid var(--info);
     background: var(--info-bg);
-    animation: fadeIn .3s ease;
+    animation: popIn .3s cubic-bezier(.2,.8,.3,1) both;
   }
   .atend-card .atend-avatar {
     width: 40px; height: 40px; border-radius: var(--radius-sm);
@@ -433,6 +578,26 @@ window.addEventListener('error', function(e) {
     z-index: 9998;
   }
 
+  /* ─── Samsung Tablet / Chrome touch optimizations ─── */
+  @media (pointer: coarse) {
+    .footer-card { min-width: 64px; padding: 8px 10px; }
+    .footer-card .fc-avatar { width: 42px; height: 42px; font-size: 15px; }
+    .atend-actions button { min-width: 48px; min-height: 48px; font-size: 16px; }
+    .queue-item { padding: 14px 16px; min-height: 52px; }
+    .setor-tab { padding: 8px 6px; font-size: 18px; }
+    .motivo-option { padding: 16px; }
+    .turno-switch-track { width: 56px; height: 30px; border-radius: 15px; }
+    .turno-switch-thumb { width: 24px; height: 24px; top: 2px; border-radius: 12px; }
+    .turno-switch.on .turno-switch-thumb { transform: translateX(26px); }
+    .turno-switch:active .turno-switch-thumb { width: 30px; }
+  }
+
+  /* Prevent 300ms tap delay on touch */
+  * { touch-action: manipulation; }
+
+  /* Smooth scrolling for queue */
+  .queue-panel, .service-panel { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+
   /* Live clock */
   .live-clock {
     font-family: var(--font-mono);
@@ -458,7 +623,12 @@ window.addEventListener('error', function(e) {
     <div id="headerKpis" style="display:flex;align-items:center;gap:12px;font-family:var(--font-mono);font-size:11px;font-weight:700">
       <span style="color:var(--text-muted)"><span id="statAtend" style="color:var(--text-primary)">0</span> atend</span>
       <span style="color:var(--text-muted)"><span id="statVendas" style="color:var(--success)">0</span> vendas</span>
-      <span style="color:var(--text-muted)"><span id="statConv" style="color:var(--gold)">0%</span></span>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="color:var(--text-muted)"><span id="statConv" style="color:var(--gold)">0%</span></span>
+        <div style="width:48px;height:4px;border-radius:2px;background:var(--bg-hover);overflow:hidden;flex-shrink:0">
+          <div id="convBar" style="height:100%;width:0%;border-radius:2px;background:var(--accent);transition:width .6s cubic-bezier(.4,0,.2,1)"></div>
+        </div>
+      </div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
       <span class="live-clock" id="clock" style="font-size:12px">--:--</span>
@@ -722,54 +892,132 @@ function playSound(type) {
   }
 }
 
-// ─── Confetti ───
-function fireConfetti() {
+// ─── Venda Celebration ───
+function fireVendaCelebration() {
+  // Full-screen flash overlay
+  const flash = document.createElement('div');
+  flash.style.cssText = 'position:fixed;inset:0;z-index:9999;pointer-events:none;display:flex;align-items:center;justify-content:center;background:rgba(52,211,153,.08)';
+  flash.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;animation:popIn .4s cubic-bezier(.2,.8,.3,1) both">
+      <i class="fa-solid fa-circle-check" style="font-size:56px;color:var(--success);margin-bottom:8px;filter:drop-shadow(0 0 20px rgba(52,211,153,.5))"></i>
+      <span style="font-family:var(--font-mono);font-size:20px;font-weight:800;color:var(--success);letter-spacing:.06em;text-shadow:0 0 20px rgba(52,211,153,.3)">VENDA!</span>
+    </div>`;
+  document.body.appendChild(flash);
+
+  // Expanding ring particles
   const canvas = document.getElementById('confettiCanvas');
-  if (!canvas) return;
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  const ctx = canvas.getContext('2d');
-  const colors = ['#4ade80', '#fbbf24', '#60a5fa', '#f87171', '#a78bfa', '#fb923c', '#e879f9'];
-  const particles = [];
+  if (canvas) {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const ctx = canvas.getContext('2d');
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    let frame = 0;
+    const rings = [
+      { r: 0, maxR: Math.max(canvas.width, canvas.height) * 0.6, speed: 8, color: 'rgba(52,211,153,' },
+      { r: 0, maxR: Math.max(canvas.width, canvas.height) * 0.5, speed: 6, color: 'rgba(74,222,128,' }
+    ];
 
-  for (let i = 0; i < 40; i++) {
-    particles.push({
-      x: Math.random() * canvas.width,
-      y: -20 - Math.random() * 200,
-      w: 6 + Math.random() * 6,
-      h: 4 + Math.random() * 4,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      vx: (Math.random() - 0.5) * 4,
-      vy: 2 + Math.random() * 4,
-      rot: Math.random() * Math.PI * 2,
-      rotSpeed: (Math.random() - 0.5) * 0.2,
-      gravity: 0.08 + Math.random() * 0.04
-    });
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let alive = false;
+      rings.forEach(ring => {
+        ring.r += ring.speed;
+        if (ring.r < ring.maxR) alive = true;
+        const alpha = Math.max(0, 1 - ring.r / ring.maxR) * 0.4;
+        ctx.beginPath();
+        ctx.arc(cx, cy, ring.r, 0, Math.PI * 2);
+        ctx.strokeStyle = ring.color + alpha + ')';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      });
+      frame++;
+      if (alive && frame < 60) requestAnimationFrame(animate);
+      else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    requestAnimationFrame(animate);
   }
 
-  let frame = 0;
-  function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    let alive = false;
-    particles.forEach(p => {
-      p.x += p.vx;
-      p.vy += p.gravity;
-      p.y += p.vy;
-      p.rot += p.rotSpeed;
-      if (p.y < canvas.height + 20) alive = true;
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.rot);
-      ctx.fillStyle = p.color;
-      ctx.globalAlpha = Math.max(0, 1 - p.y / canvas.height);
-      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-      ctx.restore();
+  // Remove flash after delay
+  setTimeout(() => {
+    flash.style.transition = 'opacity .4s';
+    flash.style.opacity = '0';
+    setTimeout(() => flash.remove(), 400);
+  }, 1200);
+}
+
+// ─── Epic Troca Achievement (≥ R$1.000) ───
+function fireEpicTrocaAnimation(nome, valor) {
+  playSound('venda'); // reuse triumph sound
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);backdrop-filter:blur(4px)';
+
+  // Particle canvas behind the card
+  const cvs = document.createElement('canvas');
+  cvs.style.cssText = 'position:absolute;inset:0;width:100%;height:100%';
+  overlay.appendChild(cvs);
+
+  const card = document.createElement('div');
+  card.style.cssText = 'position:relative;z-index:1;text-align:center;padding:40px 48px;border-radius:8px;border:2px solid;animation:epicCardIn .6s cubic-bezier(.2,.8,.3,1) both;background:linear-gradient(135deg,#1a0a2e 0%,#0f172a 50%,#1a0a2e 100%);border-image:linear-gradient(135deg,#a78bfa,#e879f9,#f472b6,#a78bfa) 1';
+  card.innerHTML = `
+    <div style="font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#a78bfa;margin-bottom:12px;animation:epicGlow 1.5s ease infinite alternate">CONQUISTA DESBLOQUEADA</div>
+    <div style="font-size:48px;margin-bottom:8px;animation:epicBounce .8s cubic-bezier(.2,.8,.3,1) .3s both">💎</div>
+    <div style="font-family:var(--font-mono);font-size:20px;font-weight:800;color:#e879f9;margin-bottom:4px;text-shadow:0 0 20px rgba(232,121,249,.4)">${nome}</div>
+    <div style="font-size:13px;color:#c4b5fd;font-weight:600;margin-bottom:16px">Troca com diferença épica</div>
+    <div style="font-family:var(--font-mono);font-size:32px;font-weight:800;color:#f0abfc;text-shadow:0 0 30px rgba(240,171,252,.4);animation:epicPulse 1s ease infinite alternate">R$ ${Number(valor).toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
+    <div style="margin-top:16px;font-size:10px;color:#7c3aed;font-weight:700;letter-spacing:.1em">1º DA FILA GARANTIDO</div>
+    <button onclick="this.closest('div[style*=fixed]').remove()" style="margin-top:20px;padding:10px 32px;border:1px solid rgba(167,139,250,.3);border-radius:4px;background:rgba(167,139,250,.1);color:#c4b5fd;font-family:var(--font-mono);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s" onmouseenter="this.style.background='rgba(167,139,250,.25)'" onmouseleave="this.style.background='rgba(167,139,250,.1)'">FECHAR</button>
+  `;
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+
+  // Sparkle particles
+  const dpr = window.devicePixelRatio || 1;
+  cvs.width = window.innerWidth * dpr;
+  cvs.height = window.innerHeight * dpr;
+  const ctx = cvs.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const sparkles = [];
+  const sparkColors = ['#a78bfa', '#e879f9', '#f472b6', '#c4b5fd', '#fbbf24', '#f0abfc'];
+  for (let i = 0; i < 60; i++) {
+    sparkles.push({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      size: 1 + Math.random() * 3,
+      color: sparkColors[Math.floor(Math.random() * sparkColors.length)],
+      speed: 0.3 + Math.random() * 1.5,
+      phase: Math.random() * Math.PI * 2,
+      drift: (Math.random() - 0.5) * 0.5
     });
-    frame++;
-    if (alive && frame < 90) requestAnimationFrame(animate);
-    else ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
-  requestAnimationFrame(animate);
+  let af;
+  function animateSparkles() {
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    const t = performance.now() / 1000;
+    sparkles.forEach(s => {
+      s.y -= s.speed;
+      s.x += s.drift;
+      if (s.y < -10) { s.y = window.innerHeight + 10; s.x = Math.random() * window.innerWidth; }
+      const alpha = 0.3 + Math.sin(t * 3 + s.phase) * 0.4;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+      ctx.fillStyle = s.color;
+      ctx.globalAlpha = Math.max(0, alpha);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    });
+    af = requestAnimationFrame(animateSparkles);
+  }
+  animateSparkles();
+
+  // Auto-close after 6s
+  setTimeout(() => {
+    cancelAnimationFrame(af);
+    overlay.style.transition = 'opacity .5s';
+    overlay.style.opacity = '0';
+    setTimeout(() => overlay.remove(), 500);
+  }, 6000);
 }
 
 // ─── Clock ───
@@ -999,41 +1247,42 @@ async function addToQueueAt(vendedorId, beforeId) {
     sp.classList.remove('drop-active');
     const id = draggedId;
     draggedId = null;
-    if (!id || !currentTurno) return;
-    const v = vendedores.find(x => x.id === id);
-    if (!v || v.status !== 'disponivel' || v.posicao_fila == null) return;
-    // Iniciar atendimento direto
-    try {
-      markLocal();
-      const { data, error } = await sb.rpc('proximo_cliente', { p_turno_id: currentTurno.id, p_setor: v.setor || 'loja' });
-      if (error) throw error;
-      const atend = Array.isArray(data) ? data[0] : data;
-      activeAtendimentos.push(atend);
-      renderActiveAtendimentos();
-      playSound('atendimento');
-      await loadVendedores();
-      toast((v.apelido || v.nome) + ' iniciou atendimento', 'info', 1500);
-    } catch (err) {
-      toast('Erro: ' + (err.message || 'falha ao iniciar'), 'error');
-    }
+    if (!id) return;
+    await sendToAtendimento(id);
   });
 })();
 
-// ─── Enviar vendedor da fila direto ao atendimento (click) ───
+// ─── Enviar vendedor específico ao atendimento (click ou drag) ───
 window.sendToAtendimento = async function(vendedorId) {
   if (!currentTurno) { toast('Abra o turno primeiro', 'warning'); return; }
-  const v = vendedores.find(x => x.id === vendedorId);
-  if (!v || v.status !== 'disponivel' || v.posicao_fila == null) return;
+  let v = vendedores.find(x => x.id === vendedorId);
+  if (!v) return;
+  // Se vendedor está fora/pausa, colocar na fila primeiro
+  if (v.status === 'fora' || v.status === 'pausa') {
+    await addToQueue(vendedorId);
+    v = vendedores.find(x => x.id === vendedorId);
+    if (!v || v.posicao_fila == null) return;
+  }
+  if (v.status !== 'disponivel' || v.posicao_fila == null) return;
+  // Se não é o primeiro da fila, é atendimento preferencial
+  const setor = v.setor || 'loja';
+  const fila = vendedores.filter(x => (x.setor || 'loja') === setor && x.status === 'disponivel' && x.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
+  const isPreferencial = fila.length > 0 && fila[0].id !== vendedorId;
   try {
     markLocal();
-    const { data, error } = await sb.rpc('proximo_cliente', { p_turno_id: currentTurno.id, p_setor: v.setor || 'loja' });
+    const { data, error } = await sb.rpc('iniciar_atendimento_vendedor', {
+      p_turno_id: currentTurno.id,
+      p_vendedor_id: vendedorId,
+      p_preferencial: isPreferencial
+    });
     if (error) throw error;
     const { data: atend } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('id', data).single();
     activeAtendimentos.push(atend);
     renderActiveAtendimentos();
     playSound('atendimento');
     await loadVendedores();
-    toast((v.apelido || v.nome) + ' iniciou atendimento', 'info', 1500);
+    const prefLabel = isPreferencial ? ' (preferencial)' : '';
+    toast((v.apelido || v.nome) + ' iniciou atendimento' + prefLabel, 'info', 2000);
   } catch (err) {
     toast('Erro: ' + (err.message || 'falha ao iniciar'), 'error');
   }
@@ -1147,21 +1396,8 @@ window.onTouchDragStart = function(e) {
       if (isInQueue) { await reorderInQueue(touchDragId, afterId); }
       else { await addToQueueAt(touchDragId, afterId); }
     } else if (dropEl && (dropEl.id === 'servicePanel' || dropEl.closest('#servicePanel') || dropEl.closest('#activeList'))) {
-      // Soltar no painel de atendimento = iniciar atendimento
-      const v = vendedores.find(x => x.id === touchDragId);
-      if (v && v.status === 'disponivel' && v.posicao_fila != null && currentTurno) {
-        try {
-          markLocal();
-          const { data, error } = await sb.rpc('proximo_cliente', { p_turno_id: currentTurno.id, p_setor: v.setor || 'loja' });
-          if (error) throw error;
-          const atend = Array.isArray(data) ? data[0] : data;
-          activeAtendimentos.push(atend);
-          renderActiveAtendimentos();
-          playSound('atendimento');
-          await loadVendedores();
-          toast((v.apelido || v.nome) + ' iniciou atendimento', 'info', 1500);
-        } catch (err) { toast('Erro: ' + (err.message || ''), 'error'); }
-      }
+      // Soltar no painel de atendimento = iniciar atendimento (qualquer vendedor)
+      await sendToAtendimento(touchDragId);
     } else if (dropEl && (dropEl.id === 'statusFooter' || dropEl.closest('#statusFooter'))) {
       openSaida(touchDragId);
     }
@@ -1341,7 +1577,24 @@ window.onFooterDragStart = function(e) {
   setTimeout(() => { if (card) card.style.opacity = ''; }, 200);
 };
 
+// ─── Animated counter ───
+function animateValue(el, start, end, duration = 400, suffix = '') {
+  if (!el || start === end) { if (el) el.textContent = end + suffix; return; }
+  const range = end - start;
+  const startTime = performance.now();
+  function tick(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+    const current = Math.round(start + range * eased);
+    el.textContent = current + suffix;
+    if (progress < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
 // ─── Quick stats ───
+let _prevStats = { total: 0, vendas: 0, conv: 0 };
 async function updateQuickStats() {
   if (!currentTurno) return;
   const { data } = await sb.from('atendimentos').select('resultado').eq('turno_id', currentTurno.id);
@@ -1349,9 +1602,16 @@ async function updateQuickStats() {
   const total = data.filter(a => a.resultado !== 'em_andamento').length;
   const vendas = data.filter(a => a.resultado === 'venda').length;
   const conv = total > 0 ? Math.round(vendas / total * 100) : 0;
-  document.getElementById('statAtend').textContent = total;
-  document.getElementById('statVendas').textContent = vendas;
-  document.getElementById('statConv').textContent = conv + '%';
+  animateValue(document.getElementById('statAtend'), _prevStats.total, total);
+  animateValue(document.getElementById('statVendas'), _prevStats.vendas, vendas);
+  animateValue(document.getElementById('statConv'), _prevStats.conv, conv, 400, '%');
+  // Progress bar
+  const bar = document.getElementById('convBar');
+  if (bar) {
+    bar.style.width = conv + '%';
+    bar.style.background = conv >= 50 ? 'var(--success)' : conv >= 30 ? 'var(--warning)' : 'var(--accent)';
+  }
+  _prevStats = { total, vendas, conv };
 }
 
 // ─── Turno Switch ───
@@ -1389,7 +1649,7 @@ window.toggleTurno = async function() {
     renderActiveAtendimentos();
     document.getElementById('turnoLabel').textContent = 'Turno encerrado';
     updateTurnoSwitch(false);
-    document.getElementById('btnProximo').disabled = true;
+    // btnProximo removido — controle via switch
     toast('Turno encerrado', 'info');
   } else {
     // Abrir turno: vendedores ficam "fora" até serem arrastados para a fila
@@ -1398,7 +1658,7 @@ window.toggleTurno = async function() {
     currentTurno = data;
     document.getElementById('turnoLabel').textContent = 'Turno aberto';
     updateTurnoSwitch(true);
-    document.getElementById('btnProximo').disabled = false;
+    // btnProximo removido — controle via switch
     toast('Turno aberto! Arraste vendedores para a fila.', 'success');
   }
   loadVendedores();
@@ -1407,8 +1667,6 @@ window.toggleTurno = async function() {
 // ─── Próximo cliente ───
 window.handleProximoCliente = async function() {
   if (!currentTurno) return;
-  const btn = document.getElementById('btnProximo');
-  btn.disabled = true;
   try {
     const { data, error } = await sb.rpc('proximo_cliente', { p_turno_id: currentTurno.id, p_setor: currentSetor });
     if (error) throw error;
@@ -1420,7 +1678,6 @@ window.handleProximoCliente = async function() {
   } catch (e) {
     toast(e.message || 'Nenhum vendedor disponível', 'warning');
   }
-  btn.disabled = !currentTurno;
 };
 
 function renderActiveAtendimentos() {
@@ -1568,8 +1825,12 @@ function openTrocaDiferenca(atendId) {
         </button>
       </div>
       <div id="trocaValorBox" style="display:none">
-        <input id="trocaValorInput" type="number" inputmode="decimal" placeholder="R$ valor da diferença" step="0.01" min="0"
-          style="width:100%;padding:14px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);color:var(--text-primary);font-family:var(--font-mono);font-size:20px;font-weight:700;text-align:center;margin-bottom:8px">
+        <div style="position:relative;margin-bottom:8px">
+          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--text-muted)">R$</span>
+          <input id="trocaValorInput" type="text" inputmode="decimal" placeholder="0,00"
+            style="width:100%;padding:14px 14px 14px 44px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);color:var(--text-primary);font-family:var(--font-mono);font-size:20px;font-weight:700;text-align:left"
+            oninput="formatCurrencyInput(this)">
+        </div>
         <p style="font-size:10px;color:var(--text-muted);margin-bottom:10px">Acima de R$ 1.000 o vendedor volta para o 1º da fila</p>
         <button class="btn" style="width:100%;min-height:44px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer" onclick="submitTroca('${atendId}',true)">
           <i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar
@@ -1588,7 +1849,7 @@ window.submitTroca = async function(atendId, comDiferenca) {
   let valor = null;
   if (comDiferenca) {
     const input = document.getElementById('trocaValorInput');
-    valor = input ? parseFloat(input.value) || 0 : 0;
+    valor = input ? parseCurrency(input.value) || 0 : 0;
   }
   document.getElementById('trocaOverlay')?.remove();
 
@@ -1599,13 +1860,15 @@ window.submitTroca = async function(atendId, comDiferenca) {
   if (comDiferenca && valor >= 1000) {
     await finalize('troca', null, null, null, atendId, valor, false);
     if (vendedorId) {
-      const setor = vendedores.find(v => v.id === vendedorId)?.setor || 'loja';
+      const v2 = vendedores.find(v => v.id === vendedorId);
+      const setor = v2?.setor || 'loja';
       const inQueue = vendedores.filter(v => (v.setor || 'loja') === setor && v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
       const updates = inQueue.map((v, i) => sb.from('vendedores').update({ posicao_fila: i + 2 }).eq('id', v.id));
       updates.push(sb.from('vendedores').update({ status: 'disponivel', posicao_fila: 1 }).eq('id', vendedorId));
       await Promise.all(updates);
       await loadVendedores();
-      toast('Troca com diferença! Vendedor voltou para 1º da fila.', 'success');
+      // EPIC achievement animation!
+      fireEpicTrocaAnimation(v2?.apelido || v2?.nome || 'Vendedor', valor);
     }
   } else {
     askContinuar(atendId, () => finalize('troca', null, null, null, atendId, valor, false), () => finalize('troca', null, null, null, atendId, valor, true));
@@ -1617,17 +1880,21 @@ function openValorVenda(atendId) {
   overlay.id = 'valorOverlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);z-index:1000;display:flex;align-items:center;justify-content:center';
   overlay.innerHTML = `
-    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:360px;text-align:center">
+    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:360px;text-align:center;animation:popIn .25s cubic-bezier(.2,.8,.3,1) both">
       <i class="fa-solid fa-dollar-sign" style="font-size:28px;color:var(--success);margin-bottom:12px"></i>
       <h3 style="font-family:var(--font-mono);font-size:14px;font-weight:700;margin-bottom:4px">Valor da Venda</h3>
       <p style="font-size:11px;color:var(--text-muted);margin-bottom:16px">Opcional — deixe vazio se não souber</p>
-      <input id="valorVendaInput" type="number" inputmode="decimal" placeholder="R$ 0,00" step="0.01" min="0"
-        style="width:100%;padding:14px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);color:var(--text-primary);font-family:var(--font-mono);font-size:20px;font-weight:700;text-align:center;margin-bottom:16px">
+      <div style="position:relative;margin-bottom:16px">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--text-muted)">R$</span>
+        <input id="valorVendaInput" type="text" inputmode="decimal" placeholder="0,00"
+          style="width:100%;padding:14px 14px 14px 44px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);color:var(--text-primary);font-family:var(--font-mono);font-size:20px;font-weight:700;text-align:left"
+          oninput="formatCurrencyInput(this)">
+      </div>
       <div style="display:flex;gap:8px">
-        <button class="btn btn-ghost" style="flex:1;min-height:44px" onclick="document.getElementById('valorOverlay').remove();askContinuar('${atendId}',()=>finalize('venda',null,null,null,'${atendId}',null,false),()=>finalize('venda',null,null,null,'${atendId}',null,true))">
+        <button class="btn btn-ghost" style="flex:1;min-height:44px;transition:transform .15s" onmouseenter="this.style.transform='scale(1.03)'" onmouseleave="this.style.transform=''" onclick="document.getElementById('valorOverlay').remove();askContinuar('${atendId}',()=>finalize('venda',null,null,null,'${atendId}',null,false),()=>finalize('venda',null,null,null,'${atendId}',null,true))">
           Pular
         </button>
-        <button class="btn" style="flex:1;min-height:44px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer" onclick="submitValorVenda('${atendId}')">
+        <button class="btn" style="flex:1;min-height:44px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;transition:transform .15s" onmouseenter="this.style.transform='scale(1.03)'" onmouseleave="this.style.transform=''" onclick="submitValorVenda('${atendId}')">
           <i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar
         </button>
       </div>
@@ -1636,9 +1903,25 @@ function openValorVenda(atendId) {
   setTimeout(() => document.getElementById('valorVendaInput')?.focus(), 100);
 }
 
+// Currency formatting: accepts comma and dot as decimal separator
+window.formatCurrencyInput = function(input) {
+  let v = input.value.replace(/[^\d,\.]/g, '');
+  // Replace comma with dot for internal, but display with comma
+  v = v.replace(/\.(?=.*[,\.])/g, ''); // keep only last separator
+  input.value = v;
+};
+
+function parseCurrency(str) {
+  if (!str) return null;
+  // Accept both comma and dot as decimal separator
+  const cleaned = str.replace(/\./g, '').replace(',', '.');
+  const val = parseFloat(cleaned);
+  return isNaN(val) ? null : val;
+}
+
 window.submitValorVenda = function(atendId) {
   const input = document.getElementById('valorVendaInput');
-  const valor = input ? parseFloat(input.value) || null : null;
+  const valor = input ? parseCurrency(input.value) : null;
   document.getElementById('valorOverlay')?.remove();
   askContinuar(atendId, () => finalize('venda', null, null, null, atendId, valor, false), () => finalize('venda', null, null, null, atendId, valor, true));
 };
@@ -1646,39 +1929,80 @@ window.submitValorVenda = function(atendId) {
 // ─── Popup "Continuar atendendo?" ───
 let _continuarCallbacks = { onNo: null, onYes: null };
 
+window.finalize = finalize;
+window.askContinuar = askContinuar;
 function askContinuar(atendId, onNo, onYes) {
   const atend = activeAtendimentos.find(a => a.id === atendId);
   const vendedorId = atend?.vendedor_id;
   const v = vendedorId ? vendedores.find(x => x.id === vendedorId) : (atend?.vendedores || null);
   const nome = v ? (v.apelido || v.nome) : 'Vendedor';
-  _continuarCallbacks = { onNo, onYes };
+  _continuarCallbacks = { onNo, onYes, atendId, vendedorId };
 
   document.getElementById('continuarOverlay')?.remove();
   const overlay = document.createElement('div');
   overlay.id = 'continuarOverlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);z-index:1001;display:flex;align-items:center;justify-content:center';
   overlay.innerHTML = `
-    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:340px;text-align:center">
+    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;width:90%;max-width:380px;text-align:center;animation:popIn .25s cubic-bezier(.2,.8,.3,1) both">
       <i class="fa-solid fa-rotate-right" style="font-size:28px;color:var(--info);margin-bottom:12px"></i>
       <h3 style="font-family:var(--font-mono);font-size:14px;font-weight:700;margin-bottom:4px">${nome}</h3>
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px">Continuar atendendo outro cliente?</p>
-      <div style="display:flex;gap:8px">
-        <button class="btn" style="flex:1;min-height:48px;background:var(--bg-hover);color:var(--text-primary);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);font-weight:700;font-size:13px;cursor:pointer" onclick="answerContinuar(false)">
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px">Continuar atendendo?</p>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button class="btn" style="flex:1;min-height:48px;background:var(--bg-hover);color:var(--text-primary);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);font-weight:700;font-size:13px;cursor:pointer;transition:transform .15s" onmouseenter="this.style.transform='scale(1.03)'" onmouseleave="this.style.transform=''" onclick="answerContinuar(false)">
           <i class="fa-solid fa-list-ol" style="margin-right:4px"></i>Voltar à fila
         </button>
-        <button class="btn" style="flex:1;min-height:48px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;font-size:13px;cursor:pointer" onclick="answerContinuar(true)">
+        <button class="btn" style="flex:1;min-height:48px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;font-size:13px;cursor:pointer;transition:transform .15s" onmouseenter="this.style.transform='scale(1.03)'" onmouseleave="this.style.transform=''" onclick="showMultiAtend()">
           <i class="fa-solid fa-arrow-right" style="margin-right:4px"></i>Continuar
         </button>
+      </div>
+      <div id="multiAtendBox" style="display:none">
+        <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;font-weight:600">Quantos atendimentos simultâneos?</p>
+        <div style="display:flex;gap:6px;justify-content:center">
+          ${[1,2,3,4].map(n => `<button onclick="answerContinuar(true,${n})" style="width:48px;height:48px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-family:var(--font-mono);font-size:18px;font-weight:800;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center" onmouseenter="this.style.background='var(--success)';this.style.color='#fff';this.style.transform='scale(1.1)';this.style.borderColor='var(--success)'" onmouseleave="this.style.background='var(--bg-elevated)';this.style.color='var(--text-primary)';this.style.transform='';this.style.borderColor='var(--border-subtle)'">${n}</button>`).join('')}
+        </div>
       </div>
     </div>`;
   document.body.appendChild(overlay);
 }
 
-window.answerContinuar = function(continuar) {
+window.showMultiAtend = function() {
+  const box = document.getElementById('multiAtendBox');
+  if (box) { box.style.display = ''; box.style.animation = 'slideUp .2s ease both'; }
+};
+
+window.answerContinuar = async function(continuar, count) {
   document.getElementById('continuarOverlay')?.remove();
-  const cb = continuar ? _continuarCallbacks.onYes : _continuarCallbacks.onNo;
+  if (!continuar) {
+    const cb = _continuarCallbacks.onNo;
+    _continuarCallbacks = { onNo: null, onYes: null };
+    if (cb) cb();
+    return;
+  }
+  // Criar múltiplos atendimentos
+  const vendedorId = _continuarCallbacks.vendedorId;
+  const onYes = _continuarCallbacks.onYes;
   _continuarCallbacks = { onNo: null, onYes: null };
-  if (cb) cb();
+  if (onYes) await onYes();
+
+  // Se count > 1, criar atendimentos adicionais
+  if (count && count > 1 && vendedorId && currentTurno) {
+    for (let i = 1; i < count; i++) {
+      try {
+        await sb.from('vendedores').update({ status: 'em_atendimento', posicao_fila: null }).eq('id', vendedorId);
+        const { data: novoAtend, error } = await sb.from('atendimentos').insert({
+          turno_id: currentTurno.id,
+          vendedor_id: vendedorId,
+          inicio: new Date().toISOString()
+        }).select('*, vendedores(nome, apelido)').single();
+        if (!error && novoAtend) {
+          activeAtendimentos.push(novoAtend);
+        }
+      } catch(e) {}
+    }
+    renderActiveAtendimentos();
+    toast(count + ' atendimentos abertos', 'info', 1500);
+    await loadVendedores();
+  }
 };
 
 async function finalize(resultado, motivo, detalhe, produto, atendId, valor, continuar) {
@@ -1702,7 +2026,7 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor, con
     const msg = resultado === 'venda' ? 'Venda registrada!' : resultado === 'troca' ? 'Troca registrada.' : 'Não conversão registrada.';
     const type = resultado === 'venda' ? 'success' : 'warning';
     toast(msg, type);
-    if (resultado === 'venda') { playSound('venda'); fireConfetti(); }
+    if (resultado === 'venda') { playSound('venda'); fireVendaCelebration(); }
     removeAtendimento(id);
     pendingAtendimentoId = null;
 
@@ -1817,7 +2141,7 @@ window.confirmAddToQueue = async function(vendedorId) {
   await addToQueue(vendedorId);
 };
 
-function closeConfirmFila() {
+window.closeConfirmFila = function() {
   if (_confirmFilaOutsideHandler) {
     document.removeEventListener('click', _confirmFilaOutsideHandler);
     _confirmFilaOutsideHandler = null;
@@ -1871,7 +2195,7 @@ async function checkExistingTurno() {
     currentTurno = data[0];
     document.getElementById('turnoLabel').textContent = 'Turno aberto';
     updateTurnoSwitch(true);
-    document.getElementById('btnProximo').disabled = false;
+    // btnProximo removido — controle via switch
   }
 }
 
