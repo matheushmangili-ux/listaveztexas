@@ -1003,6 +1003,32 @@ function playSound(type) {
     resG.gain.linearRampToValueAtTime(0.1, t0 + 0.4);
     resG.gain.exponentialRampToValueAtTime(0.001, t0 + 1.2);
     resolve.start(t0 + 0.35); resolve.stop(t0 + 1.2);
+  } else if (type === 'fail') {
+    // Sad trombone "wah wah wah wahhh"
+    const t0 = audioCtx.currentTime;
+    const notes = [
+      { freq: 392, start: 0, dur: 0.28 },
+      { freq: 370, start: 0.3, dur: 0.28 },
+      { freq: 349, start: 0.6, dur: 0.28 },
+      { freq: 311, start: 0.9, dur: 0.6 }
+    ];
+    notes.forEach(n => {
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.connect(g); g.connect(audioCtx.destination);
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(n.freq, t0 + n.start);
+      // Vibrato on last note
+      if (n.start === 0.9) {
+        o.frequency.setValueAtTime(n.freq, t0 + n.start);
+        o.frequency.linearRampToValueAtTime(n.freq - 15, t0 + n.start + 0.15);
+        o.frequency.linearRampToValueAtTime(n.freq - 5, t0 + n.start + 0.3);
+        o.frequency.linearRampToValueAtTime(n.freq - 25, t0 + n.start + 0.5);
+      }
+      g.gain.setValueAtTime(0.08, t0 + n.start);
+      g.gain.exponentialRampToValueAtTime(0.001, t0 + n.start + n.dur);
+      o.start(t0 + n.start); o.stop(t0 + n.start + n.dur + 0.05);
+    });
   }
 }
 
@@ -2190,6 +2216,7 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor, con
     const type = resultado === 'venda' ? 'success' : 'warning';
     toast(msg, type);
     if (resultado === 'venda') { playSound('venda'); fireVendaCelebration(); }
+    else if (resultado === 'nao_convertido') { playSound('fail'); }
     removeAtendimento(id);
     pendingAtendimentoId = null;
 
