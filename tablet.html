@@ -192,7 +192,7 @@ window.addEventListener('error', function(e) {
       inset 0 2px 4px rgba(0,0,0,.5),
       inset 0 1px 2px rgba(0,0,0,.3),
       0 1px 0 rgba(255,255,255,.04);
-    transition: all .3s cubic-bezier(.4,0,.2,1);
+    transition: background .3s cubic-bezier(.4,0,.2,1), border-color .3s cubic-bezier(.4,0,.2,1), box-shadow .3s cubic-bezier(.4,0,.2,1);
     flex-shrink: 0;
     overflow: hidden;
   }
@@ -1153,10 +1153,12 @@ function fireEpicTrocaAnimation(nome, valor) {
 }
 
 // ─── Clock ───
+const _clockEl = document.getElementById('clock');
+let _lastClockText = '';
 function updateClock() {
   const now = new Date();
-  document.getElementById('clock').textContent =
-    String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+  const text = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+  if (text !== _lastClockText) { _clockEl.textContent = text; _lastClockText = text; }
 }
 updateClock();
 setInterval(updateClock, 15000);
@@ -1300,23 +1302,36 @@ function initDragAndDrop() {
   if (!dropzone || dragDropInitialized) return;
   dragDropInitialized = true;
 
+  // Helper para limpar indicadores de drag (evita querySelectorAll repetido)
+  let _cachedQueueItems = null;
+  const getCachedItems = () => _cachedQueueItems || (_cachedQueueItems = [...dropzone.querySelectorAll('.queue-item')]);
+  const clearDragIndicators = () => { getCachedItems().forEach(el => el.classList.remove('drag-above', 'drag-below')); };
+  // Invalidar cache quando DOM muda
+  const _itemObserver = new MutationObserver(() => { _cachedQueueItems = null; });
+  _itemObserver.observe(dropzone, { childList: true });
+
+  let _prevDragAfter = null;
   dropzone.addEventListener('dragover', e => {
     e.preventDefault();
     dropzone.style.background = 'rgba(34,197,94,.05)';
-    const items = [...dropzone.querySelectorAll('.queue-item')];
-    items.forEach(el => el.classList.remove('drag-above', 'drag-below'));
     const after = getDragAfterElement(dropzone, e.clientY);
-    if (after) after.classList.add('drag-above');
-    else if (items.length > 0) items[items.length-1].classList.add('drag-below');
+    if (after !== _prevDragAfter) {
+      clearDragIndicators();
+      if (after) after.classList.add('drag-above');
+      else { const items = getCachedItems(); if (items.length > 0) items[items.length-1].classList.add('drag-below'); }
+      _prevDragAfter = after;
+    }
   });
   dropzone.addEventListener('dragleave', () => {
     dropzone.style.background = '';
-    dropzone.querySelectorAll('.queue-item').forEach(el => el.classList.remove('drag-above', 'drag-below'));
+    clearDragIndicators();
+    _prevDragAfter = null;
   });
   dropzone.addEventListener('drop', async e => {
     e.preventDefault();
     dropzone.style.background = '';
-    dropzone.querySelectorAll('.queue-item').forEach(el => el.classList.remove('drag-above', 'drag-below'));
+    clearDragIndicators();
+    _prevDragAfter = null;
     if (!draggedId) return;
 
     const v = vendedores.find(x => x.id === draggedId);
@@ -1503,23 +1518,31 @@ window.onTouchDragStart = function(e) {
 
       const elUnder = document.elementFromPoint(t.clientX, t.clientY);
 
+      // Cache items para evitar querySelectorAll repetido durante drag
+      const _clearTouchIndicators = () => {
+        if (_prevAfter) {
+          const items = queueList.querySelectorAll('.queue-item.drag-above,.queue-item.drag-below');
+          items.forEach(el => { el.classList.remove('drag-above', 'drag-below'); });
+        }
+      };
+
       if (elUnder && (elUnder.id === 'queueList' || elUnder.closest('#queueList'))) {
         queueList.style.background = 'rgba(34,197,94,.05)';
         footer?.classList.remove('drop-highlight');
         const after = getDragAfterElement(queueList, t.clientY);
         if (after !== _prevAfter) {
-          queueList.querySelectorAll('.queue-item').forEach(el => { el.classList.remove('drag-above', 'drag-below'); });
+          _clearTouchIndicators();
           if (after) after.classList.add('drag-above');
           _prevAfter = after;
         }
       } else if (elUnder && (elUnder.id === 'statusFooter' || elUnder.closest('#statusFooter'))) {
         footer?.classList.add('drop-highlight');
         queueList.style.background = '';
-        if (_prevAfter) { queueList.querySelectorAll('.queue-item').forEach(el => { el.classList.remove('drag-above', 'drag-below'); }); _prevAfter = null; }
+        _clearTouchIndicators(); _prevAfter = null;
       } else {
         queueList.style.background = '';
         footer?.classList.remove('drop-highlight');
-        if (_prevAfter) { queueList.querySelectorAll('.queue-item').forEach(el => { el.classList.remove('drag-above', 'drag-below'); }); _prevAfter = null; }
+        _clearTouchIndicators(); _prevAfter = null;
       }
     }
   };
@@ -1540,7 +1563,7 @@ window.onTouchDragStart = function(e) {
     const footer = document.getElementById('statusFooter');
     queueList.style.background = '';
     footer?.classList.remove('drop-highlight');
-    queueList.querySelectorAll('.queue-item').forEach(el => { el.classList.remove('drag-above', 'drag-below'); });
+    queueList.querySelectorAll('.queue-item.drag-above,.queue-item.drag-below').forEach(el => { el.classList.remove('drag-above', 'drag-below'); });
 
     if (!touchDragging) {
       // Foi um tap, não drag — não fazer nada (o onclick cuida)
@@ -1770,10 +1793,13 @@ async function updateQuickStats() {
   if (now - _statsThrottle < 2000) return; // Max 1 query / 2s
   _statsThrottle = now;
   if (!currentTurno) return;
-  const { data } = await sb.from('atendimentos').select('resultado').eq('turno_id', currentTurno.id);
-  if (!data) return;
-  const total = data.filter(a => a.resultado !== 'em_andamento').length;
-  const vendas = data.filter(a => a.resultado === 'venda').length;
+  // Queries leves com count em vez de trazer todos os registros
+  const [totalRes, vendasRes] = await Promise.all([
+    sb.from('atendimentos').select('id', { count: 'exact', head: true }).eq('turno_id', currentTurno.id).neq('resultado', 'em_andamento'),
+    sb.from('atendimentos').select('id', { count: 'exact', head: true }).eq('turno_id', currentTurno.id).eq('resultado', 'venda')
+  ]);
+  const total = totalRes.count || 0;
+  const vendas = vendasRes.count || 0;
   const conv = total > 0 ? Math.round(vendas / total * 100) : 0;
   animateValue(document.getElementById('statAtend'), _prevStats.total, total);
   animateValue(document.getElementById('statVendas'), _prevStats.vendas, vendas);
@@ -1957,19 +1983,27 @@ function renderActiveAtendimentos() {
   });
 
   // Timer global para todos os atendimentos (painel + sidebar)
+  // Cache de referências DOM para evitar queries a cada segundo
   clearInterval(timerInterval);
+  const _timerRefs = new Map();
+  activeAtendimentos.forEach(atend => {
+    _timerRefs.set(atend.id, {
+      main: document.getElementById('timer-' + atend.id),
+      side: document.querySelector(`[data-sidebar-timer="${atend.id}"]`),
+      startMs: new Date(atend.inicio).getTime(),
+      lastText: ''
+    });
+  });
   timerInterval = setInterval(() => {
-    activeAtendimentos.forEach(atend => {
-      const elapsed = (Date.now() - new Date(atend.inicio).getTime()) / 1000;
+    const now = Date.now();
+    _timerRefs.forEach((ref) => {
+      const elapsed = (now - ref.startMs) / 1000;
       const timeStr = formatTime(elapsed);
-      const cls = elapsed > 2400 ? ' danger' : '';
-      const clr = elapsed > 2400 ? 'var(--danger)' : '#fff';
-      // Main panel timer
-      const el = document.getElementById('timer-' + atend.id);
-      if (el) { el.textContent = timeStr; el.className = 'atend-timer' + cls; }
-      // Sidebar timer
-      const sideEl = document.querySelector(`[data-sidebar-timer="${atend.id}"]`);
-      if (sideEl) { sideEl.textContent = timeStr; sideEl.style.color = clr; }
+      if (timeStr === ref.lastText) return; // skip if unchanged
+      ref.lastText = timeStr;
+      const isDanger = elapsed > 2400;
+      if (ref.main) { ref.main.textContent = timeStr; ref.main.className = 'atend-timer' + (isDanger ? ' danger' : ''); }
+      if (ref.side) { ref.side.textContent = timeStr; ref.side.style.color = isDanger ? 'var(--danger)' : '#fff'; }
     });
   }, 1000);
 }

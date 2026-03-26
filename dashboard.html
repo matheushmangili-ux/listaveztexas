@@ -115,7 +115,7 @@ window.addEventListener('error', function(e) {
     font-weight: 500;
     color: var(--text-muted);
     cursor: pointer;
-    transition: all 150ms ease;
+    transition: background 150ms ease, color 150ms ease;
   }
   .period-tabs button.active {
     background: var(--bg-elevated);
@@ -148,6 +148,7 @@ window.addEventListener('error', function(e) {
   }
   .vendedor-row:hover { background: var(--bg-hover); }
   .vendedor-row:last-child { border-bottom: none; }
+  .led-track, #marqueeTrack { will-change: transform; transform: translateZ(0); }
   .vendedor-avatar {
     width: 36px; height: 36px; border-radius: var(--radius-sm);
     background: var(--bg-elevated);
@@ -225,7 +226,7 @@ window.addEventListener('error', function(e) {
 
   /* ─── Modal ─── */
   .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,.5); backdrop-filter: blur(2px);
+    position: fixed; inset: 0; background: rgba(0,0,0,.55);
     display: flex; align-items: center; justify-content: center;
     z-index: 1000; opacity: 0; pointer-events: none; transition: opacity .2s;
   }
@@ -504,6 +505,9 @@ Chart.defaults.plugins.tooltip.boxHeight = 8;
 Chart.defaults.plugins.tooltip.boxPadding = 4;
 // Disable datalabels globally, enable per-chart
 Chart.defaults.plugins.datalabels = { display: false };
+Chart.defaults.responsive = true;
+Chart.defaults.maintainAspectRatio = false;
+Chart.defaults.animation = { duration: 300 }; // Faster chart animations
 
 function getRange() {
   if (currentPeriod === 'custom' && customDate) {
@@ -765,12 +769,13 @@ function getCompareColor(elId) {
   return 'rgb(161,161,170)';
 }
 
+const _dpr = window.devicePixelRatio || 1;
 function drawSparkline(canvasId, dataPoints, color) {
   const canvas = document.getElementById(canvasId);
   if (!canvas || !dataPoints || dataPoints.length < 2) { if (canvas) canvas.style.display = 'none'; return; }
   canvas.style.display = '';
   const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
+  const dpr = _dpr;
   const w = canvas.offsetWidth; const h = canvas.offsetHeight;
   canvas.width = w * dpr; canvas.height = h * dpr;
   ctx.scale(dpr, dpr);
@@ -1329,15 +1334,18 @@ setInterval(() => {
   }
 }, 60000);
 
-// ─── Realtime dashboard updates ───
+// ─── Realtime dashboard updates (debounced p/ evitar re-renders cascata) ───
+let _realtimeTimer = null;
+function debouncedReload(includeFloor = false) {
+  clearTimeout(_realtimeTimer);
+  _realtimeTimer = setTimeout(() => {
+    if (includeFloor) loadFloor();
+    loadAll();
+  }, 500);
+}
 sb.channel('dashboard-sync')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'vendedores' }, () => {
-    loadFloor();
-    loadAll();
-  })
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos' }, () => {
-    loadAll();
-  })
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vendedores' }, () => debouncedReload(true))
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos' }, () => debouncedReload(false))
   .subscribe();
 
 // ─── Init ───
