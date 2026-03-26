@@ -164,6 +164,67 @@ window.addEventListener('error', function(e) {
     min-height: 72px;
     flex-shrink: 0;
   }
+  /* ─── Turno Toggle Switch ─── */
+  .turno-switch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    padding: 4px;
+  }
+  .turno-switch:active .turno-switch-thumb {
+    width: 24px;
+  }
+  .turno-switch-track {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    border-radius: 12px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border-medium);
+    transition: background .25s cubic-bezier(.4,0,.2,1), border-color .25s;
+    flex-shrink: 0;
+  }
+  .turno-switch-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    background: #71717A;
+    transition: transform .25s cubic-bezier(.4,0,.2,1), width .15s, background .25s;
+    box-shadow: 0 1px 3px rgba(0,0,0,.3);
+  }
+  .turno-switch-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    color: var(--text-muted);
+    transition: color .25s;
+    min-width: 24px;
+  }
+  .turno-switch.on .turno-switch-track {
+    background: rgba(52,211,153,.15);
+    border-color: rgba(52,211,153,.3);
+  }
+  .turno-switch.on .turno-switch-thumb {
+    transform: translateX(20px);
+    background: var(--success);
+  }
+  .turno-switch.on .turno-switch-label {
+    color: var(--success);
+  }
+  .turno-switch:hover .turno-switch-track {
+    border-color: var(--border-strong);
+  }
+  .turno-switch.on:hover .turno-switch-track {
+    border-color: rgba(52,211,153,.5);
+  }
+
   .t-footer::-webkit-scrollbar { height: 0; }
   .t-footer.drop-highlight { border-top: 2px solid var(--danger); background: var(--danger-bg); }
 
@@ -399,11 +460,14 @@ window.addEventListener('error', function(e) {
       <span style="color:var(--text-muted)"><span id="statVendas" style="color:var(--success)">0</span> vendas</span>
       <span style="color:var(--text-muted)"><span id="statConv" style="color:var(--gold)">0%</span></span>
     </div>
-    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
       <span class="live-clock" id="clock" style="font-size:12px">--:--</span>
-      <button class="btn btn-ghost" style="min-height:36px;padding:0 10px;font-size:11px" id="btnTurno" onclick="toggleTurno()">
-        <i class="fa-solid fa-play" style="font-size:10px"></i> <span class="header-title">Abrir Turno</span>
-      </button>
+      <div class="turno-switch" id="turnoSwitch" onclick="toggleTurno()">
+        <div class="turno-switch-track" id="turnoTrack">
+          <div class="turno-switch-thumb" id="turnoThumb"></div>
+        </div>
+        <span class="turno-switch-label" id="turnoSwitchLabel">OFF</span>
+      </div>
       <button class="btn btn-ghost" style="min-height:36px;padding:0 8px;font-size:11px" onclick="window._toggleTheme()" title="Modo claro/escuro">
         <i class="fa-solid fa-circle-half-stroke"></i>
       </button>
@@ -1290,7 +1354,14 @@ async function updateQuickStats() {
   document.getElementById('statConv').textContent = conv + '%';
 }
 
-// ─── Turno ───
+// ─── Turno Switch ───
+function updateTurnoSwitch(isOn) {
+  const sw = document.getElementById('turnoSwitch');
+  const label = document.getElementById('turnoSwitchLabel');
+  if (sw) sw.classList.toggle('on', isOn);
+  if (label) label.textContent = isOn ? 'ON' : 'OFF';
+}
+
 window.toggleTurno = async function() {
   markLocal();
   if (currentTurno) {
@@ -1317,7 +1388,7 @@ window.toggleTurno = async function() {
     activeAtendimentos = [];
     renderActiveAtendimentos();
     document.getElementById('turnoLabel').textContent = 'Turno encerrado';
-    document.getElementById('btnTurno').innerHTML = '<i class="fa-solid fa-play" style="font-size:10px"></i> Abrir Turno';
+    updateTurnoSwitch(false);
     document.getElementById('btnProximo').disabled = true;
     toast('Turno encerrado', 'info');
   } else {
@@ -1326,7 +1397,7 @@ window.toggleTurno = async function() {
     if (error) { toast('Erro ao abrir turno', 'error'); return; }
     currentTurno = data;
     document.getElementById('turnoLabel').textContent = 'Turno aberto';
-    document.getElementById('btnTurno').innerHTML = '<i class="fa-solid fa-stop" style="font-size:10px"></i> Fechar Turno';
+    updateTurnoSwitch(true);
     document.getElementById('btnProximo').disabled = false;
     toast('Turno aberto! Arraste vendedores para a fila.', 'success');
   }
@@ -1799,7 +1870,7 @@ async function checkExistingTurno() {
   if (data && data.length > 0) {
     currentTurno = data[0];
     document.getElementById('turnoLabel').textContent = 'Turno aberto';
-    document.getElementById('btnTurno').innerHTML = '<i class="fa-solid fa-stop" style="font-size:10px"></i> Fechar Turno';
+    updateTurnoSwitch(true);
     document.getElementById('btnProximo').disabled = false;
   }
 }
