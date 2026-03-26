@@ -293,11 +293,12 @@ window.addEventListener('error', function(e) {
   <!-- Status Marquee -->
   <div id="statusMarquee" style="overflow:hidden;white-space:nowrap;margin-bottom:16px;background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:8px 0;position:relative">
     <div style="position:absolute;left:0;top:0;bottom:0;display:flex;align-items:center;padding:0 12px;background:linear-gradient(90deg,var(--bg-surface) 80%,transparent);z-index:2;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted)"><i class="fa-solid fa-circle" style="font-size:5px;color:var(--success);margin-right:6px;animation:pulse 2s infinite"></i>On Time</div>
-    <div id="marqueeTrack" style="display:inline-flex;gap:16px;animation:marquee 25s linear infinite;padding-left:120px">
+    <div id="marqueeTrack" style="display:inline-flex;gap:16px;animation:marqueeHeader 25s linear infinite;padding-left:120px">
     </div>
   </div>
   <style>
     @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    @keyframes marqueeHeader { 0% { transform: translateX(0); } 100% { transform: translateX(-33.333%); } }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
     #statusMarquee:hover #marqueeTrack { animation-play-state: paused; }
     .marquee-pill {
@@ -917,6 +918,11 @@ async function loadFloor() {
 function renderHeaderMarquee(vendedoresData) {
   const track = document.getElementById('marqueeTrack');
   if (!track) return;
+  if (!vendedoresData || vendedoresData.length === 0) {
+    track.innerHTML = '<span style="color:var(--text-muted);font-size:11px;padding:0 16px">Nenhum vendedor no turno</span>';
+    track.style.animation = 'none';
+    return;
+  }
   const pills = vendedoresData.map(v => {
     const cfg = STATUS_CONFIG[v.status] || STATUS_CONFIG.fora;
     const pos = v.posicao_fila ? ` #${v.posicao_fila}` : '';
@@ -926,10 +932,14 @@ function renderHeaderMarquee(vendedoresData) {
       <span class="mp-status" style="color:${cfg.color}">${cfg.short}${pos}</span>
     </div>`;
   }).join('');
-  // Duplicar para loop
-  track.innerHTML = pills + pills;
-  const speed = Math.max(15, vendedoresData.length * 2.5);
+  // Triplicar para loop suave (garante que -50% sempre funcione)
+  track.innerHTML = pills + pills + pills;
+  const speed = Math.max(15, vendedoresData.length * 3);
   track.style.animationDuration = speed + 's';
+  // Reiniciar animação
+  track.style.animation = 'none';
+  track.offsetHeight; // force reflow
+  track.style.animation = `marqueeHeader ${speed}s linear infinite`;
 }
 
 // ─── Scatter: Volume × Conversão ───
