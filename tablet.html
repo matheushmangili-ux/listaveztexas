@@ -398,7 +398,6 @@ window.addEventListener('error', function(e) {
     opacity: .8;
   }
   .footer-card.in-queue { opacity: .25; pointer-events: none; }
-  .footer-card.in-queue .fc-avatar { box-shadow: 0 0 0 2px var(--success); }
   .footer-end-all {
     display: flex;
     align-items: center;
@@ -1541,7 +1540,9 @@ window.onTouchDragStart = function(e) {
       // Soltar no painel de atendimento = iniciar atendimento (qualquer vendedor)
       await sendToAtendimento(touchDragId);
     } else if (dropEl && (dropEl.id === 'statusFooter' || dropEl.closest('#statusFooter'))) {
-      openSaida(touchDragId);
+      const saidaId = touchDragId;
+      // Delay para sair do ciclo de touch — sem isso o bottom sheet não responde
+      setTimeout(() => openSaida(saidaId), 50);
     }
 
     touchDragId = null; touchDragEl = null; touchDragging = false;
@@ -1681,14 +1682,29 @@ function renderFooter() {
 
     // Avatar color by status
     let avatarBg = '#4b5563'; // cinza = fora
-    if (atendendo) avatarBg = '#3b82f6'; // azul
-    else if (inQueue) avatarBg = '#22c55e'; // verde
-    else if (v.status === 'pausa') avatarBg = statusColor;
+    let cardBorder = 'transparent';
+    let avatarRing = 'transparent';
+    if (atendendo) {
+      avatarBg = '#3b82f6'; // azul
+      cardBorder = '#3b82f6';
+      avatarRing = '#3b82f6';
+    } else if (inQueue) {
+      avatarBg = '#22c55e'; // verde
+      cardBorder = '#22c55e';
+      avatarRing = '#22c55e';
+    } else if (v.status === 'pausa') {
+      avatarBg = statusColor;
+      cardBorder = statusColor;
+      avatarRing = statusColor;
+    } else if (v.status === 'fora') {
+      cardBorder = statusColor;
+      avatarRing = statusColor;
+    }
 
     const firstName = (v.apelido || v.nome.split(' ')[0]);
 
-    return `<div class="footer-card${inQueueClass}" data-id="${v.id}" ${dragAttr} onclick="handleFooterTap('${v.id}')">
-      <div class="fc-avatar" style="background:${avatarBg}">${avatarContent}</div>
+    return `<div class="footer-card${inQueueClass}" data-id="${v.id}" ${dragAttr} onclick="handleFooterTap('${v.id}')" style="border:2px solid ${cardBorder}">
+      <div class="fc-avatar" style="background:${avatarBg};box-shadow:0 0 0 2px ${avatarRing}">${avatarContent}</div>
       <span class="fc-name">${firstName}</span>
       <span class="fc-status" style="color:${statusColor}">${statusLabel}</span>
     </div>`;

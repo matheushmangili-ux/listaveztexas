@@ -287,7 +287,7 @@ body {
   pointer-events: none;
   transition: opacity .2s;
 }
-.bottom-sheet-overlay.open { opacity: 1; pointer-events: auto; }
+.bottom-sheet-overlay.open { opacity: 1; pointer-events: auto; touch-action: manipulation; }
 
 .bottom-sheet {
   position: fixed;
@@ -328,6 +328,7 @@ body {
   transition: all var(--transition);
   min-height: var(--touch-min);
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 .motivo-option:hover { border-color: var(--border-medium); background: var(--bg-hover); }
 .motivo-option.selected { border-color: var(--accent); background: rgba(225,29,72,.06); }
