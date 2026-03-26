@@ -1714,9 +1714,15 @@ function renderFooter() {
       statusLabel = sl.label;
       statusColor = sl.color;
       dotColor = sl.color;
+    } else if (v.status === 'disponivel') {
+      // Disponível mas fora da fila
+      statusLabel = 'Disponível';
+      statusColor = '#64748b';
+      dotColor = '#64748b';
     } else {
+      // Fora / outro status
       const m = saidaMotivos[v.id];
-      const sl = SAIDA_LABELS[m] || { label: 'Disponível', color: '#64748b' };
+      const sl = SAIDA_LABELS[m] || { label: 'Fora', color: '#71717A' };
       statusLabel = sl.label;
       statusColor = sl.color;
       dotColor = sl.color;
