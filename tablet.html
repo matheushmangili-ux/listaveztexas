@@ -73,6 +73,7 @@ window.addEventListener('error', function(e) {
     padding: 12px;
     display: flex;
     flex-direction: column;
+    contain: layout style;
   }
   .queue-list { display: flex; flex-direction: column; gap: 4px; }
   .queue-item {
@@ -119,6 +120,7 @@ window.addEventListener('error', function(e) {
     position: relative;
     overflow-y: auto;
     background: var(--bg-deep);
+    contain: layout style;
   }
   .service-panel.drop-active {
     outline: 2px dashed var(--success);
@@ -617,7 +619,6 @@ window.addEventListener('error', function(e) {
     font-family: var(--font-mono); font-weight: 700; font-size: 13px;
     color: #fff;
   }
-  .atend-card .atend-timer.warning { color: var(--warning); }
   .atend-card .atend-timer.danger { color: var(--danger); }
   .atend-actions { display: flex; gap: 6px; flex-shrink: 0; }
   .atend-actions button {
@@ -662,7 +663,7 @@ window.addEventListener('error', function(e) {
   * { touch-action: manipulation; }
 
   /* Smooth scrolling for queue */
-  .queue-panel, .service-panel { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+  .queue-panel, .service-panel { -webkit-overflow-scrolling: touch; }
 
   /* Live clock */
   .live-clock {
@@ -1272,8 +1273,7 @@ function renderQueueItem(v, pos, isActive, draggable) {
     const atend = activeAtendimentos.find(a => a.vendedor_id === v.id);
     if (atend) {
       const elapsed = (Date.now() - new Date(atend.inicio).getTime()) / 1000;
-      const cls = elapsed > 600 ? 'danger' : elapsed > 300 ? 'warning' : '';
-      const clr = elapsed > 600 ? 'var(--danger)' : elapsed > 300 ? 'var(--warning)' : 'var(--info)';
+      const clr = elapsed > 2400 ? 'var(--danger)' : '#fff';
       timerHtml = `<span data-sidebar-timer="${atend.id}" style="font-family:var(--font-mono);font-weight:700;font-size:11px;color:${clr};margin-left:auto;flex-shrink:0">${formatTime(elapsed)}</span>`;
     }
   }
@@ -1477,6 +1477,11 @@ window.onTouchDragStart = function(e) {
       touchDragging = true;
       item.style.opacity = '0.3';
 
+      // Travar scroll durante drag
+      document.body.style.overflow = 'hidden';
+      document.querySelector('.queue-panel')?.style.setProperty('overflow', 'hidden');
+      document.querySelector('.service-panel')?.style.setProperty('overflow', 'hidden');
+
       _ghostInitX = t.clientX - itemW / 2;
       _ghostInitY = t.clientY - 30;
 
@@ -1532,6 +1537,11 @@ window.onTouchDragStart = function(e) {
   const onEnd = async (ev) => {
     document.removeEventListener('touchmove', onMove);
     document.removeEventListener('touchend', onEnd);
+
+    // Destravar scroll
+    document.body.style.overflow = '';
+    document.querySelector('.queue-panel')?.style.setProperty('overflow', '');
+    document.querySelector('.service-panel')?.style.setProperty('overflow', '');
 
     // Limpar visual
     if (touchGhost) { touchGhost.remove(); touchGhost = null; }
@@ -1958,8 +1968,8 @@ function renderActiveAtendimentos() {
     activeAtendimentos.forEach(atend => {
       const elapsed = (Date.now() - new Date(atend.inicio).getTime()) / 1000;
       const timeStr = formatTime(elapsed);
-      const cls = elapsed > 600 ? ' danger' : elapsed > 300 ? ' warning' : '';
-      const clr = elapsed > 600 ? 'var(--danger)' : elapsed > 300 ? 'var(--warning)' : 'var(--info)';
+      const cls = elapsed > 2400 ? ' danger' : '';
+      const clr = elapsed > 2400 ? 'var(--danger)' : '#fff';
       // Main panel timer
       const el = document.getElementById('timer-' + atend.id);
       if (el) { el.textContent = timeStr; el.className = 'atend-timer' + cls; }
