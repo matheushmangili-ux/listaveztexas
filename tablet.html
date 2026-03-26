@@ -1379,8 +1379,9 @@ async function reorderInQueue(movedId, beforeId) {
   if (!moved) return;
   ordered.splice(beforeIdx >= 0 ? beforeIdx : ordered.length, 0, moved);
 
-  const updates = ordered.map((v, i) => sb.from('vendedores').update({ posicao_fila: i + 1 }).eq('id', v.id));
-  await Promise.all(updates);
+  // Batch: 1 RPC em vez de N queries individuais
+  const ids = ordered.map(v => v.id);
+  await sb.rpc('reordenar_fila', { p_ids: ids });
   await loadVendedores();
   toast('Fila reordenada', 'info', 1500);
 }
@@ -1393,13 +1394,13 @@ async function addToQueueAt(vendedorId, beforeId) {
   const beforeIdx = beforeId ? inQueue.findIndex(v => v.id === beforeId) : inQueue.length;
   const insertAt = beforeIdx >= 0 ? beforeIdx : inQueue.length;
 
-  // Shift positions down from insertAt
-  const updates = [];
-  for (let i = inQueue.length - 1; i >= insertAt; i--) {
-    updates.push(sb.from('vendedores').update({ posicao_fila: i + 2 }).eq('id', inQueue[i].id));
-  }
-  updates.push(sb.from('vendedores').update({ status: 'disponivel', posicao_fila: insertAt + 1 }).eq('id', vendedorId));
-  await Promise.all(updates);
+  // Montar nova ordem com o vendedor inserido na posição certa
+  const newOrder = [...inQueue];
+  newOrder.splice(insertAt, 0, { id: vendedorId });
+  const ids = newOrder.map(v => v.id);
+
+  // Batch: 1 RPC (seta status='disponivel' + posicao_fila para todos)
+  await sb.rpc('reordenar_fila', { p_ids: ids });
   await loadVendedores();
   const v = vendedores.find(x => x.id === vendedorId);
   toast((v?.apelido || v?.nome || 'Vendedor') + ' entrou na fila', 'success', 1500);
@@ -1925,12 +1926,9 @@ window.confirmCheckin = async function() {
   if (error) { toast('Erro ao abrir turno', 'error'); btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-check" style="margin-right:4px"></i>Iniciar Turno'; return; }
   currentTurno = data;
 
-  // Colocar vendedores selecionados na fila
+  // Colocar vendedores selecionados na fila (1 RPC batch)
   markLocal();
-  const updates = checked.map((id, i) =>
-    sb.from('vendedores').update({ status: 'disponivel', posicao_fila: i + 1 }).eq('id', id)
-  );
-  await Promise.all(updates);
+  await sb.rpc('reordenar_fila', { p_ids: checked });
 
   document.getElementById('turnoLabel').textContent = 'Turno aberto';
   updateTurnoSwitch(true);
@@ -2345,11 +2343,10 @@ window.submitTroca = async function(atendId, comDiferenca) {
     if (vendedorId) {
       const v2 = vendedores.find(v => v.id === vendedorId);
       const setor = v2?.setor || 'loja';
-      // Troca >= R$1.000 → vendedor volta pro 1º da fila (premiação)
+      // Troca >= R$1.000 → vendedor volta pro 1º da fila (premiação) — 1 RPC batch
       const inQueue = vendedores.filter(v => (v.setor || 'loja') === setor && v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
-      const updates = inQueue.map((v, i) => sb.from('vendedores').update({ posicao_fila: i + 2 }).eq('id', v.id));
-      updates.push(sb.from('vendedores').update({ status: 'disponivel', posicao_fila: 1 }).eq('id', vendedorId));
-      await Promise.all(updates);
+      const newOrder = [vendedorId, ...inQueue.filter(v => v.id !== vendedorId).map(v => v.id)];
+      await sb.rpc('reordenar_fila', { p_ids: newOrder });
       await loadVendedores();
       // EPIC achievement animation!
       fireEpicTrocaAnimation(v2?.apelido || v2?.nome || 'Vendedor', valor);

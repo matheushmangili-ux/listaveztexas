@@ -194,3 +194,18 @@ BEGIN
     ORDER BY COUNT(*) DESC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Reordenar fila em batch (1 query em vez de N)
+-- Recebe array de UUIDs na ordem desejada, atualiza posicao_fila = índice+1
+CREATE OR REPLACE FUNCTION reordenar_fila(p_ids UUID[])
+RETURNS VOID AS $$
+BEGIN
+    UPDATE vendedores
+    SET posicao_fila = sub.nova_pos,
+        status = 'disponivel'
+    FROM (
+        SELECT unnest(p_ids) AS vid, generate_series(1, array_length(p_ids, 1)) AS nova_pos
+    ) sub
+    WHERE vendedores.id = sub.vid;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
