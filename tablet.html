@@ -1348,12 +1348,24 @@ function initDragAndDrop() {
   });
 }
 
+// Cache de rects para evitar reflow durante drag
+let _dragRectsCache = null;
+let _dragRectsCacheTime = 0;
+
+function cacheDragRects(container) {
+  const items = [...container.querySelectorAll('.queue-item:not([style*="opacity: 0.3"])')];
+  _dragRectsCache = items.map(el => ({ el, rect: el.getBoundingClientRect() }));
+  _dragRectsCacheTime = performance.now();
+}
+
 function getDragAfterElement(container, y) {
-  const items = [...container.querySelectorAll('.queue-item:not([style*="opacity: 0.5"])')];
-  return items.reduce((closest, child) => {
-    const box = child.getBoundingClientRect();
-    const offset = y - box.top - box.height / 2;
-    if (offset < 0 && offset > closest.offset) return { offset, element: child };
+  // Usar cache se < 200ms (rects não mudam durante drag com scroll travado)
+  if (!_dragRectsCache || performance.now() - _dragRectsCacheTime > 200) {
+    cacheDragRects(container);
+  }
+  return _dragRectsCache.reduce((closest, { el, rect }) => {
+    const offset = y - rect.top - rect.height / 2;
+    if (offset < 0 && offset > closest.offset) return { offset, element: el };
     return closest;
   }, { offset: Number.NEGATIVE_INFINITY }).element || null;
 }
@@ -1486,6 +1498,8 @@ window.onTouchDragStart = function(e) {
       document.body.style.overflow = 'hidden';
       document.querySelector('.queue-panel')?.style.setProperty('overflow', 'hidden');
       document.querySelector('.service-panel')?.style.setProperty('overflow', 'hidden');
+      // Pre-cachear rects (scroll travado = rects estáveis)
+      cacheDragRects(queueList);
 
       _ghostInitX = t.clientX - itemW / 2;
       _ghostInitY = t.clientY - 30;
@@ -1518,12 +1532,10 @@ window.onTouchDragStart = function(e) {
 
       const elUnder = document.elementFromPoint(t.clientX, t.clientY);
 
-      // Cache items para evitar querySelectorAll repetido durante drag
+      // Rastrear elemento marcado para limpar sem querySelectorAll
+      let _markedEl = null;
       const _clearTouchIndicators = () => {
-        if (_prevAfter) {
-          const items = queueList.querySelectorAll('.queue-item.drag-above,.queue-item.drag-below');
-          items.forEach(el => { el.classList.remove('drag-above', 'drag-below'); });
-        }
+        if (_markedEl) { _markedEl.classList.remove('drag-above', 'drag-below'); _markedEl = null; }
       };
 
       if (elUnder && (elUnder.id === 'queueList' || elUnder.closest('#queueList'))) {
@@ -1532,7 +1544,7 @@ window.onTouchDragStart = function(e) {
         const after = getDragAfterElement(queueList, t.clientY);
         if (after !== _prevAfter) {
           _clearTouchIndicators();
-          if (after) after.classList.add('drag-above');
+          if (after) { after.classList.add('drag-above'); _markedEl = after; }
           _prevAfter = after;
         }
       } else if (elUnder && (elUnder.id === 'statusFooter' || elUnder.closest('#statusFooter'))) {
@@ -1556,7 +1568,8 @@ window.onTouchDragStart = function(e) {
     document.querySelector('.queue-panel')?.style.setProperty('overflow', '');
     document.querySelector('.service-panel')?.style.setProperty('overflow', '');
 
-    // Limpar visual
+    // Limpar visual + cache
+    _dragRectsCache = null;
     if (touchGhost) { touchGhost.remove(); touchGhost = null; }
     if (touchDragEl) touchDragEl.style.opacity = '1';
     const queueList = document.getElementById('queueList');
@@ -1754,16 +1767,20 @@ function renderFooter() {
   const footerTitle = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:56px;padding:4px 6px;flex-shrink:0"><span style="font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);white-space:nowrap">Vendedores</span><span style="font-size:10px;font-weight:700;color:var(--text-secondary);font-family:var(--font-mono)">${setorVendedores.length}</span></div>`;
 
   footer.innerHTML = footerTitle + cards;
+}
 
-  // Footer como drop zone — arrastar DA fila PARA footer = popup motivo
-  footer.ondragover = e => { e.preventDefault(); footer.classList.add('drop-highlight'); };
-  footer.ondragleave = () => { footer.classList.remove('drop-highlight'); };
-  footer.ondrop = e => {
+// Footer drop zone — inicializar UMA vez (não recria a cada render)
+(function initFooterDropZone() {
+  const footer = document.getElementById('statusFooter');
+  if (!footer) return;
+  footer.addEventListener('dragover', e => { e.preventDefault(); footer.classList.add('drop-highlight'); });
+  footer.addEventListener('dragleave', () => { footer.classList.remove('drop-highlight'); });
+  footer.addEventListener('drop', e => {
     e.preventDefault();
     footer.classList.remove('drop-highlight');
     if (draggedId) { openSaida(draggedId); draggedId = null; }
-  };
-}
+  });
+})();
 
 // ─── Footer drag start (arrastar do footer para sidebar) ───
 window.onFooterDragStart = function(e) {
@@ -2002,13 +2019,17 @@ function renderActiveAtendimentos() {
   });
   timerInterval = setInterval(() => {
     const now = Date.now();
-    _timerRefs.forEach((ref) => {
+    _timerRefs.forEach((ref, id) => {
       const elapsed = (now - ref.startMs) / 1000;
       const timeStr = formatTime(elapsed);
       if (timeStr === ref.lastText) return; // skip if unchanged
       ref.lastText = timeStr;
       const isDanger = elapsed > 2400;
       if (ref.main) { ref.main.textContent = timeStr; ref.main.className = 'atend-timer' + (isDanger ? ' danger' : ''); }
+      // Sidebar ref pode ficar stale após renderQueue — re-buscar se necessário
+      if (!ref.side || !ref.side.isConnected) {
+        ref.side = document.querySelector(`[data-sidebar-timer="${id}"]`);
+      }
       if (ref.side) { ref.side.textContent = timeStr; ref.side.style.color = isDanger ? 'var(--danger)' : '#fff'; }
     });
   }, 1000);
