@@ -338,7 +338,10 @@ window.addEventListener('error', function(e) {
   }
 
   .t-footer::-webkit-scrollbar { height: 0; }
-  .t-footer.drop-highlight { border-top: 2px solid var(--danger); background: var(--danger-bg); }
+  .t-footer.drop-highlight {
+    background: linear-gradient(180deg, rgba(248,113,113,.08) 0%, transparent 100%);
+    box-shadow: inset 0 2px 0 0 var(--warning), 0 -4px 12px rgba(251,191,36,.1);
+  }
 
   .footer-card {
     display: flex;
@@ -349,9 +352,10 @@ window.addEventListener('error', function(e) {
     min-width: 56px;
     max-width: 72px;
     cursor: grab;
-    border-radius: var(--radius-sm);
-    background: transparent;
-    transition: background 150ms ease, opacity 150ms ease, transform 100ms ease;
+    border-radius: 12px;
+    background: var(--bg-card);
+    box-shadow: 0 1px 3px rgba(0,0,0,.2), 0 1px 2px rgba(0,0,0,.15);
+    transition: background 150ms ease, opacity 150ms ease, transform 100ms ease, box-shadow 150ms ease;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     position: relative;
@@ -361,7 +365,7 @@ window.addEventListener('error', function(e) {
   .footer-card:active { transform: scale(.93); }
   .footer-card .fc-avatar {
     width: 38px; height: 38px;
-    border-radius: var(--radius-sm);
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1234,11 +1238,14 @@ function renderQueue() {
   if (pausa.length > 0) {
     html += '<div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px;border-top:1px solid var(--border-subtle);margin-top:4px"><i class="fa-solid fa-pause" style="margin-right:4px"></i>Em pausa</div>';
     pausa.forEach(v => {
-      html += `<div class="queue-item pausa" data-id="${v.id}" style="cursor:pointer;opacity:.7" onclick="returnFromPause('${v.id}')">
-        <div class="queue-position" style="background:${STATUS_CONFIG.pausa.bg};color:${STATUS_CONFIG.pausa.color}"><i class="fa-solid ${STATUS_CONFIG.pausa.icon}" style="font-size:11px"></i></div>
+      const motivoKey = saidaMotivos[v.id];
+      const motivoColor = motivoKey ? (SAIDA_COLORS[motivoKey]?.color || STATUS_CONFIG.pausa.color) : STATUS_CONFIG.pausa.color;
+      const motivoLabel = motivoKey ? (SAIDA_COLORS[motivoKey]?.label || 'Pausa') : 'Pausa';
+      html += `<div class="queue-item" data-id="${v.id}" style="cursor:pointer;opacity:.8;border-left:3px solid ${motivoColor}" onclick="returnFromPause('${v.id}')">
+        <div class="queue-position" style="background:${motivoColor}20;color:${motivoColor}"><i class="fa-solid ${STATUS_CONFIG.pausa.icon}" style="font-size:11px"></i></div>
         <div style="flex:1;min-width:0">
           <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.apelido || v.nome}</div>
-          <div style="font-size:10px;color:${saidaMotivos[v.id] ? (SAIDA_COLORS[saidaMotivos[v.id]]?.color || STATUS_CONFIG.pausa.color) : STATUS_CONFIG.pausa.color};font-weight:600;text-transform:uppercase;letter-spacing:.05em">${saidaMotivos[v.id] ? (SAIDA_COLORS[saidaMotivos[v.id]]?.label || 'Pausa') : 'Pausa'}</div>
+          <div style="font-size:10px;color:${motivoColor};font-weight:600;text-transform:uppercase;letter-spacing:.05em">${motivoLabel}</div>
         </div>
         <i class="fa-solid fa-arrow-rotate-left" style="color:var(--success);font-size:12px;opacity:.6" title="Voltar à fila"></i>
       </div>`;
@@ -1605,15 +1612,20 @@ window.confirmSaida = async function(motivo) {
   const newStatus = motivo === 'banheiro' || motivo === 'reuniao' || motivo === 'operacional' ? 'pausa' : 'fora';
   saidaMotivos[pendingSaidaId] = motivo;
   markLocal();
-  const { error } = await sb.from('vendedores').update({ status: newStatus, posicao_fila: null }).eq('id', pendingSaidaId);
+  const savedId = pendingSaidaId;
+  const { error } = await sb.from('vendedores').update({ status: newStatus, posicao_fila: null }).eq('id', savedId);
   if (error) { toast('Erro ao registrar saída', 'error'); closeSaida(); return; }
-  // Registrar pausa no log — aguardar antes de recarregar vendedores
+  // Registrar pausa no log (fire-and-forget — motivo já está em saidaMotivos)
   if (currentTurno) {
-    try { await sb.rpc('registrar_pausa', { p_vendedor_id: pendingSaidaId, p_turno_id: currentTurno.id, p_motivo: motivo }); } catch(e) {}
+    sb.rpc('registrar_pausa', { p_vendedor_id: savedId, p_turno_id: currentTurno.id, p_motivo: motivo });
   }
   toast(SAIDA_COLORS[motivo]?.label || 'Saiu da fila', 'info', 2000);
   closeSaida();
+  // Preservar motivo local antes de recarregar
+  const savedMotivo = motivo;
   await loadVendedores();
+  saidaMotivos[savedId] = savedMotivo;
+  scheduleRender();
 };
 
 // ─── Finalizar Todos ───
