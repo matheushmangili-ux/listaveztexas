@@ -1939,8 +1939,8 @@ function updateTurnoSwitch(isOn) {
 window.toggleTurno = async function() {
   markLocal();
   if (currentTurno) {
-    // Bloquear se houver atendimentos ativos
-    const activeCount = activeAtendimentos.length;
+    // Bloquear se houver atendimentos ativos ou aguardando
+    const activeCount = activeAtendimentos.length + aguardandoAtendimentos.length;
     if (activeCount > 0) {
       toast(`Finalize ${activeCount} atendimento${activeCount > 1 ? 's' : ''} antes de encerrar o turno`, 'warning', 3000);
       return;
@@ -1958,6 +1958,7 @@ window.toggleTurno = async function() {
     if (e1 || e2) { toast('Erro ao fechar turno', 'error'); return; }
     currentTurno = null;
     activeAtendimentos = [];
+    aguardandoAtendimentos = [];
     renderActiveAtendimentos();
     document.getElementById('turnoLabel').textContent = 'Turno encerrado';
     updateTurnoSwitch(false);
@@ -2058,9 +2059,8 @@ function renderActiveAtendimentos() {
   const countEl = document.getElementById('activeCount');
   if (countEl) countEl.textContent = activeAtendimentos.length + ' ativo' + (activeAtendimentos.length !== 1 ? 's' : '');
 
-  if (activeAtendimentos.length === 0) {
+  if (activeAtendimentos.length === 0 && aguardandoAtendimentos.length === 0) {
     label.style.display = 'none';
-    // Mostrar empty state
     const existing = list.querySelector('.service-empty');
     if (!existing) {
       const empty = document.createElement('div');
@@ -2068,10 +2068,11 @@ function renderActiveAtendimentos() {
       empty.innerHTML = '<i class="fa-solid fa-arrow-left" style="font-size:24px;margin-bottom:8px;opacity:.3"></i>Arraste vendedores da fila para iniciar atendimento';
       list.appendChild(empty);
     }
+    renderAguardando(list);
     return;
   }
   list.querySelectorAll('.service-empty').forEach(e => e.remove());
-  label.style.display = 'block';
+  label.style.display = activeAtendimentos.length > 0 ? 'block' : 'none';
 
   activeAtendimentos.forEach(atend => {
     const v = atend.vendedores;
@@ -2178,6 +2179,7 @@ window.suspenderAtendimento = async function(atendId) {
   if (_actionLock) return;
   _actionLock = true;
   try {
+    markLocal();
     const atend = activeAtendimentos.find(a => a.id === atendId);
     const { error } = await sb.rpc('suspender_atendimento', { p_atendimento_id: atendId });
     if (error) throw error;
@@ -2201,6 +2203,7 @@ window.retomarAtendimento = async function(atendId) {
   if (_actionLock) return;
   _actionLock = true;
   try {
+    markLocal();
     const { error } = await sb.rpc('retomar_atendimento', { p_atendimento_id: atendId });
     if (error) throw error;
     // Move from aguardando to active
@@ -2883,9 +2886,7 @@ async function checkExistingTurno() {
 async function checkActiveAtendimentos() {
   if (!currentTurno) return;
   const { data } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('turno_id', currentTurno.id).eq('resultado', 'em_andamento').order('inicio');
-  if (data && data.length > 0) {
-    activeAtendimentos = data;
-  }
+  activeAtendimentos = data || [];
   // Also load aguardando
   const { data: aguardando } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('turno_id', currentTurno.id).eq('resultado', 'aguardando').order('inicio');
   aguardandoAtendimentos = aguardando || [];
