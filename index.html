@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=5">
+<link rel="stylesheet" href="/css/styles.css?v=5">
 <meta name="theme-color" content="#09090B">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -45,7 +45,7 @@ if ('serviceWorker' in navigator) {
     transform: translate(-50%, -50%);
     width: min(85vw, 520px);
     height: min(85vw, 520px);
-    background: url('assets/logo-minhavez-web.png') no-repeat center/contain;
+    background: url('/assets/logo-minhavez-web.png') no-repeat center/contain;
     opacity: .03;
     pointer-events: none;
     z-index: 0;
@@ -222,9 +222,9 @@ if ('serviceWorker' in navigator) {
 <span class="version-tag">v1.1</span>
 
 <script type="module">
-import { login, loginWithPin, getUser, redirectByRole } from './js/auth.js';
-import { toast } from './js/utils.js';
-import { loadTenant, applyBranding, getSlug } from './js/tenant.js';
+import { login, loginWithPin, getUser, redirectByRole } from '/js/auth.js';
+import { toast } from '/js/utils.js';
+import { loadTenant, applyBranding, getSlug } from '/js/tenant.js';
 // Login page always uses dark theme (set in HTML attribute), skip initTheme()
 
 // Load tenant context from URL slug

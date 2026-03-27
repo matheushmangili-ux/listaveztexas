@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="/css/styles.css">
 <meta name="theme-color" content="#09090B">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
@@ -915,10 +915,10 @@ window.addEventListener('error', function(e) {
 <div id="toastContainer"></div>
 
 <script type="module">
-import { getSupabase } from './js/supabase-config.js';
-import { requireRole, logout, getTenantId } from './js/auth.js';
-import { STATUS_CONFIG, MOTIVOS, formatTime, initials, toast, elapsedSince, initTheme, toggleTheme } from './js/utils.js';
-import { loadTenant, applyBranding, tenantPath } from './js/tenant.js';
+import { getSupabase } from '/js/supabase-config.js';
+import { requireRole, logout, getTenantId } from '/js/auth.js';
+import { STATUS_CONFIG, MOTIVOS, formatTime, initials, toast, elapsedSince, initTheme, toggleTheme } from '/js/utils.js';
+import { loadTenant, applyBranding, tenantPath } from '/js/tenant.js';
 initTheme();
 
 // Load tenant context

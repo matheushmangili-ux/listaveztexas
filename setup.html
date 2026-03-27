@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="/css/styles.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -501,8 +501,8 @@
 <button onclick="document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');localStorage.setItem('lv-theme',document.documentElement.getAttribute('data-theme'))" style="position:fixed;top:16px;right:16px;width:32px;height:32px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-card);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;font-size:13px" title="Modo claro/escuro"><i class="fa-solid fa-circle-half-stroke"></i></button>
 
 <script type="module">
-import { getSupabase } from './js/supabase-config.js';
-import { toast, initTheme } from './js/utils.js';
+import { getSupabase } from '/js/supabase-config.js';
+import { toast, initTheme } from '/js/utils.js';
 initTheme();
 
 const sb = getSupabase();
