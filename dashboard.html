@@ -253,7 +253,7 @@ window.addEventListener('error', function(e) {
   <div class="dash-header">
     <div style="display:flex;align-items:center;gap:14px">
       <div style="width:40px;height:40px;border-radius:var(--radius-sm);overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg-elevated)">
-        <img src="assets/logo-minhavez-web.png" alt="MinhaVez" style="width:32px;height:32px;object-fit:contain;filter:brightness(0) invert(1)">
+        <img src="/assets/logo-minhavez-web.png" alt="MinhaVez" style="width:32px;height:32px;object-fit:contain;filter:brightness(0) invert(1)">
       </div>
       <div>
         <h1 style="font-family:var(--font-mono);font-size:18px;font-weight:700;letter-spacing:-.025em">Dashboard</h1>
@@ -279,10 +279,10 @@ window.addEventListener('error', function(e) {
           <button onclick="exportPDF();document.getElementById('exportMenu').classList.remove('open')"><i class="fa-solid fa-file-pdf" style="color:var(--danger)"></i> Exportar PDF</button>
         </div>
       </div>
-      <a id="linkTablet" href="tablet.html" class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px">
+      <a id="linkTablet" href="/tablet.html" class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px">
         <i class="fa-solid fa-tablet-screen-button" style="font-size:10px"></i> Tablet
       </a>
-      <a id="linkSettings" href="settings.html" class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px">
+      <a id="linkSettings" href="/settings.html" class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px">
         <i class="fa-solid fa-gear" style="font-size:10px"></i>
       </a>
       <button class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px" onclick="toggleTheme()">
@@ -838,7 +838,9 @@ async function loadRanking(range, cachedData) {
   }
 
   // Buscar fotos dos vendedores
-  const { data: vendedoresData } = await sb.from('vendedores').select('id, foto_url, apelido').eq('ativo', true);
+  const vendQuery = sb.from('vendedores').select('id, foto_url, apelido').eq('ativo', true);
+  if (tenantId) vendQuery.eq('tenant_id', tenantId);
+  const { data: vendedoresData } = await vendQuery;
   const fotoMap = {};
   (vendedoresData || []).forEach(v => { fotoMap[v.id] = v.foto_url; });
 
@@ -908,7 +910,9 @@ async function loadPauseStats(range) {
 
 // ─── Floor (who's on now) — LED marquee ───
 async function loadFloor() {
-  const { data, error } = await sb.from('vendedores').select('*').eq('ativo', true).order('nome');
+  const floorQ = sb.from('vendedores').select('*').eq('ativo', true);
+  if (tenantId) floorQ.eq('tenant_id', tenantId);
+  const { data, error } = await floorQ.order('nome');
   if (error) { toast('Erro ao carregar equipe: ' + error.message, 'error'); return; }
   const el = document.getElementById('floorList');
   if (!data || data.length === 0) {
@@ -1074,7 +1078,9 @@ window.toggleTheme = toggleTheme;
 // ─── Gestão de Vendedores ───
 async function loadVendedores() {
   const el = document.getElementById('vendedorList');
-  const { data, error } = await sb.from('vendedores').select('*').order('nome');
+  const vq = sb.from('vendedores').select('*');
+  if (tenantId) vq.eq('tenant_id', tenantId);
+  const { data, error } = await vq.order('nome');
   if (error || !data || data.length === 0) {
     el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum vendedor cadastrado</div>';
     return;
@@ -1174,7 +1180,7 @@ window.saveVendedor = async function() {
     if (error) { toast('Erro ao atualizar: ' + error.message, 'error'); savingVendedor = false; return; }
     toast('Vendedor atualizado', 'success');
   } else {
-    const insertObj = { nome, apelido, setor };
+    const insertObj = { nome, apelido, setor, tenant_id: tenantId };
     if (pin) insertObj.pin = pin;
     const { data: inserted, error } = await sb.from('vendedores').insert(insertObj).select().single();
     if (error) { toast('Erro ao cadastrar: ' + error.message, 'error'); savingVendedor = false; return; }
