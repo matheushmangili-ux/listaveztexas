@@ -1,5 +1,5 @@
 // Minha Vez — Service Worker v4 (network-first, no HTML cache)
-const CACHE_NAME = 'minhavez-v4';
+const CACHE_NAME = 'minhavez-v5';
 const STATIC_ASSETS = [
   '/css/styles.css',
   '/assets/logo-minhavez-web.png',
