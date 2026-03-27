@@ -1,5 +1,5 @@
 // ============================================
-// ListaVez Texas — Shared Utilities
+// MinhaVez — Shared Utilities
 // ============================================
 
 export const MOTIVOS = {

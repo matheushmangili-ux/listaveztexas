@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
     if (type === 'setup-complete') {
       const tabletUrl = `${BASE_URL}/${slug}/tablet`
       const dashUrl = `${BASE_URL}/${slug}/dashboard`
-      subject = 'ListaVez — Sua loja está pronta!'
+      subject = 'MinhaVez — Sua loja está pronta!'
       html = `
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
 <tr><td align="center">
 <table width="560" cellpadding="0" cellspacing="0" style="background:#18181B;border-radius:8px;border:1px solid rgba(255,255,255,.06)">
   <tr><td style="padding:40px 32px 24px;text-align:center">
-    <h1 style="margin:0;font-size:24px;font-weight:800;color:#FAFAFA">Lista da Vez</h1>
+    <h1 style="margin:0;font-size:24px;font-weight:800;color:#FAFAFA">Minha Vez</h1>
     <p style="margin:4px 0 0;font-size:11px;color:#34D399;text-transform:uppercase;letter-spacing:2px">Loja Configurada</p>
   </td></tr>
   <tr><td style="padding:0 32px"><div style="height:1px;background:rgba(255,255,255,.06)"></div></td></tr>
@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
     <p style="margin:20px 0 0;color:#71717A;font-size:12px;line-height:1.5">Abra o link do Tablet no navegador do seu tablet e coloque no balcão. Boas vendas!</p>
   </td></tr>
   <tr><td style="padding:20px 32px;text-align:center">
-    <p style="margin:0;color:#52525B;font-size:11px">&copy; ${new Date().getFullYear()} ListaVez</p>
+    <p style="margin:0;color:#52525B;font-size:11px">&copy; ${new Date().getFullYear()} MinhaVez</p>
   </td></tr>
 </table>
 </td></tr>
@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'ListaVez <noreply@listavez.com.br>',
+        from: 'MinhaVez <noreply@minhavez.com.br>',
         to: [to],
         subject,
         html

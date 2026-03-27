@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ListaVez — Gestão inteligente de fila de vendedores</title>
+<title>MinhaVez — Gestão inteligente de fila de vendedores</title>
 <meta name="description" content="Sistema de gestão de fila de vendedores para lojas físicas. Organize a vez, acompanhe vendas e aumente a conversão da sua equipe.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 /* ══════════════════════════════════════════
-   LISTAVEZ LANDING — DESIGN SYSTEM
+   MINHAVEZ LANDING — DESIGN SYSTEM
    Colors from the app: dark zinc + rose red + emerald
    ══════════════════════════════════════════ */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -578,7 +578,7 @@ section { position: relative; z-index: 1; }
   transform: scale(1.03);
 }
 .price-card.featured::before {
-  content: 'MAIS POPULAR';
+  content: 'OFERTA DE LANÇAMENTO';
   position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
   padding: 4px 16px;
   background: var(--accent);
@@ -801,7 +801,7 @@ section { position: relative; z-index: 1; }
 <nav class="nav" id="nav">
   <a href="#" class="nav-logo">
     <i class="fa-solid fa-list-ol"></i>
-    Lista<span class="dot">Vez</span>
+    Minha<span class="dot">Vez</span>
   </a>
   <div class="nav-links">
     <a href="#problema">Problema</a>
@@ -845,7 +845,7 @@ section { position: relative; z-index: 1; }
           <div class="device-dot r"></div>
           <div class="device-dot y"></div>
           <div class="device-dot g"></div>
-          <span style="flex:1;text-align:center;font-size:12px;color:var(--text-muted)">ListaVez — Painel</span>
+          <span style="flex:1;text-align:center;font-size:12px;color:var(--text-muted)">MinhaVez — Painel</span>
         </div>
         <div class="device-screen">
           <div class="mock-sidebar">
@@ -952,7 +952,7 @@ section { position: relative; z-index: 1; }
       <i class="fa-solid fa-tablet-screen-button"></i>
       <div>
         <strong>Requisito: você precisa de um tablet.</strong>
-        O ListaVez funciona no navegador de qualquer tablet (Android ou iPad) — sem instalar nada. Basta abrir o link no tablet e colocar no balcão da loja.
+        O MinhaVez funciona no navegador de qualquer tablet (Android ou iPad) — sem instalar nada. Basta abrir o link no tablet e colocar no balcão da loja.
       </div>
     </div>
   </div>
@@ -1088,7 +1088,7 @@ section { position: relative; z-index: 1; }
         <div class="testimonial-avatar">TC</div>
         <div class="testimonial-info">
           <div class="testimonial-name">Texas Center</div>
-          <div class="testimonial-role">Primeira loja a usar o ListaVez</div>
+          <div class="testimonial-role">Primeira loja a usar o MinhaVez</div>
         </div>
       </div>
     </div>
@@ -1103,50 +1103,26 @@ section { position: relative; z-index: 1; }
       <h2>Simples e sem surpresas</h2>
       <p>Pague apenas pelo que usa. Sem taxa de setup, sem contrato de fidelidade.</p>
     </div>
-    <div class="pricing-cards stagger">
-      <div class="price-card reveal" style="--i:0">
-        <div class="price-name">Starter</div>
-        <div class="price-desc">Para lojas menores com até 5 vendedores</div>
-        <div class="price-value"><span>R$</span> 99<span>/mês</span></div>
-        <div class="price-period">por loja</div>
-        <ul class="price-features">
-          <li><i class="fa-solid fa-check"></i> Até 5 vendedores</li>
-          <li><i class="fa-solid fa-check"></i> Fila inteligente</li>
-          <li><i class="fa-solid fa-check"></i> Dashboard básico</li>
-          <li><i class="fa-solid fa-check"></i> Tablet responsivo</li>
-          <li><i class="fa-solid fa-check"></i> Suporte por WhatsApp</li>
-        </ul>
-        <button class="price-btn outline" onclick="openCheckoutModal('starter')">Começar</button>
-      </div>
-      <div class="price-card featured reveal" style="--i:1">
-        <div class="price-name">Profissional</div>
-        <div class="price-desc">Para lojas com equipe completa e múltiplos setores</div>
-        <div class="price-value"><span>R$</span> 199<span>/mês</span></div>
-        <div class="price-period">por loja</div>
+    <div class="pricing-cards stagger" style="justify-content:center">
+      <div class="price-card featured reveal" style="--i:0;max-width:420px">
+        <div class="price-name">MinhaVez Completo</div>
+        <div class="price-desc">Tudo que sua loja precisa para organizar a vez e vender mais</div>
+        <div class="price-original" style="font-size:16px;color:var(--text-muted);text-decoration:line-through;margin-bottom:4px;font-family:var(--font-mono)">R$ 129,90/mês</div>
+        <div class="price-value"><span>R$</span> 89<span>,90/mês</span></div>
+        <div class="price-period" style="color:var(--accent);font-weight:600">Promoção de lançamento</div>
         <ul class="price-features">
           <li><i class="fa-solid fa-check"></i> Vendedores ilimitados</li>
           <li><i class="fa-solid fa-check"></i> Múltiplos setores</li>
+          <li><i class="fa-solid fa-check"></i> Fila inteligente com rodízio</li>
           <li><i class="fa-solid fa-check"></i> Dashboard completo</li>
-          <li><i class="fa-solid fa-check"></i> Gestão de trocas</li>
           <li><i class="fa-solid fa-check"></i> Timer de atendimento</li>
+          <li><i class="fa-solid fa-check"></i> Gestão de trocas</li>
           <li><i class="fa-solid fa-check"></i> Controle de saídas</li>
+          <li><i class="fa-solid fa-check"></i> Tablet responsivo</li>
           <li><i class="fa-solid fa-check"></i> Suporte prioritário</li>
         </ul>
-        <button class="price-btn primary" onclick="openCheckoutModal('pro')">Quero esse</button>
-      </div>
-      <div class="price-card reveal" style="--i:2">
-        <div class="price-name">Rede</div>
-        <div class="price-desc">Para redes com múltiplas lojas e gestão centralizada</div>
-        <div class="price-value" style="font-size:28px">Sob consulta</div>
-        <div class="price-period">preço por unidade</div>
-        <ul class="price-features">
-          <li><i class="fa-solid fa-check"></i> Tudo do Profissional</li>
-          <li><i class="fa-solid fa-check"></i> Painel multi-loja</li>
-          <li><i class="fa-solid fa-check"></i> Relatórios consolidados</li>
-          <li><i class="fa-solid fa-check"></i> Onboarding dedicado</li>
-          <li><i class="fa-solid fa-check"></i> SLA de suporte</li>
-        </ul>
-        <button class="price-btn outline" onclick="openCheckoutModal('rede')">Falar com consultor</button>
+        <button class="price-btn primary" onclick="openCheckoutModal('pro')">Começar agora</button>
+        <p style="font-size:11px;color:var(--text-muted);margin-top:12px">Sem contrato. Cancele quando quiser.</p>
       </div>
     </div>
   </div>
@@ -1156,13 +1132,13 @@ section { position: relative; z-index: 1; }
 <section class="cta" id="contato">
   <div class="container">
     <h2 class="reveal">Pronto pra organizar<br>a vez na sua loja?</h2>
-    <p class="reveal">Escolha seu plano e comece a usar em minutos. Sem contrato, cancele quando quiser.</p>
+    <p class="reveal">Comece a usar em minutos por apenas R$ 89,90/mês. Sem contrato, cancele quando quiser.</p>
     <div class="hero-actions reveal">
       <button class="btn btn-primary" onclick="openCheckoutModal('pro')" style="font-size:16px;padding:16px 32px;min-height:56px">
         <i class="fa-solid fa-rocket"></i>
         Começar agora
       </button>
-      <a href="mailto:contato@listavez.com.br" class="btn btn-ghost" style="font-size:16px;padding:16px 32px;min-height:56px">
+      <a href="mailto:contato@minhavez.com.br" class="btn btn-ghost" style="font-size:16px;padding:16px 32px;min-height:56px">
         <i class="fa-solid fa-envelope"></i>
         Dúvidas? Fale conosco
       </a>
@@ -1181,7 +1157,7 @@ section { position: relative; z-index: 1; }
     </div>
     <div id="modalRedeMsg" style="display:none;text-align:center;padding:16px;background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.15);border-radius:8px;margin-bottom:16px">
       <p style="color:#A1A1AA;font-size:14px;margin:0 0 12px">Para redes com múltiplas lojas, entre em contato para um orçamento personalizado.</p>
-      <a href="mailto:contato@listavez.com.br" style="color:#60A5FA;font-size:14px;font-weight:600;text-decoration:none"><i class="fa-solid fa-envelope" style="margin-right:6px"></i>contato@listavez.com.br</a>
+      <a href="mailto:contato@minhavez.com.br" style="color:#60A5FA;font-size:14px;font-weight:600;text-decoration:none"><i class="fa-solid fa-envelope" style="margin-right:6px"></i>contato@minhavez.com.br</a>
     </div>
     <div id="modalCheckoutForm">
       <div style="margin-bottom:16px">
@@ -1202,7 +1178,7 @@ section { position: relative; z-index: 1; }
   <div class="container">
     <div class="footer-inner">
       <div class="footer-brand">
-        <i class="fa-solid fa-list-ol"></i> Lista<span>Vez</span> &copy; 2025
+        <i class="fa-solid fa-list-ol"></i> Minha<span>Vez</span> &copy; 2025
       </div>
       <div class="footer-links">
         <a href="#funcionalidades">Funcionalidades</a>
@@ -1330,22 +1306,19 @@ const SUPABASE_ANON_KEY = 'sb_publishable_0AJbQVEVFsL71gAGtks6rw_V1rYn3Ne';
 let selectedPlan = 'pro';
 
 const planInfo = {
-  starter: { title: 'Plano Starter', price: 'R$ 99/mês' },
-  pro: { title: 'Plano Profissional', price: 'R$ 199/mês' },
-  rede: { title: 'Plano Rede', price: 'Sob consulta' }
+  pro: { title: 'MinhaVez Completo', price: 'R$ 89,90/mês' }
 };
 
 function openCheckoutModal(plan) {
-  selectedPlan = plan;
-  const info = planInfo[plan];
+  selectedPlan = 'pro';
+  const info = planInfo.pro;
   document.getElementById('modalPlanTitle').textContent = info.title;
   document.getElementById('modalPlanPrice').textContent = info.price;
-  const isRede = plan === 'rede';
-  document.getElementById('modalRedeMsg').style.display = isRede ? 'block' : 'none';
-  document.getElementById('modalCheckoutForm').style.display = isRede ? 'none' : 'block';
+  document.getElementById('modalRedeMsg').style.display = 'none';
+  document.getElementById('modalCheckoutForm').style.display = 'block';
   const modal = document.getElementById('checkoutModal');
   modal.style.display = 'flex';
-  if (!isRede) document.getElementById('checkoutEmail').focus();
+  document.getElementById('checkoutEmail').focus();
 }
 
 function closeCheckoutModal() {

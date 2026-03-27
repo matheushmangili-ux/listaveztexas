@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Lista da Vez — Fila</title>
+<title>Minha Vez — Fila</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
 <script>
 if ('serviceWorker' in navigator) {
   // Limpar caches antigos e forçar SW novo
-  if (caches) caches.keys().then(ks => ks.forEach(k => { if (k !== 'listavez-v4') caches.delete(k); }));
+  if (caches) caches.keys().then(ks => ks.forEach(k => { if (k !== 'minhavez-v4') caches.delete(k); }));
   navigator.serviceWorker.register('/sw.js').then(reg => {
     reg.update();
     if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -712,7 +712,7 @@ window.addEventListener('error', function(e) {
       <div style="width:28px;height:28px;border-radius:var(--radius-sm);overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg-elevated);flex-shrink:0">
         <img src="assets/logo-tc.png" alt="TC" style="width:22px;height:22px;object-fit:contain;filter:brightness(0) invert(.85)">
       </div>
-      <span class="header-title" style="font-family:var(--font-mono);font-weight:700;font-size:13px;white-space:nowrap">Lista da Vez</span>
+      <span class="header-title" style="font-family:var(--font-mono);font-weight:700;font-size:13px;white-space:nowrap">Minha Vez</span>
       <span class="header-turno-label" id="turnoLabel" style="font-size:10px;color:var(--text-muted);white-space:nowrap">Turno não iniciado</span>
     </div>
     <div id="headerKpis" style="display:flex;align-items:center;gap:12px;font-family:var(--font-mono);font-size:11px;font-weight:700">
@@ -1215,7 +1215,7 @@ setInterval(updateClock, 15000);
 async function loadVendedores() {
   const { data, error } = await sb.from('vendedores').select('*').eq('ativo', true).order('posicao_fila', { ascending: true, nullsFirst: false });
   if (error) {
-    const backup = localStorage.getItem('listavez_vendedores');
+    const backup = localStorage.getItem('minhavez_vendedores');
     if (backup) {
       vendedores = JSON.parse(backup);
       toast('Offline — usando dados locais', 'warning');
@@ -1226,7 +1226,7 @@ async function loadVendedores() {
     return;
   }
   vendedores = data || [];
-  try { localStorage.setItem('listavez_vendedores', JSON.stringify(vendedores)); } catch(e) {}
+  try { localStorage.setItem('minhavez_vendedores', JSON.stringify(vendedores)); } catch(e) {}
   // Carregar motivos de pausa do banco apenas para vendedores sem motivo local
   const pausadosSemMotivo = vendedores.filter(v => v.status === 'pausa' && !saidaMotivos[v.id]);
   if (pausadosSemMotivo.length > 0) {

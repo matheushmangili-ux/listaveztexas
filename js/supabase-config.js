@@ -1,5 +1,5 @@
 // ============================================
-// ListaVez Texas — Supabase Config
+// MinhaVez — Supabase Config
 // ============================================
 // Preencha com as credenciais do seu projeto Supabase
 

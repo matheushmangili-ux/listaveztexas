@@ -46,7 +46,7 @@ async function sendEmail(to: string, subject: string, html: string) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      from: 'ListaVez <noreply@listavez.com.br>',
+      from: 'MinhaVez <noreply@minhavez.com.br>',
       to: [to],
       subject,
       html
@@ -65,7 +65,7 @@ function welcomeEmailHTML(setupUrl: string, plano: string) {
 <tr><td align="center">
 <table width="560" cellpadding="0" cellspacing="0" style="background:#18181B;border-radius:8px;border:1px solid rgba(255,255,255,.06)">
   <tr><td style="padding:40px 32px 24px;text-align:center">
-    <h1 style="margin:0;font-size:24px;font-weight:800;color:#FAFAFA;font-family:'Inter',sans-serif">Lista da Vez</h1>
+    <h1 style="margin:0;font-size:24px;font-weight:800;color:#FAFAFA;font-family:'Inter',sans-serif">Minha Vez</h1>
     <p style="margin:4px 0 0;font-size:11px;color:#71717A;text-transform:uppercase;letter-spacing:2px">Bem-vindo</p>
   </td></tr>
   <tr><td style="padding:0 32px"><div style="height:1px;background:rgba(255,255,255,.06)"></div></td></tr>
@@ -89,7 +89,7 @@ function welcomeEmailHTML(setupUrl: string, plano: string) {
   </td></tr>
   <tr><td style="padding:0 32px"><div style="height:1px;background:rgba(255,255,255,.06)"></div></td></tr>
   <tr><td style="padding:20px 32px;text-align:center">
-    <p style="margin:0;color:#52525B;font-size:11px">&copy; ${new Date().getFullYear()} ListaVez. Todos os direitos reservados.</p>
+    <p style="margin:0;color:#52525B;font-size:11px">&copy; ${new Date().getFullYear()} MinhaVez. Todos os direitos reservados.</p>
   </td></tr>
 </table>
 </td></tr>
@@ -110,7 +110,7 @@ function setupCompleteEmailHTML(slug: string) {
 <tr><td align="center">
 <table width="560" cellpadding="0" cellspacing="0" style="background:#18181B;border-radius:8px;border:1px solid rgba(255,255,255,.06)">
   <tr><td style="padding:40px 32px 24px;text-align:center">
-    <h1 style="margin:0;font-size:24px;font-weight:800;color:#FAFAFA">Lista da Vez</h1>
+    <h1 style="margin:0;font-size:24px;font-weight:800;color:#FAFAFA">Minha Vez</h1>
     <p style="margin:4px 0 0;font-size:11px;color:#34D399;text-transform:uppercase;letter-spacing:2px">Loja Configurada</p>
   </td></tr>
   <tr><td style="padding:0 32px"><div style="height:1px;background:rgba(255,255,255,.06)"></div></td></tr>
@@ -132,7 +132,7 @@ function setupCompleteEmailHTML(slug: string) {
   </td></tr>
   <tr><td style="padding:0 32px"><div style="height:1px;background:rgba(255,255,255,.06)"></div></td></tr>
   <tr><td style="padding:20px 32px;text-align:center">
-    <p style="margin:0;color:#52525B;font-size:11px">&copy; ${new Date().getFullYear()} ListaVez. Todos os direitos reservados.</p>
+    <p style="margin:0;color:#52525B;font-size:11px">&copy; ${new Date().getFullYear()} MinhaVez. Todos os direitos reservados.</p>
   </td></tr>
 </table>
 </td></tr>
@@ -164,7 +164,7 @@ Deno.serve(async (req) => {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object
       const email = session.customer_email || session.metadata?.email
-      const plano = session.metadata?.plano || 'starter'
+      const plano = session.metadata?.plano || 'pro'
       const stripeCustomerId = session.customer
       const stripeSubscriptionId = session.subscription
 
@@ -206,7 +206,7 @@ Deno.serve(async (req) => {
 
       // Send welcome email with setup link
       const setupUrl = `${BASE_URL}/setup?token=${token}`
-      await sendEmail(email, 'Bem-vindo ao ListaVez! Configure sua loja', welcomeEmailHTML(setupUrl, plano))
+      await sendEmail(email, 'Bem-vindo ao MinhaVez! Configure sua loja', welcomeEmailHTML(setupUrl, plano))
 
       return new Response(JSON.stringify({ received: true, token }), {
         status: 200, headers: { 'Content-Type': 'application/json' }
@@ -221,7 +221,7 @@ Deno.serve(async (req) => {
       if (email) {
         await sendEmail(
           email,
-          'ListaVez — Problema com seu pagamento',
+          'MinhaVez — Problema com seu pagamento',
           `
 <!DOCTYPE html>
 <html>
@@ -231,7 +231,7 @@ Deno.serve(async (req) => {
 <tr><td align="center">
 <table width="560" cellpadding="0" cellspacing="0" style="background:#18181B;border-radius:8px;border:1px solid rgba(255,255,255,.06)">
   <tr><td style="padding:40px 32px 24px;text-align:center">
-    <h1 style="margin:0;font-size:24px;font-weight:800;color:#FAFAFA">Lista da Vez</h1>
+    <h1 style="margin:0;font-size:24px;font-weight:800;color:#FAFAFA">Minha Vez</h1>
     <p style="margin:4px 0 0;font-size:11px;color:#F87171;text-transform:uppercase;letter-spacing:2px">Atenção</p>
   </td></tr>
   <tr><td style="padding:0 32px"><div style="height:1px;background:rgba(255,255,255,.06)"></div></td></tr>
@@ -248,7 +248,7 @@ Deno.serve(async (req) => {
     </table>
   </td></tr>
   <tr><td style="padding:20px 32px;text-align:center">
-    <p style="margin:0;color:#52525B;font-size:11px">&copy; ${new Date().getFullYear()} ListaVez</p>
+    <p style="margin:0;color:#52525B;font-size:11px">&copy; ${new Date().getFullYear()} MinhaVez</p>
   </td></tr>
 </table>
 </td></tr>

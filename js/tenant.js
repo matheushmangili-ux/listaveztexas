@@ -1,5 +1,5 @@
 // ============================================
-// ListaVez — Tenant Module
+// MinhaVez — Tenant Module
 // Resolves tenant from URL slug, loads context
 // ============================================
 import { getSupabase } from './supabase-config.js';
@@ -76,6 +76,6 @@ export function applyBranding(tenant) {
     document.documentElement.style.setProperty('--accent', tenant.cor_primaria);
   }
   if (tenant.nome_loja) {
-    document.title = `Lista da Vez — ${tenant.nome_loja}`;
+    document.title = `Minha Vez — ${tenant.nome_loja}`;
   }
 }

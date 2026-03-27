@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
     }
 
     // Determine max_vendedores by plan
-    const maxVendedores = plano === 'pro' ? 30 : 10
+    const maxVendedores = 999
 
     // If we have an owner email from token, create or find owner auth user
     let ownerUserId: string | null = null
@@ -142,7 +142,7 @@ Deno.serve(async (req) => {
 
     // Create recepcionista auth user for PIN login
     // We create one shared recepcionista user per tenant
-    const recEmail = `recepcao_${slug}@listavez.app`
+    const recEmail = `recepcao_${slug}@minhavez.app`
     const recPassword = `rec_${tenantId}_${crypto.randomUUID().slice(0, 8)}`
 
     const { data: recUser, error: recErr } = await supabaseAdmin.auth.admin.createUser({

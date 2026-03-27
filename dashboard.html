@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lista da Vez — Dashboard</title>
+<title>Minha Vez — Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -257,7 +257,7 @@ window.addEventListener('error', function(e) {
       </div>
       <div>
         <h1 style="font-family:var(--font-mono);font-size:18px;font-weight:700;letter-spacing:-.025em">Dashboard</h1>
-        <p style="font-size:11px;color:var(--text-muted);font-weight:500">Lista da Vez — <span id="dashDate"></span></p>
+        <p style="font-size:11px;color:var(--text-muted);font-weight:500">Minha Vez — <span id="dashDate"></span></p>
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:12px">
@@ -431,7 +431,7 @@ window.addEventListener('error', function(e) {
 
   <!-- Footer -->
   <footer style="text-align:center;margin-top:32px;padding:16px 0;border-top:1px solid var(--border-subtle)">
-    <p style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);letter-spacing:.15em;text-transform:uppercase">Lista da Vez v1.0</p>
+    <p style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);letter-spacing:.15em;text-transform:uppercase">Minha Vez v1.0</p>
   </footer>
 </div>
 
@@ -1239,7 +1239,7 @@ window.exportCSV = async function() {
   if (!d) return;
   const period = getPeriodLabel();
   let csv = '\uFEFF';
-  csv += 'Relatório Lista da Vez — ' + period + '\n';
+  csv += 'Relatório Minha Vez — ' + period + '\n';
   csv += 'Gerado em: ' + new Date().toLocaleString('pt-BR') + '\n\n';
   csv += 'Vendedor,Atendimentos,Vendas,Conversão %,Tempo Médio (min)\n';
   d.ranking.forEach(r => {
@@ -1253,7 +1253,7 @@ window.exportCSV = async function() {
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = 'relatorio-listavez-' + currentPeriod + '-' + new Date().toISOString().split('T')[0] + '.csv';
+  a.href = url; a.download = 'relatorio-minhavez-' + currentPeriod + '-' + new Date().toISOString().split('T')[0] + '.csv';
   a.click(); URL.revokeObjectURL(url);
   toast('CSV exportado!', 'success');
 };
@@ -1296,7 +1296,7 @@ tr:nth-child(even){background:#FAFAFA}
 @media print{body{padding:24px}@page{margin:1cm;size:A4}}
 </style></head><body>
 <div class="header">
-  <div><h1>Lista da Vez</h1><div class="sub">Texas Center — Relatório ${period}</div></div>
+  <div><h1>Minha Vez</h1><div class="sub">Texas Center — Relatório ${period}</div></div>
   <div style="text-align:right"><div class="sub">${now}</div></div>
 </div>
 <div class="kpi-row">
@@ -1319,7 +1319,7 @@ tr:nth-child(even){background:#FAFAFA}
   </tbody>
 </table>
 ${d.motivos.length > 0 ? `<div class="section-title">Motivos de Perda</div><div class="motivos">${d.motivos.map(m => `<div class="motivo-tag">${motivoLabels[m.motivo]||m.motivo}: <strong>${m.total}</strong></div>`).join('')}</div>` : ''}
-<div class="footer">Lista da Vez v1.0 — Texas Center — Gerado automaticamente</div>
+<div class="footer">Minha Vez v1.0 — Texas Center — Gerado automaticamente</div>
 </body></html>`;
 
   const printWin = window.open('', '_blank');

@@ -1,5 +1,5 @@
-// Lista da Vez — Service Worker v4 (network-first, no HTML cache)
-const CACHE_NAME = 'listavez-v4';
+// Minha Vez — Service Worker v4 (network-first, no HTML cache)
+const CACHE_NAME = 'minhavez-v4';
 const STATIC_ASSETS = [
   '/css/styles.css',
   '/assets/logo-tc.png',

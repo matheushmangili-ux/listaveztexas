@@ -1,5 +1,5 @@
 // ============================================
-// ListaVez — Auth Module (Multi-Tenant)
+// MinhaVez — Auth Module (Multi-Tenant)
 // ============================================
 import { getSupabase } from './supabase-config.js';
 import { getSlug, tenantPath } from './tenant.js';
@@ -35,8 +35,8 @@ export async function loginWithPin(pin) {
     }
     return data.user;
   }
-  // Fallback: legacy PIN login (pin_XXXX@listavez.local)
-  const email = `pin_${pin}@listavez.local`;
+  // Fallback: legacy PIN login (pin_XXXX@minhavez.local)
+  const email = `pin_${pin}@minhavez.local`;
   const password = `pin_${pin}_texas`;
   return login(email, password);
 }

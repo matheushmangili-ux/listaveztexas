@@ -1,6 +1,6 @@
 {
-  "name": "Lista da Vez — Texas Center",
-  "short_name": "Lista da Vez",
+  "name": "Minha Vez — Texas Center",
+  "short_name": "Minha Vez",
   "description": "Sistema de gestão de fila de vendedores",
   "start_url": "/index.html",
   "display": "standalone",
