@@ -2,7 +2,7 @@
 const CACHE_NAME = 'minhavez-v4';
 const STATIC_ASSETS = [
   '/css/styles.css',
-  '/assets/logo-tc.png',
+  '/assets/logo-minhavez-web.png',
   '/manifest.json'
 ];
 
