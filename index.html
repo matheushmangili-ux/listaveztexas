@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -211,7 +211,6 @@ if ('serviceWorker' in navigator) {
 </div>
 
 <div id="toastContainer"></div>
-<button onclick="document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');localStorage.setItem('lv-theme',document.documentElement.getAttribute('data-theme'))" style="position:fixed;top:16px;right:16px;width:32px;height:32px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-card);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;font-size:13px" title="Modo claro/escuro"><i class="fa-solid fa-circle-half-stroke"></i></button>
 <span class="version-tag">v1.1</span>
 
 <script type="module">
