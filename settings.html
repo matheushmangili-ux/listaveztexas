@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Configurações — Lista da Vez</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .settings-layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .settings-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .settings-topbar h1 {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+  }
+  .settings-topbar .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-family: var(--font-body);
+  }
+  .settings-topbar .back-btn:hover { color: var(--text-primary); }
+  .settings-body {
+    flex: 1;
+    max-width: 680px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+  .settings-section {
+    margin-bottom: 40px;
+  }
+  .settings-section h2 {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .settings-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+  .settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-row .label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+  .settings-row .sublabel {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .settings-row .value {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .form-group {
+    margin-bottom: 16px;
+  }
+  .form-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 6px;
+  }
+  /* Color picker */
+  .color-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .color-swatch {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--border-medium);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .color-swatch input[type="color"] {
+    position: absolute;
+    inset: -4px;
+    width: calc(100% + 8px);
+    height: calc(100% + 8px);
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+  }
+  /* Vendor management */
+  .vendor-mgmt-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .vendor-mgmt-row {
+    display: grid;
+    grid-template-columns: 1fr 100px 80px 40px;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 12px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+  }
+  .vendor-mgmt-row .vendor-name {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .vendor-mgmt-row .vendor-sector {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .vendor-mgmt-row .vendor-pin {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+  .vendor-mgmt-row .vendor-actions {
+    display: flex;
+    gap: 4px;
+  }
+  .vendor-mgmt-row .vendor-actions button {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+  }
+  .vendor-mgmt-row .vendor-actions button:hover { background: var(--bg-hover); color: var(--text-primary); }
+  /* Plan badge */
+  .plan-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  .plan-badge.starter { background: rgba(96,165,250,.1); color: #60A5FA; border: 1px solid rgba(96,165,250,.2); }
+  .plan-badge.pro { background: rgba(225,29,72,.1); color: #E11D48; border: 1px solid rgba(225,29,72,.2); }
+  /* URL cards */
+  .url-display {
+    padding: 10px 14px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .url-display .copy-btn {
+    padding: 4px 8px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 11px;
+    font-family: var(--font-body);
+  }
+  .url-display .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.6);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    width: 100%;
+    max-width: 420px;
+    animation: fadeIn .2s ease;
+  }
+  .modal-box h3 {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 24px;
+  }
+  @media (max-width: 600px) {
+    .vendor-mgmt-row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="settings-layout">
+  <div class="settings-topbar">
+    <button class="back-btn" onclick="goBack()">
+      <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
+    </button>
+    <h1>Configurações</h1>
+    <div style="width:100px"></div>
+  </div>
+
+  <div class="settings-body" id="settingsBody">
+    <!-- Loading -->
+    <div id="settingsLoader" style="text-align:center;padding:60px 0">
+      <div class="spinner" style="margin:0 auto 16px;border-top-color:var(--accent)"></div>
+      <p style="font-size:13px;color:var(--text-muted)">Carregando...</p>
+    </div>
+
+    <!-- Content (hidden until loaded) -->
+    <div id="settingsContent" style="display:none">
+
+      <!-- Store Info -->
+      <div class="settings-section">
+        <h2><i class="fa-solid fa-store"></i> Loja</h2>
+        <div class="settings-card">
+          <div class="form-group">
+            <label class="form-label">Nome da loja</label>
+            <input id="settStoreName" class="input" type="text" maxlength="60">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cor principal</label>
+            <div class="color-row">
+              <div class="color-swatch" id="colorSwatch">
+                <input type="color" id="settColor" value="#E11D48">
+              </div>
+              <input id="settColorText" class="input" type="text" value="#E11D48" maxlength="7" style="max-width:120px;font-family:var(--font-mono);font-size:13px">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Setores</label>
+            <div id="settSectors" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
+            <div style="display:flex;gap:8px">
+              <input id="settNewSector" class="input" type="text" placeholder="Novo setor..." maxlength="30" style="max-width:200px;min-height:36px;font-size:13px">
+              <button class="btn btn-ghost" onclick="addSettSector()" style="min-height:36px;padding:0 12px;font-size:12px">
+                <i class="fa-solid fa-plus"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="saveStoreSettings()" style="width:100%">
+          <i class="fa-solid fa-floppy-disk"></i> Salvar alterações
+        </button>
+      </div>
+
+      <!-- Links -->
+      <div class="settings-section">
+        <h2><i class="fa-solid fa-link"></i> Links</h2>
+        <div class="settings-card">
+          <div class="form-group">
+            <label class="form-label">Tablet (recepção)</label>
+            <div class="url-display">
+              <span id="linkTablet"></span>
+              <button class="copy-btn" onclick="copyText('linkTablet')"><i class="fa-solid fa-copy"></i></button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Dashboard (gerência)</label>
+            <div class="url-display">
+              <span id="linkDashboard"></span>
+              <button class="copy-btn" onclick="copyText('linkDashboard')"><i class="fa-solid fa-copy"></i></button>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Login</label>
+            <div class="url-display">
+              <span id="linkLogin"></span>
+              <button class="copy-btn" onclick="copyText('linkLogin')"><i class="fa-solid fa-copy"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vendors -->
+      <div class="settings-section">
+        <h2><i class="fa-solid fa-users"></i> Vendedores</h2>
+        <div id="vendorMgmtList" class="vendor-mgmt-list"></div>
+        <button class="btn btn-ghost" onclick="openAddVendor()" style="width:100%;margin-top:12px">
+          <i class="fa-solid fa-user-plus"></i> Adicionar vendedor
+        </button>
+      </div>
+
+      <!-- Plan -->
+      <div class="settings-section">
+        <h2><i class="fa-solid fa-crown"></i> Plano</h2>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <div class="label">Plano atual</div>
+              <div class="sublabel">Renovação automática</div>
+            </div>
+            <span id="planBadge" class="plan-badge starter">Starter</span>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="label">Vendedores</div>
+              <div class="sublabel">Limite do plano</div>
+            </div>
+            <span id="planVendorCount" class="value">0 / 10</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="settings-section">
+        <h2 style="color:var(--danger)"><i class="fa-solid fa-triangle-exclamation"></i> Zona de Perigo</h2>
+        <div class="settings-card" style="border-color:rgba(248,113,113,.15)">
+          <div class="settings-row">
+            <div>
+              <div class="label">Sair da conta</div>
+              <div class="sublabel">Você será redirecionado ao login</div>
+            </div>
+            <button class="btn btn-ghost" onclick="handleLogout()" style="min-height:36px;padding:0 16px;font-size:12px;color:var(--danger);border-color:rgba(248,113,113,.2)">
+              <i class="fa-solid fa-right-from-bracket"></i> Sair
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Vendor Modal -->
+<div class="modal-overlay" id="vendorModal">
+  <div class="modal-box">
+    <h3 id="vendorModalTitle">Adicionar Vendedor</h3>
+    <input type="hidden" id="vendorEditId">
+    <div class="form-group">
+      <label class="form-label">Nome</label>
+      <input id="vmName" class="input" type="text" placeholder="Nome do vendedor" maxlength="60">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Setor</label>
+      <select id="vmSector" class="input" style="padding:0 12px"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">PIN (4 dígitos)</label>
+      <input id="vmPin" class="input" type="text" maxlength="4" inputmode="numeric" placeholder="0000" style="font-family:var(--font-mono);letter-spacing:3px;font-weight:700;max-width:140px;text-align:center;color:var(--accent)">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeVendorModal()">Cancelar</button>
+      <button id="vmSave" class="btn btn-primary" onclick="saveVendor()">
+        <i class="fa-solid fa-check"></i> Salvar
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="toastContainer"></div>
+<button onclick="document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');localStorage.setItem('lv-theme',document.documentElement.getAttribute('data-theme'))" style="position:fixed;top:16px;right:16px;width:32px;height:32px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-card);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;font-size:13px" title="Modo claro/escuro"><i class="fa-solid fa-circle-half-stroke"></i></button>
+
+<script type="module">
+import { getSupabase } from './js/supabase-config.js';
+import { requireRole, logout, getTenantId } from './js/auth.js';
+import { loadTenant, applyBranding, tenantPath, getTenant } from './js/tenant.js';
+import { toast, initTheme } from './js/utils.js';
+initTheme();
+
+const sb = getSupabase();
+let tenant = null;
+let tenantId = null;
+let vendedores = [];
+let tenantSectors = [];
+
+(async function init() {
+  tenant = await loadTenant();
+  if (!tenant) return;
+  applyBranding(tenant);
+
+  const user = await requireRole(['gerente', 'admin', 'owner']);
+  if (!user) return;
+
+  tenantId = getTenantId(user) || tenant.id;
+  tenantSectors = tenant.setores || ['loja'];
+
+  // Load full tenant data
+  const { data: tenantData } = await sb.from('tenants').select('*').eq('id', tenantId).single();
+  if (tenantData) tenant = tenantData;
+
+  // Load vendors
+  const { data: vData } = await sb.from('vendedores').select('*').eq('tenant_id', tenantId).order('posicao_fila');
+  vendedores = vData || [];
+
+  // Populate UI
+  document.getElementById('settStoreName').value = tenant.nome_loja || '';
+  const color = tenant.cor_primaria || '#E11D48';
+  document.getElementById('settColor').value = color;
+  document.getElementById('settColorText').value = color;
+  document.getElementById('colorSwatch').style.background = color;
+  tenantSectors = tenant.setores || ['loja'];
+
+  renderSettSectors();
+  renderVendorList();
+  populateLinks();
+  populatePlan();
+
+  document.getElementById('settingsLoader').style.display = 'none';
+  document.getElementById('settingsContent').style.display = 'block';
+})();
+
+// Color sync
+document.getElementById('settColor').addEventListener('input', (e) => {
+  document.getElementById('settColorText').value = e.target.value;
+  document.getElementById('colorSwatch').style.background = e.target.value;
+});
+document.getElementById('settColorText').addEventListener('input', (e) => {
+  const v = e.target.value;
+  if (/^#[0-9a-fA-F]{6}$/.test(v)) {
+    document.getElementById('settColor').value = v;
+    document.getElementById('colorSwatch').style.background = v;
+  }
+});
+
+document.getElementById('settNewSector').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') addSettSector();
+});
+
+document.getElementById('vmPin').addEventListener('input', (e) => {
+  e.target.value = e.target.value.replace(/\D/g, '');
+});
+
+// Sectors
+function renderSettSectors() {
+  document.getElementById('settSectors').innerHTML = tenantSectors.map((s, i) => `
+    <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:16px;font-size:12px;font-weight:600;color:var(--text-secondary)">
+      ${s}
+      <span onclick="removeSettSector(${i})" style="cursor:pointer;color:var(--text-muted);font-size:10px" title="Remover"><i class="fa-solid fa-xmark"></i></span>
+    </span>
+  `).join('');
+}
+
+window.addSettSector = function() {
+  const input = document.getElementById('settNewSector');
+  const name = input.value.trim().toLowerCase();
+  if (!name || tenantSectors.includes(name)) return;
+  tenantSectors.push(name);
+  input.value = '';
+  renderSettSectors();
+};
+
+window.removeSettSector = function(idx) {
+  tenantSectors.splice(idx, 1);
+  renderSettSectors();
+};
+
+// Save store settings
+window.saveStoreSettings = async function() {
+  const name = document.getElementById('settStoreName').value.trim();
+  const color = document.getElementById('settColorText').value.trim();
+  if (!name) { toast('Nome da loja é obrigatório', 'error'); return; }
+
+  const { error } = await sb.from('tenants').update({
+    nome_loja: name,
+    cor_primaria: color,
+    setores: tenantSectors
+  }).eq('id', tenantId);
+
+  if (error) { toast('Erro ao salvar: ' + error.message, 'error'); return; }
+  toast('Configurações salvas!', 'success');
+  applyBranding({ ...tenant, nome_loja: name, cor_primaria: color });
+};
+
+// Links
+function populateLinks() {
+  const base = window.location.origin;
+  const slug = tenant.slug;
+  document.getElementById('linkTablet').textContent = `${base}/${slug}/tablet`;
+  document.getElementById('linkDashboard').textContent = `${base}/${slug}/dashboard`;
+  document.getElementById('linkLogin').textContent = `${base}/${slug}/login`;
+}
+
+window.copyText = function(id) {
+  navigator.clipboard.writeText(document.getElementById(id).textContent)
+    .then(() => toast('Copiado!', 'success'));
+};
+
+// Plan
+function populatePlan() {
+  const plano = tenant.plano || 'starter';
+  const badge = document.getElementById('planBadge');
+  badge.textContent = plano.charAt(0).toUpperCase() + plano.slice(1);
+  badge.className = 'plan-badge ' + plano;
+  const max = tenant.max_vendedores || 10;
+  document.getElementById('planVendorCount').textContent = `${vendedores.length} / ${max}`;
+}
+
+// Vendor list
+function renderVendorList() {
+  const list = document.getElementById('vendorMgmtList');
+  if (vendedores.length === 0) {
+    list.innerHTML = '<p style="text-align:center;color:var(--text-muted);font-size:13px;padding:20px">Nenhum vendedor cadastrado</p>';
+    return;
+  }
+  list.innerHTML = vendedores.map(v => `
+    <div class="vendor-mgmt-row">
+      <div>
+        <div class="vendor-name">${v.nome}</div>
+        <div class="vendor-sector">${v.setor || '—'}</div>
+      </div>
+      <div class="vendor-sector" style="text-align:center">${v.setor || '—'}</div>
+      <div class="vendor-pin" style="text-align:center">${v.pin || '—'}</div>
+      <div class="vendor-actions">
+        <button onclick="openEditVendor('${v.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Add vendor modal
+window.openAddVendor = function() {
+  document.getElementById('vendorModalTitle').textContent = 'Adicionar Vendedor';
+  document.getElementById('vendorEditId').value = '';
+  document.getElementById('vmName').value = '';
+  document.getElementById('vmPin').value = '';
+  populateSectorSelect('');
+  document.getElementById('vendorModal').classList.add('open');
+  document.getElementById('vmName').focus();
+};
+
+window.openEditVendor = function(id) {
+  const v = vendedores.find(x => x.id === id);
+  if (!v) return;
+  document.getElementById('vendorModalTitle').textContent = 'Editar Vendedor';
+  document.getElementById('vendorEditId').value = id;
+  document.getElementById('vmName').value = v.nome;
+  document.getElementById('vmPin').value = v.pin || '';
+  populateSectorSelect(v.setor);
+  document.getElementById('vendorModal').classList.add('open');
+};
+
+window.closeVendorModal = function() {
+  document.getElementById('vendorModal').classList.remove('open');
+};
+
+function populateSectorSelect(selected) {
+  document.getElementById('vmSector').innerHTML = tenantSectors.map(s =>
+    `<option value="${s}" ${s === selected ? 'selected' : ''}>${s}</option>`
+  ).join('');
+}
+
+window.saveVendor = async function() {
+  const id = document.getElementById('vendorEditId').value;
+  const nome = document.getElementById('vmName').value.trim();
+  const setor = document.getElementById('vmSector').value;
+  const pin = document.getElementById('vmPin').value.trim();
+
+  if (!nome) { toast('Nome é obrigatório', 'error'); return; }
+  if (pin && pin.length !== 4) { toast('PIN deve ter 4 dígitos', 'error'); return; }
+
+  const btn = document.getElementById('vmSave');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div>';
+
+  try {
+    if (id) {
+      // Update
+      const { error } = await sb.from('vendedores').update({ nome, setor, pin }).eq('id', id);
+      if (error) throw error;
+      toast('Vendedor atualizado!', 'success');
+    } else {
+      // Insert
+      const maxPos = vendedores.length > 0 ? Math.max(...vendedores.map(v => v.posicao_fila || 0)) + 1 : 1;
+      const { error } = await sb.from('vendedores').insert({
+        nome, setor, pin,
+        tenant_id: tenantId,
+        status: 'fora',
+        posicao_fila: maxPos
+      });
+      if (error) throw error;
+      toast('Vendedor adicionado!', 'success');
+    }
+
+    // Reload
+    const { data } = await sb.from('vendedores').select('*').eq('tenant_id', tenantId).order('posicao_fila');
+    vendedores = data || [];
+    renderVendorList();
+    populatePlan();
+    closeVendorModal();
+  } catch (e) {
+    toast('Erro: ' + e.message, 'error');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fa-solid fa-check"></i> Salvar';
+};
+
+// Nav
+window.goBack = function() {
+  window.location.href = tenantPath('/dashboard');
+};
+
+window.handleLogout = async function() {
+  await logout();
+};
+
+// Close modal on overlay click
+document.getElementById('vendorModal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeVendorModal();
+});
+</script>
+</body>
+</html>

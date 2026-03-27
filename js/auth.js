@@ -13,7 +13,29 @@ export async function login(email, password) {
 }
 
 export async function loginWithPin(pin) {
-  // PIN maps to a pre-configured user email: pin_XXXX@listavez.local
+  const slug = getSlug();
+  // Try Edge Function for tenant-scoped PIN auth
+  if (slug) {
+    const res = await fetch(`${sb.supabaseUrl}/functions/v1/login-pin`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sb.supabaseKey}`
+      },
+      body: JSON.stringify({ slug, pin })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'PIN inválido');
+    // Set the session returned by the Edge Function
+    if (data.access_token) {
+      await sb.auth.setSession({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token
+      });
+    }
+    return data.user;
+  }
+  // Fallback: legacy PIN login (pin_XXXX@listavez.local)
   const email = `pin_${pin}@listavez.local`;
   const password = `pin_${pin}_texas`;
   return login(email, password);

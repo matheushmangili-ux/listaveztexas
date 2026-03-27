@@ -279,8 +279,11 @@ window.addEventListener('error', function(e) {
           <button onclick="exportPDF();document.getElementById('exportMenu').classList.remove('open')"><i class="fa-solid fa-file-pdf" style="color:var(--danger)"></i> Exportar PDF</button>
         </div>
       </div>
-      <a href="tablet.html" class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px">
+      <a id="linkTablet" href="tablet.html" class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px">
         <i class="fa-solid fa-tablet-screen-button" style="font-size:10px"></i> Tablet
+      </a>
+      <a id="linkSettings" href="settings.html" class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px">
+        <i class="fa-solid fa-gear" style="font-size:10px"></i>
       </a>
       <button class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px" onclick="toggleTheme()">
         <i class="fa-solid fa-circle-half-stroke" style="font-size:10px"></i>
@@ -480,7 +483,14 @@ initTheme();
 
 // Load tenant context
 const tenant = await loadTenant();
-if (tenant) applyBranding(tenant);
+if (tenant) {
+  applyBranding(tenant);
+  // Update nav links with tenant slug
+  const tabletLink = document.getElementById('linkTablet');
+  const settingsLink = document.getElementById('linkSettings');
+  if (tabletLink) tabletLink.href = tenantPath('/tablet');
+  if (settingsLink) settingsLink.href = tenantPath('/settings');
+}
 
 const sb = getSupabase();
 let user;
