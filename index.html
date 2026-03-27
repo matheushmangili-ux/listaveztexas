@@ -36,20 +36,7 @@ if ('serviceWorker' in navigator) {
     position: relative;
     overflow: hidden;
   }
-  /* Logo watermark */
-  .login-container::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: min(85vw, 520px);
-    height: min(85vw, 520px);
-    background: url('/assets/logo-minhavez-web.png') no-repeat center/contain;
-    opacity: .03;
-    pointer-events: none;
-    z-index: 0;
-  }
+  /* Logo watermark — removed */
   /* Red glow pulse */
   .login-container::after {
     content: '';
@@ -83,9 +70,6 @@ if ('serviceWorker' in navigator) {
     10% { opacity: .35; }
     90% { opacity: .35; }
     100% { opacity: 0; transform: translateY(-10vh) scale(1); }
-  }
-  [data-theme="light"] .login-container::before {
-    opacity: .05;
   }
   [data-theme="light"] .brand-mark img {
     filter: none !important;
