@@ -475,13 +475,18 @@ window.addEventListener('error', function(e) {
 import { getSupabase } from './js/supabase-config.js';
 import { requireRole, logout } from './js/auth.js';
 import { STATUS_CONFIG, MOTIVOS, todayRange, yesterdayRange, weekRange, monthRange, initials, toast, initTheme, toggleTheme } from './js/utils.js';
+import { loadTenant, applyBranding, tenantPath } from './js/tenant.js';
 initTheme();
+
+// Load tenant context
+const tenant = await loadTenant();
+if (tenant) applyBranding(tenant);
 
 const sb = getSupabase();
 let user;
-try { user = await requireRole(['gerente', 'admin']); } catch(e) {}
+try { user = await requireRole(['gerente', 'admin', 'owner']); } catch(e) {}
 if (!user) {
-  window.handleLogout = () => { window.location.href = '/index.html'; };
+  window.handleLogout = () => { window.location.href = tenantPath('/login'); };
   window.toggleTheme = () => { document.documentElement.classList.toggle('light'); };
 }
 

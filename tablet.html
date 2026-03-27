@@ -916,19 +916,23 @@ window.addEventListener('error', function(e) {
 
 <script type="module">
 import { getSupabase } from './js/supabase-config.js';
-import { requireRole, logout } from './js/auth.js';
+import { requireRole, logout, getTenantId } from './js/auth.js';
 import { STATUS_CONFIG, MOTIVOS, formatTime, initials, toast, elapsedSince, initTheme, toggleTheme } from './js/utils.js';
+import { loadTenant, applyBranding, tenantPath } from './js/tenant.js';
 initTheme();
+
+// Load tenant context
+const tenant = await loadTenant();
+if (tenant) applyBranding(tenant);
+const tenantId = tenant?.id || null;
 
 const sb = getSupabase();
 let user;
 try {
-  user = await requireRole(['recepcionista', 'gerente', 'admin']);
+  user = await requireRole(['recepcionista', 'gerente', 'admin', 'owner']);
 } catch(e) { /* auth error */ }
 if (!user) {
-  // Não fazer nada — requireRole já redireciona pro login
-  // Mas garantir que botões básicos funcionem
-  window.handleLogout = () => { window.location.href = '/index.html'; };
+  window.handleLogout = () => { window.location.href = tenantPath('/login'); };
   window._toggleTheme = () => { toggleTheme(); };
 }
 
@@ -2006,7 +2010,7 @@ window.confirmCheckin = async function() {
   btn.innerHTML = '<div class="spinner"></div> Abrindo...';
 
   // Criar turno
-  const { data, error } = await sb.from('turnos').insert({ data: new Date().toISOString().split('T')[0] }).select().single();
+  const { data, error } = await sb.from('turnos').insert({ data: new Date().toISOString().split('T')[0], tenant_id: tenantId }).select().single();
   if (error) { toast('Erro ao abrir turno', 'error'); btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-check" style="margin-right:4px"></i>Iniciar Turno'; return; }
   currentTurno = data;
 
@@ -2305,7 +2309,8 @@ async function finalizeMultiOutcome() {
       const { data: novoId } = await sb.from('atendimentos').insert({
         turno_id: currentTurno.id,
         vendedor_id: vendedorId,
-        inicio: atend.inicio
+        inicio: atend.inicio,
+        tenant_id: tenantId
       }).select('id').single();
       if (novoId) {
         await sb.rpc('finalizar_atendimento', {
@@ -2342,7 +2347,7 @@ async function finalizeMultiOutcome() {
         if (vendedorId && currentTurno) {
           await sb.from('vendedores').update({ status: 'em_atendimento', posicao_fila: null }).eq('id', vendedorId);
           const { data: novoAtend, error: errNovo } = await sb.from('atendimentos').insert({
-            turno_id: currentTurno.id, vendedor_id: vendedorId, inicio: new Date().toISOString()
+            turno_id: currentTurno.id, vendedor_id: vendedorId, inicio: new Date().toISOString(), tenant_id: tenantId
           }).select('*, vendedores(nome, apelido)').single();
           if (!errNovo && novoAtend) {
             activeAtendimentos.push(novoAtend);
@@ -2596,7 +2601,8 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor, con
       const { data: novoAtend, error: errNovo } = await sb.from('atendimentos').insert({
         turno_id: currentTurno.id,
         vendedor_id: vendedorId,
-        inicio: new Date().toISOString()
+        inicio: new Date().toISOString(),
+        tenant_id: tenantId
       }).select('*, vendedores(nome, apelido)').single();
       if (!errNovo && novoAtend) {
         activeAtendimentos.push(novoAtend);
@@ -2730,22 +2736,22 @@ setInterval(() => {
 // ─── Realtime (debounced, ignora ação local) ───
 let _rtVendTimer = null;
 let _rtAtendTimer = null;
-sb.channel('tablet-sync')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'vendedores' }, () => {
-    if (_localAction) return; // Ação local já fez o render
+const _rtChannelName = `tablet-sync-${tenantId || 'default'}`;
+sb.channel(_rtChannelName)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vendedores', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined }, () => {
+    if (_localAction) return;
     clearTimeout(_rtVendTimer);
     _rtVendTimer = setTimeout(loadVendedores, 300);
   })
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos' }, () => {
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined }, () => {
     if (_localAction) return;
     clearTimeout(_rtAtendTimer);
     _rtAtendTimer = setTimeout(() => { updateQuickStats(); checkActiveAtendimentos(); }, 300);
   })
   .subscribe((status) => {
     if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-      // Reconectar após perda de conexão (previne empilhamento de timeouts)
       clearTimeout(_reconnectTimer);
-      _reconnectTimer = setTimeout(() => { sb.channel('tablet-sync').subscribe(); }, 3000);
+      _reconnectTimer = setTimeout(() => { sb.channel(_rtChannelName).subscribe(); }, 3000);
       toast('Reconectando...', 'warning', 2000);
     }
   });

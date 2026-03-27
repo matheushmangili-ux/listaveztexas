@@ -217,7 +217,19 @@ if ('serviceWorker' in navigator) {
 <script type="module">
 import { login, loginWithPin, getUser, redirectByRole } from './js/auth.js';
 import { toast, initTheme } from './js/utils.js';
+import { loadTenant, applyBranding, getSlug } from './js/tenant.js';
 initTheme();
+
+// Load tenant context from URL slug
+const tenant = await loadTenant();
+if (tenant) {
+  applyBranding(tenant);
+  // Update store name in UI
+  const h1 = document.querySelector('.login-box h1');
+  const sub = document.querySelector('.login-box p');
+  if (h1) h1.textContent = 'Lista da Vez';
+  if (sub) sub.textContent = tenant.nome_loja.toUpperCase();
+}
 
 // Check if already logged in
 const user = await getUser();
