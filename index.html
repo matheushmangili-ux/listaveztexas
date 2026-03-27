@@ -215,9 +215,9 @@ if ('serviceWorker' in navigator) {
 
 <script type="module">
 import { login, loginWithPin, getUser, redirectByRole } from './js/auth.js';
-import { toast, initTheme } from './js/utils.js';
+import { toast } from './js/utils.js';
 import { loadTenant, applyBranding, getSlug } from './js/tenant.js';
-initTheme();
+// Login page always uses dark theme (set in HTML attribute), skip initTheme()
 
 // Load tenant context from URL slug
 const tenant = await loadTenant();
