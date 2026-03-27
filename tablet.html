@@ -1213,7 +1213,9 @@ setInterval(updateClock, 15000);
 
 // ─── Load vendedores ───
 async function loadVendedores() {
-  const { data, error } = await sb.from('vendedores').select('*').eq('ativo', true).order('posicao_fila', { ascending: true, nullsFirst: false });
+  const vq = sb.from('vendedores').select('*').eq('ativo', true);
+  if (tenantId) vq.eq('tenant_id', tenantId);
+  const { data, error } = await vq.order('posicao_fila', { ascending: true, nullsFirst: false });
   if (error) {
     const backup = localStorage.getItem('minhavez_vendedores');
     if (backup) {
@@ -1948,7 +1950,9 @@ window.toggleTurno = async function() {
     if (inQueueCount > 0) msg += `\n\n${inQueueCount} vendedor(es) na fila serão removidos.`;
     if (!confirm(msg)) return;
 
-    const { error: e1 } = await sb.from('vendedores').update({ status: 'fora', posicao_fila: null }).eq('ativo', true);
+    const fq = sb.from('vendedores').update({ status: 'fora', posicao_fila: null }).eq('ativo', true);
+    if (tenantId) fq.eq('tenant_id', tenantId);
+    const { error: e1 } = await fq;
     const { error: e2 } = await sb.from('turnos').update({ fechamento: new Date().toISOString() }).eq('id', currentTurno.id);
     if (e1 || e2) { toast('Erro ao fechar turno', 'error'); return; }
     currentTurno = null;
@@ -2782,7 +2786,9 @@ document.addEventListener('visibilitychange', () => {
 // ─── Check for existing open turno ───
 async function checkExistingTurno() {
   const today = new Date().toISOString().split('T')[0];
-  const { data } = await sb.from('turnos').select('*').eq('data', today).is('fechamento', null).order('abertura', { ascending: false }).limit(1);
+  const tq = sb.from('turnos').select('*').eq('data', today).is('fechamento', null);
+  if (tenantId) tq.eq('tenant_id', tenantId);
+  const { data } = await tq.order('abertura', { ascending: false }).limit(1);
   if (data && data.length > 0) {
     currentTurno = data[0];
     document.getElementById('turnoLabel').textContent = 'Turno aberto';
