@@ -478,7 +478,8 @@ window.addEventListener('error', function(e) {
 import { getSupabase } from './js/supabase-config.js';
 import { requireRole, logout } from './js/auth.js';
 import { STATUS_CONFIG, MOTIVOS, todayRange, yesterdayRange, weekRange, monthRange, initials, toast, initTheme, toggleTheme } from './js/utils.js';
-import { loadTenant, applyBranding, tenantPath } from './js/tenant.js';
+import { loadTenant, applyBranding, tenantPath, getTenant } from './js/tenant.js';
+import { getTenantId } from './js/auth.js';
 initTheme();
 
 // Load tenant context
@@ -499,6 +500,7 @@ if (!user) {
   window.handleLogout = () => { window.location.href = tenantPath('/login'); };
   window.toggleTheme = () => { document.documentElement.classList.toggle('light'); };
 }
+const tenantId = user ? getTenantId(user) : null;
 
 let charts = {};
 let currentPeriod = 'hoje';
@@ -1358,9 +1360,9 @@ function debouncedReload(includeFloor = false) {
     loadAll();
   }, 500);
 }
-sb.channel('dashboard-sync')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'vendedores' }, () => debouncedReload(true))
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos' }, () => debouncedReload(false))
+sb.channel(`dashboard-sync-${tenantId || 'default'}`)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vendedores', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined }, () => debouncedReload(true))
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined }, () => debouncedReload(false))
   .subscribe();
 
 // ─── Init ───

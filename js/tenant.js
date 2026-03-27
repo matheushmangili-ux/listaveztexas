@@ -15,7 +15,7 @@ let _slug = null;
 export function getSlug() {
   if (_slug !== null) return _slug;
   const parts = window.location.pathname.split('/').filter(Boolean);
-  const reserved = ['landing.html', 'landing', 'css', 'js', 'assets', 'sw.js', 'manifest.json', 'setup'];
+  const reserved = ['landing.html', 'landing', 'index.html', 'index', 'css', 'js', 'assets', 'sw.js', 'manifest.json', 'setup'];
   if (parts.length >= 1 && !reserved.includes(parts[0])) {
     _slug = parts[0];
   } else {

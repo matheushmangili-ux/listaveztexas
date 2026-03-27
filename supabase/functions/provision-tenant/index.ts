@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
     // Validate onboarding token if provided
     let onboardingToken = null
     let ownerEmail = null
-    let plano = 'starter'
+    let plano = 'pro'
 
     if (token) {
       const { data: tkData, error: tkErr } = await supabaseAdmin

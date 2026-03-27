@@ -99,7 +99,7 @@ const SUPABASE_ANON_KEY = 'sua-anon-key';
 ### 3. Criar usuários
 
 No Supabase Dashboard > Authentication > Users:
-- **Recepcionista**: `pin_XXXX@listavez.local`, metadata: `{"user_role": "recepcionista"}`
+- **Recepcionista**: `pin_XXXX@minhavez.local`, metadata: `{"user_role": "recepcionista"}`
 - **Gerente**: email real, metadata: `{"user_role": "gerente"}`
 
 ### 4. Cadastrar vendedores
