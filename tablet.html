@@ -938,6 +938,7 @@ if (!user) {
 
 let currentTurno = null;
 let activeAtendimentos = [];
+let aguardandoAtendimentos = [];
 let timerInterval = null;
 let vendedores = [];
 let currentSetor = 'loja';
@@ -1909,7 +1910,7 @@ async function updateQuickStats() {
   if (!currentTurno) return;
   // Queries leves com count em vez de trazer todos os registros
   const [totalRes, vendasRes] = await Promise.all([
-    sb.from('atendimentos').select('id', { count: 'exact', head: true }).eq('turno_id', currentTurno.id).neq('resultado', 'em_andamento'),
+    sb.from('atendimentos').select('id', { count: 'exact', head: true }).eq('turno_id', currentTurno.id).neq('resultado', 'em_andamento').neq('resultado', 'aguardando'),
     sb.from('atendimentos').select('id', { count: 'exact', head: true }).eq('turno_id', currentTurno.id).eq('resultado', 'venda')
   ]);
   const total = totalRes.count || 0;
@@ -2091,6 +2092,7 @@ function renderActiveAtendimentos() {
         <button class="btn-sale" title="Venda" onclick="handleOutcome('venda','${atend.id}')"><i class="fa-solid fa-check"></i></button>
         <button class="btn-nosale" title="Não converteu" onclick="handleOutcome('nao_convertido','${atend.id}')"><i class="fa-solid fa-xmark"></i></button>
         <button class="btn-exchange" title="Troca" onclick="handleOutcome('troca','${atend.id}')"><i class="fa-solid fa-rotate"></i></button>
+        <button class="btn-waiting" title="Aguardando cliente" onclick="suspenderAtendimento('${atend.id}')" style="background:rgba(251,191,36,.1);color:var(--warning);border:1px solid rgba(251,191,36,.2);border-radius:var(--radius-sm);width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px"><i class="fa-solid fa-clock"></i></button>
         <button class="btn-cancel" title="Cancelar" onclick="cancelarAtendimento('${atend.id}')" style="background:var(--bg-hover);color:var(--text-muted);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px"><i class="fa-solid fa-arrow-rotate-left"></i></button>
       </div>`;
     list.appendChild(card);
@@ -2126,6 +2128,39 @@ function renderActiveAtendimentos() {
       if (ref.side) { ref.side.textContent = timeStr; ref.side.style.color = isDanger ? 'var(--danger)' : '#fff'; }
     });
   }, 1000);
+
+  // Render aguardando section
+  renderAguardando(list);
+}
+
+function renderAguardando(container) {
+  container.querySelectorAll('.aguardando-section').forEach(e => e.remove());
+  if (aguardandoAtendimentos.length === 0) return;
+  const section = document.createElement('div');
+  section.className = 'aguardando-section';
+  section.innerHTML = `
+    <p style="font-size:10px;font-weight:700;color:var(--warning);text-transform:uppercase;letter-spacing:.1em;margin:12px 0 8px;display:flex;align-items:center;gap:6px">
+      <i class="fa-solid fa-clock" style="font-size:9px"></i> Aguardando cliente (${aguardandoAtendimentos.length})
+    </p>`;
+  aguardandoAtendimentos.forEach(atend => {
+    const nome = atend.vendedores?.apelido || atend.vendedores?.nome || '?';
+    const elapsed = Math.floor((Date.now() - new Date(atend.inicio).getTime()) / 1000);
+    const card = document.createElement('div');
+    card.className = 'atend-card';
+    card.style.borderColor = 'rgba(251,191,36,.2)';
+    card.style.background = 'rgba(251,191,36,.03)';
+    card.innerHTML = `
+      <div class="atend-avatar" style="background:rgba(251,191,36,.15);color:var(--warning)">${initials(nome)}</div>
+      <div class="atend-info">
+        <div class="atend-name">${nome} <span style="font-size:10px;color:var(--warning);font-weight:600">AGUARDANDO</span></div>
+        <div class="atend-timer" style="color:var(--warning)">${formatTime(elapsed)}</div>
+      </div>
+      <div class="atend-actions">
+        <button class="btn-sale" title="Retomar atendimento" onclick="retomarAtendimento('${atend.id}')" style="background:rgba(251,191,36,.15);color:var(--warning);border:1px solid rgba(251,191,36,.3);border-radius:var(--radius-sm);min-width:80px;height:36px;display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer;font-size:12px;font-weight:600"><i class="fa-solid fa-play"></i> Retomar</button>
+      </div>`;
+    section.appendChild(card);
+  });
+  container.appendChild(section);
 }
 
 function removeAtendimento(atendId) {
@@ -2137,6 +2172,53 @@ function removeAtendimento(atendId) {
     document.getElementById('activeLabel').style.display = 'none';
   }
 }
+
+// ─── Aguardando Cliente ───
+window.suspenderAtendimento = async function(atendId) {
+  if (_actionLock) return;
+  _actionLock = true;
+  try {
+    const atend = activeAtendimentos.find(a => a.id === atendId);
+    const { error } = await sb.rpc('suspender_atendimento', { p_atendimento_id: atendId });
+    if (error) throw error;
+    // Move from active to aguardando
+    if (atend) {
+      atend.resultado = 'aguardando';
+      aguardandoAtendimentos.push(atend);
+    }
+    removeAtendimento(atendId);
+    toast('Vendedor voltou pra fila — cliente aguardando', 'warning');
+    await loadVendedores();
+    renderActiveAtendimentos();
+  } catch (e) {
+    toast('Erro: ' + e.message, 'error');
+  } finally {
+    setTimeout(() => { _actionLock = false; }, 300);
+  }
+};
+
+window.retomarAtendimento = async function(atendId) {
+  if (_actionLock) return;
+  _actionLock = true;
+  try {
+    const { error } = await sb.rpc('retomar_atendimento', { p_atendimento_id: atendId });
+    if (error) throw error;
+    // Move from aguardando to active
+    const atend = aguardandoAtendimentos.find(a => a.id === atendId);
+    if (atend) {
+      atend.resultado = 'em_andamento';
+      activeAtendimentos.push(atend);
+    }
+    aguardandoAtendimentos = aguardandoAtendimentos.filter(a => a.id !== atendId);
+    toast('Atendimento retomado!', 'success');
+    await loadVendedores();
+    renderActiveAtendimentos();
+  } catch (e) {
+    toast('Erro: ' + e.message, 'error');
+  } finally {
+    setTimeout(() => { _actionLock = false; }, 300);
+  }
+};
 
 // ─── Cancelar atendimento (voltar vendedor à posição original) ───
 window.cancelarAtendimento = async function(atendId) {
@@ -2803,8 +2885,11 @@ async function checkActiveAtendimentos() {
   const { data } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('turno_id', currentTurno.id).eq('resultado', 'em_andamento').order('inicio');
   if (data && data.length > 0) {
     activeAtendimentos = data;
-    renderActiveAtendimentos();
   }
+  // Also load aguardando
+  const { data: aguardando } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('turno_id', currentTurno.id).eq('resultado', 'aguardando').order('inicio');
+  aguardandoAtendimentos = aguardando || [];
+  renderActiveAtendimentos();
 }
 
 // ─── Init ───
