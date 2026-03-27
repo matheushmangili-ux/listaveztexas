@@ -2108,8 +2108,10 @@ function renderActiveAtendimentos() {
       if (timeStr === ref.lastText) return; // skip if unchanged
       ref.lastText = timeStr;
       const isDanger = elapsed > 2400;
+      if (!ref.main || !ref.main.isConnected) {
+        ref.main = document.getElementById('timer-' + id);
+      }
       if (ref.main) { ref.main.textContent = timeStr; ref.main.className = 'atend-timer' + (isDanger ? ' danger' : ''); }
-      // Sidebar ref pode ficar stale após renderQueue — re-buscar se necessário
       if (!ref.side || !ref.side.isConnected) {
         ref.side = document.querySelector(`[data-sidebar-timer="${id}"]`);
       }

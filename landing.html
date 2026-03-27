@@ -365,6 +365,28 @@ section { position: relative; z-index: 1; }
   font-size: 13px; color: var(--text-muted); margin-top: 4px;
 }
 
+/* ─── Tablet requirement notice ─── */
+.tablet-notice {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 28px;
+  background: linear-gradient(135deg, rgba(225,29,72,.08) 0%, rgba(52,211,153,.06) 100%);
+  border: 1px solid rgba(225,29,72,.15);
+  border-radius: var(--radius);
+  display: flex; align-items: center; gap: 16px;
+  font-size: 15px; color: var(--text-secondary);
+  line-height: 1.5;
+}
+.tablet-notice i {
+  font-size: 32px;
+  color: var(--accent-bright);
+  flex-shrink: 0;
+}
+.tablet-notice strong { color: var(--text-primary); }
+@media (max-width: 768px) {
+  .tablet-notice { flex-direction: column; text-align: center; padding: 20px; }
+}
+
 /* ─── Pain section ─── */
 .pain {
   padding: 120px 0;
@@ -918,6 +940,19 @@ section { position: relative; z-index: 1; }
       <div class="proof-stat">
         <div class="proof-stat-number counter" data-target="24" data-suffix="/7">0</div>
         <div class="proof-stat-label">Disponibilidade</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ TABLET REQUIREMENT ═══════════ -->
+<section style="padding:40px 0">
+  <div class="container">
+    <div class="tablet-notice reveal">
+      <i class="fa-solid fa-tablet-screen-button"></i>
+      <div>
+        <strong>Requisito: você precisa de um tablet.</strong>
+        O ListaVez funciona no navegador de qualquer tablet (Android ou iPad) — sem instalar nada. Basta abrir o link no tablet e colocar no balcão da loja.
       </div>
     </div>
   </div>
