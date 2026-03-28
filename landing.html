@@ -161,9 +161,9 @@ section { position: relative; z-index: 1; }
 }
 .hero-content {
   text-align: center;
-  max-width: 1000px;
+  max-width: 1100px;
   position: relative;
-  padding: 0 20px;
+  padding: 0 32px;
 }
 .hero-badge {
   display: inline-flex; align-items: center; gap: 8px;
@@ -182,11 +182,11 @@ section { position: relative; z-index: 1; }
 }
 .hero-badge i { font-size: 10px; }
 .hero h1 {
-  font-size: clamp(40px, 7vw, 80px);
+  font-size: clamp(48px, 8vw, 92px);
   font-weight: 900;
-  line-height: 1.1;
-  letter-spacing: -.03em;
-  margin-bottom: 32px;
+  line-height: 1.08;
+  letter-spacing: -.035em;
+  margin-bottom: 36px;
 }
 .hero h1 .highlight {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-bright) 100%);
@@ -194,21 +194,21 @@ section { position: relative; z-index: 1; }
   background-clip: text;
 }
 .hero p {
-  font-size: clamp(16px, 2vw, 20px);
+  font-size: clamp(17px, 2.2vw, 22px);
   color: var(--text-secondary);
   line-height: 1.7;
-  max-width: 680px;
-  margin: 0 auto 48px;
+  max-width: 720px;
+  margin: 0 auto 52px;
 }
 .hero-actions {
   display: flex; align-items: center; justify-content: center; gap: 16px;
   flex-wrap: wrap;
 }
 .btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 14px 32px;
-  border-radius: 10px;
-  font-size: 16px; font-weight: 700;
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 16px 40px;
+  border-radius: 12px;
+  font-size: 17px; font-weight: 700;
   text-decoration: none;
   transition: all .25s cubic-bezier(.16,1,.3,1);
   cursor: pointer; border: none;
