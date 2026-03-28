@@ -3019,12 +3019,11 @@ document.addEventListener('visibilitychange', () => {
     updateClock();
     _clockInterval = setInterval(updateClock, 15000);
     _sessionInterval = setInterval(() => { if (currentTurno) updateQuickStats(); }, 60000);
-    // Recarregar dados do banco e re-renderizar após conclusão
-    (async () => {
-      await loadVendedores();
-      await checkActiveAtendimentos();
-      updateQuickStats();
-    })();
+    // Forçar reload mesmo se outro load está em andamento
+    _loadingVendedores = false;
+    loadVendedores();
+    checkActiveAtendimentos();
+    updateQuickStats();
   }
 });
 
