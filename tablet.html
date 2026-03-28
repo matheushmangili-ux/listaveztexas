@@ -594,15 +594,17 @@ window.addEventListener('error', function(e) {
   }
   .modal-box {
     background: var(--bg-card); border: 1px solid var(--border-subtle);
-    border-radius: var(--radius); padding: 24px;
-    width: 90%; max-width: 360px; text-align: center;
+    border-radius: 16px; padding: 28px;
+    width: 90%; max-width: 400px; text-align: center;
     position: relative;
     animation: popIn .25s cubic-bezier(.2,.8,.3,1) both;
+    font-size: 15px;
   }
   .modal-close {
-    position: absolute; top: 8px; right: 10px;
+    position: absolute; top: 12px; right: 14px;
     background: none; border: none; color: var(--text-muted);
-    font-size: 18px; cursor: pointer; padding: 4px 8px; line-height: 1;
+    font-size: 22px; cursor: pointer; padding: 6px 10px; line-height: 1;
+    min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;
   }
   .modal-close:active { transform: scale(.85); }
   .currency-wrap { position: relative; margin-bottom: 8px; }
@@ -822,56 +824,56 @@ window.addEventListener('error', function(e) {
 <div class="bottom-sheet-overlay" id="motivoOverlay" onclick="closeMotivos()"></div>
 <div class="bottom-sheet" id="motivoSheet">
   <div class="bottom-sheet-handle"></div>
-  <h3 style="font-family:var(--font-mono);font-size:16px;font-weight:700;margin-bottom:4px">Motivo da não conversão</h3>
-  <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px">Selecione o motivo principal</p>
+  <h3 style="font-family:var(--font-mono);font-size:18px;font-weight:700;margin-bottom:6px">Motivo da não conversão</h3>
+  <p style="font-size:14px;color:var(--text-secondary);margin-bottom:20px">Selecione o motivo principal</p>
 
   <div style="display:flex;flex-direction:column;gap:8px" id="motivoList">
     <div class="motivo-option" data-motivo="preco" onclick="selectMotivo(this)">
       <i class="fa-solid fa-tag" style="color:#f59e0b"></i>
       <div>
-        <div style="font-weight:700;font-size:14px">Preço</div>
-        <div style="font-size:11px;color:var(--text-muted)">Cliente achou caro</div>
+        <div style="font-weight:700;font-size:16px">Preço</div>
+        <div style="font-size:13px;color:var(--text-muted)">Cliente achou caro</div>
       </div>
     </div>
     <div class="motivo-option" data-motivo="ruptura" onclick="selectMotivo(this)">
       <i class="fa-solid fa-box-open" style="color:#ef4444"></i>
       <div>
-        <div style="font-weight:700;font-size:14px">Ruptura</div>
-        <div style="font-size:11px;color:var(--text-muted)">Produto em falta / sem estoque</div>
+        <div style="font-weight:700;font-size:16px">Ruptura</div>
+        <div style="font-size:13px;color:var(--text-muted)">Produto em falta / sem estoque</div>
       </div>
     </div>
     <div class="motivo-option" data-motivo="indecisao" onclick="selectMotivo(this)">
       <i class="fa-solid fa-face-meh" style="color:#A1A1AA"></i>
       <div>
-        <div style="font-weight:700;font-size:14px">Indecisão</div>
-        <div style="font-size:11px;color:var(--text-muted)">Cliente vai pensar / voltar depois</div>
+        <div style="font-weight:700;font-size:16px">Indecisão</div>
+        <div style="font-size:13px;color:var(--text-muted)">Cliente vai pensar / voltar depois</div>
       </div>
     </div>
     <div class="motivo-option" data-motivo="so_olhando" onclick="selectMotivo(this)">
       <i class="fa-solid fa-eye" style="color:#6b7280"></i>
       <div>
-        <div style="font-weight:700;font-size:14px">Só olhando</div>
-        <div style="font-size:11px;color:var(--text-muted)">Sem intenção de compra</div>
+        <div style="font-weight:700;font-size:16px">Só olhando</div>
+        <div style="font-size:13px;color:var(--text-muted)">Sem intenção de compra</div>
       </div>
     </div>
     <div class="motivo-option" data-motivo="outro" onclick="selectMotivo(this)">
       <i class="fa-solid fa-ellipsis" style="color:#374151"></i>
       <div>
-        <div style="font-weight:700;font-size:14px">Outro</div>
-        <div style="font-size:11px;color:var(--text-muted)">Motivo diferente</div>
+        <div style="font-weight:700;font-size:16px">Outro</div>
+        <div style="font-size:13px;color:var(--text-muted)">Motivo diferente</div>
       </div>
     </div>
   </div>
 
   <!-- Ruptura: campo produto (hidden) -->
   <div id="rupturaField" style="display:none;margin-top:16px">
-    <label style="display:block;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Qual produto?</label>
+    <label style="display:block;font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Qual produto?</label>
     <input id="rupturaInput" class="input" type="text" placeholder="Ex: Chapéu Pralana 6X" autocomplete="off">
   </div>
 
   <!-- Outro: campo detalhe (hidden) -->
   <div id="outroField" style="display:none;margin-top:16px">
-    <label style="display:block;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Descreva o motivo</label>
+    <label style="display:block;font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Descreva o motivo</label>
     <input id="outroInput" class="input" type="text" placeholder="Ex: Cliente errou de loja" autocomplete="off">
   </div>
 
@@ -1526,12 +1528,20 @@ async function addToQueueAt(vendedorId, beforeId) {
   newOrder.splice(insertAt, 0, { id: vendedorId });
   const ids = newOrder.map(v => v.id);
 
-  // Batch: 1 RPC (seta status='disponivel' + posicao_fila para todos)
+  // Update otimista: atualiza local e renderiza imediatamente
+  markLocal();
+  if (target) { target.status = 'disponivel'; }
+  ids.forEach((id, i) => {
+    const vv = vendedores.find(x => x.id === id);
+    if (vv) vv.posicao_fila = i + 1;
+  });
+  _lastFooterKey = '';
+  scheduleRender();
+  toast((target?.apelido || target?.nome || 'Vendedor') + ' entrou na fila', 'success', 1500);
+
+  // Banco em background
   const { error } = await sb.rpc('reordenar_fila', { p_ids: ids });
-  if (error) { toast('Erro ao adicionar: ' + error.message, 'error'); return; }
-  await loadVendedores();
-  const v = vendedores.find(x => x.id === vendedorId);
-  toast((v?.apelido || v?.nome || 'Vendedor') + ' entrou na fila', 'success', 1500);
+  if (error) { toast('Erro ao salvar: ' + error.message, 'error'); await loadVendedores(); }
 }
 
 // Service panel como drop zone (desktop drag)
@@ -1743,10 +1753,16 @@ async function addToQueue(vendedorId) {
   const setor = v?.setor || 'loja';
   const setorQueue = vendedores.filter(x => (x.setor || 'loja') === setor && x.posicao_fila != null);
   const maxPos = Math.max(0, ...setorQueue.map(x => x.posicao_fila));
+  const newPos = maxPos + 1;
   markLocal();
-  await sb.from('vendedores').update({ status: 'disponivel', posicao_fila: maxPos + 1 }).eq('id', vendedorId);
-  toast('Adicionado à fila', 'success', 1500);
-  await loadVendedores();
+  // Update otimista: atualiza local e renderiza imediatamente
+  if (v) { v.status = 'disponivel'; v.posicao_fila = newPos; }
+  _lastFooterKey = ''; // forçar re-render do footer
+  scheduleRender();
+  toast((v?.apelido || v?.nome || 'Vendedor') + ' entrou na fila', 'success', 1500);
+  // Banco em background
+  const { error } = await sb.from('vendedores').update({ status: 'disponivel', posicao_fila: newPos }).eq('id', vendedorId);
+  if (error) { toast('Erro ao salvar: ' + error.message, 'error'); await loadVendedores(); }
 }
 
 // ─── Retornar da pausa ───
@@ -2261,17 +2277,17 @@ function showMultiStep() {
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">
       <span style="background:var(--info);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px">${_multiCurrent} de ${_multiTotal}</span>
     </div>
-    <h3 style="font-family:var(--font-mono);font-size:15px;font-weight:700;margin-bottom:4px">Cliente ${_multiCurrent}</h3>
-    <p style="font-size:11px;color:var(--text-muted);margin-bottom:20px">Qual foi o resultado?</p>
+    <h3 style="font-family:var(--font-mono);font-size:17px;font-weight:700;margin-bottom:6px">Cliente ${_multiCurrent}</h3>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px">Qual foi o resultado?</p>
     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
       <button onclick="multiPickOutcome('venda')" class="motivo-option" style="min-height:48px">
-        <i class="fa-solid fa-check" style="color:var(--success);font-size:16px"></i><span style="font-weight:600;font-size:13px">Venda</span>
+        <i class="fa-solid fa-check" style="color:var(--success);font-size:18px"></i><span style="font-weight:600;font-size:15px">Venda</span>
       </button>
       <button onclick="multiPickOutcome('nao_convertido')" class="motivo-option" style="min-height:48px">
-        <i class="fa-solid fa-xmark" style="color:var(--danger);font-size:16px"></i><span style="font-weight:600;font-size:13px">Não converteu</span>
+        <i class="fa-solid fa-xmark" style="color:var(--danger);font-size:18px"></i><span style="font-weight:600;font-size:15px">Não converteu</span>
       </button>
       <button onclick="multiPickOutcome('troca')" class="motivo-option" style="min-height:48px">
-        <i class="fa-solid fa-rotate" style="color:var(--warning);font-size:16px"></i><span style="font-weight:600;font-size:13px">Troca</span>
+        <i class="fa-solid fa-rotate" style="color:var(--warning);font-size:18px"></i><span style="font-weight:600;font-size:15px">Troca</span>
       </button>
     </div>
     <div id="multiDetailBox" style="display:none"></div>
@@ -2414,8 +2430,8 @@ async function finalizeMultiOutcome() {
 function openTrocaDiferenca(atendId) {
   createModal('trocaOverlay', `
     <i class="fa-solid fa-rotate" style="font-size:28px;color:var(--warning);margin-bottom:12px"></i>
-    <h3 style="font-family:var(--font-mono);font-size:14px;font-weight:700;margin-bottom:4px">Troca</h3>
-    <p style="font-size:11px;color:var(--text-muted);margin-bottom:16px">Houve diferença de valor na troca?</p>
+    <h3 style="font-family:var(--font-mono);font-size:17px;font-weight:700;margin-bottom:6px">Troca</h3>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Houve diferença de valor na troca?</p>
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <button class="btn" style="flex:1;min-height:44px;background:var(--bg-hover);color:var(--text-primary);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);font-weight:700;cursor:pointer" onclick="submitTroca('${atendId}',false)">
         Sem diferença
@@ -2426,7 +2442,7 @@ function openTrocaDiferenca(atendId) {
     </div>
     <div id="trocaValorBox" style="display:none">
       ${currencyInputHTML('trocaValorInput')}
-      <p style="font-size:10px;color:var(--text-muted);margin-bottom:10px">Acima de R$ 1.000 o vendedor volta para o 1º da fila</p>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Acima de R$ 1.000 o vendedor volta para o 1º da fila</p>
       <button class="btn" style="width:100%;min-height:44px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer" onclick="submitTroca('${atendId}',true)">
         <i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar
       </button>
@@ -2473,8 +2489,8 @@ window.submitTroca = async function(atendId, comDiferenca) {
 function openValorVenda(atendId) {
   createModal('valorOverlay', `
     <i class="fa-solid fa-dollar-sign" style="font-size:28px;color:var(--success);margin-bottom:12px"></i>
-    <h3 style="font-family:var(--font-mono);font-size:14px;font-weight:700;margin-bottom:4px">Valor da Venda</h3>
-    <p style="font-size:11px;color:var(--text-muted);margin-bottom:16px">Opcional — deixe vazio se não souber</p>
+    <h3 style="font-family:var(--font-mono);font-size:17px;font-weight:700;margin-bottom:6px">Valor da Venda</h3>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Opcional — deixe vazio se não souber</p>
     ${currencyInputHTML('valorVendaInput')}
     <div style="display:flex;gap:8px;margin-top:16px">
       <button class="btn btn-ghost" style="flex:1;min-height:44px" onclick="document.getElementById('valorOverlay').remove();askContinuar('${atendId}',()=>finalize('venda',null,null,null,'${atendId}',null,false),()=>finalize('venda',null,null,null,'${atendId}',null,true))">
@@ -2565,18 +2581,18 @@ function askContinuar(atendId, onNo, onYes) {
 
   createModal('continuarOverlay', `
     <i class="fa-solid fa-rotate-right" style="font-size:28px;color:var(--info);margin-bottom:12px"></i>
-    <h3 style="font-family:var(--font-mono);font-size:14px;font-weight:700;margin-bottom:4px">${nome}</h3>
-    <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px">Continuar atendendo?</p>
+    <h3 style="font-family:var(--font-mono);font-size:17px;font-weight:700;margin-bottom:6px">${nome}</h3>
+    <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px">Continuar atendendo?</p>
     <div style="display:flex;gap:8px;margin-bottom:12px">
-      <button class="btn btn-ghost" style="flex:1;min-height:48px;font-size:13px;font-weight:700" onclick="answerContinuar(false)">
+      <button class="btn btn-ghost" style="flex:1;min-height:48px;font-size:15px;font-weight:700" onclick="answerContinuar(false)">
         <i class="fa-solid fa-list-ol" style="margin-right:4px"></i>Voltar à fila
       </button>
-      <button class="btn btn-success" style="flex:1;min-height:48px;font-size:13px;font-weight:700" onclick="showMultiAtend()">
+      <button class="btn btn-success" style="flex:1;min-height:48px;font-size:15px;font-weight:700" onclick="showMultiAtend()">
         <i class="fa-solid fa-arrow-right" style="margin-right:4px"></i>Continuar
       </button>
     </div>
     <div id="multiAtendBox" style="display:none">
-      <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;font-weight:600">Quantos atendimentos simultâneos?</p>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px;font-weight:600">Quantos atendimentos simultâneos?</p>
       <div style="display:flex;gap:6px;justify-content:center">
         ${[1,2,3,4].map(n => `<button onclick="answerContinuar(true,${n})" style="width:48px;height:48px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-family:var(--font-mono);font-size:18px;font-weight:800;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center" onmouseenter="this.style.background='var(--success)';this.style.color='#fff';this.style.transform='scale(1.1)';this.style.borderColor='var(--success)'" onmouseleave="this.style.background='var(--bg-elevated)';this.style.color='var(--text-primary)';this.style.transform='';this.style.borderColor='var(--border-subtle)'">${n}</button>`).join('')}
       </div>
@@ -2726,14 +2742,14 @@ function openConfirmFila(vendedorId) {
 
   const menu = document.createElement('div');
   menu.id = 'footerMenu';
-  menu.style.cssText = 'position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);border:1px solid var(--border-medium);border-radius:var(--radius);padding:16px;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.4);min-width:240px;text-align:center';
+  menu.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);border:1px solid var(--border-medium);border-radius:16px;padding:20px;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.5);min-width:280px;text-align:center';
 
   menu.innerHTML = `
-    <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:4px">${nome}</div>
-    <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px">Colocar na fila de atendimento?</div>
-    <div style="display:flex;gap:8px">
-      <button onclick="closeConfirmFila()" style="flex:1;padding:10px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-hover);color:var(--text-muted);font-weight:600;font-size:12px;cursor:pointer;font-family:var(--font-body)">Cancelar</button>
-      <button onclick="confirmAddToQueue('${vendedorId}')" style="flex:1;padding:10px;border:none;border-radius:var(--radius-sm);background:var(--success);color:#09090B;font-weight:700;font-size:12px;cursor:pointer;font-family:var(--font-body)">
+    <div style="font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:6px">${nome}</div>
+    <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Colocar na fila de atendimento?</div>
+    <div style="display:flex;gap:10px">
+      <button onclick="closeConfirmFila()" style="flex:1;padding:12px;border:1px solid var(--border-subtle);border-radius:12px;background:var(--bg-hover);color:var(--text-muted);font-weight:600;font-size:14px;cursor:pointer;font-family:var(--font-body)">Cancelar</button>
+      <button onclick="confirmAddToQueue('${vendedorId}')" style="flex:1;padding:12px;border:none;border-radius:12px;background:var(--success);color:#09090B;font-weight:700;font-size:14px;cursor:pointer;font-family:var(--font-body)">
         <i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar
       </button>
     </div>
@@ -2862,6 +2878,17 @@ window.addEventListener('beforeunload', () => {
 // Para cada deploy, basta adicionar um objeto { version, date, items[] } no início.
 // O popup aparece automaticamente 1x por versão para cada usuário.
 const APP_CHANGELOG = [
+  {
+    version: '2.3.0',
+    date: '2026-03-28',
+    items: [
+      { icon: 'fa-bolt', text: 'Resposta instantânea ao colocar vendedor na fila (sem delay)' },
+      { icon: 'fa-font', text: 'Fontes maiores em todos os popups, toasts e modais' },
+      { icon: 'fa-circle-dot', text: 'Indicador de turno: bolinha verde pulsante na chave' },
+      { icon: 'fa-square', text: 'Bordas arredondadas em check-in e confirmações' },
+      { icon: 'fa-broom', text: 'Header limpo: removido texto e imagem desnecessários' }
+    ]
+  },
   {
     version: '2.2.0',
     date: '2026-03-28',

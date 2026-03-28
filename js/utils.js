@@ -140,8 +140,8 @@ export function toast(msg, type = 'info', duration = 4000) {
   };
   const s = styles[type] || styles.info;
   const el = document.createElement('div');
-  el.style.cssText = `display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:6px;border:1px solid ${s.border};background:${s.bg};color:${s.text};font-size:13px;font-weight:600;font-family:var(--font-body);box-shadow:0 4px 12px rgba(0,0,0,.3);animation:toastIn .25s ease forwards;min-width:260px;max-width:400px`;
-  el.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i><span>${msg}</span>`;
+  el.style.cssText = `display:flex;align-items:center;gap:14px;padding:16px 20px;border-radius:12px;border:1px solid ${s.border};background:${s.bg};color:${s.text};font-size:15px;font-weight:600;font-family:var(--font-body);box-shadow:0 4px 16px rgba(0,0,0,.35);animation:toastIn .25s ease forwards;min-width:300px;max-width:460px`;
+  el.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}" style="font-size:18px;flex-shrink:0"></i><span>${msg}</span>`;
   container.appendChild(el);
   setTimeout(() => {
     el.style.animation = 'toastOut .3s ease forwards';
