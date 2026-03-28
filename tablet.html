@@ -2362,31 +2362,35 @@ window.cancelarAtendimento = async function(atendId) {
   _actionLock = true;
   try {
     const atend = activeAtendimentos.find(a => a.id === atendId);
-    if (!atend) return;
+    if (!atend) { toast('Atendimento não encontrado', 'warning'); return; }
     const vendedorId = atend.vendedor_id;
+    const v = vendedores.find(x => x.id === vendedorId);
+    if (!v) { toast('Vendedor não encontrado', 'warning'); return; }
 
     // Deletar atendimento (foi engano, não conta)
     markLocal();
     await sb.from('atendimentos').delete().eq('id', atendId);
 
     // Devolver vendedor ao PRIMEIRO da fila do setor dele
-    const v = vendedores.find(x => x.id === vendedorId);
-    const setor = v?.setor || 'loja';
+    const setor = v.setor || 'loja';
     const inQueue = vendedores
       .filter(x => (x.setor || 'loja') === setor && x.status === 'disponivel' && x.posicao_fila != null)
       .sort((a, b) => a.posicao_fila - b.posicao_fila);
     const newOrder = [vendedorId, ...inQueue.map(x => x.id)];
 
     // Optimistic: update local state
-    if (v) { v.status = 'disponivel'; v.posicao_fila = 1; }
+    v.status = 'disponivel';
+    v.posicao_fila = 1;
     inQueue.forEach((x, i) => { x.posicao_fila = i + 2; });
 
     removeAtendimento(atendId);
     scheduleRender();
 
-    // Persist: set status + reorder queue
-    await sb.from('vendedores').update({ status: 'disponivel' }).eq('id', vendedorId);
-    await sb.rpc('reordenar_fila', { p_ids: newOrder });
+    // Persist: set status + posição first, then reorder
+    const { error: errUp } = await sb.from('vendedores').update({ status: 'disponivel', posicao_fila: 1 }).eq('id', vendedorId);
+    if (errUp) { toast('Erro ao atualizar vendedor: ' + errUp.message, 'error'); }
+    const { error: errReo } = await sb.rpc('reordenar_fila', { p_ids: newOrder });
+    if (errReo) { toast('Erro ao reordenar: ' + errReo.message, 'error'); }
     await loadVendedores();
     toast('Atendimento cancelado — vendedor voltou ao 1º da fila', 'info');
   } catch (e) {
