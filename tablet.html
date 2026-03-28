@@ -3019,12 +3019,20 @@ document.addEventListener('visibilitychange', () => {
       _dragRectsCache = null;
     }
   } else {
-    // Refetch e reconectar timers
+    // Resetar flags que podem ter ficado travados enquanto a tab estava oculta
+    _localAction = false;
+    clearTimeout(_localActionTimer);
+    _loadingVendedores = false;
+    _actionLock = false;
+    // Reconectar timers
     updateClock();
     _clockInterval = setInterval(updateClock, 15000);
     _sessionInterval = setInterval(() => { if (currentTurno) updateQuickStats(); }, 60000);
-    // Forçar reload mesmo se outro load está em andamento
-    _loadingVendedores = false;
+    // Invalidar cache de render e forçar re-render imediato
+    _lastQueueKey = '';
+    _lastFooterKey = '';
+    scheduleRender();
+    // Depois buscar dados frescos do banco
     loadVendedores();
     checkActiveAtendimentos();
     updateQuickStats();
