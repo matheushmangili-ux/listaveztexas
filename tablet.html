@@ -1649,19 +1649,47 @@ window.sendToAtendimento = async function(vendedorId) {
   const isPreferencial = fila.length > 0 && fila[0].id !== vendedorId;
   try {
     markLocal();
+    // Feedback otimista: mostrar card de atendimento imediatamente
+    const tempId = 'temp-' + Date.now();
+    const optimisticAtend = {
+      id: tempId,
+      turno_id: currentTurno.id,
+      vendedor_id: vendedorId,
+      resultado: 'em_andamento',
+      inicio: new Date().toISOString(),
+      preferencial: isPreferencial,
+      vendedores: { nome: v.nome, apelido: v.apelido }
+    };
+    activeAtendimentos.push(optimisticAtend);
+    v.status = 'em_atendimento';
+    v.posicao_fila = null;
+    renderActiveAtendimentos();
+    scheduleRender();
+    const prefLabel = isPreferencial ? ' (preferencial)' : '';
+    toast((v.apelido || v.nome) + ' iniciou atendimento' + prefLabel, 'info', 2000);
+
+    // Agora confirma no banco
     const { data, error } = await sb.rpc('iniciar_atendimento_vendedor', {
       p_turno_id: currentTurno.id,
       p_vendedor_id: vendedorId,
       p_preferencial: isPreferencial
     });
     if (error) throw error;
-    const { data: atend } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('id', data).single();
-    activeAtendimentos.push(atend);
+    // Substituir atendimento temporário pelo real
+    const idx = activeAtendimentos.findIndex(a => a.id === tempId);
+    if (idx !== -1) {
+      const { data: atend } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('id', data).single();
+      if (atend) activeAtendimentos[idx] = atend;
+      else activeAtendimentos[idx].id = data;
+    }
     renderActiveAtendimentos();
     await loadVendedores();
-    const prefLabel = isPreferencial ? ' (preferencial)' : '';
-    toast((v.apelido || v.nome) + ' iniciou atendimento' + prefLabel, 'info', 2000);
   } catch (err) {
+    // Reverter otimista em caso de erro
+    const idx = activeAtendimentos.findIndex(a => a.id?.startsWith?.('temp-'));
+    if (idx !== -1) activeAtendimentos.splice(idx, 1);
+    renderActiveAtendimentos();
+    await loadVendedores();
     toast('Erro: ' + (err.message || 'falha ao iniciar'), 'error');
   }
 };
