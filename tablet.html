@@ -2287,21 +2287,28 @@ window.handleProximoCliente = async function() {
 function renderActiveAtendimentos() {
   clearInterval(timerInterval); timerInterval = null;
   const list = document.getElementById('activeList');
-  const label = document.getElementById('activeLabel');
+  if (!list) return;
+
+  // Preservar activeLabel (é filho de activeList, não pode ser destruído pelo replaceChildren)
+  let label = document.getElementById('activeLabel');
   list.replaceChildren(); // limpa todos os filhos de uma vez
+  // Recriar activeLabel se foi destruído pelo replaceChildren
+  if (!label || !label.isConnected) {
+    label = document.createElement('p');
+    label.id = 'activeLabel';
+    label.style.cssText = 'font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;display:none';
+  }
+  list.appendChild(label); // sempre reinserir no topo
 
   const countEl = document.getElementById('activeCount');
   if (countEl) countEl.textContent = activeAtendimentos.length + ' ativo' + (activeAtendimentos.length !== 1 ? 's' : '');
 
   if (activeAtendimentos.length === 0) {
     label.style.display = 'none';
-    const existing = list.querySelector('.service-empty');
-    if (!existing) {
-      const empty = document.createElement('div');
-      empty.className = 'service-empty';
-      empty.innerHTML = '<i class="fa-solid fa-arrow-left" style="font-size:24px;margin-bottom:8px;opacity:.3"></i>Arraste vendedores da fila para iniciar atendimento';
-      list.appendChild(empty);
-    }
+    const empty = document.createElement('div');
+    empty.className = 'service-empty';
+    empty.innerHTML = '<i class="fa-solid fa-arrow-left" style="font-size:24px;margin-bottom:8px;opacity:.3"></i>Arraste vendedores da fila para iniciar atendimento';
+    list.appendChild(empty);
     return;
   }
   label.style.display = 'block';
@@ -2366,7 +2373,8 @@ function removeAtendimento(atendId) {
   if (card) card.remove();
   if (activeAtendimentos.length === 0) {
     clearInterval(timerInterval); timerInterval = null;
-    document.getElementById('activeLabel').style.display = 'none';
+    const label = document.getElementById('activeLabel');
+    if (label) label.style.display = 'none';
   }
 }
 
