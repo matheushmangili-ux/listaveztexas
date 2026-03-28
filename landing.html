@@ -364,6 +364,12 @@ section { position: relative; z-index: 1; }
 .proof-stat-label {
   font-size: 13px; color: var(--text-muted); margin-top: 4px;
 }
+.proof-stat-icon {
+  font-size: 22px;
+  color: var(--accent-bright);
+  margin-bottom: 8px;
+  opacity: .7;
+}
 
 /* ─── Tablet requirement notice ─── */
 .tablet-notice {
@@ -533,6 +539,13 @@ section { position: relative; z-index: 1; }
   position: relative;
   transition: all .3s;
 }
+.step-icon {
+  font-size: 20px;
+  color: var(--accent-bright);
+  margin-bottom: 8px;
+  opacity: .8;
+}
+.step:hover .step-icon { opacity: 1; }
 .step:hover .step-number {
   background: var(--accent);
   color: #fff;
@@ -694,6 +707,12 @@ section { position: relative; z-index: 1; }
 .testimonial-info { text-align: left; }
 .testimonial-name { font-weight: 700; font-size: 15px; }
 .testimonial-role { font-size: 13px; color: var(--text-muted); }
+.testimonial-stars {
+  color: #FBBF24;
+  font-size: 18px;
+  margin-bottom: 16px;
+  letter-spacing: 2px;
+}
 
 /* ─── CTA ─── */
 .cta {
@@ -926,18 +945,22 @@ section { position: relative; z-index: 1; }
   <div class="container">
     <div class="social-proof-inner reveal">
       <div class="proof-stat">
+        <i class="fa-solid fa-bolt proof-stat-icon"></i>
         <div class="proof-stat-number counter" data-target="100" data-suffix="%">0</div>
         <div class="proof-stat-label">Operação em tempo real</div>
       </div>
       <div class="proof-stat">
+        <i class="fa-solid fa-cloud proof-stat-icon"></i>
         <div class="proof-stat-number counter" data-target="0">0</div>
         <div class="proof-stat-label">Instalação necessária</div>
       </div>
       <div class="proof-stat">
+        <i class="fa-solid fa-gauge-high proof-stat-icon"></i>
         <div class="proof-stat-number">&lt;3s</div>
         <div class="proof-stat-label">Tempo de carregamento</div>
       </div>
       <div class="proof-stat">
+        <i class="fa-solid fa-clock proof-stat-icon"></i>
         <div class="proof-stat-number counter" data-target="24" data-suffix="/7">0</div>
         <div class="proof-stat-label">Disponibilidade</div>
       </div>
@@ -1053,23 +1076,26 @@ section { position: relative; z-index: 1; }
     <div class="section-header reveal">
       <div class="section-tag"><i class="fa-solid fa-route"></i> Como funciona</div>
       <h2>Funcionando em 3 passos</h2>
-      <p>Não precisa instalar nada. É só abrir no navegador do tablet.</p>
+      <p>Zero instalação, zero complicação. Abra no navegador e comece a usar.</p>
     </div>
     <div class="steps">
       <div class="step reveal" style="--i:0">
         <div class="step-number">1</div>
+        <i class="fa-solid fa-users-gear step-icon"></i>
         <h3>Cadastre a equipe</h3>
-        <p>Adicione seus vendedores com nome e setor. Pronto, a fila está criada.</p>
+        <p>Cadastre seus vendedores em segundos com nome e setor. O sistema monta a fila automaticamente — sem favoritismo, sem confusão.</p>
       </div>
       <div class="step reveal" style="--i:1">
         <div class="step-number">2</div>
+        <i class="fa-solid fa-tablet-screen-button step-icon"></i>
         <h3>Coloque o tablet no balcão</h3>
-        <p>Abra o sistema no navegador. A equipe vê a fila em tempo real e sabe quem é o próximo.</p>
+        <p>Abra o MinhaVez no navegador de qualquer tablet. Sem instalar nada. A equipe vê a fila em tempo real e registra vendas com um toque.</p>
       </div>
       <div class="step reveal" style="--i:2">
         <div class="step-number">3</div>
+        <i class="fa-solid fa-chart-line step-icon"></i>
         <h3>Acompanhe os resultados</h3>
-        <p>O dashboard atualiza sozinho. Vendas, conversão, atendimentos — tudo na sua mão.</p>
+        <p>O dashboard atualiza sozinho com tudo que importa: vendas por vendedor, conversão, tempo médio. Acompanhe de qualquer lugar.</p>
       </div>
     </div>
   </div>
@@ -1079,6 +1105,13 @@ section { position: relative; z-index: 1; }
 <section class="testimonial">
   <div class="container">
     <div class="testimonial-card reveal-scale">
+      <div class="testimonial-stars">
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
+      </div>
       <p class="testimonial-text">
         Antes era caderninho e discussão. Agora a equipe sabe exatamente quem é o próximo,
         o clima melhorou e eu consigo acompanhar as vendas em tempo real do meu celular.
@@ -1088,7 +1121,7 @@ section { position: relative; z-index: 1; }
         <div class="testimonial-avatar">TC</div>
         <div class="testimonial-info">
           <div class="testimonial-name">Texas Center</div>
-          <div class="testimonial-role">Primeira loja a usar o MinhaVez</div>
+          <div class="testimonial-role">Primeira loja a usar o MinhaVez | Desde 2025</div>
         </div>
       </div>
     </div>
@@ -1109,16 +1142,19 @@ section { position: relative; z-index: 1; }
       </p>
       <div style="margin-top:32px;display:flex;justify-content:center;gap:32px;flex-wrap:wrap">
         <div style="text-align:center">
+          <i class="fa-solid fa-store" style="font-size:22px;color:var(--accent-bright);margin-bottom:8px;display:block;opacity:.7"></i>
           <div style="font-family:var(--font-mono);font-size:28px;font-weight:900;color:var(--accent)">10+</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:4px">anos no varejo</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:4px">anos no varejo físico</div>
         </div>
         <div style="text-align:center">
+          <i class="fa-solid fa-check-double" style="font-size:22px;color:var(--accent-bright);margin-bottom:8px;display:block;opacity:.7"></i>
           <div style="font-family:var(--font-mono);font-size:28px;font-weight:900;color:var(--accent)">100%</div>
           <div style="font-size:12px;color:var(--text-muted);margin-top:4px">baseado em vivência real</div>
         </div>
         <div style="text-align:center">
+          <i class="fa-solid fa-ban" style="font-size:22px;color:var(--accent-bright);margin-bottom:8px;display:block;opacity:.7"></i>
           <div style="font-family:var(--font-mono);font-size:28px;font-weight:900;color:var(--accent)">0</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:4px">feature inútil</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:4px">funcionalidade de enfeite</div>
         </div>
       </div>
     </div>
