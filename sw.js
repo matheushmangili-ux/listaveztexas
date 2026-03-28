@@ -1,24 +1,18 @@
-// Minha Vez — Service Worker v5 (network-first, controlled updates)
-const CACHE_NAME = 'minhavez-v7';
+// Minha Vez — Service Worker v6 (network-first, lightweight)
+const CACHE_NAME = 'minhavez-v8';
 const STATIC_ASSETS = [
   '/css/styles.css',
   '/assets/logo-minhavez-web.png',
   '/manifest.json'
 ];
 
-// Install: cache only truly static assets (do NOT skipWaiting — let page control update)
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
   );
+  self.skipWaiting();
 });
 
-// Skip waiting only when page requests it (user clicked "update" banner)
-self.addEventListener('message', e => {
-  if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
-});
-
-// Activate: clean ALL old caches
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -28,21 +22,18 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// Fetch: network-first, never cache HTML or JS (only CSS/images)
+// Fetch: network-first for everything, cache fallback only for static assets
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Skip external requests entirely
+  // Skip external requests
   if (url.hostname.includes('supabase')) return;
   if (url.hostname.includes('cdn') || url.hostname.includes('cdnjs')) return;
   if (url.hostname.includes('fonts')) return;
 
-  // Never cache HTML or JS — always fetch from network
+  // HTML/JS: always network, no cache
   const isPage = e.request.destination === 'document' || url.pathname.endsWith('.html') || url.pathname.endsWith('.js') || url.pathname === '/';
-  if (isPage) {
-    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
-    return;
-  }
+  if (isPage) return; // Let browser handle directly — no SW interception
 
   // Static assets: network-first with cache fallback
   e.respondWith(

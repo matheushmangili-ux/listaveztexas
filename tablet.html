@@ -47,11 +47,18 @@ if ('serviceWorker' in navigator) {
 })();
 window._showUpdateBanner = function() {
   if (document.getElementById('updateBanner')) return;
+  // Cooldown: não mostrar banner nos primeiros 10s após um reload por update
+  const lastUpdate = sessionStorage.getItem('_updateClickedAt');
+  if (lastUpdate && (Date.now() - parseInt(lastUpdate)) < 10000) return;
   const banner = document.createElement('div');
   banner.id = 'updateBanner';
   banner.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--accent,#facc15);color:#09090B;padding:12px 20px;border-radius:12px;font-family:Inter,sans-serif;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;box-shadow:0 4px 24px rgba(0,0,0,.3);cursor:pointer;animation:slideUpBanner .3s ease';
   banner.innerHTML = '<i class="fa-solid fa-arrow-rotate-right"></i> Atualização disponível — toque para atualizar';
-  banner.addEventListener('click', () => { banner.textContent = 'Atualizando...'; location.reload(); });
+  banner.addEventListener('click', () => {
+    sessionStorage.setItem('_updateClickedAt', String(Date.now()));
+    banner.textContent = 'Atualizando...';
+    location.reload();
+  });
   document.body.appendChild(banner);
   const style = document.createElement('style');
   style.textContent = '@keyframes slideUpBanner{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}';
@@ -1456,6 +1463,8 @@ function initDragAndDrop() {
     draggedId = item.dataset.id;
     e.dataTransfer.effectAllowed = 'move';
   });
+  // Limpar draggedId se drag cancelado sem drop (previne renderFooter bloqueado)
+  dropzone.addEventListener('dragend', () => { draggedId = null; });
   dropzone.addEventListener('touchstart', e => {
     const item = e.target.closest('.queue-item');
     if (item) onTouchDragStart(e);
@@ -2104,6 +2113,7 @@ function renderFooter() {
     card.style.opacity = '0.4';
     setTimeout(() => { if (card) card.style.opacity = ''; }, 200);
   });
+  footer.addEventListener('dragend', () => { draggedId = null; });
   // Touch start delegation
   footer.addEventListener('touchstart', e => {
     const card = e.target.closest('.footer-card[data-id]');
@@ -3023,11 +3033,15 @@ document.addEventListener('visibilitychange', () => {
       _queuePanel?.style.setProperty('overflow', '');
       _servicePanel?.style.setProperty('overflow', '');
       touchDragging = false; touchDragId = null; touchDragEl = null;
+      draggedId = null; // Limpar drag desktop também
       _dragRectsCache = null;
     }
+    // Sempre limpar draggedId ao ocultar tab (previne renderFooter bloqueado)
+    draggedId = null;
   } else {
     // Resetar TODOS os flags
     _localAction = false;
+    draggedId = null; // Garantir que não ficou travado
     clearTimeout(_localActionTimer);
     _loadingVendedores = false;
     _actionLock = false;
@@ -3084,6 +3098,15 @@ window.addEventListener('beforeunload', () => {
 // Para cada deploy, basta adicionar um objeto { version, date, items[] } no início.
 // O popup aparece automaticamente 1x por versão para cada usuário.
 const APP_CHANGELOG = [
+  {
+    version: '2.9.0',
+    date: '2026-03-28',
+    items: [
+      { icon: 'fa-sync', text: 'Correção definitiva: nomes não somem mais ao alternar abas' },
+      { icon: 'fa-feather', text: 'Tab mais leve — carregamento mais rápido' },
+      { icon: 'fa-bell', text: 'Banner de atualização funciona corretamente' }
+    ]
+  },
   {
     version: '2.8.0',
     date: '2026-03-28',
