@@ -1772,23 +1772,23 @@ window.onTouchDragStart = function(e) {
     const touch = ev.changedTouches[0];
     const dropEl = document.elementFromPoint(touch.clientX, touch.clientY);
 
+    // IMPORTANTE: limpar flags de drag ANTES das ações async
+    // Caso contrário, renderFooter() fica bloqueado durante todo o await
+    const _savedDragId = touchDragId;
+    touchDragId = null; touchDragEl = null; touchDragging = false;
+
     if (dropEl && (dropEl.id === 'queueList' || dropEl.closest('#queueList'))) {
-      const v = vendedores.find(x => x.id === touchDragId);
+      const v = vendedores.find(x => x.id === _savedDragId);
       const isInQueue = v && v.status === 'disponivel' && v.posicao_fila != null;
       const afterEl = getDragAfterElement(queueList, touch.clientY);
       const afterId = afterEl?.dataset.id || null;
-      if (isInQueue) { await reorderInQueue(touchDragId, afterId); }
-      else { await addToQueueAt(touchDragId, afterId); }
+      if (isInQueue) { await reorderInQueue(_savedDragId, afterId); }
+      else { await addToQueueAt(_savedDragId, afterId); }
     } else if (dropEl && (dropEl.id === 'servicePanel' || dropEl.closest('#servicePanel') || dropEl.closest('#activeList'))) {
-      // Soltar no painel de atendimento = iniciar atendimento (qualquer vendedor)
-      await sendToAtendimento(touchDragId);
+      await sendToAtendimento(_savedDragId);
     } else if (dropEl && (dropEl.id === 'statusFooter' || dropEl.closest('#statusFooter'))) {
-      const saidaId = touchDragId;
-      // Delay para sair do ciclo de touch — sem isso o bottom sheet não responde
-      setTimeout(() => openSaida(saidaId), 50);
+      setTimeout(() => openSaida(_savedDragId), 50);
     }
-
-    touchDragId = null; touchDragEl = null; touchDragging = false;
   };
 
   document.addEventListener('touchmove', onMove, { passive: false });
