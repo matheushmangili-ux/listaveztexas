@@ -583,9 +583,6 @@ window.addEventListener('error', function(e) {
   .footer-card.new-item {
     animation: slideUp .2s ease both;
   }
-  .atend-actions button:hover { transform: scale(1.08); }
-  .atend-actions button:active { transform: scale(.92); }
-
   /* ─── Modal helpers ─── */
   .modal-overlay {
     position: fixed; inset: 0; z-index: 1000;
@@ -673,20 +670,7 @@ window.addEventListener('error', function(e) {
     color: #fff;
   }
   .atend-card .atend-timer.danger { color: var(--danger); }
-  .atend-actions { display: flex; gap: 6px; flex-shrink: 0; }
-  .atend-actions button {
-    min-width: 44px; min-height: 44px; border-radius: var(--radius-sm);
-    border: 1px solid var(--border-subtle); background: var(--bg-card);
-    color: var(--text-muted); cursor: pointer; font-size: 14px;
-    display: flex; align-items: center; justify-content: center;
-    transition: all .15s; -webkit-tap-highlight-color: transparent;
-  }
-  .atend-actions .btn-sale { color: var(--success); }
-  .atend-actions .btn-sale:hover { background: var(--success-bg); border-color: var(--success); }
-  .atend-actions .btn-nosale { color: var(--danger); }
-  .atend-actions .btn-nosale:hover { background: var(--danger-bg); border-color: var(--danger); }
-  .atend-actions .btn-exchange { color: var(--warning); }
-  .atend-actions .btn-exchange:hover { background: var(--warning-bg); border-color: var(--warning); }
+  .atend-card { cursor: grab; -webkit-tap-highlight-color: transparent; }
 
   /* Confetti canvas */
   #confettiCanvas {
@@ -702,7 +686,6 @@ window.addEventListener('error', function(e) {
   @media (pointer: coarse) {
     .footer-card { min-width: 80px; padding: 10px 12px; }
     .footer-card .fc-avatar { width: 52px; height: 52px; font-size: 17px; }
-    .atend-actions button { min-width: 48px; min-height: 48px; font-size: 16px; }
     .queue-item { padding: 14px 16px; min-height: 52px; }
     .setor-tab { padding: 12px 10px; font-size: 20px; }
     .motivo-option { padding: 16px; }
@@ -881,6 +864,45 @@ window.addEventListener('error', function(e) {
     <i class="fa-solid fa-check"></i>
     Confirmar
   </button>
+</div>
+
+<!-- Outcome Sheet (resultado do atendimento) -->
+<div class="bottom-sheet-overlay" id="outcomeOverlay" onclick="closeOutcomeSheet()"></div>
+<div class="bottom-sheet" id="outcomeSheet">
+  <div class="bottom-sheet-handle"></div>
+  <h3 style="font-family:var(--font-mono);font-size:18px;font-weight:700;margin-bottom:6px">Resultado do atendimento</h3>
+  <p style="font-size:14px;color:var(--text-secondary);margin-bottom:20px" id="outcomeVendorName"></p>
+
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div class="motivo-option" onclick="selectOutcome('venda')">
+      <i class="fa-solid fa-shopping-bag" style="color:var(--success);font-size:20px;width:28px;text-align:center"></i>
+      <div>
+        <div style="font-weight:700;font-size:16px">Venda</div>
+        <div style="font-size:13px;color:var(--text-muted)">Cliente comprou</div>
+      </div>
+    </div>
+    <div class="motivo-option" onclick="selectOutcome('troca')">
+      <i class="fa-solid fa-arrow-right-arrow-left" style="color:var(--info);font-size:20px;width:28px;text-align:center"></i>
+      <div>
+        <div style="font-weight:700;font-size:16px">Troca</div>
+        <div style="font-size:13px;color:var(--text-muted)">Cliente trocou produto</div>
+      </div>
+    </div>
+    <div class="motivo-option" onclick="selectOutcome('nao_convertido')">
+      <i class="fa-solid fa-xmark" style="color:var(--warning);font-size:20px;width:28px;text-align:center"></i>
+      <div>
+        <div style="font-weight:700;font-size:16px">Não Converteu</div>
+        <div style="font-size:13px;color:var(--text-muted)">Cliente saiu sem comprar</div>
+      </div>
+    </div>
+    <div class="motivo-option" onclick="selectOutcome('cancelar')">
+      <i class="fa-solid fa-rotate-left" style="color:var(--danger);font-size:20px;width:28px;text-align:center"></i>
+      <div>
+        <div style="font-weight:700;font-size:16px">Cancelar Atendimento</div>
+        <div style="font-size:13px;color:var(--text-muted)">Vendedor volta ao 1º da fila</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Check-in Overlay (abertura de turno) -->
@@ -1748,6 +1770,130 @@ window.onTouchDragStart = function(e) {
   document.addEventListener('touchend', onEnd);
 };
 
+// ─── Atendimento card drag → Outcome Sheet ───
+let _atendDragInit = false;
+let _atendDragId = null;
+let _atendDragGhost = null;
+let _atendTouchDragging = false;
+
+function initAtendDrag() {
+  const activeList = document.getElementById('activeList');
+  if (!activeList || _atendDragInit) return;
+  _atendDragInit = true;
+
+  activeList.addEventListener('touchstart', e => {
+    const card = e.target.closest('.atend-card');
+    if (!card) return;
+    const atendId = card.dataset.atendId;
+    if (!atendId) return;
+
+    _atendDragId = atendId;
+    _atendTouchDragging = false;
+    const touch = e.touches[0];
+    const startX = touch.clientX;
+    const startY = touch.clientY;
+    const cardW = card.offsetWidth;
+
+    const onMove = (ev) => {
+      if (_atendTouchDragging) ev.preventDefault();
+      const t = ev.touches[0];
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+
+      if (!_atendTouchDragging && Math.abs(dx) + Math.abs(dy) > 12) {
+        _atendTouchDragging = true;
+        card.style.opacity = '0.3';
+        document.body.style.overflow = 'hidden';
+
+        _atendDragGhost = card.cloneNode(true);
+        _atendDragGhost.style.cssText = `
+          position:fixed;z-index:9999;pointer-events:none;
+          opacity:.9;will-change:transform;
+          box-shadow:0 4px 16px rgba(0,0,0,.3);
+          border:1px solid var(--info);border-radius:10px;
+          background:var(--bg-card);
+          width:${cardW}px;
+          left:0;top:0;
+          transform:translate(${t.clientX - cardW/2}px,${t.clientY - 30}px) scale(1.05);
+        `;
+        document.body.appendChild(_atendDragGhost);
+      }
+
+      if (_atendTouchDragging && _atendDragGhost) {
+        _atendDragGhost.style.transform = `translate(${t.clientX - cardW/2}px,${t.clientY - 30}px) scale(1.05)`;
+
+        const elUnder = document.elementFromPoint(t.clientX, t.clientY);
+        const overQueue = elUnder && (elUnder.id === 'queueList' || elUnder.closest('#queueList') || elUnder.id === 'queuePanel' || elUnder.closest('#queuePanel'));
+        if (overQueue) {
+          _queueList.style.background = 'rgba(96,165,250,.06)';
+        } else {
+          _queueList.style.background = '';
+        }
+      }
+    };
+
+    const onEnd = (ev) => {
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onEnd);
+      document.body.style.overflow = '';
+      if (_atendDragGhost) { _atendDragGhost.remove(); _atendDragGhost = null; }
+      card.style.opacity = '1';
+      _queueList.style.background = '';
+
+      if (!_atendTouchDragging) {
+        // Tap — open outcome sheet directly
+        _atendDragId = null;
+        openOutcomeSheet(atendId);
+        return;
+      }
+
+      const touch2 = ev.changedTouches[0];
+      const dropEl = document.elementFromPoint(touch2.clientX, touch2.clientY);
+      const droppedOnQueue = dropEl && (dropEl.id === 'queueList' || dropEl.closest('#queueList') || dropEl.id === 'queuePanel' || dropEl.closest('#queuePanel'));
+
+      if (droppedOnQueue) {
+        setTimeout(() => openOutcomeSheet(atendId), 50);
+      }
+      // If not dropped on queue, snap back (do nothing)
+
+      _atendDragId = null;
+      _atendTouchDragging = false;
+    };
+
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onEnd);
+  }, { passive: true });
+}
+
+// ─── Outcome Sheet logic ───
+let _outcomeAtendId = null;
+
+function openOutcomeSheet(atendId) {
+  _outcomeAtendId = atendId;
+  const atend = activeAtendimentos.find(a => a.id === atendId);
+  const nome = atend?.vendedores?.apelido || atend?.vendedores?.nome || 'Vendedor';
+  document.getElementById('outcomeVendorName').textContent = nome;
+  document.getElementById('outcomeOverlay').classList.add('open');
+  document.getElementById('outcomeSheet').classList.add('open');
+}
+
+window.closeOutcomeSheet = function() {
+  document.getElementById('outcomeOverlay').classList.remove('open');
+  document.getElementById('outcomeSheet').classList.remove('open');
+  _outcomeAtendId = null;
+};
+
+window.selectOutcome = function(resultado) {
+  closeOutcomeSheet();
+  if (!_outcomeAtendId) return;
+  const atendId = _outcomeAtendId;
+  if (resultado === 'cancelar') {
+    cancelarAtendimento(atendId);
+  } else {
+    handleOutcome(resultado, atendId);
+  }
+};
+
 async function addToQueue(vendedorId) {
   const v = vendedores.find(x => x.id === vendedorId);
   const setor = v?.setor || 'loja';
@@ -2138,18 +2284,14 @@ function renderActiveAtendimentos() {
     card.id = 'atend-' + atend.id;
     const prefBadge = atend.preferencial ? '<span style="display:inline-block;background:var(--warning);color:#09090B;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:6px;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle">PREF</span>' : '';
     const clientBadge = (atend._clientCount && atend._clientCount > 1) ? `<span style="display:inline-block;background:var(--info);color:#fff;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:6px;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle">${atend._clientCount} clientes</span>` : '';
+    card.dataset.atendId = atend.id;
     card.innerHTML = `
       <div class="atend-avatar">${initials(nome)}</div>
       <div class="atend-info">
         <div class="atend-name">${nome}${prefBadge}${clientBadge}</div>
-        <div class="atend-timer" id="timer-${atend.id}">00:00</div>
+        <div class="atend-timer" id="timer-${atend.id}">0min 0s</div>
       </div>
-      <div class="atend-actions">
-        <button class="btn-sale" title="Venda" onclick="handleOutcome('venda','${atend.id}')"><i class="fa-solid fa-check"></i></button>
-        <button class="btn-nosale" title="Não converteu" onclick="handleOutcome('nao_convertido','${atend.id}')"><i class="fa-solid fa-xmark"></i></button>
-        <button class="btn-exchange" title="Troca" onclick="handleOutcome('troca','${atend.id}')"><i class="fa-solid fa-rotate"></i></button>
-        <button class="btn-cancel" title="Cancelar" onclick="cancelarAtendimento('${atend.id}')" style="background:var(--bg-hover);color:var(--text-muted);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px"><i class="fa-solid fa-arrow-rotate-left"></i></button>
-      </div>`;
+      <i class="fa-solid fa-grip-vertical" style="color:var(--text-muted);font-size:14px;opacity:.3;flex-shrink:0;margin-left:auto"></i>`;
     list.appendChild(card);
   });
 
@@ -2184,6 +2326,7 @@ function renderActiveAtendimentos() {
     });
   }, 1000);
 
+  initAtendDrag();
 }
 
 function removeAtendimento(atendId) {
@@ -2199,7 +2342,7 @@ function removeAtendimento(atendId) {
 // ─── Cancelar atendimento (voltar vendedor à posição original) ───
 window.cancelarAtendimento = async function(atendId) {
   if (_actionLock) return;
-  if (!confirm('Cancelar este atendimento? O vendedor volta para a posição dele na fila.')) return;
+  // User already confirmed via outcome sheet
   try {
     const atend = activeAtendimentos.find(a => a.id === atendId);
     if (!atend) return;
@@ -2209,16 +2352,26 @@ window.cancelarAtendimento = async function(atendId) {
     markLocal();
     await sb.from('atendimentos').delete().eq('id', atendId);
 
-    // Devolver vendedor ao ÚLTIMO da fila do setor dele
+    // Devolver vendedor ao PRIMEIRO da fila do setor dele
     const v = vendedores.find(x => x.id === vendedorId);
     const setor = v?.setor || 'loja';
-    const inQueue = vendedores.filter(x => (x.setor || 'loja') === setor && x.status === 'disponivel' && x.posicao_fila != null);
-    const maxPos = Math.max(0, ...inQueue.map(x => x.posicao_fila));
-    await sb.from('vendedores').update({ status: 'disponivel', posicao_fila: maxPos + 1 }).eq('id', vendedorId);
+    const inQueue = vendedores
+      .filter(x => (x.setor || 'loja') === setor && x.status === 'disponivel' && x.posicao_fila != null)
+      .sort((a, b) => a.posicao_fila - b.posicao_fila);
+    const newOrder = [vendedorId, ...inQueue.map(x => x.id)];
+
+    // Optimistic: update local state
+    if (v) { v.status = 'disponivel'; v.posicao_fila = 1; }
+    inQueue.forEach((x, i) => { x.posicao_fila = i + 2; });
 
     removeAtendimento(atendId);
-    await loadVendedores(); // scheduleRender inclui updateQuickStats
-    toast('Atendimento cancelado — vendedor voltou ao último da fila', 'info');
+    scheduleRender();
+
+    // Persist: set status + reorder queue
+    await sb.from('vendedores').update({ status: 'disponivel' }).eq('id', vendedorId);
+    await sb.rpc('reordenar_fila', { p_ids: newOrder });
+    await loadVendedores();
+    toast('Atendimento cancelado — vendedor voltou ao 1º da fila', 'info');
   } catch (e) {
     toast('Erro ao cancelar: ' + e.message, 'error');
   }
@@ -2878,6 +3031,16 @@ window.addEventListener('beforeunload', () => {
 // Para cada deploy, basta adicionar um objeto { version, date, items[] } no início.
 // O popup aparece automaticamente 1x por versão para cada usuário.
 const APP_CHANGELOG = [
+  {
+    version: '2.4.0',
+    date: '2026-03-28',
+    items: [
+      { icon: 'fa-hand-pointer', text: 'Novo: arraste ou toque o card de atendimento para resolver (venda, troca, não converteu ou cancelar)' },
+      { icon: 'fa-arrow-up', text: 'Cancelar atendimento agora retorna o vendedor ao 1º da fila (antes ia pro último)' },
+      { icon: 'fa-clock', text: 'Timers agora mostram "5min 23s" em vez de "05:23" — mais legível' },
+      { icon: 'fa-broom', text: 'Removidos os 4 mini botões de ação — interface mais limpa' }
+    ]
+  },
   {
     version: '2.3.0',
     date: '2026-03-28',

@@ -18,9 +18,11 @@ export const STATUS_CONFIG = {
 };
 
 export function formatTime(seconds) {
-  const m = Math.floor(seconds / 60);
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
-  return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  if (h > 0) return h + 'h ' + String(m).padStart(2, '0') + 'min';
+  return m + 'min ' + s + 's';
 }
 
 export function formatTimeLong(seconds) {
