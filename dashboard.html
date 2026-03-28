@@ -190,7 +190,7 @@ window._showUpdateBanner = function(worker) {
     width: 30px; height: 30px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);
     background: var(--bg-surface); color: var(--text-muted); cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    font-size: 11px; transition: all .15s;
+    font-size: 11px; transition: background-color .15s, color .15s, border-color .15s;
   }
   .vendedor-actions button:hover { background: var(--bg-elevated); color: var(--text-primary); }
   .vendedor-actions button.btn-danger:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
@@ -529,6 +529,15 @@ const tenantId = user ? getTenantId(user) : null;
 let charts = {};
 let currentPeriod = 'hoje';
 
+// Cache KPI DOM refs (avoid repeated getElementById on realtime updates)
+const _kpi = {
+  total: document.getElementById('kpiTotal'),
+  conv: document.getElementById('kpiConv'),
+  loss: document.getElementById('kpiLoss'),
+  time: document.getElementById('kpiTime'),
+  ticket: document.getElementById('kpiTicket')
+};
+
 Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
 Chart.defaults.font.weight = 500;
 Chart.defaults.color = '#71717A';
@@ -662,14 +671,14 @@ async function loadKPIs(range, prevRange) {
   const convAtual = calcConv(d, currTrocas.data);
   const convAnterior = calcConv(p, prevTrocas.data);
 
-  document.getElementById('kpiTotal').textContent = d.total_atendimentos || 0;
-  document.getElementById('kpiConv').textContent = convAtual + '%';
-  document.getElementById('kpiLoss').textContent = d.total_nao_convertido || 0;
-  document.getElementById('kpiTime').textContent = (d.tempo_medio_min || 0) + 'min';
+  if (_kpi.total) _kpi.total.textContent = d.total_atendimentos || 0;
+  if (_kpi.conv) _kpi.conv.textContent = convAtual + '%';
+  if (_kpi.loss) _kpi.loss.textContent = d.total_nao_convertido || 0;
+  if (_kpi.time) _kpi.time.textContent = (d.tempo_medio_min || 0) + 'min';
   // Ticket médio
   const ticket = d.ticket_medio || 0;
   const pTicket = p.ticket_medio || 0;
-  document.getElementById('kpiTicket').textContent = ticket > 0 ? 'R$ ' + ticket.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '—';
+  if (_kpi.ticket) _kpi.ticket.textContent = ticket > 0 ? 'R$ ' + ticket.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '—';
   renderCompare('kpiTotalCmp', d.total_atendimentos || 0, p.total_atendimentos || 0);
   renderCompare('kpiConvCmp', convAtual, convAnterior);
   renderCompare('kpiLossCmp', d.total_nao_convertido || 0, p.total_nao_convertido || 0, true);
@@ -1397,6 +1406,15 @@ sb.channel(`dashboard-sync-${tenantId || 'default'}`)
 
 // ─── Changelog versionado (mesma lista do tablet — adicione novas entradas no TOPO) ───
 const APP_CHANGELOG = [
+  {
+    version: '2.7.0',
+    date: '2026-03-28',
+    items: [
+      { icon: 'fa-gauge-high', text: 'Micro-otimização: transições CSS mais leves, menos repaints' },
+      { icon: 'fa-shield', text: 'Correções de estabilidade: race condition no menu de fila, guards em timers' },
+      { icon: 'fa-chart-line', text: 'Dashboard: KPIs com cache de DOM, transições específicas' }
+    ]
+  },
   {
     version: '2.6.0',
     date: '2026-03-28',

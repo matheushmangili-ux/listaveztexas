@@ -231,7 +231,7 @@ window.addEventListener('error', function(e) {
       inset 0 2px 4px rgba(0,0,0,.5),
       inset 0 1px 2px rgba(0,0,0,.3),
       0 1px 0 rgba(255,255,255,.04);
-    transition: background .3s cubic-bezier(.4,0,.2,1), border-color .3s cubic-bezier(.4,0,.2,1), box-shadow .3s cubic-bezier(.4,0,.2,1);
+    transition: background .3s cubic-bezier(.4,0,.2,1), border-color .3s cubic-bezier(.4,0,.2,1);
     flex-shrink: 0;
     overflow: hidden;
   }
@@ -252,7 +252,7 @@ window.addEventListener('error', function(e) {
     height: 20px;
     border-radius: 10px;
     background: linear-gradient(180deg, #8a8a8f 0%, #5a5a60 50%, #4a4a50 100%);
-    transition: transform .3s cubic-bezier(.34,1.56,.64,1), width .15s, background .3s, box-shadow .3s;
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1), width .15s, background .3s;
     box-shadow:
       0 2px 4px rgba(0,0,0,.4),
       0 1px 1px rgba(0,0,0,.2),
@@ -2947,6 +2947,7 @@ window.handleFooterTap = async function(vendedorId) {
 
 // Popup de confirmação para entrar na fila
 let _confirmFilaOutsideHandler = null;
+let _confirmFilaTimeout = null;
 
 function openConfirmFila(vendedorId) {
   const v = vendedores.find(x => x.id === vendedorId);
@@ -2969,7 +2970,7 @@ function openConfirmFila(vendedorId) {
   `;
 
   document.body.appendChild(menu);
-  setTimeout(() => {
+  _confirmFilaTimeout = setTimeout(() => {
     _confirmFilaOutsideHandler = function(e) {
       if (!menu.contains(e.target)) closeConfirmFila();
     };
@@ -2984,6 +2985,7 @@ window.confirmAddToQueue = async function(vendedorId) {
 };
 
 window.closeConfirmFila = function() {
+  if (_confirmFilaTimeout) { clearTimeout(_confirmFilaTimeout); _confirmFilaTimeout = null; }
   if (_confirmFilaOutsideHandler) {
     document.removeEventListener('click', _confirmFilaOutsideHandler);
     _confirmFilaOutsideHandler = null;
@@ -3096,6 +3098,15 @@ window.addEventListener('beforeunload', () => {
 // Para cada deploy, basta adicionar um objeto { version, date, items[] } no início.
 // O popup aparece automaticamente 1x por versão para cada usuário.
 const APP_CHANGELOG = [
+  {
+    version: '2.7.0',
+    date: '2026-03-28',
+    items: [
+      { icon: 'fa-gauge-high', text: 'Micro-otimização: transições CSS mais leves, menos repaints' },
+      { icon: 'fa-shield', text: 'Correções de estabilidade: race condition no menu de fila, guards em timers' },
+      { icon: 'fa-chart-line', text: 'Dashboard: KPIs com cache de DOM, transições específicas' }
+    ]
+  },
   {
     version: '2.6.0',
     date: '2026-03-28',

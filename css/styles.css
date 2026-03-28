@@ -287,11 +287,9 @@ body {
   pointer-events: none;
   transition: opacity .2s;
 }
-.bottom-sheet-overlay { will-change: opacity; }
-.bottom-sheet-overlay.open { opacity: 1; pointer-events: auto; touch-action: manipulation; }
+.bottom-sheet-overlay.open { opacity: 1; pointer-events: auto; touch-action: manipulation; will-change: opacity; }
 
 .bottom-sheet {
-  will-change: transform;
   position: fixed;
   bottom: 0;
   left: 0;
@@ -306,7 +304,7 @@ body {
   max-height: 85vh;
   overflow-y: auto;
 }
-.bottom-sheet.open { transform: translateY(0); }
+.bottom-sheet.open { transform: translateY(0); will-change: transform; }
 
 .bottom-sheet-handle {
   width: 32px;
