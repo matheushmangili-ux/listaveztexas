@@ -3052,12 +3052,15 @@ document.addEventListener('visibilitychange', () => {
     }
   } else {
     // Refetch e reconectar timers
-    loadVendedores();
-    updateQuickStats();
     updateClock();
     _clockInterval = setInterval(updateClock, 15000);
     _sessionInterval = setInterval(() => { if (currentTurno) updateQuickStats(); }, 60000);
-    if (activeAtendimentos.length > 0) renderActiveAtendimentos(); // Re-cria timer
+    // Recarregar dados do banco e re-renderizar após conclusão
+    (async () => {
+      await loadVendedores();
+      await checkActiveAtendimentos();
+      updateQuickStats();
+    })();
   }
 });
 
