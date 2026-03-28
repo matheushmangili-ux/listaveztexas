@@ -1606,7 +1606,10 @@ window.sendToAtendimento = async function(vendedorId) {
     v = vendedores.find(x => x.id === vendedorId);
     if (!v || v.posicao_fila == null) return;
   }
-  if (v.status !== 'disponivel' || v.posicao_fila == null) return;
+  if (v.status !== 'disponivel' || v.posicao_fila == null) {
+    toast((v.apelido || v.nome) + ' não está na fila (status: ' + v.status + ')', 'warning');
+    return;
+  }
   // Se não é o primeiro da fila, é atendimento preferencial
   const setor = v.setor || 'loja';
   const fila = vendedores.filter(x => (x.setor || 'loja') === setor && x.status === 'disponivel' && x.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
@@ -2640,7 +2643,8 @@ window.submitTroca = async function(atendId, comDiferenca) {
   document.getElementById('trocaOverlay')?.remove();
 
   const atend = activeAtendimentos.find(a => a.id === atendId);
-  const vendedorId = atend?.vendedor_id;
+  if (!atend) { toast('Atendimento não encontrado', 'warning'); return; }
+  const vendedorId = atend.vendedor_id;
 
   // Se diferença >= R$1.000, volta pro 1º da fila (sem perguntar continuar)
   if (comDiferenca && valor >= 1000) {
