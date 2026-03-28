@@ -180,7 +180,7 @@ window.addEventListener('error', function(e) {
   .turno-switch {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
@@ -322,7 +322,7 @@ window.addEventListener('error', function(e) {
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    border-radius: var(--radius-sm);
+    border-radius: 12px;
     border: 1px solid var(--border-subtle);
     background: var(--bg-surface);
     cursor: pointer;
@@ -732,7 +732,6 @@ window.addEventListener('error', function(e) {
   <!-- HEADER -->
   <header class="t-header">
     <div style="display:flex;align-items:center;gap:10px;min-width:0;flex-shrink:1">
-      <img src="/assets/logo-minhavez-web.png" alt="MinhaVez" style="width:32px;height:32px;object-fit:contain;filter:brightness(0) invert(1);flex-shrink:0">
       <span class="header-title" style="font-family:var(--font-mono);font-weight:700;font-size:16px;white-space:nowrap">Minha Vez</span>
     </div>
     <div id="headerKpis" style="display:flex;align-items:center;gap:16px;font-family:var(--font-mono);font-weight:700">
@@ -2021,7 +2020,7 @@ function openCheckin() {
     const nome = v.apelido || v.nome;
     return `<label class="checkin-item" data-id="${v.id}">
       <div style="display:flex;align-items:center;gap:12px;flex:1">
-        <div style="width:36px;height:36px;border-radius:var(--radius-sm);background:var(--bg-hover);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:12px;color:var(--text-secondary);flex-shrink:0">${ini}</div>
+        <div style="width:36px;height:36px;border-radius:10px;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:12px;color:var(--text-secondary);flex-shrink:0">${ini}</div>
         <span style="font-weight:600;font-size:14px">${nome}</span>
       </div>
       <input type="checkbox" class="checkin-toggle" value="${v.id}" style="display:none">
@@ -2863,6 +2862,16 @@ window.addEventListener('beforeunload', () => {
 // Para cada deploy, basta adicionar um objeto { version, date, items[] } no início.
 // O popup aparece automaticamente 1x por versão para cada usuário.
 const APP_CHANGELOG = [
+  {
+    version: '2.2.0',
+    date: '2026-03-28',
+    items: [
+      { icon: 'fa-circle-dot', text: 'Indicador de turno: bolinha verde pulsante na chave' },
+      { icon: 'fa-palette', text: 'Chave de turno agora em cinza neutro, visual mais limpo' },
+      { icon: 'fa-square', text: 'Bordas arredondadas no check-in dos vendedores' },
+      { icon: 'fa-broom', text: 'Header limpo: removido texto e imagem desnecessários' }
+    ]
+  },
   {
     version: '2.1.0',
     date: '2026-03-28',
