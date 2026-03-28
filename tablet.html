@@ -1070,6 +1070,7 @@ window.setSetor = function(setor) {
 // ─── Sound effects (Web Audio API) ───
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
+let _vendaAudio = null;
 
 function playSound(type) {
   if (!audioCtx) audioCtx = new AudioCtx();
@@ -1093,52 +1094,13 @@ function playSound(type) {
     gain2.gain.exponentialRampToValueAtTime(0.01, t0 + 0.5);
     osc2.start(t0 + 0.15); osc2.stop(t0 + 0.5);
   } else if (type === 'venda') {
-    // Cash register "ka-ching!" 💰
-    const t0 = audioCtx.currentTime;
-
-    // 1) Mecânica da gaveta — ruído metálico curto (clack)
-    const bufLen = audioCtx.sampleRate * 0.08;
-    const noiseBuf = audioCtx.createBuffer(1, bufLen, audioCtx.sampleRate);
-    const noiseData = noiseBuf.getChannelData(0);
-    for (let i = 0; i < bufLen; i++) noiseData[i] = (Math.random() * 2 - 1) * 0.6;
-    const noise = audioCtx.createBufferSource();
-    noise.buffer = noiseBuf;
-    const noiseFilter = audioCtx.createBiquadFilter();
-    noiseFilter.type = 'bandpass'; noiseFilter.frequency.value = 4000; noiseFilter.Q.value = 2;
-    const noiseG = audioCtx.createGain();
-    noise.connect(noiseFilter); noiseFilter.connect(noiseG); noiseG.connect(audioCtx.destination);
-    noiseG.gain.setValueAtTime(0.25, t0);
-    noiseG.gain.exponentialRampToValueAtTime(0.001, t0 + 0.08);
-    noise.start(t0); noise.stop(t0 + 0.08);
-
-    // 2) "Ching" — sino metálico (duas frequências altas batendo)
-    const bell1 = audioCtx.createOscillator();
-    const bell1G = audioCtx.createGain();
-    bell1.connect(bell1G); bell1G.connect(audioCtx.destination);
-    bell1.type = 'sine';
-    bell1.frequency.value = 3520; // A7
-    bell1G.gain.setValueAtTime(0.18, t0 + 0.06);
-    bell1G.gain.exponentialRampToValueAtTime(0.001, t0 + 0.55);
-    bell1.start(t0 + 0.06); bell1.stop(t0 + 0.6);
-
-    const bell2 = audioCtx.createOscillator();
-    const bell2G = audioCtx.createGain();
-    bell2.connect(bell2G); bell2G.connect(audioCtx.destination);
-    bell2.type = 'sine';
-    bell2.frequency.value = 5274; // E8 — inarmônico, dá o timbre de sino
-    bell2G.gain.setValueAtTime(0.10, t0 + 0.06);
-    bell2G.gain.exponentialRampToValueAtTime(0.001, t0 + 0.45);
-    bell2.start(t0 + 0.06); bell2.stop(t0 + 0.5);
-
-    // 3) Harmônico metálico sutil (brilho do metal)
-    const shimmer = audioCtx.createOscillator();
-    const shimmerG = audioCtx.createGain();
-    shimmer.connect(shimmerG); shimmerG.connect(audioCtx.destination);
-    shimmer.type = 'square';
-    shimmer.frequency.value = 7040; // A8
-    shimmerG.gain.setValueAtTime(0.03, t0 + 0.07);
-    shimmerG.gain.exponentialRampToValueAtTime(0.001, t0 + 0.3);
-    shimmer.start(t0 + 0.07); shimmer.stop(t0 + 0.35);
+    // Cash register "KA-CHING!" — som real de caixa registradora 💰
+    if (!_vendaAudio) {
+      _vendaAudio = new Audio('/assets/cash-register.wav');
+      _vendaAudio.volume = 0.7;
+    }
+    _vendaAudio.currentTime = 0;
+    _vendaAudio.play().catch(() => {});
   } else if (type === 'fail') {
     // Sad trombone "wah wah wah wahhh"
     const t0 = audioCtx.currentTime;
@@ -3129,6 +3091,15 @@ window.addEventListener('beforeunload', () => {
 // Para cada deploy, basta adicionar um objeto { version, date, items[] } no início.
 // O popup aparece automaticamente 1x por versão para cada usuário.
 const APP_CHANGELOG = [
+  {
+    version: '2.8.0',
+    date: '2026-03-28',
+    items: [
+      { icon: 'fa-cash-register', text: 'Som realista de caixa registradora ao registrar venda' },
+      { icon: 'fa-bolt', text: 'Feedback instantâneo ao enviar vendedor para atendimento' },
+      { icon: 'fa-eye', text: 'Lista de atendimentos não some mais ao alternar abas' }
+    ]
+  },
   {
     version: '2.7.0',
     date: '2026-03-28',
