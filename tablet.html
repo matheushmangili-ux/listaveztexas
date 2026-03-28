@@ -718,6 +718,7 @@ window.addEventListener('error', function(e) {
   <header class="t-header">
     <div style="display:flex;align-items:center;gap:10px;min-width:0;flex-shrink:1">
       <span class="header-title" style="font-family:var(--font-mono);font-weight:700;font-size:16px;white-space:nowrap">Minha Vez</span>
+      <span id="appVersion" style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);opacity:.6;white-space:nowrap"></span>
     </div>
     <div id="headerKpis" style="display:flex;align-items:center;gap:16px;font-family:var(--font-mono);font-weight:700">
       <div style="display:flex;align-items:center;gap:6px" title="Atendimentos finalizados">
@@ -3075,6 +3076,12 @@ const APP_CHANGELOG = [
   }
   // ↑ Adicione novas versões ACIMA desta linha ↑
 ];
+
+// Mostrar versão no header
+if (APP_CHANGELOG[0]) {
+  const vEl = document.getElementById('appVersion');
+  if (vEl) vEl.textContent = 'v' + APP_CHANGELOG[0].version;
+}
 
 (function showChangelog() {
   const latest = APP_CHANGELOG[0];
