@@ -1,17 +1,21 @@
-// Minha Vez — Service Worker v4 (network-first, no HTML cache)
-const CACHE_NAME = 'minhavez-v6';
+// Minha Vez — Service Worker v5 (network-first, controlled updates)
+const CACHE_NAME = 'minhavez-v7';
 const STATIC_ASSETS = [
   '/css/styles.css',
   '/assets/logo-minhavez-web.png',
   '/manifest.json'
 ];
 
-// Install: cache only truly static assets
+// Install: cache only truly static assets (do NOT skipWaiting — let page control update)
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
   );
-  self.skipWaiting();
+});
+
+// Skip waiting only when page requests it (user clicked "update" banner)
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 // Activate: clean ALL old caches
