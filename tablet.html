@@ -64,7 +64,6 @@ window.addEventListener('error', function(e) {
   @media (max-width: 600px) {
     .t-header { padding: 8px 10px; }
     .t-header .header-title { display: none; }
-    .t-header .header-turno-label { display: none; }
   }
 
   /* Queue panel (left — Fila de Espera) */
@@ -251,50 +250,66 @@ window.addEventListener('error', function(e) {
     transition: color .3s;
     min-width: 24px;
   }
-  /* ON state */
+  /* Pulse dot — bolinha verde piscando quando turno ON */
+  .turno-pulse-dot {
+    display: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 6px rgba(34,197,94,.6);
+    animation: turno-pulse 1.5s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  .turno-switch.on .turno-pulse-dot { display: block; }
+  @keyframes turno-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .4; transform: scale(.75); }
+  }
+
+  /* ON state — cinza neutro */
   .turno-switch.on .turno-switch-track {
-    background: linear-gradient(180deg, #330a18 0%, #4e1328 60%, #6d1a38 100%);
-    border-color: rgba(225,29,72,.25);
+    background: linear-gradient(180deg, #1f1f23 0%, #2e2e33 60%, #3a3a40 100%);
+    border-color: rgba(255,255,255,.12);
     box-shadow:
       inset 0 2px 4px rgba(0,0,0,.3),
       inset 0 1px 2px rgba(0,0,0,.2),
-      0 0 12px rgba(225,29,72,.15),
+      0 0 8px rgba(255,255,255,.04),
       0 1px 0 rgba(255,255,255,.04);
   }
   .turno-switch.on .turno-switch-track::after {
-    background: radial-gradient(ellipse at 70% 50%, rgba(251,113,133,.2) 0%, transparent 70%);
+    background: radial-gradient(ellipse at 70% 50%, rgba(255,255,255,.06) 0%, transparent 70%);
   }
   .turno-switch.on .turno-switch-thumb {
     transform: translateX(22px);
-    background: linear-gradient(180deg, #FB7185 0%, #E11D48 40%, #BE123C 100%);
+    background: linear-gradient(180deg, #b0b0b8 0%, #8a8a92 40%, #6e6e76 100%);
     box-shadow:
-      0 2px 6px rgba(225,29,72,.4),
+      0 2px 6px rgba(0,0,0,.3),
       0 1px 2px rgba(0,0,0,.2),
       inset 0 1px 0 rgba(255,255,255,.4),
       inset 0 -1px 0 rgba(0,0,0,.1),
-      0 0 8px rgba(225,29,72,.3);
+      0 0 4px rgba(255,255,255,.08);
   }
   .turno-switch.on .turno-switch-thumb::after {
-    background: linear-gradient(180deg, rgba(255,255,255,.5) 0%, rgba(255,255,255,.15) 100%);
+    background: linear-gradient(180deg, rgba(255,255,255,.4) 0%, rgba(255,255,255,.1) 100%);
   }
   .turno-switch.on .turno-switch-label {
-    color: var(--accent-bright);
-    text-shadow: 0 0 8px rgba(251,113,133,.3);
+    color: var(--text-secondary);
   }
   .turno-switch:hover .turno-switch-track {
     border-color: rgba(255,255,255,.14);
   }
   .turno-switch.on:hover .turno-switch-track {
-    border-color: rgba(225,29,72,.4);
+    border-color: rgba(255,255,255,.18);
     box-shadow:
       inset 0 2px 4px rgba(0,0,0,.3),
       inset 0 1px 2px rgba(0,0,0,.2),
-      0 0 16px rgba(225,29,72,.2),
+      0 0 10px rgba(255,255,255,.06),
       0 1px 0 rgba(255,255,255,.04);
   }
   .turno-switch.on:hover .turno-switch-thumb {
     box-shadow:
-      0 2px 8px rgba(225,29,72,.5),
+      0 2px 8px rgba(0,0,0,.4),
       0 1px 2px rgba(0,0,0,.2),
       inset 0 1px 0 rgba(255,255,255,.4),
       inset 0 -1px 0 rgba(0,0,0,.1),
@@ -719,7 +734,6 @@ window.addEventListener('error', function(e) {
     <div style="display:flex;align-items:center;gap:10px;min-width:0;flex-shrink:1">
       <img src="/assets/logo-minhavez-web.png" alt="MinhaVez" style="width:32px;height:32px;object-fit:contain;filter:brightness(0) invert(1);flex-shrink:0">
       <span class="header-title" style="font-family:var(--font-mono);font-weight:700;font-size:16px;white-space:nowrap">Minha Vez</span>
-      <span class="header-turno-label" id="turnoLabel" style="font-size:12px;color:var(--text-muted);white-space:nowrap">Turno não iniciado</span>
     </div>
     <div id="headerKpis" style="display:flex;align-items:center;gap:16px;font-family:var(--font-mono);font-weight:700">
       <div style="display:flex;align-items:center;gap:6px" title="Atendimentos finalizados">
@@ -756,6 +770,7 @@ window.addEventListener('error', function(e) {
           <div class="turno-switch-thumb" id="turnoThumb"></div>
         </div>
         <span class="turno-switch-label" id="turnoSwitchLabel">OFF</span>
+        <span class="turno-pulse-dot" id="turnoPulse"></span>
       </div>
       <button class="btn btn-ghost" style="min-height:42px;padding:0 12px;font-size:14px" onclick="window._toggleTheme()" title="Modo claro/escuro">
         <i class="fa-solid fa-circle-half-stroke"></i>
@@ -1988,7 +2003,6 @@ window.toggleTurno = async function() {
     currentTurno = null;
     activeAtendimentos = [];
     renderActiveAtendimentos();
-    document.getElementById('turnoLabel').textContent = 'Turno encerrado';
     updateTurnoSwitch(false);
     // btnProximo removido — controle via switch
     toast('Turno encerrado', 'info');
@@ -2053,7 +2067,6 @@ window.confirmCheckin = async function() {
   const { error: errFila } = await sb.rpc('reordenar_fila', { p_ids: checked });
   if (errFila) { toast('Erro ao montar fila', 'error'); return; }
 
-  document.getElementById('turnoLabel').textContent = 'Turno aberto';
   updateTurnoSwitch(true);
   closeCheckin();
   await loadVendedores();
@@ -2821,7 +2834,6 @@ async function checkExistingTurno() {
   const { data } = await tq.order('abertura', { ascending: false }).limit(1);
   if (data && data.length > 0) {
     currentTurno = data[0];
-    document.getElementById('turnoLabel').textContent = 'Turno aberto';
     updateTurnoSwitch(true);
     // btnProximo removido — controle via switch
   }
