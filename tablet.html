@@ -1064,7 +1064,8 @@ let _reconnectTimer = null; // Previne empilhamento de timeouts de reconexão
 async function withLock(fn) {
   if (_actionLock) return;
   _actionLock = true;
-  try { await fn(); } finally { setTimeout(() => { _actionLock = false; }, 300); }
+  const safety = setTimeout(() => { _actionLock = false; }, 8000); // fallback se travar
+  try { await fn(); } finally { clearTimeout(safety); _actionLock = false; }
 }
 
 // Marcar que uma ação local está em andamento (evita re-render do realtime)
@@ -2347,21 +2348,23 @@ function renderActiveAtendimentos() {
   });
   timerInterval = setInterval(() => {
     const now = Date.now();
+    let allDetached = true;
     _timerRefs.forEach((ref, id) => {
       const elapsed = (now - ref.startMs) / 1000;
       const timeStr = formatTime(elapsed);
-      if (timeStr === ref.lastText) return; // skip if unchanged
+      if (timeStr === ref.lastText) { if (ref.main || ref.side) allDetached = false; return; }
       ref.lastText = timeStr;
       const isDanger = elapsed > 2400;
-      if (!ref.main || !ref.main.isConnected) {
-        ref.main = document.getElementById('timer-' + id);
-      }
-      if (ref.main) { ref.main.textContent = timeStr; ref.main.className = 'atend-timer' + (isDanger ? ' danger' : ''); }
-      if (!ref.side || !ref.side.isConnected) {
-        ref.side = document.querySelector(`[data-sidebar-timer="${id}"]`);
-      }
-      if (ref.side) { ref.side.textContent = timeStr; ref.side.style.color = isDanger ? 'var(--danger)' : '#fff'; }
+      // Se main desconectou, tentar UMA vez re-encontrar; se não achar, desistir
+      if (ref.main && !ref.main.isConnected) ref.main = null;
+      if (!ref.main) ref.main = document.getElementById('timer-' + id) || null;
+      if (ref.main) { ref.main.textContent = timeStr; ref.main.className = 'atend-timer' + (isDanger ? ' danger' : ''); allDetached = false; }
+      if (ref.side && !ref.side.isConnected) ref.side = null;
+      if (!ref.side) ref.side = document.querySelector(`[data-sidebar-timer="${id}"]`) || null;
+      if (ref.side) { ref.side.textContent = timeStr; ref.side.style.color = isDanger ? 'var(--danger)' : '#fff'; allDetached = false; }
     });
+    // Se todos os refs sumiram do DOM, parar o interval
+    if (allDetached && _timerRefs.size > 0) { clearInterval(timerInterval); timerInterval = null; }
   }, 1000);
 
   initAtendDrag();
@@ -2716,7 +2719,8 @@ function createModal(id, content, { zIndex = 1000, maxWidth = '360px', onClose }
     <button class="modal-close" data-modal-close title="Fechar">&times;</button>
     ${content}
   </div>`;
-  overlay.querySelector('[data-modal-close]').addEventListener('click', closeFn);
+  const _closeBtn = overlay.querySelector('[data-modal-close]');
+  if (_closeBtn) _closeBtn.addEventListener('click', closeFn);
   document.body.appendChild(overlay);
   return overlay;
 }
@@ -2957,6 +2961,7 @@ function openConfirmFila(vendedorId) {
 
   document.body.appendChild(menu);
   _confirmFilaTimeout = setTimeout(() => {
+    if (!menu.parentNode) return; // menu já foi removido, não adicionar handler
     _confirmFilaOutsideHandler = function(e) {
       if (!menu.contains(e.target)) closeConfirmFila();
     };
@@ -3000,7 +3005,7 @@ let _sessionInterval = setInterval(() => {
 let _rtVendTimer = null;
 let _rtAtendTimer = null;
 const _rtChannelName = `tablet-sync-${tenantId || 'default'}`;
-sb.channel(_rtChannelName)
+let _rtChannel = sb.channel(_rtChannelName)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vendedores', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined }, () => {
     if (_localAction) return;
     clearTimeout(_rtVendTimer);
@@ -3014,7 +3019,7 @@ sb.channel(_rtChannelName)
   .subscribe((status) => {
     if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
       clearTimeout(_reconnectTimer);
-      _reconnectTimer = setTimeout(() => { sb.channel(_rtChannelName).subscribe(); }, 3000);
+      _reconnectTimer = setTimeout(() => { if (_rtChannel) _rtChannel.subscribe(); }, 3000);
       toast('Reconectando...', 'warning', 2000);
     }
   });
@@ -3047,9 +3052,16 @@ document.addEventListener('visibilitychange', () => {
     // Sempre limpar draggedId ao ocultar tab (previne renderFooter bloqueado)
     draggedId = null;
   } else {
-    // Resetar TODOS os flags
+    // Resetar TODOS os flags de drag (inclusive ghosts órfãos)
     _localAction = false;
-    draggedId = null; // Garantir que não ficou travado
+    draggedId = null;
+    touchDragging = false;
+    touchDragId = null;
+    if (touchDragEl) { touchDragEl.style.opacity = '1'; touchDragEl = null; }
+    if (touchGhost) { touchGhost.remove(); touchGhost = null; }
+    _atendTouchDragging = false;
+    if (_atendDragGhost) { _atendDragGhost.remove(); _atendDragGhost = null; }
+    document.body.style.overflow = '';
     clearTimeout(_localActionTimer);
     _loadingVendedores = false;
     _actionLock = false;
@@ -3099,13 +3111,22 @@ window.addEventListener('beforeunload', () => {
   clearTimeout(_rtAtendTimer);
   clearTimeout(_reconnectTimer);
   if (_itemObserver) _itemObserver.disconnect();
-  try { sb.removeChannel(sb.channel(_rtChannelName)); } catch(e) {}
+  try { if (_rtChannel) { _rtChannel.unsubscribe(); sb.removeChannel(_rtChannel); _rtChannel = null; } } catch(e) {}
 });
 
 // ─── Changelog versionado (adicione novas entradas no TOPO do array) ───
 // Para cada deploy, basta adicionar um objeto { version, date, items[] } no início.
 // O popup aparece automaticamente 1x por versão para cada usuário.
 const APP_CHANGELOG = [
+  {
+    version: '3.0.0',
+    date: '2026-03-28',
+    items: [
+      { icon: 'fa-shield-halved', text: 'Proteção contra double-tap em ações (lock com fallback de segurança)' },
+      { icon: 'fa-plug-circle-check', text: 'Canal realtime com cleanup correto — sem vazamento de conexão' },
+      { icon: 'fa-broom', text: 'Timers, ghosts e drag limpos automaticamente ao trocar de aba' }
+    ]
+  },
   {
     version: '2.9.0',
     date: '2026-03-28',
