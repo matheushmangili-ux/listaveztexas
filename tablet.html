@@ -3001,14 +3001,21 @@ sb.channel(_rtChannelName)
     }
   });
 
+// ─── Auto-sync: recarrega dados a cada 30s (funciona sempre, independente de tab/app switch) ───
+setInterval(() => {
+  if (document.hidden || !currentTurno) return;
+  _loadingVendedores = false;
+  _localAction = false;
+  loadVendedores();
+  checkActiveAtendimentos();
+}, 30000);
+
 // ─── Visibility: pause timer when hidden, refetch on return ───
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
-    // Pausar todos os intervals para economizar bateria do tablet
     clearInterval(timerInterval); timerInterval = null;
     clearInterval(_clockInterval); _clockInterval = null;
     clearInterval(_sessionInterval); _sessionInterval = null;
-    // Limpar drag state caso tab mude no meio de um drag
     if (touchDragging) {
       if (touchGhost) { touchGhost.remove(); touchGhost = null; }
       if (touchDragEl) touchDragEl.style.opacity = '1';
@@ -3019,7 +3026,7 @@ document.addEventListener('visibilitychange', () => {
       _dragRectsCache = null;
     }
   } else {
-    // Resetar flags que podem ter ficado travados enquanto a tab estava oculta
+    // Resetar TODOS os flags
     _localAction = false;
     clearTimeout(_localActionTimer);
     _loadingVendedores = false;
@@ -3028,11 +3035,12 @@ document.addEventListener('visibilitychange', () => {
     updateClock();
     _clockInterval = setInterval(updateClock, 15000);
     _sessionInterval = setInterval(() => { if (currentTurno) updateQuickStats(); }, 60000);
-    // Invalidar cache de render e forçar re-render imediato
+    // Invalidar cache e forçar re-render
     _lastQueueKey = '';
     _lastFooterKey = '';
     scheduleRender();
-    // Depois buscar dados frescos do banco
+    if (activeAtendimentos.length > 0) renderActiveAtendimentos();
+    // Buscar dados frescos do banco
     loadVendedores();
     checkActiveAtendimentos();
     updateQuickStats();
