@@ -372,8 +372,8 @@ window.addEventListener('error', function(e) {
     align-items: center;
     gap: 5px;
     padding: 8px 10px;
-    min-width: 72px;
-    max-width: 92px;
+    min-width: clamp(68px, 8vw, 100px);
+    max-width: clamp(88px, 10vw, 110px);
     cursor: grab;
     border-radius: 12px;
     background: var(--bg-card);
@@ -387,7 +387,7 @@ window.addEventListener('error', function(e) {
   .footer-card:hover { background: var(--bg-hover); }
   .footer-card:active { transform: scale(.93); }
   .footer-card .fc-avatar {
-    width: 48px; height: 48px;
+    width: clamp(44px, 5vw, 56px); height: clamp(44px, 5vw, 56px);
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -412,7 +412,7 @@ window.addEventListener('error', function(e) {
     line-height: 1.1;
   }
   .footer-card .fc-status {
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
@@ -497,7 +497,7 @@ window.addEventListener('error', function(e) {
     border: 1px solid var(--border-subtle);
   }
   .quick-stat .val { font-family: var(--font-mono); font-weight: 700; font-size: 18px; }
-  .quick-stat .lbl { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; margin-top: 2px; }
+  .quick-stat .lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; margin-top: 2px; }
 
   /* Outcome buttons */
   .outcome-row {
@@ -549,9 +549,9 @@ window.addEventListener('error', function(e) {
     100% { opacity: 1; transform: scale(1); }
   }
   @keyframes celebratePulse {
-    0% { box-shadow: 0 0 0 0 rgba(52,211,153,.4); }
-    50% { box-shadow: 0 0 0 12px rgba(52,211,153,0); }
-    100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
+    0% { outline: 2px solid rgba(52,211,153,.4); outline-offset: 0; }
+    50% { outline: 2px solid rgba(52,211,153,0); outline-offset: 8px; }
+    100% { outline: 2px solid rgba(52,211,153,0); outline-offset: 0; }
   }
   @keyframes vendaGlow {
     0% { background-position: 200% center; }
@@ -757,10 +757,10 @@ window.addEventListener('error', function(e) {
         <span class="turno-switch-label" id="turnoSwitchLabel">OFF</span>
         <span class="turno-pulse-dot" id="turnoPulse"></span>
       </div>
-      <button class="btn btn-ghost" style="min-height:42px;padding:0 12px;font-size:14px" onclick="window._toggleTheme()" title="Modo claro/escuro">
+      <button class="btn btn-ghost" style="min-height:44px;padding:0 12px;font-size:14px" onclick="window._toggleTheme()" title="Modo claro/escuro">
         <i class="fa-solid fa-circle-half-stroke"></i>
       </button>
-      <button class="btn btn-ghost" style="min-height:42px;padding:0 12px;font-size:14px" onclick="handleLogout()" title="Sair">
+      <button class="btn btn-ghost" style="min-height:44px;padding:0 12px;font-size:14px" onclick="handleLogout()" title="Sair">
         <i class="fa-solid fa-right-from-bracket"></i>
       </button>
     </div>
@@ -1190,10 +1190,17 @@ function fireVendaCelebration() {
 }
 
 // ─── Epic Troca Achievement (≥ R$1.000) ───
+let _epicOverlay = null;
+let _epicRaf = null;
 function fireEpicTrocaAnimation(nome, valor) {
+  // Cancelar celebração anterior se existir
+  if (_epicRaf) { cancelAnimationFrame(_epicRaf); _epicRaf = null; }
+  if (_epicOverlay) { _epicOverlay.remove(); _epicOverlay = null; }
+
   playSound('venda'); // reuse triumph sound
 
   const overlay = document.createElement('div');
+  _epicOverlay = overlay;
   overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.75)';
 
   // Particle canvas behind the card
@@ -1234,7 +1241,6 @@ function fireEpicTrocaAnimation(nome, valor) {
       drift: (Math.random() - 0.5) * 0.5
     });
   }
-  let af;
   function animateSparkles() {
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     const t = performance.now() / 1000;
@@ -1250,16 +1256,16 @@ function fireEpicTrocaAnimation(nome, valor) {
       ctx.fill();
       ctx.globalAlpha = 1;
     });
-    af = requestAnimationFrame(animateSparkles);
+    _epicRaf = requestAnimationFrame(animateSparkles);
   }
   animateSparkles();
 
   // Auto-close after 6s
   setTimeout(() => {
-    cancelAnimationFrame(af);
+    if (_epicRaf) { cancelAnimationFrame(_epicRaf); _epicRaf = null; }
     overlay.style.transition = 'opacity .5s';
     overlay.style.opacity = '0';
-    setTimeout(() => overlay.remove(), 500);
+    setTimeout(() => { overlay.remove(); if (_epicOverlay === overlay) _epicOverlay = null; }, 500);
   }, 6000);
 }
 
@@ -1272,10 +1278,14 @@ function updateClock() {
   if (text !== _lastClockText) { _clockEl.textContent = text; _lastClockText = text; }
 }
 updateClock();
-const _clockInterval = setInterval(updateClock, 15000);
+let _clockInterval = setInterval(updateClock, 15000);
 
 // ─── Load vendedores ───
+let _loadingVendedores = false;
 async function loadVendedores() {
+  if (_loadingVendedores) return;
+  _loadingVendedores = true;
+  try {
   const vq = sb.from('vendedores').select('*').eq('ativo', true);
   if (tenantId) vq.eq('tenant_id', tenantId);
   const { data, error } = await vq.order('posicao_fila', { ascending: true, nullsFirst: false });
@@ -1306,6 +1316,9 @@ async function loadVendedores() {
     if (!v || (v.status !== 'pausa' && v.status !== 'fora')) delete saidaMotivos[id];
   });
   scheduleRender();
+  } finally {
+    _loadingVendedores = false;
+  }
 }
 
 // Batch render — evita múltiplos re-renders no mesmo frame
@@ -1510,10 +1523,8 @@ function cacheDragRects(container) {
 }
 
 function getDragAfterElement(container, y) {
-  // Usar cache se < 200ms (rects não mudam durante drag com scroll travado)
-  if (!_dragRectsCache || performance.now() - _dragRectsCacheTime > 200) {
-    cacheDragRects(container);
-  }
+  // Scroll travado durante drag = rects estáveis, cachear até drag terminar
+  if (!_dragRectsCache) cacheDragRects(container);
   return _dragRectsCache.reduce((closest, { el, rect }) => {
     const offset = y - rect.top - rect.height / 2;
     if (offset < 0 && offset > closest.offset) return { offset, element: el };
@@ -1631,7 +1642,7 @@ let _lastDropCheck = 0;
 
 window.onTouchDragStart = function(e) {
   const item = e.target.closest('.queue-item') || e.target.closest('.footer-card');
-  if (!item) return;
+  if (!item || item.closest('#activeList')) return; // ignora atend-cards (handled by initAtendDrag)
   touchDragId = item.dataset.id;
   touchDragEl = item;
   touchDragging = false;
@@ -1682,7 +1693,7 @@ window.onTouchDragStart = function(e) {
         background:var(--bg-card);
         width:${itemW}px;
         left:0;top:0;
-        transform:translate(${_ghostInitX}px,${_ghostInitY}px) scale(1.05);
+        transform:translate3d(${_ghostInitX}px,${_ghostInitY}px,0) scale(1.05);
       `;
       document.body.appendChild(touchGhost);
     }
@@ -1691,7 +1702,7 @@ window.onTouchDragStart = function(e) {
       // Mover ghost via transform (sem reflow)
       const gx = t.clientX - itemW / 2;
       const gy = t.clientY - 30;
-      touchGhost.style.transform = `translate(${gx}px,${gy}px) scale(1.05)`;
+      touchGhost.style.transform = `translate3d(${gx}px,${gy}px,0) scale(1.05)`;
 
       // Throttle drop zone detection (~60ms)
       const now = performance.now();
@@ -1776,6 +1787,7 @@ let _atendDragInit = false;
 let _atendDragId = null;
 let _atendDragGhost = null;
 let _atendTouchDragging = false;
+let _atendDragRafId = null;
 
 function initAtendDrag() {
   const activeList = document.getElementById('activeList');
@@ -1815,13 +1827,17 @@ function initAtendDrag() {
           background:var(--bg-card);
           width:${cardW}px;
           left:0;top:0;
-          transform:translate(${t.clientX - cardW/2}px,${t.clientY - 30}px) scale(1.05);
+          transform:translate3d(${t.clientX - cardW/2}px,${t.clientY - 30}px,0) scale(1.05);
         `;
         document.body.appendChild(_atendDragGhost);
       }
 
       if (_atendTouchDragging && _atendDragGhost) {
-        _atendDragGhost.style.transform = `translate(${t.clientX - cardW/2}px,${t.clientY - 30}px) scale(1.05)`;
+        if (_atendDragRafId) cancelAnimationFrame(_atendDragRafId);
+        const gx = t.clientX - cardW/2, gy = t.clientY - 30;
+        _atendDragRafId = requestAnimationFrame(() => {
+          if (_atendDragGhost) _atendDragGhost.style.transform = `translate3d(${gx}px,${gy}px,0) scale(1.05)`;
+        });
 
         const elUnder = document.elementFromPoint(t.clientX, t.clientY);
         const overQueue = elUnder && (elUnder.id === 'queueList' || elUnder.closest('#queueList') || elUnder.id === 'queuePanel' || elUnder.closest('#queuePanel'));
@@ -1837,6 +1853,7 @@ function initAtendDrag() {
       document.removeEventListener('touchmove', onMove);
       document.removeEventListener('touchend', onEnd);
       document.body.style.overflow = '';
+      if (_atendDragRafId) { cancelAnimationFrame(_atendDragRafId); _atendDragRafId = null; }
       if (_atendDragGhost) { _atendDragGhost.remove(); _atendDragGhost = null; }
       card.style.opacity = '1';
       _queueList.style.background = '';
@@ -2254,10 +2271,10 @@ window.handleProximoCliente = async function() {
 };
 
 function renderActiveAtendimentos() {
-  clearInterval(timerInterval);
+  clearInterval(timerInterval); timerInterval = null;
   const list = document.getElementById('activeList');
   const label = document.getElementById('activeLabel');
-  list.querySelectorAll('.atend-card').forEach(c => c.remove());
+  list.replaceChildren(); // limpa todos os filhos de uma vez
 
   const countEl = document.getElementById('activeCount');
   if (countEl) countEl.textContent = activeAtendimentos.length + ' ativo' + (activeAtendimentos.length !== 1 ? 's' : '');
@@ -2273,7 +2290,6 @@ function renderActiveAtendimentos() {
     }
     return;
   }
-  list.querySelectorAll('.service-empty').forEach(e => e.remove());
   label.style.display = 'block';
 
   activeAtendimentos.forEach(atend => {
@@ -2298,7 +2314,7 @@ function renderActiveAtendimentos() {
 
   // Timer global para todos os atendimentos (painel + sidebar)
   // Cache de referências DOM para evitar queries a cada segundo
-  clearInterval(timerInterval);
+  clearInterval(timerInterval); timerInterval = null;
   const _timerRefs = new Map();
   activeAtendimentos.forEach(atend => {
     _timerRefs.set(atend.id, {
@@ -2335,7 +2351,7 @@ function removeAtendimento(atendId) {
   const card = document.getElementById('atend-' + atendId);
   if (card) card.remove();
   if (activeAtendimentos.length === 0) {
-    clearInterval(timerInterval);
+    clearInterval(timerInterval); timerInterval = null;
     document.getElementById('activeLabel').style.display = 'none';
   }
 }
@@ -2343,7 +2359,7 @@ function removeAtendimento(atendId) {
 // ─── Cancelar atendimento (voltar vendedor à posição original) ───
 window.cancelarAtendimento = async function(atendId) {
   if (_actionLock) return;
-  // User already confirmed via outcome sheet
+  _actionLock = true;
   try {
     const atend = activeAtendimentos.find(a => a.id === atendId);
     if (!atend) return;
@@ -2375,6 +2391,8 @@ window.cancelarAtendimento = async function(atendId) {
     toast('Atendimento cancelado — vendedor voltou ao 1º da fila', 'info');
   } catch (e) {
     toast('Erro ao cancelar: ' + e.message, 'error');
+  } finally {
+    _actionLock = false;
   }
 };
 
@@ -2942,7 +2960,7 @@ let _lastActivity = Date.now();
 ['click','keydown','touchstart','scroll'].forEach(evt => {
   document.addEventListener(evt, () => { _lastActivity = Date.now(); }, { passive: true });
 });
-const _sessionInterval = setInterval(() => {
+let _sessionInterval = setInterval(() => {
   if (Date.now() - _lastActivity > 30 * 60 * 1000) {
     toast('Sessão expirada por inatividade', 'warning');
     setTimeout(() => logout(), 1500);
@@ -2975,8 +2993,10 @@ sb.channel(_rtChannelName)
 // ─── Visibility: pause timer when hidden, refetch on return ───
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
-    // Pausar timer para economizar bateria do tablet
-    clearInterval(timerInterval);
+    // Pausar todos os intervals para economizar bateria do tablet
+    clearInterval(timerInterval); timerInterval = null;
+    clearInterval(_clockInterval); _clockInterval = null;
+    clearInterval(_sessionInterval); _sessionInterval = null;
     // Limpar drag state caso tab mude no meio de um drag
     if (touchDragging) {
       if (touchGhost) { touchGhost.remove(); touchGhost = null; }
@@ -2988,9 +3008,12 @@ document.addEventListener('visibilitychange', () => {
       _dragRectsCache = null;
     }
   } else {
-    // Refetch e reconectar timer
+    // Refetch e reconectar timers
     loadVendedores();
     updateQuickStats();
+    updateClock();
+    _clockInterval = setInterval(updateClock, 15000);
+    _sessionInterval = setInterval(() => { if (currentTurno) updateQuickStats(); }, 60000);
     if (activeAtendimentos.length > 0) renderActiveAtendimentos(); // Re-cria timer
   }
 });
@@ -3020,7 +3043,7 @@ async function checkActiveAtendimentos() {
 window.addEventListener('beforeunload', () => {
   clearInterval(_clockInterval);
   clearInterval(_sessionInterval);
-  clearInterval(timerInterval);
+  clearInterval(timerInterval); timerInterval = null;
   clearTimeout(_rtVendTimer);
   clearTimeout(_rtAtendTimer);
   clearTimeout(_reconnectTimer);
@@ -3032,6 +3055,17 @@ window.addEventListener('beforeunload', () => {
 // Para cada deploy, basta adicionar um objeto { version, date, items[] } no início.
 // O popup aparece automaticamente 1x por versão para cada usuário.
 const APP_CHANGELOG = [
+  {
+    version: '2.5.0',
+    date: '2026-03-28',
+    items: [
+      { icon: 'fa-bug', text: 'Correções de bugs: race condition no drag, double-tap cancelar, timer leak' },
+      { icon: 'fa-bolt', text: 'Performance: limpeza de DOM otimizada, animações via GPU, cache de drag melhorado' },
+      { icon: 'fa-battery-half', text: 'Economia de bateria: intervals pausam quando tab está oculta' },
+      { icon: 'fa-expand', text: 'Responsivo: breakpoints para tablets pequenos e grandes, landscape otimizado' },
+      { icon: 'fa-hand-pointer', text: 'Touch targets mínimo 44px, fontes mínimo 10px para acessibilidade' }
+    ]
+  },
   {
     version: '2.4.0',
     date: '2026-03-28',

@@ -115,7 +115,7 @@ body {
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
-  transition: all var(--transition);
+  transition: background-color var(--transition), border-color var(--transition), opacity var(--transition), transform var(--transition);
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
@@ -287,9 +287,11 @@ body {
   pointer-events: none;
   transition: opacity .2s;
 }
+.bottom-sheet-overlay { will-change: opacity; }
 .bottom-sheet-overlay.open { opacity: 1; pointer-events: auto; touch-action: manipulation; }
 
 .bottom-sheet {
+  will-change: transform;
   position: fixed;
   bottom: 0;
   left: 0;
@@ -325,7 +327,7 @@ body {
   border: 1px solid var(--border-subtle);
   background: var(--bg-surface);
   cursor: pointer;
-  transition: all var(--transition);
+  transition: background-color var(--transition), border-color var(--transition), transform var(--transition);
   min-height: var(--touch-min);
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -467,6 +469,33 @@ body {
   .kpi-label { font-size: 12px; }
 }
 
+/* Tablets pequenos (< 768px, ex: Galaxy Tab A7 portrait) */
+@media (max-width: 767px) {
+  .btn { min-height: 44px; font-size: 13px; }
+  .btn-xl { min-height: 64px; font-size: 18px; }
+  .input { min-height: 44px; font-size: 14px; }
+  .timer-display { font-size: 40px; }
+  .kpi-value { font-size: 28px; }
+  .queue-item { padding: 10px 12px; gap: 10px; }
+  .queue-position { width: 26px; height: 26px; font-size: 11px; }
+  .motivo-option { padding: 14px 16px; min-height: 48px; }
+}
+
+/* Tablets grandes (1281px+, ex: Tab S7+, Tab S8 Ultra) */
+@media (min-width: 1281px) {
+  .btn-xl { min-height: 84px; font-size: 22px; }
+  .timer-display { font-size: 64px; }
+  .kpi-value { font-size: 40px; }
+  .queue-item { padding: 16px 20px; gap: 16px; }
+  .motivo-option { padding: 20px 24px; min-height: 60px; }
+}
+
+/* Landscape: bottom sheets mais baixos */
+@media (orientation: landscape) {
+  .bottom-sheet { max-height: 70vh; padding: 16px 24px; }
+  .bottom-sheet-handle { margin-bottom: 12px; }
+}
+
 /* ─── Prevent text selection on touch elements ─── */
 .btn, .status-pill, .queue-item, .motivo-option, .outcome-btn, .pin-input {
   -webkit-user-select: none;
@@ -477,4 +506,7 @@ body {
 @supports (padding: env(safe-area-inset-bottom)) {
   .t-footer { padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
   .bottom-sheet { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+}
+@supports (padding: env(safe-area-inset-top)) {
+  .t-header { padding-top: calc(14px + env(safe-area-inset-top)); }
 }
