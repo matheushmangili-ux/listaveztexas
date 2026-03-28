@@ -1885,9 +1885,9 @@ window.closeOutcomeSheet = function() {
 };
 
 window.selectOutcome = function(resultado) {
-  closeOutcomeSheet();
-  if (!_outcomeAtendId) return;
   const atendId = _outcomeAtendId;
+  closeOutcomeSheet();
+  if (!atendId) return;
   if (resultado === 'cancelar') {
     cancelarAtendimento(atendId);
   } else {
