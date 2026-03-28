@@ -15,34 +15,39 @@
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').then(reg => {
-    if (reg.waiting) window._showUpdateBanner(reg.waiting);
+    if (reg.waiting) window._showUpdateBanner();
     reg.addEventListener('updatefound', () => {
       const nw = reg.installing;
       if (!nw) return;
       nw.addEventListener('statechange', () => {
-        if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-          window._showUpdateBanner(nw);
-        }
+        if (nw.state === 'installed' && navigator.serviceWorker.controller) window._showUpdateBanner();
       });
     });
+    setInterval(() => reg.update(), 5 * 60 * 1000);
   }).catch(() => {});
-  let _refreshing = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (_refreshing) return;
-    _refreshing = true;
-    location.reload();
-  });
 }
-window._showUpdateBanner = function(worker) {
+(function() {
+  let _pageHash = null;
+  async function checkForUpdate() {
+    try {
+      const res = await fetch('/dashboard.html', { cache: 'no-store', headers: { 'Range': 'bytes=0-512' } });
+      const text = await res.text();
+      const hash = text.length + '|' + text.slice(0, 200);
+      if (_pageHash === null) { _pageHash = hash; return; }
+      if (hash !== _pageHash) window._showUpdateBanner();
+    } catch(e) {}
+  }
+  setTimeout(checkForUpdate, 3000);
+  setInterval(checkForUpdate, 2 * 60 * 1000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(checkForUpdate, 1000); });
+})();
+window._showUpdateBanner = function() {
   if (document.getElementById('updateBanner')) return;
   const banner = document.createElement('div');
   banner.id = 'updateBanner';
   banner.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--accent,#facc15);color:#09090B;padding:12px 20px;border-radius:12px;font-family:Inter,sans-serif;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;box-shadow:0 4px 24px rgba(0,0,0,.3);cursor:pointer;animation:slideUpBanner .3s ease';
   banner.innerHTML = '<i class="fa-solid fa-arrow-rotate-right"></i> Atualização disponível — clique para atualizar';
-  banner.addEventListener('click', () => {
-    banner.textContent = 'Atualizando...';
-    worker.postMessage({ type: 'SKIP_WAITING' });
-  });
+  banner.addEventListener('click', () => { banner.textContent = 'Atualizando...'; location.reload(); });
   document.body.appendChild(banner);
   const style = document.createElement('style');
   style.textContent = '@keyframes slideUpBanner{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}';
