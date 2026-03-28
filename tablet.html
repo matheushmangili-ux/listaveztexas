@@ -240,7 +240,7 @@ window.addEventListener('error', function(e) {
     position: absolute;
     inset: 0;
     border-radius: 13px;
-    background: radial-gradient(ellipse at 30% 50%, rgba(52,211,153,.0) 0%, transparent 70%);
+    background: radial-gradient(ellipse at 30% 50%, rgba(239,68,68,.08) 0%, transparent 70%);
     transition: background .3s;
     pointer-events: none;
   }
@@ -277,22 +277,24 @@ window.addEventListener('error', function(e) {
     font-size: 10px;
     font-weight: 800;
     letter-spacing: .06em;
-    color: var(--text-muted);
+    color: #ef4444;
     transition: color .3s;
     min-width: 24px;
   }
-  /* Pulse dot — bolinha verde piscando quando turno ON */
+  /* Pulse dot — vermelho piscando quando OFF, verde quando ON */
   .turno-pulse-dot {
-    display: none;
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #22c55e;
-    box-shadow: 0 0 6px rgba(34,197,94,.6);
+    background: #ef4444;
+    box-shadow: 0 0 6px rgba(239,68,68,.6);
     animation: turno-pulse 1.5s ease-in-out infinite;
     flex-shrink: 0;
   }
-  .turno-switch.on .turno-pulse-dot { display: block; }
+  .turno-switch.on .turno-pulse-dot {
+    background: #22c55e;
+    box-shadow: 0 0 6px rgba(34,197,94,.6);
+  }
   @keyframes turno-pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: .4; transform: scale(.75); }
@@ -325,7 +327,7 @@ window.addEventListener('error', function(e) {
     background: linear-gradient(180deg, rgba(255,255,255,.4) 0%, rgba(255,255,255,.1) 100%);
   }
   .turno-switch.on .turno-switch-label {
-    color: var(--text-secondary);
+    color: #22c55e;
   }
   .turno-switch:hover .turno-switch-track {
     border-color: rgba(255,255,255,.14);
