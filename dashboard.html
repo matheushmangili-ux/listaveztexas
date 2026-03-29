@@ -637,9 +637,9 @@ window._showUpdateBanner = function() {
     <div class="dash-header-controls">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <div class="period-tabs" id="periodTabs">
-          <button data-period="hoje" class="active" onclick="setPeriod('hoje')">Hoje</button>
+          <button data-period="hoje" onclick="setPeriod('hoje')">Hoje</button>
           <button data-period="ontem" onclick="setPeriod('ontem')">Ontem</button>
-          <button data-period="semana" onclick="setPeriod('semana')">Semana</button>
+          <button data-period="semana" class="active" onclick="setPeriod('semana')">Semana</button>
           <button data-period="mes" onclick="setPeriod('mes')">Mês</button>
           <button data-period="custom" onclick="setPeriod('custom')" title="Data específica"><i class="fa-solid fa-calendar-day" style="font-size:10px"></i></button>
         </div>
@@ -926,7 +926,7 @@ if (!user) {
 const tenantId = user ? getTenantId(user) : null;
 
 let charts = {};
-let currentPeriod = 'hoje';
+let currentPeriod = 'semana';
 let filterSetor = '';
 let filterVendedor = '';
 
@@ -1371,14 +1371,39 @@ async function loadMotivos(range) {
 
 // ─── Hourly flow chart ───
 async function loadHourly(range) {
+  const isMultiDay = currentPeriod === 'semana' || currentPeriod === 'mes';
   const { data, error } = await sb.rpc('get_hourly_flow', { p_inicio: range.start, p_fim: range.end });
   if (error) { toast('Erro ao carregar fluxo: ' + error.message, 'error'); return; }
+
+  // For multi-day, also load today's data separately
+  let todayHourlyData = null;
+  if (isMultiDay) {
+    const todayR = todayRange();
+    const { data: td } = await sb.rpc('get_hourly_flow', { p_inicio: todayR.start, p_fim: todayR.end });
+    todayHourlyData = td;
+  }
+
   const ctx = document.getElementById('chartHourly');
   if (charts.hourly) charts.hourly.destroy();
 
+  // Calculate number of days in range for averaging
+  const rangeStart = new Date(range.start);
+  const rangeEnd = new Date(range.end);
+  const numDays = Math.max(1, Math.round((rangeEnd - rangeStart) / (1000 * 60 * 60 * 24)));
+
   const hours = (data || []).map(d => d.hora + 'h');
-  const atend = (data || []).map(d => d.atendimentos);
-  const vendas = (data || []).map(d => d.vendas);
+  const atendRaw = (data || []).map(d => d.atendimentos);
+  const vendasRaw = (data || []).map(d => d.vendas);
+  // For multi-day, show daily average; for single day, show totals
+  const atend = isMultiDay ? atendRaw.map(v => Math.round(v / numDays * 10) / 10) : atendRaw;
+  const vendas = isMultiDay ? vendasRaw.map(v => Math.round(v / numDays * 10) / 10) : vendasRaw;
+
+  // Build today overlay for multi-day
+  let todayAtendByHour = {};
+  if (todayHourlyData) {
+    todayHourlyData.forEach(d => { todayAtendByHour[d.hora + 'h'] = d.atendimentos; });
+  }
+  const todayOverlay = isMultiDay ? hours.map(h => todayAtendByHour[h] || 0) : null;
 
   // Sparklines nos KPI cards (cor dinâmica via comparativo)
   const losses = (data || []).map(d => (d.atendimentos || 0) - (d.vendas || 0));
@@ -1396,7 +1421,7 @@ async function loadHourly(range) {
       labels: hours,
       datasets: [
         {
-          label: 'Atendimentos', data: atend,
+          label: isMultiDay ? 'Média Atendimentos' : 'Atendimentos', data: atend,
           backgroundColor: atend.map((v, i) => i === peakIdx ? '#3B82F6' : 'rgba(59,130,246,.4)'),
           borderColor: 'transparent',
           borderWidth: 0,
@@ -1404,13 +1429,29 @@ async function loadHourly(range) {
           barPercentage: 0.7, categoryPercentage: 0.8
         },
         {
-          label: 'Vendas', data: vendas,
+          label: isMultiDay ? 'Média Vendas' : 'Vendas', data: vendas,
           backgroundColor: 'rgba(52,211,153,.4)',
           borderColor: 'transparent',
           borderWidth: 0,
           borderRadius: 6,
           barPercentage: 0.7, categoryPercentage: 0.8
-        }
+        },
+        ...(todayOverlay ? [{
+          label: 'Hoje',
+          data: todayOverlay,
+          type: 'line',
+          borderColor: '#E11D48',
+          backgroundColor: 'rgba(225,29,72,.08)',
+          borderWidth: 2.5,
+          pointRadius: todayOverlay.map(v => v > 0 ? 5 : 0),
+          pointBackgroundColor: '#E11D48',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointHoverRadius: 7,
+          tension: 0.3,
+          fill: true,
+          order: -1
+        }] : [])
       ]
     },
     plugins: [{
@@ -1431,7 +1472,7 @@ async function loadHourly(range) {
         c.font = "600 9px 'Inter'";
         c.fillStyle = isDarkTheme() ? 'rgba(250,204,21,.7)' : 'rgba(180,140,0,.7)';
         c.textAlign = 'right';
-        c.fillText('média ' + avgAtend, x.right, yPos - 4);
+        c.fillText(isMultiDay ? 'média/dia ' + avgAtend : 'média ' + avgAtend, x.right, yPos - 4);
         c.restore();
       }
     }],
@@ -1857,14 +1898,14 @@ async function loadTempoMeta(range, cachedData) {
 
 // ─── Trend Line (evolução diária) ───
 async function loadTrend(range) {
-  // Para trend, usar range de 30 dias se período = hoje/ontem, senão usar o range selecionado
+  // Para trend, usar range mínimo de 7 dias para ter contexto visual
   let trendRange = range;
   if (currentPeriod === 'hoje' || currentPeriod === 'ontem' || currentPeriod === 'custom') {
     const end = new Date();
     end.setDate(end.getDate() + 1);
     end.setHours(0, 0, 0, 0);
     const start = new Date(end);
-    start.setDate(start.getDate() - 30);
+    start.setDate(start.getDate() - 7);
     trendRange = { start: start.toISOString(), end: end.toISOString() };
   }
   const { data, error } = await sb.rpc('get_daily_trend', { p_inicio: trendRange.start, p_fim: trendRange.end });
@@ -1873,13 +1914,25 @@ async function loadTrend(range) {
   if (charts.trend) charts.trend.destroy();
   if (!data || data.length === 0) { charts.trend = null; return; }
 
+  const todayStr = new Date().toISOString().split('T')[0];
   const labels = data.map(d => {
     const dt = new Date(d.dia + 'T12:00:00');
-    return dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    const label = dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    return d.dia === todayStr ? label + ' ★' : label;
   });
   const atend = data.map(d => d.total_atendimentos);
   const vendas = data.map(d => d.total_vendas);
   const conv = data.map(d => d.taxa_conversao || 0);
+  // Highlight today's point
+  const todayIdx = data.findIndex(d => d.dia === todayStr);
+  const pointRadiusAtend = data.map((d, i) => i === todayIdx ? 7 : 0);
+  const pointRadiusVendas = data.map((d, i) => i === todayIdx ? 7 : 0);
+  const pointRadiusConv = data.map((d, i) => i === todayIdx ? 6 : 0);
+  const pointBgAtend = data.map((d, i) => i === todayIdx ? '#3B82F6' : 'transparent');
+  const pointBgVendas = data.map((d, i) => i === todayIdx ? '#34D399' : 'transparent');
+  const pointBgConv = data.map((d, i) => i === todayIdx ? '#FBBF24' : 'transparent');
+  const pointBorderAtend = data.map((d, i) => i === todayIdx ? '#fff' : 'transparent');
+  const pointBorderVendas = data.map((d, i) => i === todayIdx ? '#fff' : 'transparent');
 
   // Meta line for conversion
   const metaConv = parseInt(localStorage.getItem('meta_conversao') || DEFAULT_METAS.conversao);
@@ -1929,21 +1982,24 @@ async function loadTrend(range) {
         {
           label: 'Atendimentos', data: atend, yAxisID: 'y',
           borderColor: '#3B82F6', backgroundColor: gradAtend,
-          borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 6,
+          borderWidth: 2.5, pointRadius: pointRadiusAtend, pointHoverRadius: 8,
+          pointBackgroundColor: pointBgAtend, pointBorderColor: pointBorderAtend, pointBorderWidth: 2,
           pointHoverBackgroundColor: '#3B82F6', pointHoverBorderColor: '#fff', pointHoverBorderWidth: 2,
           tension: 0.4, fill: true
         },
         {
           label: 'Vendas', data: vendas, yAxisID: 'y',
           borderColor: '#34D399', backgroundColor: gradVendas,
-          borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 6,
+          borderWidth: 2.5, pointRadius: pointRadiusVendas, pointHoverRadius: 8,
+          pointBackgroundColor: pointBgVendas, pointBorderColor: pointBorderVendas, pointBorderWidth: 2,
           pointHoverBackgroundColor: '#34D399', pointHoverBorderColor: '#fff', pointHoverBorderWidth: 2,
           tension: 0.4, fill: true
         },
         {
           label: 'Conversão %', data: conv, yAxisID: 'y1',
           borderColor: '#FBBF24', backgroundColor: 'transparent',
-          borderWidth: 2, borderDash: [6, 3], pointRadius: 0, pointHoverRadius: 5,
+          borderWidth: 2, borderDash: [6, 3], pointRadius: pointRadiusConv, pointHoverRadius: 7,
+          pointBackgroundColor: pointBgConv,
           pointHoverBackgroundColor: '#FBBF24',
           tension: 0.4, fill: false
         }
@@ -1976,7 +2032,17 @@ async function loadTrend(range) {
       scales: {
         x: {
           grid: { display: false },
-          ticks: { font: { size: 9, weight: 600 }, color: chartColors().text, maxRotation: 45, autoSkipPadding: 8 }
+          ticks: {
+            font: (ctx2) => {
+              const label = ctx2.tick?.label || '';
+              return label.includes('★') ? { size: 10, weight: 800 } : { size: 9, weight: 600 };
+            },
+            color: (ctx2) => {
+              const label = ctx2.tick?.label || '';
+              return label.includes('★') ? (isDarkTheme() ? '#fff' : '#18181B') : chartColors().text;
+            },
+            maxRotation: 45, autoSkipPadding: 8
+          }
         },
         y: {
           beginAtZero: true, position: 'left',
@@ -2316,13 +2382,14 @@ function updateTimestamp() { if (_lastUpdateEl) _lastUpdateEl.textContent = '· 
 // ─── Changelog versionado (mesma lista do tablet — adicione novas entradas no TOPO) ───
 const APP_CHANGELOG = [
   {
-    version: '3.4.0',
+    version: '3.5.0',
     date: '2026-03-29',
     items: [
-      { icon: 'fa-mug-hot', text: 'Pausas: registro individual com motivo, horário e duração — "Dia Finalizado" não conta como pausa' },
-      { icon: 'fa-file-export', text: 'Botão Exportar com visual padronizado (mesmo estilo do Aplicar)' },
-      { icon: 'fa-circle-dot', text: 'Indicador On Time com efeito glow pulsante restaurado' },
-      { icon: 'fa-border-none', text: 'Linha divisória removida entre On Time e marquee' }
+      { icon: 'fa-calendar-week', text: 'Período padrão agora é "Semana" — gráficos mostram últimos 7 dias com mais contexto' },
+      { icon: 'fa-chart-line', text: 'Tendência: ponto de hoje em destaque com ★ e bolinha maior' },
+      { icon: 'fa-chart-bar', text: 'Fluxo por Hora: em multi-dia mostra média/dia + linha vermelha do hoje' },
+      { icon: 'fa-mug-hot', text: 'Pausas: registro individual com motivo, horário e duração' },
+      { icon: 'fa-file-export', text: 'Botão Exportar padronizado + On Time com efeito glow' }
     ]
   },
   {
