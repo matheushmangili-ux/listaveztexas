@@ -30,8 +30,8 @@
   --danger-bg: rgba(248,113,113,.08);
   --info: #60A5FA;
   --info-bg: rgba(96,165,250,.06);
-  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+  --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Space Mono', 'SF Mono', monospace;
   --radius: 6px;
   --radius-sm: 4px;
   --radius-lg: 8px;
