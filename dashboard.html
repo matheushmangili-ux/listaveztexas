@@ -1694,7 +1694,7 @@ async function loadScatter(range, cachedData) {
     x: r.total_atendimentos || 0,
     y: r.taxa_conversao || 0,
     label: (r.apelido || r.nome || '').split(' ')[0],
-    r: Math.max(6, Math.min(18, 6 + ((r.total_atendimentos || 0) / maxAtend) * 12))
+    r: Math.max(8, Math.min(22, 8 + ((r.total_atendimentos || 0) / maxAtend) * 14))
   }));
 
   charts.scatter = new Chart(ctx, {
@@ -1750,21 +1750,24 @@ async function loadScatter(range, cachedData) {
         datalabels: {
           display: true,
           color: chartColors().textStrong,
-          font: { weight: 600, size: 10 },
-          anchor: 'end', align: 'top', offset: 2,
+          font: { weight: 700, size: 11 },
+          anchor: 'end', align: 'top', offset: 4,
           formatter: (val, ctx2) => ctx2.dataset.data[ctx2.dataIndex].label
         }
       },
+      layout: { padding: { top: 20, right: 20, bottom: 4, left: 4 } },
       scales: {
         x: {
-          title: { display: true, text: 'VOLUME', font: { size: 9, weight: 700 }, color: chartColors().textMuted, padding: 4 },
+          title: { display: true, text: 'VOLUME (ATENDIMENTOS)', font: { size: 10, weight: 700 }, color: chartColors().textMuted, padding: 6 },
           grid: { color: chartColors().grid, drawBorder: false },
-          ticks: { font: { size: 11, weight: 500 }, color: chartColors().text }
+          ticks: { font: { size: 11, weight: 500 }, color: chartColors().text, stepSize: 1, precision: 0 },
+          beginAtZero: true,
+          suggestedMax: Math.max(...points.map(p => p.x), 3) + 1
         },
         y: {
-          title: { display: true, text: 'CONVERSÃO %', font: { size: 9, weight: 700 }, color: chartColors().textMuted, padding: 4 },
+          title: { display: true, text: 'CONVERSÃO %', font: { size: 10, weight: 700 }, color: chartColors().textMuted, padding: 6 },
           grid: { color: chartColors().grid, drawBorder: false },
-          ticks: { font: { size: 11, weight: 500 }, callback: v => v + '%', color: chartColors().text },
+          ticks: { font: { size: 11, weight: 500 }, callback: v => v + '%', color: chartColors().text, stepSize: 10 },
           beginAtZero: true, max: 100
         }
       }
