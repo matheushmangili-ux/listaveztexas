@@ -74,9 +74,10 @@ body {
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.2); }
 
 /* ─── Typography ─── */
 .font-display { font-family: var(--font-mono); letter-spacing: -.025em; }
@@ -338,35 +339,67 @@ body {
 .kpi-card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: 24px;
+  border-radius: 14px;
+  padding: 20px;
   position: relative;
-  transition: border-color 150ms ease, box-shadow 150ms ease;
-  box-shadow: 0 1px 3px rgba(0,0,0,.1);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,.12);
 }
 .kpi-card:hover {
   border-color: var(--border-medium);
-  box-shadow: 0 4px 12px rgba(0,0,0,.18);
+  box-shadow: 0 4px 20px rgba(0,0,0,.3);
 }
 .kpi-value {
-  font-family: var(--font-mono);
-  font-weight: 700;
-  font-size: 32px;
-  letter-spacing: -.025em;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 2rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
   line-height: 1.1;
-  color: #fff;
+  color: var(--text-primary);
+  margin-bottom: 6px;
 }
 .kpi-label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: .06em;
-  color: var(--text-secondary);
-  margin-bottom: 10px;
+  letter-spacing: 1.5px;
+  color: rgba(255,255,255,.45);
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
   gap: 6px;
 }
+.kpi-label i { font-size: 14px; opacity: .6; }
+/* Variation badge pills */
+.kpi-compare .up {
+  display: inline-block;
+  background: rgba(52,211,153,.12);
+  color: #34D399;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.kpi-compare .down {
+  display: inline-block;
+  background: rgba(248,113,113,.12);
+  color: #F87171;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.kpi-compare .neutral {
+  display: inline-block;
+  background: rgba(148,163,184,.1);
+  color: #94A3B8;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+[data-theme="light"] .kpi-label { color: rgba(0,0,0,.45); }
 
 /* ─── Animations ─── */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
