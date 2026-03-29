@@ -753,6 +753,10 @@ window._showUpdateBanner = function() {
   <!-- Footer -->
   <footer style="text-align:center;margin-top:32px;padding:16px 0;border-top:1px solid var(--border-subtle)">
     <p style="font-size:10px;color:var(--text-muted);letter-spacing:.15em;text-transform:uppercase;font-weight:600">Minha Vez v3.1</p>
+    <p id="tenantSlugFooter" style="margin-top:8px;font-size:10px;color:var(--text-muted);cursor:pointer;display:none" title="Clique para copiar seu ID de suporte">
+      <i class="fa-solid fa-copy" style="margin-right:4px;opacity:.5"></i>
+      ID: <span id="tenantSlugValue"></span>
+    </p>
   </footer>
 </div>
 
@@ -799,7 +803,7 @@ window._showUpdateBanner = function() {
 import { getSupabase } from '/js/supabase-config.js';
 import { requireRole, logout } from '/js/auth.js';
 import { STATUS_CONFIG, MOTIVOS, todayRange, yesterdayRange, weekRange, monthRange, initials, toast, initTheme, toggleTheme } from '/js/utils.js';
-import { loadTenant, applyBranding, tenantPath, getTenant } from '/js/tenant.js';
+import { loadTenant, applyBranding, tenantPath, getTenant, getSlug } from '/js/tenant.js';
 import { getTenantId } from '/js/auth.js';
 initTheme();
 
@@ -822,6 +826,17 @@ if (tenant) {
     } else {
       headerLogo.textContent = (tenant.nome_loja || 'MV').substring(0, 2).toUpperCase();
     }
+  }
+  // Show tenant slug in footer for support
+  const slugEl = document.getElementById('tenantSlugFooter');
+  const slugVal = document.getElementById('tenantSlugValue');
+  const slug = getSlug();
+  if (slugEl && slugVal && slug) {
+    slugVal.textContent = slug;
+    slugEl.style.display = '';
+    slugEl.addEventListener('click', () => {
+      navigator.clipboard.writeText(slug).then(() => toast('ID copiado!', 'success')).catch(() => {});
+    });
   }
 }
 
