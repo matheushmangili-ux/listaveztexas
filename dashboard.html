@@ -960,9 +960,8 @@ Chart.defaults.font.weight = 500;
 Chart.defaults.responsive = true;
 Chart.defaults.maintainAspectRatio = false;
 Chart.defaults.animation = { duration: 500, easing: 'easeOutQuart' };
-// Datalabels: keep registered but display:false by default
-// Charts that need labels override display in their own config
-Chart.defaults.set('plugins.datalabels', { display: false });
+// Datalabels: globally off, charts opt-in via their own datalabels config
+Chart.defaults.plugins.datalabels.display = false;
 
 // ─── Theme-aware chart colors ───
 function isDarkTheme() {
@@ -988,23 +987,22 @@ function applyChartTheme() {
   const c = chartColors();
   Chart.defaults.color = c.text;
   Chart.defaults.borderColor = c.grid;
-  Chart.defaults.set('plugins.tooltip', {
-    enabled: true,
-    backgroundColor: c.tooltipBg,
-    titleColor: c.tooltipTitle,
-    bodyColor: c.tooltipBody,
-    borderColor: c.tooltipBorder,
-    borderWidth: 1,
-    cornerRadius: 10,
-    titleFont: { weight: 600, size: 13 },
-    bodyFont: { weight: 500, size: 12 },
-    padding: 12,
-    displayColors: true,
-    boxWidth: 8,
-    boxHeight: 8,
-    boxPadding: 6,
-    usePointStyle: true
-  });
+  const tt = Chart.defaults.plugins.tooltip;
+  tt.enabled = true;
+  tt.backgroundColor = c.tooltipBg;
+  tt.titleColor = c.tooltipTitle;
+  tt.bodyColor = c.tooltipBody;
+  tt.borderColor = c.tooltipBorder;
+  tt.borderWidth = 1;
+  tt.cornerRadius = 10;
+  tt.titleFont = { weight: 600, size: 13 };
+  tt.bodyFont = { weight: 500, size: 12 };
+  tt.padding = 12;
+  tt.displayColors = true;
+  tt.boxWidth = 8;
+  tt.boxHeight = 8;
+  tt.boxPadding = 6;
+  tt.usePointStyle = true;
 }
 applyChartTheme();
 // Chart palette
@@ -1292,9 +1290,10 @@ async function loadMotivos(range) {
 
   const totalMotivos = values.reduce((a, b) => a + b, 0);
   if (totalMotivos === 0) {
-    ctx.parentElement.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-muted);gap:8px"><i class="fa-solid fa-circle-check" style="font-size:32px;color:var(--success);opacity:.3"></i><span style="font-size:13px;font-weight:600">Nenhuma perda registrada</span><span style="font-size:10px">Todos os atendimentos convertidos!</span></div>';
+    ctx.style.display = 'none';
     return;
   }
+  ctx.style.display = '';
   const maxIdx = values.indexOf(Math.max(...values));
   // Helper: hex to rgba
   function hexAlpha(hex, a) {
@@ -1397,12 +1396,9 @@ async function loadHourly(range) {
   const todayHourlyData = isMultiDay ? (results[1]?.data || null) : null;
 
   const ctx = document.getElementById('chartHourly');
-  if (charts.hourly) charts.hourly.destroy();
-  if (!data || data.length === 0) {
-    charts.hourly = null;
-    ctx.parentElement.innerHTML = '<canvas id="chartHourly"></canvas><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-muted);gap:8px"><i class="fa-solid fa-chart-bar" style="font-size:32px;opacity:.3"></i><span style="font-size:13px;font-weight:600">Sem fluxo no período</span></div>';
-    return;
-  }
+  if (!ctx) return;
+  if (charts.hourly) { charts.hourly.destroy(); charts.hourly = null; }
+  if (!data || data.length === 0) { return; }
 
   // Calculate number of days in range for averaging
   const rangeStart = new Date(range.start);
@@ -1850,9 +1846,10 @@ async function loadTempoMeta(range, cachedData) {
   const filtered = (data || []).filter(r => (r.tempo_medio_min || 0) > 0);
   if (filtered.length === 0) {
     charts.tempoMeta = null;
-    ctx.parentElement.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-muted);gap:8px"><i class="fa-solid fa-clock" style="font-size:32px;opacity:.3"></i><span style="font-size:13px;font-weight:600">Sem dados de tempo</span><span style="font-size:10px">Nenhum atendimento finalizado no período</span></div>';
+    ctx.style.display = 'none';
     return;
   }
+  ctx.style.display = '';
 
   const names = filtered.map(r => (r.apelido || r.nome || '?').split(' ')[0]);
   const tempos = filtered.map(r => r.tempo_medio_min || 0);
