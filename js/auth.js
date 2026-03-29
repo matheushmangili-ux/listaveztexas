@@ -35,10 +35,8 @@ export async function loginWithPin(pin) {
     }
     return data.user;
   }
-  // Fallback: legacy PIN login (pin_XXXX@minhavez.local)
-  const email = `pin_${pin}@minhavez.local`;
-  const password = `pin_${pin}_texas`;
-  return login(email, password);
+  // No slug = no tenant context, PIN login not possible
+  throw new Error('Contexto de loja não encontrado. Acesse pela URL correta.');
 }
 
 export async function logout() {
