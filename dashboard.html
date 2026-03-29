@@ -1146,10 +1146,16 @@ async function loadAll() {
   const prevRange = getPrevRange();
   const hasFilter = !!(filterSetor || filterVendedor);
   // Carregar ranking + KPIs em paralelo (são independentes)
-  const [rankRes, kpiRes] = await Promise.all([
-    sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end }),
-    hasFilter ? Promise.resolve(null) : loadKPIs(range, prevRange)
-  ]);
+  let rankRes;
+  try {
+    [rankRes] = await Promise.all([
+      sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end }),
+      hasFilter ? Promise.resolve(null) : loadKPIs(range, prevRange)
+    ]);
+  } catch (fetchErr) {
+    toast('Erro de conexão. Verifique sua internet e recarregue.', 'error');
+    return;
+  }
   if (rankRes.error) { toast('Erro ao carregar ranking: ' + rankRes.error.message, 'error'); }
   let cachedRanking = rankRes.data || [];
   // Aplicar filtros no ranking
@@ -1378,9 +1384,11 @@ async function loadHourly(range) {
   // For multi-day, also load today's data separately
   let todayHourlyData = null;
   if (isMultiDay) {
-    const todayR = todayRange();
-    const { data: td } = await sb.rpc('get_hourly_flow', { p_inicio: todayR.start, p_fim: todayR.end });
-    todayHourlyData = td;
+    try {
+      const todayR = todayRange();
+      const { data: td } = await sb.rpc('get_hourly_flow', { p_inicio: todayR.start, p_fim: todayR.end });
+      todayHourlyData = td;
+    } catch { /* ignore - today overlay is optional */ }
   }
 
   const ctx = document.getElementById('chartHourly');
