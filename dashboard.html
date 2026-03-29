@@ -801,7 +801,7 @@ window._showUpdateBanner = function() {
     </div>
     <div class="chart-card">
       <h3><i class="fa-solid fa-mug-hot" style="margin-right:6px;color:var(--warning)"></i>Pausas — Saídas da Fila</h3>
-      <div id="pauseStatsList">
+      <div id="pauseStatsList" style="max-height:340px;overflow-y:auto">
         <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>
       </div>
     </div>
@@ -1588,23 +1588,36 @@ async function loadRuptures(range) {
   </div>`).join('');
 }
 
-// ─── Pause Stats ───
+// ─── Pause Log (individual pauses) ───
 async function loadPauseStats(range) {
-  const { data, error } = await sb.rpc('get_pause_stats', { p_inicio: range.start, p_fim: range.end });
+  const { data, error } = await sb.rpc('get_pause_log', { p_inicio: range.start, p_fim: range.end });
   const el = document.getElementById('pauseStatsList');
   if (!el) return;
   if (error || !data || data.length === 0) {
     el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px"><i class="fa-solid fa-check-circle" style="font-size:20px;margin-bottom:8px;display:block;color:var(--success);opacity:.4"></i>Nenhuma pausa registrada</div>';
     return;
   }
-  const motivoLabels = { almoco: 'Almoço', banheiro: 'Banheiro', reuniao: 'Reunião', operacional: 'Operacional', finalizar: 'Fim do dia', outro: 'Outro' };
-  el.innerHTML = data.map(r => `<div class="rupture-item">
-    <div>
-      <div style="font-weight:600;font-size:13px">${r.nome}</div>
-      <div style="font-size:10px;color:var(--text-muted)">${r.total_pausas} pausa${r.total_pausas !== 1 ? 's' : ''} · ${Math.round(r.tempo_total_min || 0)}min total · ${motivoLabels[r.motivo_mais_comum] || r.motivo_mais_comum || '—'}</div>
-    </div>
-    <div class="rupture-count" style="color:var(--warning)">${Math.round(r.tempo_total_min || 0)}<span style="font-size:9px;font-weight:600">min</span></div>
-  </div>`).join('');
+  const motivoLabels = { almoco: 'Almoço', banheiro: 'Banheiro', reuniao: 'Reunião', operacional: 'Operacional', outro: 'Outro' };
+  const motivoIcons = { almoco: 'fa-utensils', banheiro: 'fa-restroom', reuniao: 'fa-people-group', operacional: 'fa-wrench', outro: 'fa-ellipsis' };
+  const motivoColors = { almoco: '#f59e0b', banheiro: '#60a5fa', reuniao: '#A1A1AA', operacional: '#8b5cf6', outro: '#64748b' };
+  el.innerHTML = data.map(r => {
+    const horaInicio = new Date(r.inicio).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const horaFim = r.fim ? new Date(r.fim).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : 'em pausa';
+    const dur = Math.round(r.duracao_min || 0);
+    const motLabel = motivoLabels[r.motivo] || r.motivo || '—';
+    const motIcon = motivoIcons[r.motivo] || 'fa-ellipsis';
+    const motColor = motivoColors[r.motivo] || '#64748b';
+    return `<div class="rupture-item">
+      <div style="display:flex;align-items:center;gap:10px">
+        <i class="fa-solid ${motIcon}" style="font-size:14px;color:${motColor};width:18px;text-align:center;flex-shrink:0"></i>
+        <div>
+          <div style="font-weight:600;font-size:13px">${r.vendedor_nome}</div>
+          <div style="font-size:10px;color:var(--text-muted)">${motLabel} · ${horaInicio} → ${horaFim}</div>
+        </div>
+      </div>
+      <div class="rupture-count" style="color:var(--warning)">${dur}<span style="font-size:9px;font-weight:600">min</span></div>
+    </div>`;
+  }).join('');
 }
 
 // ─── Floor (who's on now) — LED marquee ───
