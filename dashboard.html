@@ -69,13 +69,113 @@ window._showUpdateBanner = function() {
     margin: 0 auto;
     padding: 24px;
   }
+  /* ─── Header ─── */
   .dash-header {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg, 8px);
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .dash-header-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 28px;
-    flex-wrap: wrap;
+    padding: 16px 20px;
     gap: 12px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .dash-header-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+  .dash-header-logo {
+    width: 36px; height: 36px;
+    border-radius: var(--radius-sm);
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 800; font-size: 14px;
+    color: #fff;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .dash-header-logo img { width: 100%; height: 100%; object-fit: cover; }
+  .dash-header-title {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    line-height: 1.2;
+  }
+  .dash-header-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 1px;
+  }
+  .dash-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .dash-header-actions .header-btn {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all .15s ease;
+    position: relative;
+  }
+  .dash-header-actions .header-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
+  .dash-header-actions .header-btn:active {
+    transform: scale(.92);
+  }
+  .dash-header-actions .header-btn-label {
+    display: none;
+    position: absolute;
+    bottom: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+    background: var(--bg-elevated);
+    padding: 2px 6px;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .dash-header-actions .header-btn:hover .header-btn-label { display: block; }
+  .header-btn-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--border-subtle);
+    margin: 0 4px;
+  }
+  .dash-header-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    gap: 12px;
+    flex-wrap: wrap;
+    background: var(--bg-surface);
   }
   .kpi-grid {
     display: grid;
@@ -317,53 +417,72 @@ window._showUpdateBanner = function() {
 <div class="dash-layout">
   <!-- Header -->
   <div class="dash-header">
-    <div style="display:flex;align-items:center;gap:14px">
-      <div>
-        <h1 style="font-family:var(--font-mono);font-size:18px;font-weight:700;letter-spacing:-.025em">Minha Vez <span style="font-weight:500;color:var(--text-muted);font-size:14px">Dashboard</span></h1>
-        <p style="font-size:11px;color:var(--text-muted);font-weight:500"><span id="dashDate"></span></p>
-      </div>
-    </div>
-    <div style="display:flex;align-items:center;gap:12px">
-      <div class="period-tabs" id="periodTabs">
-        <button class="active" onclick="setPeriod('hoje')">Hoje</button>
-        <button onclick="setPeriod('ontem')">Ontem</button>
-        <button onclick="setPeriod('semana')">Semana</button>
-        <button onclick="setPeriod('mes')">Mês</button>
-        <button onclick="setPeriod('custom')"><i class="fa-solid fa-calendar-day" style="font-size:10px"></i></button>
-      </div>
-      <input type="date" id="dashDatePicker" style="display:none;font-size:11px;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);color:var(--text-primary);font-family:var(--font-body);font-weight:600" onchange="applyCustomDate()"
-      >
-      <div class="filter-bar">
-        <label>Setor:</label>
-        <select id="filterSetor" onchange="applyFilters()">
-          <option value="">Todos</option>
-        </select>
-        <label>Vendedor:</label>
-        <select id="filterVendedor" onchange="applyFilters()">
-          <option value="">Todos</option>
-        </select>
-      </div>
-      <div style="position:relative;display:inline-block" id="exportDropdown">
-        <button class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px" onclick="document.getElementById('exportMenu').classList.toggle('open')">
-          <i class="fa-solid fa-file-export" style="font-size:10px"></i> Exportar <i class="fa-solid fa-chevron-down" style="font-size:8px;margin-left:2px"></i>
-        </button>
-        <div id="exportMenu" class="export-menu">
-          <button onclick="exportCSV();document.getElementById('exportMenu').classList.remove('open')"><i class="fa-solid fa-file-csv" style="color:var(--success)"></i> Exportar CSV</button>
-          <button onclick="exportPDF();document.getElementById('exportMenu').classList.remove('open')"><i class="fa-solid fa-file-pdf" style="color:var(--danger)"></i> Exportar PDF</button>
+    <!-- Top: Brand + Actions -->
+    <div class="dash-header-top">
+      <div class="dash-header-brand">
+        <div class="dash-header-logo" id="headerLogo">MV</div>
+        <div>
+          <div class="dash-header-title" id="headerTitle">Minha Vez</div>
+          <div class="dash-header-subtitle">
+            <span id="dashDate"></span>
+            <span id="lastUpdateIndicator" style="opacity:.6"></span>
+          </div>
         </div>
       </div>
-      <a id="linkTablet" href="/tablet.html" class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px">
-        <i class="fa-solid fa-tablet-screen-button" style="font-size:10px"></i> Tablet
-      </a>
-      <a id="linkSettings" href="/settings.html" class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px">
-        <i class="fa-solid fa-gear" style="font-size:10px"></i>
-      </a>
-      <button class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px" onclick="toggleTheme()">
-        <i class="fa-solid fa-circle-half-stroke" style="font-size:10px"></i>
-      </button>
-      <button class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px" onclick="handleLogout()">
-        <i class="fa-solid fa-right-from-bracket" style="font-size:10px"></i>
-      </button>
+      <div class="dash-header-actions">
+        <a id="linkTablet" href="/tablet.html" class="header-btn" title="Tablet">
+          <i class="fa-solid fa-tablet-screen-button"></i>
+          <span class="header-btn-label">Tablet</span>
+        </a>
+        <a id="linkSettings" href="/settings.html" class="header-btn" title="Configurações">
+          <i class="fa-solid fa-gear"></i>
+          <span class="header-btn-label">Config</span>
+        </a>
+        <div class="header-btn-divider"></div>
+        <button class="header-btn" onclick="toggleTheme()" title="Alternar tema">
+          <i class="fa-solid fa-circle-half-stroke"></i>
+          <span class="header-btn-label">Tema</span>
+        </button>
+        <button class="header-btn" onclick="handleLogout()" title="Sair">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span class="header-btn-label">Sair</span>
+        </button>
+      </div>
+    </div>
+    <!-- Bottom: Controls -->
+    <div class="dash-header-controls">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div class="period-tabs" id="periodTabs">
+          <button class="active" onclick="setPeriod('hoje')">Hoje</button>
+          <button onclick="setPeriod('ontem')">Ontem</button>
+          <button onclick="setPeriod('semana')">Semana</button>
+          <button onclick="setPeriod('mes')">Mês</button>
+          <button onclick="setPeriod('custom')"><i class="fa-solid fa-calendar-day" style="font-size:10px"></i></button>
+        </div>
+        <input type="date" id="dashDatePicker" style="display:none;font-size:11px;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text-primary);font-family:var(--font-body);font-weight:600" onchange="applyCustomDate()">
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div class="filter-bar">
+          <label>Setor:</label>
+          <select id="filterSetor" onchange="applyFilters()">
+            <option value="">Todos</option>
+          </select>
+          <label>Vendedor:</label>
+          <select id="filterVendedor" onchange="applyFilters()">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div style="position:relative;display:inline-block" id="exportDropdown">
+          <button class="header-btn" style="width:auto;padding:0 10px;gap:6px;font-size:11px;font-weight:600;color:var(--text-muted)" onclick="document.getElementById('exportMenu').classList.toggle('open')">
+            <i class="fa-solid fa-file-export" style="font-size:10px"></i>
+            <i class="fa-solid fa-chevron-down" style="font-size:7px"></i>
+          </button>
+          <div id="exportMenu" class="export-menu">
+            <button onclick="exportCSV();document.getElementById('exportMenu').classList.remove('open')"><i class="fa-solid fa-file-csv" style="color:var(--success)"></i> Exportar CSV</button>
+            <button onclick="exportPDF();document.getElementById('exportMenu').classList.remove('open')"><i class="fa-solid fa-file-pdf" style="color:var(--danger)"></i> Exportar PDF</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -576,6 +695,17 @@ if (tenant) {
   const settingsLink = document.getElementById('linkSettings');
   if (tabletLink) tabletLink.href = tenantPath('/tablet');
   if (settingsLink) settingsLink.href = tenantPath('/settings');
+  // Populate header brand
+  const headerTitle = document.getElementById('headerTitle');
+  const headerLogo = document.getElementById('headerLogo');
+  if (headerTitle && tenant.nome_loja) headerTitle.textContent = tenant.nome_loja;
+  if (headerLogo) {
+    if (tenant.logo_url) {
+      headerLogo.innerHTML = `<img src="${tenant.logo_url}" alt="${tenant.nome_loja || ''}">`;
+    } else {
+      headerLogo.textContent = (tenant.nome_loja || 'MV').substring(0, 2).toUpperCase();
+    }
+  }
 }
 
 const sb = getSupabase();
@@ -622,11 +752,15 @@ Chart.defaults.color = '#71717A';
 Chart.defaults.borderColor = 'rgba(255,255,255,.04)';
 Chart.defaults.plugins.tooltip.backgroundColor = '#18181B';
 Chart.defaults.plugins.tooltip.borderColor = 'rgba(255,255,255,.1)';
+Chart.defaults.plugins.tooltip.backgroundColor = '#27272A';
+Chart.defaults.plugins.tooltip.titleColor = '#FAFAFA';
+Chart.defaults.plugins.tooltip.bodyColor = '#E4E4E7';
+Chart.defaults.plugins.tooltip.borderColor = '#3F3F46';
 Chart.defaults.plugins.tooltip.borderWidth = 1;
-Chart.defaults.plugins.tooltip.cornerRadius = 4;
+Chart.defaults.plugins.tooltip.cornerRadius = 8;
 Chart.defaults.plugins.tooltip.titleFont = { weight: 700, size: 12 };
-Chart.defaults.plugins.tooltip.bodyFont = { weight: 600, size: 11 };
-Chart.defaults.plugins.tooltip.padding = 10;
+Chart.defaults.plugins.tooltip.bodyFont = { weight: 500, size: 12 };
+Chart.defaults.plugins.tooltip.padding = 12;
 Chart.defaults.plugins.tooltip.displayColors = true;
 Chart.defaults.plugins.tooltip.boxWidth = 8;
 Chart.defaults.plugins.tooltip.boxHeight = 8;
@@ -840,47 +974,57 @@ async function loadMotivos(range) {
   const colors = (data || []).map(d => MOTIVOS[d.motivo]?.color || '#6b7280');
 
   const totalMotivos = values.reduce((a, b) => a + b, 0);
+  if (totalMotivos === 0) {
+    ctx.parentElement.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-muted);gap:8px"><i class="fa-solid fa-circle-check" style="font-size:32px;color:var(--success);opacity:.3"></i><span style="font-size:13px;font-weight:600">Nenhuma perda registrada</span><span style="font-size:10px">Todos os atendimentos convertidos!</span></div>';
+    return;
+  }
+  // Highlight do motivo principal
+  const maxIdx = values.indexOf(Math.max(...values));
   charts.motivos = new Chart(ctx, {
     type: 'doughnut',
     data: {
       labels,
       datasets: [{
         data: values,
-        backgroundColor: colors.map(c => c + 'cc'),
-        borderColor: 'rgba(24,24,27,1)',
-        borderWidth: 3,
+        backgroundColor: colors.map((c, i) => i === maxIdx ? c : c + 'CC'),
+        borderColor: 'var(--bg-card, #18181B)',
+        borderWidth: 2,
         cutout: '65%',
-        hoverOffset: 6
+        hoverOffset: 6,
+        spacing: 1
       }]
     },
-    plugins: [ChartDataLabels, {
+    plugins: [{
       id: 'centerText',
       afterDraw(chart) {
         const { ctx: c, width, height } = chart;
         c.save();
-        c.font = "800 28px 'Inter'";
-        c.fillStyle = '#FAFAFA';
         c.textAlign = 'center';
         c.textBaseline = 'middle';
-        c.fillText(totalMotivos, width / 2, height / 2 - 8);
-        c.font = "600 10px 'Inter'";
+        c.font = "800 28px 'Inter'";
+        c.fillStyle = '#FAFAFA';
+        c.fillText(totalMotivos, width / 2, height / 2 - 10);
+        c.font = "700 9px 'Inter'";
         c.fillStyle = '#71717A';
-        c.fillText('TOTAL', width / 2, height / 2 + 14);
+        c.fillText('PERDAS', width / 2, height / 2 + 8);
+        if (labels[maxIdx]) {
+          c.font = "600 10px 'Inter'";
+          c.fillStyle = colors[maxIdx];
+          c.fillText('#1 ' + labels[maxIdx], width / 2, height / 2 + 24);
+        }
         c.restore();
       }
     }],
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      animation: { animateRotate: true, duration: 500 },
       plugins: {
-        legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'rectRounded', padding: 16, font: { size: 11, weight: 600 } } },
-        tooltip: { callbacks: { label: c => c.label + ': ' + c.parsed + ' (' + (totalMotivos > 0 ? Math.round(c.parsed / totalMotivos * 100) : 0) + '%)' } },
-        datalabels: {
-          display: ctx2 => ctx2.dataset.data[ctx2.dataIndex] > 0,
-          color: '#fff',
-          font: { weight: 800, size: 12 },
-          formatter: (val) => totalMotivos > 0 ? Math.round(val / totalMotivos * 100) + '%' : ''
-        }
+        legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', padding: 12, font: { size: 11, weight: 600 }, generateLabels: chart => chart.data.labels.map((l, i) => ({ text: l + ' (' + values[i] + ')', fillStyle: colors[i], strokeStyle: 'transparent', pointStyle: 'circle', index: i })) } },
+        tooltip: {
+          callbacks: { label: c => ' ' + c.label + ': ' + c.parsed + ' (' + (totalMotivos > 0 ? Math.round(c.parsed / totalMotivos * 100) : 0) + '%)' }
+        },
+        datalabels: { display: false }
       }
     }
   });
@@ -903,6 +1047,10 @@ async function loadHourly(range) {
   drawSparkline('sparkConv', vendas.map((v, i) => atend[i] > 0 ? Math.round(v / atend[i] * 100) : 0), getCompareColor('kpiConvCmp'));
   drawSparkline('sparkLoss', losses, getCompareColor('kpiLossCmp'));
 
+  // Calcular pico e média
+  const peakIdx = atend.indexOf(Math.max(...atend));
+  const avgAtend = atend.length > 0 ? Math.round(atend.reduce((a, b) => a + b, 0) / atend.length * 10) / 10 : 0;
+
   charts.hourly = new Chart(ctx, {
     type: 'bar',
     data: {
@@ -910,40 +1058,63 @@ async function loadHourly(range) {
       datasets: [
         {
           label: 'Atendimentos', data: atend,
-          backgroundColor: 'rgba(225,29,72,.25)', borderColor: '#E11D48',
-          borderWidth: { top: 2, right: 0, bottom: 0, left: 0 },
-          borderRadius: { topLeft: 4, topRight: 4 },
+          backgroundColor: atend.map((v, i) => i === peakIdx ? '#E11D48' : 'rgba(225,29,72,.45)'),
+          borderColor: atend.map((v, i) => i === peakIdx ? '#E11D48' : 'rgba(225,29,72,.6)'),
+          borderWidth: 1,
+          borderRadius: 4,
           barPercentage: 0.65, categoryPercentage: 0.8
         },
         {
           label: 'Vendas', data: vendas,
-          backgroundColor: 'rgba(52,211,153,.25)', borderColor: '#34D399',
-          borderWidth: { top: 2, right: 0, bottom: 0, left: 0 },
-          borderRadius: { topLeft: 4, topRight: 4 },
+          backgroundColor: 'rgba(52,211,153,.45)',
+          borderColor: 'rgba(52,211,153,.6)',
+          borderWidth: 1,
+          borderRadius: 4,
           barPercentage: 0.65, categoryPercentage: 0.8
         }
       ]
     },
-    plugins: [ChartDataLabels],
+    plugins: [{
+      id: 'avgLine',
+      afterDatasetsDraw(chart) {
+        if (avgAtend <= 0) return;
+        const { ctx: c, scales: { y, x } } = chart;
+        const yPos = y.getPixelForValue(avgAtend);
+        c.save();
+        c.setLineDash([4, 4]);
+        c.strokeStyle = 'rgba(250,204,21,.4)';
+        c.lineWidth = 1;
+        c.beginPath();
+        c.moveTo(x.left, yPos);
+        c.lineTo(x.right, yPos);
+        c.stroke();
+        c.setLineDash([]);
+        c.font = "600 9px 'Inter'";
+        c.fillStyle = 'rgba(250,204,21,.7)';
+        c.textAlign = 'right';
+        c.fillText('média ' + avgAtend, x.right, yPos - 4);
+        c.restore();
+      }
+    }],
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      animation: { duration: 400 },
       plugins: {
-        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'rectRounded', padding: 16, font: { size: 10, weight: 700 } } },
-        datalabels: {
-          display: ctx2 => ctx2.dataset.data[ctx2.dataIndex] > 0,
-          anchor: 'end',
-          align: ctx2 => {
-            const max = Math.max(...ctx2.dataset.data);
-            return ctx2.dataset.data[ctx2.dataIndex] >= max * 0.85 ? 'start' : 'end';
-          },
-          offset: 2,
-          color: ctx2 => ctx2.datasetIndex === 0 ? '#E11D48' : '#34D399',
-          font: { weight: 800, size: 10 }
-        }
+        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, font: { size: 10, weight: 600 } } },
+        tooltip: {
+          callbacks: {
+            afterBody: items => {
+              const idx = items[0]?.dataIndex;
+              if (idx === peakIdx) return ['', '⬆ Horário de pico'];
+              return [];
+            }
+          }
+        },
+        datalabels: { display: false }
       },
       scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 10, weight: 600 }, color: '#A1A1AA' } },
+        x: { grid: { display: false }, ticks: { font: { size: 10, weight: 600 }, color: '#71717A' } },
         y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.04)', drawBorder: false }, ticks: { font: { size: 10, weight: 500 }, stepSize: 1, padding: 8 } }
       }
     }
@@ -1025,14 +1196,22 @@ async function loadRanking(range, cachedData) {
   drawSparkline('sparkTime', temposSpark, getCompareColor('kpiTimeCmp'));
   drawSparkline('sparkTicket', ticketsSpark, getCompareColor('kpiTicketCmp'));
 
+  const metaConv = parseInt(localStorage.getItem('meta_conversao') || DEFAULT_METAS.conversao);
+
   body.innerHTML = data.map((r, i) => {
-    const convColor = (r.taxa_conversao || 0) >= 50 ? 'var(--success)' : (r.taxa_conversao || 0) >= 30 ? 'var(--warning)' : 'var(--danger)';
-    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+    const cv = r.taxa_conversao || 0;
+    const convColor = cv >= metaConv ? 'var(--success)' : cv >= metaConv * 0.6 ? 'var(--warning)' : 'var(--danger)';
+    const barW = Math.min(cv, 100);
+    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `<span style="color:var(--text-muted)">${i + 1}</span>`;
+    const topGlow = i < 3 ? 'box-shadow:inset 0 0 0 1px rgba(225,29,72,.08);background:rgba(225,29,72,.03)' : '';
     const foto = fotoMap[r.vendedor_id];
     const avatarContent = foto
       ? `<img src="${foto}" style="width:100%;height:100%;object-fit:cover">`
       : initials(r.nome);
-    return `<tr>
+    const tempoMeta = parseInt(localStorage.getItem('meta_tempo_medio') || DEFAULT_METAS.tempo_medio);
+    const tm = r.tempo_medio_min || 0;
+    const tempoColor = tm <= tempoMeta ? 'var(--success)' : tm <= tempoMeta * 1.3 ? 'var(--warning)' : 'var(--danger)';
+    return `<tr style="${topGlow}">
       <td style="font-size:16px;text-align:center;width:40px">${medal}</td>
       <td><div style="display:flex;align-items:center;gap:10px">
         <div style="width:32px;height:32px;border-radius:var(--radius-sm);background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:11px;color:var(--accent);flex-shrink:0;overflow:hidden">${avatarContent}</div>
@@ -1040,8 +1219,15 @@ async function loadRanking(range, cachedData) {
       </div></td>
       <td class="mono">${r.total_atendimentos || 0}</td>
       <td class="mono" style="color:var(--success)">${r.total_vendas || 0}</td>
-      <td class="mono" style="color:${convColor}">${r.taxa_conversao || 0}%</td>
-      <td class="mono" style="color:var(--info)">${r.tempo_medio_min || 0}min</td>
+      <td style="min-width:120px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="flex:1;height:6px;background:var(--bg-elevated);border-radius:3px;overflow:hidden">
+            <div style="width:${barW}%;height:100%;background:${convColor};border-radius:3px;transition:width .6s ease"></div>
+          </div>
+          <span class="mono" style="font-size:11px;color:${convColor};min-width:36px;text-align:right">${cv}%</span>
+        </div>
+      </td>
+      <td class="mono" style="color:${tempoColor}">${tm}min</td>
     </tr>`;
   }).join('');
 }
@@ -1150,52 +1336,83 @@ async function loadScatter(range, cachedData) {
   if (charts.scatter) charts.scatter.destroy();
   if (!data || data.length === 0) { charts.scatter = null; return; }
 
+  const maxAtend = Math.max(...data.map(r => r.total_atendimentos || 0), 1);
+  const metaConv = metas.conversao || 70;
   const points = data.map(r => ({
     x: r.total_atendimentos || 0,
     y: r.taxa_conversao || 0,
-    label: r.apelido || r.nome
+    label: (r.apelido || r.nome || '').split(' ')[0],
+    r: Math.max(6, Math.min(18, 6 + ((r.total_atendimentos || 0) / maxAtend) * 12))
   }));
 
   charts.scatter = new Chart(ctx, {
-    type: 'scatter',
+    type: 'bubble',
     data: {
       datasets: [{
         label: 'Vendedores',
         data: points,
-        backgroundColor: points.map(p => p.y >= 50 ? 'rgba(74,222,128,.7)' : p.y >= 30 ? 'rgba(225,29,72,.35)' : 'rgba(248,113,113,.7)'),
-        borderColor: points.map(p => p.y >= 50 ? '#22c55e' : p.y >= 30 ? '#E11D48' : '#ef4444'),
-        borderWidth: 2,
-        pointRadius: 10,
-        pointHoverRadius: 13,
-        pointStyle: 'rectRounded'
+        backgroundColor: points.map(p => p.y >= metaConv ? 'rgba(52,211,153,.5)' : p.y >= metaConv * 0.6 ? 'rgba(251,191,36,.4)' : 'rgba(248,113,113,.5)'),
+        borderColor: points.map(p => p.y >= metaConv ? '#34D399' : p.y >= metaConv * 0.6 ? '#FBBF24' : '#F87171'),
+        borderWidth: 1.5,
+        hoverBorderWidth: 2.5
       }]
     },
-    plugins: [ChartDataLabels],
+    plugins: [{
+      id: 'metaLine',
+      afterDatasetsDraw(chart) {
+        const { ctx: c, scales: { x, y } } = chart;
+        const metaY = y.getPixelForValue(metaConv);
+        c.save();
+        c.setLineDash([6, 4]);
+        c.strokeStyle = 'rgba(113,113,122,.35)';
+        c.lineWidth = 1;
+        c.beginPath();
+        c.moveTo(x.left, metaY);
+        c.lineTo(x.right, metaY);
+        c.stroke();
+        c.setLineDash([]);
+        c.font = "600 9px 'Inter'";
+        c.fillStyle = '#71717A';
+        c.textAlign = 'left';
+        c.fillText('Meta ' + metaConv + '%', x.left + 4, metaY - 5);
+        c.restore();
+      }
+    }],
     options: {
       responsive: true, maintainAspectRatio: false,
+      animation: { duration: 400 },
       plugins: {
         legend: { display: false },
         tooltip: {
-          callbacks: { label: c => { const p = c.raw; return p.label + ': ' + p.x + ' atend. / ' + p.y + '% conv.'; } }
+          callbacks: {
+            title: items => {
+              const p = items[0]?.raw;
+              return p ? p.label : '';
+            },
+            label: c => {
+              const p = c.raw;
+              return [' Atendimentos: ' + p.x, ' Conversão: ' + p.y + '%'];
+            }
+          }
         },
         datalabels: {
           display: true,
-          color: '#FAFAFA',
-          font: { weight: 700, size: 9 },
-          anchor: 'end', align: 'top', offset: 4,
+          color: '#D4D4D8',
+          font: { weight: 600, size: 9 },
+          anchor: 'end', align: 'top', offset: 2,
           formatter: (val, ctx2) => ctx2.dataset.data[ctx2.dataIndex].label
         }
       },
       scales: {
         x: {
-          title: { display: true, text: 'ATENDIMENTOS', font: { size: 9, weight: 800 }, color: '#71717A', padding: 4 },
+          title: { display: true, text: 'VOLUME', font: { size: 9, weight: 700 }, color: '#52525B', padding: 4 },
           grid: { color: 'rgba(255,255,255,.04)', drawBorder: false },
-          ticks: { font: { size: 10, weight: 600 } }
+          ticks: { font: { size: 10, weight: 500 }, color: '#71717A' }
         },
         y: {
-          title: { display: true, text: 'CONVERSÃO %', font: { size: 9, weight: 800 }, color: '#71717A', padding: 4 },
+          title: { display: true, text: 'CONVERSÃO %', font: { size: 9, weight: 700 }, color: '#52525B', padding: 4 },
           grid: { color: 'rgba(255,255,255,.04)', drawBorder: false },
-          ticks: { font: { size: 10, weight: 600 }, callback: v => v + '%' },
+          ticks: { font: { size: 10, weight: 500 }, callback: v => v + '%', color: '#71717A' },
           beginAtZero: true, max: 100
         }
       }
@@ -1210,8 +1427,12 @@ async function loadTempoMeta(range, cachedData) {
   if (charts.tempoMeta) charts.tempoMeta.destroy();
   if (!data || data.length === 0) { charts.tempoMeta = null; return; }
 
-  const names = data.map(r => r.apelido || r.nome?.split(' ').slice(0, 2).join(' ') || '?');
+  const names = data.map(r => (r.apelido || r.nome || '?').split(' ')[0]);
   const tempos = data.map(r => r.tempo_medio_min || 0);
+  const metaTempo = metas.tempo_medio || 30;
+  // Cor dinâmica: verde = abaixo da meta (bom), amarelo = perto, vermelho = acima
+  const barColors = tempos.map(t => t <= metaTempo * 0.8 ? 'rgba(52,211,153,.4)' : t <= metaTempo ? 'rgba(251,191,36,.35)' : 'rgba(248,113,113,.4)');
+  const barBorders = tempos.map(t => t <= metaTempo * 0.8 ? '#34D399' : t <= metaTempo ? '#FBBF24' : '#F87171');
 
   charts.tempoMeta = new Chart(ctx, {
     type: 'bar',
@@ -1219,29 +1440,61 @@ async function loadTempoMeta(range, cachedData) {
       labels: names,
       datasets: [{
         label: 'Tempo Médio (min)', data: tempos,
-        backgroundColor: 'rgba(96,165,250,.25)', borderColor: '#60A5FA',
-        borderWidth: { top: 0, right: 2, bottom: 0, left: 0 },
-        borderRadius: { topRight: 4, bottomRight: 4 },
-        barPercentage: 0.65
+        backgroundColor: barColors,
+        borderColor: barBorders,
+        borderWidth: 1,
+        borderRadius: 4,
+        barPercentage: 0.6
       }]
     },
-    plugins: [ChartDataLabels],
+    plugins: [{
+      id: 'metaVertical',
+      afterDatasetsDraw(chart) {
+        const { ctx: c, scales: { x, y } } = chart;
+        const metaX = x.getPixelForValue(metaTempo);
+        c.save();
+        c.setLineDash([5, 4]);
+        c.strokeStyle = 'rgba(113,113,122,.35)';
+        c.lineWidth = 1;
+        c.beginPath();
+        c.moveTo(metaX, y.top);
+        c.lineTo(metaX, y.bottom);
+        c.stroke();
+        c.setLineDash([]);
+        c.font = "600 9px 'Inter'";
+        c.fillStyle = '#71717A';
+        c.textAlign = 'center';
+        c.fillText('Meta ' + metaTempo + 'min', metaX, y.top - 4);
+        c.restore();
+      }
+    }],
     options: {
       responsive: true, maintainAspectRatio: false,
       indexAxis: 'y',
+      animation: { duration: 400 },
       plugins: {
         legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: c => {
+              const v = c.parsed.x;
+              const diff = v - metaTempo;
+              const sign = diff > 0 ? '+' : '';
+              return ' ' + v + ' min (' + sign + Math.round(diff) + ' vs meta)';
+            }
+          }
+        },
         datalabels: {
           display: true,
           anchor: 'end', align: 'end', offset: 4,
-          color: '#60A5FA',
-          font: { weight: 800, size: 11 },
+          color: '#D4D4D8',
+          font: { weight: 700, size: 10 },
           formatter: v => v + 'min'
         }
       },
       scales: {
-        x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.04)', drawBorder: false }, ticks: { font: { size: 10, weight: 500 }, callback: v => v + 'min', padding: 4 } },
-        y: { grid: { display: false }, ticks: { font: { size: 11, weight: 700 }, color: '#A1A1AA' } }
+        x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.04)', drawBorder: false }, ticks: { font: { size: 10, weight: 500 }, callback: v => v + 'min', padding: 4, color: '#71717A' } },
+        y: { grid: { display: false }, ticks: { font: { size: 11, weight: 600 }, color: '#A1A1AA' } }
       }
     }
   });
@@ -1273,6 +1526,46 @@ async function loadTrend(range) {
   const vendas = data.map(d => d.total_vendas);
   const conv = data.map(d => d.taxa_conversao || 0);
 
+  // Meta line for conversion
+  const metaConv = parseInt(localStorage.getItem('meta_conversao') || DEFAULT_METAS.conversao);
+
+  // Gradient fills
+  const canvas = ctx;
+  const ctxObj = canvas.getContext('2d');
+  const gradAtend = ctxObj.createLinearGradient(0, 0, 0, 300);
+  gradAtend.addColorStop(0, 'rgba(225,29,72,.18)');
+  gradAtend.addColorStop(1, 'rgba(225,29,72,.01)');
+  const gradVendas = ctxObj.createLinearGradient(0, 0, 0, 300);
+  gradVendas.addColorStop(0, 'rgba(52,211,153,.18)');
+  gradVendas.addColorStop(1, 'rgba(52,211,153,.01)');
+
+  // Plugin: meta conversion line (sutil)
+  const trendAnnotations = {
+    id: 'trendAnnotations',
+    afterDraw(chart) {
+      const { ctx: c, chartArea: area, scales } = chart;
+      const y1Scale = scales.y1;
+      if (!y1Scale) return;
+      const metaY = y1Scale.getPixelForValue(metaConv);
+      if (metaY >= area.top && metaY <= area.bottom) {
+        c.save();
+        c.strokeStyle = 'rgba(113,113,122,.3)';
+        c.lineWidth = 1;
+        c.setLineDash([6, 4]);
+        c.beginPath();
+        c.moveTo(area.left, metaY);
+        c.lineTo(area.right, metaY);
+        c.stroke();
+        c.setLineDash([]);
+        c.fillStyle = '#71717A';
+        c.font = '600 9px Inter';
+        c.textAlign = 'right';
+        c.fillText('Meta ' + metaConv + '%', area.right - 4, metaY - 5);
+        c.restore();
+      }
+    }
+  };
+
   charts.trend = new Chart(ctx, {
     type: 'line',
     data: {
@@ -1280,52 +1573,67 @@ async function loadTrend(range) {
       datasets: [
         {
           label: 'Atendimentos', data: atend, yAxisID: 'y',
-          borderColor: '#E11D48', backgroundColor: 'rgba(225,29,72,.08)',
-          borderWidth: 2, pointRadius: 3, pointHoverRadius: 6,
-          tension: 0.3, fill: true
+          borderColor: '#E11D48', backgroundColor: gradAtend,
+          borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 6,
+          pointHoverBackgroundColor: '#E11D48', pointHoverBorderColor: '#fff', pointHoverBorderWidth: 2,
+          tension: 0.4, fill: true
         },
         {
           label: 'Vendas', data: vendas, yAxisID: 'y',
-          borderColor: '#34D399', backgroundColor: 'rgba(52,211,153,.08)',
-          borderWidth: 2, pointRadius: 3, pointHoverRadius: 6,
-          tension: 0.3, fill: true
+          borderColor: '#34D399', backgroundColor: gradVendas,
+          borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 6,
+          pointHoverBackgroundColor: '#34D399', pointHoverBorderColor: '#fff', pointHoverBorderWidth: 2,
+          tension: 0.4, fill: true
         },
         {
-          label: 'Conversao %', data: conv, yAxisID: 'y1',
+          label: 'Conversão %', data: conv, yAxisID: 'y1',
           borderColor: '#FBBF24', backgroundColor: 'transparent',
-          borderWidth: 2, borderDash: [6, 3], pointRadius: 2, pointHoverRadius: 5,
-          tension: 0.3, fill: false
+          borderWidth: 2, borderDash: [6, 3], pointRadius: 0, pointHoverRadius: 5,
+          pointHoverBackgroundColor: '#FBBF24',
+          tension: 0.4, fill: false
         }
       ]
     },
+    plugins: [trendAnnotations],
     options: {
       responsive: true, maintainAspectRatio: false,
+      animation: { duration: 800, easing: 'easeOutQuart' },
       interaction: { mode: 'index', intersect: false },
       plugins: {
-        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, font: { size: 10, weight: 700 } } },
+        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, font: { size: 10, weight: 600 } } },
         tooltip: {
           callbacks: {
             label: c => {
-              if (c.datasetIndex === 2) return c.dataset.label + ': ' + c.parsed.y + '%';
-              return c.dataset.label + ': ' + c.parsed.y;
+              if (c.datasetIndex === 2) return ' ' + c.dataset.label + ': ' + c.parsed.y + '%';
+              return ' ' + c.dataset.label + ': ' + c.parsed.y;
+            },
+            afterBody: items => {
+              const idx = items[0]?.dataIndex;
+              if (idx != null && data[idx]?.ticket_medio) {
+                return [' Ticket: R$ ' + Number(data[idx].ticket_medio).toLocaleString('pt-BR', { minimumFractionDigits: 0 })];
+              }
+              return [];
             }
           }
         },
         datalabels: { display: false }
       },
       scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 9, weight: 600 }, color: '#A1A1AA', maxRotation: 45 } },
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 9, weight: 600 }, color: '#71717A', maxRotation: 45, autoSkipPadding: 8 }
+        },
         y: {
           beginAtZero: true, position: 'left',
           grid: { color: 'rgba(255,255,255,.04)', drawBorder: false },
-          ticks: { font: { size: 10, weight: 500 }, stepSize: 1, padding: 8 },
-          title: { display: true, text: 'VOLUME', font: { size: 9, weight: 800 }, color: '#71717A' }
+          ticks: { font: { size: 10, weight: 500 }, stepSize: 1, padding: 8, color: '#71717A' },
+          title: { display: true, text: 'VOLUME', font: { size: 9, weight: 800 }, color: '#52525B' }
         },
         y1: {
           beginAtZero: true, max: 100, position: 'right',
           grid: { drawOnChartArea: false },
-          ticks: { font: { size: 10, weight: 500 }, callback: v => v + '%' },
-          title: { display: true, text: 'CONVERSAO', font: { size: 9, weight: 800 }, color: '#71717A' }
+          ticks: { font: { size: 10, weight: 500 }, callback: v => v + '%', color: '#71717A' },
+          title: { display: true, text: 'CONVERSÃO', font: { size: 9, weight: 800 }, color: '#52525B' }
         }
       }
     }
@@ -1643,11 +1951,8 @@ sb.channel(`dashboard-sync-${tenantId || 'default'}`)
   .subscribe();
 
 // Indicador de última atualização
-const _lastUpdateEl = document.createElement('span');
-_lastUpdateEl.id = 'lastUpdate';
-_lastUpdateEl.style.cssText = 'font-size:9px;color:var(--text-muted);font-weight:500;margin-left:8px';
-document.getElementById('dashDate')?.parentElement?.appendChild(_lastUpdateEl);
-function updateTimestamp() { _lastUpdateEl.textContent = '· atualizado ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
+const _lastUpdateEl = document.getElementById('lastUpdateIndicator');
+function updateTimestamp() { if (_lastUpdateEl) _lastUpdateEl.textContent = '· atualizado ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
 
 // ─── Changelog versionado (mesma lista do tablet — adicione novas entradas no TOPO) ───
 const APP_CHANGELOG = [
