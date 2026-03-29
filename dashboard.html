@@ -186,14 +186,14 @@ window._showUpdateBanner = function() {
   .kpi-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 12px;
+    gap: 20px;
+    margin-bottom: 16px;
   }
   .kpi-grid-secondary {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    margin-bottom: 24px;
+    gap: 20px;
+    margin-bottom: 32px;
   }
   @media (max-width: 900px) {
     .kpi-grid { grid-template-columns: repeat(2, 1fr); }
@@ -206,8 +206,8 @@ window._showUpdateBanner = function() {
   .charts-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 24px;
+    gap: 24px;
+    margin-bottom: 32px;
   }
   @media (max-width: 768px) { .charts-grid { grid-template-columns: 1fr; } }
 
@@ -290,27 +290,37 @@ window._showUpdateBanner = function() {
   .chart-card {
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
-    border-radius: var(--radius);
-    padding: 20px;
+    border-radius: var(--radius-lg);
+    padding: 24px 28px;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 0 1px rgba(255,255,255,.02);
+  }
+  .chart-card:hover {
+    border-color: var(--border-medium);
+    box-shadow: 0 4px 12px rgba(0,0,0,.2);
   }
   .kpi-compare {
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
-    margin-top: 4px;
-    min-height: 14px;
+    margin-top: 6px;
+    min-height: 16px;
   }
   .kpi-compare .up { color: var(--success); }
   .kpi-compare .down { color: var(--danger); }
   .kpi-compare .neutral { color: var(--text-muted); }
   .chart-card h3 {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .08em;
-    color: var(--text-muted);
-    margin-bottom: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  .chart-box { position: relative; height: 260px; }
+  .chart-card h3 i { font-size: 14px; opacity: .7; }
+  .chart-box { position: relative; height: 340px; }
   .ranking-table {
     width: 100%;
     border-collapse: collapse;
@@ -835,7 +845,7 @@ const _kpi = {
 Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
 Chart.defaults.font.weight = 500;
 Chart.defaults.color = '#71717A';
-Chart.defaults.borderColor = 'rgba(255,255,255,.04)';
+Chart.defaults.borderColor = 'rgba(255,255,255,.06)';
 Chart.defaults.plugins.tooltip.enabled = true;
 Chart.defaults.plugins.tooltip.backgroundColor = '#27272A';
 Chart.defaults.plugins.tooltip.titleColor = '#FAFAFA';
@@ -843,18 +853,18 @@ Chart.defaults.plugins.tooltip.bodyColor = '#E4E4E7';
 Chart.defaults.plugins.tooltip.borderColor = '#3F3F46';
 Chart.defaults.plugins.tooltip.borderWidth = 1;
 Chart.defaults.plugins.tooltip.cornerRadius = 8;
-Chart.defaults.plugins.tooltip.titleFont = { weight: 700, size: 12 };
-Chart.defaults.plugins.tooltip.bodyFont = { weight: 500, size: 12 };
-Chart.defaults.plugins.tooltip.padding = 12;
+Chart.defaults.plugins.tooltip.titleFont = { weight: 700, size: 13 };
+Chart.defaults.plugins.tooltip.bodyFont = { weight: 600, size: 12 };
+Chart.defaults.plugins.tooltip.padding = 14;
 Chart.defaults.plugins.tooltip.displayColors = true;
-Chart.defaults.plugins.tooltip.boxWidth = 8;
-Chart.defaults.plugins.tooltip.boxHeight = 8;
-Chart.defaults.plugins.tooltip.boxPadding = 4;
+Chart.defaults.plugins.tooltip.boxWidth = 10;
+Chart.defaults.plugins.tooltip.boxHeight = 10;
+Chart.defaults.plugins.tooltip.boxPadding = 6;
 // Disable datalabels globally, enable per-chart
 Chart.defaults.plugins.datalabels = { display: false };
 Chart.defaults.responsive = true;
 Chart.defaults.maintainAspectRatio = false;
-Chart.defaults.animation = { duration: 300 }; // Faster chart animations
+Chart.defaults.animation = { duration: 500, easing: 'easeOutQuart' };
 
 function getRange() {
   if (currentPeriod === 'custom' && customDate) {
@@ -2088,6 +2098,16 @@ function updateTimestamp() { if (_lastUpdateEl) _lastUpdateEl.textContent = '· 
 
 // ─── Changelog versionado (mesma lista do tablet — adicione novas entradas no TOPO) ───
 const APP_CHANGELOG = [
+  {
+    version: '3.0.0',
+    date: '2026-03-29',
+    items: [
+      { icon: 'fa-filter', text: 'Novo: filtros de setor e vendedor — visualize dados individuais' },
+      { icon: 'fa-chart-bar', text: 'Gráficos 30% maiores, com gradientes e animações mais suaves' },
+      { icon: 'fa-expand', text: 'Layout mais espaçoso, cards com hover e borda colorida' },
+      { icon: 'fa-icons', text: 'KPIs com ícones e labels mais legíveis' }
+    ]
+  },
   {
     version: '2.7.0',
     date: '2026-03-28',
