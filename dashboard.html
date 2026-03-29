@@ -259,7 +259,7 @@ window._showUpdateBanner = function() {
     flex-shrink: 0;
     overflow: hidden;
   }
-  .rank-info { flex: 1; min-width: 0; }
+  .rank-info { flex: 1; min-width: 0; overflow: hidden; }
   .rank-name {
     font-weight: 600;
     font-size: 13px;
@@ -271,25 +271,26 @@ window._showUpdateBanner = function() {
   .rank-stats {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     font-size: 11px;
     color: var(--text-muted);
+    flex-wrap: wrap;
   }
   .rank-stats .stat-val {
-    font-family: var(--font-mono);
     font-weight: 700;
+    font-variant-numeric: tabular-nums;
     color: var(--text-secondary);
   }
   .rank-conv-bar {
-    width: 60px; height: 5px;
+    width: 48px; height: 4px;
     background: var(--bg-elevated);
-    border-radius: 3px;
+    border-radius: 2px;
     overflow: hidden;
     flex-shrink: 0;
   }
   .rank-conv-fill {
     height: 100%;
-    border-radius: 3px;
+    border-radius: 2px;
     transition: width .5s ease;
   }
   .chart-card {
