@@ -78,9 +78,11 @@ window._showUpdateBanner = function() {
     padding: 0;
     margin-bottom: var(--gap);
     position: relative;
+    overflow: hidden;
   }
   .dash-header-top {
     border-radius: 14px 14px 0 0;
+    background: #060606;
   }
   .dash-header-controls {
     border-radius: 0 0 14px 14px;
@@ -92,7 +94,7 @@ window._showUpdateBanner = function() {
     padding: 16px 20px;
     gap: 12px;
     flex-wrap: wrap;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: 1px solid rgba(255,255,255,.06);
   }
   .dash-header-brand {
     display: flex;
@@ -101,27 +103,29 @@ window._showUpdateBanner = function() {
     min-width: 0;
   }
   .dash-header-logo {
-    width: 36px; height: 36px;
-    border-radius: var(--radius-sm);
-    background: var(--accent);
+    width: 42px; height: 42px;
+    border-radius: 8px;
+    background: #060606;
     display: flex; align-items: center; justify-content: center;
     font-family: var(--font-mono);
     font-weight: 800; font-size: 14px;
     color: #fff;
     flex-shrink: 0;
     overflow: hidden;
+    border: 1px solid rgba(255,255,255,.08);
   }
-  .dash-header-logo img { width: 100%; height: 100%; object-fit: cover; }
+  .dash-header-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
   .dash-header-title {
     font-family: var(--font-mono);
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 700;
     letter-spacing: -.02em;
     line-height: 1.2;
+    color: #fff;
   }
   .dash-header-subtitle {
     font-size: 11px;
-    color: var(--text-muted);
+    color: rgba(255,255,255,.4);
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -139,15 +143,16 @@ window._showUpdateBanner = function() {
     border: none;
     border-radius: var(--radius-sm);
     background: transparent;
-    color: var(--text-muted);
+    color: rgba(255,255,255,.5);
     font-size: 13px;
     cursor: pointer;
     transition: all .15s ease;
     position: relative;
+    text-decoration: none;
   }
   .dash-header-actions .header-btn:hover {
-    background: var(--bg-hover);
-    color: var(--text-primary);
+    background: rgba(255,255,255,.08);
+    color: #fff;
   }
   .dash-header-actions .header-btn:active {
     transform: scale(.92);
@@ -162,17 +167,18 @@ window._showUpdateBanner = function() {
     font-weight: 600;
     color: var(--text-muted);
     white-space: nowrap;
-    background: var(--bg-elevated);
+    background: rgba(255,255,255,.12);
     padding: 2px 6px;
     border-radius: 4px;
     pointer-events: none;
     z-index: 10;
+    color: rgba(255,255,255,.7);
   }
   .dash-header-actions .header-btn:hover .header-btn-label { display: block; }
   .header-btn-divider {
     width: 1px;
     height: 20px;
-    background: var(--border-subtle);
+    background: rgba(255,255,255,.1);
     margin: 0 4px;
   }
   .dash-header-controls {
@@ -368,6 +374,9 @@ window._showUpdateBanner = function() {
   [data-theme="light"] .dash-header {
     background: #FFFFFF; border-color: rgba(0,0,0,.06);
     box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  }
+  [data-theme="light"] .dash-header-top {
+    background: #060606;
   }
   [data-theme="light"] #statusMarquee {
     background: #FFFFFF; border-color: rgba(0,0,0,.06);
