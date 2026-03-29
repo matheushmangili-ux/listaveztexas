@@ -605,6 +605,7 @@ window._showUpdateBanner = function() {
     <!-- Top: Brand + Actions -->
     <div class="dash-header-top">
       <div class="dash-header-brand">
+        <img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:28px;width:28px;object-fit:contain;margin-right:8px;border-radius:4px">
         <div class="dash-header-logo" id="headerLogo">MV</div>
         <div>
           <div class="dash-header-title" id="headerTitle">Minha Vez</div>
@@ -823,7 +824,7 @@ window._showUpdateBanner = function() {
 
   <!-- Footer -->
   <footer style="text-align:center;margin-top:32px;padding:16px 0;border-top:1px solid var(--border-subtle)">
-    <p style="font-size:10px;color:var(--text-muted);letter-spacing:.15em;text-transform:uppercase;font-weight:600">Minha Vez v3.1</p>
+    <p style="font-size:10px;color:var(--text-muted);letter-spacing:.15em;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px"><img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:16px;object-fit:contain"> <span style="text-transform:none;color:#ec4899">minhavez</span> <span style="text-transform:uppercase">v3.1</span></p>
     <p id="tenantSlugFooter" style="margin-top:8px;font-size:10px;color:var(--text-muted);cursor:pointer;display:none" title="Clique para copiar seu ID de suporte">
       <i class="fa-solid fa-copy" style="margin-right:4px;opacity:.5"></i>
       ID: <span id="tenantSlugValue"></span>
@@ -2346,7 +2347,7 @@ tr:nth-child(even){background:#FAFAFA}
 @media print{body{padding:24px}@page{margin:1cm;size:A4}}
 </style></head><body>
 <div class="header">
-  <div><h1>Minha Vez</h1><div class="sub">${tenant?.nome_loja || 'Minha Vez'} — Relatório ${period}</div></div>
+  <div><h1>minhavez</h1><div class="sub">${tenant?.nome_loja || 'minhavez'} — Relatório ${period}</div></div>
   <div style="text-align:right"><div class="sub">${now}</div></div>
 </div>
 <div class="kpi-row">
@@ -2369,7 +2370,7 @@ tr:nth-child(even){background:#FAFAFA}
   </tbody>
 </table>
 ${d.motivos.length > 0 ? `<div class="section-title">Motivos de Perda</div><div class="motivos">${d.motivos.map(m => `<div class="motivo-tag">${motivoLabels[m.motivo]||m.motivo}: <strong>${m.total}</strong></div>`).join('')}</div>` : ''}
-<div class="footer">Minha Vez v1.0 — ${tenant?.nome_loja || 'Minha Vez'} — Gerado automaticamente</div>
+<div class="footer">minhavez v3.1 — ${tenant?.nome_loja || 'minhavez'} — Gerado automaticamente</div>
 </body></html>`;
 
   const printWin = window.open('', '_blank');

@@ -117,10 +117,10 @@ body {
   box-shadow: 0 4px 30px rgba(0,0,0,.3);
 }
 .nav-logo {
-  display: flex; align-items: center; gap: 10px;
-  font-weight: 800; font-size: 20px; text-decoration: none; color: var(--text-primary);
+  display: flex; align-items: center;
+  text-decoration: none;
 }
-.nav-logo .dot { color: var(--accent); }
+.nav-logo img { height: 32px; width: auto; }
 .nav-links { display: flex; align-items: center; gap: 24px; }
 .nav-links a {
   color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500;
@@ -764,10 +764,11 @@ section { position: relative; z-index: 1; }
   flex-wrap: wrap; gap: 16px;
 }
 .footer-brand {
+  display: flex; align-items: center; gap: 10px;
   font-weight: 700; font-size: 15px;
   color: var(--text-muted);
 }
-.footer-brand span { color: var(--accent); }
+.footer-brand img { height: 24px; width: auto; }
 .footer-links { display: flex; gap: 20px; }
 .footer-links a {
   color: var(--text-muted); text-decoration: none; font-size: 13px;
@@ -820,8 +821,7 @@ section { position: relative; z-index: 1; }
 <!-- Navigation -->
 <nav class="nav" id="nav">
   <a href="#" class="nav-logo">
-    <i class="fa-solid fa-list-ol"></i>
-    Minha<span class="dot">Vez</span>
+    <img src="/assets/logo-minhavez-new.png" alt="MinhaVez" style="height:32px;width:auto">
   </a>
   <div class="nav-links">
     <a href="#problema">Problema</a>
@@ -1286,7 +1286,7 @@ section { position: relative; z-index: 1; }
   <div class="container">
     <div class="footer-inner">
       <div class="footer-brand">
-        <i class="fa-solid fa-list-ol"></i> Minha<span>Vez</span> &copy; 2025
+        <img src="/assets/logo-minhavez-new.png" alt="MinhaVez"> &copy; 2025
       </div>
       <div class="footer-links">
         <a href="#funcionalidades">Funcionalidades</a>
