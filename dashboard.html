@@ -960,14 +960,10 @@ Chart.defaults.font.weight = 500;
 Chart.defaults.responsive = true;
 Chart.defaults.maintainAspectRatio = false;
 Chart.defaults.animation = { duration: 500, easing: 'easeOutQuart' };
-// Tooltip e interação global
-Chart.defaults.interaction.mode = 'nearest';
-Chart.defaults.interaction.intersect = false;
-Chart.defaults.plugins.tooltip.enabled = true;
-// Datalabels global off (habilitado por gráfico) — não capturar eventos de hover
-if (Chart.defaults.plugins.datalabels) {
-  Chart.defaults.plugins.datalabels.display = false;
-  Chart.defaults.plugins.datalabels.listeners = {};
+// CRITICAL: Unregister datalabels globally — it intercepts hover events and blocks tooltips
+// We'll pass ChartDataLabels only to charts that need it via the plugins array
+if (typeof ChartDataLabels !== 'undefined') {
+  Chart.unregister(ChartDataLabels);
 }
 
 // ─── Theme-aware chart colors ───
@@ -1308,6 +1304,7 @@ async function loadMotivos(range) {
 
   charts.motivos = new Chart(ctx, {
     type: 'doughnut',
+    plugins: [ChartDataLabels],
     data: {
       labels,
       datasets: [{
@@ -1379,7 +1376,7 @@ async function loadMotivos(range) {
           color: '#fff',
           font: { weight: 700, size: 12 },
           formatter: val => totalMotivos > 0 ? Math.round(val / totalMotivos * 100) + '%' : '',
-          listeners: {}
+          clamp: true
         }
       }
     }
@@ -1761,6 +1758,7 @@ async function loadScatter(range, cachedData) {
 
   charts.scatter = new Chart(ctx, {
     type: 'bubble',
+    plugins: [ChartDataLabels],
     data: {
       datasets: [{
         label: 'Vendedores',
@@ -1817,7 +1815,7 @@ async function loadScatter(range, cachedData) {
           font: { weight: 700, size: 11 },
           anchor: 'end', align: 'top', offset: 4,
           formatter: (val, ctx2) => ctx2.dataset.data[ctx2.dataIndex].label,
-          listeners: {}
+          clamp: true
         }
       },
       layout: { padding: { top: 20, right: 20, bottom: 4, left: 4 } },
@@ -1862,6 +1860,7 @@ async function loadTempoMeta(range, cachedData) {
 
   charts.tempoMeta = new Chart(ctx, {
     type: 'bar',
+    plugins: [ChartDataLabels],
     data: {
       labels: names,
       datasets: [{
@@ -1919,7 +1918,7 @@ async function loadTempoMeta(range, cachedData) {
           color: chartColors().datalabel,
           font: { weight: 700, size: 11 },
           formatter: v => Math.round(v) + 'min',
-          listeners: {}
+          clamp: true
         }
       },
       scales: {
