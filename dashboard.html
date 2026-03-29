@@ -282,6 +282,34 @@ window._showUpdateBanner = function() {
   }
   .modal-box input:focus { outline: none; border-color: var(--gold-dim); }
   .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+
+  /* ─── Skeleton Loaders ─── */
+  .skeleton { position: relative; overflow: hidden; background: var(--bg-elevated); border-radius: var(--radius-sm); }
+  .skeleton::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.04) 40%, rgba(255,255,255,.08) 50%, rgba(255,255,255,.04) 60%, transparent 100%);
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+  }
+  @keyframes skeletonShimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+  .skeleton-kpi-value { width: 80px; height: 32px; margin-bottom: 4px; }
+  .skeleton-kpi-compare { width: 100px; height: 14px; }
+  .skeleton-chart { width: 100%; height: 240px; }
+  .skeleton-row { width: 100%; height: 48px; margin-bottom: 4px; }
+
+  /* ─── Filter bar ─── */
+  .filter-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .filter-bar select {
+    padding: 6px 12px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
+    background: var(--bg-surface); color: var(--text-primary); font-family: var(--font-body);
+    font-size: 11px; font-weight: 600; cursor: pointer;
+  }
+  .filter-bar select:focus { outline: none; border-color: var(--accent); }
+  .filter-bar label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
+
+  /* ─── Meta progress bar ─── */
+  .meta-bar { width: 100%; height: 4px; background: var(--bg-elevated); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+  .meta-bar-fill { height: 100%; border-radius: 2px; transition: width .5s ease; }
+  .meta-label { font-size: 9px; font-weight: 600; color: var(--text-muted); margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -305,6 +333,16 @@ window._showUpdateBanner = function() {
       </div>
       <input type="date" id="dashDatePicker" style="display:none;font-size:11px;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);color:var(--text-primary);font-family:var(--font-body);font-weight:600" onchange="applyCustomDate()"
       >
+      <div class="filter-bar">
+        <label>Setor:</label>
+        <select id="filterSetor" onchange="applyFilters()">
+          <option value="">Todos</option>
+        </select>
+        <label>Vendedor:</label>
+        <select id="filterVendedor" onchange="applyFilters()">
+          <option value="">Todos</option>
+        </select>
+      </div>
       <div style="position:relative;display:inline-block" id="exportDropdown">
         <button class="btn btn-ghost" style="min-height:40px;padding:0 14px;font-size:12px" onclick="document.getElementById('exportMenu').classList.toggle('open')">
           <i class="fa-solid fa-file-export" style="font-size:10px"></i> Exportar <i class="fa-solid fa-chevron-down" style="font-size:8px;margin-left:2px"></i>
@@ -355,33 +393,39 @@ window._showUpdateBanner = function() {
   <div class="kpi-grid" id="kpiGrid">
     <div class="kpi-card" style="--accent:var(--text-primary)">
       <div class="kpi-label">Total Atendimentos</div>
-      <div class="kpi-value" id="kpiTotal" style="color:#fff">—</div>
-      <div class="kpi-compare" id="kpiTotalCmp"></div>
+      <div class="kpi-value" id="kpiTotal" style="color:#fff"><div class="skeleton skeleton-kpi-value"></div></div>
+      <div class="kpi-compare" id="kpiTotalCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
       <canvas id="sparkAtend" style="width:100%;height:24px;margin-top:4px"></canvas>
     </div>
     <div class="kpi-card" style="--accent:var(--success)">
       <div class="kpi-label">Taxa de Conversão</div>
-      <div class="kpi-value" id="kpiConv" style="color:#fff">—</div>
-      <div class="kpi-compare" id="kpiConvCmp"></div>
+      <div class="kpi-value" id="kpiConv" style="color:#fff"><div class="skeleton skeleton-kpi-value"></div></div>
+      <div class="kpi-compare" id="kpiConvCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
       <canvas id="sparkConv" style="width:100%;height:24px;margin-top:4px"></canvas>
+      <div class="meta-bar" id="metaConvBar" style="display:none"><div class="meta-bar-fill" id="metaConvFill"></div></div>
+      <div class="meta-label" id="metaConvLabel" style="display:none"></div>
     </div>
     <div class="kpi-card" style="--accent:var(--danger)">
       <div class="kpi-label">Não Convertidos</div>
-      <div class="kpi-value" id="kpiLoss" style="color:#fff">—</div>
-      <div class="kpi-compare" id="kpiLossCmp"></div>
+      <div class="kpi-value" id="kpiLoss" style="color:#fff"><div class="skeleton skeleton-kpi-value"></div></div>
+      <div class="kpi-compare" id="kpiLossCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
       <canvas id="sparkLoss" style="width:100%;height:24px;margin-top:4px"></canvas>
     </div>
     <div class="kpi-card" style="--accent:var(--info)">
       <div class="kpi-label">Tempo Médio</div>
-      <div class="kpi-value" id="kpiTime" style="color:#fff">—</div>
-      <div class="kpi-compare" id="kpiTimeCmp"></div>
+      <div class="kpi-value" id="kpiTime" style="color:#fff"><div class="skeleton skeleton-kpi-value"></div></div>
+      <div class="kpi-compare" id="kpiTimeCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
       <canvas id="sparkTime" style="width:100%;height:24px;margin-top:4px"></canvas>
+      <div class="meta-bar" id="metaTimeBar" style="display:none"><div class="meta-bar-fill" id="metaTimeFill"></div></div>
+      <div class="meta-label" id="metaTimeLabel" style="display:none"></div>
     </div>
     <div class="kpi-card" style="--accent:var(--accent)">
       <div class="kpi-label">Ticket Médio</div>
-      <div class="kpi-value" id="kpiTicket" style="color:#fff">—</div>
-      <div class="kpi-compare" id="kpiTicketCmp"></div>
+      <div class="kpi-value" id="kpiTicket" style="color:#fff"><div class="skeleton skeleton-kpi-value"></div></div>
+      <div class="kpi-compare" id="kpiTicketCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
       <canvas id="sparkTicket" style="width:100%;height:24px;margin-top:4px"></canvas>
+      <div class="meta-bar" id="metaTicketBar" style="display:none"><div class="meta-bar-fill" id="metaTicketFill"></div></div>
+      <div class="meta-label" id="metaTicketLabel" style="display:none"></div>
     </div>
   </div>
 
@@ -407,6 +451,12 @@ window._showUpdateBanner = function() {
       <h3><i class="fa-solid fa-stopwatch" style="margin-right:6px;color:var(--accent-dim)"></i>Tempo Médio por Vendedor</h3>
       <div class="chart-box"><canvas id="chartTempoMeta"></canvas></div>
     </div>
+  </div>
+
+  <!-- Trend Line -->
+  <div class="chart-card" style="margin-bottom:24px">
+    <h3><i class="fa-solid fa-chart-line" style="margin-right:6px;color:var(--accent-dim)"></i>Evolução Diária</h3>
+    <div class="chart-box" style="height:300px"><canvas id="chartTrend"></canvas></div>
   </div>
 
   <!-- Ranking Table -->
@@ -539,6 +589,23 @@ const tenantId = user ? getTenantId(user) : null;
 
 let charts = {};
 let currentPeriod = 'hoje';
+let filterSetor = '';
+let filterVendedor = '';
+
+// Metas configuráveis (salvas no localStorage, editáveis no futuro via settings)
+const METAS_KEY = 'minhavez_metas';
+const DEFAULT_METAS = { conversao: 70, tempo_medio: 30, ticket_medio: 3000 };
+function getMetas() {
+  try { return { ...DEFAULT_METAS, ...JSON.parse(localStorage.getItem(METAS_KEY) || '{}') }; } catch { return DEFAULT_METAS; }
+}
+function setMetas(m) { localStorage.setItem(METAS_KEY, JSON.stringify(m)); }
+const metas = getMetas();
+
+// Cache de dados para filtros e exports (evita refetch)
+let _cachedRanking = [];
+let _cachedStats = {};
+let _cachedMotivos = [];
+let _cachedVendedores = [];
 
 // Cache KPI DOM refs (avoid repeated getElementById on realtime updates)
 const _kpi = {
@@ -584,6 +651,38 @@ function getRange() {
 
 // ─── Period tabs ───
 let customDate = null;
+
+// ─── Filters ───
+async function populateFilters() {
+  const vq = sb.from('vendedores').select('id, nome, apelido, setor').eq('ativo', true);
+  if (tenantId) vq.eq('tenant_id', tenantId);
+  const { data } = await vq.order('nome');
+  _cachedVendedores = data || [];
+
+  const setores = [...new Set(_cachedVendedores.map(v => v.setor || 'loja'))];
+  const setorLabels = { loja: 'Vestuario', chapelaria: 'Chapelaria', selaria: 'Selaria' };
+  const selSetor = document.getElementById('filterSetor');
+  const selVend = document.getElementById('filterVendedor');
+  selSetor.innerHTML = '<option value="">Todos os setores</option>' + setores.map(s => `<option value="${s}">${setorLabels[s] || s}</option>`).join('');
+  updateVendedorFilter();
+}
+
+function updateVendedorFilter() {
+  const selVend = document.getElementById('filterVendedor');
+  const filtered = filterSetor ? _cachedVendedores.filter(v => (v.setor || 'loja') === filterSetor) : _cachedVendedores;
+  selVend.innerHTML = '<option value="">Todos os vendedores</option>' + filtered.map(v => `<option value="${v.id}">${v.apelido || v.nome}</option>`).join('');
+}
+
+window.applyFilters = function() {
+  filterSetor = document.getElementById('filterSetor').value;
+  filterVendedor = document.getElementById('filterVendedor').value;
+  updateVendedorFilter();
+  if (filterVendedor && !document.querySelector(`#filterVendedor option[value="${filterVendedor}"]`)) {
+    filterVendedor = '';
+    document.getElementById('filterVendedor').value = '';
+  }
+  loadAll();
+};
 
 window.setPeriod = function(p) {
   const picker = document.getElementById('dashDatePicker');
@@ -642,12 +741,20 @@ function renderCompare(elId, current, previous, invertGood = false) {
 async function loadAll() {
   const range = getRange();
   const prevRange = getPrevRange();
-  // Cachear ranking RPC (usado por 3 funções)
-  const { data: rankingData, error: rankErr } = await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end });
-  if (rankErr) { toast('Erro ao carregar ranking: ' + rankErr.message, 'error'); }
-  const cachedRanking = rankingData || [];
-  // KPIs primeiro (comparativos precisam estar no DOM para sparklines)
-  await loadKPIs(range, prevRange);
+  // Carregar ranking + KPIs em paralelo (são independentes)
+  const [rankRes, kpiRes] = await Promise.all([
+    sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end }),
+    loadKPIs(range, prevRange)
+  ]);
+  if (rankRes.error) { toast('Erro ao carregar ranking: ' + rankRes.error.message, 'error'); }
+  let cachedRanking = rankRes.data || [];
+  // Aplicar filtros no ranking
+  if (filterSetor) cachedRanking = cachedRanking.filter(r => {
+    const vd = _cachedVendedores.find(cv => cv.id === r.vendedor_id);
+    return vd && (vd.setor || 'loja') === filterSetor;
+  });
+  if (filterVendedor) cachedRanking = cachedRanking.filter(r => r.vendedor_id === filterVendedor);
+  _cachedRanking = cachedRanking;
   await Promise.all([
     loadMotivos(range),
     loadHourly(range),
@@ -656,8 +763,10 @@ async function loadAll() {
     loadPauseStats(range),
     loadFloor(),
     loadScatter(range, cachedRanking),
-    loadTempoMeta(range, cachedRanking)
+    loadTempoMeta(range, cachedRanking),
+    loadTrend(range)
   ]);
+  updateTimestamp();
 }
 
 // ─── KPIs ───
@@ -695,12 +804,34 @@ async function loadKPIs(range, prevRange) {
   renderCompare('kpiLossCmp', d.total_nao_convertido || 0, p.total_nao_convertido || 0, true);
   renderCompare('kpiTimeCmp', d.tempo_medio_min || 0, p.tempo_medio_min || 0, true);
   if (ticket > 0 || pTicket > 0) renderCompare('kpiTicketCmp', ticket, pTicket);
+
+  // Meta bars
+  renderMetaBar('metaConv', convAtual, metas.conversao, false);
+  renderMetaBar('metaTime', d.tempo_medio_min || 0, metas.tempo_medio, true);
+  renderMetaBar('metaTicket', ticket, metas.ticket_medio, false);
+  _cachedStats = d;
+}
+
+function renderMetaBar(prefix, value, meta, invertGood) {
+  const bar = document.getElementById(prefix + 'Bar');
+  const fill = document.getElementById(prefix + 'Fill');
+  const label = document.getElementById(prefix + 'Label');
+  if (!bar || !fill || !label || !meta) return;
+  bar.style.display = '';
+  label.style.display = '';
+  const pct = Math.min(100, Math.round((value / meta) * 100));
+  fill.style.width = pct + '%';
+  const isGood = invertGood ? (value <= meta) : (value >= meta);
+  fill.style.background = isGood ? 'var(--success)' : pct >= 70 ? 'var(--warning)' : 'var(--danger)';
+  label.textContent = `Meta: ${meta}${prefix.includes('Ticket') ? '' : prefix.includes('Time') ? 'min' : '%'} (${pct}%)`;
+  label.style.color = isGood ? 'var(--success)' : 'var(--text-muted)';
 }
 
 // ─── Motivos chart ───
 async function loadMotivos(range) {
   const { data, error } = await sb.rpc('get_loss_reasons', { p_inicio: range.start, p_fim: range.end });
   if (error) { toast('Erro ao carregar motivos: ' + error.message, 'error'); return; }
+  _cachedMotivos = data || [];
   const ctx = document.getElementById('chartMotivos');
   if (charts.motivos) charts.motivos.destroy();
 
@@ -1116,6 +1247,91 @@ async function loadTempoMeta(range, cachedData) {
   });
 }
 
+// ─── Trend Line (evolução diária) ───
+async function loadTrend(range) {
+  // Para trend, usar range de 30 dias se período = hoje/ontem, senão usar o range selecionado
+  let trendRange = range;
+  if (currentPeriod === 'hoje' || currentPeriod === 'ontem' || currentPeriod === 'custom') {
+    const end = new Date();
+    end.setDate(end.getDate() + 1);
+    end.setHours(0, 0, 0, 0);
+    const start = new Date(end);
+    start.setDate(start.getDate() - 30);
+    trendRange = { start: start.toISOString(), end: end.toISOString() };
+  }
+  const { data, error } = await sb.rpc('get_daily_trend', { p_inicio: trendRange.start, p_fim: trendRange.end });
+  if (error) { return; }
+  const ctx = document.getElementById('chartTrend');
+  if (charts.trend) charts.trend.destroy();
+  if (!data || data.length === 0) { charts.trend = null; return; }
+
+  const labels = data.map(d => {
+    const dt = new Date(d.dia + 'T12:00:00');
+    return dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  });
+  const atend = data.map(d => d.total_atendimentos);
+  const vendas = data.map(d => d.total_vendas);
+  const conv = data.map(d => d.taxa_conversao || 0);
+
+  charts.trend = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Atendimentos', data: atend, yAxisID: 'y',
+          borderColor: '#E11D48', backgroundColor: 'rgba(225,29,72,.08)',
+          borderWidth: 2, pointRadius: 3, pointHoverRadius: 6,
+          tension: 0.3, fill: true
+        },
+        {
+          label: 'Vendas', data: vendas, yAxisID: 'y',
+          borderColor: '#34D399', backgroundColor: 'rgba(52,211,153,.08)',
+          borderWidth: 2, pointRadius: 3, pointHoverRadius: 6,
+          tension: 0.3, fill: true
+        },
+        {
+          label: 'Conversao %', data: conv, yAxisID: 'y1',
+          borderColor: '#FBBF24', backgroundColor: 'transparent',
+          borderWidth: 2, borderDash: [6, 3], pointRadius: 2, pointHoverRadius: 5,
+          tension: 0.3, fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, font: { size: 10, weight: 700 } } },
+        tooltip: {
+          callbacks: {
+            label: c => {
+              if (c.datasetIndex === 2) return c.dataset.label + ': ' + c.parsed.y + '%';
+              return c.dataset.label + ': ' + c.parsed.y;
+            }
+          }
+        },
+        datalabels: { display: false }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 9, weight: 600 }, color: '#A1A1AA', maxRotation: 45 } },
+        y: {
+          beginAtZero: true, position: 'left',
+          grid: { color: 'rgba(255,255,255,.04)', drawBorder: false },
+          ticks: { font: { size: 10, weight: 500 }, stepSize: 1, padding: 8 },
+          title: { display: true, text: 'VOLUME', font: { size: 9, weight: 800 }, color: '#71717A' }
+        },
+        y1: {
+          beginAtZero: true, max: 100, position: 'right',
+          grid: { drawOnChartArea: false },
+          ticks: { font: { size: 10, weight: 500 }, callback: v => v + '%' },
+          title: { display: true, text: 'CONVERSAO', font: { size: 9, weight: 800 }, color: '#71717A' }
+        }
+      }
+    }
+  });
+}
+
 window.handleLogout = function() { logout(); };
 window.toggleTheme = toggleTheme;
 
@@ -1145,7 +1361,7 @@ async function loadVendedores() {
       <div class="vendedor-actions">
         <button title="Editar" onclick="editVendedor('${v.id}','${v.nome.replace(/'/g,"\\'")}','${(v.apelido||'').replace(/'/g,"\\'")}','${v.setor||'loja'}')"><i class="fa-solid fa-pen"></i></button>
         <button title="${v.ativo ? 'Desativar' : 'Ativar'}" onclick="toggleVendedor('${v.id}',${v.ativo})"><i class="fa-solid fa-${v.ativo ? 'toggle-on' : 'toggle-off'}"></i></button>
-        <button title="Excluir" class="btn-danger" onclick="deleteVendedor('${v.id}','${v.nome.replace(/'/g,"\\'")}')"><i class="fa-solid fa-trash"></i></button>
+        <button title="Desativar" class="btn-danger" onclick="deleteVendedor('${v.id}','${v.nome.replace(/'/g,"\\'")}')"><i class="fa-solid fa-user-slash"></i></button>
       </div>
     </div>`;
   }).join('');
@@ -1249,27 +1465,20 @@ window.toggleVendedor = async function(id, isAtivo) {
 };
 
 window.deleteVendedor = async function(id, nome) {
-  if (!confirm('Excluir "' + nome + '"? Esta ação não pode ser desfeita.')) return;
-
-  // Limpar referências primeiro (turno_vendedores, pausas, atendimentos)
-  await sb.from('turno_vendedores').delete().eq('vendedor_id', id);
-  await sb.from('pausas_log').delete().eq('vendedor_id', id);
-  await sb.from('atendimentos').delete().eq('vendedor_id', id);
-
-  const { error } = await sb.from('vendedores').delete().eq('id', id);
-  if (error) {
-    // Fallback: se ainda falhar por FK, desativar em vez de excluir
-    await sb.from('vendedores').update({ ativo: false }).eq('id', id);
-    toast('Vendedor desativado (possui histórico)', 'warning');
-  } else {
-    toast('Vendedor excluído', 'success');
-  }
+  if (!confirm('Desativar "' + nome + '"? O vendedor será removido da fila mas seu histórico será preservado.')) return;
+  const { error } = await sb.from('vendedores').update({ ativo: false, status: 'fora', posicao_fila: null }).eq('id', id);
+  if (error) { toast('Erro: ' + error.message, 'error'); return; }
+  toast('Vendedor desativado — histórico preservado', 'success');
   await loadVendedores();
   loadFloor();
 };
 
 // ─── Export helpers ───
 async function getExportData() {
+  // Usar dados em cache quando disponíveis (evita refetch)
+  if (_cachedRanking.length > 0 && _cachedStats.total_atendimentos != null) {
+    return { ranking: _cachedRanking, stats: _cachedStats, motivos: _cachedMotivos };
+  }
   const range = getRange();
   const [rankRes, statsRes, motivosRes] = await Promise.all([
     sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end }),
@@ -1348,7 +1557,7 @@ tr:nth-child(even){background:#FAFAFA}
 @media print{body{padding:24px}@page{margin:1cm;size:A4}}
 </style></head><body>
 <div class="header">
-  <div><h1>Minha Vez</h1><div class="sub">Texas Center — Relatório ${period}</div></div>
+  <div><h1>Minha Vez</h1><div class="sub">${tenant?.nome_loja || 'Minha Vez'} — Relatório ${period}</div></div>
   <div style="text-align:right"><div class="sub">${now}</div></div>
 </div>
 <div class="kpi-row">
@@ -1371,7 +1580,7 @@ tr:nth-child(even){background:#FAFAFA}
   </tbody>
 </table>
 ${d.motivos.length > 0 ? `<div class="section-title">Motivos de Perda</div><div class="motivos">${d.motivos.map(m => `<div class="motivo-tag">${motivoLabels[m.motivo]||m.motivo}: <strong>${m.total}</strong></div>`).join('')}</div>` : ''}
-<div class="footer">Minha Vez v1.0 — Texas Center — Gerado automaticamente</div>
+<div class="footer">Minha Vez v1.0 — ${tenant?.nome_loja || 'Minha Vez'} — Gerado automaticamente</div>
 </body></html>`;
 
   const printWin = window.open('', '_blank');
@@ -1401,19 +1610,44 @@ setInterval(() => {
   }
 }, 60000);
 
-// ─── Realtime dashboard updates (debounced p/ evitar re-renders cascata) ───
-let _realtimeTimer = null;
-function debouncedReload(includeFloor = false) {
-  clearTimeout(_realtimeTimer);
-  _realtimeTimer = setTimeout(() => {
-    if (includeFloor) loadFloor();
-    loadAll();
-  }, 500);
+// ─── Realtime dashboard updates (partial — só recarrega o que mudou) ───
+let _rtVendTimer = null;
+let _rtAtendTimer = null;
+function debouncedReloadVendedores() {
+  clearTimeout(_rtVendTimer);
+  _rtVendTimer = setTimeout(() => { loadFloor(); loadVendedores(); }, 500);
+}
+function debouncedReloadAtendimentos() {
+  clearTimeout(_rtAtendTimer);
+  _rtAtendTimer = setTimeout(() => {
+    const range = getRange();
+    const prevRange = getPrevRange();
+    loadKPIs(range, prevRange);
+    sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end }).then(res => {
+      let data = res.data || [];
+      if (filterSetor) data = data.filter(r => { const vd = _cachedVendedores.find(cv => cv.id === r.vendedor_id); return vd && (vd.setor || 'loja') === filterSetor; });
+      if (filterVendedor) data = data.filter(r => r.vendedor_id === filterVendedor);
+      _cachedRanking = data;
+      loadRanking(range, data);
+      loadScatter(range, data);
+      loadTempoMeta(range, data);
+    });
+    loadMotivos(range);
+    loadHourly(range);
+    updateTimestamp();
+  }, 800);
 }
 sb.channel(`dashboard-sync-${tenantId || 'default'}`)
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'vendedores', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined }, () => debouncedReload(true))
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined }, () => debouncedReload(false))
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vendedores', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined }, () => debouncedReloadVendedores())
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined }, () => debouncedReloadAtendimentos())
   .subscribe();
+
+// Indicador de última atualização
+const _lastUpdateEl = document.createElement('span');
+_lastUpdateEl.id = 'lastUpdate';
+_lastUpdateEl.style.cssText = 'font-size:9px;color:var(--text-muted);font-weight:500;margin-left:8px';
+document.getElementById('dashDate')?.parentElement?.appendChild(_lastUpdateEl);
+function updateTimestamp() { _lastUpdateEl.textContent = '· atualizado ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
 
 // ─── Changelog versionado (mesma lista do tablet — adicione novas entradas no TOPO) ───
 const APP_CHANGELOG = [
@@ -1494,7 +1728,9 @@ const APP_CHANGELOG = [
 
 // ─── Init ───
 document.getElementById('dashDate').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+await populateFilters();
 await Promise.all([loadAll(), loadVendedores()]);
+updateTimestamp();
 </script>
 </body>
 </html>

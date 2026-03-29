@@ -1,16 +1,18 @@
 -- ============================================
--- ListaVez Texas — Database Functions (RPCs)
+-- MinhaVez — Database Functions (RPCs)
 -- Executar no Supabase SQL Editor APÓS schema.sql
+-- Todas as funções filtram por tenant_id via get_my_tenant_id()
 -- ============================================
 
--- Próximo cliente: atribui o vendedor da vez com lock
+-- Próximo cliente: atribui o vendedor da vez com lock (versão sem setor)
 CREATE OR REPLACE FUNCTION proximo_cliente(p_turno_id UUID)
 RETURNS UUID AS $$
 DECLARE
     v_vendedor_id UUID;
     v_atendimento_id UUID;
+    v_tenant_id UUID;
 BEGIN
-    SELECT id INTO v_vendedor_id
+    SELECT id, tenant_id INTO v_vendedor_id, v_tenant_id
     FROM vendedores
     WHERE status = 'disponivel' AND posicao_fila IS NOT NULL AND ativo = true
     ORDER BY posicao_fila ASC
@@ -18,11 +20,45 @@ BEGIN
     FOR UPDATE SKIP LOCKED;
 
     IF v_vendedor_id IS NULL THEN
-        RAISE EXCEPTION 'Nenhum vendedor disponível';
+        RAISE EXCEPTION 'Nenhum vendedor disponivel';
     END IF;
 
-    INSERT INTO atendimentos (vendedor_id, turno_id)
-    VALUES (v_vendedor_id, p_turno_id)
+    INSERT INTO atendimentos (vendedor_id, turno_id, tenant_id)
+    VALUES (v_vendedor_id, p_turno_id, v_tenant_id)
+    RETURNING id INTO v_atendimento_id;
+
+    UPDATE vendedores
+    SET status = 'em_atendimento', posicao_fila = NULL
+    WHERE id = v_vendedor_id;
+
+    RETURN v_atendimento_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Próximo cliente por setor
+CREATE OR REPLACE FUNCTION proximo_cliente(p_turno_id UUID, p_setor TEXT)
+RETURNS UUID AS $$
+DECLARE
+    v_vendedor_id UUID;
+    v_atendimento_id UUID;
+    v_tenant_id UUID;
+BEGIN
+    SELECT id, tenant_id INTO v_vendedor_id, v_tenant_id
+    FROM vendedores
+    WHERE status = 'disponivel'
+      AND posicao_fila IS NOT NULL
+      AND ativo = true
+      AND COALESCE(setor, 'loja') = p_setor
+    ORDER BY posicao_fila ASC
+    LIMIT 1
+    FOR UPDATE SKIP LOCKED;
+
+    IF v_vendedor_id IS NULL THEN
+        RAISE EXCEPTION 'Nenhum vendedor disponível no setor %', p_setor;
+    END IF;
+
+    INSERT INTO atendimentos (vendedor_id, turno_id, tenant_id)
+    VALUES (v_vendedor_id, p_turno_id, v_tenant_id)
     RETURNING id INTO v_atendimento_id;
 
     UPDATE vendedores
@@ -44,14 +80,18 @@ CREATE OR REPLACE FUNCTION finalizar_atendimento(
 ) RETURNS VOID AS $$
 DECLARE
     v_vendedor_id UUID;
+    v_tenant_id UUID;
     v_max_pos INT;
 BEGIN
     SELECT vendedor_id INTO v_vendedor_id
     FROM atendimentos WHERE id = p_atendimento_id;
 
     IF v_vendedor_id IS NULL THEN
-        RAISE EXCEPTION 'Atendimento não encontrado';
+        RAISE EXCEPTION 'Atendimento nao encontrado';
     END IF;
+
+    -- Get tenant_id from vendedor
+    SELECT tenant_id INTO v_tenant_id FROM vendedores WHERE id = v_vendedor_id;
 
     UPDATE atendimentos SET
         fim = now(),
@@ -62,7 +102,10 @@ BEGIN
         valor_venda = p_valor_venda
     WHERE id = p_atendimento_id;
 
-    SELECT COALESCE(MAX(posicao_fila), 0) INTO v_max_pos FROM vendedores;
+    -- Scope MAX to same tenant only
+    SELECT COALESCE(MAX(posicao_fila), 0) INTO v_max_pos
+    FROM vendedores
+    WHERE tenant_id = v_tenant_id;
 
     UPDATE vendedores SET
         status = 'disponivel',
@@ -81,19 +124,29 @@ CREATE OR REPLACE FUNCTION get_conversion_stats(
     total_nao_convertido BIGINT,
     total_trocas BIGINT,
     taxa_conversao NUMERIC,
-    tempo_medio_min NUMERIC
+    tempo_medio_min NUMERIC,
+    ticket_medio NUMERIC
 ) AS $$
 BEGIN
     RETURN QUERY
+    WITH dados AS (
+        SELECT * FROM atendimentos a
+        WHERE a.inicio BETWEEN p_inicio AND p_fim
+          AND a.resultado <> 'em_andamento'
+          AND a.tenant_id = get_my_tenant_id()
+    )
     SELECT
         COUNT(*)::BIGINT,
-        COUNT(*) FILTER (WHERE resultado = 'venda')::BIGINT,
-        COUNT(*) FILTER (WHERE resultado = 'nao_convertido')::BIGINT,
-        COUNT(*) FILTER (WHERE resultado = 'troca')::BIGINT,
-        ROUND(COUNT(*) FILTER (WHERE resultado = 'venda')::NUMERIC / NULLIF(COUNT(*) FILTER (WHERE resultado != 'em_andamento'), 0) * 100, 1),
-        ROUND(AVG(EXTRACT(EPOCH FROM (fim - inicio)) / 60) FILTER (WHERE fim IS NOT NULL)::NUMERIC, 1)
-    FROM atendimentos
-    WHERE inicio >= p_inicio AND inicio < p_fim;
+        COUNT(*) FILTER (WHERE d.resultado = 'venda')::BIGINT,
+        COUNT(*) FILTER (WHERE d.resultado = 'nao_convertido')::BIGINT,
+        COUNT(*) FILTER (WHERE d.resultado = 'troca')::BIGINT,
+        CASE WHEN COUNT(*) FILTER (WHERE d.resultado IN ('venda','nao_convertido')) > 0
+            THEN ROUND(COUNT(*) FILTER (WHERE d.resultado = 'venda')::numeric /
+                 COUNT(*) FILTER (WHERE d.resultado IN ('venda','nao_convertido')) * 100, 1)
+            ELSE 0 END,
+        ROUND(AVG(EXTRACT(EPOCH FROM (COALESCE(d.fim, now()) - d.inicio)) / 60)::numeric, 1),
+        ROUND(AVG(d.valor_venda) FILTER (WHERE d.resultado = 'venda'), 2)
+    FROM dados d;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -108,11 +161,13 @@ CREATE OR REPLACE FUNCTION get_loss_reasons(
 BEGIN
     RETURN QUERY
     SELECT
-        COALESCE(motivo_perda::TEXT, 'sem_motivo'),
+        motivo_perda::TEXT,
         COUNT(*)::BIGINT
     FROM atendimentos
-    WHERE inicio >= p_inicio AND inicio < p_fim
+    WHERE inicio BETWEEN p_inicio AND p_fim
       AND resultado = 'nao_convertido'
+      AND motivo_perda IS NOT NULL
+      AND tenant_id = get_my_tenant_id()
     GROUP BY motivo_perda
     ORDER BY COUNT(*) DESC;
 END;
@@ -133,18 +188,21 @@ CREATE OR REPLACE FUNCTION get_seller_ranking(
 BEGIN
     RETURN QUERY
     SELECT
-        v.id,
+        a.vendedor_id,
         v.nome,
-        COUNT(a.id)::BIGINT,
-        COUNT(a.id) FILTER (WHERE a.resultado = 'venda')::BIGINT,
-        ROUND(COUNT(a.id) FILTER (WHERE a.resultado = 'venda')::NUMERIC / NULLIF(COUNT(a.id) FILTER (WHERE a.resultado != 'em_andamento'), 0) * 100, 1),
-        ROUND(AVG(EXTRACT(EPOCH FROM (a.fim - a.inicio)) / 60) FILTER (WHERE a.fim IS NOT NULL)::NUMERIC, 1)
-    FROM vendedores v
-    LEFT JOIN atendimentos a ON a.vendedor_id = v.id
-        AND a.inicio >= p_inicio AND a.inicio < p_fim
-    WHERE v.ativo = true
-    GROUP BY v.id, v.nome
-    ORDER BY COUNT(a.id) FILTER (WHERE a.resultado = 'venda') DESC;
+        COUNT(*)::BIGINT,
+        COUNT(*) FILTER (WHERE a.resultado = 'venda')::BIGINT,
+        CASE WHEN COUNT(*) > 0
+            THEN ROUND(COUNT(*) FILTER (WHERE a.resultado = 'venda')::numeric / COUNT(*) * 100, 1)
+            ELSE 0 END,
+        ROUND(AVG(EXTRACT(EPOCH FROM (COALESCE(a.fim, now()) - a.inicio)) / 60)::numeric, 1)
+    FROM atendimentos a
+    JOIN vendedores v ON v.id = a.vendedor_id
+    WHERE a.inicio BETWEEN p_inicio AND p_fim
+      AND a.resultado <> 'em_andamento'
+      AND a.tenant_id = get_my_tenant_id()
+    GROUP BY a.vendedor_id, v.nome
+    ORDER BY COUNT(*) FILTER (WHERE a.resultado = 'venda') DESC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -164,10 +222,11 @@ BEGIN
         COUNT(*)::BIGINT,
         COUNT(*) FILTER (WHERE resultado = 'venda')::BIGINT
     FROM atendimentos
-    WHERE inicio >= p_inicio AND inicio < p_fim
-      AND resultado != 'em_andamento'
+    WHERE inicio BETWEEN p_inicio AND p_fim
+      AND resultado <> 'em_andamento'
+      AND tenant_id = get_my_tenant_id()
     GROUP BY EXTRACT(HOUR FROM inicio)
-    ORDER BY EXTRACT(HOUR FROM inicio);
+    ORDER BY 1;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -187,25 +246,57 @@ BEGIN
         COUNT(*)::BIGINT,
         MAX(inicio)
     FROM atendimentos
-    WHERE inicio >= p_inicio AND inicio < p_fim
-      AND motivo_perda = 'ruptura'
-      AND produto_ruptura IS NOT NULL AND produto_ruptura != ''
+    WHERE inicio BETWEEN p_inicio AND p_fim
+      AND produto_ruptura IS NOT NULL AND produto_ruptura <> ''
+      AND tenant_id = get_my_tenant_id()
     GROUP BY produto_ruptura
     ORDER BY COUNT(*) DESC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Reordenar fila em batch (1 query em vez de N)
--- Recebe array de UUIDs na ordem desejada, atualiza posicao_fila = índice+1
 CREATE OR REPLACE FUNCTION reordenar_fila(p_ids UUID[])
 RETURNS VOID AS $$
 BEGIN
     UPDATE vendedores
-    SET posicao_fila = sub.nova_pos,
-        status = 'disponivel'
+    SET posicao_fila = sub.nova_pos, status = 'disponivel'
     FROM (
         SELECT unnest(p_ids) AS vid, generate_series(1, array_length(p_ids, 1)) AS nova_pos
     ) sub
-    WHERE vendedores.id = sub.vid;
+    WHERE vendedores.id = sub.vid
+      AND vendedores.tenant_id = get_my_tenant_id();
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trend diário (evolução ao longo do tempo)
+CREATE OR REPLACE FUNCTION get_daily_trend(
+    p_inicio TIMESTAMPTZ,
+    p_fim TIMESTAMPTZ
+) RETURNS TABLE(
+    dia DATE,
+    total_atendimentos BIGINT,
+    total_vendas BIGINT,
+    total_nao_convertido BIGINT,
+    taxa_conversao NUMERIC,
+    ticket_medio NUMERIC
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        DATE(a.inicio),
+        COUNT(*)::BIGINT,
+        COUNT(*) FILTER (WHERE a.resultado = 'venda')::BIGINT,
+        COUNT(*) FILTER (WHERE a.resultado = 'nao_convertido')::BIGINT,
+        CASE WHEN COUNT(*) FILTER (WHERE a.resultado IN ('venda','nao_convertido')) > 0
+            THEN ROUND(COUNT(*) FILTER (WHERE a.resultado = 'venda')::numeric /
+                 COUNT(*) FILTER (WHERE a.resultado IN ('venda','nao_convertido')) * 100, 1)
+            ELSE 0 END,
+        ROUND(AVG(a.valor_venda) FILTER (WHERE a.resultado = 'venda'), 2)
+    FROM atendimentos a
+    WHERE a.inicio BETWEEN p_inicio AND p_fim
+      AND a.resultado <> 'em_andamento'
+      AND a.tenant_id = get_my_tenant_id()
+    GROUP BY DATE(a.inicio)
+    ORDER BY DATE(a.inicio);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
