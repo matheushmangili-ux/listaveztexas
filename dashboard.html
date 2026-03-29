@@ -796,8 +796,8 @@ window._showUpdateBanner = function() {
   </div>
 
   <!-- Footer -->
-  <footer style="text-align:center;margin-top:40px;padding:28px 0;border-top:1px solid var(--border-subtle)">
-    <img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:28px;object-fit:contain;opacity:.45;background:#060606;border-radius:8px;padding:6px 10px">
+  <footer style="text-align:center;margin-top:40px;padding:32px 0;border-top:1px solid var(--border-subtle)">
+    <img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:36px;object-fit:contain;background:#060606;border-radius:10px;padding:8px 14px">
   </footer>
 </div>
 
@@ -971,10 +971,11 @@ function applyChartTheme() {
   tt.bodyColor = c.tooltipBody;
   tt.borderColor = c.tooltipBorder;
   tt.borderWidth = 1;
-  tt.cornerRadius = 10;
-  tt.titleFont = { weight: 600, size: 13 };
-  tt.bodyFont = { weight: 500, size: 12 };
-  tt.padding = 12;
+  tt.cornerRadius = 12;
+  tt.titleFont = { weight: 600, size: 13, family: "'Satoshi', sans-serif" };
+  tt.bodyFont = { weight: 500, size: 12, family: "'Satoshi', sans-serif" };
+  tt.padding = 14;
+  tt.caretSize = 6;
   tt.displayColors = true;
   tt.boxWidth = 8;
   tt.boxHeight = 8;
@@ -1421,7 +1422,7 @@ async function loadHourly(range) {
   const datasets = [
     {
       label: isMultiDay ? 'Média Atendimentos' : 'Atendimentos', data: atend,
-      backgroundColor: atend.map((v, i) => i === peakIdx ? '#e2506f' : 'rgba(226,80,111,.35)'),
+      backgroundColor: atend.map((v, i) => i === peakIdx ? '#e2506f' : 'rgba(226,80,111,.5)'),
       borderColor: 'transparent',
       borderWidth: 0,
       borderRadius: 6,
@@ -1429,7 +1430,7 @@ async function loadHourly(range) {
     },
     {
       label: isMultiDay ? 'Média Vendas' : 'Vendas', data: vendas,
-      backgroundColor: 'rgba(52,211,153,.5)',
+      backgroundColor: 'rgba(52,211,153,.65)',
       borderColor: 'transparent',
       borderWidth: 0,
       borderRadius: 6,
@@ -1753,8 +1754,8 @@ async function loadScatter(range, cachedData) {
       datasets: [{
         label: 'Vendedores',
         data: points,
-        backgroundColor: points.map(p => p.y >= metaConv ? 'rgba(52,211,153,.5)' : p.y >= metaConv * 0.6 ? 'rgba(251,191,36,.4)' : 'rgba(248,113,113,.5)'),
-        borderColor: points.map(p => p.y >= metaConv ? '#34D399' : p.y >= metaConv * 0.6 ? '#FBBF24' : '#F87171'),
+        backgroundColor: points.map(p => p.y >= metaConv ? 'rgba(52,211,153,.6)' : p.y >= metaConv * 0.6 ? 'rgba(251,191,36,.5)' : 'rgba(226,80,111,.45)'),
+        borderColor: points.map(p => p.y >= metaConv ? '#34D399' : p.y >= metaConv * 0.6 ? '#FBBF24' : '#e2506f'),
         borderWidth: 1.5,
         hoverBorderWidth: 2.5
       }]
@@ -1846,8 +1847,8 @@ async function loadTempoMeta(range, cachedData) {
   const tempos = filtered.map(r => r.tempo_medio_min || 0);
   const metaTempo = metas.tempo_medio || 30;
   // Cor dinâmica: verde = abaixo da meta (bom), amarelo = perto, vermelho = acima
-  const barColors = tempos.map(t => t <= metaTempo * 0.8 ? 'rgba(52,211,153,.5)' : t <= metaTempo ? 'rgba(251,191,36,.45)' : 'rgba(248,113,113,.5)');
-  const barBorders = tempos.map(t => t <= metaTempo * 0.8 ? '#34D399' : t <= metaTempo ? '#FBBF24' : '#F87171');
+  const barColors = tempos.map(t => t <= metaTempo * 0.8 ? 'rgba(52,211,153,.65)' : t <= metaTempo ? 'rgba(251,191,36,.6)' : 'rgba(226,80,111,.55)');
+  const barBorders = tempos.map(t => t <= metaTempo * 0.8 ? '#34D399' : t <= metaTempo ? '#FBBF24' : '#e2506f');
 
   charts.tempoMeta = new Chart(ctx, {
     type: 'bar',
@@ -1859,7 +1860,7 @@ async function loadTempoMeta(range, cachedData) {
         borderColor: 'transparent',
         borderWidth: 0,
         borderRadius: 6,
-        barPercentage: 0.65
+        barPercentage: 0.75
       }]
     },
     plugins: [{
@@ -1994,7 +1995,7 @@ async function loadTrend(range) {
         c.stroke();
         c.setLineDash([]);
         c.fillStyle = '#71717A';
-        c.font = '600 9px Inter';
+        c.font = "600 9px 'Satoshi'";
         c.textAlign = 'right';
         c.fillText('Meta ' + metaConv + '%', area.right - 4, metaY - 5);
         c.restore();
@@ -2539,9 +2540,15 @@ const APP_CHANGELOG = [
 // ─── Init ───
 document.getElementById('dashDate').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
 await populateFilters();
+// Wait for Satoshi font to load before rendering charts
+await document.fonts.ready;
 await Promise.all([loadAll(), loadVendedores()]);
 _firstLoad = false;
 updateTimestamp();
+// Re-render charts after all fonts are fully available (fallback)
+document.fonts.ready.then(() => {
+  Object.values(charts).forEach(c => { if (c && c.update) c.update(); });
+});
 </script>
 </body>
 </html>
