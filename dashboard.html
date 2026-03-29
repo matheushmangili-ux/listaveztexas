@@ -961,7 +961,11 @@ Chart.defaults.responsive = true;
 Chart.defaults.maintainAspectRatio = false;
 Chart.defaults.animation = { duration: 500, easing: 'easeOutQuart' };
 // Datalabels: globally off, charts opt-in via their own datalabels config
-Chart.defaults.plugins.datalabels.display = false;
+if (Chart.defaults.plugins.datalabels) {
+  Chart.defaults.plugins.datalabels.display = false;
+} else {
+  Chart.defaults.plugins.datalabels = { display: false };
+}
 
 // ─── Theme-aware chart colors ───
 function isDarkTheme() {
