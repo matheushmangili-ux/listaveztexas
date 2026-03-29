@@ -961,11 +961,11 @@ Chart.defaults.responsive = true;
 Chart.defaults.maintainAspectRatio = false;
 Chart.defaults.animation = { duration: 500, easing: 'easeOutQuart' };
 // Datalabels: globally off, charts opt-in via their own datalabels config
-if (Chart.defaults.plugins.datalabels) {
-  Chart.defaults.plugins.datalabels.display = false;
-} else {
-  Chart.defaults.plugins.datalabels = { display: false };
+if (typeof ChartDataLabels !== 'undefined') {
+  Chart.register(ChartDataLabels);
 }
+Chart.defaults.plugins.datalabels = Chart.defaults.plugins.datalabels || {};
+Chart.defaults.plugins.datalabels.display = false;
 
 // ─── Theme-aware chart colors ───
 function isDarkTheme() {
@@ -1155,15 +1155,19 @@ async function loadAll() {
   // Carregar ranking + KPIs em paralelo (são independentes)
   let rankRes;
   try {
-    [rankRes] = await Promise.all([
+    [rankRes] = await Promise.allSettled([
       sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end }),
       hasFilter ? Promise.resolve(null) : loadKPIs(range, prevRange)
-    ]);
+    ]).then(results => {
+      if (results[1].status === 'rejected') console.error('KPI load error:', results[1].reason);
+      return [results[0].status === 'fulfilled' ? results[0].value : { data: [], error: results[0].reason }];
+    });
   } catch (fetchErr) {
+    console.error('loadAll fetch error:', fetchErr);
     toast('Erro de conexão. Verifique sua internet e recarregue.', 'error');
     return;
   }
-  if (rankRes.error) { toast('Erro ao carregar ranking: ' + rankRes.error.message, 'error'); }
+  if (rankRes.error) { toast('Erro ao carregar ranking: ' + (rankRes.error?.message || rankRes.error), 'error'); }
   let cachedRanking = rankRes.data || [];
   // Aplicar filtros no ranking
   if (filterSetor) cachedRanking = cachedRanking.filter(r => {
@@ -1207,7 +1211,7 @@ async function loadAll() {
       if (el) el.innerHTML = '<span class="neutral">filtrado</span>';
     });
   }
-  await Promise.all([
+  const results = await Promise.allSettled([
     loadMotivos(range),
     loadHourly(range),
     loadRanking(range, cachedRanking),
@@ -1218,6 +1222,7 @@ async function loadAll() {
     loadTempoMeta(range, cachedRanking),
     loadTrend(range)
   ]);
+  results.forEach((r, i) => { if (r.status === 'rejected') console.error('Dashboard load error [' + i + ']:', r.reason); });
   updateTimestamp();
 }
 
@@ -1387,22 +1392,28 @@ async function loadMotivos(range) {
 
 // ─── Hourly flow chart ───
 async function loadHourly(range) {
+  try {
   const isMultiDay = currentPeriod === 'semana' || currentPeriod === 'mes';
   // Load main data + today overlay in parallel
   const promises = [sb.rpc('get_hourly_flow', { p_inicio: range.start, p_fim: range.end })];
   if (isMultiDay) {
     const todayR = todayRange();
-    promises.push(sb.rpc('get_hourly_flow', { p_inicio: todayR.start, p_fim: todayR.end }).catch(() => ({ data: null })));
+    promises.push(sb.rpc('get_hourly_flow', { p_inicio: todayR.start, p_fim: todayR.end }).then(r => r, () => ({ data: null })));
   }
   const results = await Promise.all(promises);
   const { data, error } = results[0];
-  if (error) { toast('Erro ao carregar fluxo: ' + error.message, 'error'); return; }
+  if (error) { console.error('[loadHourly] RPC error:', error); toast('Erro ao carregar fluxo: ' + error.message, 'error'); return; }
   const todayHourlyData = isMultiDay ? (results[1]?.data || null) : null;
 
   const ctx = document.getElementById('chartHourly');
-  if (!ctx) return;
+  if (!ctx) { console.error('[loadHourly] canvas not found'); return; }
   if (charts.hourly) { charts.hourly.destroy(); charts.hourly = null; }
-  if (!data || data.length === 0) { return; }
+  if (!data || data.length === 0) {
+    console.warn('[loadHourly] no data for range', range);
+    ctx.parentElement.insertAdjacentHTML('afterbegin', '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:13px">Sem dados de fluxo no período</div>');
+    return;
+  }
+  console.log('[loadHourly] rendering chart with', data.length, 'hours of data');
 
   // Calculate number of days in range for averaging
   const rangeStart = new Date(range.start);
@@ -1433,45 +1444,47 @@ async function loadHourly(range) {
   const peakIdx = atend.indexOf(Math.max(...atend));
   const avgAtend = atend.length > 0 ? Math.round(atend.reduce((a, b) => a + b, 0) / atend.length * 10) / 10 : 0;
 
+  // Build datasets
+  const datasets = [
+    {
+      label: isMultiDay ? 'Média Atendimentos' : 'Atendimentos', data: atend,
+      backgroundColor: atend.map((v, i) => i === peakIdx ? '#E11D48' : 'rgba(225,29,72,.35)'),
+      borderColor: 'transparent',
+      borderWidth: 0,
+      borderRadius: 6,
+      barPercentage: 0.7, categoryPercentage: 0.8
+    },
+    {
+      label: isMultiDay ? 'Média Vendas' : 'Vendas', data: vendas,
+      backgroundColor: 'rgba(52,211,153,.5)',
+      borderColor: 'transparent',
+      borderWidth: 0,
+      borderRadius: 6,
+      barPercentage: 0.7, categoryPercentage: 0.8
+    }
+  ];
+  if (todayOverlay && todayOverlay.some(v => v > 0)) {
+    datasets.push({
+      label: 'Hoje',
+      data: todayOverlay,
+      type: 'line',
+      borderColor: '#E11D48',
+      backgroundColor: 'rgba(225,29,72,.08)',
+      borderWidth: 2.5,
+      pointRadius: todayOverlay.map(v => v > 0 ? 5 : 0),
+      pointBackgroundColor: '#E11D48',
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2,
+      pointHoverRadius: 7,
+      tension: 0.3,
+      fill: true,
+      order: -1
+    });
+  }
+
   charts.hourly = new Chart(ctx, {
     type: 'bar',
-    data: {
-      labels: hours,
-      datasets: [
-        {
-          label: isMultiDay ? 'Média Atendimentos' : 'Atendimentos', data: atend,
-          backgroundColor: atend.map((v, i) => i === peakIdx ? '#3B82F6' : 'rgba(59,130,246,.4)'),
-          borderColor: 'transparent',
-          borderWidth: 0,
-          borderRadius: 6,
-          barPercentage: 0.7, categoryPercentage: 0.8
-        },
-        {
-          label: isMultiDay ? 'Média Vendas' : 'Vendas', data: vendas,
-          backgroundColor: 'rgba(52,211,153,.4)',
-          borderColor: 'transparent',
-          borderWidth: 0,
-          borderRadius: 6,
-          barPercentage: 0.7, categoryPercentage: 0.8
-        },
-        ...(todayOverlay ? [{
-          label: 'Hoje',
-          data: todayOverlay,
-          type: 'line',
-          borderColor: '#E11D48',
-          backgroundColor: 'rgba(225,29,72,.08)',
-          borderWidth: 2.5,
-          pointRadius: todayOverlay.map(v => v > 0 ? 5 : 0),
-          pointBackgroundColor: '#E11D48',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          pointHoverRadius: 7,
-          tension: 0.3,
-          fill: true,
-          order: -1
-        }] : [])
-      ]
-    },
+    data: { labels: hours, datasets },
     plugins: [{
       id: 'avgLine',
       afterDatasetsDraw(chart) {
@@ -1519,6 +1532,7 @@ async function loadHourly(range) {
       }
     }
   });
+  } catch (err) { console.error('loadHourly error:', err); }
 }
 
 // ─── Sparklines (mini gráficos nos KPI cards) ───
