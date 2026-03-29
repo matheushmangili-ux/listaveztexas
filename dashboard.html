@@ -1739,11 +1739,13 @@ async function loadScatter(range, cachedData) {
   const data = cachedData || (await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end })).data;
   const ctx = document.getElementById('chartScatter');
   if (charts.scatter) charts.scatter.destroy();
-  if (!data || data.length === 0) { charts.scatter = null; return; }
+  // Filtrar apenas vendedores com atendimentos
+  const filtered = (data || []).filter(r => (r.total_atendimentos || 0) > 0);
+  if (filtered.length === 0) { charts.scatter = null; return; }
 
-  const maxAtend = Math.max(...data.map(r => r.total_atendimentos || 0), 1);
+  const maxAtend = Math.max(...filtered.map(r => r.total_atendimentos || 0), 1);
   const metaConv = metas.conversao || 70;
-  const points = data.map(r => ({
+  const points = filtered.map(r => ({
     x: r.total_atendimentos || 0,
     y: r.taxa_conversao || 0,
     label: (r.apelido || r.nome || '').split(' ')[0],
@@ -1834,13 +1836,19 @@ async function loadTempoMeta(range, cachedData) {
   const data = cachedData || (await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end })).data;
   const ctx = document.getElementById('chartTempoMeta');
   if (charts.tempoMeta) charts.tempoMeta.destroy();
-  if (!data || data.length === 0) { charts.tempoMeta = null; return; }
+  // Filtrar apenas vendedores com atendimentos (tempo > 0)
+  const filtered = (data || []).filter(r => (r.tempo_medio_min || 0) > 0);
+  if (filtered.length === 0) {
+    charts.tempoMeta = null;
+    ctx.parentElement.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-muted);gap:8px"><i class="fa-solid fa-clock" style="font-size:32px;opacity:.3"></i><span style="font-size:13px;font-weight:600">Sem dados de tempo</span><span style="font-size:10px">Nenhum atendimento finalizado no período</span></div>';
+    return;
+  }
 
-  const names = data.map(r => (r.apelido || r.nome || '?').split(' ')[0]);
-  const tempos = data.map(r => r.tempo_medio_min || 0);
+  const names = filtered.map(r => (r.apelido || r.nome || '?').split(' ')[0]);
+  const tempos = filtered.map(r => r.tempo_medio_min || 0);
   const metaTempo = metas.tempo_medio || 30;
   // Cor dinâmica: verde = abaixo da meta (bom), amarelo = perto, vermelho = acima
-  const barColors = tempos.map(t => t <= metaTempo * 0.8 ? 'rgba(52,211,153,.4)' : t <= metaTempo ? 'rgba(251,191,36,.35)' : 'rgba(248,113,113,.4)');
+  const barColors = tempos.map(t => t <= metaTempo * 0.8 ? 'rgba(52,211,153,.5)' : t <= metaTempo ? 'rgba(251,191,36,.45)' : 'rgba(248,113,113,.5)');
   const barBorders = tempos.map(t => t <= metaTempo * 0.8 ? '#34D399' : t <= metaTempo ? '#FBBF24' : '#F87171');
 
   charts.tempoMeta = new Chart(ctx, {
@@ -1880,6 +1888,7 @@ async function loadTempoMeta(range, cachedData) {
     options: {
       responsive: true, maintainAspectRatio: false,
       indexAxis: 'y',
+      layout: { padding: { top: 20, right: 40 } },
       animation: { duration: 400 },
       interaction: { mode: 'index', intersect: false, axis: 'y' },
       plugins: {
@@ -1898,13 +1907,18 @@ async function loadTempoMeta(range, cachedData) {
           display: true,
           anchor: 'end', align: 'end', offset: 4,
           color: chartColors().datalabel,
-          font: { weight: 700, size: 10 },
-          formatter: v => v + 'min'
+          font: { weight: 700, size: 11 },
+          formatter: v => Math.round(v) + 'min'
         }
       },
       scales: {
-        x: { beginAtZero: true, grid: { color: chartColors().grid, drawBorder: false }, ticks: { font: { size: 11, weight: 500 }, callback: v => v + 'min', padding: 4, color: chartColors().text } },
-        y: { grid: { display: false }, ticks: { font: { size: 11, weight: 600 }, color: chartColors().text } }
+        x: {
+          beginAtZero: true,
+          suggestedMax: Math.max(...tempos, metaTempo) * 1.15,
+          grid: { color: chartColors().grid, drawBorder: false },
+          ticks: { font: { size: 11, weight: 500 }, callback: v => v + 'min', padding: 4, color: chartColors().text, stepSize: 5 }
+        },
+        y: { grid: { display: false }, ticks: { font: { size: 12, weight: 700 }, color: chartColors().textStrong } }
       }
     }
   });
