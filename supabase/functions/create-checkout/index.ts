@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
       'line_items[0][price]': PRICE_ID,
       'line_items[0][quantity]': '1',
       'customer_email': email,
-      'success_url': `${BASE_URL}/setup?token={CHECKOUT_SESSION_ID}&plano=${plano}`,
+      'success_url': `${BASE_URL}/setup?session_id={CHECKOUT_SESSION_ID}`,
       'cancel_url': `${BASE_URL}/landing.html#precos`,
       'metadata[plano]': plano,
       'metadata[email]': email,

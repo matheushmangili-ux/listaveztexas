@@ -325,6 +325,53 @@ window._showUpdateBanner = function() {
     gap: 8px;
   }
   [data-theme="light"] .chart-card h3 { color: rgba(0,0,0,.5); }
+  [data-theme="light"] .chart-card {
+    background: #FFFFFF;
+    border-color: rgba(0,0,0,.06);
+    box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  }
+  [data-theme="light"] .chart-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,.1);
+    border-color: rgba(0,0,0,.1);
+  }
+  [data-theme="light"] .kpi-card {
+    background: #FFFFFF;
+    border-color: rgba(0,0,0,.06);
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  [data-theme="light"] .kpi-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,.1);
+    border-color: rgba(0,0,0,.1);
+  }
+  [data-theme="light"] .kpi-value { color: #18181B; }
+  [data-theme="light"] .kpi-compare .up {
+    background: rgba(22,163,74,.1); color: #16A34A;
+  }
+  [data-theme="light"] .kpi-compare .down {
+    background: rgba(220,38,38,.1); color: #DC2626;
+  }
+  [data-theme="light"] .kpi-compare .neutral {
+    background: rgba(113,113,122,.08); color: #71717A;
+  }
+  [data-theme="light"] .filter-apply-btn {
+    background: #BE123C; border-color: #BE123C; color: #fff;
+  }
+  [data-theme="light"] .period-tabs button {
+    background: rgba(0,0,0,.03); color: #52525B; border-color: rgba(0,0,0,.06);
+  }
+  [data-theme="light"] .period-tabs button.active {
+    background: #BE123C; color: #fff; border-color: #BE123C;
+  }
+  [data-theme="light"] .filter-bar select {
+    background: #FFFFFF; border-color: rgba(0,0,0,.1); color: #18181B;
+  }
+  [data-theme="light"] .dash-header {
+    background: #FFFFFF; border-color: rgba(0,0,0,.06);
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  }
+  [data-theme="light"] #statusMarquee {
+    background: #FFFFFF; border-color: rgba(0,0,0,.06);
+  }
   .chart-card h3 i { font-size: 14px; opacity: .5; }
   .chart-box { position: relative; height: 340px; }
   .ranking-table {
@@ -518,6 +565,20 @@ window._showUpdateBanner = function() {
   }
   .filter-bar select:focus { outline: none; border-color: var(--accent); }
   .filter-bar label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
+  .filter-apply-btn {
+    padding: 6px 14px; border: 1px solid var(--accent); border-radius: var(--radius-sm);
+    background: var(--accent); color: #fff; font-family: var(--font-body);
+    font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;
+    transition: background-color .15s ease, transform .1s ease;
+  }
+  .filter-apply-btn:hover { filter: brightness(1.15); }
+  .filter-apply-btn:active { transform: scale(.97); }
+  .filter-clear-btn {
+    padding: 6px 8px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
+    background: var(--bg-surface); color: var(--text-muted); font-size: 11px; cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease;
+  }
+  .filter-clear-btn:hover { border-color: var(--danger); color: var(--danger); }
 
   /* ─── Meta progress bar ─── */
   .meta-bar { width: 100%; height: 4px; background: rgba(255,255,255,.06); border-radius: 2px; margin-top: 8px; overflow: hidden; }
@@ -587,13 +648,19 @@ window._showUpdateBanner = function() {
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <div class="filter-bar">
           <label>Setor:</label>
-          <select id="filterSetor" onchange="applyFilters()">
+          <select id="filterSetor" onchange="onSetorChange()">
             <option value="">Todos</option>
           </select>
           <label>Vendedor:</label>
-          <select id="filterVendedor" onchange="applyFilters()">
+          <select id="filterVendedor">
             <option value="">Todos</option>
           </select>
+          <button class="filter-apply-btn" onclick="applyFilters()" title="Aplicar filtros" style="padding:6px 14px;background:#E11D48;color:#fff;border:1px solid #E11D48;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:var(--font-body)">
+            <i class="fa-solid fa-filter"></i> Aplicar
+          </button>
+          <button class="filter-clear-btn" id="filterClearBtn" onclick="clearFilters()" title="Limpar filtros" style="display:none;padding:6px 8px;background:var(--bg-surface);color:var(--text-muted);border:1px solid var(--border-subtle);border-radius:4px;font-size:11px;cursor:pointer">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
         </div>
         <div style="position:relative;display:inline-block" id="exportDropdown">
           <button class="header-btn" style="width:auto;padding:0 10px;gap:6px;font-size:11px;font-weight:600;color:var(--text-muted)" onclick="document.getElementById('exportMenu').classList.toggle('open')">
@@ -845,7 +912,13 @@ let user;
 try { user = await requireRole(['gerente', 'admin', 'owner']); } catch(e) {}
 if (!user) {
   window.handleLogout = () => { window.location.href = tenantPath('/login'); };
-  window.toggleTheme = () => { document.documentElement.classList.toggle('light'); };
+  window.toggleTheme = () => {
+    const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('lv-theme', next);
+    applyChartTheme();
+  };
 }
 const tenantId = user ? getTenantId(user) : null;
 
@@ -880,28 +953,52 @@ const _kpi = {
 
 Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
 Chart.defaults.font.weight = 500;
-Chart.defaults.color = 'rgba(255,255,255,.5)';
-Chart.defaults.borderColor = 'rgba(255,255,255,.04)';
-Chart.defaults.plugins.tooltip.enabled = true;
-Chart.defaults.plugins.tooltip.backgroundColor = '#1E1E2E';
-Chart.defaults.plugins.tooltip.titleColor = '#fff';
-Chart.defaults.plugins.tooltip.bodyColor = 'rgba(255,255,255,.8)';
-Chart.defaults.plugins.tooltip.borderColor = 'rgba(255,255,255,.1)';
-Chart.defaults.plugins.tooltip.borderWidth = 1;
-Chart.defaults.plugins.tooltip.cornerRadius = 10;
-Chart.defaults.plugins.tooltip.titleFont = { weight: 600, size: 13 };
-Chart.defaults.plugins.tooltip.bodyFont = { weight: 500, size: 12 };
-Chart.defaults.plugins.tooltip.padding = 12;
-Chart.defaults.plugins.tooltip.displayColors = true;
-Chart.defaults.plugins.tooltip.boxWidth = 8;
-Chart.defaults.plugins.tooltip.boxHeight = 8;
-Chart.defaults.plugins.tooltip.boxPadding = 6;
-Chart.defaults.plugins.tooltip.usePointStyle = true;
-// Disable datalabels globally, enable per-chart
 Chart.defaults.plugins.datalabels = { display: false };
 Chart.defaults.responsive = true;
 Chart.defaults.maintainAspectRatio = false;
 Chart.defaults.animation = { duration: 500, easing: 'easeOutQuart' };
+
+// ─── Theme-aware chart colors ───
+function isDarkTheme() {
+  return document.documentElement.getAttribute('data-theme') !== 'light';
+}
+function chartColors() {
+  const dark = isDarkTheme();
+  return {
+    text: dark ? 'rgba(255,255,255,.55)' : 'rgba(0,0,0,.55)',
+    textStrong: dark ? 'rgba(255,255,255,.7)' : 'rgba(0,0,0,.7)',
+    textMuted: dark ? 'rgba(255,255,255,.4)' : 'rgba(0,0,0,.35)',
+    grid: dark ? 'rgba(255,255,255,.04)' : 'rgba(0,0,0,.06)',
+    tooltipBg: dark ? '#1E1E2E' : '#FFFFFF',
+    tooltipTitle: dark ? '#fff' : '#18181B',
+    tooltipBody: dark ? 'rgba(255,255,255,.8)' : 'rgba(0,0,0,.7)',
+    tooltipBorder: dark ? 'rgba(255,255,255,.1)' : 'rgba(0,0,0,.1)',
+    centerText: dark ? '#FAFAFA' : '#18181B',
+    datalabel: dark ? '#D4D4D8' : '#3F3F46'
+  };
+}
+
+function applyChartTheme() {
+  const c = chartColors();
+  Chart.defaults.color = c.text;
+  Chart.defaults.borderColor = c.grid;
+  Chart.defaults.plugins.tooltip.enabled = true;
+  Chart.defaults.plugins.tooltip.backgroundColor = c.tooltipBg;
+  Chart.defaults.plugins.tooltip.titleColor = c.tooltipTitle;
+  Chart.defaults.plugins.tooltip.bodyColor = c.tooltipBody;
+  Chart.defaults.plugins.tooltip.borderColor = c.tooltipBorder;
+  Chart.defaults.plugins.tooltip.borderWidth = 1;
+  Chart.defaults.plugins.tooltip.cornerRadius = 10;
+  Chart.defaults.plugins.tooltip.titleFont = { weight: 600, size: 13 };
+  Chart.defaults.plugins.tooltip.bodyFont = { weight: 500, size: 12 };
+  Chart.defaults.plugins.tooltip.padding = 12;
+  Chart.defaults.plugins.tooltip.displayColors = true;
+  Chart.defaults.plugins.tooltip.boxWidth = 8;
+  Chart.defaults.plugins.tooltip.boxHeight = 8;
+  Chart.defaults.plugins.tooltip.boxPadding = 6;
+  Chart.defaults.plugins.tooltip.usePointStyle = true;
+}
+applyChartTheme();
 // Chart palette
 const CHART_PALETTE = ['#3B82F6', '#34D399', '#F59E0B', '#F87171', '#8B5CF6', '#06B6D4'];
 
@@ -959,14 +1056,32 @@ function updateVendedorFilter() {
   selVend.innerHTML = '<option value="">Todos os vendedores</option>' + filtered.map(v => `<option value="${v.id}">${v.apelido || v.nome}</option>`).join('');
 }
 
-window.applyFilters = function() {
+window.onSetorChange = function() {
   filterSetor = document.getElementById('filterSetor').value;
-  filterVendedor = document.getElementById('filterVendedor').value;
   updateVendedorFilter();
+  // Reset vendor if not in new list
   if (filterVendedor && !document.querySelector(`#filterVendedor option[value="${filterVendedor}"]`)) {
     filterVendedor = '';
     document.getElementById('filterVendedor').value = '';
   }
+};
+
+window.applyFilters = function() {
+  filterSetor = document.getElementById('filterSetor').value;
+  filterVendedor = document.getElementById('filterVendedor').value;
+  const clearBtn = document.getElementById('filterClearBtn');
+  if (clearBtn) clearBtn.style.display = (filterSetor || filterVendedor) ? '' : 'none';
+  loadAll();
+};
+
+window.clearFilters = function() {
+  filterSetor = '';
+  filterVendedor = '';
+  document.getElementById('filterSetor').value = '';
+  document.getElementById('filterVendedor').value = '';
+  updateVendedorFilter();
+  const clearBtn = document.getElementById('filterClearBtn');
+  if (clearBtn) clearBtn.style.display = 'none';
   loadAll();
 };
 
@@ -1041,19 +1156,36 @@ async function loadAll() {
   });
   if (filterVendedor) cachedRanking = cachedRanking.filter(r => r.vendedor_id === filterVendedor);
   _cachedRanking = cachedRanking;
-  // Se filtro ativo, recalcular KPIs a partir do ranking filtrado
+  // Se filtro ativo, buscar dados reais dos atendimentos filtrados
   if (hasFilter) {
-    const totAtend = cachedRanking.reduce((s, r) => s + (r.total_atendimentos || 0), 0);
-    const totVendas = cachedRanking.reduce((s, r) => s + (r.total_vendas || 0), 0);
-    const totNaoConv = totAtend - totVendas;
-    const conv = totAtend > 0 ? Math.round(totVendas / totAtend * 1000) / 10 : 0;
-    const tempoArr = cachedRanking.filter(r => r.tempo_medio_min > 0).map(r => r.tempo_medio_min);
-    const tempoMed = tempoArr.length > 0 ? Math.round(tempoArr.reduce((a, b) => a + b, 0) / tempoArr.length * 10) / 10 : 0;
+    // Query direta para KPIs precisos do vendedor/setor filtrado
+    let aq = sb.from('atendimentos')
+      .select('resultado, valor_venda, inicio, fim')
+      .gte('inicio', range.start).lt('inicio', range.end)
+      .neq('resultado', 'em_andamento');
+    if (tenantId) aq = aq.eq('tenant_id', tenantId);
+    if (filterVendedor) {
+      aq = aq.eq('vendedor_id', filterVendedor);
+    } else if (filterSetor) {
+      const setorIds = _cachedVendedores.filter(v => (v.setor || 'loja') === filterSetor).map(v => v.id);
+      if (setorIds.length > 0) aq = aq.in('vendedor_id', setorIds);
+    }
+    const { data: atendData } = await aq;
+    const items = atendData || [];
+    const totAtend = items.length;
+    const totVendas = items.filter(a => a.resultado === 'venda').length;
+    const trocasComValor = items.filter(a => a.resultado === 'troca' && a.valor_venda > 0).length;
+    const totNaoConv = items.filter(a => a.resultado === 'nao_convertido').length;
+    const conv = totAtend > 0 ? Math.round((totVendas + trocasComValor) / totAtend * 1000) / 10 : 0;
+    const tempos = items.filter(a => a.inicio && a.fim).map(a => (new Date(a.fim) - new Date(a.inicio)) / 60000);
+    const tempoMed = tempos.length > 0 ? Math.round(tempos.reduce((a, b) => a + b, 0) / tempos.length * 10) / 10 : 0;
+    const vendaValues = items.filter(a => a.resultado === 'venda' && a.valor_venda > 0).map(a => a.valor_venda);
+    const ticketMed = vendaValues.length > 0 ? Math.round(vendaValues.reduce((a, b) => a + b, 0) / vendaValues.length) : 0;
     if (_kpi.total) _kpi.total.textContent = totAtend;
     if (_kpi.conv) _kpi.conv.textContent = conv + '%';
     if (_kpi.loss) _kpi.loss.textContent = totNaoConv;
     if (_kpi.time) _kpi.time.textContent = tempoMed + 'min';
-    if (_kpi.ticket) _kpi.ticket.textContent = '—';
+    if (_kpi.ticket) _kpi.ticket.textContent = ticketMed > 0 ? 'R$ ' + ticketMed.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '—';
     ['kpiTotalCmp', 'kpiConvCmp', 'kpiLossCmp', 'kpiTimeCmp', 'kpiTicketCmp'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.innerHTML = '<span class="neutral">filtrado</span>';
@@ -1179,11 +1311,12 @@ async function loadMotivos(range) {
         c.save();
         c.textAlign = 'center';
         c.textBaseline = 'middle';
+        const _cc = chartColors();
         c.font = "700 28px 'Inter'";
-        c.fillStyle = '#FAFAFA';
+        c.fillStyle = _cc.centerText;
         c.fillText(totalMotivos, cx, cy - 8);
         c.font = "600 9px 'Inter'";
-        c.fillStyle = 'rgba(255,255,255,.4)';
+        c.fillStyle = _cc.textMuted;
         c.fillText('PERDAS', cx, cy + 10);
         c.restore();
       }
@@ -1198,12 +1331,13 @@ async function loadMotivos(range) {
           position: 'bottom',
           labels: {
             usePointStyle: true, pointStyle: 'circle', padding: 14, boxWidth: 8,
-            color: 'rgba(255,255,255,.6)',
+            color: chartColors().textStrong,
             font: { size: 11, weight: 600 },
             generateLabels: chart => chart.data.labels.map((l, i) => ({
               text: l + ' (' + values[i] + ')',
               fillStyle: colors[i],
               strokeStyle: 'transparent',
+              fontColor: chartColors().textStrong,
               pointStyle: 'circle',
               index: i
             }))
@@ -1292,7 +1426,7 @@ async function loadHourly(range) {
         c.stroke();
         c.setLineDash([]);
         c.font = "600 9px 'Inter'";
-        c.fillStyle = 'rgba(250,204,21,.7)';
+        c.fillStyle = isDarkTheme() ? 'rgba(250,204,21,.7)' : 'rgba(180,140,0,.7)';
         c.textAlign = 'right';
         c.fillText('média ' + avgAtend, x.right, yPos - 4);
         c.restore();
@@ -1303,7 +1437,7 @@ async function loadHourly(range) {
       maintainAspectRatio: false,
       animation: { duration: 400 },
       plugins: {
-        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, boxWidth: 8, color: 'rgba(255,255,255,.6)', font: { size: 11, weight: 600 } } },
+        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, boxWidth: 8, color: chartColors().textStrong, font: { size: 11, weight: 600 } } },
         tooltip: {
           callbacks: {
             afterBody: items => {
@@ -1316,8 +1450,8 @@ async function loadHourly(range) {
         datalabels: { display: false }
       },
       scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 11, weight: 500 }, color: 'rgba(255,255,255,.5)' } },
-        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.04)', drawBorder: false }, ticks: { font: { size: 11, weight: 500 }, color: 'rgba(255,255,255,.5)', stepSize: 1, padding: 8 } }
+        x: { grid: { display: false }, ticks: { font: { size: 11, weight: 500 }, color: chartColors().text } },
+        y: { beginAtZero: true, grid: { color: chartColors().grid, drawBorder: false }, ticks: { font: { size: 11, weight: 500 }, color: chartColors().text, stepSize: 1, padding: 8 } }
       }
     }
   });
@@ -1599,7 +1733,7 @@ async function loadScatter(range, cachedData) {
         },
         datalabels: {
           display: true,
-          color: 'rgba(255,255,255,.7)',
+          color: chartColors().textStrong,
           font: { weight: 600, size: 10 },
           anchor: 'end', align: 'top', offset: 2,
           formatter: (val, ctx2) => ctx2.dataset.data[ctx2.dataIndex].label
@@ -1607,14 +1741,14 @@ async function loadScatter(range, cachedData) {
       },
       scales: {
         x: {
-          title: { display: true, text: 'VOLUME', font: { size: 9, weight: 700 }, color: 'rgba(255,255,255,.4)', padding: 4 },
-          grid: { color: 'rgba(255,255,255,.04)', drawBorder: false },
-          ticks: { font: { size: 11, weight: 500 }, color: 'rgba(255,255,255,.5)' }
+          title: { display: true, text: 'VOLUME', font: { size: 9, weight: 700 }, color: chartColors().textMuted, padding: 4 },
+          grid: { color: chartColors().grid, drawBorder: false },
+          ticks: { font: { size: 11, weight: 500 }, color: chartColors().text }
         },
         y: {
-          title: { display: true, text: 'CONVERSÃO %', font: { size: 9, weight: 700 }, color: 'rgba(255,255,255,.4)', padding: 4 },
-          grid: { color: 'rgba(255,255,255,.04)', drawBorder: false },
-          ticks: { font: { size: 11, weight: 500 }, callback: v => v + '%', color: 'rgba(255,255,255,.5)' },
+          title: { display: true, text: 'CONVERSÃO %', font: { size: 9, weight: 700 }, color: chartColors().textMuted, padding: 4 },
+          grid: { color: chartColors().grid, drawBorder: false },
+          ticks: { font: { size: 11, weight: 500 }, callback: v => v + '%', color: chartColors().text },
           beginAtZero: true, max: 100
         }
       }
@@ -1689,14 +1823,14 @@ async function loadTempoMeta(range, cachedData) {
         datalabels: {
           display: true,
           anchor: 'end', align: 'end', offset: 4,
-          color: '#D4D4D8',
+          color: chartColors().datalabel,
           font: { weight: 700, size: 10 },
           formatter: v => v + 'min'
         }
       },
       scales: {
-        x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.04)', drawBorder: false }, ticks: { font: { size: 11, weight: 500 }, callback: v => v + 'min', padding: 4, color: 'rgba(255,255,255,.5)' } },
-        y: { grid: { display: false }, ticks: { font: { size: 11, weight: 600 }, color: 'rgba(255,255,255,.5)' } }
+        x: { beginAtZero: true, grid: { color: chartColors().grid, drawBorder: false }, ticks: { font: { size: 11, weight: 500 }, callback: v => v + 'min', padding: 4, color: chartColors().text } },
+        y: { grid: { display: false }, ticks: { font: { size: 11, weight: 600 }, color: chartColors().text } }
       }
     }
   });
@@ -1802,7 +1936,7 @@ async function loadTrend(range) {
       animation: { duration: 800, easing: 'easeOutQuart' },
       interaction: { mode: 'index', intersect: false },
       plugins: {
-        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, boxWidth: 8, color: 'rgba(255,255,255,.6)', font: { size: 11, weight: 600 } } },
+        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, boxWidth: 8, color: chartColors().textStrong, font: { size: 11, weight: 600 } } },
         tooltip: {
           callbacks: {
             label: c => {
@@ -1823,19 +1957,19 @@ async function loadTrend(range) {
       scales: {
         x: {
           grid: { display: false },
-          ticks: { font: { size: 9, weight: 600 }, color: 'rgba(255,255,255,.5)', maxRotation: 45, autoSkipPadding: 8 }
+          ticks: { font: { size: 9, weight: 600 }, color: chartColors().text, maxRotation: 45, autoSkipPadding: 8 }
         },
         y: {
           beginAtZero: true, position: 'left',
-          grid: { color: 'rgba(255,255,255,.04)', drawBorder: false },
-          ticks: { font: { size: 10, weight: 500 }, stepSize: 1, padding: 8, color: 'rgba(255,255,255,.5)' },
-          title: { display: true, text: 'VOLUME', font: { size: 9, weight: 700 }, color: 'rgba(255,255,255,.4)' }
+          grid: { color: chartColors().grid, drawBorder: false },
+          ticks: { font: { size: 10, weight: 500 }, stepSize: 1, padding: 8, color: chartColors().text },
+          title: { display: true, text: 'VOLUME', font: { size: 9, weight: 700 }, color: chartColors().textMuted }
         },
         y1: {
           beginAtZero: true, max: 100, position: 'right',
           grid: { drawOnChartArea: false },
-          ticks: { font: { size: 10, weight: 500 }, callback: v => v + '%', color: 'rgba(255,255,255,.5)' },
-          title: { display: true, text: 'CONVERSÃO', font: { size: 9, weight: 700 }, color: 'rgba(255,255,255,.4)' }
+          ticks: { font: { size: 10, weight: 500 }, callback: v => v + '%', color: chartColors().text },
+          title: { display: true, text: 'CONVERSÃO', font: { size: 9, weight: 700 }, color: chartColors().textMuted }
         }
       }
     }
@@ -1843,7 +1977,11 @@ async function loadTrend(range) {
 }
 
 window.handleLogout = function() { logout(); };
-window.toggleTheme = toggleTheme;
+window.toggleTheme = function() {
+  const next = toggleTheme();
+  applyChartTheme();
+  loadAll();
+};
 
 // ─── Gestão de Vendedores ───
 async function loadVendedores() {
@@ -2158,6 +2296,15 @@ function updateTimestamp() { if (_lastUpdateEl) _lastUpdateEl.textContent = '· 
 
 // ─── Changelog versionado (mesma lista do tablet — adicione novas entradas no TOPO) ───
 const APP_CHANGELOG = [
+  {
+    version: '3.2.0',
+    date: '2026-03-29',
+    items: [
+      { icon: 'fa-filter', text: 'Filtro por vendedor agora atualiza KPIs com dados reais (atendimentos, conversão, ticket médio)' },
+      { icon: 'fa-square-check', text: 'Botão "Aplicar" para confirmar filtros + botão limpar' },
+      { icon: 'fa-bug', text: 'Correção: KPIs não atualizavam ao filtrar por vendedor' }
+    ]
+  },
   {
     version: '3.1.0',
     date: '2026-03-29',

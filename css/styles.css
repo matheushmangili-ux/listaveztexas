@@ -400,6 +400,18 @@ body {
   font-weight: 600;
 }
 [data-theme="light"] .kpi-label { color: rgba(0,0,0,.45); }
+[data-theme="light"] .kpi-value { color: #18181B; }
+[data-theme="light"] .kpi-card {
+  background: #FFFFFF; border-color: rgba(0,0,0,.06);
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+[data-theme="light"] .kpi-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,.1);
+  border-color: rgba(0,0,0,.1);
+}
+[data-theme="light"] .kpi-compare .up { background: rgba(22,163,74,.1); color: #16A34A; }
+[data-theme="light"] .kpi-compare .down { background: rgba(220,38,38,.1); color: #DC2626; }
+[data-theme="light"] .kpi-compare .neutral { background: rgba(113,113,122,.08); color: #71717A; }
 
 /* ─── Animations ─── */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }

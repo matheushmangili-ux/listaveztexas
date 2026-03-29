@@ -366,6 +366,11 @@
       <i class="fa-solid fa-circle-xmark"></i>
       <span id="setupErrorMsg"></span>
     </div>
+    <div id="setupLoading" style="display:none;text-align:center;padding:48px 24px">
+      <div style="width:40px;height:40px;border:3px solid rgba(255,255,255,.1);border-top-color:#E11D48;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 20px"></div>
+      <p style="font-size:15px;font-weight:600;color:#FAFAFA;margin:0 0 8px">Confirmando pagamento...</p>
+      <p style="font-size:12px;color:#71717A;margin:0">Isso pode levar alguns segundos</p>
+    </div>
 
     <!-- Step 1: Store Info -->
     <div class="step-panel active" data-panel="1">
@@ -511,12 +516,14 @@ let sectors = ['loja'];
 let vendors = [];
 let createdSlug = '';
 
-// Check for onboarding token
+// Check for onboarding token or Stripe session_id
 const params = new URLSearchParams(window.location.search);
-const token = params.get('token');
+let token = params.get('token');
+const sessionId = params.get('session_id');
 
 // Validate token on load
 (async function init() {
+  // Direct token from email link
   if (token) {
     const { data, error } = await sb.from('onboarding_tokens')
       .select('*')
@@ -526,6 +533,39 @@ const token = params.get('token');
       .single();
     if (error || !data) {
       showError('Token inválido ou expirado. Por favor, faça uma nova compra.');
+      return;
+    }
+  }
+  // Stripe redirect — poll for webhook to create token
+  else if (sessionId) {
+    document.getElementById('setupLoading').style.display = '';
+    const maxAttempts = 15;
+    let attempt = 0;
+    let found = false;
+    while (attempt < maxAttempts && !found) {
+      const { data } = await sb.from('onboarding_tokens')
+        .select('*')
+        .eq('stripe_session_id', sessionId)
+        .eq('used', false)
+        .single();
+      if (data) {
+        token = data.token;
+        found = true;
+        // Update URL to use token instead of session_id
+        const url = new URL(window.location);
+        url.searchParams.delete('session_id');
+        url.searchParams.set('token', token);
+        history.replaceState(null, '', url);
+        break;
+      }
+      attempt++;
+      if (attempt < maxAttempts) {
+        await new Promise(r => setTimeout(r, 2000));
+      }
+    }
+    document.getElementById('setupLoading').style.display = 'none';
+    if (!found) {
+      showError('Pagamento em processamento. Verifique seu e-mail em alguns minutos — enviaremos o link de configuração.');
       return;
     }
   }
