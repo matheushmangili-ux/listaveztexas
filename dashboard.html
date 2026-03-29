@@ -605,7 +605,6 @@ window._showUpdateBanner = function() {
     <!-- Top: Brand + Actions -->
     <div class="dash-header-top">
       <div class="dash-header-brand">
-        <img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:28px;width:28px;object-fit:contain;margin-right:8px;border-radius:4px">
         <div class="dash-header-logo" id="headerLogo">MV</div>
         <div>
           <div class="dash-header-title" id="headerTitle">Minha Vez</div>
@@ -896,7 +895,7 @@ if (tenant) {
     if (tenant.logo_url) {
       headerLogo.innerHTML = `<img src="${tenant.logo_url}" alt="${tenant.nome_loja || ''}">`;
     } else {
-      headerLogo.textContent = (tenant.nome_loja || 'MV').substring(0, 2).toUpperCase();
+      headerLogo.innerHTML = `<img src="/assets/logo-minhavez-new.png" alt="minhavez">`;
     }
   }
   // Show tenant slug in footer for support
