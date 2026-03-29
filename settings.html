@@ -196,7 +196,7 @@
     letter-spacing: .05em;
   }
   .plan-badge.starter { background: rgba(96,165,250,.1); color: #60A5FA; border: 1px solid rgba(96,165,250,.2); }
-  .plan-badge.pro { background: rgba(225,29,72,.1); color: #E11D48; border: 1px solid rgba(225,29,72,.2); }
+  .plan-badge.pro { background: rgba(226,80,111,.1); color: #e2506f; border: 1px solid rgba(226,80,111,.2); }
   /* URL cards */
   .url-display {
     padding: 10px 14px;
@@ -296,9 +296,9 @@
             <label class="form-label">Cor principal</label>
             <div class="color-row">
               <div class="color-swatch" id="colorSwatch">
-                <input type="color" id="settColor" value="#E11D48">
+                <input type="color" id="settColor" value="#e2506f">
               </div>
-              <input id="settColorText" class="input" type="text" value="#E11D48" maxlength="7" style="max-width:120px;font-family:var(--font-mono);font-size:13px">
+              <input id="settColorText" class="input" type="text" value="#e2506f" maxlength="7" style="max-width:120px;font-family:var(--font-mono);font-size:13px">
             </div>
           </div>
           <div class="form-group" style="margin-bottom:0">
@@ -458,7 +458,7 @@ let tenantSectors = [];
 
   // Populate UI
   document.getElementById('settStoreName').value = tenant.nome_loja || '';
-  const color = tenant.cor_primaria || '#E11D48';
+  const color = tenant.cor_primaria || '#e2506f';
   document.getElementById('settColor').value = color;
   document.getElementById('settColorText').value = color;
   document.getElementById('colorSwatch').style.background = color;

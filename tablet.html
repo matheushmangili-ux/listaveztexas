@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/styles.css">
-<meta name="theme-color" content="#09090B">
+<meta name="theme-color" content="#060606">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -52,7 +52,7 @@ window._showUpdateBanner = function() {
   if (lastUpdate && (Date.now() - parseInt(lastUpdate)) < 10000) return;
   const banner = document.createElement('div');
   banner.id = 'updateBanner';
-  banner.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--accent,#facc15);color:#09090B;padding:12px 20px;border-radius:12px;font-family:Inter,sans-serif;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;box-shadow:0 4px 24px rgba(0,0,0,.3);cursor:pointer;animation:slideUpBanner .3s ease';
+  banner.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--accent,#facc15);color:#060606;padding:12px 20px;border-radius:12px;font-family:Inter,sans-serif;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;box-shadow:0 4px 24px rgba(0,0,0,.3);cursor:pointer;animation:slideUpBanner .3s ease';
   banner.innerHTML = '<i class="fa-solid fa-arrow-rotate-right"></i> Atualização disponível — toque para atualizar';
   banner.addEventListener('click', () => {
     sessionStorage.setItem('_updateClickedAt', String(Date.now()));
@@ -156,7 +156,7 @@ window.addEventListener('error', function(e) {
   .setor-tab .tab-label { font-size: 11px; font-weight: 600; display: block; margin-top: 2px; text-transform: uppercase; letter-spacing: .05em; }
   .setor-tab.active {
     background: var(--accent);
-    color: #09090B;
+    color: #060606;
     border-color: var(--accent);
   }
   .setor-tab:not(.active):hover { background: var(--bg-hover); }
@@ -357,7 +357,7 @@ window.addEventListener('error', function(e) {
       0 1px 2px rgba(0,0,0,.2),
       inset 0 1px 0 rgba(255,255,255,.4),
       inset 0 -1px 0 rgba(0,0,0,.1),
-      0 0 12px rgba(225,29,72,.4);
+      0 0 12px rgba(226,80,111,.4);
   }
 
   /* Check-in items */
@@ -504,7 +504,7 @@ window.addEventListener('error', function(e) {
     font-family: var(--font-mono);
     font-weight: 700;
     font-size: 24px;
-    color: #09090B;
+    color: #060606;
   }
 
   /* Idle state */
@@ -2321,7 +2321,7 @@ function renderActiveAtendimentos() {
     const card = document.createElement('div');
     card.className = 'atend-card';
     card.id = 'atend-' + atend.id;
-    const prefBadge = atend.preferencial ? '<span style="display:inline-block;background:var(--warning);color:#09090B;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:6px;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle">PREF</span>' : '';
+    const prefBadge = atend.preferencial ? '<span style="display:inline-block;background:var(--warning);color:#060606;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:6px;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle">PREF</span>' : '';
     const clientBadge = (atend._clientCount && atend._clientCount > 1) ? `<span style="display:inline-block;background:var(--info);color:#fff;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:6px;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle">${atend._clientCount} clientes</span>` : '';
     card.dataset.atendId = atend.id;
     card.innerHTML = `
@@ -2953,7 +2953,7 @@ function openConfirmFila(vendedorId) {
     <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Colocar na fila de atendimento?</div>
     <div style="display:flex;gap:10px">
       <button onclick="closeConfirmFila()" style="flex:1;padding:12px;border:1px solid var(--border-subtle);border-radius:12px;background:var(--bg-hover);color:var(--text-muted);font-weight:600;font-size:14px;cursor:pointer;font-family:var(--font-body)">Cancelar</button>
-      <button onclick="confirmAddToQueue('${vendedorId}')" style="flex:1;padding:12px;border:none;border-radius:12px;background:var(--success);color:#09090B;font-weight:700;font-size:14px;cursor:pointer;font-family:var(--font-body)">
+      <button onclick="confirmAddToQueue('${vendedorId}')" style="flex:1;padding:12px;border:none;border-radius:12px;background:var(--success);color:#060606;font-weight:700;font-size:14px;cursor:pointer;font-family:var(--font-body)">
         <i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar
       </button>
     </div>
@@ -3247,7 +3247,7 @@ if (APP_CHANGELOG[0]) {
       <p style="font-size:12px;color:var(--text-muted);margin:0">minhavez foi atualizado!${dateStr ? ' — ' + dateStr : ''}</p>
     </div>
     <div style="margin-bottom:20px">${listHtml}</div>
-    <button id="btnCloseUpdate" class="btn" style="width:100%;padding:12px;font-size:14px;font-weight:700;background:var(--accent);color:#09090B;border:none;border-radius:var(--radius-sm);cursor:pointer">
+    <button id="btnCloseUpdate" class="btn" style="width:100%;padding:12px;font-size:14px;font-weight:700;background:var(--accent);color:#060606;border:none;border-radius:var(--radius-sm);cursor:pointer">
       Entendi, vamos lá!
     </button>
   `;

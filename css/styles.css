@@ -5,23 +5,23 @@
 /* Font loaded via <link> in HTML — removed @import to avoid render-blocking duplicate */
 
 :root {
-  --bg-deep: #09090B;
-  --bg-surface: #131316;
-  --bg-card: #18181B;
-  --bg-elevated: #1f1f23;
-  --bg-hover: #27272A;
+  --bg-deep: #060606;
+  --bg-surface: #111114;
+  --bg-card: #161619;
+  --bg-elevated: #1c1c20;
+  --bg-hover: #242428;
   --border-subtle: rgba(255,255,255,.06);
   --border-medium: rgba(255,255,255,.1);
   --border-strong: rgba(255,255,255,.16);
   --text-primary: #FAFAFA;
   --text-secondary: #A1A1AA;
   --text-muted: #71717A;
-  --accent: #E11D48;
-  --accent-bright: #FB7185;
-  --accent-dim: #BE123C;
-  --gold: #E11D48;
-  --gold-bright: #FB7185;
-  --gold-dim: #9F1239;
+  --accent: #e2506f;
+  --accent-bright: #f0758e;
+  --accent-dim: #c43d5a;
+  --gold: #e2506f;
+  --gold-bright: #f0758e;
+  --gold-dim: #a8304d;
   --success: #34D399;
   --success-bg: rgba(52,211,153,.08);
   --warning: #FBBF24;
@@ -52,12 +52,12 @@
   --text-primary: #18181B;
   --text-secondary: #52525B;
   --text-muted: #A1A1AA;
-  --accent: #BE123C;
-  --accent-bright: #9F1239;
-  --accent-dim: #E11D48;
-  --gold: #BE123C;
-  --gold-bright: #9F1239;
-  --gold-dim: #E11D48;
+  --accent: #c43d5a;
+  --accent-bright: #a8304d;
+  --accent-dim: #e2506f;
+  --gold: #c43d5a;
+  --gold-bright: #a8304d;
+  --gold-dim: #e2506f;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -125,31 +125,31 @@ body {
 
 .btn-primary {
   background: var(--accent);
-  color: #09090B;
+  color: #060606;
 }
 .btn-primary:hover { opacity: .85; }
 
 .btn-success {
   background: var(--success);
-  color: #09090B;
+  color: #060606;
 }
 .btn-success:hover { opacity: .85; }
 
 .btn-danger {
   background: var(--danger);
-  color: #09090B;
+  color: #060606;
 }
 .btn-danger:hover { opacity: .85; }
 
 .btn-warning {
   background: var(--warning);
-  color: #09090B;
+  color: #060606;
 }
 .btn-warning:hover { opacity: .85; }
 
 .btn-gold {
   background: var(--accent);
-  color: #09090B;
+  color: #060606;
 }
 .btn-gold:hover { opacity: .85; }
 
@@ -332,7 +332,7 @@ body {
   touch-action: manipulation;
 }
 .motivo-option:hover { border-color: var(--border-medium); background: var(--bg-hover); }
-.motivo-option.selected { border-color: var(--accent); background: rgba(225,29,72,.06); }
+.motivo-option.selected { border-color: var(--accent); background: rgba(226,80,111,.06); }
 .motivo-option i { font-size: 18px; width: 24px; text-align: center; }
 
 /* ─── KPI Card (Dashboard) ─── */

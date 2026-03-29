@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/styles.css">
-<meta name="theme-color" content="#09090B">
+<meta name="theme-color" content="#060606">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -48,7 +48,7 @@ window._showUpdateBanner = function() {
   if (lastUpdate && (Date.now() - parseInt(lastUpdate)) < 10000) return;
   const banner = document.createElement('div');
   banner.id = 'updateBanner';
-  banner.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--accent,#facc15);color:#09090B;padding:12px 20px;border-radius:12px;font-family:Inter,sans-serif;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;box-shadow:0 4px 24px rgba(0,0,0,.3);cursor:pointer;animation:slideUpBanner .3s ease';
+  banner.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--accent,#facc15);color:#060606;padding:12px 20px;border-radius:12px;font-family:Inter,sans-serif;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;box-shadow:0 4px 24px rgba(0,0,0,.3);cursor:pointer;animation:slideUpBanner .3s ease';
   banner.innerHTML = '<i class="fa-solid fa-arrow-rotate-right"></i> Atualização disponível — clique para atualizar';
   banner.addEventListener('click', () => {
     sessionStorage.setItem('_updateClickedAt', String(Date.now()));
@@ -237,11 +237,11 @@ window._showUpdateBanner = function() {
     box-shadow: 0 4px 20px rgba(0,0,0,.3);
   }
   .rank-card.top-3 {
-    border-color: rgba(225,29,72,.15);
-    background: rgba(225,29,72,.03);
+    border-color: rgba(226,80,111,.15);
+    background: rgba(226,80,111,.03);
   }
   .rank-card.top-3:hover {
-    border-color: rgba(225,29,72,.25);
+    border-color: rgba(226,80,111,.25);
   }
   .rank-pos {
     font-size: 18px;
@@ -354,13 +354,13 @@ window._showUpdateBanner = function() {
     background: rgba(113,113,122,.08); color: #71717A;
   }
   [data-theme="light"] .filter-apply-btn {
-    background: #BE123C; border-color: #BE123C; color: #fff;
+    background: #c43d5a; border-color: #c43d5a; color: #fff;
   }
   [data-theme="light"] .period-tabs button {
     background: rgba(0,0,0,.03); color: #52525B; border-color: rgba(0,0,0,.06);
   }
   [data-theme="light"] .period-tabs button.active {
-    background: #BE123C; color: #fff; border-color: #BE123C;
+    background: #c43d5a; color: #fff; border-color: #c43d5a;
   }
   [data-theme="light"] .filter-bar select {
     background: #FFFFFF; border-color: rgba(0,0,0,.1); color: #18181B;
@@ -656,7 +656,7 @@ window._showUpdateBanner = function() {
           <select id="filterVendedor">
             <option value="">Todos</option>
           </select>
-          <button class="filter-apply-btn" onclick="applyFilters()" title="Aplicar filtros" style="padding:6px 14px;background:#E11D48;color:#fff;border:1px solid #E11D48;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:var(--font-body)">
+          <button class="filter-apply-btn" onclick="applyFilters()" title="Aplicar filtros" style="padding:6px 14px;background:#e2506f;color:#fff;border:1px solid #e2506f;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:var(--font-body)">
             <i class="fa-solid fa-filter"></i> Aplicar
           </button>
           <button class="filter-clear-btn" id="filterClearBtn" onclick="clearFilters()" title="Limpar filtros" style="display:none;padding:6px 8px;background:var(--bg-surface);color:var(--text-muted);border:1px solid var(--border-subtle);border-radius:4px;font-size:11px;cursor:pointer">
@@ -664,7 +664,7 @@ window._showUpdateBanner = function() {
           </button>
         </div>
         <div style="position:relative;display:inline-block" id="exportDropdown">
-          <button onclick="document.getElementById('exportMenu').classList.toggle('open')" title="Exportar dados" style="padding:6px 14px;background:#E11D48;color:#fff;border:1px solid #E11D48;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:var(--font-body)">
+          <button onclick="document.getElementById('exportMenu').classList.toggle('open')" title="Exportar dados" style="padding:6px 14px;background:#e2506f;color:#fff;border:1px solid #e2506f;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:var(--font-body)">
             <i class="fa-solid fa-file-export"></i> Exportar
           </button>
           <div id="exportMenu" class="export-menu">
@@ -823,7 +823,7 @@ window._showUpdateBanner = function() {
 
   <!-- Footer -->
   <footer style="text-align:center;margin-top:32px;padding:16px 0;border-top:1px solid var(--border-subtle)">
-    <p style="font-size:10px;color:var(--text-muted);letter-spacing:.15em;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px"><img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:16px;object-fit:contain"> <span style="text-transform:none;color:#ec4899">minhavez</span> <span style="text-transform:uppercase">v3.1</span></p>
+    <p style="font-size:10px;color:var(--text-muted);letter-spacing:.15em;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px"><img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:16px;object-fit:contain;background:#060606;border-radius:4px;padding:2px 4px"> <span style="text-transform:none;color:#e2506f">minhavez</span> <span style="text-transform:uppercase">v3.1</span></p>
     <p id="tenantSlugFooter" style="margin-top:8px;font-size:10px;color:var(--text-muted);cursor:pointer;display:none" title="Clique para copiar seu ID de suporte">
       <i class="fa-solid fa-copy" style="margin-right:4px;opacity:.5"></i>
       ID: <span id="tenantSlugValue"></span>
@@ -895,6 +895,9 @@ if (tenant) {
     if (tenant.logo_url) {
       headerLogo.innerHTML = `<img src="${tenant.logo_url}" alt="${tenant.nome_loja || ''}">`;
     } else {
+      headerLogo.style.background = '#060606';
+      headerLogo.style.borderRadius = '6px';
+      headerLogo.style.padding = '4px';
       headerLogo.innerHTML = `<img src="/assets/logo-minhavez-new.png" alt="minhavez">`;
     }
   }
@@ -1448,7 +1451,7 @@ async function loadHourly(range) {
   const datasets = [
     {
       label: isMultiDay ? 'Média Atendimentos' : 'Atendimentos', data: atend,
-      backgroundColor: atend.map((v, i) => i === peakIdx ? '#E11D48' : 'rgba(225,29,72,.35)'),
+      backgroundColor: atend.map((v, i) => i === peakIdx ? '#e2506f' : 'rgba(226,80,111,.35)'),
       borderColor: 'transparent',
       borderWidth: 0,
       borderRadius: 6,
@@ -1468,11 +1471,11 @@ async function loadHourly(range) {
       label: 'Hoje',
       data: todayOverlay,
       type: 'line',
-      borderColor: '#E11D48',
-      backgroundColor: 'rgba(225,29,72,.08)',
+      borderColor: '#e2506f',
+      backgroundColor: 'rgba(226,80,111,.08)',
       borderWidth: 2.5,
       pointRadius: todayOverlay.map(v => v > 0 ? 5 : 0),
-      pointBackgroundColor: '#E11D48',
+      pointBackgroundColor: '#e2506f',
       pointBorderColor: '#fff',
       pointBorderWidth: 2,
       pointHoverRadius: 7,
@@ -2324,14 +2327,14 @@ window.exportPDF = async function() {
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',sans-serif;background:#fff;color:#18181B;padding:40px}
-.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:16px;border-bottom:3px solid #E11D48}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:16px;border-bottom:3px solid #e2506f}
 .header h1{font-size:22px;font-weight:800;letter-spacing:-.02em}
 .header .sub{font-size:11px;color:#71717A;font-weight:600}
 .kpi-row{display:flex;gap:16px;margin-bottom:28px}
 .kpi{flex:1;background:#FAFAFA;border:1px solid #E4E4E7;border-radius:6px;padding:16px;text-align:center}
 .kpi .label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#71717A;margin-bottom:4px}
 .kpi .value{font-size:28px;font-weight:800;letter-spacing:-.02em}
-.kpi .value.green{color:#16a34a} .kpi .value.red{color:#dc2626} .kpi .value.blue{color:#2563eb} .kpi .value.amber{color:#E11D48}
+.kpi .value.green{color:#16a34a} .kpi .value.red{color:#dc2626} .kpi .value.blue{color:#2563eb} .kpi .value.amber{color:#e2506f}
 table{width:100%;border-collapse:collapse;margin-bottom:24px;font-size:12px}
 th{background:#18181B;color:#FAFAFA;padding:10px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 td{padding:10px 12px;border-bottom:1px solid #E4E4E7;font-weight:500}
@@ -2553,7 +2556,7 @@ const APP_CHANGELOG = [
       <p style="font-size:12px;color:var(--text-muted);margin:0">Minha Vez foi atualizado!${dateStr ? ' — ' + dateStr : ''}</p>
     </div>
     <div style="margin-bottom:20px">${listHtml}</div>
-    <button id="btnCloseDashUpdate" class="btn" style="width:100%;padding:12px;font-size:14px;font-weight:700;background:var(--accent);color:#09090B;border:none;border-radius:var(--radius-sm);cursor:pointer">
+    <button id="btnCloseDashUpdate" class="btn" style="width:100%;padding:12px;font-size:14px;font-weight:700;background:var(--accent);color:#060606;border:none;border-radius:var(--radius-sm);cursor:pointer">
       Entendi, vamos lá!
     </button>
   </div>`;
