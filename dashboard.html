@@ -1480,6 +1480,7 @@ async function loadHourly(range) {
       responsive: true,
       maintainAspectRatio: false,
       animation: { duration: 400 },
+      interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, boxWidth: 8, color: chartColors().textStrong, font: { size: 11, weight: 600 } } },
         tooltip: {
@@ -1774,6 +1775,7 @@ async function loadScatter(range, cachedData) {
     options: {
       responsive: true, maintainAspectRatio: false,
       animation: { duration: 400 },
+      interaction: { mode: 'nearest', intersect: true },
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -1868,6 +1870,7 @@ async function loadTempoMeta(range, cachedData) {
       responsive: true, maintainAspectRatio: false,
       indexAxis: 'y',
       animation: { duration: 400 },
+      interaction: { mode: 'index', intersect: false, axis: 'y' },
       plugins: {
         legend: { display: false },
         tooltip: {
