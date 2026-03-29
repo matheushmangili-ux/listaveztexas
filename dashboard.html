@@ -373,7 +373,8 @@ window._showUpdateBanner = function() {
     background: #FFFFFF; border-color: rgba(0,0,0,.06);
   }
   .chart-card h3 i { font-size: 14px; opacity: .5; }
-  .chart-box { position: relative; height: 340px; }
+  .chart-box { position: relative; height: 340px; z-index: 1; }
+  .chart-box canvas { position: relative; z-index: 2; }
   .ranking-table {
     width: 100%;
     border-collapse: collapse;
@@ -960,6 +961,8 @@ Chart.defaults.plugins.datalabels = { display: false };
 Chart.defaults.responsive = true;
 Chart.defaults.maintainAspectRatio = false;
 Chart.defaults.animation = { duration: 500, easing: 'easeOutQuart' };
+Chart.defaults.interaction = { mode: 'nearest', intersect: false };
+Chart.defaults.events = ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'];
 
 // ─── Theme-aware chart colors ───
 function isDarkTheme() {
