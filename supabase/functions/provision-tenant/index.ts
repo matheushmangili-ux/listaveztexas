@@ -70,7 +70,8 @@ Deno.serve(async (req) => {
     }
 
     // Determine max_vendedores by plan
-    const maxVendedores = 999
+    const planLimits: Record<string, number> = { starter: 5, pro: 15, advanced: 30 }
+    const maxVendedores = planLimits[plano] || 15
 
     // If we have an owner email from token, create or find owner auth user
     let ownerUserId: string | null = null

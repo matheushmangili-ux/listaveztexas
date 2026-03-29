@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Termos de Uso — MinhaVez</title>
+<meta name="description" content="Termos de Uso da plataforma MinhaVez. Leia os termos e condições para utilização do nosso sistema de gestão de filas para lojas físicas.">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Termos de Uso — MinhaVez">
+<meta property="og:description" content="Termos e condições de uso da plataforma MinhaVez, sistema SaaS de gestão de filas para o varejo.">
+<meta property="og:type" content="website">
+<meta name="author" content="MinhaVez">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-deep: #09090B;
+  --bg-surface: #131316;
+  --bg-card: #18181B;
+  --bg-elevated: #1f1f23;
+  --border-subtle: rgba(255,255,255,.06);
+  --border-medium: rgba(255,255,255,.1);
+  --text-primary: #FAFAFA;
+  --text-secondary: #A1A1AA;
+  --text-muted: #71717A;
+  --accent: #E11D48;
+  --accent-bright: #FB7185;
+  --accent-dim: #BE123C;
+  --font-sans: 'Inter', -apple-system, sans-serif;
+  --radius: 12px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.7;
+}
+
+a { color: var(--accent-bright); text-decoration: none; transition: color .2s; }
+a:hover { color: var(--accent); }
+
+/* ─── Top bar ─── */
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(9,9,11,.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 16px 0;
+}
+.top-bar-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.back-link:hover { color: var(--text-primary); }
+.logo-text {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.logo-text span { color: var(--accent); }
+
+/* ─── Main content ─── */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+.page-header {
+  margin-bottom: 48px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border-medium);
+}
+.page-header h1 {
+  font-size: clamp(28px, 5vw, 40px);
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+}
+.page-header h1 i { color: var(--accent); margin-right: 12px; font-size: 0.85em; }
+.page-header .meta {
+  font-size: 14px;
+  color: var(--text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.page-header .meta span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* ─── Table of contents ─── */
+.toc {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  margin-bottom: 48px;
+}
+.toc h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+.toc ol {
+  list-style: none;
+  counter-reset: toc-counter;
+  columns: 2;
+  column-gap: 32px;
+}
+.toc ol li {
+  counter-increment: toc-counter;
+  margin-bottom: 8px;
+  font-size: 14px;
+  break-inside: avoid;
+}
+.toc ol li a {
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.toc ol li a::before {
+  content: counter(toc-counter) ".";
+  color: var(--accent);
+  font-weight: 600;
+  min-width: 20px;
+}
+.toc ol li a:hover { color: var(--text-primary); }
+
+/* ─── Sections ─── */
+.section {
+  margin-bottom: 40px;
+}
+.section h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section h2 .num {
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.section p,
+.section li {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.8;
+}
+.section p { margin-bottom: 14px; }
+.section ul, .section ol {
+  margin: 12px 0 16px 20px;
+}
+.section li { margin-bottom: 8px; }
+.section strong { color: var(--text-primary); font-weight: 600; }
+
+.highlight-box {
+  background: rgba(225,29,72,.06);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 16px 20px;
+  margin: 16px 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ─── Footer ─── */
+.footer {
+  border-top: 1px solid var(--border-subtle);
+  padding: 32px 24px;
+  text-align: center;
+}
+.footer-inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.footer p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.footer a { color: var(--text-secondary); }
+.footer a:hover { color: var(--accent-bright); }
+
+/* ─── Responsive ─── */
+@media (max-width: 640px) {
+  .toc ol { columns: 1; }
+  .container { padding: 32px 16px 60px; }
+  .toc { padding: 20px; }
+  .page-header .meta { flex-direction: column; gap: 8px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<nav class="top-bar">
+  <div class="top-bar-inner">
+    <a href="landing.html" class="back-link">
+      <i class="fas fa-arrow-left"></i> Voltar ao site
+    </a>
+    <div class="logo-text">Minha<span>Vez</span></div>
+  </div>
+</nav>
+
+<main class="container">
+
+  <!-- Header -->
+  <header class="page-header">
+    <h1><i class="fas fa-file-contract"></i>Termos de Uso</h1>
+    <div class="meta">
+      <span><i class="fas fa-calendar-alt"></i> Atualizado em marco de 2026</span>
+      <span><i class="fas fa-building"></i> MinhaVez Tecnologia</span>
+      <span><i class="fas fa-globe-americas"></i> Brasil</span>
+    </div>
+  </header>
+
+  <!-- Table of contents -->
+  <nav class="toc">
+    <h2><i class="fas fa-list"></i> Indice</h2>
+    <ol>
+      <li><a href="#aceitacao">Aceitacao e Escopo</a></li>
+      <li><a href="#definicoes">Definicoes</a></li>
+      <li><a href="#servico">Descricao do Servico</a></li>
+      <li><a href="#cadastro">Cadastro e Conta</a></li>
+      <li><a href="#assinatura">Assinatura e Pagamento</a></li>
+      <li><a href="#obrigacoes">Obrigacoes do Usuario</a></li>
+      <li><a href="#propriedade">Propriedade Intelectual</a></li>
+      <li><a href="#responsabilidade">Limitacao de Responsabilidade</a></li>
+      <li><a href="#cancelamento">Cancelamento e Rescisao</a></li>
+      <li><a href="#dados">Protecao de Dados e LGPD</a></li>
+      <li><a href="#alteracoes">Alteracoes nos Termos</a></li>
+      <li><a href="#legislacao">Legislacao Aplicavel e Foro</a></li>
+      <li><a href="#contato">Contato</a></li>
+    </ol>
+  </nav>
+
+  <!-- 1. Aceitacao -->
+  <section class="section" id="aceitacao">
+    <h2><span class="num">1</span> Aceitacao e Escopo</h2>
+    <p>
+      Estes Termos de Uso ("Termos") regulam o acesso e a utilizacao da plataforma <strong>MinhaVez</strong>,
+      um servico de software como servico (SaaS) destinado a gestao de filas de atendimento e vendedores
+      em estabelecimentos comerciais do varejo brasileiro.
+    </p>
+    <p>
+      Ao criar uma conta, contratar um plano ou simplesmente utilizar qualquer funcionalidade da plataforma,
+      voce ("Usuario") declara que leu, compreendeu e concorda integralmente com estes Termos.
+      Caso nao concorde com qualquer disposicao aqui prevista, voce devera cessar imediatamente o uso do servico.
+    </p>
+    <p>
+      Estes Termos se aplicam a todas as modalidades de uso da plataforma MinhaVez, incluindo acesso via
+      navegador web, aplicativos moveis, APIs e quaisquer integracoes disponibilizadas.
+    </p>
+  </section>
+
+  <!-- 2. Definicoes -->
+  <section class="section" id="definicoes">
+    <h2><span class="num">2</span> Definicoes</h2>
+    <ul>
+      <li><strong>Plataforma:</strong> o sistema MinhaVez, incluindo todos os seus modulos, funcionalidades, APIs e interfaces.</li>
+      <li><strong>Usuario:</strong> qualquer pessoa fisica ou juridica que acesse ou utilize a Plataforma.</li>
+      <li><strong>Conta:</strong> o registro individual criado pelo Usuario para acessar a Plataforma.</li>
+      <li><strong>Assinatura:</strong> o plano de pagamento recorrente que garante acesso as funcionalidades da Plataforma.</li>
+      <li><strong>Conteudo do Usuario:</strong> todos os dados, informacoes e configuracoes inseridos pelo Usuario na Plataforma.</li>
+      <li><strong>LGPD:</strong> Lei Geral de Protecao de Dados Pessoais (Lei n. 13.709/2018).</li>
+    </ul>
+  </section>
+
+  <!-- 3. Servico -->
+  <section class="section" id="servico">
+    <h2><span class="num">3</span> Descricao do Servico</h2>
+    <p>
+      A MinhaVez oferece uma plataforma de gestao de filas de atendimento projetada para lojas fisicas
+      do varejo. O servico inclui, entre outras funcionalidades:
+    </p>
+    <ul>
+      <li>Organizacao automatizada da fila de vendedores;</li>
+      <li>Painel de acompanhamento em tempo real para gerentes;</li>
+      <li>Registro de atendimentos e acompanhamento de vendas;</li>
+      <li>Relatorios de desempenho e metricas da equipe;</li>
+      <li>Acesso via tablet para uso na loja;</li>
+      <li>Dashboard administrativo com configuracoes da operacao.</li>
+    </ul>
+    <p>
+      A MinhaVez reserva-se o direito de adicionar, modificar ou descontinuar funcionalidades da Plataforma
+      a qualquer momento, mediante aviso previo aos Usuarios quando tais alteracoes impactarem
+      significativamente o uso do servico.
+    </p>
+    <div class="highlight-box">
+      <strong>Disponibilidade:</strong> Embora nos esforcemos para manter a Plataforma disponivel 24 horas
+      por dia, 7 dias por semana, nao garantimos disponibilidade ininterrupta. Manutencoes programadas
+      serao comunicadas com antecedencia sempre que possivel.
+    </div>
+  </section>
+
+  <!-- 4. Cadastro -->
+  <section class="section" id="cadastro">
+    <h2><span class="num">4</span> Cadastro e Conta</h2>
+    <p>
+      Para utilizar a Plataforma, o Usuario devera criar uma conta fornecendo informacoes veridicas,
+      completas e atualizadas. O Usuario e integralmente responsavel por:
+    </p>
+    <ul>
+      <li>Manter a confidencialidade de suas credenciais de acesso (login e senha);</li>
+      <li>Todas as atividades realizadas em sua conta;</li>
+      <li>Notificar a MinhaVez imediatamente em caso de uso nao autorizado ou suspeita de violacao de seguranca;</li>
+      <li>Manter seus dados cadastrais atualizados.</li>
+    </ul>
+    <p>
+      O Usuario deve ter pelo menos 18 (dezoito) anos de idade ou ser representado por pessoa legalmente
+      habilitada. No caso de pessoa juridica, o cadastro devera ser realizado por representante com
+      poderes para vincular a empresa aos presentes Termos.
+    </p>
+  </section>
+
+  <!-- 5. Assinatura e Pagamento -->
+  <section class="section" id="assinatura">
+    <h2><span class="num">5</span> Assinatura e Pagamento</h2>
+    <p>
+      O acesso as funcionalidades da Plataforma esta condicionado a contratacao de um plano de assinatura
+      mensal. Os pagamentos sao processados por meio da plataforma <strong>Stripe</strong>, e o Usuario
+      concorda com os termos de servico do respectivo processador de pagamentos.
+    </p>
+    <ul>
+      <li>As cobrancas sao realizadas de forma recorrente, no mesmo dia de cada mes em que a assinatura foi iniciada;</li>
+      <li>Os precos dos planos estao disponiveis na pagina de contratacao e podem ser reajustados mediante aviso previo de 30 (trinta) dias;</li>
+      <li>Em caso de falha no processamento do pagamento, a MinhaVez podera suspender o acesso a Plataforma apos 5 (cinco) dias uteis de inadimplencia;</li>
+      <li>Nao serao realizados reembolsos proporcionais por cancelamento antes do termino do periodo ja pago, salvo nos casos previstos pelo Codigo de Defesa do Consumidor.</li>
+    </ul>
+    <div class="highlight-box">
+      <strong>Periodo de teste:</strong> Caso oferecido, o periodo de teste gratuito sera informado no
+      momento da contratacao. Ao termino do periodo de teste, a assinatura sera convertida automaticamente
+      em plano pago, salvo cancelamento previo pelo Usuario.
+    </div>
+  </section>
+
+  <!-- 6. Obrigacoes do Usuario -->
+  <section class="section" id="obrigacoes">
+    <h2><span class="num">6</span> Obrigacoes do Usuario</h2>
+    <p>Ao utilizar a Plataforma, o Usuario compromete-se a:</p>
+    <ul>
+      <li>Utilizar o servico exclusivamente para os fins a que se destina, ou seja, gestao de filas e atendimento no varejo;</li>
+      <li>Nao reproduzir, duplicar, copiar, vender, revender ou explorar comercialmente qualquer parte da Plataforma sem autorizacao expressa;</li>
+      <li>Nao tentar acessar sistemas, servidores ou bancos de dados da MinhaVez por meios nao autorizados;</li>
+      <li>Nao utilizar robos, scrapers ou quaisquer ferramentas automatizadas para acessar a Plataforma sem consentimento previo;</li>
+      <li>Nao transmitir virus, malware ou qualquer codigo de natureza destrutiva;</li>
+      <li>Respeitar a legislacao vigente, incluindo a LGPD, ao inserir dados de terceiros na Plataforma;</li>
+      <li>Nao utilizar a Plataforma para atividades ilicitas, fraudulentas ou que violem direitos de terceiros.</li>
+    </ul>
+    <p>
+      O descumprimento de qualquer destas obrigacoes podera resultar na suspensao ou encerramento
+      imediato da conta do Usuario, sem prejuizo das medidas legais cabiveis.
+    </p>
+  </section>
+
+  <!-- 7. Propriedade Intelectual -->
+  <section class="section" id="propriedade">
+    <h2><span class="num">7</span> Propriedade Intelectual</h2>
+    <p>
+      Todos os direitos de propriedade intelectual relativos a Plataforma MinhaVez, incluindo, mas nao se
+      limitando a, software, codigo-fonte, design, interfaces, logotipos, marcas, textos e documentacao,
+      sao de titularidade exclusiva da MinhaVez ou de seus licenciadores.
+    </p>
+    <p>
+      A contratacao da assinatura confere ao Usuario uma <strong>licenca limitada, nao exclusiva,
+      intransferivel e revogavel</strong> para utilizar a Plataforma durante a vigencia da assinatura,
+      exclusivamente para os fins previstos nestes Termos.
+    </p>
+    <p>
+      O Conteudo do Usuario permanece de propriedade do Usuario. Ao inserir conteudo na Plataforma,
+      o Usuario concede a MinhaVez uma licenca limitada para processar, armazenar e exibir tais dados
+      exclusivamente para a prestacao do servico contratado.
+    </p>
+  </section>
+
+  <!-- 8. Limitacao de Responsabilidade -->
+  <section class="section" id="responsabilidade">
+    <h2><span class="num">8</span> Limitacao de Responsabilidade</h2>
+    <p>
+      Na extensao maxima permitida pela legislacao brasileira, a MinhaVez nao sera responsavel por:
+    </p>
+    <ul>
+      <li>Danos indiretos, incidentais, especiais, consequenciais ou punitivos decorrentes do uso ou da impossibilidade de uso da Plataforma;</li>
+      <li>Perda de lucros, receitas, dados ou oportunidades de negocio;</li>
+      <li>Interrupcoes causadas por falhas em servicos de terceiros, incluindo provedores de internet, hosting ou processadores de pagamento;</li>
+      <li>Acoes ou omissoes do Usuario, incluindo o uso inadequado da Plataforma;</li>
+      <li>Eventos de forca maior ou caso fortuito.</li>
+    </ul>
+    <p>
+      Em qualquer hipotese, a responsabilidade total da MinhaVez sera limitada ao valor total pago pelo
+      Usuario nos <strong>12 (doze) meses anteriores</strong> ao evento que deu origem a reclamacao.
+    </p>
+    <div class="highlight-box">
+      <strong>Importante:</strong> Esta limitacao de responsabilidade nao se aplica nos casos em que a
+      legislacao brasileira, incluindo o Codigo de Defesa do Consumidor, impeca tal limitacao.
+    </div>
+  </section>
+
+  <!-- 9. Cancelamento -->
+  <section class="section" id="cancelamento">
+    <h2><span class="num">9</span> Cancelamento e Rescisao</h2>
+    <p><strong>Pelo Usuario:</strong></p>
+    <ul>
+      <li>O Usuario podera cancelar sua assinatura a qualquer momento, diretamente pelo painel administrativo da Plataforma ou mediante solicitacao ao suporte;</li>
+      <li>O cancelamento sera efetivado ao final do periodo de faturamento vigente, mantendo-se o acesso ate essa data;</li>
+      <li>Apos o cancelamento, o Usuario tera um prazo de 30 (trinta) dias para exportar seus dados. Apos esse periodo, os dados poderao ser excluidos permanentemente.</li>
+    </ul>
+    <p><strong>Pela MinhaVez:</strong></p>
+    <ul>
+      <li>A MinhaVez podera suspender ou encerrar a conta do Usuario em caso de violacao destes Termos, inadimplencia reiterada ou por exigencia legal;</li>
+      <li>Em caso de descontinuacao do servico, a MinhaVez notificara os Usuarios com antecedencia minima de 60 (sessenta) dias.</li>
+    </ul>
+    <p>
+      Apos o encerramento da conta, por qualquer motivo, as clausulas referentes a propriedade intelectual,
+      limitacao de responsabilidade e legislacao aplicavel permanecerao em vigor.
+    </p>
+  </section>
+
+  <!-- 10. Protecao de Dados -->
+  <section class="section" id="dados">
+    <h2><span class="num">10</span> Protecao de Dados e LGPD</h2>
+    <p>
+      A MinhaVez esta comprometida com a protecao dos dados pessoais de seus Usuarios e opera em
+      conformidade com a <strong>Lei Geral de Protecao de Dados Pessoais (LGPD - Lei n. 13.709/2018)</strong>.
+    </p>
+    <p>
+      O tratamento de dados pessoais realizado pela Plataforma esta detalhado em nossa
+      <a href="privacidade.html"><i class="fas fa-shield-alt"></i> Politica de Privacidade</a>,
+      que complementa e integra estes Termos de Uso. Recomendamos a leitura atenta desse documento.
+    </p>
+    <p>
+      Ao utilizar a Plataforma, o Usuario reconhece que a MinhaVez atua como <strong>operadora de dados</strong>
+      em relacao aos dados de clientes e colaboradores inseridos pelo Usuario, cabendo ao Usuario a qualidade
+      de <strong>controlador</strong> desses dados, conforme definicoes da LGPD.
+    </p>
+    <ul>
+      <li>O Usuario e responsavel por garantir que possui base legal para o tratamento dos dados inseridos na Plataforma;</li>
+      <li>A MinhaVez adota medidas tecnicas e administrativas adequadas para proteger os dados pessoais contra acessos nao autorizados, perda ou destruicao;</li>
+      <li>Em caso de incidente de seguranca envolvendo dados pessoais, a MinhaVez notificara o Usuario e a Autoridade Nacional de Protecao de Dados (ANPD), conforme exigido pela legislacao.</li>
+    </ul>
+  </section>
+
+  <!-- 11. Alteracoes nos Termos -->
+  <section class="section" id="alteracoes">
+    <h2><span class="num">11</span> Alteracoes nos Termos</h2>
+    <p>
+      A MinhaVez reserva-se o direito de alterar, modificar ou atualizar estes Termos de Uso a qualquer
+      momento. Em caso de alteracoes substanciais, a MinhaVez notificara os Usuarios com antecedencia
+      minima de <strong>30 (trinta) dias</strong>, por meio do endereco de e-mail cadastrado na Plataforma.
+    </p>
+    <div class="highlight-box">
+      <strong>Notificacao de alteracoes:</strong> Alteracoes substanciais nestes Termos serao comunicadas
+      com 30 dias de antecedencia via e-mail. O uso continuado da Plataforma apos o prazo de notificacao
+      constituira aceitacao dos novos termos. Caso o Usuario nao concorde com as alteracoes, podera
+      cancelar sua assinatura antes da entrada em vigor dos novos termos, sem qualquer onus adicional.
+    </div>
+    <p>
+      A versao mais recente destes Termos estara sempre disponivel nesta pagina, com a data da ultima
+      atualizacao indicada no topo do documento.
+    </p>
+  </section>
+
+  <!-- 12. Legislacao -->
+  <section class="section" id="legislacao">
+    <h2><span class="num">12</span> Legislacao Aplicavel e Foro</h2>
+    <p>
+      Estes Termos de Uso sao regidos e interpretados de acordo com as leis da <strong>Republica
+      Federativa do Brasil</strong>, incluindo, mas nao se limitando a:
+    </p>
+    <ul>
+      <li>Codigo Civil Brasileiro (Lei n. 10.406/2002);</li>
+      <li>Marco Civil da Internet (Lei n. 12.965/2014);</li>
+      <li>Lei Geral de Protecao de Dados Pessoais (Lei n. 13.709/2018);</li>
+      <li>Codigo de Defesa do Consumidor (Lei n. 8.078/1990), quando aplicavel.</li>
+    </ul>
+    <p>
+      As partes se comprometem a tentar resolver quaisquer disputas de forma amigavel. Caso nao seja
+      possivel uma solucao consensual, as partes poderao recorrer a mediacao ou arbitragem, conforme
+      a Lei de Arbitragem (Lei n. 9.307/1996).
+    </p>
+    <p>
+      Persistindo o conflito, fica eleito o foro da comarca do domicilio do Usuario, nos termos do
+      Codigo de Defesa do Consumidor, ou, quando nao aplicavel a relacao de consumo, o foro da sede
+      da MinhaVez, com exclusao de qualquer outro, por mais privilegiado que seja.
+    </p>
+  </section>
+
+  <!-- 13. Contato -->
+  <section class="section" id="contato">
+    <h2><span class="num">13</span> Contato</h2>
+    <p>
+      Em caso de duvidas, sugestoes ou solicitacoes relacionadas a estes Termos de Uso, o Usuario
+      podera entrar em contato com a MinhaVez por meio dos seguintes canais:
+    </p>
+    <ul>
+      <li><strong>E-mail:</strong> suporte@minhavez.com.br</li>
+      <li><strong>Plataforma:</strong> Atraves do canal de suporte disponivel no painel administrativo</li>
+    </ul>
+    <p>
+      A MinhaVez se compromete a responder todas as solicitacoes em um prazo razoavel, nao superior
+      a 15 (quinze) dias uteis.
+    </p>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-inner">
+    <p>&copy; 2026 MinhaVez Tecnologia. Todos os direitos reservados.</p>
+    <p>
+      <a href="privacidade.html"><i class="fas fa-shield-alt"></i> Politica de Privacidade</a>
+      &nbsp;&middot;&nbsp;
+      <a href="landing.html"><i class="fas fa-home"></i> Pagina Inicial</a>
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

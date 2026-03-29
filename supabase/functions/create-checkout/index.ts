@@ -5,8 +5,12 @@ import { corsHeaders } from '../_shared/cors.ts'
 const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY')!
 const BASE_URL = Deno.env.get('BASE_URL') || 'https://listaveztexas.vercel.app'
 
-// Stripe price ID (single plan)
-const PRICE_ID = Deno.env.get('STRIPE_PRICE_STARTER') || Deno.env.get('STRIPE_PRICE_PRO') || ''
+// Stripe price IDs per plan
+const PRICE_IDS: Record<string, string> = {
+  starter: Deno.env.get('STRIPE_PRICE_STARTER') || '',
+  pro: Deno.env.get('STRIPE_PRICE_PRO') || '',
+  advanced: Deno.env.get('STRIPE_PRICE_ADVANCED') || ''
+}
 
 async function stripeRequest(endpoint: string, body: Record<string, string>) {
   const res = await fetch(`https://api.stripe.com/v1${endpoint}`, {
@@ -34,7 +38,8 @@ Deno.serve(async (req) => {
       })
     }
 
-    if (!PRICE_ID) {
+    const priceId = PRICE_IDS[plano] || PRICE_IDS.pro
+    if (!priceId) {
       return new Response(JSON.stringify({ error: 'Preço não configurado. Contate o suporte.' }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
@@ -44,7 +49,7 @@ Deno.serve(async (req) => {
     const session = await stripeRequest('/checkout/sessions', {
       'mode': 'subscription',
       'payment_method_types[0]': 'card',
-      'line_items[0][price]': PRICE_ID,
+      'line_items[0][price]': priceId,
       'line_items[0][quantity]': '1',
       'customer_email': email,
       'success_url': `${BASE_URL}/setup?session_id={CHECKOUT_SESSION_ID}`,

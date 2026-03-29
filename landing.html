@@ -1167,28 +1167,69 @@ section { position: relative; z-index: 1; }
   <div class="container">
     <div class="section-header reveal">
       <div class="section-tag"><i class="fa-solid fa-tags"></i> Preços</div>
-      <h2>Simples e sem surpresas</h2>
-      <p>Pague apenas pelo que usa. Sem taxa de setup, sem contrato de fidelidade.</p>
+      <h2>Escolha o plano ideal para sua loja</h2>
+      <p>Sem taxa de setup, sem contrato de fidelidade. Comece pequeno e cresça quando quiser.</p>
     </div>
-    <div class="pricing-cards stagger" style="justify-content:center">
-      <div class="price-card featured reveal" style="--i:0;max-width:420px">
-        <div class="price-name">MinhaVez Completo</div>
-        <div class="price-desc">Tudo que sua loja precisa para organizar a vez e vender mais</div>
+    <div class="pricing-cards stagger">
+      <!-- BÁSICO -->
+      <div class="price-card reveal" style="--i:0">
+        <div class="price-name">Básico</div>
+        <div class="price-desc">Para lojas pequenas que querem organizar o atendimento</div>
+        <div class="price-value"><span>R$</span> 49<span>,90/mês</span></div>
+        <div class="price-period">Ideal para começar</div>
+        <ul class="price-features">
+          <li><i class="fa-solid fa-check"></i> Até <strong>5 vendedores</strong></li>
+          <li><i class="fa-solid fa-check"></i> 1 setor</li>
+          <li><i class="fa-solid fa-check"></i> Fila inteligente com rodízio</li>
+          <li><i class="fa-solid fa-check"></i> Timer de atendimento</li>
+          <li><i class="fa-solid fa-check"></i> Tablet responsivo</li>
+          <li><i class="fa-solid fa-check"></i> Dashboard básico</li>
+          <li style="color:var(--text-muted)"><i class="fa-solid fa-xmark" style="color:var(--text-muted)"></i> Gestão de trocas</li>
+          <li style="color:var(--text-muted)"><i class="fa-solid fa-xmark" style="color:var(--text-muted)"></i> Exportação CSV/PDF</li>
+          <li style="color:var(--text-muted)"><i class="fa-solid fa-xmark" style="color:var(--text-muted)"></i> Suporte prioritário</li>
+        </ul>
+        <button class="price-btn primary" onclick="openCheckoutModal('starter')">Começar agora</button>
+        <p style="font-size:11px;color:var(--text-muted);margin-top:12px">Sem contrato. Cancele quando quiser.</p>
+      </div>
+      <!-- PROFISSIONAL -->
+      <div class="price-card featured reveal" style="--i:1">
+        <div class="price-name">Profissional</div>
+        <div class="price-desc">Para lojas em crescimento que precisam de dados completos</div>
         <div class="price-original" style="font-size:16px;color:var(--text-muted);text-decoration:line-through;margin-bottom:4px;font-family:var(--font-mono)">R$ 129,90/mês</div>
         <div class="price-value"><span>R$</span> 89<span>,90/mês</span></div>
         <div class="price-period" style="color:var(--accent);font-weight:600">Promoção de lançamento</div>
         <ul class="price-features">
-          <li><i class="fa-solid fa-check"></i> Vendedores ilimitados</li>
+          <li><i class="fa-solid fa-check"></i> Até <strong>15 vendedores</strong></li>
           <li><i class="fa-solid fa-check"></i> Múltiplos setores</li>
           <li><i class="fa-solid fa-check"></i> Fila inteligente com rodízio</li>
-          <li><i class="fa-solid fa-check"></i> Dashboard completo</li>
           <li><i class="fa-solid fa-check"></i> Timer de atendimento</li>
-          <li><i class="fa-solid fa-check"></i> Gestão de trocas</li>
-          <li><i class="fa-solid fa-check"></i> Controle de saídas</li>
           <li><i class="fa-solid fa-check"></i> Tablet responsivo</li>
+          <li><i class="fa-solid fa-check"></i> Dashboard completo</li>
+          <li><i class="fa-solid fa-check"></i> Gestão de trocas</li>
+          <li><i class="fa-solid fa-check"></i> Exportação CSV/PDF</li>
           <li><i class="fa-solid fa-check"></i> Suporte prioritário</li>
         </ul>
         <button class="price-btn primary" onclick="openCheckoutModal('pro')">Começar agora</button>
+        <p style="font-size:11px;color:var(--text-muted);margin-top:12px">Sem contrato. Cancele quando quiser.</p>
+      </div>
+      <!-- AVANÇADO -->
+      <div class="price-card reveal" style="--i:2">
+        <div class="price-name">Avançado</div>
+        <div class="price-desc">Para operações grandes com múltiplos setores e equipe robusta</div>
+        <div class="price-value"><span>R$</span> 149<span>,90/mês</span></div>
+        <div class="price-period">Máxima capacidade</div>
+        <ul class="price-features">
+          <li><i class="fa-solid fa-check"></i> Até <strong>30 vendedores</strong></li>
+          <li><i class="fa-solid fa-check"></i> Setores ilimitados</li>
+          <li><i class="fa-solid fa-check"></i> Fila inteligente com rodízio</li>
+          <li><i class="fa-solid fa-check"></i> Timer de atendimento</li>
+          <li><i class="fa-solid fa-check"></i> Tablet responsivo</li>
+          <li><i class="fa-solid fa-check"></i> Dashboard completo</li>
+          <li><i class="fa-solid fa-check"></i> Gestão de trocas</li>
+          <li><i class="fa-solid fa-check"></i> Exportação CSV/PDF</li>
+          <li><i class="fa-solid fa-check"></i> Suporte prioritário + onboarding</li>
+        </ul>
+        <button class="price-btn primary" onclick="openCheckoutModal('advanced')">Começar agora</button>
         <p style="font-size:11px;color:var(--text-muted);margin-top:12px">Sem contrato. Cancele quando quiser.</p>
       </div>
     </div>
@@ -1199,7 +1240,7 @@ section { position: relative; z-index: 1; }
 <section class="cta" id="contato">
   <div class="container">
     <h2 class="reveal">Pronto pra organizar<br>a vez na sua loja?</h2>
-    <p class="reveal">Comece a usar em minutos por apenas R$ 89,90/mês. Sem contrato, cancele quando quiser.</p>
+    <p class="reveal">Planos a partir de R$ 49,90/mês. Sem contrato, cancele quando quiser.</p>
     <div class="hero-actions reveal">
       <button class="btn btn-primary" onclick="openCheckoutModal('pro')" style="font-size:16px;padding:16px 32px;min-height:56px">
         <i class="fa-solid fa-rocket"></i>
@@ -1251,6 +1292,8 @@ section { position: relative; z-index: 1; }
         <a href="#funcionalidades">Funcionalidades</a>
         <a href="#precos">Preços</a>
         <a href="#contato">Contato</a>
+        <a href="/termos.html">Termos de Uso</a>
+        <a href="/privacidade.html">Privacidade</a>
       </div>
     </div>
   </div>
@@ -1373,12 +1416,14 @@ const SUPABASE_ANON_KEY = 'sb_publishable_0AJbQVEVFsL71gAGtks6rw_V1rYn3Ne';
 let selectedPlan = 'pro';
 
 const planInfo = {
-  pro: { title: 'MinhaVez Completo', price: 'R$ 89,90/mês' }
+  starter: { title: 'Básico', price: 'R$ 49,90/mês', vendedores: 5 },
+  pro: { title: 'Profissional', price: 'R$ 89,90/mês', vendedores: 15 },
+  advanced: { title: 'Avançado', price: 'R$ 149,90/mês', vendedores: 30 }
 };
 
 function openCheckoutModal(plan) {
-  selectedPlan = 'pro';
-  const info = planInfo.pro;
+  selectedPlan = plan;
+  const info = planInfo[plan] || planInfo.pro;
   document.getElementById('modalPlanTitle').textContent = info.title;
   document.getElementById('modalPlanPrice').textContent = info.price;
   document.getElementById('modalRedeMsg').style.display = 'none';

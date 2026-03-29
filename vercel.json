@@ -1,6 +1,8 @@
 {
   "rewrites": [
     { "source": "/landing", "destination": "/landing.html" },
+    { "source": "/termos", "destination": "/termos.html" },
+    { "source": "/privacidade", "destination": "/privacidade.html" },
     { "source": "/:slug/login", "destination": "/index.html" },
     { "source": "/:slug/tablet", "destination": "/tablet.html" },
     { "source": "/:slug/dashboard", "destination": "/dashboard.html" },
