@@ -300,7 +300,7 @@ window._showUpdateBanner = function() {
     padding: 20px;
     transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
     box-shadow: 0 1px 3px rgba(0,0,0,.12);
-    animation: cardFadeIn .4s ease both;
+    /* animation: cardFadeIn .4s ease both; — disabled for instant period switching */
   }
   .chart-card:hover {
     border-color: var(--border-medium);
@@ -589,7 +589,7 @@ window._showUpdateBanner = function() {
   [data-theme="light"] .meta-label { color: rgba(0,0,0,.35); }
   /* ─── Card fade-in ─── */
   @keyframes cardFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-  .kpi-card { animation: cardFadeIn .3s ease both; }
+  .kpi-card { animation: none; }
   .kpi-grid .kpi-card:nth-child(1) { animation-delay: 0s; }
   .kpi-grid .kpi-card:nth-child(2) { animation-delay: .05s; }
   .kpi-grid .kpi-card:nth-child(3) { animation-delay: .1s; }
@@ -957,12 +957,18 @@ const _kpi = {
 
 Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
 Chart.defaults.font.weight = 500;
-Chart.defaults.plugins.datalabels = { display: false };
 Chart.defaults.responsive = true;
 Chart.defaults.maintainAspectRatio = false;
 Chart.defaults.animation = { duration: 500, easing: 'easeOutQuart' };
-Chart.defaults.interaction = { mode: 'nearest', intersect: false };
-Chart.defaults.events = ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'];
+// Tooltip e interação global
+Chart.defaults.interaction.mode = 'nearest';
+Chart.defaults.interaction.intersect = false;
+Chart.defaults.plugins.tooltip.enabled = true;
+// Datalabels global off (habilitado por gráfico) — não capturar eventos de hover
+if (Chart.defaults.plugins.datalabels) {
+  Chart.defaults.plugins.datalabels.display = false;
+  Chart.defaults.plugins.datalabels.listeners = {};
+}
 
 // ─── Theme-aware chart colors ───
 function isDarkTheme() {
@@ -1356,6 +1362,7 @@ async function loadMotivos(range) {
           }
         },
         tooltip: {
+          enabled: true,
           callbacks: {
             title: items => items[0]?.label || '',
             label: c => {
@@ -1371,7 +1378,8 @@ async function loadMotivos(range) {
           },
           color: '#fff',
           font: { weight: 700, size: 12 },
-          formatter: val => totalMotivos > 0 ? Math.round(val / totalMotivos * 100) + '%' : ''
+          formatter: val => totalMotivos > 0 ? Math.round(val / totalMotivos * 100) + '%' : '',
+          listeners: {}
         }
       }
     }
@@ -1381,18 +1389,16 @@ async function loadMotivos(range) {
 // ─── Hourly flow chart ───
 async function loadHourly(range) {
   const isMultiDay = currentPeriod === 'semana' || currentPeriod === 'mes';
-  const { data, error } = await sb.rpc('get_hourly_flow', { p_inicio: range.start, p_fim: range.end });
-  if (error) { toast('Erro ao carregar fluxo: ' + error.message, 'error'); return; }
-
-  // For multi-day, also load today's data separately
-  let todayHourlyData = null;
+  // Load main data + today overlay in parallel
+  const promises = [sb.rpc('get_hourly_flow', { p_inicio: range.start, p_fim: range.end })];
   if (isMultiDay) {
-    try {
-      const todayR = todayRange();
-      const { data: td } = await sb.rpc('get_hourly_flow', { p_inicio: todayR.start, p_fim: todayR.end });
-      todayHourlyData = td;
-    } catch { /* ignore - today overlay is optional */ }
+    const todayR = todayRange();
+    promises.push(sb.rpc('get_hourly_flow', { p_inicio: todayR.start, p_fim: todayR.end }).catch(() => ({ data: null })));
   }
+  const results = await Promise.all(promises);
+  const { data, error } = results[0];
+  if (error) { toast('Erro ao carregar fluxo: ' + error.message, 'error'); return; }
+  const todayHourlyData = isMultiDay ? (results[1]?.data || null) : null;
 
   const ctx = document.getElementById('chartHourly');
   if (charts.hourly) charts.hourly.destroy();
@@ -1495,6 +1501,7 @@ async function loadHourly(range) {
       plugins: {
         legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, boxWidth: 8, color: chartColors().textStrong, font: { size: 11, weight: 600 } } },
         tooltip: {
+          enabled: true,
           callbacks: {
             afterBody: items => {
               const idx = items[0]?.dataIndex;
@@ -1792,6 +1799,7 @@ async function loadScatter(range, cachedData) {
       plugins: {
         legend: { display: false },
         tooltip: {
+          enabled: true,
           callbacks: {
             title: items => {
               const p = items[0]?.raw;
@@ -1808,7 +1816,8 @@ async function loadScatter(range, cachedData) {
           color: chartColors().textStrong,
           font: { weight: 700, size: 11 },
           anchor: 'end', align: 'top', offset: 4,
-          formatter: (val, ctx2) => ctx2.dataset.data[ctx2.dataIndex].label
+          formatter: (val, ctx2) => ctx2.dataset.data[ctx2.dataIndex].label,
+          listeners: {}
         }
       },
       layout: { padding: { top: 20, right: 20, bottom: 4, left: 4 } },
@@ -1894,6 +1903,7 @@ async function loadTempoMeta(range, cachedData) {
       plugins: {
         legend: { display: false },
         tooltip: {
+          enabled: true,
           callbacks: {
             label: c => {
               const v = c.parsed.x;
@@ -1908,7 +1918,8 @@ async function loadTempoMeta(range, cachedData) {
           anchor: 'end', align: 'end', offset: 4,
           color: chartColors().datalabel,
           font: { weight: 700, size: 11 },
-          formatter: v => Math.round(v) + 'min'
+          formatter: v => Math.round(v) + 'min',
+          listeners: {}
         }
       },
       scales: {
@@ -2041,6 +2052,7 @@ async function loadTrend(range) {
       plugins: {
         legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, boxWidth: 8, color: chartColors().textStrong, font: { size: 11, weight: 600 } } },
         tooltip: {
+          enabled: true,
           callbacks: {
             label: c => {
               if (c.datasetIndex === 2) return ' ' + c.dataset.label + ': ' + c.parsed.y + '%';
