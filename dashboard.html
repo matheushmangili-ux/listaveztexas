@@ -663,9 +663,8 @@ window._showUpdateBanner = function() {
           </button>
         </div>
         <div style="position:relative;display:inline-block" id="exportDropdown">
-          <button class="header-btn" style="width:auto;padding:0 10px;gap:6px;font-size:11px;font-weight:600;color:var(--text-muted)" onclick="document.getElementById('exportMenu').classList.toggle('open')">
-            <i class="fa-solid fa-file-export" style="font-size:10px"></i>
-            <i class="fa-solid fa-chevron-down" style="font-size:7px"></i>
+          <button onclick="document.getElementById('exportMenu').classList.toggle('open')" title="Exportar dados" style="padding:6px 14px;background:#E11D48;color:#fff;border:1px solid #E11D48;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:var(--font-body)">
+            <i class="fa-solid fa-file-export"></i> Exportar
           </button>
           <div id="exportMenu" class="export-menu">
             <button onclick="exportCSV();document.getElementById('exportMenu').classList.remove('open')"><i class="fa-solid fa-file-csv" style="color:var(--success)"></i> Exportar CSV</button>
@@ -2313,6 +2312,16 @@ function updateTimestamp() { if (_lastUpdateEl) _lastUpdateEl.textContent = '· 
 
 // ─── Changelog versionado (mesma lista do tablet — adicione novas entradas no TOPO) ───
 const APP_CHANGELOG = [
+  {
+    version: '3.4.0',
+    date: '2026-03-29',
+    items: [
+      { icon: 'fa-mug-hot', text: 'Pausas: registro individual com motivo, horário e duração — "Dia Finalizado" não conta como pausa' },
+      { icon: 'fa-file-export', text: 'Botão Exportar com visual padronizado (mesmo estilo do Aplicar)' },
+      { icon: 'fa-circle-dot', text: 'Indicador On Time com efeito glow pulsante restaurado' },
+      { icon: 'fa-border-none', text: 'Linha divisória removida entre On Time e marquee' }
+    ]
+  },
   {
     version: '3.3.0',
     date: '2026-03-29',
