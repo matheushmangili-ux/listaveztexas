@@ -93,12 +93,12 @@ export function initials(name) {
 
 // Theme toggle (light/dark)
 export function initTheme() {
-  const saved = localStorage.getItem('lv-theme') || 'dark';
+  const saved = localStorage.getItem('lv-theme') || 'light';
   document.documentElement.setAttribute('data-theme', saved);
 }
 export function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme') || 'dark';
-  const next = current === 'dark' ? 'light' : 'dark';
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = current === 'light' ? 'dark' : 'light';
   document.documentElement.setAttribute('data-theme', next);
   localStorage.setItem('lv-theme', next);
   return next;

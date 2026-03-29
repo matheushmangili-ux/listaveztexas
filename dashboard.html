@@ -4,11 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Minha Vez — Dashboard</title>
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,600,700,800,900&display=swap" rel="stylesheet">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/styles.css">
-<meta name="theme-color" content="#060606">
+<meta name="theme-color" content="#F5F5F7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -48,7 +50,7 @@ window._showUpdateBanner = function() {
   if (lastUpdate && (Date.now() - parseInt(lastUpdate)) < 10000) return;
   const banner = document.createElement('div');
   banner.id = 'updateBanner';
-  banner.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--accent,#facc15);color:#060606;padding:12px 20px;border-radius:12px;font-family:Inter,sans-serif;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;box-shadow:0 4px 24px rgba(0,0,0,.3);cursor:pointer;animation:slideUpBanner .3s ease';
+  banner.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--accent,#facc15);color:#060606;padding:12px 20px;border-radius:12px;font-family:Satoshi,sans-serif;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;box-shadow:0 4px 24px rgba(0,0,0,.3);cursor:pointer;animation:slideUpBanner .3s ease';
   banner.innerHTML = '<i class="fa-solid fa-arrow-rotate-right"></i> Atualização disponível — clique para atualizar';
   banner.addEventListener('click', () => {
     sessionStorage.setItem('_updateClickedAt', String(Date.now()));
@@ -74,18 +76,19 @@ window._showUpdateBanner = function() {
   .dash-header {
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
-    border-radius: 14px;
+    border-radius: 16px;
     padding: 0;
     margin-bottom: var(--gap);
     position: relative;
     overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.03);
   }
   .dash-header-top {
-    border-radius: 14px 14px 0 0;
+    border-radius: 16px 16px 0 0;
     background: #060606;
   }
   .dash-header-controls {
-    border-radius: 0 0 14px 14px;
+    border-radius: 0 0 16px 16px;
   }
   .dash-header-top {
     display: flex;
@@ -234,13 +237,14 @@ window._showUpdateBanner = function() {
     padding: 14px 16px;
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
-    border-radius: 14px;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
     transition: transform .2s ease, box-shadow .2s ease, border-color .15s, background .15s;
   }
   .rank-card:hover {
     border-color: var(--border-medium);
     background: var(--bg-elevated);
-    box-shadow: 0 4px 20px rgba(0,0,0,.3);
+    box-shadow: 0 4px 16px rgba(0,0,0,.08);
   }
   .rank-card.top-3 {
     border-color: rgba(226,80,111,.15);
@@ -302,15 +306,14 @@ window._showUpdateBanner = function() {
   .chart-card {
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
-    border-radius: 14px;
-    padding: 20px;
+    border-radius: 16px;
+    padding: 22px;
     transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
-    box-shadow: 0 1px 3px rgba(0,0,0,.12);
-    /* animation: cardFadeIn .4s ease both; — disabled for instant period switching */
+    box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.03);
   }
   .chart-card:hover {
     border-color: var(--border-medium);
-    box-shadow: 0 4px 20px rgba(0,0,0,.3);
+    box-shadow: 0 4px 16px rgba(0,0,0,.08);
   }
   .kpi-compare {
     font-size: 11px;
@@ -324,62 +327,21 @@ window._showUpdateBanner = function() {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: rgba(255,255,255,.5);
+    color: rgba(0,0,0,.45);
     margin-bottom: 16px;
     display: flex;
     align-items: center;
     gap: 8px;
   }
-  [data-theme="light"] .chart-card h3 { color: rgba(0,0,0,.5); }
-  [data-theme="light"] .chart-card {
-    background: #FFFFFF;
-    border-color: rgba(0,0,0,.06);
-    box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  [data-theme="dark"] .chart-card h3 { color: rgba(255,255,255,.5); }
+  [data-theme="dark"] .chart-card {
+    box-shadow: 0 1px 3px rgba(0,0,0,.2);
   }
-  [data-theme="light"] .chart-card:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,.1);
-    border-color: rgba(0,0,0,.1);
+  [data-theme="dark"] .chart-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,.4);
   }
-  [data-theme="light"] .kpi-card {
-    background: #FFFFFF;
-    border-color: rgba(0,0,0,.06);
-    box-shadow: 0 1px 3px rgba(0,0,0,.06);
-  }
-  [data-theme="light"] .kpi-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,.1);
-    border-color: rgba(0,0,0,.1);
-  }
-  [data-theme="light"] .kpi-value { color: #18181B; }
-  [data-theme="light"] .kpi-compare .up {
-    background: rgba(22,163,74,.1); color: #16A34A;
-  }
-  [data-theme="light"] .kpi-compare .down {
-    background: rgba(220,38,38,.1); color: #DC2626;
-  }
-  [data-theme="light"] .kpi-compare .neutral {
-    background: rgba(113,113,122,.08); color: #71717A;
-  }
-  [data-theme="light"] .filter-apply-btn {
-    background: #c43d5a; border-color: #c43d5a; color: #fff;
-  }
-  [data-theme="light"] .period-tabs button {
-    background: rgba(0,0,0,.03); color: #52525B; border-color: rgba(0,0,0,.06);
-  }
-  [data-theme="light"] .period-tabs button.active {
-    background: #c43d5a; color: #fff; border-color: #c43d5a;
-  }
-  [data-theme="light"] .filter-bar select {
-    background: #FFFFFF; border-color: rgba(0,0,0,.1); color: #18181B;
-  }
-  [data-theme="light"] .dash-header {
-    background: #FFFFFF; border-color: rgba(0,0,0,.06);
-    box-shadow: 0 1px 3px rgba(0,0,0,.04);
-  }
-  [data-theme="light"] .dash-header-top {
-    background: #060606;
-  }
-  [data-theme="light"] #statusMarquee {
-    background: #FFFFFF; border-color: rgba(0,0,0,.06);
+  [data-theme="dark"] .rank-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,.4);
   }
   .chart-card h3 i { font-size: 14px; opacity: .5; }
   .chart-box { position: relative; height: 340px; z-index: 1; }
@@ -426,8 +388,10 @@ window._showUpdateBanner = function() {
     transition: background 150ms ease, color 150ms ease;
   }
   .period-tabs button.active {
-    background: var(--bg-elevated);
+    background: var(--bg-card);
     color: var(--accent);
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    font-weight: 600;
   }
   .rupture-item {
     display: flex;
@@ -542,6 +506,7 @@ window._showUpdateBanner = function() {
   .modal-box {
     background: var(--bg-card); border: 1px solid var(--border-medium);
     border-radius: var(--radius); padding: 24px; width: 90%; max-width: 400px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.12);
   }
   .modal-box h3 { font-family: var(--font-mono); font-size: 14px; font-weight: 700; margin-bottom: 16px; }
   .modal-box label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .05em; }
@@ -557,7 +522,7 @@ window._showUpdateBanner = function() {
   .skeleton { position: relative; overflow: hidden; background: var(--bg-elevated); border-radius: var(--radius-sm); }
   .skeleton::after {
     content: ''; position: absolute; inset: 0;
-    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.03) 30%, rgba(255,255,255,.07) 50%, rgba(255,255,255,.03) 70%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.02) 30%, rgba(0,0,0,.04) 50%, rgba(0,0,0,.02) 70%, transparent 100%);
     animation: skeletonShimmer 1.8s ease-in-out infinite;
   }
   @keyframes skeletonShimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
@@ -591,11 +556,11 @@ window._showUpdateBanner = function() {
   .filter-clear-btn:hover { border-color: var(--danger); color: var(--danger); }
 
   /* ─── Meta progress bar ─── */
-  .meta-bar { width: 100%; height: 4px; background: rgba(255,255,255,.06); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+  .meta-bar { width: 100%; height: 4px; background: rgba(0,0,0,.06); border-radius: 2px; margin-top: 8px; overflow: hidden; }
   .meta-bar-fill { height: 100%; border-radius: 2px; transition: width .5s ease; }
-  .meta-label { font-size: 10px; font-weight: 500; color: rgba(255,255,255,.35); margin-top: 4px; }
-  [data-theme="light"] .meta-bar { background: rgba(0,0,0,.06); }
-  [data-theme="light"] .meta-label { color: rgba(0,0,0,.35); }
+  .meta-label { font-size: 10px; font-weight: 500; color: rgba(0,0,0,.35); margin-top: 4px; }
+  [data-theme="dark"] .meta-bar { background: rgba(255,255,255,.06); }
+  [data-theme="dark"] .meta-label { color: rgba(255,255,255,.35); }
   /* ─── Card fade-in ─── */
   @keyframes cardFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
   .kpi-card { animation: none; }
@@ -831,12 +796,8 @@ window._showUpdateBanner = function() {
   </div>
 
   <!-- Footer -->
-  <footer style="text-align:center;margin-top:32px;padding:16px 0;border-top:1px solid var(--border-subtle)">
-    <p style="font-size:10px;color:var(--text-muted);letter-spacing:.15em;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px"><img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:16px;object-fit:contain;background:#060606;border-radius:4px;padding:2px 4px"> <span style="text-transform:none;color:#e2506f">minhavez</span> <span style="text-transform:uppercase">v3.1</span></p>
-    <p id="tenantSlugFooter" style="margin-top:8px;font-size:10px;color:var(--text-muted);cursor:pointer;display:none" title="Clique para copiar seu ID de suporte">
-      <i class="fa-solid fa-copy" style="margin-right:4px;opacity:.5"></i>
-      ID: <span id="tenantSlugValue"></span>
-    </p>
+  <footer style="text-align:center;margin-top:40px;padding:28px 0;border-top:1px solid var(--border-subtle)">
+    <img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:28px;object-fit:contain;opacity:.45;background:#060606;border-radius:8px;padding:6px 10px">
   </footer>
 </div>
 
@@ -929,8 +890,8 @@ try { user = await requireRole(['gerente', 'admin', 'owner']); } catch(e) {}
 if (!user) {
   window.handleLogout = () => { window.location.href = tenantPath('/login'); };
   window.toggleTheme = () => {
-    const cur = document.documentElement.getAttribute('data-theme') || 'dark';
-    const next = cur === 'dark' ? 'light' : 'dark';
+    const cur = document.documentElement.getAttribute('data-theme') || 'light';
+    const next = cur === 'light' ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('lv-theme', next);
     applyChartTheme();
@@ -967,7 +928,7 @@ const _kpi = {
   ticket: document.getElementById('kpiTicket')
 };
 
-Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+Chart.defaults.font.family = "'Satoshi', system-ui, sans-serif";
 Chart.defaults.font.weight = 500;
 Chart.defaults.responsive = true;
 Chart.defaults.maintainAspectRatio = false;
@@ -981,7 +942,7 @@ Chart.defaults.plugins.datalabels.display = false;
 
 // ─── Theme-aware chart colors ───
 function isDarkTheme() {
-  return document.documentElement.getAttribute('data-theme') !== 'light';
+  return document.documentElement.getAttribute('data-theme') === 'dark';
 }
 function chartColors() {
   const dark = isDarkTheme();
@@ -1346,10 +1307,10 @@ async function loadMotivos(range) {
         c.textAlign = 'center';
         c.textBaseline = 'middle';
         const _cc = chartColors();
-        c.font = "700 28px 'Inter'";
+        c.font = "700 28px 'Satoshi'";
         c.fillStyle = _cc.centerText;
         c.fillText(totalMotivos, cx, cy - 8);
-        c.font = "600 9px 'Inter'";
+        c.font = "600 9px 'Satoshi'";
         c.fillStyle = _cc.textMuted;
         c.fillText('PERDAS', cx, cy + 10);
         c.restore();
@@ -1512,7 +1473,7 @@ async function loadHourly(range) {
         c.lineTo(x.right, yPos);
         c.stroke();
         c.setLineDash([]);
-        c.font = "600 9px 'Inter'";
+        c.font = "600 9px 'Satoshi'";
         c.fillStyle = isDarkTheme() ? 'rgba(250,204,21,.7)' : 'rgba(180,140,0,.7)';
         c.textAlign = 'right';
         c.fillText(isMultiDay ? 'média/dia ' + avgAtend : 'média ' + avgAtend, x.right, yPos - 4);
@@ -1812,7 +1773,7 @@ async function loadScatter(range, cachedData) {
         c.lineTo(x.right, metaY);
         c.stroke();
         c.setLineDash([]);
-        c.font = "600 9px 'Inter'";
+        c.font = "600 9px 'Satoshi'";
         c.fillStyle = '#71717A';
         c.textAlign = 'left';
         c.fillText('Meta ' + metaConv + '%', x.left + 4, metaY - 5);
@@ -1915,7 +1876,7 @@ async function loadTempoMeta(range, cachedData) {
         c.lineTo(metaX, y.bottom);
         c.stroke();
         c.setLineDash([]);
-        c.font = "600 9px 'Inter'";
+        c.font = "600 9px 'Satoshi'";
         c.fillStyle = '#71717A';
         c.textAlign = 'center';
         c.fillText('Meta ' + metaTempo + 'min', metaX, y.top - 4);
@@ -2335,7 +2296,7 @@ window.exportPDF = async function() {
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:#fff;color:#18181B;padding:40px}
+body{font-family:'Satoshi',sans-serif;background:#fff;color:#18181B;padding:40px}
 .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:16px;border-bottom:3px solid #e2506f}
 .header h1{font-size:22px;font-weight:800;letter-spacing:-.02em}
 .header .sub{font-size:11px;color:#71717A;font-weight:600}
