@@ -1776,7 +1776,7 @@ async function loadScatter(range, cachedData) {
       label: { text: 'Meta ' + metaConv + '%', style: { fontSize: '10px', fontWeight: 700, fontFamily: "'Satoshi'", background: 'rgba(226,80,111,.12)', color: '#e2506f', padding: { left: 6, right: 6, top: 2, bottom: 2 } }, position: 'right', offsetX: -10 } }] },
     dataLabels: { enabled: true, textAnchor: 'start',
       formatter: (val, opts) => allNames[opts.seriesIndex]?.[opts.dataPointIndex] || '',
-      offsetX: 14, offsetY: -2,
+      offsetX: 18, offsetY: -12,
       style: { fontSize: '11px', fontWeight: 700, colors: ['#18181B'] },
       background: { enabled: false }
     },
