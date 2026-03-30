@@ -414,8 +414,30 @@ window.addEventListener('error', function(e) {
 
   .t-footer::-webkit-scrollbar { height: 0; }
   .t-footer.drop-highlight {
-    background: linear-gradient(180deg, rgba(248,113,113,.06) 0%, transparent 100%);
-    box-shadow: inset 0 2px 0 0 var(--warning), 0 -4px 12px rgba(251,191,36,.08);
+    background: linear-gradient(180deg, rgba(248,113,113,.08) 0%, transparent 100%);
+    box-shadow: inset 0 2px 0 0 var(--warning), 0 -4px 12px rgba(251,191,36,.12);
+    outline: 2px dashed var(--warning);
+    outline-offset: -4px;
+    position: relative;
+  }
+  .t-footer .drop-label {
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--warning);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    pointer-events: none;
+    z-index: 51;
+    animation: dropLabelPulse 1s ease infinite;
+    white-space: nowrap;
+  }
+  @keyframes dropLabelPulse {
+    0%, 100% { opacity: .7; }
+    50% { opacity: 1; }
   }
 
   .footer-card {
@@ -453,7 +475,7 @@ window.addEventListener('error', function(e) {
   }
   .footer-card .fc-avatar img { width: 100%; height: 100%; object-fit: cover; }
   .footer-card .fc-name {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
@@ -464,7 +486,7 @@ window.addEventListener('error', function(e) {
     line-height: 1.1;
   }
   .footer-card .fc-status {
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
@@ -747,6 +769,18 @@ window.addEventListener('error', function(e) {
     .turno-switch:active .turno-switch-thumb { width: 30px; }
   }
 
+  /* ─── Small tablets / large phones (600-767px) ─── */
+  @media (max-width: 767px) {
+    #headerKpis { gap: 10px; }
+    #headerKpis span[id^="stat"] { font-size: 16px !important; }
+    .live-clock { font-size: 14px !important; }
+    .t-footer { min-height: 76px; padding: 8px 10px; gap: 8px; }
+    .footer-card { min-width: 60px; padding: 6px 8px; }
+    .footer-card .fc-avatar { width: 40px; height: 40px; font-size: 14px; }
+    .footer-card .fc-name { font-size: 10px; }
+    .footer-card .fc-status { font-size: 9px; }
+  }
+
   /* Prevent 300ms tap delay on touch */
   * { touch-action: manipulation; }
 
@@ -776,24 +810,24 @@ window.addEventListener('error', function(e) {
       <div style="display:flex;align-items:center;gap:6px" title="Atendimentos finalizados">
         <i class="fa-solid fa-users" style="font-size:14px;color:rgba(255,255,255,.6)"></i>
         <div style="display:flex;flex-direction:column;line-height:1.2">
-          <span id="statAtend" style="color:#FFFFFF;font-size:16px">0</span>
-          <span style="color:rgba(255,255,255,.5);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Atendidos</span>
+          <span id="statAtend" style="color:#FFFFFF;font-size:20px">0</span>
+          <span style="color:rgba(255,255,255,.5);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Atendidos</span>
         </div>
       </div>
       <div style="width:1px;height:24px;background:rgba(255,255,255,.15)"></div>
       <div style="display:flex;align-items:center;gap:6px" title="Vendas concretizadas">
         <i class="fa-solid fa-bag-shopping" style="font-size:14px;color:var(--success)"></i>
         <div style="display:flex;flex-direction:column;line-height:1.2">
-          <span id="statVendas" style="color:var(--success);font-size:16px">0</span>
-          <span style="color:rgba(255,255,255,.5);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Vendas</span>
+          <span id="statVendas" style="color:#FFFFFF;font-size:20px">0</span>
+          <span style="color:rgba(255,255,255,.5);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Vendas</span>
         </div>
       </div>
       <div style="width:1px;height:24px;background:rgba(255,255,255,.15)"></div>
       <div style="display:flex;align-items:center;gap:6px" title="Taxa de conversão">
         <i class="fa-solid fa-chart-line" style="font-size:14px;color:var(--gold)"></i>
         <div style="display:flex;flex-direction:column;line-height:1.2">
-          <span id="statConv" style="color:var(--gold);font-size:16px">0%</span>
-          <span style="color:rgba(255,255,255,.5);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Conversão</span>
+          <span id="statConv" style="color:#FFFFFF;font-size:20px">0%</span>
+          <span style="color:rgba(255,255,255,.5);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Conversão</span>
         </div>
         <div style="width:60px;height:6px;border-radius:3px;background:rgba(255,255,255,.15);overflow:hidden;flex-shrink:0;margin-left:4px">
           <div id="convBar" style="height:100%;width:0%;border-radius:3px;background:#e2506f;transition:width .6s cubic-bezier(.4,0,.2,1)"></div>
@@ -1053,6 +1087,7 @@ if (!user) {
 
 let currentTurno = null;
 let activeAtendimentos = [];
+const _savedQueuePositions = new Map(); // vendedorId → posicao_fila antes do atendimento
 let timerInterval = null;
 let vendedores = [];
 let currentSetor = 'loja';
@@ -1379,8 +1414,8 @@ function renderQueue() {
   });
   if (inQueue.length === 0) {
     const empty = document.createElement('div');
-    empty.style.cssText = 'text-align:center;padding:20px 12px;color:var(--text-muted);font-size:11px;opacity:.5';
-    empty.innerHTML = '<i class="fa-solid fa-arrow-up-from-bracket" style="display:block;font-size:18px;margin-bottom:6px;opacity:.3"></i>Arraste vendedores do footer para cá';
+    empty.style.cssText = 'text-align:center;padding:32px 16px;color:var(--text-muted);font-size:13px';
+    empty.innerHTML = '<i class="fa-solid fa-arrow-up-from-bracket" style="display:block;font-size:24px;margin-bottom:10px;opacity:.4"></i><strong>Fila vazia</strong><br><span style="font-size:11px;opacity:.6;margin-top:4px;display:inline-block">Arraste vendedores do rodapé ou toque neles para adicionar</span>';
     frag.appendChild(empty);
   }
 
@@ -1397,7 +1432,7 @@ function renderQueue() {
       div.innerHTML = `<div class="queue-item" data-id="${v.id}" data-action="return-pause" draggable="true" style="cursor:grab;opacity:.8;border-left:3px solid ${motivoColor}">
         <div class="queue-position" style="background:${motivoColor}20;color:${motivoColor}"><i class="fa-solid ${STATUS_CONFIG.pausa.icon}" style="font-size:11px"></i></div>
         <div style="flex:1;min-width:0">
-          <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.apelido || v.nome}</div>
+          <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.apelido || v.nome}</div>
           <div style="font-size:10px;color:${motivoColor};font-weight:600;text-transform:uppercase;letter-spacing:.05em">${motivoLabel}</div>
         </div>
         <i class="fa-solid fa-arrow-rotate-left" style="color:var(--success);font-size:12px;opacity:.6" title="Voltar à fila"></i>
@@ -1440,7 +1475,7 @@ function renderQueueItem(v, pos, isActive, draggable) {
     ${draggable ? '<i class="fa-solid fa-grip-vertical" style="color:var(--text-muted);font-size:10px;opacity:.4;margin-right:2px"></i>' : ''}
     ${posHtml}
     <div style="flex:1;min-width:0">
-      <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.apelido || v.nome}</div>
+      <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.apelido || v.nome}</div>
       <div style="font-size:10px;color:${cfg.color};font-weight:600;text-transform:uppercase;letter-spacing:.05em">${cfg.short}</div>
     </div>
     ${timerHtml}
@@ -1527,6 +1562,19 @@ function initDragAndDrop() {
     }
     draggedId = null;
   });
+}
+
+// ─── Drop zone label helpers ───
+let _footerDropLabel = null;
+function showFooterDropLabel() {
+  if (_footerDropLabel || !_statusFooter) return;
+  _footerDropLabel = document.createElement('div');
+  _footerDropLabel.className = 'drop-label';
+  _footerDropLabel.textContent = 'Soltar para dar saída';
+  _statusFooter.appendChild(_footerDropLabel);
+}
+function hideFooterDropLabel() {
+  if (_footerDropLabel) { _footerDropLabel.remove(); _footerDropLabel = null; }
 }
 
 // Cache de rects para evitar reflow durante drag
@@ -1631,6 +1679,8 @@ window.sendToAtendimento = async function(vendedorId) {
   const setor = v.setor || 'loja';
   const fila = vendedores.filter(x => (x.setor || 'loja') === setor && x.status === 'disponivel' && x.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
   const isPreferencial = fila.length > 0 && fila[0].id !== vendedorId;
+  // Salvar posição original para restaurar se cancelar
+  _savedQueuePositions.set(vendedorId, v.posicao_fila);
   try {
     markLocal();
     const prefLabel = isPreferencial ? ' (preferencial)' : '';
@@ -1735,7 +1785,7 @@ window.onTouchDragStart = function(e) {
 
       if (elUnder && (elUnder.id === 'queueList' || elUnder.closest('#queueList'))) {
         queueList.style.background = 'rgba(34,197,94,.05)';
-        footer?.classList.remove('drop-highlight');
+        footer?.classList.remove('drop-highlight'); hideFooterDropLabel();
         const after = getDragAfterElement(queueList, t.clientY);
         if (after !== _prevAfter) {
           _clearTouchIndicators();
@@ -1743,12 +1793,12 @@ window.onTouchDragStart = function(e) {
           _prevAfter = after;
         }
       } else if (elUnder && (elUnder.id === 'statusFooter' || elUnder.closest('#statusFooter'))) {
-        footer?.classList.add('drop-highlight');
+        footer?.classList.add('drop-highlight'); showFooterDropLabel();
         queueList.style.background = '';
         _clearTouchIndicators(); _prevAfter = null;
       } else {
         queueList.style.background = '';
-        footer?.classList.remove('drop-highlight');
+        footer?.classList.remove('drop-highlight'); hideFooterDropLabel();
         _clearTouchIndicators(); _prevAfter = null;
       }
     }
@@ -1770,7 +1820,7 @@ window.onTouchDragStart = function(e) {
     if (touchGhost) { touchGhost.remove(); touchGhost = null; }
     if (touchDragEl) touchDragEl.style.opacity = '1';
     queueList.style.background = '';
-    footer?.classList.remove('drop-highlight');
+    footer?.classList.remove('drop-highlight'); hideFooterDropLabel();
 
     if (!touchDragging) {
       // Foi um tap, não drag — não fazer nada (o onclick cuida)
@@ -1785,6 +1835,7 @@ window.onTouchDragStart = function(e) {
     // Caso contrário, renderFooter() fica bloqueado durante todo o await
     const _savedDragId = touchDragId;
     touchDragId = null; touchDragEl = null; touchDragging = false;
+    _lastFooterKey = ''; // Garantir que footer re-renderize após drag
 
     if (dropEl && (dropEl.id === 'queueList' || dropEl.closest('#queueList'))) {
       const v = vendedores.find(x => x.id === _savedDragId);
@@ -1986,6 +2037,10 @@ window.closeSaida = function() {
   document.getElementById('saidaOverlay').classList.remove('open');
   document.getElementById('saidaSheet').classList.remove('open');
   pendingSaidaId = null;
+  // Forçar re-render completo para restaurar DOM stale (fix: último item arrastado pro footer)
+  _lastQueueKey = '';
+  _lastFooterKey = '';
+  scheduleRender();
 };
 
 window.confirmSaida = async function(motivo) {
@@ -2043,7 +2098,9 @@ function renderFooter() {
     let statusLabel, statusColor, dotColor;
 
     if (atendendo) {
-      statusLabel = 'Atendendo';
+      const atend = activeAtendimentos.find(a => a.vendedor_id === v.id);
+      const mins = atend && atend.inicio ? Math.floor((Date.now() - new Date(atend.inicio).getTime()) / 60000) : 0;
+      statusLabel = mins > 0 ? 'Atendendo (' + mins + 'min)' : 'Atendendo';
       statusColor = 'var(--info)';
       dotColor = STATUS_CONFIG.em_atendimento.color;
     } else if (inQueue) {
@@ -2101,12 +2158,15 @@ function renderFooter() {
   const footer = _statusFooter;
   if (!footer) return;
   // Drop zone
-  footer.addEventListener('dragover', e => { e.preventDefault(); footer.classList.add('drop-highlight'); });
-  footer.addEventListener('dragleave', () => { footer.classList.remove('drop-highlight'); });
+  footer.addEventListener('dragover', e => { e.preventDefault(); footer.classList.add('drop-highlight'); showFooterDropLabel(); });
+  footer.addEventListener('dragleave', () => { footer.classList.remove('drop-highlight'); hideFooterDropLabel(); });
   footer.addEventListener('drop', e => {
     e.preventDefault();
     footer.classList.remove('drop-highlight');
-    if (draggedId) { openSaida(draggedId); draggedId = null; }
+    hideFooterDropLabel();
+    const id = draggedId;
+    draggedId = null;
+    if (id) { openSaida(id); }
   });
   // Click delegation
   footer.addEventListener('click', e => {
@@ -2404,28 +2464,38 @@ window.cancelarAtendimento = async function(atendId) {
     markLocal();
     await sb.from('atendimentos').delete().eq('id', atendId);
 
-    // Devolver vendedor ao PRIMEIRO da fila do setor dele
+    // Devolver vendedor à posição original (ou 1º se não tiver salva)
     const setor = v.setor || 'loja';
+    const savedPos = _savedQueuePositions.get(vendedorId) || 1;
+    _savedQueuePositions.delete(vendedorId);
     const inQueue = vendedores
       .filter(x => (x.setor || 'loja') === setor && x.status === 'disponivel' && x.posicao_fila != null)
       .sort((a, b) => a.posicao_fila - b.posicao_fila);
-    const newOrder = [vendedorId, ...inQueue.map(x => x.id)];
+
+    // Inserir na posição salva (ajustada ao tamanho atual da fila)
+    const insertIdx = Math.min(savedPos - 1, inQueue.length);
+    const before = inQueue.slice(0, insertIdx).map(x => x.id);
+    const after = inQueue.slice(insertIdx).map(x => x.id);
+    const newOrder = [...before, vendedorId, ...after];
 
     // Optimistic: update local state
     v.status = 'disponivel';
-    v.posicao_fila = 1;
-    inQueue.forEach((x, i) => { x.posicao_fila = i + 2; });
+    v.posicao_fila = insertIdx + 1;
+    after.forEach((id, i) => {
+      const x = vendedores.find(vx => vx.id === id);
+      if (x) x.posicao_fila = insertIdx + 2 + i;
+    });
 
     removeAtendimento(atendId);
     scheduleRender();
 
     // Persist: set status + posição first, then reorder
-    const { error: errUp } = await sb.from('vendedores').update({ status: 'disponivel', posicao_fila: 1 }).eq('id', vendedorId);
+    const { error: errUp } = await sb.from('vendedores').update({ status: 'disponivel', posicao_fila: insertIdx + 1 }).eq('id', vendedorId);
     if (errUp) { toast('Erro ao atualizar vendedor: ' + errUp.message, 'error'); }
     const { error: errReo } = await sb.rpc('reordenar_fila', { p_ids: newOrder });
     if (errReo) { toast('Erro ao reordenar: ' + errReo.message, 'error'); }
     await loadVendedores();
-    toast('Atendimento cancelado — vendedor voltou ao 1º da fila', 'info');
+    toast('Atendimento cancelado — vendedor voltou à posição #' + (insertIdx + 1), 'info');
   } catch (e) {
     toast('Erro ao cancelar: ' + e.message, 'error');
   } finally {
@@ -2555,6 +2625,7 @@ async function finalizeMultiOutcome() {
   const atendId = _multiAtendId;
   const atend = activeAtendimentos.find(a => a.id === atendId);
   const vendedorId = atend?.vendedor_id;
+  if (vendedorId) _savedQueuePositions.delete(vendedorId);
   if (!atendId || _multiResults.length === 0) return;
 
   markLocal();
@@ -2850,6 +2921,7 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor, con
     // Guardar info do vendedor antes de finalizar
     const atendInfo = activeAtendimentos.find(a => a.id === id);
     const vendedorId = atendInfo?.vendedor_id;
+    if (vendedorId) _savedQueuePositions.delete(vendedorId);
 
     const { error } = await sb.rpc('finalizar_atendimento', {
       p_atendimento_id: id,
