@@ -1889,38 +1889,39 @@ async function loadTrend(range) {
     trendBox.style.minWidth = Math.max(700, xLabels.length * 55) + 'px';
   }
 
+  // Se só tem 1 dia, usar barras agrupadas. Se mais, usar barras + linha
+  const isSingleDay = xLabels.length <= 2;
+
   renderChart('trend', '#chartTrend', {
-    chart: { type: 'line', height: 360 },
+    chart: { type: 'bar', height: 340, stacked: false },
     series: [
-      { name: 'Atendimentos', type: 'area', data: atend },
-      { name: 'Vendas', type: 'area', data: vendas },
-      { name: 'Conversão %', type: 'line', data: conv }
+      { name: 'Atendimentos', type: 'bar', data: atend },
+      { name: 'Vendas', type: 'bar', data: vendas },
+      { name: 'Conversão', type: 'line', data: conv }
     ],
-    xaxis: { categories: xLabels, labels: {
-      style: { fontSize: '11px', fontWeight: 500 },
-      rotate: 0, rotateAlways: false
-    } },
+    xaxis: { categories: xLabels, labels: { style: { fontSize: '11px', fontWeight: 600 } } },
     yaxis: [
-      { title: { text: 'Atendimentos / Vendas', style: { fontSize: '10px', fontWeight: 600, color: isDarkTheme() ? 'rgba(255,255,255,.4)' : 'rgba(0,0,0,.35)' } },
-        labels: { style: { fontSize: '10px', fontWeight: 500 } }, forceNiceScale: true, min: 0 },
-      { opposite: true, title: { text: 'Conversão %', style: { fontSize: '10px', fontWeight: 600, color: isDarkTheme() ? 'rgba(255,255,255,.4)' : 'rgba(0,0,0,.35)' } },
-        labels: { formatter: v => Math.round(v) + '%', style: { fontSize: '10px', fontWeight: 500 } }, min: 0, max: 100 }
+      { labels: { style: { fontSize: '10px', fontWeight: 500 } }, forceNiceScale: true, min: 0 },
+      { opposite: true,
+        labels: { formatter: v => Math.round(v) + '%', style: { fontSize: '10px', fontWeight: 500 } }, min: 0, max: 100,
+        forceNiceScale: false }
     ],
-    stroke: { width: [2.5, 2.5, 2], curve: 'smooth', dashArray: [0, 0, 6] },
-    fill: { type: ['gradient', 'gradient', 'solid'],
-      gradient: { shadeIntensity: 1, opacityFrom: 0.25, opacityTo: 0.05, stops: [0, 100] } },
-    colors: ['#e2506f', '#D4D4D8', '#A1A1AA'],
-    markers: { size: [4, 4, 3], hover: { size: 7 } },
+    plotOptions: { bar: { borderRadius: 4, columnWidth: isSingleDay ? '35%' : '55%' } },
+    stroke: { width: [0, 0, 3], curve: 'smooth' },
+    fill: { opacity: [0.85, 0.5, 1] },
+    colors: ['#e2506f', '#D4D4D8', '#f59e0b'],
+    markers: { size: [0, 0, 5], strokeWidth: 2, strokeColors: '#fff', hover: { size: 7 } },
     grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { left: 10, right: 10, bottom: 5 } },
     legend: { position: 'top', horizontalAlign: 'center', fontSize: '11px', fontWeight: 600,
               labels: { colors: chartColors().textStrong },
               markers: { shape: 'circle', size: 5 },
-              itemMargin: { horizontal: 20, vertical: 0 },
-              floating: false, offsetY: 0, height: 30 },
+              itemMargin: { horizontal: 24, vertical: 0 } },
     annotations,
-    dataLabels: { enabled: false },
+    dataLabels: { enabled: isSingleDay, formatter: (val, { seriesIndex }) => seriesIndex === 2 ? val + '%' : Math.round(val),
+      style: { fontSize: '11px', fontWeight: 700 },
+      offsetY: -4 },
     tooltip: { shared: true, intersect: false,
-      y: { formatter: (val, { seriesIndex }) => seriesIndex === 2 ? val + '%' : Math.round(val) } }
+      y: { formatter: (val, { seriesIndex }) => seriesIndex === 2 ? Math.round(val) + '%' : Math.round(val) } }
   });
 
   // ─── KPI Sparklines ───
