@@ -1375,16 +1375,6 @@ async function loadHourly(range) {
   }
   const todayOverlay = isMultiDay ? hours.map(h => todayAtendByHour[h] || 0) : null;
 
-  // Sparkline for KPI card
-  renderChart('sparkAtend', '#sparkAtend', {
-    chart: { type: 'area', height: 36, sparkline: { enabled: true } },
-    series: [{ data: atend.length > 0 ? atend : [0] }],
-    stroke: { width: 1.5, curve: 'smooth' },
-    fill: { type: 'gradient', gradient: { opacityFrom: 0.3, opacityTo: 0.05 } },
-    colors: ['#e2506f'],
-    tooltip: { enabled: false }
-  });
-
   // Calcular pico e média
   const peakIdx = atend.indexOf(Math.max(...atend));
   const avgAtend = atend.length > 0 ? Math.round(atend.reduce((a, b) => a + b, 0) / atend.length * 10) / 10 : 0;
@@ -1754,22 +1744,24 @@ async function loadTrend(range) {
       { name: 'Conversão %', type: 'line', data: conv }
     ],
     xaxis: { categories: xLabels, labels: {
-      style: { fontSize: '10px', fontWeight: 500 },
-      rotate: -45, rotateAlways: false
+      style: { fontSize: '11px', fontWeight: 500 },
+      rotate: 0, rotateAlways: false
     } },
     yaxis: [
-      { title: { text: 'VOLUME', style: { fontSize: '9px', fontWeight: 700, color: chartColors().textMuted } },
-        labels: { style: { fontSize: '10px', fontWeight: 500 } }, forceNiceScale: true },
-      { opposite: true, title: { text: 'CONVERSÃO', style: { fontSize: '9px', fontWeight: 700, color: chartColors().textMuted } },
+      { labels: { style: { fontSize: '10px', fontWeight: 500 } }, forceNiceScale: true },
+      { opposite: true,
         labels: { formatter: v => Math.round(v) + '%', style: { fontSize: '10px', fontWeight: 500 } }, min: 0, max: 100 }
     ],
     stroke: { width: [2.5, 2.5, 2], curve: 'smooth', dashArray: [0, 0, 6] },
     fill: { type: ['gradient', 'gradient', 'solid'],
       gradient: { shadeIntensity: 1, opacityFrom: 0.25, opacityTo: 0.05, stops: [0, 100] } },
     colors: ['#e2506f', '#D4D4D8', '#A1A1AA'],
-    markers: { size: [0, 0, 0], hover: { size: 6 } },
-    grid: { borderColor: chartColors().grid, strokeDashArray: 3 },
-    legend: { position: 'top', fontSize: '11px', fontWeight: 600, labels: { colors: chartColors().textStrong }, markers: { shape: 'circle', size: 5 } },
+    markers: { size: [3, 3, 0], hover: { size: 6 } },
+    grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { left: 10, right: 10, bottom: 5 } },
+    legend: { position: 'top', horizontalAlign: 'center', fontSize: '11px', fontWeight: 600,
+              labels: { colors: chartColors().textStrong },
+              markers: { shape: 'circle', size: 5 },
+              itemMargin: { horizontal: 16, vertical: 4 } },
     annotations,
     dataLabels: { enabled: false },
     tooltip: { shared: true, intersect: false,
