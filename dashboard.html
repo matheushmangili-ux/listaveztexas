@@ -213,6 +213,40 @@ window._showUpdateBanner = function() {
   }
   @media (max-width: 768px) { .charts-grid { grid-template-columns: 1fr; } }
 
+  /* ─── KPI Progress Bars ─── */
+  .kpi-bar-wrap {
+    width: 100%; height: 5px; border-radius: 3px;
+    background: var(--border-subtle); margin-top: 8px; overflow: hidden;
+  }
+  .kpi-bar-fill {
+    height: 100%; border-radius: 3px;
+    transition: width .6s ease, background .3s ease;
+  }
+
+  /* ─── Collapsible Sections ─── */
+  .chart-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; user-select: none; gap: 8px;
+  }
+  .chart-card-header h3 { margin-bottom: 0; flex: 1; }
+  .collapse-btn {
+    width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border-subtle);
+    background: transparent; color: var(--text-muted); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .25s ease, background .15s ease;
+    flex-shrink: 0;
+  }
+  .collapse-btn:hover { background: rgba(255,255,255,.06); }
+  .collapse-btn i { font-size: 11px; transition: transform .25s ease; }
+  .collapse-btn.collapsed i { transform: rotate(-90deg); }
+  .chart-card-body {
+    overflow: hidden; transition: max-height .35s ease, opacity .25s ease;
+    max-height: 2000px; opacity: 1;
+  }
+  .chart-card-body.collapsed {
+    max-height: 0 !important; opacity: 0; margin-top: 0 !important;
+  }
+
   /* ─── Ranking Cards ─── */
   .ranking-grid {
     display: grid;
@@ -699,54 +733,42 @@ window._showUpdateBanner = function() {
   <div class="kpi-grid-hero" id="kpiGrid">
     <div class="kpi-card">
       <div class="kpi-label"><i class="fa-solid fa-users"></i> Total Atendimentos</div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="kpi-value" id="kpiTotal"><div class="skeleton skeleton-kpi-value"></div></div>
-        <div id="gaugeTotal" style="width:48px;height:48px;flex-shrink:0"></div>
-      </div>
+      <div class="kpi-value" id="kpiTotal"><div class="skeleton skeleton-kpi-value"></div></div>
       <div class="kpi-compare" id="kpiTotalCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+      <div class="kpi-bar-wrap"><div class="kpi-bar-fill" id="barTotal"></div></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label"><i class="fa-solid fa-bag-shopping"></i> Total Vendas</div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="kpi-value" id="kpiVendas"><div class="skeleton skeleton-kpi-value"></div></div>
-        <div id="gaugeVendas" style="width:48px;height:48px;flex-shrink:0"></div>
-      </div>
+      <div class="kpi-value" id="kpiVendas"><div class="skeleton skeleton-kpi-value"></div></div>
       <div class="kpi-compare" id="kpiVendasCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+      <div class="kpi-bar-wrap"><div class="kpi-bar-fill" id="barVendas"></div></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label"><i class="fa-solid fa-chart-line"></i> Taxa de Conversão</div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="kpi-value" id="kpiConv"><div class="skeleton skeleton-kpi-value"></div></div>
-        <div id="gaugeConv" style="width:48px;height:48px;flex-shrink:0"></div>
-      </div>
+      <div class="kpi-value" id="kpiConv"><div class="skeleton skeleton-kpi-value"></div></div>
       <div class="kpi-compare" id="kpiConvCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+      <div class="kpi-bar-wrap"><div class="kpi-bar-fill" id="barConv"></div></div>
     </div>
   </div>
   <!-- KPI Cards — Secondary Row -->
   <div class="kpi-grid-secondary">
     <div class="kpi-card">
       <div class="kpi-label"><i class="fa-solid fa-xmark"></i> Não Convertidos</div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="kpi-value" id="kpiLoss"><div class="skeleton skeleton-kpi-value"></div></div>
-        <div id="gaugeLoss" style="width:48px;height:48px;flex-shrink:0"></div>
-      </div>
+      <div class="kpi-value" id="kpiLoss"><div class="skeleton skeleton-kpi-value"></div></div>
       <div class="kpi-compare" id="kpiLossCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+      <div class="kpi-bar-wrap"><div class="kpi-bar-fill" id="barLoss"></div></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label"><i class="fa-solid fa-receipt"></i> Ticket Médio</div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="kpi-value" id="kpiTicket"><div class="skeleton skeleton-kpi-value"></div></div>
-        <div id="gaugeTicket" style="width:48px;height:48px;flex-shrink:0"></div>
-      </div>
+      <div class="kpi-value" id="kpiTicket"><div class="skeleton skeleton-kpi-value"></div></div>
       <div class="kpi-compare" id="kpiTicketCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+      <div class="kpi-bar-wrap"><div class="kpi-bar-fill" id="barTicket"></div></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label"><i class="fa-solid fa-clock"></i> Tempo Médio</div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="kpi-value" id="kpiTime"><div class="skeleton skeleton-kpi-value"></div></div>
-        <div id="gaugeTempo" style="width:48px;height:48px;flex-shrink:0"></div>
-      </div>
+      <div class="kpi-value" id="kpiTime"><div class="skeleton skeleton-kpi-value"></div></div>
       <div class="kpi-compare" id="kpiTimeCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+      <div class="kpi-bar-wrap"><div class="kpi-bar-fill" id="barTempo"></div></div>
     </div>
   </div>
 
@@ -784,27 +806,42 @@ window._showUpdateBanner = function() {
 
   <!-- Ranking -->
   <div class="chart-card" style="margin-bottom:var(--gap)">
-    <h3><i class="fa-solid fa-ranking-star" style="margin-right:6px;color:var(--accent-dim)"></i>Ranking Vendedores</h3>
-    <div class="ranking-grid" id="rankingBody">
-      <div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text-muted)">Carregando...</div>
+    <div class="chart-card-header" onclick="toggleSection('ranking')">
+      <h3><i class="fa-solid fa-ranking-star" style="margin-right:6px;color:var(--accent-dim)"></i>Ranking Vendedores</h3>
+      <button class="collapse-btn" id="collapseBtn-ranking"><i class="fa-solid fa-chevron-down"></i></button>
+    </div>
+    <div class="chart-card-body" id="collapseBody-ranking" style="margin-top:16px">
+      <div class="ranking-grid" id="rankingBody">
+        <div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text-muted)">Carregando...</div>
+      </div>
     </div>
   </div>
 
   <!-- Bottom row: Ruptures + Pausas -->
   <div class="charts-grid">
     <div class="chart-card">
-      <h3><i class="fa-solid fa-box-open" style="margin-right:6px;color:var(--danger)"></i>Rupturas — Produtos em Falta</h3>
-      <div id="ruptureList">
-        <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">
-          <i class="fa-solid fa-check-circle" style="font-size:20px;margin-bottom:8px;display:block;color:var(--success);opacity:.4"></i>
-          Nenhuma ruptura registrada
+      <div class="chart-card-header" onclick="toggleSection('rupturas')">
+        <h3><i class="fa-solid fa-box-open" style="margin-right:6px;color:var(--danger)"></i>Rupturas — Produtos em Falta</h3>
+        <button class="collapse-btn" id="collapseBtn-rupturas"><i class="fa-solid fa-chevron-down"></i></button>
+      </div>
+      <div class="chart-card-body" id="collapseBody-rupturas" style="margin-top:16px">
+        <div id="ruptureList">
+          <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">
+            <i class="fa-solid fa-check-circle" style="font-size:20px;margin-bottom:8px;display:block;color:var(--success);opacity:.4"></i>
+            Nenhuma ruptura registrada
+          </div>
         </div>
       </div>
     </div>
     <div class="chart-card">
-      <h3><i class="fa-solid fa-mug-hot" style="margin-right:6px;color:var(--warning)"></i>Pausas — Saídas da Fila</h3>
-      <div id="pauseStatsList" style="max-height:340px;overflow-y:auto">
-        <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>
+      <div class="chart-card-header" onclick="toggleSection('pausas')">
+        <h3><i class="fa-solid fa-mug-hot" style="margin-right:6px;color:var(--warning)"></i>Pausas — Saídas da Fila</h3>
+        <button class="collapse-btn" id="collapseBtn-pausas"><i class="fa-solid fa-chevron-down"></i></button>
+      </div>
+      <div class="chart-card-body" id="collapseBody-pausas" style="margin-top:16px">
+        <div id="pauseStatsList" style="max-height:340px;overflow-y:auto">
+          <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>
+        </div>
       </div>
     </div>
   </div>
@@ -812,14 +849,19 @@ window._showUpdateBanner = function() {
 
   <!-- Gestão de Vendedores -->
   <div class="chart-card" style="margin-bottom:var(--gap)">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
-      <h3 style="margin-bottom:0"><i class="fa-solid fa-user-gear" style="margin-right:6px;color:var(--accent-dim)"></i>Gestão de Vendedores</h3>
-      <button class="btn btn-gold" style="min-height:34px;padding:0 14px;font-size:11px" onclick="openVendedorModal()">
-        <i class="fa-solid fa-plus" style="font-size:9px;margin-right:4px"></i> Novo Vendedor
-      </button>
+    <div class="chart-card-header" onclick="toggleSection('gestao')">
+      <h3><i class="fa-solid fa-user-gear" style="margin-right:6px;color:var(--accent-dim)"></i>Gestão de Vendedores</h3>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="btn btn-gold" style="min-height:34px;padding:0 14px;font-size:11px" onclick="event.stopPropagation();openVendedorModal()">
+          <i class="fa-solid fa-plus" style="font-size:9px;margin-right:4px"></i> Novo Vendedor
+        </button>
+        <button class="collapse-btn" id="collapseBtn-gestao"><i class="fa-solid fa-chevron-down"></i></button>
+      </div>
     </div>
-    <div id="vendedorList">
-      <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>
+    <div class="chart-card-body" id="collapseBody-gestao" style="margin-top:16px">
+      <div id="vendedorList">
+        <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>
+      </div>
     </div>
   </div>
 
@@ -845,9 +887,9 @@ window._showUpdateBanner = function() {
     <input type="text" id="vendedorApelido" placeholder="Ex: Luiz">
     <label>Departamento</label>
     <select id="vendedorSetor" style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);color:var(--text-primary);font-size:13px;font-weight:600;margin-bottom:12px;font-family:var(--font-body)">
-      <option value="loja">👔 Vestuário</option>
-      <option value="chapelaria">🤠 Chapelaria</option>
-      <option value="selaria">🐴 Selaria</option>
+      <option value="loja">Vestuário</option>
+      <option value="chapelaria">Chapelaria</option>
+      <option value="selaria">Selaria</option>
     </select>
     <label>Foto (opcional)</label>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
@@ -1255,27 +1297,20 @@ async function loadKPIs(range, prevRange) {
   renderCompare('kpiTimeCmp', d.tempo_medio_min || 0, p.tempo_medio_min || 0, true);
   if (ticket > 0 || pTicket > 0) renderCompare('kpiTicketCmp', ticket, pTicket);
 
-  // ─── Mini gauges (48px radialBar, padronizado em todos os 6 KPIs) ───
-  function miniGauge(key, selector, pct, color) {
-    renderChart(key, selector, {
-      chart: { type: 'radialBar', height: 48, sparkline: { enabled: true } },
-      series: [Math.min(100, Math.max(0, Math.round(pct)))],
-      plotOptions: { radialBar: {
-        startAngle: 0, endAngle: 360,
-        hollow: { size: '50%' },
-        track: { background: chartColors().trackBg, strokeWidth: '97%' },
-        dataLabels: { name: { show: false }, value: { show: false } }
-      }},
-      colors: [color],
-      stroke: { lineCap: 'round' }
-    });
+  // ─── KPI Progress Bars ───
+  function setBar(id, pct, color) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const clamped = Math.min(100, Math.max(0, Math.round(pct)));
+    el.style.width = clamped + '%';
+    el.style.background = color;
   }
-  function gaugeColor(pct, meta) {
+  function barColor(pct, meta) {
     return pct >= meta ? '#e2506f' : pct >= meta * 0.7 ? '#f0758e' : '#D4D4D8';
   }
 
   const totalAtend = parseInt(d.total_atendimentos) || 0;
-  const pTotalAtend = parseInt(p.total_atendimientos || p.total_atendimentos) || 0;
+  const pTotalAtend = parseInt(p.total_atendimentos) || 0;
   const totalVendas = parseInt(d.total_vendas) || 0;
   const pTotalVendas = parseInt(p.total_vendas) || 0;
   const totalNaoConv = parseInt(d.total_nao_convertido) || 0;
@@ -1283,28 +1318,22 @@ async function loadKPIs(range, prevRange) {
   const ticketVal = parseFloat(d.ticket_medio) || 0;
   const tempoVal = parseFloat(d.tempo_medio_min) || 0;
 
-  // 1. Total Atendimentos — % de variação vs anterior (capped at 100%)
   const atendPct = pTotalAtend > 0 ? Math.round(totalAtend / pTotalAtend * 100) : (totalAtend > 0 ? 100 : 0);
-  miniGauge('gaugeTotal', '#gaugeTotal', atendPct, gaugeColor(atendPct, 100));
+  setBar('barTotal', atendPct, barColor(atendPct, 100));
 
-  // 2. Total Vendas — % de variação vs anterior
   const vendasPct = pTotalVendas > 0 ? Math.round(totalVendas / pTotalVendas * 100) : (totalVendas > 0 ? 100 : 0);
-  miniGauge('gaugeVendas', '#gaugeVendas', vendasPct, gaugeColor(vendasPct, 100));
+  setBar('barVendas', vendasPct, barColor(vendasPct, 100));
 
-  // 3. Conversão — % da meta
-  miniGauge('gaugeConv', '#gaugeConv', convPct, gaugeColor(convPct, metas.conversao));
+  setBar('barConv', convPct, barColor(convPct, metas.conversao));
 
-  // 4. Não Convertidos — proporção inversa (menos perdas = melhor)
   const lossPct = totalAtend > 0 ? Math.round((1 - totalNaoConv / totalAtend) * 100) : 100;
-  miniGauge('gaugeLoss', '#gaugeLoss', lossPct, gaugeColor(lossPct, 70));
+  setBar('barLoss', lossPct, barColor(lossPct, 70));
 
-  // 5. Ticket Médio — % da meta
   const ticketPct = metas.ticket_medio > 0 ? Math.round(ticketVal / metas.ticket_medio * 100) : 0;
-  miniGauge('gaugeTicket', '#gaugeTicket', ticketPct, gaugeColor(ticketPct, 100));
+  setBar('barTicket', ticketPct, barColor(ticketPct, 100));
 
-  // 6. Tempo Médio — inverso (menor tempo = melhor)
   const tempoPct = metas.tempo_medio > 0 ? Math.round((metas.tempo_medio / Math.max(tempoVal, 1)) * 100) : 0;
-  miniGauge('gaugeTempo', '#gaugeTempo', tempoPct, gaugeColor(tempoPct, 100));
+  setBar('barTempo', tempoPct, barColor(tempoPct, 100));
 
   _cachedStats = d;
 }
@@ -1353,7 +1382,8 @@ async function loadMotivos(range) {
     legend: { position: 'bottom', fontSize: '11px', fontWeight: 600, fontFamily: "'Satoshi'",
               labels: { colors: chartColors().textStrong } },
     stroke: { width: 2, colors: [isDarkTheme() ? '#18181B' : '#FFFFFF'] },
-    tooltip: { y: { formatter: (val) => val + ' registros' } }
+    tooltip: { y: { formatter: (val) => val + ' registros' } },
+    states: { hover: { filter: { type: 'darken', value: 0.85 } }, active: { filter: { type: 'none' } } }
   });
 }
 
@@ -1806,6 +1836,29 @@ window.toggleTheme = function() {
   loadAll();
 };
 
+// ─── Collapsible Sections ───
+window.toggleSection = function(id) {
+  const btn = document.getElementById('collapseBtn-' + id);
+  const body = document.getElementById('collapseBody-' + id);
+  if (!btn || !body) return;
+  const isCollapsed = body.classList.toggle('collapsed');
+  btn.classList.toggle('collapsed', isCollapsed);
+  // Persist state
+  const stored = JSON.parse(localStorage.getItem('lv-collapsed') || '{}');
+  stored[id] = isCollapsed;
+  localStorage.setItem('lv-collapsed', JSON.stringify(stored));
+};
+// Restore collapsed state on load
+(function restoreCollapsed() {
+  const stored = JSON.parse(localStorage.getItem('lv-collapsed') || '{}');
+  Object.entries(stored).forEach(([id, collapsed]) => {
+    if (!collapsed) return;
+    const btn = document.getElementById('collapseBtn-' + id);
+    const body = document.getElementById('collapseBody-' + id);
+    if (btn && body) { btn.classList.add('collapsed'); body.classList.add('collapsed'); }
+  });
+})();
+
 // ─── Gestão de Vendedores ───
 async function loadVendedores() {
   const el = document.getElementById('vendedorList');
@@ -1816,7 +1869,7 @@ async function loadVendedores() {
     el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum vendedor cadastrado</div>';
     return;
   }
-  const setorLabels = { loja: '👔 Vestuário', chapelaria: '🤠 Chapelaria', selaria: '🐴 Selaria' };
+  const setorLabels = { loja: 'Vestuário', chapelaria: 'Chapelaria', selaria: 'Selaria' };
   el.innerHTML = data.map(v => {
     const avatarContent = v.foto_url
       ? `<img src="${v.foto_url}" style="width:100%;height:100%;object-fit:cover">`
@@ -1826,7 +1879,7 @@ async function loadVendedores() {
       <div class="vendedor-info">
         <div class="vendedor-name">${v.nome}</div>
         ${v.apelido ? '<div class="vendedor-nick">' + v.apelido + '</div>' : ''}
-        <div style="font-size:9px;color:var(--text-muted);font-weight:600;margin-top:1px">${setorLabels[v.setor] || '👔 Vestuário'}</div>
+        <div style="font-size:9px;color:var(--text-muted);font-weight:600;margin-top:1px">${setorLabels[v.setor] || 'Vestuário'}</div>
       </div>
       <span class="badge-ativo ${v.ativo ? 'on' : 'off'}">${v.ativo ? 'Ativo' : 'Inativo'}</span>
       <div class="vendedor-actions">
