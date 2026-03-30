@@ -194,19 +194,24 @@ window._showUpdateBanner = function() {
   }
   .kpi-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--gap);
+    margin-bottom: var(--gap);
+  }
+  .kpi-grid-secondary {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--gap);
     margin-bottom: var(--gap);
   }
   .kpi-card--gauge { text-align: center; }
-  @media (max-width: 1200px) {
-    .kpi-grid { grid-template-columns: repeat(3, 1fr); }
-  }
   @media (max-width: 768px) {
     .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .kpi-grid-secondary { grid-template-columns: 1fr; }
   }
   @media (max-width: 480px) {
     .kpi-grid { grid-template-columns: 1fr; }
+    .kpi-grid-secondary { grid-template-columns: 1fr; }
   }
   .charts-grid {
     display: grid;
@@ -668,23 +673,32 @@ window._showUpdateBanner = function() {
 
   <!-- KPI Cards -->
   <div class="kpi-grid" id="kpiGrid">
+    <div class="kpi-card kpi-card--gauge">
+      <div class="kpi-label"><i class="fa-solid fa-chart-line"></i> Taxa de Conversão</div>
+      <div id="gaugeConv" style="height:160px;margin:0 auto"></div>
+      <div class="kpi-compare" id="kpiConvCmp" style="margin-top:-8px"><div class="skeleton skeleton-kpi-compare"></div></div>
+      <div class="kpi-value" id="kpiConv" style="display:none"></div>
+    </div>
+    <div class="kpi-card kpi-card--gauge">
+      <div class="kpi-label"><i class="fa-solid fa-receipt"></i> Ticket Médio</div>
+      <div id="gaugeTicket" style="height:160px;margin:0 auto"></div>
+      <div class="kpi-compare" id="kpiTicketCmp" style="margin-top:-8px"><div class="skeleton skeleton-kpi-compare"></div></div>
+      <div class="kpi-value" id="kpiTicket" style="display:none"></div>
+    </div>
+    <div class="kpi-card kpi-card--gauge">
+      <div class="kpi-label"><i class="fa-solid fa-clock"></i> Tempo Médio</div>
+      <div id="gaugeTempo" style="height:160px;margin:0 auto"></div>
+      <div class="kpi-compare" id="kpiTimeCmp" style="margin-top:-8px"><div class="skeleton skeleton-kpi-compare"></div></div>
+      <div class="kpi-value" id="kpiTime" style="display:none"></div>
+    </div>
+  </div>
+  <!-- KPI Cards — Secondary Row -->
+  <div class="kpi-grid-secondary">
     <div class="kpi-card">
       <div class="kpi-label"><i class="fa-solid fa-users"></i> Total Atendimentos</div>
       <div class="kpi-value" id="kpiTotal"><div class="skeleton skeleton-kpi-value"></div></div>
       <div class="kpi-compare" id="kpiTotalCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
       <div id="sparkAtend" style="width:100%;height:36px;margin-top:4px"></div>
-    </div>
-    <div class="kpi-card kpi-card--gauge">
-      <div class="kpi-label"><i class="fa-solid fa-chart-line"></i> Taxa de Conversão</div>
-      <div id="gaugeConv" style="height:130px;margin:-4px auto 0"></div>
-      <div class="kpi-value" id="kpiConv" style="margin-top:-16px"><div class="skeleton skeleton-kpi-value"></div></div>
-      <div class="kpi-compare" id="kpiConvCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
-    </div>
-    <div class="kpi-card kpi-card--gauge">
-      <div class="kpi-label"><i class="fa-solid fa-receipt"></i> Ticket Médio</div>
-      <div id="gaugeTicket" style="height:130px;margin:-4px auto 0"></div>
-      <div class="kpi-value" id="kpiTicket" style="margin-top:-16px"><div class="skeleton skeleton-kpi-value"></div></div>
-      <div class="kpi-compare" id="kpiTicketCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label"><i class="fa-solid fa-xmark"></i> Não Convertidos</div>
@@ -693,12 +707,6 @@ window._showUpdateBanner = function() {
         <div id="miniDonutLoss" style="width:48px;height:48px;flex-shrink:0"></div>
       </div>
       <div class="kpi-compare" id="kpiLossCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
-    </div>
-    <div class="kpi-card kpi-card--gauge">
-      <div class="kpi-label"><i class="fa-solid fa-clock"></i> Tempo Médio</div>
-      <div id="gaugeTempo" style="height:130px;margin:-4px auto 0"></div>
-      <div class="kpi-value" id="kpiTime" style="margin-top:-16px"><div class="skeleton skeleton-kpi-value"></div></div>
-      <div class="kpi-compare" id="kpiTimeCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
     </div>
   </div>
 
@@ -1210,13 +1218,18 @@ async function loadKPIs(range, prevRange) {
   const convPct = parseFloat(convAtual) || 0;
   const convColor = convPct >= metas.conversao ? '#e2506f' : convPct >= metas.conversao * 0.7 ? '#f0758e' : '#D4D4D8';
   renderChart('gaugeConv', '#gaugeConv', {
-    chart: { type: 'radialBar', height: 140, sparkline: { enabled: true } },
+    chart: { type: 'radialBar', height: 170, sparkline: { enabled: true } },
     series: [Math.min(100, Math.round(convPct))],
     plotOptions: { radialBar: {
       startAngle: -135, endAngle: 135,
-      hollow: { size: '58%' },
-      track: { background: chartColors().trackBg, strokeWidth: '100%' },
-      dataLabels: { show: false }
+      hollow: { size: '55%' },
+      track: { background: chartColors().trackBg, strokeWidth: '97%' },
+      dataLabels: {
+        name: { show: false },
+        value: { show: true, fontSize: '22px', fontWeight: 700, fontFamily: "'Satoshi', sans-serif",
+                 color: chartColors().centerText, offsetY: 8,
+                 formatter: () => convAtual + '%' }
+      }
     }},
     colors: [convColor],
     stroke: { lineCap: 'round' }
@@ -1225,14 +1238,20 @@ async function loadKPIs(range, prevRange) {
   const ticketVal = parseFloat(d.ticket_medio) || 0;
   const ticketPct = metas.ticket_medio > 0 ? Math.min(100, Math.round(ticketVal / metas.ticket_medio * 100)) : 0;
   const ticketColor = ticketPct >= 100 ? '#e2506f' : ticketPct >= 70 ? '#f0758e' : '#D4D4D8';
+  const ticketLabel = ticket > 0 ? 'R$ ' + ticket.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '—';
   renderChart('gaugeTicket', '#gaugeTicket', {
-    chart: { type: 'radialBar', height: 140, sparkline: { enabled: true } },
+    chart: { type: 'radialBar', height: 170, sparkline: { enabled: true } },
     series: [ticketPct],
     plotOptions: { radialBar: {
       startAngle: -135, endAngle: 135,
-      hollow: { size: '58%' },
-      track: { background: chartColors().trackBg, strokeWidth: '100%' },
-      dataLabels: { show: false }
+      hollow: { size: '55%' },
+      track: { background: chartColors().trackBg, strokeWidth: '97%' },
+      dataLabels: {
+        name: { show: false },
+        value: { show: true, fontSize: '18px', fontWeight: 700, fontFamily: "'Satoshi', sans-serif",
+                 color: chartColors().centerText, offsetY: 8,
+                 formatter: () => ticketLabel }
+      }
     }},
     colors: [ticketColor],
     stroke: { lineCap: 'round' }
@@ -1241,14 +1260,20 @@ async function loadKPIs(range, prevRange) {
   const tempoVal = parseFloat(d.tempo_medio_min) || 0;
   const tempoPct = metas.tempo_medio > 0 ? Math.min(100, Math.round((metas.tempo_medio / Math.max(tempoVal, 1)) * 100)) : 0;
   const tempoColor = tempoVal <= metas.tempo_medio * 0.8 ? '#e2506f' : tempoVal <= metas.tempo_medio ? '#f0758e' : '#D4D4D8';
+  const tempoLabel = tempoVal > 0 ? Math.round(tempoVal * 10) / 10 + 'min' : '—';
   renderChart('gaugeTempo', '#gaugeTempo', {
-    chart: { type: 'radialBar', height: 140, sparkline: { enabled: true } },
+    chart: { type: 'radialBar', height: 170, sparkline: { enabled: true } },
     series: [tempoPct],
     plotOptions: { radialBar: {
       startAngle: -135, endAngle: 135,
-      hollow: { size: '58%' },
-      track: { background: chartColors().trackBg, strokeWidth: '100%' },
-      dataLabels: { show: false }
+      hollow: { size: '55%' },
+      track: { background: chartColors().trackBg, strokeWidth: '97%' },
+      dataLabels: {
+        name: { show: false },
+        value: { show: true, fontSize: '20px', fontWeight: 700, fontFamily: "'Satoshi', sans-serif",
+                 color: chartColors().centerText, offsetY: 8,
+                 formatter: () => tempoLabel }
+      }
     }},
     colors: [tempoColor],
     stroke: { lineCap: 'round' }
