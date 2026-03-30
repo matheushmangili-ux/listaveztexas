@@ -1701,9 +1701,10 @@ async function loadScatter(range, cachedData) {
       formatter: (val, opts) => allNames[opts.seriesIndex]?.[opts.dataPointIndex] || '',
       offsetX: 6, offsetY: -6,
       style: { fontSize: '10px', fontWeight: 600, colors: ['#71717A'] },
-      background: { enabled: true, borderRadius: 4, padding: 4, opacity: 0.92,
-        foreColor: '#52525B', borderWidth: 0, borderColor: 'transparent',
-        dropShadow: { enabled: false } }
+      background: { enabled: true, borderRadius: 4, padding: 4, opacity: 1,
+        foreColor: '#71717A', borderWidth: 1, borderColor: 'rgba(0,0,0,.06)',
+        dropShadow: { enabled: false },
+        color: '#fff' }
     },
     legend: { position: 'top', fontSize: '11px', fontWeight: 600, labels: { colors: chartColors().textStrong },
               markers: { shape: 'circle', size: 5 }, offsetY: -5 },
