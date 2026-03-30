@@ -800,16 +800,16 @@ window._showUpdateBanner = function() {
     <div class="chart-box" id="chartPrefBox"><div id="chartPreferenciais"></div></div>
   </div>
 
-  <!-- Second charts row: Scatter + Tempo vs Meta -->
-  <div class="charts-grid">
-    <div class="chart-card">
-      <h3><i class="fa-solid fa-chart-scatter" style="margin-right:6px;color:var(--accent-dim)"></i>Volume × Conversão por Vendedor</h3>
-      <div class="chart-box"><div id="chartScatter"></div></div>
-    </div>
-    <div class="chart-card">
-      <h3><i class="fa-solid fa-stopwatch" style="margin-right:6px;color:var(--accent-dim)"></i>Tempo Médio por Vendedor</h3>
-      <div class="chart-box"><div id="chartTempoMeta"></div></div>
-    </div>
+  <!-- Scatter -->
+  <div class="chart-card" style="margin-bottom:var(--gap)">
+    <h3><i class="fa-solid fa-chart-scatter" style="margin-right:6px;color:var(--accent-dim)"></i>Volume × Conversão por Vendedor</h3>
+    <div class="chart-box"><div id="chartScatter"></div></div>
+  </div>
+
+  <!-- Tempo vs Meta -->
+  <div class="chart-card" style="margin-bottom:var(--gap)">
+    <h3><i class="fa-solid fa-stopwatch" style="margin-right:6px;color:var(--accent-dim)"></i>Tempo Médio por Vendedor</h3>
+    <div class="chart-box"><div id="chartTempoMeta"></div></div>
   </div>
 
   <!-- Trend Line -->
@@ -1737,8 +1737,7 @@ async function loadScatter(range, cachedData) {
   const axisColor = isDarkTheme() ? 'rgba(255,255,255,.5)' : 'rgba(0,0,0,.5)';
 
   renderChart('scatter', '#chartScatter', {
-    chart: { type: 'scatter', height: 340, zoom: { enabled: false },
-      parentHeightOffset: 0, offsetY: -10 },
+    chart: { type: 'scatter', height: 340, zoom: { enabled: false } },
     series: [
       { name: 'Acima da meta', data: series1 },
       { name: 'Perto da meta', data: series2 },
