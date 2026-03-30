@@ -116,8 +116,8 @@ window.addEventListener('error', function(e) {
 
   /* Queue panel (left — Fila de Espera) */
   .queue-panel {
-    background: #FFFFFF;
-    border-right: 1px solid rgba(0,0,0,.06);
+    background: var(--bg-card);
+    border-right: 1px solid var(--border-subtle);
     overflow-y: auto;
     padding: 14px 16px;
     display: flex;
@@ -128,9 +128,9 @@ window.addEventListener('error', function(e) {
   .queue-item {
     position: relative;
     transition: transform .15s ease;
-    background: #FAFAFA;
+    background: var(--bg-surface);
     box-shadow: 0 1px 4px rgba(0,0,0,.08);
-    border: 1px solid rgba(0,0,0,.1);
+    border: 1px solid var(--border-medium);
     border-radius: 10px;
   }
   .queue-list.dragging .queue-item { will-change: transform; }
@@ -148,10 +148,10 @@ window.addEventListener('error', function(e) {
     flex: 1;
     padding: 10px 8px;
     min-height: 52px;
-    border: 1px solid rgba(0,0,0,.06);
+    border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
-    background: #F5F5F7;
-    color: #52525B;
+    background: var(--bg-deep);
+    color: var(--text-secondary);
     font-size: 18px;
     cursor: pointer;
     text-align: center;
@@ -164,14 +164,14 @@ window.addEventListener('error', function(e) {
     gap: 4px;
   }
   .setor-tab .tab-label { font-size: 11px; font-weight: 600; display: block; margin-top: 2px; text-transform: uppercase; letter-spacing: .05em; }
-  .setor-tab i { color: #71717A; }
+  .setor-tab i { color: var(--text-muted); }
   .setor-tab.active {
     background: #e2506f;
     color: #FFFFFF;
     border-color: #e2506f;
   }
   .setor-tab.active i { color: #FFFFFF; }
-  .setor-tab:not(.active):hover { background: #EDEDF0; }
+  .setor-tab:not(.active):hover { background: var(--bg-hover); }
 
   /* Service panel (right — Em Atendimento) */
   .service-panel {
@@ -180,7 +180,7 @@ window.addEventListener('error', function(e) {
     padding: 14px 16px;
     position: relative;
     overflow-y: auto;
-    background: #F5F5F7;
+    background: var(--bg-deep);
     contain: layout style;
   }
   .service-panel.drop-active {
@@ -198,7 +198,7 @@ window.addEventListener('error', function(e) {
   .service-panel .panel-header span {
     font-size: 13px;
     font-weight: 700;
-    color: #1A1A1A;
+    color: var(--text-primary);
     text-transform: uppercase;
     letter-spacing: .1em;
   }
@@ -223,8 +223,8 @@ window.addEventListener('error', function(e) {
     align-items: center;
     gap: 10px;
     padding: 10px 14px;
-    background: #FFFFFF;
-    border-top: 1px solid rgba(0,0,0,.06);
+    background: var(--bg-card);
+    border-top: 1px solid var(--border-subtle);
     box-shadow: 0 -1px 3px rgba(0,0,0,.06);
     overflow-x: auto;
     min-height: 88px;
@@ -379,8 +379,8 @@ window.addEventListener('error', function(e) {
     gap: 12px;
     padding: 12px 16px;
     border-radius: 12px;
-    border: 1px solid rgba(0,0,0,.06);
-    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
     cursor: pointer;
     transition: background .15s, border-color .15s;
     -webkit-tap-highlight-color: transparent;
@@ -502,7 +502,7 @@ window.addEventListener('error', function(e) {
     line-height: 1;
     opacity: .8;
   }
-  .footer-card.in-queue { opacity: .25; pointer-events: none; }
+  .footer-card.in-queue { opacity: .4; pointer-events: none; }
   .footer-end-all {
     display: flex;
     align-items: center;
@@ -815,7 +815,7 @@ window.addEventListener('error', function(e) {
     animation: slideUp .25s ease both;
   }
   .atend-card:hover {
-    border-color: rgba(0,0,0,.12);
+    border-color: var(--border-strong);
     box-shadow: 0 2px 8px rgba(0,0,0,.08);
   }
   .atend-card .atend-avatar {
@@ -829,7 +829,7 @@ window.addEventListener('error', function(e) {
   .atend-card .atend-name { font-weight: 700; font-size: 14px; }
   .atend-card .atend-timer {
     font-family: var(--font-mono); font-weight: 700; font-size: 13px;
-    color: #1A1A1A;
+    color: var(--text-primary);
   }
   .atend-card .atend-timer.danger { color: var(--danger); }
   .atend-card { cursor: grab; -webkit-tap-highlight-color: transparent; }
@@ -882,6 +882,47 @@ window.addEventListener('error', function(e) {
     font-weight: 600;
     color: rgba(255,255,255,.7);
     letter-spacing: 1px;
+  }
+
+  /* ─── Dark Mode (tablet overrides) ─── */
+  [data-theme="dark"] .queue-item {
+    box-shadow: 0 1px 4px rgba(0,0,0,.25);
+  }
+  [data-theme="dark"] .footer-card {
+    box-shadow: 0 1px 3px rgba(0,0,0,.3);
+  }
+  [data-theme="dark"] .atend-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,.3);
+  }
+  [data-theme="dark"] .t-footer {
+    box-shadow: 0 -1px 3px rgba(0,0,0,.2);
+  }
+  [data-theme="dark"] .modal-overlay {
+    background: rgba(0,0,0,.7);
+  }
+  [data-theme="dark"] .turno-switch-track {
+    background: linear-gradient(180deg, #3f3f46 0%, #27272a 100%);
+    border-color: rgba(255,255,255,.1);
+  }
+  [data-theme="dark"] .turno-switch-thumb {
+    background: linear-gradient(180deg, #e4e4e7 0%, #d4d4d8 50%, #a1a1aa 100%);
+  }
+  [data-theme="dark"] .turno-switch.on .turno-switch-track {
+    background: linear-gradient(180deg, #52525b 0%, #3f3f46 60%, #27272a 100%);
+    border-color: rgba(255,255,255,.12);
+  }
+  [data-theme="dark"] .turno-switch.on .turno-switch-thumb {
+    background: linear-gradient(180deg, #e4e4e7 0%, #d4d4d8 40%, #a1a1aa 100%);
+  }
+  [data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,.12);
+  }
+  [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,.2);
+  }
+  /* Dark mode toggle icon feedback */
+  [data-theme="dark"] .fa-circle-half-stroke {
+    color: var(--gold) !important;
   }
 </style>
 </head>
@@ -1010,7 +1051,7 @@ window.addEventListener('error', function(e) {
       </div>
     </div>
     <div class="motivo-option" data-motivo="indecisao" onclick="selectMotivo(this)">
-      <i class="fa-solid fa-face-meh" style="color:#A1A1AA"></i>
+      <i class="fa-solid fa-face-meh" style="color:var(--text-muted)"></i>
       <div>
         <div style="font-weight:700;font-size:16px">Indecisão</div>
         <div style="font-size:13px;color:var(--text-muted)">Cliente vai pensar / voltar depois</div>
@@ -1127,7 +1168,7 @@ window.addEventListener('error', function(e) {
       </div>
     </div>
     <div class="motivo-option" onclick="confirmSaida('reuniao')">
-      <i class="fa-solid fa-people-group" style="color:#A1A1AA"></i>
+      <i class="fa-solid fa-people-group" style="color:var(--text-muted)"></i>
       <div>
         <div style="font-weight:700;font-size:14px">Reunião</div>
         <div style="font-size:11px;color:var(--text-muted)">Chamado para reunião interna</div>
@@ -1196,6 +1237,10 @@ import { requireRole, logout, getTenantId } from '/js/auth.js';
 import { STATUS_CONFIG, MOTIVOS, formatTime, initials, toast, elapsedSince, initTheme, toggleTheme } from '/js/utils.js';
 import { loadTenant, applyBranding, tenantPath } from '/js/tenant.js';
 initTheme();
+// Sync theme-color meta with saved theme
+{ const _t = document.documentElement.getAttribute('data-theme') || 'light';
+  const _m = document.querySelector('meta[name="theme-color"]');
+  if (_m) _m.content = _t === 'dark' ? '#060606' : '#F5F5F7'; }
 
 // Load tenant context
 const tenant = await loadTenant();
@@ -1645,7 +1690,7 @@ function renderQueueItem(v, pos, isActive, draggable) {
     if (atend && atend.inicio) {
       const startMs = new Date(atend.inicio).getTime();
       const elapsed = isNaN(startMs) ? 0 : (Date.now() - startMs) / 1000;
-      const clr = elapsed > 2400 ? 'var(--danger)' : '#1A1A1A';
+      const clr = elapsed > 2400 ? 'var(--danger)' : 'var(--text-primary)';
       timerHtml = `<span data-sidebar-timer="${atend.id}" style="font-family:var(--font-mono);font-weight:700;font-size:11px;color:${clr};margin-left:auto;flex-shrink:0">${formatTime(elapsed)}</span>`;
     }
   }
@@ -2758,7 +2803,7 @@ function renderActiveAtendimentos() {
       if (ref.main) { ref.main.textContent = timeStr; ref.main.className = 'atend-timer' + (isDanger ? ' danger' : ''); allDetached = false; }
       if (ref.side && !ref.side.isConnected) ref.side = null;
       if (!ref.side) ref.side = document.querySelector(`[data-sidebar-timer="${id}"]`) || null;
-      if (ref.side) { ref.side.textContent = timeStr; ref.side.style.color = isDanger ? 'var(--danger)' : '#1A1A1A'; allDetached = false; }
+      if (ref.side) { ref.side.textContent = timeStr; ref.side.style.color = isDanger ? 'var(--danger)' : 'var(--text-primary)'; allDetached = false; }
     });
     // Se todos os refs sumiram do DOM, parar o interval
     if (allDetached && _timerRefs.size > 0) { clearInterval(timerInterval); timerInterval = null; }
@@ -3440,7 +3485,7 @@ function openConfirmFila(vendedorId) {
 
   const menu = document.createElement('div');
   menu.id = 'footerMenu';
-  menu.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#FFFFFF;border:1px solid rgba(0,0,0,.1);border-radius:16px;padding:20px;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.12);min-width:280px;text-align:center';
+  menu.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--bg-card);border:1px solid var(--border-medium);border-radius:16px;padding:20px;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.2);min-width:280px;text-align:center;color:var(--text-primary)';
 
   menu.innerHTML = `
     <div style="font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:6px">${nome}</div>
@@ -3501,7 +3546,11 @@ if (_tvMode) requestAnimationFrame(() => applyTvMode());
 
 // ─── Logout ───
 window.handleLogout = function() { logout(); };
-window._toggleTheme = function() { toggleTheme(); };
+window._toggleTheme = function() {
+  const next = toggleTheme();
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = next === 'dark' ? '#060606' : '#F5F5F7';
+};
 
 // ─── Session timeout (30min inactivity) ───
 let _lastActivity = Date.now();
