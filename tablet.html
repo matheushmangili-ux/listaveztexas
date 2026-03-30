@@ -651,6 +651,99 @@ window.addEventListener('error', function(e) {
     to { transform: scale(1.05); }
   }
 
+  /* ─── PRÓXIMO badge (1º da fila) ─── */
+  .queue-item.next-in-line {
+    border: 1.5px solid var(--success);
+    box-shadow: 0 0 8px rgba(34,197,94,.15);
+    position: relative;
+  }
+  .queue-item.next-in-line .next-badge {
+    position: absolute;
+    top: -7px; right: 8px;
+    background: var(--success);
+    color: #060606;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    line-height: 1.2;
+    animation: nextPulse 2s ease infinite;
+  }
+  @keyframes nextPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,.3); }
+    50% { box-shadow: 0 0 0 4px rgba(34,197,94,0); }
+  }
+
+  /* ─── Cold seller indicator ─── */
+  .queue-item.cold-seller {
+    background: rgba(59,130,246,.04);
+  }
+  .queue-item.cold-seller::after {
+    content: '\f252';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 8px; top: 50%; transform: translateY(-50%);
+    font-size: 10px;
+    color: var(--info);
+    opacity: .5;
+  }
+
+  /* ─── Pause exceeded ─── */
+  .footer-card.pause-exceeded {
+    border: 1.5px solid var(--danger) !important;
+    animation: pauseExceededPulse 1.5s ease infinite;
+  }
+  @keyframes pauseExceededPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,.2); }
+    50% { box-shadow: 0 0 0 4px rgba(239,68,68,0); }
+  }
+
+  /* ─── Transition animations ─── */
+  @keyframes leaveQueue {
+    from { opacity: 1; transform: scale(1); max-height: 80px; }
+    to { opacity: 0; transform: scale(.9); max-height: 0; margin: 0; padding: 0; }
+  }
+  @keyframes enterAtend {
+    from { opacity: 0; transform: translateY(12px) scale(.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes returnToQueue {
+    from { opacity: 0; transform: translateX(-20px); background: rgba(34,197,94,.08); }
+    to { opacity: 1; transform: translateX(0); background: transparent; }
+  }
+  .queue-item.leaving { animation: leaveQueue .25s ease forwards; pointer-events: none; }
+  .queue-item.entering, .atend-card.entering { animation: enterAtend .3s ease both; }
+  .queue-item.returning { animation: returnToQueue .35s ease both; }
+
+  /* ─── TV Mode ─── */
+  .tablet-layout.tv-mode .t-footer,
+  .tablet-layout.tv-mode #setorTabs,
+  .tablet-layout.tv-mode .turno-switch,
+  .tablet-layout.tv-mode [data-action="send-atend"],
+  .tablet-layout.tv-mode .fa-grip-vertical,
+  .tablet-layout.tv-mode .outcome-btn,
+  .tablet-layout.tv-mode .atend-card .fa-grip-vertical {
+    display: none !important;
+  }
+  .tablet-layout.tv-mode .queue-item { cursor: default !important; }
+  .tablet-layout.tv-mode .queue-item .fc-name,
+  .tablet-layout.tv-mode .queue-item div[style*="font-weight:700"] {
+    font-size: 18px !important;
+  }
+  .tablet-layout.tv-mode #statAtend,
+  .tablet-layout.tv-mode #statVendas,
+  .tablet-layout.tv-mode #statConv {
+    font-size: 28px !important;
+  }
+  .tablet-layout.tv-mode .atend-timer {
+    font-size: 16px !important;
+  }
+  .tv-btn { min-height: 44px; padding: 0 12px; font-size: 14px; color: #FFFFFF; background: none; border: none; cursor: pointer; transition: color .2s; font-family: inherit; }
+  .tv-btn.active { color: var(--success); }
+
   .queue-item.new-item {
     animation: slideIn .25s ease both;
   }
@@ -835,6 +928,13 @@ window.addEventListener('error', function(e) {
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+      <button style="min-height:44px;padding:0 12px;font-size:14px;color:#FFFFFF;background:none;border:none;cursor:pointer;position:relative" onclick="toggleMiniRanking()" title="Ranking do turno">
+        <i class="fa-solid fa-trophy"></i>
+      </button>
+      <div id="miniRankingDropdown" style="display:none;position:absolute;top:56px;right:120px;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;padding:16px;z-index:998;box-shadow:0 8px 32px rgba(0,0,0,.2);min-width:260px;max-width:320px">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:10px"><i class="fa-solid fa-trophy" style="color:#FBBF24;margin-right:4px"></i>Ranking do Turno</div>
+        <div id="miniRankingList" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
       <span class="live-clock" id="clock" style="font-size:16px">--:--</span>
       <div class="turno-switch" id="turnoSwitch" onclick="toggleTurno()">
         <div class="turno-switch-track" id="turnoTrack">
@@ -843,6 +943,9 @@ window.addEventListener('error', function(e) {
         <span class="turno-switch-label" id="turnoSwitchLabel">OFF</span>
         <span class="turno-pulse-dot" id="turnoPulse"></span>
       </div>
+      <button class="tv-btn" id="tvBtn" onclick="toggleTvMode()" title="Modo TV (painel)">
+        <i class="fa-solid fa-tv"></i>
+      </button>
       <button class="btn btn-ghost" style="min-height:44px;padding:0 12px;font-size:14px;color:#FFFFFF" onclick="window._toggleTheme()" title="Modo claro/escuro">
         <i class="fa-solid fa-circle-half-stroke"></i>
       </button>
@@ -861,7 +964,10 @@ window.addEventListener('error', function(e) {
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:0 4px">
       <span style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em">Fila</span>
-      <span id="queueCount" style="font-size:13px;font-weight:600;color:var(--text-muted)">0 na fila</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button onclick="openPosLog()" style="background:none;border:none;color:var(--text-muted);font-size:12px;cursor:pointer;padding:4px 6px;border-radius:6px;transition:background .15s" title="Histórico de movimentações"><i class="fa-solid fa-clock-rotate-left"></i></button>
+        <span id="queueCount" style="font-size:13px;font-weight:600;color:var(--text-muted)">0 na fila</span>
+      </div>
     </div>
     <div class="queue-list" id="queueList">
       <div style="text-align:center;padding:40px 0;color:var(--text-muted);font-size:13px">
@@ -1060,6 +1166,30 @@ window.addEventListener('error', function(e) {
   </div>
 </div>
 
+<!-- Bottom Sheet: Resumo do Turno -->
+<div class="bottom-sheet-overlay" id="turnoSummaryOverlay" onclick="closeTurnoSummary()"></div>
+<div class="bottom-sheet" id="turnoSummarySheet" style="max-height:80vh">
+  <div class="bottom-sheet-handle"></div>
+  <h3 style="font-family:var(--font-mono);font-size:16px;font-weight:700;margin-bottom:4px"><i class="fa-solid fa-flag-checkered" style="margin-right:6px"></i>Encerrar Turno</h3>
+  <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">Resumo do turno atual</p>
+  <div id="turnoSummaryContent" style="margin-bottom:20px"></div>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-ghost" style="flex:1;min-height:48px" onclick="closeTurnoSummary()">Voltar</button>
+    <button class="btn" style="flex:1;min-height:48px;background:var(--danger);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer" id="btnConfirmCloseTurno" onclick="confirmCloseTurno()">
+      <i class="fa-solid fa-power-off" style="margin-right:4px"></i>Encerrar Turno
+    </button>
+  </div>
+</div>
+
+<!-- Bottom Sheet: Histórico de Posições -->
+<div class="bottom-sheet-overlay" id="posLogOverlay" onclick="closePosLog()"></div>
+<div class="bottom-sheet" id="posLogSheet" style="max-height:80vh">
+  <div class="bottom-sheet-handle"></div>
+  <h3 style="font-family:var(--font-mono);font-size:16px;font-weight:700;margin-bottom:4px"><i class="fa-solid fa-clock-rotate-left" style="margin-right:6px"></i>Histórico da Sessão</h3>
+  <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">Movimentações registradas nesta sessão</p>
+  <div id="posLogList" style="max-height:50vh;overflow-y:auto;display:flex;flex-direction:column;gap:4px"></div>
+</div>
+
 <canvas id="confettiCanvas"></canvas>
 <div id="toastContainer"></div>
 
@@ -1095,6 +1225,10 @@ let _localAction = false; // Flag: ignora realtime quando ação é local
 let _localActionTimer = null;
 let _renderPending = false; // Debounce render
 let _actionLock = false; // Previne double-tap em ações críticas
+const _queueEntryTimes = new Map(); // vendedorId → { pos, time } para cold seller
+const _pauseStartTimes = new Map(); // vendedorId → Date inicio da pausa
+const _positionLog = []; // { time, icon, vendedor, action, details } — max 200
+let _tvMode = localStorage.getItem('minhavez_tvMode') === '1' || new URLSearchParams(location.search).has('tv');
 
 // Cached DOM refs (evita querySelector repetido)
 const _queuePanel = document.querySelector('.queue-panel');
@@ -1121,6 +1255,14 @@ window.setSetor = function(setor) {
   renderQueue();
   renderFooter();
 };
+
+// ─── Position log (in-memory session history) ───
+function logPosition(vendedor, action, details) {
+  const nome = vendedor ? (vendedor.apelido || vendedor.nome) : '?';
+  const icons = { fila: 'fa-list-ol', atendimento: 'fa-headset', pausa: 'fa-pause', retorno: 'fa-arrow-rotate-left', saida: 'fa-door-open', cancelar: 'fa-xmark', finalizar: 'fa-check', turno: 'fa-clock' };
+  _positionLog.unshift({ time: new Date(), icon: icons[action] || 'fa-circle', vendedor: nome, action, details: details || '' });
+  if (_positionLog.length > 200) _positionLog.length = 200;
+}
 
 // ─── Sound effects (Web Audio API) ───
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -1156,6 +1298,23 @@ function playSound(type) {
     }
     _vendaAudio.currentTime = 0;
     _vendaAudio.play().catch(() => {});
+  } else if (type === 'retorno') {
+    // Two ascending notes (C6 → E6) — cheerful return
+    const t0 = audioCtx.currentTime;
+    const o1 = audioCtx.createOscillator();
+    const g1 = audioCtx.createGain();
+    o1.connect(g1); g1.connect(audioCtx.destination);
+    o1.frequency.value = 1047; o1.type = 'sine'; // C6
+    g1.gain.setValueAtTime(0.12, t0);
+    g1.gain.exponentialRampToValueAtTime(0.01, t0 + 0.2);
+    o1.start(t0); o1.stop(t0 + 0.2);
+    const o2 = audioCtx.createOscillator();
+    const g2 = audioCtx.createGain();
+    o2.connect(g2); g2.connect(audioCtx.destination);
+    o2.frequency.value = 1319; o2.type = 'sine'; // E6
+    g2.gain.setValueAtTime(0.12, t0 + 0.12);
+    g2.gain.exponentialRampToValueAtTime(0.01, t0 + 0.35);
+    o2.start(t0 + 0.12); o2.stop(t0 + 0.35);
   } else if (type === 'fail') {
     // Sad trombone "wah wah wah wahhh"
     const t0 = audioCtx.currentTime;
@@ -1355,9 +1514,12 @@ async function loadVendedores() {
   // Carregar motivos de pausa do banco apenas para vendedores sem motivo local
   const pausadosSemMotivo = vendedores.filter(v => v.status === 'pausa' && !saidaMotivos[v.id]);
   if (pausadosSemMotivo.length > 0) {
-    const { data: pausas } = await sb.from('pausas').select('vendedor_id, motivo').is('fim', null).in('vendedor_id', pausadosSemMotivo.map(v => v.id));
+    const { data: pausas } = await sb.from('pausas').select('vendedor_id, motivo, inicio').is('fim', null).in('vendedor_id', pausadosSemMotivo.map(v => v.id));
     if (pausas) {
-      pausas.forEach(p => { saidaMotivos[p.vendedor_id] = p.motivo; });
+      pausas.forEach(p => {
+        saidaMotivos[p.vendedor_id] = p.motivo;
+        if (p.inicio) _pauseStartTimes.set(p.vendedor_id, new Date(p.inicio));
+      });
     }
   }
   // Limpar motivos de vendedores que não estão mais em pausa
@@ -1393,6 +1555,24 @@ function renderQueue() {
   const pausa = setorVendedores.filter(v => v.status === 'pausa');
 
   document.getElementById('queueCount').textContent = inQueue.length + ' na fila';
+
+  // Atualizar cold seller tracking
+  const currentIds = new Set(inQueue.map(v => v.id));
+  // Remover vendedores que saíram da fila
+  for (const [id] of _queueEntryTimes) {
+    if (!currentIds.has(id)) _queueEntryTimes.delete(id);
+  }
+  // Adicionar novos ou atualizar posição
+  inQueue.forEach(v => {
+    const entry = _queueEntryTimes.get(v.id);
+    if (!entry) {
+      _queueEntryTimes.set(v.id, { pos: v.posicao_fila, time: Date.now() });
+    } else if (entry.pos !== v.posicao_fila) {
+      // Posição mudou = reset timer
+      entry.pos = v.posicao_fila;
+      entry.time = Date.now();
+    }
+  });
 
   // Build key para detectar mudanças reais
   const queueKey = (currentTurno ? '1' : '0') + '|' + inQueue.map(v => v.id).join(',') + '|' + pausa.map(v => v.id + ':' + (saidaMotivos[v.id] || '')).join(',');
@@ -1471,7 +1651,14 @@ function renderQueueItem(v, pos, isActive, draggable) {
     actionHtml = `<button data-action="send-atend" data-vid="${v.id}" style="padding:4px 8px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-hover);color:var(--info);font-size:9px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font-body);transition:all .15s" title="Enviar ao atendimento"><i class="fa-solid fa-arrow-right" style="font-size:8px"></i></button>`;
   }
 
-  return `<div class="queue-item ${v.status}${isActive ? ' active' : ''}" data-id="${v.id}" ${dragAttr} style="${dragStyle}">
+  const isNext = draggable && pos === 1;
+  const nextClass = isNext ? ' next-in-line' : '';
+  const nextBadge = isNext ? '<span class="next-badge">PRÓXIMO</span>' : '';
+  // Cold seller: >20min na fila sem ser chamado
+  const coldClass = (draggable && _queueEntryTimes.has(v.id) && (Date.now() - _queueEntryTimes.get(v.id).time > 20 * 60 * 1000)) ? ' cold-seller' : '';
+
+  return `<div class="queue-item ${v.status}${isActive ? ' active' : ''}${nextClass}${coldClass}" data-id="${v.id}" ${dragAttr} style="${dragStyle};position:relative">
+    ${nextBadge}
     ${draggable ? '<i class="fa-solid fa-grip-vertical" style="color:var(--text-muted);font-size:10px;opacity:.4;margin-right:2px"></i>' : ''}
     ${posHtml}
     <div style="flex:1;min-width:0">
@@ -1659,8 +1846,34 @@ async function addToQueueAt(vendedorId, beforeId) {
   });
 })();
 
+// ─── Confirmação antes de iniciar atendimento ───
+window.sendToAtendimento = function(vendedorId) {
+  if (_tvMode) return;
+  if (_actionLock) return;
+  if (!currentTurno) { toast('Abra o turno primeiro', 'warning'); return; }
+  const v = vendedores.find(x => x.id === vendedorId);
+  if (!v) return;
+  const nome = v.apelido || v.nome;
+  let _confirmTimer = null;
+  const overlay = createModal('confirmAtendOverlay', `
+    <i class="fa-solid fa-headset" style="font-size:28px;color:var(--info);margin-bottom:12px"></i>
+    <h3 style="font-family:var(--font-mono);font-size:17px;font-weight:700;margin-bottom:6px">${nome}</h3>
+    <p style="font-size:14px;color:var(--text-muted);margin-bottom:20px">Iniciar atendimento?</p>
+    <div style="display:flex;gap:8px">
+      <button id="btnCancelAtend" class="btn btn-ghost" style="flex:1;min-height:48px;font-size:15px;font-weight:700">Cancelar</button>
+      <button id="btnConfirmAtend" class="btn btn-success" style="flex:1;min-height:48px;font-size:15px;font-weight:700">
+        <i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar
+      </button>
+    </div>
+  `, { zIndex: 1001, maxWidth: '380px', onClose: () => { clearTimeout(_confirmTimer); } });
+  overlay.querySelector('#btnCancelAtend').addEventListener('click', () => { clearTimeout(_confirmTimer); overlay.remove(); });
+  overlay.querySelector('#btnConfirmAtend').addEventListener('click', () => { clearTimeout(_confirmTimer); overlay.remove(); _doSendToAtendimento(vendedorId); });
+  // Auto-dismiss após 5s
+  _confirmTimer = setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 5000);
+};
+
 // ─── Enviar vendedor específico ao atendimento (click ou drag) ───
-window.sendToAtendimento = async function(vendedorId) {
+async function _doSendToAtendimento(vendedorId) {
   if (_actionLock) return;
   if (!currentTurno) { toast('Abra o turno primeiro', 'warning'); return; }
   let v = vendedores.find(x => x.id === vendedorId);
@@ -1695,6 +1908,9 @@ window.sendToAtendimento = async function(vendedorId) {
     activeAtendimentos.push(atend);
     renderActiveAtendimentos();
     await loadVendedores();
+    playSound('atendimento');
+    if (navigator.vibrate) navigator.vibrate(200);
+    logPosition(v, 'atendimento', isPreferencial ? 'Preferencial' : 'Da vez');
     toast((v.apelido || v.nome) + ' em atendimento' + prefLabel, 'success', 2000);
   } catch (err) {
     toast('Erro: ' + (err.message || 'falha ao iniciar'), 'error');
@@ -1713,6 +1929,7 @@ let _dragRafId = null;
 let _lastDropCheck = 0;
 
 window.onTouchDragStart = function(e) {
+  if (_tvMode) return;
   const item = e.target.closest('.queue-item') || e.target.closest('.footer-card');
   if (!item || item.closest('#activeList')) return; // ignora atend-cards (handled by initAtendDrag)
   touchDragId = item.dataset.id;
@@ -1996,6 +2213,7 @@ async function addToQueue(vendedorId) {
   if (v) { v.status = 'disponivel'; v.posicao_fila = newPos; }
   _lastFooterKey = ''; // forçar re-render do footer
   scheduleRender();
+  logPosition(v, 'fila', 'Posição #' + newPos);
   toast((v?.apelido || v?.nome || 'Vendedor') + ' entrou na fila', 'success', 1500);
   // Banco em background
   const { error } = await sb.from('vendedores').update({ status: 'disponivel', posicao_fila: newPos }).eq('id', vendedorId);
@@ -2005,14 +2223,19 @@ async function addToQueue(vendedorId) {
 // ─── Retornar da pausa ───
 window.returnFromPause = async function(vendedorId) {
   delete saidaMotivos[vendedorId];
+  _pauseStartTimes.delete(vendedorId);
   // Registrar retorno no log
   try { sb.rpc('registrar_retorno', { p_vendedor_id: vendedorId }); } catch(e) {}
   await addToQueue(vendedorId);
   const v = vendedores.find(x => x.id === vendedorId);
+  playSound('retorno');
+  logPosition(v, 'retorno', 'Voltou da pausa');
   toast((v?.apelido || v?.nome || 'Vendedor') + ' voltou à fila', 'success', 1500);
 };
 
 // ─── Remover da fila (com motivo) ───
+const PAUSE_LIMITS = { almoco: 60, banheiro: 15, reuniao: 30, operacional: 45 }; // minutos
+
 const SAIDA_COLORS = {
   almoco: { color: '#FBBF24', label: 'Almoço', labelFull: 'Em almoço' },
   banheiro: { color: '#60A5FA', label: 'Banheiro', labelFull: 'Banheiro' },
@@ -2047,6 +2270,7 @@ window.confirmSaida = async function(motivo) {
   if (!pendingSaidaId) return;
   const newStatus = motivo === 'banheiro' || motivo === 'reuniao' || motivo === 'operacional' ? 'pausa' : 'fora';
   saidaMotivos[pendingSaidaId] = motivo;
+  _pauseStartTimes.set(pendingSaidaId, new Date());
   markLocal();
   const savedId = pendingSaidaId;
   const { error } = await sb.from('vendedores').update({ status: newStatus, posicao_fila: null }).eq('id', savedId);
@@ -2055,6 +2279,8 @@ window.confirmSaida = async function(motivo) {
   if (currentTurno) {
     sb.rpc('registrar_pausa', { p_vendedor_id: savedId, p_turno_id: currentTurno.id, p_motivo: motivo });
   }
+  const sv = vendedores.find(x => x.id === savedId);
+  logPosition(sv, 'saida', SAIDA_COLORS[motivo]?.label || 'Saída');
   toast(SAIDA_COLORS[motivo]?.label || 'Saiu da fila', 'info', 2000);
   closeSaida();
   // Preservar motivo local antes de recarregar
@@ -2089,7 +2315,19 @@ function renderFooter() {
   const allV = vendedores || [];
   const setorVendedores = allV.filter(v => (v.setor || 'loja') === currentSetor);
   // Skip if nada mudou
-  const footerKey = setorVendedores.map(v => v.id + ':' + v.status + ':' + (v.posicao_fila || '') + ':' + (saidaMotivos[v.id] || '')).join('|');
+  const footerKey = setorVendedores.map(v => {
+    let k = v.id + ':' + v.status + ':' + (v.posicao_fila || '') + ':' + (saidaMotivos[v.id] || '');
+    // Incluir minutos de pausa e atendimento para re-render de timers
+    if (v.status === 'pausa') {
+      const ps = _pauseStartTimes.get(v.id);
+      if (ps) k += ':' + Math.floor((Date.now() - ps.getTime()) / 60000);
+    }
+    if (v.status === 'em_atendimento') {
+      const at = activeAtendimentos.find(a => a.vendedor_id === v.id);
+      if (at?.inicio) k += ':' + Math.floor((Date.now() - new Date(at.inicio).getTime()) / 60000);
+    }
+    return k;
+  }).join('|');
   if (footerKey === _lastFooterKey) return;
   _lastFooterKey = footerKey;
   const cards = setorVendedores.map(v => {
@@ -2110,7 +2348,9 @@ function renderFooter() {
     } else if (v.status === 'pausa') {
       const m = saidaMotivos[v.id];
       const sc = SAIDA_COLORS[m] || SAIDA_COLORS.outro;
-      statusLabel = sc.labelFull;
+      const pauseStart = _pauseStartTimes.get(v.id);
+      const pauseMins = pauseStart ? Math.floor((Date.now() - pauseStart.getTime()) / 60000) : 0;
+      statusLabel = sc.label + (pauseMins > 0 ? ' (' + pauseMins + 'min)' : '');
       statusColor = sc.color;
       dotColor = sc.color;
     } else if (v.status === 'disponivel') {
@@ -2123,6 +2363,16 @@ function renderFooter() {
       statusLabel = sc.labelFull;
       statusColor = sc.color;
       dotColor = sc.color;
+    }
+
+    // Pause exceeded check
+    let pauseExceededClass = '';
+    if (v.status === 'pausa') {
+      const pm = saidaMotivos[v.id];
+      const pStart = _pauseStartTimes.get(v.id);
+      const pMins = pStart ? Math.floor((Date.now() - pStart.getTime()) / 60000) : 0;
+      const pLimit = PAUSE_LIMITS[pm] || 60;
+      if (pMins >= pLimit) pauseExceededClass = ' pause-exceeded';
     }
 
     const inQueueClass = inQueue || atendendo ? ' in-queue' : '';
@@ -2141,7 +2391,7 @@ function renderFooter() {
 
     const firstName = (v.apelido || v.nome.split(' ')[0]);
 
-    return `<div class="footer-card${inQueueClass}" data-id="${v.id}" ${dragAttr}>
+    return `<div class="footer-card${inQueueClass}${pauseExceededClass}" data-id="${v.id}" ${dragAttr}>
       <div class="fc-avatar" style="background:${avatarBg}">${avatarContent}</div>
       <span class="fc-name">${firstName}</span>
       <span class="fc-status" style="color:${statusColor}">${statusLabel}</span>
@@ -2189,6 +2439,13 @@ function renderFooter() {
     if (card) onTouchDragStart(e);
   }, { passive: true });
 })();
+
+// ─── Footer timer refresh (pause/atend timers update every 60s) ───
+setInterval(() => {
+  if (document.hidden || !currentTurno) return;
+  _lastFooterKey = '';
+  renderFooter();
+}, 60000);
 
 // ─── Animated counter ───
 function animateValue(el, start, end, duration = 400, suffix = '') {
@@ -2252,26 +2509,102 @@ window.toggleTurno = async function() {
       return;
     }
 
-    const inQueueCount = vendedores.filter(v => v.status === 'disponivel' && v.posicao_fila != null).length;
-    let msg = 'Tem certeza que deseja FECHAR o turno?';
-    if (inQueueCount > 0) msg += `\n\n${inQueueCount} vendedor(es) na fila serão removidos.`;
-    if (!confirm(msg)) return;
-
-    const fq = sb.from('vendedores').update({ status: 'fora', posicao_fila: null }).eq('ativo', true);
-    if (tenantId) fq.eq('tenant_id', tenantId);
-    const { error: e1 } = await fq;
-    const { error: e2 } = await sb.from('turnos').update({ fechamento: new Date().toISOString() }).eq('id', currentTurno.id);
-    if (e1 || e2) { toast('Erro ao fechar turno', 'error'); return; }
-    currentTurno = null;
-    activeAtendimentos = [];
-    renderActiveAtendimentos();
-    updateTurnoSwitch(false);
-    // btnProximo removido — controle via switch
-    toast('Turno encerrado', 'info');
+    openTurnoSummary();
+    return;
   } else {
     // Abrir turno: mostrar check-in
     openCheckin();
   }
+};
+
+// ─── Turno Summary (resumo ao fechar) ───
+async function openTurnoSummary() {
+  if (!currentTurno) return;
+  const content = document.getElementById('turnoSummaryContent');
+  content.innerHTML = '<div style="text-align:center;padding:16px"><div class="spinner"></div></div>';
+  document.getElementById('turnoSummaryOverlay').classList.add('open');
+  document.getElementById('turnoSummarySheet').classList.add('open');
+  try {
+    const turnoStart = currentTurno.abertura || currentTurno.created_at;
+    const { data: stats } = await sb.rpc('get_conversion_stats', { p_inicio: turnoStart, p_fim: new Date().toISOString() });
+    const s = stats || { total_atendimentos: 0, vendas: 0, nao_convertido: 0, taxa_conversao: 0 };
+    // Tempo médio
+    const { data: atends } = await sb.from('atendimentos').select('inicio, fim').eq('turno_id', currentTurno.id).neq('resultado', 'em_andamento').not('fim', 'is', null);
+    let tempoMedio = 0;
+    if (atends && atends.length > 0) {
+      const totalSec = atends.reduce((sum, a) => sum + (new Date(a.fim) - new Date(a.inicio)) / 1000, 0);
+      tempoMedio = Math.round(totalSec / atends.length / 60);
+    }
+    // Top vendedor
+    const { data: ranking } = await sb.from('atendimentos').select('vendedor_id, resultado, vendedores(nome, apelido)').eq('turno_id', currentTurno.id).eq('resultado', 'venda');
+    let topVendedor = null;
+    if (ranking && ranking.length > 0) {
+      const countMap = new Map();
+      ranking.forEach(r => {
+        const vid = r.vendedor_id;
+        if (!countMap.has(vid)) countMap.set(vid, { nome: r.vendedores?.apelido || r.vendedores?.nome || '?', vendas: 0 });
+        countMap.get(vid).vendas++;
+      });
+      topVendedor = [...countMap.values()].sort((a, b) => b.vendas - a.vendas)[0];
+    }
+    const inQueueCount = vendedores.filter(v => v.status === 'disponivel' && v.posicao_fila != null).length;
+    const conv = Math.round((s.taxa_conversao || 0) * 100);
+    content.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+        <div style="background:var(--bg-surface);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-family:var(--font-mono);font-size:24px;font-weight:800;color:var(--text-primary)">${s.total_atendimentos}</div>
+          <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Atendimentos</div>
+        </div>
+        <div style="background:var(--bg-surface);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-family:var(--font-mono);font-size:24px;font-weight:800;color:var(--success)">${s.vendas}</div>
+          <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Vendas</div>
+        </div>
+        <div style="background:var(--bg-surface);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-family:var(--font-mono);font-size:24px;font-weight:800;color:${conv >= 50 ? 'var(--success)' : conv >= 30 ? 'var(--warning)' : 'var(--accent)'}">${conv}%</div>
+          <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Conversão</div>
+        </div>
+        <div style="background:var(--bg-surface);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-family:var(--font-mono);font-size:24px;font-weight:800;color:var(--text-primary)">${tempoMedio}min</div>
+          <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Tempo Médio</div>
+        </div>
+      </div>
+      ${topVendedor ? `<div style="background:rgba(251,191,36,.08);border-radius:10px;padding:12px;text-align:center;margin-bottom:12px">
+        <span style="font-size:18px;margin-right:6px">🏆</span>
+        <span style="font-weight:700;font-size:14px">${topVendedor.nome}</span>
+        <span style="font-family:var(--font-mono);font-size:13px;color:var(--success);margin-left:6px">${topVendedor.vendas} venda${topVendedor.vendas > 1 ? 's' : ''}</span>
+      </div>` : ''}
+      ${inQueueCount > 0 ? `<div style="background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.2);border-radius:10px;padding:10px;text-align:center;font-size:13px;color:var(--warning);font-weight:600">
+        <i class="fa-solid fa-triangle-exclamation" style="margin-right:4px"></i>${inQueueCount} vendedor${inQueueCount > 1 ? 'es' : ''} na fila ser${inQueueCount > 1 ? 'ão' : 'á'} removido${inQueueCount > 1 ? 's' : ''}
+      </div>` : ''}
+    `;
+  } catch (e) {
+    content.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:13px">Erro ao carregar resumo</div>';
+  }
+}
+window.closeTurnoSummary = function() {
+  document.getElementById('turnoSummaryOverlay').classList.remove('open');
+  document.getElementById('turnoSummarySheet').classList.remove('open');
+};
+window.confirmCloseTurno = async function() {
+  const btn = document.getElementById('btnConfirmCloseTurno');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Encerrando...'; }
+  markLocal();
+  const fq = sb.from('vendedores').update({ status: 'fora', posicao_fila: null }).eq('ativo', true);
+  if (tenantId) fq.eq('tenant_id', tenantId);
+  const { error: e1 } = await fq;
+  const { error: e2 } = await sb.from('turnos').update({ fechamento: new Date().toISOString() }).eq('id', currentTurno.id);
+  if (e1 || e2) { toast('Erro ao fechar turno', 'error'); if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-power-off" style="margin-right:4px"></i>Encerrar Turno'; } return; }
+  logPosition(null, 'turno', 'Turno encerrado');
+  currentTurno = null;
+  activeAtendimentos = [];
+  _pauseStartTimes.clear();
+  _queueEntryTimes.clear();
+  renderActiveAtendimentos();
+  updateTurnoSwitch(false);
+  closeTurnoSummary();
+  toast('Turno encerrado', 'info');
+  await loadVendedores();
+  if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-power-off" style="margin-right:4px"></i>Encerrar Turno'; }
 };
 
 // ─── Check-in de abertura ───
@@ -2495,6 +2828,7 @@ window.cancelarAtendimento = async function(atendId) {
     const { error: errReo } = await sb.rpc('reordenar_fila', { p_ids: newOrder });
     if (errReo) { toast('Erro ao reordenar: ' + errReo.message, 'error'); }
     await loadVendedores();
+    logPosition(v, 'cancelar', 'Voltou para #' + (insertIdx + 1));
     toast('Atendimento cancelado — vendedor voltou à posição #' + (insertIdx + 1), 'info');
   } catch (e) {
     toast('Erro ao cancelar: ' + e.message, 'error');
@@ -2937,6 +3271,8 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor, con
     toast(msg, type);
     if (resultado === 'venda') { playSound('venda'); fireVendaCelebration(); }
     else if (resultado === 'nao_convertido') { playSound('fail'); }
+    const fv = vendedorId ? vendedores.find(x => x.id === vendedorId) : null;
+    logPosition(fv || atendInfo?.vendedores, 'finalizar', resultado + (valor ? ' R$' + valor : ''));
     removeAtendimento(id);
     pendingAtendimentoId = null;
 
@@ -3000,8 +3336,89 @@ window.confirmMotivo = function() {
   askContinuar(atendId, () => finalize('nao_convertido', pendingOutcome, detalhe, produto, atendId, null, false), () => finalize('nao_convertido', pendingOutcome, detalhe, produto, atendId, null, true));
 };
 
+// ─── Position Log (histórico da sessão) ───
+window.openPosLog = function() {
+  const list = document.getElementById('posLogList');
+  if (_positionLog.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px">Nenhuma movimentação registrada nesta sessão</div>';
+  } else {
+    list.innerHTML = _positionLog.map(entry => {
+      const h = String(entry.time.getHours()).padStart(2, '0');
+      const m = String(entry.time.getMinutes()).padStart(2, '0');
+      const s = String(entry.time.getSeconds()).padStart(2, '0');
+      const actionLabels = { fila: 'Entrou na fila', atendimento: 'Atendimento', pausa: 'Pausa', retorno: 'Retornou', saida: 'Saiu', cancelar: 'Cancelado', finalizar: 'Finalizado', turno: 'Turno' };
+      return `<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid var(--border-subtle)">
+        <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);flex-shrink:0;width:52px">${h}:${m}:${s}</span>
+        <i class="fa-solid ${entry.icon}" style="font-size:11px;color:var(--text-muted);width:16px;text-align:center;flex-shrink:0"></i>
+        <span style="font-weight:600;font-size:13px;flex-shrink:0;max-width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${entry.vendedor}</span>
+        <span style="font-size:11px;color:var(--text-muted);flex-shrink:0">${actionLabels[entry.action] || entry.action}</span>
+        <span style="font-size:11px;color:var(--text-secondary);margin-left:auto;flex-shrink:0;text-align:right">${entry.details}</span>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('posLogOverlay').classList.add('open');
+  document.getElementById('posLogSheet').classList.add('open');
+};
+window.closePosLog = function() {
+  document.getElementById('posLogOverlay').classList.remove('open');
+  document.getElementById('posLogSheet').classList.remove('open');
+};
+
+// ─── Mini Ranking (troféu) ───
+let _miniRankingOpen = false;
+let _miniRankingOutside = null;
+window.toggleMiniRanking = async function() {
+  const dd = document.getElementById('miniRankingDropdown');
+  if (!dd) return;
+  if (_miniRankingOpen) { closeMiniRanking(); return; }
+  if (!currentTurno) { toast('Abra o turno para ver o ranking', 'warning'); return; }
+  _miniRankingOpen = true;
+  dd.style.display = '';
+  // Query atendimentos do turno
+  const { data } = await sb.from('atendimentos').select('vendedor_id, resultado, vendedores(nome, apelido)').eq('turno_id', currentTurno.id).neq('resultado', 'em_andamento');
+  if (!data || data.length === 0) {
+    document.getElementById('miniRankingList').innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px">Nenhum atendimento finalizado</div>';
+  } else {
+    // Agrupar por vendedor
+    const map = new Map();
+    data.forEach(a => {
+      const vid = a.vendedor_id;
+      if (!map.has(vid)) map.set(vid, { nome: a.vendedores?.apelido || a.vendedores?.nome || '?', total: 0, vendas: 0 });
+      const e = map.get(vid);
+      e.total++;
+      if (a.resultado === 'venda') e.vendas++;
+    });
+    const sorted = [...map.values()].sort((a, b) => b.vendas - a.vendas || b.total - a.total).slice(0, 5);
+    const medals = ['🥇', '🥈', '🥉', '4º', '5º'];
+    document.getElementById('miniRankingList').innerHTML = sorted.map((s, i) => {
+      const conv = s.total > 0 ? Math.round(s.vendas / s.total * 100) : 0;
+      return `<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;${i === 0 ? 'background:rgba(251,191,36,.08);border-radius:8px' : ''}">
+        <span style="font-size:14px;width:24px;text-align:center;flex-shrink:0">${medals[i]}</span>
+        <span style="flex:1;font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.nome}</span>
+        <span style="font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--success)">${s.vendas}v</span>
+        <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${s.total}at</span>
+        <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${conv}%</span>
+      </div>`;
+    }).join('');
+  }
+  // Fechar ao clicar fora
+  setTimeout(() => {
+    _miniRankingOutside = (e) => {
+      if (!dd.contains(e.target) && !e.target.closest('[onclick*="toggleMiniRanking"]')) closeMiniRanking();
+    };
+    document.addEventListener('click', _miniRankingOutside);
+  }, 100);
+};
+function closeMiniRanking() {
+  _miniRankingOpen = false;
+  const dd = document.getElementById('miniRankingDropdown');
+  if (dd) dd.style.display = 'none';
+  if (_miniRankingOutside) { document.removeEventListener('click', _miniRankingOutside); _miniRankingOutside = null; }
+}
+
 // ─── Footer card tap ───
 window.handleFooterTap = async function(vendedorId) {
+  if (_tvMode) return;
   const v = vendedores.find(x => x.id === vendedorId);
   if (!v) return;
   if (v.status === 'em_atendimento') return;
@@ -3064,6 +3481,26 @@ window.closeConfirmFila = function() {
   const m = document.getElementById('footerMenu');
   if (m) m.remove();
 }
+
+// ─── TV Mode ───
+window.toggleTvMode = function() {
+  _tvMode = !_tvMode;
+  localStorage.setItem('minhavez_tvMode', _tvMode ? '1' : '0');
+  applyTvMode();
+  toast(_tvMode ? 'Modo TV ativado' : 'Modo TV desativado', 'info', 1500);
+};
+function applyTvMode() {
+  const layout = document.querySelector('.tablet-layout');
+  const btn = document.getElementById('tvBtn');
+  if (layout) layout.classList.toggle('tv-mode', _tvMode);
+  if (btn) btn.classList.toggle('active', _tvMode);
+  // Forçar re-render para esconder/mostrar elementos dinâmicos
+  _lastQueueKey = '';
+  _lastFooterKey = '';
+  scheduleRender();
+}
+// Aplicar modo TV ao carregar
+if (_tvMode) requestAnimationFrame(() => applyTvMode());
 
 // ─── Logout ───
 window.handleLogout = function() { logout(); };
@@ -3198,6 +3635,22 @@ window.addEventListener('beforeunload', () => {
 // Para cada deploy, basta adicionar um objeto { version, date, items[] } no início.
 // O popup aparece automaticamente 1x por versão para cada usuário.
 const APP_CHANGELOG = [
+  {
+    version: '4.0.0',
+    date: '2026-03-30',
+    items: [
+      { icon: 'fa-hand-pointer', text: 'Confirmação antes de iniciar atendimento — evita toques acidentais' },
+      { icon: 'fa-star', text: 'Badge PRÓXIMO no 1º da fila com destaque visual' },
+      { icon: 'fa-bell', text: 'Som ao retornar da pausa + vibração ao iniciar atendimento' },
+      { icon: 'fa-clock', text: 'Timer de pausa no rodapé com alerta de tempo excedido' },
+      { icon: 'fa-snowflake', text: 'Indicador de vendedor frio (>20min na fila sem ser chamado)' },
+      { icon: 'fa-trophy', text: 'Mini-ranking do turno no header (troféu)' },
+      { icon: 'fa-flag-checkered', text: 'Resumo completo ao encerrar turno (KPIs + top vendedor)' },
+      { icon: 'fa-clock-rotate-left', text: 'Histórico de movimentações da sessão (botão Log na fila)' },
+      { icon: 'fa-tv', text: 'Modo TV: painel somente leitura com fontes maiores' },
+      { icon: 'fa-wand-magic-sparkles', text: 'Animações de transição entre estados (fila ↔ atendimento)' }
+    ]
+  },
   {
     version: '3.0.0',
     date: '2026-03-28',
