@@ -1697,10 +1697,10 @@ async function loadScatter(range, cachedData) {
         return pt.name || '';
       },
       offsetX: 8, offsetY: -4,
-      background: { enabled: true, borderRadius: 3, padding: 4, opacity: 0.9,
-        foreColor: chartColors().datalabel, borderWidth: 0,
+      background: { enabled: true, borderRadius: 4, padding: 4, opacity: 1,
+        foreColor: '#52525B', borderWidth: 1, borderColor: 'rgba(0,0,0,.08)',
         dropShadow: { enabled: false } },
-      style: { fontSize: '10px', fontWeight: 700, colors: [chartColors().datalabel] } },
+      style: { fontSize: '10px', fontWeight: 700, colors: ['#52525B'] } },
     legend: { position: 'top', fontSize: '11px', fontWeight: 600, labels: { colors: chartColors().textStrong },
               markers: { shape: 'circle', size: 5 }, offsetY: -5 },
     tooltip: { shared: false,
