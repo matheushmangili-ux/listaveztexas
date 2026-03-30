@@ -1637,45 +1637,46 @@ async function loadScatter(range, cachedData) {
   const metaConv = metas.conversao || 70;
   const maxAtend = Math.max(...filtered.map(r => r.total_atendimentos || 0), 1);
 
-  // Usar array flat com nome embutido para evitar colisão de labelMap
-  const scatterData = filtered.map(r => ({
-    x: r.total_atendimentos || 0,
-    y: r.taxa_conversao || 0,
-    name: (r.apelido || r.nome || '').split(' ')[0]
-  }));
+  // Mapa de nomes: cada vendedor indexado por posição no array filtered
+  const nameMap = {};
+  const series1 = [], series2 = [], series3 = [];
+  const names1 = [], names2 = [], names3 = [];
 
-  const aboveMeta = scatterData.filter(p => p.y >= metaConv);
-  const nearMeta = scatterData.filter(p => p.y >= metaConv * 0.6 && p.y < metaConv);
-  const belowMeta = scatterData.filter(p => p.y < metaConv * 0.6);
+  filtered.forEach(r => {
+    const x = r.total_atendimentos || 0;
+    const y = r.taxa_conversao || 0;
+    const name = (r.apelido || r.nome || '').split(' ')[0];
+    const pt = [x, y];
+    if (y >= metaConv) { series1.push(pt); names1.push(name); }
+    else if (y >= metaConv * 0.6) { series2.push(pt); names2.push(name); }
+    else { series3.push(pt); names3.push(name); }
+  });
 
+  const allNames = [names1, names2, names3];
   const allY = filtered.map(r => r.taxa_conversao || 0);
   const minY = Math.max(0, Math.floor(Math.min(...allY) / 10) * 10 - 10);
   const maxX = Math.max(maxAtend, 5);
   const gridColor = isDarkTheme() ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.12)';
   const axisColor = isDarkTheme() ? 'rgba(255,255,255,.5)' : 'rgba(0,0,0,.5)';
 
-  // Tamanho proporcional ao volume de atendimentos
-  const allPoints = [...aboveMeta, ...nearMeta, ...belowMeta];
-  const mkSize = (series) => series.map(p => Math.max(8, Math.round(8 + (p.x / maxAtend) * 12)));
-
   renderChart('scatter', '#chartScatter', {
     chart: { type: 'scatter', height: 340, zoom: { enabled: false } },
     series: [
-      { name: 'Acima da meta', data: aboveMeta },
-      { name: 'Perto da meta', data: nearMeta },
-      { name: 'Abaixo da meta', data: belowMeta }
+      { name: 'Acima da meta', data: series1 },
+      { name: 'Perto da meta', data: series2 },
+      { name: 'Abaixo da meta', data: series3 }
     ],
     colors: ['#e2506f', '#f0758e', '#D4D4D8'],
     markers: {
-      size: [aboveMeta, nearMeta, belowMeta].map(s => s.length > 0 ? mkSize(s) : [0]),
-      opacity: 0.8,
+      size: 10,
+      opacity: 0.85,
       strokeWidth: 2,
       strokeColors: ['#c43d5a', '#d4607a', '#A1A1AA'],
       hover: { sizeOffset: 4 }
     },
     xaxis: {
       type: 'numeric',
-      min: 0, max: Math.ceil(maxX * 1.4) + 1,
+      min: 0, max: Math.ceil(maxX * 1.3) + 1,
       axisBorder: { show: true, color: gridColor },
       axisTicks: { show: true, color: gridColor },
       title: { text: 'Volume (Atendimentos)', style: { fontSize: '10px', fontWeight: 600, color: axisColor } },
@@ -1696,19 +1697,27 @@ async function loadScatter(range, cachedData) {
             padding: { right: 20, top: 10, left: 10, bottom: 10 } },
     annotations: { yaxis: [{ y: metaConv, borderColor: '#e2506f', strokeDashArray: 5, opacity: 0.6,
       label: { text: 'Meta ' + metaConv + '%', style: { fontSize: '10px', fontWeight: 700, fontFamily: "'Satoshi'", background: 'rgba(226,80,111,.12)', color: '#e2506f', padding: { left: 6, right: 6, top: 2, bottom: 2 } }, position: 'right', offsetX: -10 } }] },
-    dataLabels: { enabled: false },
+    dataLabels: { enabled: true, textAnchor: 'start',
+      formatter: (val, opts) => allNames[opts.seriesIndex]?.[opts.dataPointIndex] || '',
+      offsetX: 6, offsetY: -6,
+      style: { fontSize: '10px', fontWeight: 600, colors: ['#71717A'] },
+      background: { enabled: true, borderRadius: 4, padding: 4, opacity: 0.92,
+        foreColor: '#52525B', borderWidth: 0, borderColor: 'transparent',
+        dropShadow: { enabled: false } }
+    },
     legend: { position: 'top', fontSize: '11px', fontWeight: 600, labels: { colors: chartColors().textStrong },
               markers: { shape: 'circle', size: 5 }, offsetY: -5 },
     tooltip: { shared: false,
       custom: ({ seriesIndex, dataPointIndex, w }) => {
         const pt = w.config.series[seriesIndex].data[dataPointIndex];
+        const name = allNames[seriesIndex]?.[dataPointIndex] || '';
         const seriesColor = w.config.colors[seriesIndex];
         return '<div style="padding:10px 14px;font-family:Satoshi,sans-serif;font-size:12px;line-height:1.6">' +
                '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">' +
                '<span style="width:8px;height:8px;border-radius:50%;background:' + seriesColor + ';display:inline-block"></span>' +
-               '<strong style="font-size:13px">' + pt.name + '</strong></div>' +
-               '<span style="color:#71717A">Atendimentos:</span> <strong>' + pt.x + '</strong><br>' +
-               '<span style="color:#71717A">Conversão:</span> <strong>' + pt.y + '%</strong></div>';
+               '<strong style="font-size:13px">' + name + '</strong></div>' +
+               '<span style="color:#71717A">Atendimentos:</span> <strong>' + pt[0] + '</strong><br>' +
+               '<span style="color:#71717A">Conversão:</span> <strong>' + pt[1] + '%</strong></div>';
       }
     }
   });
