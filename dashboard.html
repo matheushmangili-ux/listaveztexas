@@ -1546,20 +1546,21 @@ async function loadPauseStats(range) {
   const motivoColors = { almoco: '#f59e0b', banheiro: '#60a5fa', reuniao: '#A1A1AA', operacional: '#8b5cf6', outro: '#64748b' };
   el.innerHTML = data.map(r => {
     const horaInicio = new Date(r.inicio).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    const horaFim = r.fim ? new Date(r.fim).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : 'em pausa';
+    const emPausa = !r.fim;
+    const horaFim = r.fim ? new Date(r.fim).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '<span style="color:var(--warning);font-weight:700">em pausa</span>';
     const dur = Math.round(r.duracao_min || 0);
     const motLabel = motivoLabels[r.motivo] || r.motivo || '—';
     const motIcon = motivoIcons[r.motivo] || 'fa-ellipsis';
     const motColor = motivoColors[r.motivo] || '#64748b';
-    return `<div class="rupture-item">
+    return `<div class="rupture-item" ${emPausa ? 'style="background:rgba(245,158,11,.06);border-left:3px solid var(--warning);padding-left:12px"' : ''}>
       <div style="display:flex;align-items:center;gap:10px">
         <i class="fa-solid ${motIcon}" style="font-size:14px;color:${motColor};width:18px;text-align:center;flex-shrink:0"></i>
         <div>
-          <div style="font-weight:600;font-size:13px">${r.vendedor_nome}</div>
+          <div style="font-weight:600;font-size:13px">${r.vendedor_nome}${emPausa ? ' <i class="fa-solid fa-circle" style="font-size:6px;color:var(--warning);vertical-align:middle;margin-left:4px;animation:dotPulse 2s ease-in-out infinite"></i>' : ''}</div>
           <div style="font-size:10px;color:var(--text-muted)">${motLabel} · ${horaInicio} → ${horaFim}</div>
         </div>
       </div>
-      <div class="rupture-count" style="color:var(--warning)">${dur}<span style="font-size:9px;font-weight:600">min</span></div>
+      <div class="rupture-count" style="color:${emPausa ? 'var(--warning)' : 'var(--text-muted)'}">${formatTempo(dur)}</div>
     </div>`;
   }).join('');
 }
