@@ -594,15 +594,14 @@ window._showUpdateBanner = function() {
     <div class="dash-header-top">
       <div class="dash-header-brand">
         <div class="dash-header-logo" id="headerLogo"><img src="/assets/logo-minhavez-new.png" alt="minhavez"></div>
-        <div style="display:flex;flex-direction:column;gap:2px">
-          <div class="dash-header-title" id="headerTitle"></div>
-          <div class="dash-header-subtitle">
-            <span id="dashDate"></span>
-            <span id="lastUpdateIndicator" style="opacity:.6"></span>
-          </div>
+        <div class="dash-header-subtitle">
+          <span id="dashDate"></span>
+          <span id="lastUpdateIndicator" style="opacity:.6"></span>
         </div>
       </div>
-      <div class="dash-header-actions">
+      <div style="display:flex;align-items:center;gap:16px">
+        <div class="dash-header-title" id="headerTitle"></div>
+        <div class="dash-header-actions">
         <a id="linkTablet" href="/tablet.html" class="header-btn" title="Tablet">
           <i class="fa-solid fa-tablet-screen-button"></i>
           <span class="header-btn-label">Tablet</span>
@@ -620,6 +619,7 @@ window._showUpdateBanner = function() {
           <i class="fa-solid fa-right-from-bracket"></i>
           <span class="header-btn-label">Sair</span>
         </button>
+        </div>
       </div>
     </div>
     <!-- Bottom: Controls -->
