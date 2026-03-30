@@ -1707,17 +1707,21 @@ async function loadScatter(range, cachedData) {
     },
     legend: { position: 'top', fontSize: '11px', fontWeight: 600, labels: { colors: chartColors().textStrong },
               markers: { shape: 'circle', size: 5 }, offsetY: -5 },
-    tooltip: { shared: false,
-      custom: ({ seriesIndex, dataPointIndex, w }) => {
-        const pt = w.config.series[seriesIndex].data[dataPointIndex];
-        const name = allNames[seriesIndex]?.[dataPointIndex] || '';
-        const seriesColor = w.config.colors[seriesIndex];
-        return '<div style="padding:10px 14px;font-family:Satoshi,sans-serif;font-size:12px;line-height:1.6">' +
-               '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">' +
-               '<span style="width:8px;height:8px;border-radius:50%;background:' + seriesColor + ';display:inline-block"></span>' +
+    tooltip: {
+      shared: false,
+      intersect: true,
+      custom: function({ seriesIndex, dataPointIndex, w }) {
+        var d = w.config.series[seriesIndex].data[dataPointIndex];
+        var name = allNames[seriesIndex] && allNames[seriesIndex][dataPointIndex] ? allNames[seriesIndex][dataPointIndex] : '';
+        var color = w.config.colors[seriesIndex];
+        var xVal = Array.isArray(d) ? d[0] : (d.x || 0);
+        var yVal = Array.isArray(d) ? d[1] : (d.y || 0);
+        return '<div style="padding:10px 14px;font-family:Satoshi,sans-serif;font-size:12px;line-height:1.6;min-width:140px">' +
+               '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">' +
+               '<span style="width:10px;height:10px;border-radius:50%;background:' + color + ';display:inline-block"></span>' +
                '<strong style="font-size:13px">' + name + '</strong></div>' +
-               '<span style="color:#71717A">Atendimentos:</span> <strong>' + pt[0] + '</strong><br>' +
-               '<span style="color:#71717A">Conversão:</span> <strong>' + pt[1] + '%</strong></div>';
+               '<div style="color:#71717A">Atendimentos: <strong style="color:#18181B">' + xVal + '</strong></div>' +
+               '<div style="color:#71717A">Conversão: <strong style="color:#18181B">' + yVal + '%</strong></div></div>';
       }
     }
   });
