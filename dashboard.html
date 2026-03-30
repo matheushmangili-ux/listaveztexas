@@ -403,7 +403,7 @@ window._showUpdateBanner = function() {
     box-shadow: 0 4px 20px rgba(0,0,0,.4);
   }
   .chart-card h3 i { font-size: 14px; opacity: .5; }
-  .chart-box { position: relative; height: 340px; z-index: 1; overflow: visible; }
+  .chart-box { position: relative; height: 340px; z-index: 1; overflow: hidden; }
   .ranking-table {
     width: 100%;
     border-collapse: collapse;
@@ -1740,8 +1740,14 @@ async function loadTempoMeta(range, cachedData) {
   // Cor dinâmica: verde = abaixo da meta (bom), amarelo = perto, vermelho = acima
   const barColors = tempos.map(t => t <= metaTempo * 0.8 ? 'rgba(226,80,111,.6)' : t <= metaTempo ? 'rgba(240,117,142,.5)' : 'rgba(212,212,216,.6)');
 
+  // Altura dinâmica: 50px por vendedor, mínimo 200px, máximo 600px
+  const dynamicHeight = Math.max(200, Math.min(600, filtered.length * 50 + 60));
+  // Ajustar o container
+  const chartBox = el?.parentElement;
+  if (chartBox) chartBox.style.height = dynamicHeight + 'px';
+
   renderChart('tempoMeta', '#chartTempoMeta', {
-    chart: { type: 'bar', height: 340 },
+    chart: { type: 'bar', height: dynamicHeight },
     series: [{ name: 'Tempo Médio (min)', data: tempos }],
     plotOptions: { bar: { horizontal: true, borderRadius: 6, barHeight: '65%', distributed: true,
       dataLabels: { position: 'top' } } },
