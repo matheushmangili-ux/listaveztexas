@@ -1073,8 +1073,9 @@ function formatTempo(minutes) {
 }
 
 function countUp(el, endVal, suffix = '', duration = 800, formatter = null) {
+  if (!el) return;
   const display = v => formatter ? formatter(v) : v + suffix;
-  if (!_firstLoad || !el) { el.textContent = display(endVal); return; }
+  if (!_firstLoad) { el.textContent = display(endVal); return; }
   const start = performance.now();
   const end = parseFloat(endVal) || 0;
   if (end === 0) { el.textContent = display(endVal); return; }
@@ -1230,10 +1231,10 @@ async function loadAll() {
   if (rankRes.error) { toast('Erro ao carregar ranking: ' + (rankRes.error?.message || rankRes.error), 'error'); }
   let cachedRanking = rankRes.data || [];
   // Aplicar filtros no ranking
-  if (filterSetor) cachedRanking = cachedRanking.filter(r => {
-    const vd = _cachedVendedores.find(cv => cv.id === r.vendedor_id);
-    return vd && (vd.setor || 'loja') === filterSetor;
-  });
+  if (filterSetor) {
+    const setorMap = new Map(_cachedVendedores.map(cv => [cv.id, cv.setor || 'loja']));
+    cachedRanking = cachedRanking.filter(r => setorMap.get(r.vendedor_id) === filterSetor);
+  }
   if (filterVendedor) cachedRanking = cachedRanking.filter(r => r.vendedor_id === filterVendedor);
   _cachedRanking = cachedRanking;
   // Se filtro ativo, buscar dados reais dos atendimentos filtrados
@@ -1399,11 +1400,9 @@ async function loadHourly(range) {
   const el = document.querySelector('#chartHourly');
   if (!el) { console.error('[loadHourly] element not found'); return; }
   if (!data || data.length === 0) {
-    console.warn('[loadHourly] no data for range', range);
     el.parentElement.insertAdjacentHTML('afterbegin', '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:13px">Sem dados de fluxo no período</div>');
     return;
   }
-  console.log('[loadHourly] rendering chart with', data.length, 'hours of data');
 
   // Calculate number of days in range for averaging
   const rangeStart = new Date(range.start);
@@ -1537,7 +1536,12 @@ async function loadPreferenciais(range) {
 
 // ─── Ranking cards ───
 async function loadRanking(range, cachedData) {
-  const data = cachedData || (await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end })).data;
+  if (!cachedData) {
+    const res = await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end });
+    if (res.error) { console.error('loadRanking RPC error:', res.error); return; }
+    cachedData = res.data;
+  }
+  const data = cachedData;
   const body = document.getElementById('rankingBody');
   if (!data || data.length === 0) {
     body.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text-muted)">Sem dados no período</div>';
@@ -1706,7 +1710,12 @@ function renderHeaderMarquee(vendedoresData) {
 
 // ─── Scatter: Volume × Conversão ───
 async function loadScatter(range, cachedData) {
-  const data = cachedData || (await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end })).data;
+  if (!cachedData) {
+    const res = await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end });
+    if (res.error) { console.error('loadScatter RPC error:', res.error); return; }
+    cachedData = res.data;
+  }
+  const data = cachedData;
   // Filtrar apenas vendedores com atendimentos
   const filtered = (data || []).filter(r => (r.total_atendimentos || 0) > 0);
   if (filtered.length === 0) { if (charts.scatter) { try { charts.scatter.destroy(); } catch(e) {} } charts.scatter = null; return; }
@@ -1799,7 +1808,12 @@ async function loadScatter(range, cachedData) {
 
 // ─── Tempo Médio vs Meta ───
 async function loadTempoMeta(range, cachedData) {
-  const data = cachedData || (await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end })).data;
+  if (!cachedData) {
+    const res = await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end });
+    if (res.error) { console.error('loadTempoMeta RPC error:', res.error); return; }
+    cachedData = res.data;
+  }
+  const data = cachedData;
   const el = document.querySelector('#chartTempoMeta');
   // Filtrar apenas vendedores com atendimentos (tempo > 0)
   const filtered = (data || []).filter(r => (r.tempo_medio_min || 0) > 0);
@@ -1997,13 +2011,27 @@ async function loadVendedores() {
       </div>
       <span class="badge-ativo ${v.ativo ? 'on' : 'off'}">${v.ativo ? 'Ativo' : 'Inativo'}</span>
       <div class="vendedor-actions">
-        <button title="Editar" onclick="editVendedor('${v.id}','${v.nome.replace(/'/g,"\\'")}','${(v.apelido||'').replace(/'/g,"\\'")}','${v.setor||'loja'}')"><i class="fa-solid fa-pen"></i></button>
-        <button title="${v.ativo ? 'Desativar' : 'Ativar'}" onclick="toggleVendedor('${v.id}',${v.ativo})"><i class="fa-solid fa-${v.ativo ? 'toggle-on' : 'toggle-off'}"></i></button>
-        <button title="Desativar" class="btn-danger" onclick="deleteVendedor('${v.id}','${v.nome.replace(/'/g,"\\'")}')"><i class="fa-solid fa-user-slash"></i></button>
+        <button title="Editar" data-action="edit" data-id="${v.id}" data-nome="${(v.nome||'').replace(/"/g,'&quot;')}" data-apelido="${(v.apelido||'').replace(/"/g,'&quot;')}" data-setor="${v.setor||'loja'}"><i class="fa-solid fa-pen"></i></button>
+        <button title="${v.ativo ? 'Desativar' : 'Ativar'}" data-action="toggle" data-id="${v.id}" data-ativo="${v.ativo}"><i class="fa-solid fa-${v.ativo ? 'toggle-on' : 'toggle-off'}"></i></button>
+        <button title="Desativar" class="btn-danger" data-action="delete" data-id="${v.id}" data-nome="${(v.nome||'').replace(/"/g,'&quot;')}"><i class="fa-solid fa-user-slash"></i></button>
       </div>
     </div>`;
   }).join('');
 }
+
+// Event delegation for vendedor action buttons (prevents XSS from inline onclick)
+document.getElementById('vendedorList')?.addEventListener('click', function(e) {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const action = btn.dataset.action;
+  if (action === 'edit') {
+    editVendedor(btn.dataset.id, btn.dataset.nome, btn.dataset.apelido, btn.dataset.setor);
+  } else if (action === 'toggle') {
+    toggleVendedor(btn.dataset.id, btn.dataset.ativo === 'true');
+  } else if (action === 'delete') {
+    deleteVendedor(btn.dataset.id, btn.dataset.nome);
+  }
+});
 
 // Photo preview
 window.previewFoto = function(input) {
@@ -2251,28 +2279,37 @@ setInterval(() => {
 // ─── Realtime dashboard updates (partial — só recarrega o que mudou) ───
 let _rtVendTimer = null;
 let _rtAtendTimer = null;
+let _isReloadingAtend = false;
 function debouncedReloadVendedores() {
   clearTimeout(_rtVendTimer);
   _rtVendTimer = setTimeout(() => { loadFloor(); loadVendedores(); }, 500);
 }
 function debouncedReloadAtendimentos() {
   clearTimeout(_rtAtendTimer);
-  _rtAtendTimer = setTimeout(() => {
-    const range = getRange();
-    const prevRange = getPrevRange();
-    loadKPIs(range, prevRange);
-    sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end }).then(res => {
+  _rtAtendTimer = setTimeout(async () => {
+    if (_isReloadingAtend) return;
+    _isReloadingAtend = true;
+    try {
+      const range = getRange();
+      const prevRange = getPrevRange();
+      loadKPIs(range, prevRange);
+      const res = await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end });
       let data = res.data || [];
-      if (filterSetor) data = data.filter(r => { const vd = _cachedVendedores.find(cv => cv.id === r.vendedor_id); return vd && (vd.setor || 'loja') === filterSetor; });
+      if (filterSetor) {
+        const setorMap = new Map(_cachedVendedores.map(cv => [cv.id, cv.setor || 'loja']));
+        data = data.filter(r => setorMap.get(r.vendedor_id) === filterSetor);
+      }
       if (filterVendedor) data = data.filter(r => r.vendedor_id === filterVendedor);
       _cachedRanking = data;
       loadRanking(range, data);
       loadScatter(range, data);
       loadTempoMeta(range, data);
-    });
-    loadMotivos(range);
-    loadHourly(range);
-    updateTimestamp();
+      loadMotivos(range);
+      loadHourly(range);
+      updateTimestamp();
+    } finally {
+      _isReloadingAtend = false;
+    }
   }, 800);
 }
 sb.channel(`dashboard-sync-${tenantId || 'default'}`)
