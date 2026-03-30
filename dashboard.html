@@ -681,9 +681,9 @@ window._showUpdateBanner = function() {
     </div>
     <div class="kpi-card">
       <div class="kpi-label"><i class="fa-solid fa-chart-line"></i> Taxa de Conversão</div>
-      <div style="display:flex;align-items:center;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
         <div class="kpi-value" id="kpiConv"><div class="skeleton skeleton-kpi-value"></div></div>
-        <div id="gaugeConv" style="width:64px;height:64px;flex-shrink:0"></div>
+        <div id="gaugeConv" style="width:48px;height:48px;flex-shrink:0"></div>
       </div>
       <div class="kpi-compare" id="kpiConvCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
     </div>
@@ -1219,15 +1219,15 @@ async function loadKPIs(range, prevRange) {
   renderCompare('kpiTimeCmp', d.tempo_medio_min || 0, p.tempo_medio_min || 0, true);
   if (ticket > 0 || pTicket > 0) renderCompare('kpiTicketCmp', ticket, pTicket);
 
-  // Mini gauge for Conversão (inline 64px)
+  // Mini gauge for Conversão (inline 48px, matches miniDonutLoss)
   const convPct = parseFloat(convAtual) || 0;
   const convColor = convPct >= metas.conversao ? '#e2506f' : convPct >= metas.conversao * 0.7 ? '#f0758e' : '#D4D4D8';
   renderChart('gaugeConv', '#gaugeConv', {
-    chart: { type: 'radialBar', height: 64, sparkline: { enabled: true } },
+    chart: { type: 'radialBar', height: 48, sparkline: { enabled: true } },
     series: [Math.min(100, Math.round(convPct))],
     plotOptions: { radialBar: {
-      startAngle: -135, endAngle: 135,
-      hollow: { size: '50%' },
+      startAngle: 0, endAngle: 360,
+      hollow: { size: '55%' },
       track: { background: chartColors().trackBg, strokeWidth: '97%' },
       dataLabels: { name: { show: false }, value: { show: false } }
     }},
