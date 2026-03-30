@@ -1860,7 +1860,6 @@ window.sendToAtendimento = function(vendedorId) {
 
 // ─── Enviar vendedor específico ao atendimento (click ou drag) ───
 async function _doSendToAtendimento(vendedorId) {
-  if (_actionLock) return;
   if (!currentTurno) { toast('Abra o turno primeiro', 'warning'); return; }
   let v = vendedores.find(x => x.id === vendedorId);
   if (!v) return;
