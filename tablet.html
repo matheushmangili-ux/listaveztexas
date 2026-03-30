@@ -679,16 +679,7 @@ window.addEventListener('error', function(e) {
   /* ─── Cold seller indicator ─── */
   .queue-item.cold-seller {
     background: rgba(59,130,246,.04);
-  }
-  .queue-item.cold-seller::after {
-    content: '\f252';
-    font-family: 'Font Awesome 6 Free';
-    font-weight: 900;
-    position: absolute;
-    right: 8px; top: 50%; transform: translateY(-50%);
-    font-size: 10px;
-    color: var(--info);
-    opacity: .5;
+    border-left: 3px solid rgba(59,130,246,.3);
   }
 
   /* ─── Pause exceeded ─── */
@@ -928,13 +919,9 @@ window.addEventListener('error', function(e) {
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-      <button style="min-height:44px;padding:0 12px;font-size:14px;color:#FFFFFF;background:none;border:none;cursor:pointer;position:relative" onclick="toggleMiniRanking()" title="Ranking do turno">
+      <button style="min-height:44px;padding:0 12px;font-size:14px;color:#FFFFFF;background:none;border:none;cursor:pointer" onclick="toggleMiniRanking()" title="Ranking do turno">
         <i class="fa-solid fa-trophy"></i>
       </button>
-      <div id="miniRankingDropdown" style="display:none;position:absolute;top:56px;right:120px;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;padding:16px;z-index:998;box-shadow:0 8px 32px rgba(0,0,0,.2);min-width:260px;max-width:320px">
-        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:10px"><i class="fa-solid fa-trophy" style="color:#FBBF24;margin-right:4px"></i>Ranking do Turno</div>
-        <div id="miniRankingList" style="display:flex;flex-direction:column;gap:6px"></div>
-      </div>
       <span class="live-clock" id="clock" style="font-size:16px">--:--</span>
       <div class="turno-switch" id="turnoSwitch" onclick="toggleTurno()">
         <div class="turno-switch-track" id="turnoTrack">
@@ -1164,6 +1151,12 @@ window.addEventListener('error', function(e) {
       </div>
     </div>
   </div>
+</div>
+
+<!-- Mini Ranking Dropdown (fora do header para não afetar flex) -->
+<div id="miniRankingDropdown" style="display:none;position:fixed;top:56px;right:120px;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;padding:16px;z-index:998;box-shadow:0 8px 32px rgba(0,0,0,.2);min-width:260px;max-width:320px">
+  <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:10px"><i class="fa-solid fa-trophy" style="color:#FBBF24;margin-right:4px"></i>Ranking do Turno</div>
+  <div id="miniRankingList" style="display:flex;flex-direction:column;gap:6px"></div>
 </div>
 
 <!-- Bottom Sheet: Resumo do Turno -->
@@ -1522,11 +1515,15 @@ async function loadVendedores() {
       });
     }
   }
-  // Limpar motivos de vendedores que não estão mais em pausa
+  // Limpar motivos e timers de vendedores que não estão mais em pausa
   Object.keys(saidaMotivos).forEach(id => {
     const v = vendedores.find(x => x.id === id);
-    if (!v || (v.status !== 'pausa' && v.status !== 'fora')) delete saidaMotivos[id];
+    if (!v || (v.status !== 'pausa' && v.status !== 'fora')) { delete saidaMotivos[id]; _pauseStartTimes.delete(id); }
   });
+  for (const [id] of _pauseStartTimes) {
+    const v = vendedores.find(x => x.id === id);
+    if (!v || v.status !== 'pausa') _pauseStartTimes.delete(id);
+  }
   scheduleRender();
   } finally {
     _loadingVendedores = false;
@@ -1574,8 +1571,12 @@ function renderQueue() {
     }
   });
 
-  // Build key para detectar mudanças reais
-  const queueKey = (currentTurno ? '1' : '0') + '|' + inQueue.map(v => v.id).join(',') + '|' + pausa.map(v => v.id + ':' + (saidaMotivos[v.id] || '')).join(',');
+  // Build key para detectar mudanças reais (inclui cold-seller state)
+  const _nowMin = Math.floor(Date.now() / 60000); // minuto global p/ cold seller
+  const queueKey = (currentTurno ? '1' : '0') + '|' + inQueue.map(v => {
+    const cold = _queueEntryTimes.has(v.id) && (Date.now() - _queueEntryTimes.get(v.id).time > 20 * 60 * 1000);
+    return v.id + (cold ? ':C' : '');
+  }).join(',') + '|' + pausa.map(v => v.id + ':' + (saidaMotivos[v.id] || '')).join(',') + '|' + _nowMin;
   if (queueKey === _lastQueueKey) return; // nada mudou
   _lastQueueKey = queueKey;
 
@@ -1797,6 +1798,7 @@ async function reorderInQueue(movedId, beforeId) {
   const ids = ordered.map(v => v.id);
   const { error } = await sb.rpc('reordenar_fila', { p_ids: ids });
   if (error) { toast('Erro ao reordenar: ' + error.message, 'error'); return; }
+  _lastQueueKey = ''; _lastFooterKey = '';
   await loadVendedores();
   toast('Fila reordenada', 'info', 1500);
 }
@@ -1867,7 +1869,7 @@ window.sendToAtendimento = function(vendedorId) {
     </div>
   `, { zIndex: 1001, maxWidth: '380px', onClose: () => { clearTimeout(_confirmTimer); } });
   overlay.querySelector('#btnCancelAtend').addEventListener('click', () => { clearTimeout(_confirmTimer); overlay.remove(); });
-  overlay.querySelector('#btnConfirmAtend').addEventListener('click', () => { clearTimeout(_confirmTimer); overlay.remove(); _doSendToAtendimento(vendedorId); });
+  overlay.querySelector('#btnConfirmAtend').addEventListener('click', () => { clearTimeout(_confirmTimer); overlay.remove(); withLock(() => _doSendToAtendimento(vendedorId)); });
   // Auto-dismiss após 5s
   _confirmTimer = setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 5000);
 };
@@ -2085,6 +2087,7 @@ function initAtendDrag() {
   _atendDragInit = true;
 
   activeList.addEventListener('touchstart', e => {
+    if (_tvMode) return;
     const card = e.target.closest('.atend-card');
     if (!card) return;
     const atendId = card.dataset.atendId;
@@ -2211,6 +2214,7 @@ async function addToQueue(vendedorId) {
   markLocal();
   // Update otimista: atualiza local e renderiza imediatamente
   if (v) { v.status = 'disponivel'; v.posicao_fila = newPos; }
+  _lastQueueKey = ''; // forçar re-render da fila
   _lastFooterKey = ''; // forçar re-render do footer
   scheduleRender();
   logPosition(v, 'fila', 'Posição #' + newPos);
@@ -2224,6 +2228,7 @@ async function addToQueue(vendedorId) {
 window.returnFromPause = async function(vendedorId) {
   delete saidaMotivos[vendedorId];
   _pauseStartTimes.delete(vendedorId);
+  _lastQueueKey = ''; _lastFooterKey = ''; // forçar re-render
   // Registrar retorno no log
   try { sb.rpc('registrar_retorno', { p_vendedor_id: vendedorId }); } catch(e) {}
   await addToQueue(vendedorId);
@@ -2314,16 +2319,17 @@ function renderFooter() {
 
   const allV = vendedores || [];
   const setorVendedores = allV.filter(v => (v.setor || 'loja') === currentSetor);
-  // Skip if nada mudou
-  const footerKey = setorVendedores.map(v => {
+  // Skip if nada mudou — Map O(1) em vez de .find() O(n) por vendedor
+  const _atendMap = new Map(activeAtendimentos.map(a => [a.vendedor_id, a]));
+  const _minGlobal = Math.floor(Date.now() / 60000);
+  const footerKey = _minGlobal + '|' + setorVendedores.map(v => {
     let k = v.id + ':' + v.status + ':' + (v.posicao_fila || '') + ':' + (saidaMotivos[v.id] || '');
-    // Incluir minutos de pausa e atendimento para re-render de timers
     if (v.status === 'pausa') {
       const ps = _pauseStartTimes.get(v.id);
       if (ps) k += ':' + Math.floor((Date.now() - ps.getTime()) / 60000);
     }
     if (v.status === 'em_atendimento') {
-      const at = activeAtendimentos.find(a => a.vendedor_id === v.id);
+      const at = _atendMap.get(v.id);
       if (at?.inicio) k += ':' + Math.floor((Date.now() - new Date(at.inicio).getTime()) / 60000);
     }
     return k;
@@ -2336,7 +2342,7 @@ function renderFooter() {
     let statusLabel, statusColor, dotColor;
 
     if (atendendo) {
-      const atend = activeAtendimentos.find(a => a.vendedor_id === v.id);
+      const atend = _atendMap.get(v.id);
       const mins = atend && atend.inicio ? Math.floor((Date.now() - new Date(atend.inicio).getTime()) / 60000) : 0;
       statusLabel = mins > 0 ? 'Atendendo (' + mins + 'min)' : 'Atendendo';
       statusColor = 'var(--info)';
@@ -2441,7 +2447,7 @@ function renderFooter() {
 })();
 
 // ─── Footer timer refresh (pause/atend timers update every 60s) ───
-setInterval(() => {
+let _footerTimerInterval = setInterval(() => {
   if (document.hidden || !currentTurno) return;
   _lastFooterKey = '';
   renderFooter();
@@ -3582,9 +3588,11 @@ document.addEventListener('visibilitychange', () => {
     clearTimeout(_localActionTimer);
     _loadingVendedores = false;
     _actionLock = false;
-    // Reconectar timers
+    // Reconectar timers (limpar antes para evitar duplicação)
     updateClock();
+    clearInterval(_clockInterval);
     _clockInterval = setInterval(updateClock, 15000);
+    clearInterval(_sessionInterval);
     _sessionInterval = setInterval(() => { if (currentTurno) updateQuickStats(); }, 60000);
     // Invalidar cache e forçar re-render
     _lastQueueKey = '';
@@ -3623,6 +3631,7 @@ async function checkActiveAtendimentos() {
 window.addEventListener('beforeunload', () => {
   clearInterval(_clockInterval);
   clearInterval(_sessionInterval);
+  clearInterval(_footerTimerInterval);
   clearInterval(timerInterval); timerInterval = null;
   clearTimeout(_rtVendTimer);
   clearTimeout(_rtAtendTimer);
