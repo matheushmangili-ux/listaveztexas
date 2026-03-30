@@ -891,7 +891,7 @@ window.addEventListener('error', function(e) {
   <!-- HEADER -->
   <header class="t-header">
     <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-      <img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:22px;width:auto">
+      <img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:30px;width:auto">
       <span id="appVersion" style="font-family:var(--font-mono);font-size:9px;color:rgba(255,255,255,.5);opacity:.6;white-space:nowrap"></span>
     </div>
     <div id="headerKpis" style="display:flex;align-items:center;gap:10px;font-family:var(--font-mono);font-weight:700;flex:1;justify-content:center;min-width:0">
@@ -1798,13 +1798,20 @@ async function reorderInQueue(movedId, beforeId) {
   if (!moved) return;
   ordered.splice(beforeIdx >= 0 ? beforeIdx : ordered.length, 0, moved);
 
-  // Batch: 1 RPC em vez de N queries individuais
   const ids = ordered.map(v => v.id);
-  const { error } = await sb.rpc('reordenar_fila', { p_ids: ids });
-  if (error) { toast('Erro ao reordenar: ' + error.message, 'error'); return; }
+
+  // Optimistic: atualizar posições locais e renderizar imediatamente
+  markLocal();
+  ids.forEach((id, i) => {
+    const vv = vendedores.find(x => x.id === id);
+    if (vv) vv.posicao_fila = i + 1;
+  });
   _lastQueueKey = ''; _lastFooterKey = '';
-  await loadVendedores();
-  toast('Fila reordenada', 'info', 1500);
+  scheduleRender();
+
+  // Persistir no banco em background
+  const { error } = await sb.rpc('reordenar_fila', { p_ids: ids });
+  if (error) { toast('Erro ao reordenar: ' + error.message, 'error'); await loadVendedores(); }
 }
 
 async function addToQueueAt(vendedorId, beforeId) {
@@ -2809,6 +2816,7 @@ window.cancelarAtendimento = async function(atendId) {
     });
 
     removeAtendimento(atendId);
+    _lastQueueKey = ''; _lastFooterKey = '';
     scheduleRender();
 
     // Persist: set status + posição first, then reorder
