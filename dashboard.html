@@ -369,6 +369,7 @@ window._showUpdateBanner = function() {
     padding: 22px;
     transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
     box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.03);
+    overflow: visible;
   }
   .chart-card:hover {
     border-color: var(--border-medium);
@@ -403,7 +404,7 @@ window._showUpdateBanner = function() {
     box-shadow: 0 4px 20px rgba(0,0,0,.4);
   }
   .chart-card h3 i { font-size: 14px; opacity: .5; }
-  .chart-box { position: relative; height: 340px; z-index: 1; overflow: hidden; }
+  .chart-box { position: relative; height: 340px; z-index: 1; overflow: visible; }
   .ranking-table {
     width: 100%;
     border-collapse: collapse;
@@ -1736,7 +1737,8 @@ async function loadScatter(range, cachedData) {
   const axisColor = isDarkTheme() ? 'rgba(255,255,255,.5)' : 'rgba(0,0,0,.5)';
 
   renderChart('scatter', '#chartScatter', {
-    chart: { type: 'scatter', height: 340, zoom: { enabled: false } },
+    chart: { type: 'scatter', height: 300, zoom: { enabled: false },
+      parentHeightOffset: 0 },
     series: [
       { name: 'Acima da meta', data: series1 },
       { name: 'Perto da meta', data: series2 },
