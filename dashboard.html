@@ -190,6 +190,16 @@ window._showUpdateBanner = function() {
     height: 48px;
     flex-shrink: 0;
   }
+  .spark-tooltip {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    padding: 4px 8px !important;
+    border-radius: 6px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,.12) !important;
+  }
+  .spark-tooltip .apexcharts-tooltip-text {
+    font-family: var(--font-body) !important;
+  }
   .kpi-grid-hero {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1824,16 +1834,28 @@ async function loadTrend(range) {
   });
 
   // ─── KPI Sparklines ───
-  const sparkOpts = (series, color) => ({
+  const sparkDates = data.map(d => {
+    const dt = new Date(d.dia + 'T12:00:00');
+    return dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  });
+  const sparkOpts = (series, color, labels, suffix) => ({
     chart: { type: 'area', height: 48, sparkline: { enabled: true }, animations: { enabled: true, speed: 400 } },
     series: [{ data: series }],
     stroke: { width: 2, curve: 'smooth' },
     colors: [color],
     fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.05, stops: [0, 100] } },
-    tooltip: { enabled: false }
+    tooltip: {
+      enabled: true,
+      fixed: { enabled: false },
+      x: { show: false },
+      y: { title: { formatter: () => '' }, formatter: (val, { dataPointIndex }) => labels[dataPointIndex] + ': ' + Math.round(val) + suffix },
+      marker: { show: false },
+      style: { fontSize: '11px' },
+      cssClass: 'spark-tooltip'
+    }
   });
-  if (conv.length > 1) renderChart('sparkConv', '#sparkConv', sparkOpts(conv, '#e2506f'));
-  if (atend.length > 1) renderChart('sparkTempo', '#sparkTempo', sparkOpts(atend, '#6366f1'));
+  if (conv.length > 1) renderChart('sparkConv', '#sparkConv', sparkOpts(conv, '#e2506f', sparkDates, '%'));
+  if (atend.length > 1) renderChart('sparkTempo', '#sparkTempo', sparkOpts(atend, '#6366f1', sparkDates, ''));
 }
 
 window.handleLogout = function() { logout(); };
