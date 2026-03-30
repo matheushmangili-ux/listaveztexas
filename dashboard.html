@@ -1879,8 +1879,8 @@ async function loadTrend(range) {
 
   const annotations = {};
   if (metaConv > 0) {
-    annotations.yaxis = [{ y: metaConv, yAxisIndex: 1, borderColor: 'rgba(0,0,0,.1)', strokeDashArray: 4, opacity: 0.3,
-      label: { text: 'Meta ' + metaConv + '%', style: { fontSize: '10px', fontWeight: 600, background: 'transparent', color: '#71717A' }, position: 'left' } }];
+    annotations.yaxis = [{ y: metaConv, yAxisIndex: 1, borderColor: 'rgba(226,80,111,.25)', strokeDashArray: 4, opacity: 0.5,
+      label: { text: 'Meta ' + metaConv + '%', style: { fontSize: '9px', fontWeight: 600, background: 'rgba(226,80,111,.08)', color: '#e2506f', padding: { left: 4, right: 4, top: 2, bottom: 2 } }, position: 'right', offsetX: -8 } }];
   }
 
   // Dynamic min-width so horizontal scroll appears when many days
@@ -1901,21 +1901,22 @@ async function loadTrend(range) {
       rotate: 0, rotateAlways: false
     } },
     yaxis: [
-      { labels: { style: { fontSize: '10px', fontWeight: 500 } }, forceNiceScale: true },
-      { opposite: true,
+      { title: { text: 'Atendimentos / Vendas', style: { fontSize: '10px', fontWeight: 600, color: isDarkTheme() ? 'rgba(255,255,255,.4)' : 'rgba(0,0,0,.35)' } },
+        labels: { style: { fontSize: '10px', fontWeight: 500 } }, forceNiceScale: true, min: 0 },
+      { opposite: true, title: { text: 'Conversão %', style: { fontSize: '10px', fontWeight: 600, color: isDarkTheme() ? 'rgba(255,255,255,.4)' : 'rgba(0,0,0,.35)' } },
         labels: { formatter: v => Math.round(v) + '%', style: { fontSize: '10px', fontWeight: 500 } }, min: 0, max: 100 }
     ],
     stroke: { width: [2.5, 2.5, 2], curve: 'smooth', dashArray: [0, 0, 6] },
     fill: { type: ['gradient', 'gradient', 'solid'],
       gradient: { shadeIntensity: 1, opacityFrom: 0.25, opacityTo: 0.05, stops: [0, 100] } },
     colors: ['#e2506f', '#D4D4D8', '#A1A1AA'],
-    markers: { size: [3, 3, 0], hover: { size: 6 } },
+    markers: { size: [4, 4, 3], hover: { size: 7 } },
     grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { left: 10, right: 10, bottom: 5 } },
     legend: { position: 'top', horizontalAlign: 'center', fontSize: '11px', fontWeight: 600,
               labels: { colors: chartColors().textStrong },
               markers: { shape: 'circle', size: 5 },
-              itemMargin: { horizontal: 16, vertical: 0 },
-              floating: false, offsetY: 0 },
+              itemMargin: { horizontal: 20, vertical: 0 },
+              floating: false, offsetY: 0, height: 30 },
     annotations,
     dataLabels: { enabled: false },
     tooltip: { shared: true, intersect: false,
