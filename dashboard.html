@@ -1774,12 +1774,7 @@ async function loadScatter(range, cachedData) {
             padding: { right: 20, top: 10, left: 10, bottom: 10 } },
     annotations: { yaxis: [{ y: metaConv, borderColor: '#e2506f', strokeDashArray: 5, opacity: 0.6,
       label: { text: 'Meta ' + metaConv + '%', style: { fontSize: '10px', fontWeight: 700, fontFamily: "'Satoshi'", background: 'rgba(226,80,111,.12)', color: '#e2506f', padding: { left: 6, right: 6, top: 2, bottom: 2 } }, position: 'right', offsetX: -10 } }] },
-    dataLabels: { enabled: true, textAnchor: 'start',
-      formatter: (val, opts) => allNames[opts.seriesIndex]?.[opts.dataPointIndex] || '',
-      offsetX: 18, offsetY: -12,
-      style: { fontSize: '11px', fontWeight: 700, colors: ['#18181B'] },
-      background: { enabled: false }
-    },
+    dataLabels: { enabled: false },
     legend: { position: 'top', fontSize: '11px', fontWeight: 600, labels: { colors: chartColors().textStrong },
               markers: { shape: 'circle', size: 5 }, offsetY: -5 },
     tooltip: {
