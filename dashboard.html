@@ -1835,6 +1835,12 @@ async function loadTrend(range) {
       label: { text: 'Meta ' + metaConv + '%', style: { fontSize: '10px', fontWeight: 600, background: 'transparent', color: '#71717A' }, position: 'left' } }];
   }
 
+  // Dynamic min-width so horizontal scroll appears when many days
+  const trendBox = document.querySelector('#chartTrend')?.parentElement;
+  if (trendBox && xLabels.length > 10) {
+    trendBox.style.minWidth = Math.max(700, xLabels.length * 55) + 'px';
+  }
+
   renderChart('trend', '#chartTrend', {
     chart: { type: 'line', height: 360 },
     series: [
