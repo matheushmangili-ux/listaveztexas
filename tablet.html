@@ -124,9 +124,9 @@ window.addEventListener('error', function(e) {
   .queue-item {
     position: relative;
     transition: transform .15s ease;
-    background: #FFFFFF;
-    box-shadow: 0 1px 3px rgba(0,0,0,.04);
-    border: 1px solid rgba(0,0,0,.06);
+    background: #FAFAFA;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    border: 1px solid rgba(0,0,0,.1);
     border-radius: 10px;
   }
   .queue-list.dragging .queue-item { will-change: transform; }
@@ -886,11 +886,11 @@ window.addEventListener('error', function(e) {
 <div class="tablet-layout">
   <!-- HEADER -->
   <header class="t-header">
-    <div style="display:flex;align-items:center;gap:10px;min-width:0;flex-shrink:1">
-      <img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:24px;width:auto">
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+      <img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:22px;width:auto">
       <span id="appVersion" style="font-family:var(--font-mono);font-size:9px;color:rgba(255,255,255,.5);opacity:.6;white-space:nowrap"></span>
     </div>
-    <div id="headerKpis" style="display:flex;align-items:center;gap:16px;font-family:var(--font-mono);font-weight:700">
+    <div id="headerKpis" style="display:flex;align-items:center;gap:12px;font-family:var(--font-mono);font-weight:700;flex:1;justify-content:center;min-width:0;overflow:hidden">
       <div style="display:flex;align-items:center;gap:6px" title="Atendimentos finalizados">
         <i class="fa-solid fa-users" style="font-size:14px;color:rgba(255,255,255,.6)"></i>
         <div style="display:flex;flex-direction:column;line-height:1.2">
@@ -1844,7 +1844,7 @@ async function addToQueueAt(vendedorId, beforeId) {
     const id = draggedId;
     draggedId = null;
     if (!id) return;
-    await sendToAtendimento(id);
+    await withLock(() => _doSendToAtendimento(id)); // drag pula confirmação
   });
 })();
 
@@ -2064,7 +2064,7 @@ window.onTouchDragStart = function(e) {
       if (isInQueue) { await reorderInQueue(_savedDragId, afterId); }
       else { await addToQueueAt(_savedDragId, afterId); }
     } else if (dropEl && (dropEl.id === 'servicePanel' || dropEl.closest('#servicePanel') || dropEl.closest('#activeList'))) {
-      await sendToAtendimento(_savedDragId);
+      await withLock(() => _doSendToAtendimento(_savedDragId)); // touch drag pula confirmação
     } else if (dropEl && (dropEl.id === 'statusFooter' || dropEl.closest('#statusFooter'))) {
       setTimeout(() => openSaida(_savedDragId), 50);
     }
