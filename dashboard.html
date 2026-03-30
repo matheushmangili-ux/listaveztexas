@@ -1647,58 +1647,49 @@ async function loadScatter(range, cachedData) {
   const filtered = (data || []).filter(r => (r.total_atendimentos || 0) > 0);
   if (filtered.length === 0) { if (charts.scatter) { try { charts.scatter.destroy(); } catch(e) {} } charts.scatter = null; return; }
 
-  const maxAtend = Math.max(...filtered.map(r => r.total_atendimentos || 0), 1);
   const metaConv = metas.conversao || 70;
-  const points = filtered.map(r => ({
-    x: r.total_atendimentos || 0,
-    y: r.taxa_conversao || 0,
-    label: (r.apelido || r.nome || '').split(' ')[0],
-    r: Math.max(8, Math.min(22, 8 + ((r.total_atendimentos || 0) / maxAtend) * 14))
-  }));
-
-  const aboveMeta = [], nearMeta = [], belowMeta = [];
   const labelMap = {};
+  const aboveMeta = [], nearMeta = [], belowMeta = [];
 
-  points.forEach(p => {
-    const item = { x: p.x, y: p.y, z: p.r || 5 };
-    const key = p.x + '_' + p.y;
-    labelMap[key] = p.label;
-    if (p.y >= metaConv) aboveMeta.push(item);
-    else if (p.y >= metaConv * 0.6) nearMeta.push(item);
+  filtered.forEach(r => {
+    const x = r.total_atendimentos || 0;
+    const y = r.taxa_conversao || 0;
+    const name = (r.apelido || r.nome || '').split(' ')[0];
+    const key = x + '_' + y;
+    labelMap[key] = name;
+    const item = { x, y, z: x };
+    if (y >= metaConv) aboveMeta.push(item);
+    else if (y >= metaConv * 0.6) nearMeta.push(item);
     else belowMeta.push(item);
   });
 
-  // Scale bubble sizes proportionally (small range to avoid giant bubbles)
-  const maxBubble = Math.max(...filtered.map(r => r.total_atendimentos || 0), 1);
-  const scaleZ = (v) => Math.max(2, Math.round((v / maxBubble) * 8 + 2));
-  aboveMeta.forEach(p => { p.z = scaleZ(p.x); });
-  nearMeta.forEach(p => { p.z = scaleZ(p.x); });
-  belowMeta.forEach(p => { p.z = scaleZ(p.x); });
-
+  const allY = filtered.map(r => r.taxa_conversao || 0);
+  const minY = Math.max(0, Math.floor(Math.min(...allY) / 10) * 10 - 10);
   const maxX = Math.max(...filtered.map(r => r.total_atendimentos || 0), 5);
 
   renderChart('scatter', '#chartScatter', {
-    chart: { type: 'bubble', height: 340 },
+    chart: { type: 'bubble', height: 340, zoom: { enabled: false } },
     series: [
       { name: 'Acima da meta', data: aboveMeta },
       { name: 'Perto da meta', data: nearMeta },
       { name: 'Abaixo da meta', data: belowMeta }
     ],
     colors: ['#e2506f', '#f0758e', '#D4D4D8'],
-    fill: { opacity: 0.6 },
+    fill: { opacity: 0.55 },
+    plotOptions: { bubble: { minBubbleRadius: 6, maxBubbleRadius: 20 } },
     xaxis: {
-      min: 0, max: Math.ceil(maxX * 1.2),
-      title: { text: 'VOLUME (ATENDIMENTOS)', style: { fontSize: '10px', fontWeight: 700, color: chartColors().textMuted } },
-      labels: { style: { fontSize: '11px', fontWeight: 500 } },
+      min: 0, max: Math.ceil(maxX * 1.15),
+      title: { text: 'VOLUME (ATENDIMENTOS)', style: { fontSize: '9px', fontWeight: 700, color: chartColors().textMuted } },
+      labels: { style: { fontSize: '10px', fontWeight: 500 } },
       tickAmount: Math.min(6, maxX)
     },
     yaxis: {
-      min: 0, max: 100,
-      title: { text: 'CONVERSÃO %', style: { fontSize: '10px', fontWeight: 700, color: chartColors().textMuted } },
-      labels: { formatter: v => Math.round(v) + '%', style: { fontSize: '11px', fontWeight: 500 } },
+      min: minY, max: 100,
+      title: { text: 'CONVERSÃO %', style: { fontSize: '9px', fontWeight: 700, color: chartColors().textMuted } },
+      labels: { formatter: v => Math.round(v) + '%', style: { fontSize: '10px', fontWeight: 500 } },
       tickAmount: 5
     },
-    grid: { show: true, borderColor: chartColors().grid, strokeDashArray: 3, padding: { right: 20, top: 10, left: 10, bottom: 10 } },
+    grid: { show: true, borderColor: chartColors().grid, strokeDashArray: 3, padding: { right: 30, top: 20, left: 10, bottom: 10 } },
     annotations: { yaxis: [{ y: metaConv, borderColor: '#e2506f', strokeDashArray: 5, opacity: 0.4,
       label: { text: 'Meta ' + metaConv + '%', style: { fontSize: '10px', fontWeight: 700, fontFamily: "'Satoshi'", background: 'rgba(226,80,111,.08)', color: '#e2506f', padding: { left: 6, right: 6, top: 2, bottom: 2 } }, position: 'left' } }] },
     dataLabels: { enabled: true, textAnchor: 'middle',
@@ -1706,8 +1697,8 @@ async function loadScatter(range, cachedData) {
         const pt = opts.w.config.series[opts.seriesIndex].data[opts.dataPointIndex];
         return labelMap[pt.x + '_' + pt.y] || '';
       },
-      offsetY: -8,
-      style: { fontSize: '11px', fontWeight: 700, colors: [chartColors().datalabel] } },
+      offsetY: -6,
+      style: { fontSize: '10px', fontWeight: 700, colors: [chartColors().datalabel] } },
     legend: { position: 'top', fontSize: '11px', fontWeight: 600, labels: { colors: chartColors().textStrong }, markers: { shape: 'circle', size: 5 } },
     tooltip: { shared: false,
       custom: ({ seriesIndex, dataPointIndex, w }) => {
