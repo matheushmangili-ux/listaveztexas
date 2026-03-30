@@ -105,20 +105,18 @@ window._showUpdateBanner = function() {
     min-width: 0;
   }
   .dash-header-logo {
-    width: 42px; height: 42px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
-    overflow: hidden;
+    display: flex;
+    align-items: center;
   }
-  .dash-header-logo img { width: 100%; height: 100%; object-fit: contain; }
+  .dash-header-logo img { height: 28px; object-fit: contain; display: block; }
   .dash-header-title {
-    font-family: var(--font-mono);
-    font-size: 17px;
-    font-weight: 700;
-    letter-spacing: -.02em;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .01em;
     line-height: 1.2;
-    color: #fff;
+    color: var(--text-secondary);
   }
   .dash-header-subtitle {
     font-size: 11px;
@@ -595,9 +593,9 @@ window._showUpdateBanner = function() {
     <!-- Top: Brand + Actions -->
     <div class="dash-header-top">
       <div class="dash-header-brand">
-        <div class="dash-header-logo" id="headerLogo">MV</div>
-        <div>
-          <div class="dash-header-title" id="headerTitle">Minha Vez</div>
+        <div class="dash-header-logo" id="headerLogo"><img src="/assets/logo-minhavez-new.png" alt="minhavez"></div>
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <div class="dash-header-title" id="headerTitle"></div>
           <div class="dash-header-subtitle">
             <span id="dashDate"></span>
             <span id="lastUpdateIndicator" style="opacity:.6"></span>
@@ -779,7 +777,9 @@ window._showUpdateBanner = function() {
   <!-- Trend Line -->
   <div class="chart-card" style="margin-bottom:var(--gap)">
     <h3><i class="fa-solid fa-chart-line" style="margin-right:6px;color:var(--accent-dim)"></i>Evolução Diária</h3>
-    <div class="chart-box" style="height:380px"><div id="chartTrend"></div></div>
+    <div style="overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--accent-dim) transparent">
+      <div class="chart-box" style="height:380px;min-width:700px"><div id="chartTrend"></div></div>
+    </div>
   </div>
 
   <!-- Ranking -->
@@ -894,14 +894,8 @@ if (tenant) {
   const headerTitle = document.getElementById('headerTitle');
   const headerLogo = document.getElementById('headerLogo');
   if (headerTitle && tenant.nome_loja) headerTitle.textContent = tenant.nome_loja;
-  if (headerLogo) {
-    if (tenant.logo_url) {
-      headerLogo.innerHTML = `<img src="${tenant.logo_url}" alt="${tenant.nome_loja || ''}">`;
-    } else {
-      headerLogo.style.background = '#060606';
-      headerLogo.style.padding = '6px';
-      headerLogo.innerHTML = `<img src="/assets/logo-minhavez-new.png" alt="minhavez">`;
-    }
+  if (headerLogo && tenant.logo_url) {
+    headerLogo.innerHTML = `<img src="${tenant.logo_url}" alt="${tenant.nome_loja || ''}">`;
   }
   // Show tenant slug in footer for support
   const slugEl = document.getElementById('tenantSlugFooter');
