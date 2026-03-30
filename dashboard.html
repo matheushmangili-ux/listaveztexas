@@ -954,7 +954,7 @@ function renderChart(key, selector, options) {
   return charts[key];
 }
 
-const CHART_PALETTE = ['#e2506f', '#3B82F6', '#34D399', '#F59E0B', '#8B5CF6', '#06B6D4'];
+const CHART_PALETTE = ['#e2506f', '#c43d5a', '#f0758e', '#D4D4D8', '#A1A1AA', '#71717A'];
 
 // CountUp animation (first load only)
 let _firstLoad = true;
@@ -1208,7 +1208,7 @@ async function loadKPIs(range, prevRange) {
 
   // Gauges
   const convPct = parseFloat(convAtual) || 0;
-  const convColor = convPct >= metas.conversao ? '#22C55E' : convPct >= metas.conversao * 0.7 ? '#F59E0B' : '#e2506f';
+  const convColor = convPct >= metas.conversao ? '#e2506f' : convPct >= metas.conversao * 0.7 ? '#f0758e' : '#D4D4D8';
   renderChart('gaugeConv', '#gaugeConv', {
     chart: { type: 'radialBar', height: 140, sparkline: { enabled: true } },
     series: [Math.min(100, Math.round(convPct))],
@@ -1224,7 +1224,7 @@ async function loadKPIs(range, prevRange) {
 
   const ticketVal = parseFloat(d.ticket_medio) || 0;
   const ticketPct = metas.ticket_medio > 0 ? Math.min(100, Math.round(ticketVal / metas.ticket_medio * 100)) : 0;
-  const ticketColor = ticketPct >= 100 ? '#22C55E' : ticketPct >= 70 ? '#F59E0B' : '#e2506f';
+  const ticketColor = ticketPct >= 100 ? '#e2506f' : ticketPct >= 70 ? '#f0758e' : '#D4D4D8';
   renderChart('gaugeTicket', '#gaugeTicket', {
     chart: { type: 'radialBar', height: 140, sparkline: { enabled: true } },
     series: [ticketPct],
@@ -1240,7 +1240,7 @@ async function loadKPIs(range, prevRange) {
 
   const tempoVal = parseFloat(d.tempo_medio_min) || 0;
   const tempoPct = metas.tempo_medio > 0 ? Math.min(100, Math.round((metas.tempo_medio / Math.max(tempoVal, 1)) * 100)) : 0;
-  const tempoColor = tempoVal <= metas.tempo_medio * 0.8 ? '#22C55E' : tempoVal <= metas.tempo_medio ? '#F59E0B' : '#e2506f';
+  const tempoColor = tempoVal <= metas.tempo_medio * 0.8 ? '#e2506f' : tempoVal <= metas.tempo_medio ? '#f0758e' : '#D4D4D8';
   renderChart('gaugeTempo', '#gaugeTempo', {
     chart: { type: 'radialBar', height: 140, sparkline: { enabled: true } },
     series: [tempoPct],
@@ -1261,7 +1261,7 @@ async function loadKPIs(range, prevRange) {
   renderChart('miniDonutLoss', '#miniDonutLoss', {
     chart: { type: 'donut', height: 48, sparkline: { enabled: true } },
     series: totalAtend > 0 ? [totalNaoConv, convPart] : [1],
-    colors: totalAtend > 0 ? ['#EF4444', chartColors().trackBg] : [chartColors().trackBg],
+    colors: totalAtend > 0 ? ['#e2506f', chartColors().trackBg] : [chartColors().trackBg],
     plotOptions: { pie: { donut: { size: '65%' } } },
     legend: { show: false }, tooltip: { enabled: false },
     stroke: { width: 0 },
@@ -1387,9 +1387,9 @@ async function loadHourly(range) {
 
   const annotations = {};
   if (avgAtend > 0) {
-    annotations.yaxis = [{ y: avgAtend, borderColor: 'rgba(250,204,21,.5)', strokeDashArray: 4,
+    annotations.yaxis = [{ y: avgAtend, borderColor: 'rgba(0,0,0,.12)', strokeDashArray: 4,
       label: { text: (isMultiDay ? 'média/dia ' : 'média ') + avgAtend,
-               style: { fontSize: '10px', fontWeight: 600, fontFamily: "'Satoshi'", color: '#92400E', background: 'rgba(250,204,21,.15)', borderColor: 'transparent', padding: { left: 6, right: 6, top: 2, bottom: 2 } },
+               style: { fontSize: '10px', fontWeight: 600, fontFamily: "'Satoshi'", color: '#71717A', background: 'rgba(0,0,0,.04)', borderColor: 'transparent', padding: { left: 6, right: 6, top: 2, bottom: 2 } },
                position: 'right' } }];
   }
 
@@ -1399,10 +1399,10 @@ async function loadHourly(range) {
     xaxis: { categories: hours, labels: { style: { fontSize: '11px', fontWeight: 500 } } },
     yaxis: { labels: { style: { fontSize: '11px', fontWeight: 500 } }, forceNiceScale: true },
     plotOptions: { bar: { borderRadius: 6, columnWidth: '60%' } },
-    colors: ['#e2506f', '#34D399', '#e2506f'],
-    fill: { opacity: [0.85, 0.7, 0.3] },
-    stroke: { width: [0, 0, 2.5], curve: 'smooth' },
-    markers: { size: [0, 0, 4] },
+    colors: ['#e2506f', '#D4D4D8', '#c43d5a'],
+    fill: { opacity: [0.75, 0.5, 0.2] },
+    stroke: { width: [0, 0, 2], curve: 'smooth' },
+    markers: { size: [0, 0, 3] },
     grid: { borderColor: chartColors().grid, strokeDashArray: 3 },
     legend: { position: 'top', fontSize: '11px', fontWeight: 600, labels: { colors: chartColors().textStrong },
               markers: { shape: 'circle', size: 5 } },
@@ -1611,8 +1611,8 @@ async function loadScatter(range, cachedData) {
       { name: 'Perto da meta', data: nearMeta },
       { name: 'Abaixo da meta', data: belowMeta }
     ],
-    colors: ['#34D399', '#F59E0B', '#e2506f'],
-    fill: { opacity: 0.6 },
+    colors: ['#e2506f', '#f0758e', '#D4D4D8'],
+    fill: { opacity: 0.5 },
     xaxis: { title: { text: 'VOLUME (ATENDIMENTOS)', style: { fontSize: '10px', fontWeight: 700, color: chartColors().textMuted } },
              labels: { style: { fontSize: '11px', fontWeight: 500 } }, tickAmount: 6 },
     yaxis: { title: { text: 'CONVERSÃO %', style: { fontSize: '10px', fontWeight: 700, color: chartColors().textMuted } },
@@ -1658,7 +1658,7 @@ async function loadTempoMeta(range, cachedData) {
   const tempos = filtered.map(r => r.tempo_medio_min || 0);
   const metaTempo = metas.tempo_medio || 30;
   // Cor dinâmica: verde = abaixo da meta (bom), amarelo = perto, vermelho = acima
-  const barColors = tempos.map(t => t <= metaTempo * 0.8 ? 'rgba(52,211,153,.65)' : t <= metaTempo ? 'rgba(251,191,36,.6)' : 'rgba(226,80,111,.55)');
+  const barColors = tempos.map(t => t <= metaTempo * 0.8 ? 'rgba(226,80,111,.6)' : t <= metaTempo ? 'rgba(240,117,142,.5)' : 'rgba(212,212,216,.6)');
 
   renderChart('tempoMeta', '#chartTempoMeta', {
     chart: { type: 'bar', height: 340 },
@@ -1711,8 +1711,8 @@ async function loadTrend(range) {
 
   const annotations = {};
   if (metaConv > 0) {
-    annotations.yaxis = [{ y: metaConv, yAxisIndex: 1, borderColor: '#e2506f', strokeDashArray: 4, opacity: 0.3,
-      label: { text: 'Meta ' + metaConv + '%', style: { fontSize: '10px', fontWeight: 600, background: 'transparent', color: '#e2506f' }, position: 'left' } }];
+    annotations.yaxis = [{ y: metaConv, yAxisIndex: 1, borderColor: 'rgba(0,0,0,.1)', strokeDashArray: 4, opacity: 0.3,
+      label: { text: 'Meta ' + metaConv + '%', style: { fontSize: '10px', fontWeight: 600, background: 'transparent', color: '#71717A' }, position: 'left' } }];
   }
 
   renderChart('trend', '#chartTrend', {
@@ -1735,7 +1735,7 @@ async function loadTrend(range) {
     stroke: { width: [2.5, 2.5, 2], curve: 'smooth', dashArray: [0, 0, 6] },
     fill: { type: ['gradient', 'gradient', 'solid'],
       gradient: { shadeIntensity: 1, opacityFrom: 0.25, opacityTo: 0.05, stops: [0, 100] } },
-    colors: ['#3B82F6', '#34D399', '#FBBF24'],
+    colors: ['#e2506f', '#D4D4D8', '#A1A1AA'],
     markers: { size: [0, 0, 0], hover: { size: 6 } },
     grid: { borderColor: chartColors().grid, strokeDashArray: 3 },
     legend: { position: 'top', fontSize: '11px', fontWeight: 600, labels: { colors: chartColors().textStrong }, markers: { shape: 'circle', size: 5 } },
@@ -1749,7 +1749,6 @@ async function loadTrend(range) {
 window.handleLogout = function() { logout(); };
 window.toggleTheme = function() {
   const next = toggleTheme();
-  applyChartTheme();
   loadAll();
 };
 
