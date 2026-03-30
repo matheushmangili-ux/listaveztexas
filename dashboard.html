@@ -670,13 +670,18 @@ window._showUpdateBanner = function() {
   <div class="kpi-grid-hero" id="kpiGrid">
     <div class="kpi-card">
       <div class="kpi-label"><i class="fa-solid fa-users"></i> Total Atendimentos</div>
-      <div class="kpi-value" id="kpiTotal"><div class="skeleton skeleton-kpi-value"></div></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="kpi-value" id="kpiTotal"><div class="skeleton skeleton-kpi-value"></div></div>
+        <div id="gaugeTotal" style="width:48px;height:48px;flex-shrink:0"></div>
+      </div>
       <div class="kpi-compare" id="kpiTotalCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
-      <div id="sparkAtend" style="width:100%;height:36px;margin-top:4px"></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label"><i class="fa-solid fa-bag-shopping"></i> Total Vendas</div>
-      <div class="kpi-value" id="kpiVendas"><div class="skeleton skeleton-kpi-value"></div></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="kpi-value" id="kpiVendas"><div class="skeleton skeleton-kpi-value"></div></div>
+        <div id="gaugeVendas" style="width:48px;height:48px;flex-shrink:0"></div>
+      </div>
       <div class="kpi-compare" id="kpiVendasCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
     </div>
     <div class="kpi-card">
@@ -694,18 +699,24 @@ window._showUpdateBanner = function() {
       <div class="kpi-label"><i class="fa-solid fa-xmark"></i> Não Convertidos</div>
       <div style="display:flex;align-items:center;gap:10px">
         <div class="kpi-value" id="kpiLoss"><div class="skeleton skeleton-kpi-value"></div></div>
-        <div id="miniDonutLoss" style="width:48px;height:48px;flex-shrink:0"></div>
+        <div id="gaugeLoss" style="width:48px;height:48px;flex-shrink:0"></div>
       </div>
       <div class="kpi-compare" id="kpiLossCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label"><i class="fa-solid fa-receipt"></i> Ticket Médio</div>
-      <div class="kpi-value" id="kpiTicket"><div class="skeleton skeleton-kpi-value"></div></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="kpi-value" id="kpiTicket"><div class="skeleton skeleton-kpi-value"></div></div>
+        <div id="gaugeTicket" style="width:48px;height:48px;flex-shrink:0"></div>
+      </div>
       <div class="kpi-compare" id="kpiTicketCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label"><i class="fa-solid fa-clock"></i> Tempo Médio</div>
-      <div class="kpi-value" id="kpiTime"><div class="skeleton skeleton-kpi-value"></div></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="kpi-value" id="kpiTime"><div class="skeleton skeleton-kpi-value"></div></div>
+        <div id="gaugeTempo" style="width:48px;height:48px;flex-shrink:0"></div>
+      </div>
       <div class="kpi-compare" id="kpiTimeCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
     </div>
   </div>
@@ -1219,35 +1230,56 @@ async function loadKPIs(range, prevRange) {
   renderCompare('kpiTimeCmp', d.tempo_medio_min || 0, p.tempo_medio_min || 0, true);
   if (ticket > 0 || pTicket > 0) renderCompare('kpiTicketCmp', ticket, pTicket);
 
-  // Mini gauge for Conversão (inline 48px, matches miniDonutLoss)
-  const convPct = parseFloat(convAtual) || 0;
-  const convColor = convPct >= metas.conversao ? '#e2506f' : convPct >= metas.conversao * 0.7 ? '#f0758e' : '#D4D4D8';
-  renderChart('gaugeConv', '#gaugeConv', {
-    chart: { type: 'radialBar', height: 48, sparkline: { enabled: true } },
-    series: [Math.min(100, Math.round(convPct))],
-    plotOptions: { radialBar: {
-      startAngle: 0, endAngle: 360,
-      hollow: { size: '55%' },
-      track: { background: chartColors().trackBg, strokeWidth: '97%' },
-      dataLabels: { name: { show: false }, value: { show: false } }
-    }},
-    colors: [convColor],
-    stroke: { lineCap: 'round' }
-  });
+  // ─── Mini gauges (48px radialBar, padronizado em todos os 6 KPIs) ───
+  function miniGauge(key, selector, pct, color) {
+    renderChart(key, selector, {
+      chart: { type: 'radialBar', height: 48, sparkline: { enabled: true } },
+      series: [Math.min(100, Math.max(0, Math.round(pct)))],
+      plotOptions: { radialBar: {
+        startAngle: 0, endAngle: 360,
+        hollow: { size: '50%' },
+        track: { background: chartColors().trackBg, strokeWidth: '97%' },
+        dataLabels: { name: { show: false }, value: { show: false } }
+      }},
+      colors: [color],
+      stroke: { lineCap: 'round' }
+    });
+  }
+  function gaugeColor(pct, meta) {
+    return pct >= meta ? '#e2506f' : pct >= meta * 0.7 ? '#f0758e' : '#D4D4D8';
+  }
 
-  // Mini donut for Não Convertidos
   const totalAtend = parseInt(d.total_atendimentos) || 0;
+  const pTotalAtend = parseInt(p.total_atendimientos || p.total_atendimentos) || 0;
+  const totalVendas = parseInt(d.total_vendas) || 0;
+  const pTotalVendas = parseInt(p.total_vendas) || 0;
   const totalNaoConv = parseInt(d.total_nao_convertido) || 0;
-  const convPart = Math.max(0, totalAtend - totalNaoConv);
-  renderChart('miniDonutLoss', '#miniDonutLoss', {
-    chart: { type: 'donut', height: 48, sparkline: { enabled: true } },
-    series: totalAtend > 0 ? [totalNaoConv, convPart] : [1],
-    colors: totalAtend > 0 ? ['#e2506f', chartColors().trackBg] : [chartColors().trackBg],
-    plotOptions: { pie: { donut: { size: '65%' } } },
-    legend: { show: false }, tooltip: { enabled: false },
-    stroke: { width: 0 },
-    dataLabels: { enabled: false }
-  });
+  const convPct = parseFloat(convAtual) || 0;
+  const ticketVal = parseFloat(d.ticket_medio) || 0;
+  const tempoVal = parseFloat(d.tempo_medio_min) || 0;
+
+  // 1. Total Atendimentos — % de variação vs anterior (capped at 100%)
+  const atendPct = pTotalAtend > 0 ? Math.round(totalAtend / pTotalAtend * 100) : (totalAtend > 0 ? 100 : 0);
+  miniGauge('gaugeTotal', '#gaugeTotal', atendPct, gaugeColor(atendPct, 100));
+
+  // 2. Total Vendas — % de variação vs anterior
+  const vendasPct = pTotalVendas > 0 ? Math.round(totalVendas / pTotalVendas * 100) : (totalVendas > 0 ? 100 : 0);
+  miniGauge('gaugeVendas', '#gaugeVendas', vendasPct, gaugeColor(vendasPct, 100));
+
+  // 3. Conversão — % da meta
+  miniGauge('gaugeConv', '#gaugeConv', convPct, gaugeColor(convPct, metas.conversao));
+
+  // 4. Não Convertidos — proporção inversa (menos perdas = melhor)
+  const lossPct = totalAtend > 0 ? Math.round((1 - totalNaoConv / totalAtend) * 100) : 100;
+  miniGauge('gaugeLoss', '#gaugeLoss', lossPct, gaugeColor(lossPct, 70));
+
+  // 5. Ticket Médio — % da meta
+  const ticketPct = metas.ticket_medio > 0 ? Math.round(ticketVal / metas.ticket_medio * 100) : 0;
+  miniGauge('gaugeTicket', '#gaugeTicket', ticketPct, gaugeColor(ticketPct, 100));
+
+  // 6. Tempo Médio — inverso (menor tempo = melhor)
+  const tempoPct = metas.tempo_medio > 0 ? Math.round((metas.tempo_medio / Math.max(tempoVal, 1)) * 100) : 0;
+  miniGauge('gaugeTempo', '#gaugeTempo', tempoPct, gaugeColor(tempoPct, 100));
 
   _cachedStats = d;
 }
@@ -1585,6 +1617,15 @@ async function loadScatter(range, cachedData) {
     else belowMeta.push(item);
   });
 
+  // Scale bubble sizes proportionally (small range to avoid giant bubbles)
+  const maxBubble = Math.max(...filtered.map(r => r.total_atendimentos || 0), 1);
+  const scaleZ = (v) => Math.max(2, Math.round((v / maxBubble) * 8 + 2));
+  aboveMeta.forEach(p => { p.z = scaleZ(p.x); });
+  nearMeta.forEach(p => { p.z = scaleZ(p.x); });
+  belowMeta.forEach(p => { p.z = scaleZ(p.x); });
+
+  const maxX = Math.max(...filtered.map(r => r.total_atendimentos || 0), 5);
+
   renderChart('scatter', '#chartScatter', {
     chart: { type: 'bubble', height: 340 },
     series: [
@@ -1593,29 +1634,38 @@ async function loadScatter(range, cachedData) {
       { name: 'Abaixo da meta', data: belowMeta }
     ],
     colors: ['#e2506f', '#f0758e', '#D4D4D8'],
-    fill: { opacity: 0.5 },
-    xaxis: { title: { text: 'VOLUME (ATENDIMENTOS)', style: { fontSize: '10px', fontWeight: 700, color: chartColors().textMuted } },
-             labels: { style: { fontSize: '11px', fontWeight: 500 } }, tickAmount: 6 },
-    yaxis: { title: { text: 'CONVERSÃO %', style: { fontSize: '10px', fontWeight: 700, color: chartColors().textMuted } },
-             labels: { formatter: v => Math.round(v) + '%', style: { fontSize: '11px', fontWeight: 500 } }, min: 0, max: 100 },
-    grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { right: 30, top: 10 } },
-    annotations: { yaxis: [{ y: metaConv, borderColor: '#71717A', strokeDashArray: 4,
-      label: { text: 'Meta ' + metaConv + '%', style: { fontSize: '10px', fontWeight: 600, background: 'transparent', color: '#71717A' }, position: 'left' } }] },
-    dataLabels: { enabled: true, textAnchor: 'start',
+    fill: { opacity: 0.6 },
+    xaxis: {
+      min: 0, max: Math.ceil(maxX * 1.2),
+      title: { text: 'VOLUME (ATENDIMENTOS)', style: { fontSize: '10px', fontWeight: 700, color: chartColors().textMuted } },
+      labels: { style: { fontSize: '11px', fontWeight: 500 } },
+      tickAmount: Math.min(6, maxX)
+    },
+    yaxis: {
+      min: 0, max: 100,
+      title: { text: 'CONVERSÃO %', style: { fontSize: '10px', fontWeight: 700, color: chartColors().textMuted } },
+      labels: { formatter: v => Math.round(v) + '%', style: { fontSize: '11px', fontWeight: 500 } },
+      tickAmount: 5
+    },
+    grid: { show: true, borderColor: chartColors().grid, strokeDashArray: 3, padding: { right: 20, top: 10, left: 10, bottom: 10 } },
+    annotations: { yaxis: [{ y: metaConv, borderColor: '#e2506f', strokeDashArray: 5, opacity: 0.4,
+      label: { text: 'Meta ' + metaConv + '%', style: { fontSize: '10px', fontWeight: 700, fontFamily: "'Satoshi'", background: 'rgba(226,80,111,.08)', color: '#e2506f', padding: { left: 6, right: 6, top: 2, bottom: 2 } }, position: 'left' } }] },
+    dataLabels: { enabled: true, textAnchor: 'middle',
       formatter: (val, opts) => {
         const pt = opts.w.config.series[opts.seriesIndex].data[opts.dataPointIndex];
         return labelMap[pt.x + '_' + pt.y] || '';
       },
-      style: { fontSize: '10px', fontWeight: 600, colors: [chartColors().datalabel] } },
+      offsetY: -8,
+      style: { fontSize: '11px', fontWeight: 700, colors: [chartColors().datalabel] } },
     legend: { position: 'top', fontSize: '11px', fontWeight: 600, labels: { colors: chartColors().textStrong }, markers: { shape: 'circle', size: 5 } },
     tooltip: { shared: false,
       custom: ({ seriesIndex, dataPointIndex, w }) => {
         const pt = w.config.series[seriesIndex].data[dataPointIndex];
         const name = labelMap[pt.x + '_' + pt.y] || '';
-        return '<div style="padding:8px 12px;font-family:Satoshi,sans-serif;font-size:12px">' +
-               '<strong>' + name + '</strong><br>' +
-               'Atendimentos: ' + pt.x + '<br>' +
-               'Conversão: ' + pt.y + '%</div>';
+        return '<div style="padding:10px 14px;font-family:Satoshi,sans-serif;font-size:12px;line-height:1.5">' +
+               '<strong style="font-size:13px">' + name + '</strong><br>' +
+               '<span style="color:#71717A">Atendimentos:</span> <strong>' + pt.x + '</strong><br>' +
+               '<span style="color:#71717A">Conversão:</span> <strong>' + pt.y + '%</strong></div>';
       }
     }
   });
