@@ -63,8 +63,7 @@ window._showUpdateBanner = function() {
   document.head.appendChild(style);
 };
 </script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.min.js"></script>
 <style>
   .dash-layout {
     max-width: 1280px;
@@ -195,26 +194,19 @@ window._showUpdateBanner = function() {
   }
   .kpi-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: var(--gap);
     margin-bottom: var(--gap);
   }
-  .kpi-grid-secondary {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--gap);
-    margin-bottom: calc(var(--gap) * 1.5);
-  }
+  .kpi-card--gauge { text-align: center; }
   @media (max-width: 1200px) {
-    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .kpi-grid { grid-template-columns: repeat(3, 1fr); }
   }
   @media (max-width: 768px) {
     .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-    .kpi-grid-secondary { grid-template-columns: 1fr; }
   }
   @media (max-width: 480px) {
     .kpi-grid { grid-template-columns: 1fr; }
-    .kpi-grid-secondary { grid-template-columns: 1fr; }
   }
   .charts-grid {
     display: grid;
@@ -345,7 +337,6 @@ window._showUpdateBanner = function() {
   }
   .chart-card h3 i { font-size: 14px; opacity: .5; }
   .chart-box { position: relative; height: 340px; z-index: 1; }
-  .chart-box canvas { position: relative; z-index: 2; }
   .ranking-table {
     width: 100%;
     border-collapse: collapse;
@@ -555,20 +546,14 @@ window._showUpdateBanner = function() {
   }
   .filter-clear-btn:hover { border-color: var(--danger); color: var(--danger); }
 
-  /* ─── Meta progress bar ─── */
-  .meta-bar { width: 100%; height: 4px; background: rgba(0,0,0,.06); border-radius: 2px; margin-top: 8px; overflow: hidden; }
-  .meta-bar-fill { height: 100%; border-radius: 2px; transition: width .5s ease; }
-  .meta-label { font-size: 10px; font-weight: 500; color: rgba(0,0,0,.35); margin-top: 4px; }
-  [data-theme="dark"] .meta-bar { background: rgba(255,255,255,.06); }
-  [data-theme="dark"] .meta-label { color: rgba(255,255,255,.35); }
   /* ─── Card fade-in ─── */
   @keyframes cardFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
   .kpi-card { animation: none; }
   .kpi-grid .kpi-card:nth-child(1) { animation-delay: 0s; }
   .kpi-grid .kpi-card:nth-child(2) { animation-delay: .05s; }
   .kpi-grid .kpi-card:nth-child(3) { animation-delay: .1s; }
-  .kpi-grid-secondary .kpi-card:nth-child(1) { animation-delay: .15s; }
-  .kpi-grid-secondary .kpi-card:nth-child(2) { animation-delay: .2s; }
+  .kpi-grid .kpi-card:nth-child(4) { animation-delay: .15s; }
+  .kpi-grid .kpi-card:nth-child(5) { animation-delay: .2s; }
 </style>
 </head>
 <body>
@@ -681,46 +666,39 @@ window._showUpdateBanner = function() {
     .marquee-pill .mp-status.fora { color:rgba(255,255,255,.4); }
   </style>
 
-  <!-- KPI Cards — Hero Row -->
+  <!-- KPI Cards -->
   <div class="kpi-grid" id="kpiGrid">
     <div class="kpi-card">
       <div class="kpi-label"><i class="fa-solid fa-users"></i> Total Atendimentos</div>
       <div class="kpi-value" id="kpiTotal"><div class="skeleton skeleton-kpi-value"></div></div>
       <div class="kpi-compare" id="kpiTotalCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
-      <canvas id="sparkAtend" style="width:100%;height:28px;margin-top:8px"></canvas>
+      <div id="sparkAtend" style="width:100%;height:36px;margin-top:4px"></div>
     </div>
-    <div class="kpi-card">
+    <div class="kpi-card kpi-card--gauge">
       <div class="kpi-label"><i class="fa-solid fa-chart-line"></i> Taxa de Conversão</div>
-      <div class="kpi-value" id="kpiConv"><div class="skeleton skeleton-kpi-value"></div></div>
+      <div id="gaugeConv" style="height:130px;margin:-4px auto 0"></div>
+      <div class="kpi-value" id="kpiConv" style="margin-top:-16px"><div class="skeleton skeleton-kpi-value"></div></div>
       <div class="kpi-compare" id="kpiConvCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
-      <canvas id="sparkConv" style="width:100%;height:28px;margin-top:8px"></canvas>
-      <div class="meta-bar" id="metaConvBar" style="display:none"><div class="meta-bar-fill" id="metaConvFill"></div></div>
-      <div class="meta-label" id="metaConvLabel" style="display:none"></div>
     </div>
-    <div class="kpi-card">
+    <div class="kpi-card kpi-card--gauge">
       <div class="kpi-label"><i class="fa-solid fa-receipt"></i> Ticket Médio</div>
-      <div class="kpi-value" id="kpiTicket"><div class="skeleton skeleton-kpi-value"></div></div>
+      <div id="gaugeTicket" style="height:130px;margin:-4px auto 0"></div>
+      <div class="kpi-value" id="kpiTicket" style="margin-top:-16px"><div class="skeleton skeleton-kpi-value"></div></div>
       <div class="kpi-compare" id="kpiTicketCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
-      <canvas id="sparkTicket" style="width:100%;height:28px;margin-top:8px"></canvas>
-      <div class="meta-bar" id="metaTicketBar" style="display:none"><div class="meta-bar-fill" id="metaTicketFill"></div></div>
-      <div class="meta-label" id="metaTicketLabel" style="display:none"></div>
     </div>
-  </div>
-  <!-- KPI Cards — Secondary Row -->
-  <div class="kpi-grid-secondary">
     <div class="kpi-card">
       <div class="kpi-label"><i class="fa-solid fa-xmark"></i> Não Convertidos</div>
-      <div class="kpi-value" id="kpiLoss"><div class="skeleton skeleton-kpi-value"></div></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="kpi-value" id="kpiLoss"><div class="skeleton skeleton-kpi-value"></div></div>
+        <div id="miniDonutLoss" style="width:48px;height:48px;flex-shrink:0"></div>
+      </div>
       <div class="kpi-compare" id="kpiLossCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
-      <canvas id="sparkLoss" style="width:100%;height:28px;margin-top:8px"></canvas>
     </div>
-    <div class="kpi-card">
+    <div class="kpi-card kpi-card--gauge">
       <div class="kpi-label"><i class="fa-solid fa-clock"></i> Tempo Médio</div>
-      <div class="kpi-value" id="kpiTime"><div class="skeleton skeleton-kpi-value"></div></div>
+      <div id="gaugeTempo" style="height:130px;margin:-4px auto 0"></div>
+      <div class="kpi-value" id="kpiTime" style="margin-top:-16px"><div class="skeleton skeleton-kpi-value"></div></div>
       <div class="kpi-compare" id="kpiTimeCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
-      <canvas id="sparkTime" style="width:100%;height:28px;margin-top:8px"></canvas>
-      <div class="meta-bar" id="metaTimeBar" style="display:none"><div class="meta-bar-fill" id="metaTimeFill"></div></div>
-      <div class="meta-label" id="metaTimeLabel" style="display:none"></div>
     </div>
   </div>
 
@@ -728,11 +706,11 @@ window._showUpdateBanner = function() {
   <div class="charts-grid">
     <div class="chart-card">
       <h3><i class="fa-solid fa-chart-pie" style="margin-right:6px;color:var(--accent-dim)"></i>Motivos de Perda</h3>
-      <div class="chart-box"><canvas id="chartMotivos"></canvas></div>
+      <div class="chart-box"><div id="chartMotivos"></div></div>
     </div>
     <div class="chart-card">
       <h3><i class="fa-solid fa-chart-bar" style="margin-right:6px;color:var(--accent-dim)"></i>Fluxo por Hora</h3>
-      <div class="chart-box"><canvas id="chartHourly"></canvas></div>
+      <div class="chart-box"><div id="chartHourly"></div></div>
     </div>
   </div>
 
@@ -740,18 +718,18 @@ window._showUpdateBanner = function() {
   <div class="charts-grid">
     <div class="chart-card">
       <h3><i class="fa-solid fa-chart-scatter" style="margin-right:6px;color:var(--accent-dim)"></i>Volume × Conversão por Vendedor</h3>
-      <div class="chart-box"><canvas id="chartScatter"></canvas></div>
+      <div class="chart-box"><div id="chartScatter"></div></div>
     </div>
     <div class="chart-card">
       <h3><i class="fa-solid fa-stopwatch" style="margin-right:6px;color:var(--accent-dim)"></i>Tempo Médio por Vendedor</h3>
-      <div class="chart-box"><canvas id="chartTempoMeta"></canvas></div>
+      <div class="chart-box"><div id="chartTempoMeta"></div></div>
     </div>
   </div>
 
   <!-- Trend Line -->
   <div class="chart-card" style="margin-bottom:var(--gap)">
     <h3><i class="fa-solid fa-chart-line" style="margin-right:6px;color:var(--accent-dim)"></i>Evolução Diária</h3>
-    <div class="chart-box" style="height:300px"><canvas id="chartTrend"></canvas></div>
+    <div class="chart-box" style="height:300px"><div id="chartTrend"></div></div>
   </div>
 
   <!-- Ranking -->
@@ -798,6 +776,9 @@ window._showUpdateBanner = function() {
   <!-- Footer -->
   <footer style="text-align:center;margin-top:40px;padding:32px 0;border-top:1px solid var(--border-subtle)">
     <img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:36px;object-fit:contain;background:#060606;border-radius:10px;padding:8px 14px">
+    <div id="tenantSlugFooter" style="display:none;margin-top:8px;font-size:11px;color:#A1A1AA;font-weight:500;cursor:pointer" title="Clique para copiar">
+      minhavez V3.1 · ID: <span id="tenantSlugValue"></span>
+    </div>
   </footer>
 </div>
 
@@ -894,7 +875,7 @@ if (!user) {
     const next = cur === 'light' ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('lv-theme', next);
-    applyChartTheme();
+    loadAll();
   };
 }
 const tenantId = user ? getTenantId(user) : null;
@@ -928,18 +909,6 @@ const _kpi = {
   ticket: document.getElementById('kpiTicket')
 };
 
-Chart.defaults.font.family = "'Satoshi', system-ui, sans-serif";
-Chart.defaults.font.weight = 500;
-Chart.defaults.responsive = true;
-Chart.defaults.maintainAspectRatio = false;
-Chart.defaults.animation = { duration: 500, easing: 'easeOutQuart' };
-// Datalabels: globally off, charts opt-in via their own datalabels config
-if (typeof ChartDataLabels !== 'undefined') {
-  Chart.register(ChartDataLabels);
-}
-Chart.defaults.plugins.datalabels = Chart.defaults.plugins.datalabels || {};
-Chart.defaults.plugins.datalabels.display = false;
-
 // ─── Theme-aware chart colors ───
 function isDarkTheme() {
   return document.documentElement.getAttribute('data-theme') === 'dark';
@@ -956,35 +925,36 @@ function chartColors() {
     tooltipBody: dark ? 'rgba(255,255,255,.8)' : 'rgba(0,0,0,.7)',
     tooltipBorder: dark ? 'rgba(255,255,255,.1)' : 'rgba(0,0,0,.1)',
     centerText: dark ? '#FAFAFA' : '#18181B',
-    datalabel: dark ? '#D4D4D8' : '#3F3F46'
+    datalabel: dark ? '#D4D4D8' : '#3F3F46',
+    trackBg: dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)'
   };
 }
 
-function applyChartTheme() {
-  const c = chartColors();
-  Chart.defaults.color = c.text;
-  Chart.defaults.borderColor = c.grid;
-  const tt = Chart.defaults.plugins.tooltip;
-  tt.enabled = true;
-  tt.backgroundColor = c.tooltipBg;
-  tt.titleColor = c.tooltipTitle;
-  tt.bodyColor = c.tooltipBody;
-  tt.borderColor = c.tooltipBorder;
-  tt.borderWidth = 1;
-  tt.cornerRadius = 12;
-  tt.titleFont = { weight: 600, size: 13, family: "'Satoshi', sans-serif" };
-  tt.bodyFont = { weight: 500, size: 12, family: "'Satoshi', sans-serif" };
-  tt.padding = 14;
-  tt.caretSize = 6;
-  tt.displayColors = true;
-  tt.boxWidth = 8;
-  tt.boxHeight = 8;
-  tt.boxPadding = 6;
-  tt.usePointStyle = true;
+// ApexCharts helper
+function renderChart(key, selector, options) {
+  if (charts[key]) { try { charts[key].destroy(); } catch(e) {} }
+  const el = document.querySelector(selector);
+  if (!el) return null;
+  el.innerHTML = '';
+  const defaults = {
+    chart: {
+      fontFamily: "'Satoshi', system-ui, sans-serif",
+      toolbar: { show: false },
+      animations: { enabled: true, easing: 'easeinout', speed: 600 }
+    }
+  };
+  // Deep merge defaults into options
+  if (!options.chart) options.chart = {};
+  options.chart.fontFamily = options.chart.fontFamily || defaults.chart.fontFamily;
+  if (!options.chart.toolbar) options.chart.toolbar = defaults.chart.toolbar;
+  if (!options.chart.animations) options.chart.animations = defaults.chart.animations;
+
+  charts[key] = new ApexCharts(el, options);
+  charts[key].render();
+  return charts[key];
 }
-applyChartTheme();
-// Chart palette
-const CHART_PALETTE = ['#3B82F6', '#34D399', '#F59E0B', '#F87171', '#8B5CF6', '#06B6D4'];
+
+const CHART_PALETTE = ['#e2506f', '#3B82F6', '#34D399', '#F59E0B', '#8B5CF6', '#06B6D4'];
 
 // CountUp animation (first load only)
 let _firstLoad = true;
@@ -1236,27 +1206,69 @@ async function loadKPIs(range, prevRange) {
   renderCompare('kpiTimeCmp', d.tempo_medio_min || 0, p.tempo_medio_min || 0, true);
   if (ticket > 0 || pTicket > 0) renderCompare('kpiTicketCmp', ticket, pTicket);
 
-  // Meta bars
-  renderMetaBar('metaConv', convAtual, metas.conversao, false);
-  renderMetaBar('metaTime', d.tempo_medio_min || 0, metas.tempo_medio, true);
-  renderMetaBar('metaTicket', ticket, metas.ticket_medio, false);
-  _cachedStats = d;
-}
+  // Gauges
+  const convPct = parseFloat(convAtual) || 0;
+  const convColor = convPct >= metas.conversao ? '#22C55E' : convPct >= metas.conversao * 0.7 ? '#F59E0B' : '#e2506f';
+  renderChart('gaugeConv', '#gaugeConv', {
+    chart: { type: 'radialBar', height: 140, sparkline: { enabled: true } },
+    series: [Math.min(100, Math.round(convPct))],
+    plotOptions: { radialBar: {
+      startAngle: -135, endAngle: 135,
+      hollow: { size: '58%' },
+      track: { background: chartColors().trackBg, strokeWidth: '100%' },
+      dataLabels: { show: false }
+    }},
+    colors: [convColor],
+    stroke: { lineCap: 'round' }
+  });
 
-function renderMetaBar(prefix, value, meta, invertGood) {
-  const bar = document.getElementById(prefix + 'Bar');
-  const fill = document.getElementById(prefix + 'Fill');
-  const label = document.getElementById(prefix + 'Label');
-  if (!bar || !fill || !label || !meta) return;
-  bar.style.display = '';
-  label.style.display = '';
-  const pct = Math.min(100, Math.round((value / meta) * 100));
-  fill.style.width = pct + '%';
-  const isGood = invertGood ? (value <= meta) : (value >= meta);
-  fill.style.background = isGood ? 'var(--success)' : pct >= 70 ? 'var(--warning)' : 'var(--danger)';
-  const unit = prefix.includes('Ticket') ? '' : prefix.includes('Time') ? 'min' : '%';
-  label.textContent = `Meta: ${meta}${unit} · ${pct}%`;
-  label.style.color = '';
+  const ticketVal = parseFloat(d.ticket_medio) || 0;
+  const ticketPct = metas.ticket_medio > 0 ? Math.min(100, Math.round(ticketVal / metas.ticket_medio * 100)) : 0;
+  const ticketColor = ticketPct >= 100 ? '#22C55E' : ticketPct >= 70 ? '#F59E0B' : '#e2506f';
+  renderChart('gaugeTicket', '#gaugeTicket', {
+    chart: { type: 'radialBar', height: 140, sparkline: { enabled: true } },
+    series: [ticketPct],
+    plotOptions: { radialBar: {
+      startAngle: -135, endAngle: 135,
+      hollow: { size: '58%' },
+      track: { background: chartColors().trackBg, strokeWidth: '100%' },
+      dataLabels: { show: false }
+    }},
+    colors: [ticketColor],
+    stroke: { lineCap: 'round' }
+  });
+
+  const tempoVal = parseFloat(d.tempo_medio_min) || 0;
+  const tempoPct = metas.tempo_medio > 0 ? Math.min(100, Math.round((metas.tempo_medio / Math.max(tempoVal, 1)) * 100)) : 0;
+  const tempoColor = tempoVal <= metas.tempo_medio * 0.8 ? '#22C55E' : tempoVal <= metas.tempo_medio ? '#F59E0B' : '#e2506f';
+  renderChart('gaugeTempo', '#gaugeTempo', {
+    chart: { type: 'radialBar', height: 140, sparkline: { enabled: true } },
+    series: [tempoPct],
+    plotOptions: { radialBar: {
+      startAngle: -135, endAngle: 135,
+      hollow: { size: '58%' },
+      track: { background: chartColors().trackBg, strokeWidth: '100%' },
+      dataLabels: { show: false }
+    }},
+    colors: [tempoColor],
+    stroke: { lineCap: 'round' }
+  });
+
+  // Mini donut for Não Convertidos
+  const totalAtend = parseInt(d.total_atendimentos) || 0;
+  const totalNaoConv = parseInt(d.total_nao_convertido) || 0;
+  const convPart = Math.max(0, totalAtend - totalNaoConv);
+  renderChart('miniDonutLoss', '#miniDonutLoss', {
+    chart: { type: 'donut', height: 48, sparkline: { enabled: true } },
+    series: totalAtend > 0 ? [totalNaoConv, convPart] : [1],
+    colors: totalAtend > 0 ? ['#EF4444', chartColors().trackBg] : [chartColors().trackBg],
+    plotOptions: { pie: { donut: { size: '65%' } } },
+    legend: { show: false }, tooltip: { enabled: false },
+    stroke: { width: 0 },
+    dataLabels: { enabled: false }
+  });
+
+  _cachedStats = d;
 }
 
 // ─── Motivos chart ───
@@ -1264,8 +1276,7 @@ async function loadMotivos(range) {
   const { data, error } = await sb.rpc('get_loss_reasons', { p_inicio: range.start, p_fim: range.end });
   if (error) { toast('Erro ao carregar motivos: ' + error.message, 'error'); return; }
   _cachedMotivos = data || [];
-  const ctx = document.getElementById('chartMotivos');
-  if (charts.motivos) charts.motivos.destroy();
+  const el = document.querySelector('#chartMotivos');
 
   const labels = (data || []).map(d => MOTIVOS[d.motivo]?.label || d.motivo);
   const values = (data || []).map(d => d.total);
@@ -1273,94 +1284,38 @@ async function loadMotivos(range) {
 
   const totalMotivos = values.reduce((a, b) => a + b, 0);
   if (totalMotivos === 0) {
-    ctx.style.display = 'none';
+    if (el) el.style.display = 'none';
     return;
   }
-  ctx.style.display = '';
-  const maxIdx = values.indexOf(Math.max(...values));
-  // Helper: hex to rgba
-  function hexAlpha(hex, a) {
-    const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-    return `rgba(${r},${g},${b},${a})`;
-  }
+  if (el) el.style.display = '';
 
-  charts.motivos = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels,
-      datasets: [{
-        data: values,
-        backgroundColor: colors.map((c, i) => i === maxIdx ? c : hexAlpha(c, 0.75)),
-        hoverBackgroundColor: colors,
-        borderWidth: 0,
-        cutout: '70%',
-        hoverOffset: 10,
-        spacing: 2
-      }]
-    },
-    plugins: [{
-      id: 'centerText',
-      afterDraw(chart) {
-        const { ctx: c, chartArea } = chart;
-        const cx = (chartArea.left + chartArea.right) / 2;
-        const cy = (chartArea.top + chartArea.bottom) / 2;
-        c.save();
-        c.textAlign = 'center';
-        c.textBaseline = 'middle';
-        const _cc = chartColors();
-        c.font = "700 28px 'Satoshi'";
-        c.fillStyle = _cc.centerText;
-        c.fillText(totalMotivos, cx, cy - 8);
-        c.font = "600 9px 'Satoshi'";
-        c.fillStyle = _cc.textMuted;
-        c.fillText('PERDAS', cx, cy + 10);
-        c.restore();
-      }
-    }],
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: { animateRotate: true, duration: 600 },
-      layout: { padding: { bottom: 4 } },
-      plugins: {
-        legend: {
-          position: 'bottom',
+  renderChart('motivos', '#chartMotivos', {
+    chart: { type: 'donut', height: 340 },
+    series: values,
+    labels: labels.map((l, i) => l + ' (' + values[i] + ')'),
+    colors: colors,
+    plotOptions: {
+      pie: {
+        donut: {
+          size: '68%',
           labels: {
-            usePointStyle: true, pointStyle: 'circle', padding: 14, boxWidth: 8,
-            color: chartColors().textStrong,
-            font: { size: 11, weight: 600 },
-            generateLabels: chart => chart.data.labels.map((l, i) => ({
-              text: l + ' (' + values[i] + ')',
-              fillStyle: colors[i],
-              strokeStyle: 'transparent',
-              fontColor: chartColors().textStrong,
-              pointStyle: 'circle',
-              index: i
-            }))
+            show: true,
+            name: { show: true, fontSize: '10px', fontWeight: 600, color: chartColors().textMuted, offsetY: -8 },
+            value: { show: true, fontSize: '28px', fontWeight: 700, color: chartColors().centerText, offsetY: 4,
+                     formatter: () => String(totalMotivos) },
+            total: { show: true, label: 'PERDAS', fontSize: '10px', fontWeight: 600, color: chartColors().textMuted,
+                     formatter: () => String(totalMotivos) }
           }
-        },
-        tooltip: {
-          enabled: true,
-          callbacks: {
-            title: items => items[0]?.label || '',
-            label: c => {
-              const pct = totalMotivos > 0 ? Math.round(c.parsed / totalMotivos * 100) : 0;
-              return ' ' + c.parsed + ' registros (' + pct + '%)';
-            }
-          }
-        },
-        datalabels: {
-          display: ctx2 => {
-            const val = ctx2.dataset.data[ctx2.dataIndex];
-            return totalMotivos > 0 && (val / totalMotivos) >= 0.08;
-          },
-          color: '#fff',
-          font: { weight: 700, size: 12 },
-          formatter: val => totalMotivos > 0 ? Math.round(val / totalMotivos * 100) + '%' : '',
-          clamp: true
         }
       }
-    }
+    },
+    dataLabels: { enabled: true, formatter: (val) => Math.round(val) + '%',
+                  dropShadow: { enabled: false },
+                  style: { fontSize: '11px', fontWeight: 700, fontFamily: "'Satoshi'" } },
+    legend: { position: 'bottom', fontSize: '11px', fontWeight: 600, fontFamily: "'Satoshi'",
+              labels: { colors: chartColors().textStrong } },
+    stroke: { width: 2, colors: [isDarkTheme() ? '#18181B' : '#FFFFFF'] },
+    tooltip: { y: { formatter: (val) => val + ' registros' } }
   });
 }
 
@@ -1379,12 +1334,11 @@ async function loadHourly(range) {
   if (error) { console.error('[loadHourly] RPC error:', error); toast('Erro ao carregar fluxo: ' + error.message, 'error'); return; }
   const todayHourlyData = isMultiDay ? (results[1]?.data || null) : null;
 
-  const ctx = document.getElementById('chartHourly');
-  if (!ctx) { console.error('[loadHourly] canvas not found'); return; }
-  if (charts.hourly) { charts.hourly.destroy(); charts.hourly = null; }
+  const el = document.querySelector('#chartHourly');
+  if (!el) { console.error('[loadHourly] element not found'); return; }
   if (!data || data.length === 0) {
     console.warn('[loadHourly] no data for range', range);
-    ctx.parentElement.insertAdjacentHTML('afterbegin', '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:13px">Sem dados de fluxo no período</div>');
+    el.parentElement.insertAdjacentHTML('afterbegin', '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:13px">Sem dados de fluxo no período</div>');
     return;
   }
   console.log('[loadHourly] rendering chart with', data.length, 'hours of data');
@@ -1408,158 +1362,56 @@ async function loadHourly(range) {
   }
   const todayOverlay = isMultiDay ? hours.map(h => todayAtendByHour[h] || 0) : null;
 
-  // Sparklines nos KPI cards (cor dinâmica via comparativo)
-  const losses = (data || []).map(d => (d.atendimentos || 0) - (d.vendas || 0));
-  drawSparkline('sparkAtend', atend, getCompareColor('kpiTotalCmp'));
-  drawSparkline('sparkConv', vendas.map((v, i) => atend[i] > 0 ? Math.round(v / atend[i] * 100) : 0), getCompareColor('kpiConvCmp'));
-  drawSparkline('sparkLoss', losses, getCompareColor('kpiLossCmp'));
+  // Sparkline for KPI card
+  renderChart('sparkAtend', '#sparkAtend', {
+    chart: { type: 'area', height: 36, sparkline: { enabled: true } },
+    series: [{ data: atend.length > 0 ? atend : [0] }],
+    stroke: { width: 1.5, curve: 'smooth' },
+    fill: { type: 'gradient', gradient: { opacityFrom: 0.3, opacityTo: 0.05 } },
+    colors: ['#e2506f'],
+    tooltip: { enabled: false }
+  });
 
   // Calcular pico e média
   const peakIdx = atend.indexOf(Math.max(...atend));
   const avgAtend = atend.length > 0 ? Math.round(atend.reduce((a, b) => a + b, 0) / atend.length * 10) / 10 : 0;
 
-  // Build datasets
-  const datasets = [
-    {
-      label: isMultiDay ? 'Média Atendimentos' : 'Atendimentos', data: atend,
-      backgroundColor: atend.map((v, i) => i === peakIdx ? '#e2506f' : 'rgba(226,80,111,.5)'),
-      borderColor: 'transparent',
-      borderWidth: 0,
-      borderRadius: 6,
-      barPercentage: 0.7, categoryPercentage: 0.8
-    },
-    {
-      label: isMultiDay ? 'Média Vendas' : 'Vendas', data: vendas,
-      backgroundColor: 'rgba(52,211,153,.65)',
-      borderColor: 'transparent',
-      borderWidth: 0,
-      borderRadius: 6,
-      barPercentage: 0.7, categoryPercentage: 0.8
-    }
+  // Build series
+  const series = [
+    { name: isMultiDay ? 'Média Atendimentos' : 'Atendimentos', type: 'bar', data: atend },
+    { name: isMultiDay ? 'Média Vendas' : 'Vendas', type: 'bar', data: vendas }
   ];
   if (todayOverlay && todayOverlay.some(v => v > 0)) {
-    datasets.push({
-      label: 'Hoje',
-      data: todayOverlay,
-      type: 'line',
-      borderColor: '#e2506f',
-      backgroundColor: 'rgba(226,80,111,.08)',
-      borderWidth: 2.5,
-      pointRadius: todayOverlay.map(v => v > 0 ? 5 : 0),
-      pointBackgroundColor: '#e2506f',
-      pointBorderColor: '#fff',
-      pointBorderWidth: 2,
-      pointHoverRadius: 7,
-      tension: 0.3,
-      fill: true,
-      order: -1
-    });
+    series.push({ name: 'Hoje', type: 'line', data: todayOverlay });
   }
 
-  charts.hourly = new Chart(ctx, {
-    type: 'bar',
-    data: { labels: hours, datasets },
-    plugins: [{
-      id: 'avgLine',
-      afterDatasetsDraw(chart) {
-        if (avgAtend <= 0) return;
-        const { ctx: c, scales: { y, x } } = chart;
-        const yPos = y.getPixelForValue(avgAtend);
-        c.save();
-        c.setLineDash([4, 4]);
-        c.strokeStyle = 'rgba(250,204,21,.4)';
-        c.lineWidth = 1;
-        c.beginPath();
-        c.moveTo(x.left, yPos);
-        c.lineTo(x.right, yPos);
-        c.stroke();
-        c.setLineDash([]);
-        c.font = "600 9px 'Satoshi'";
-        c.fillStyle = isDarkTheme() ? 'rgba(250,204,21,.7)' : 'rgba(180,140,0,.7)';
-        c.textAlign = 'right';
-        c.fillText(isMultiDay ? 'média/dia ' + avgAtend : 'média ' + avgAtend, x.right, yPos - 4);
-        c.restore();
-      }
-    }],
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: { duration: 400 },
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, boxWidth: 8, color: chartColors().textStrong, font: { size: 11, weight: 600 } } },
-        tooltip: {
-          enabled: true,
-          callbacks: {
-            afterBody: items => {
-              const idx = items[0]?.dataIndex;
-              if (idx === peakIdx) return ['', '⬆ Horário de pico'];
-              return [];
-            }
-          }
-        },
-        datalabels: { display: false }
-      },
-      scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 11, weight: 500 }, color: chartColors().text } },
-        y: { beginAtZero: true, grid: { color: chartColors().grid, drawBorder: false }, ticks: { font: { size: 11, weight: 500 }, color: chartColors().text, stepSize: 1, padding: 8 } }
-      }
-    }
+  const annotations = {};
+  if (avgAtend > 0) {
+    annotations.yaxis = [{ y: avgAtend, borderColor: 'rgba(250,204,21,.5)', strokeDashArray: 4,
+      label: { text: (isMultiDay ? 'média/dia ' : 'média ') + avgAtend,
+               style: { fontSize: '10px', fontWeight: 600, fontFamily: "'Satoshi'", color: '#92400E', background: 'rgba(250,204,21,.15)', borderColor: 'transparent', padding: { left: 6, right: 6, top: 2, bottom: 2 } },
+               position: 'right' } }];
+  }
+
+  renderChart('hourly', '#chartHourly', {
+    chart: { type: 'bar', height: 340, stacked: false },
+    series,
+    xaxis: { categories: hours, labels: { style: { fontSize: '11px', fontWeight: 500 } } },
+    yaxis: { labels: { style: { fontSize: '11px', fontWeight: 500 } }, forceNiceScale: true },
+    plotOptions: { bar: { borderRadius: 6, columnWidth: '60%' } },
+    colors: ['#e2506f', '#34D399', '#e2506f'],
+    fill: { opacity: [0.85, 0.7, 0.3] },
+    stroke: { width: [0, 0, 2.5], curve: 'smooth' },
+    markers: { size: [0, 0, 4] },
+    grid: { borderColor: chartColors().grid, strokeDashArray: 3 },
+    legend: { position: 'top', fontSize: '11px', fontWeight: 600, labels: { colors: chartColors().textStrong },
+              markers: { shape: 'circle', size: 5 } },
+    annotations,
+    dataLabels: { enabled: false },
+    tooltip: { shared: true, intersect: false,
+      y: { formatter: (val) => val != null ? Math.round(val) : '' } }
   });
   } catch (err) { console.error('loadHourly error:', err); }
-}
-
-// ─── Sparklines (mini gráficos nos KPI cards) ───
-function getCompareColor(elId) {
-  const el = document.getElementById(elId);
-  if (!el) return 'rgb(225,29,72)';
-  const span = el.querySelector('span');
-  if (!span) return 'rgb(161,161,170)'; // neutral gray
-  if (span.classList.contains('up')) return 'rgb(52,211,153)';
-  if (span.classList.contains('down')) return 'rgb(248,113,113)';
-  return 'rgb(161,161,170)';
-}
-
-const _dpr = window.devicePixelRatio || 1;
-function drawSparkline(canvasId, dataPoints, color) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas || !dataPoints || dataPoints.length < 2) { if (canvas) canvas.style.display = 'none'; return; }
-  canvas.style.display = '';
-  const ctx = canvas.getContext('2d');
-  const dpr = _dpr;
-  const w = canvas.offsetWidth; const h = canvas.offsetHeight;
-  canvas.width = w * dpr; canvas.height = h * dpr;
-  ctx.scale(dpr, dpr);
-  ctx.clearRect(0, 0, w, h);
-
-  const max = Math.max(...dataPoints, 1);
-  const min = Math.min(...dataPoints, 0);
-  const range = max - min || 1;
-  const stepX = w / (dataPoints.length - 1);
-  const pad = 2;
-
-  ctx.beginPath();
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 1.5;
-  ctx.lineJoin = 'round';
-  dataPoints.forEach((v, i) => {
-    const x = i * stepX;
-    const y = h - pad - ((v - min) / range) * (h - pad * 2);
-    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-  });
-  ctx.stroke();
-
-  // Fill gradient
-  const lastX = (dataPoints.length - 1) * stepX;
-  const lastY = h - pad - ((dataPoints[dataPoints.length - 1] - min) / range) * (h - pad * 2);
-  ctx.lineTo(lastX, h);
-  ctx.lineTo(0, h);
-  ctx.closePath();
-  const grad = ctx.createLinearGradient(0, 0, 0, h);
-  grad.addColorStop(0, color.replace(')', ',.15)').replace('rgb', 'rgba'));
-  grad.addColorStop(1, 'transparent');
-  ctx.fillStyle = grad;
-  ctx.fill();
 }
 
 // ─── Ranking cards ───
@@ -1577,12 +1429,6 @@ async function loadRanking(range, cachedData) {
   const { data: vendedoresData } = await vendQuery;
   const fotoMap = {};
   (vendedoresData || []).forEach(v => { fotoMap[v.id] = v.foto_url; });
-
-  // Sparklines de Tempo e Ticket (por vendedor)
-  const temposSpark = data.map(r => r.tempo_medio_min || 0).filter(v => v > 0);
-  const ticketsSpark = data.map(r => r.ticket_medio || 0).filter(v => v > 0);
-  drawSparkline('sparkTime', temposSpark, getCompareColor('kpiTimeCmp'));
-  drawSparkline('sparkTicket', ticketsSpark, getCompareColor('kpiTicketCmp'));
 
   const metaConv = parseInt(localStorage.getItem('meta_conversao') || DEFAULT_METAS.conversao);
 
@@ -1733,11 +1579,9 @@ function renderHeaderMarquee(vendedoresData) {
 // ─── Scatter: Volume × Conversão ───
 async function loadScatter(range, cachedData) {
   const data = cachedData || (await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end })).data;
-  const ctx = document.getElementById('chartScatter');
-  if (charts.scatter) charts.scatter.destroy();
   // Filtrar apenas vendedores com atendimentos
   const filtered = (data || []).filter(r => (r.total_atendimentos || 0) > 0);
-  if (filtered.length === 0) { charts.scatter = null; return; }
+  if (filtered.length === 0) { if (charts.scatter) { try { charts.scatter.destroy(); } catch(e) {} } charts.scatter = null; return; }
 
   const maxAtend = Math.max(...filtered.map(r => r.total_atendimentos || 0), 1);
   const metaConv = metas.conversao || 70;
@@ -1748,82 +1592,49 @@ async function loadScatter(range, cachedData) {
     r: Math.max(8, Math.min(22, 8 + ((r.total_atendimentos || 0) / maxAtend) * 14))
   }));
 
-  charts.scatter = new Chart(ctx, {
-    type: 'bubble',
-    data: {
-      datasets: [{
-        label: 'Vendedores',
-        data: points,
-        backgroundColor: points.map(p => p.y >= metaConv ? 'rgba(52,211,153,.6)' : p.y >= metaConv * 0.6 ? 'rgba(251,191,36,.5)' : 'rgba(226,80,111,.45)'),
-        borderColor: points.map(p => p.y >= metaConv ? '#34D399' : p.y >= metaConv * 0.6 ? '#FBBF24' : '#e2506f'),
-        borderWidth: 1.5,
-        hoverBorderWidth: 2.5
-      }]
-    },
-    plugins: [{
-      id: 'metaLine',
-      afterDatasetsDraw(chart) {
-        const { ctx: c, scales: { x, y } } = chart;
-        const metaY = y.getPixelForValue(metaConv);
-        c.save();
-        c.setLineDash([6, 4]);
-        c.strokeStyle = 'rgba(113,113,122,.35)';
-        c.lineWidth = 1;
-        c.beginPath();
-        c.moveTo(x.left, metaY);
-        c.lineTo(x.right, metaY);
-        c.stroke();
-        c.setLineDash([]);
-        c.font = "600 9px 'Satoshi'";
-        c.fillStyle = '#71717A';
-        c.textAlign = 'left';
-        c.fillText('Meta ' + metaConv + '%', x.left + 4, metaY - 5);
-        c.restore();
-      }
-    }],
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      animation: { duration: 400 },
-      interaction: { mode: 'nearest', intersect: true },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          enabled: true,
-          callbacks: {
-            title: items => {
-              const p = items[0]?.raw;
-              return p ? p.label : '';
-            },
-            label: c => {
-              const p = c.raw;
-              return [' Atendimentos: ' + p.x, ' Conversão: ' + p.y + '%'];
-            }
-          }
-        },
-        datalabels: {
-          display: true,
-          color: chartColors().textStrong,
-          font: { weight: 700, size: 11 },
-          anchor: 'end', align: 'top', offset: 4,
-          formatter: (val, ctx2) => ctx2.dataset.data[ctx2.dataIndex].label,
-          clamp: true
-        }
+  const aboveMeta = [], nearMeta = [], belowMeta = [];
+  const labelMap = {};
+
+  points.forEach(p => {
+    const item = { x: p.x, y: p.y, z: p.r || 5 };
+    const key = p.x + '_' + p.y;
+    labelMap[key] = p.label;
+    if (p.y >= metaConv) aboveMeta.push(item);
+    else if (p.y >= metaConv * 0.6) nearMeta.push(item);
+    else belowMeta.push(item);
+  });
+
+  renderChart('scatter', '#chartScatter', {
+    chart: { type: 'bubble', height: 340 },
+    series: [
+      { name: 'Acima da meta', data: aboveMeta },
+      { name: 'Perto da meta', data: nearMeta },
+      { name: 'Abaixo da meta', data: belowMeta }
+    ],
+    colors: ['#34D399', '#F59E0B', '#e2506f'],
+    fill: { opacity: 0.6 },
+    xaxis: { title: { text: 'VOLUME (ATENDIMENTOS)', style: { fontSize: '10px', fontWeight: 700, color: chartColors().textMuted } },
+             labels: { style: { fontSize: '11px', fontWeight: 500 } }, tickAmount: 6 },
+    yaxis: { title: { text: 'CONVERSÃO %', style: { fontSize: '10px', fontWeight: 700, color: chartColors().textMuted } },
+             labels: { formatter: v => Math.round(v) + '%', style: { fontSize: '11px', fontWeight: 500 } }, min: 0, max: 100 },
+    grid: { borderColor: chartColors().grid, strokeDashArray: 3 },
+    annotations: { yaxis: [{ y: metaConv, borderColor: '#71717A', strokeDashArray: 4,
+      label: { text: 'Meta ' + metaConv + '%', style: { fontSize: '10px', fontWeight: 600, background: 'transparent', color: '#71717A' }, position: 'left' } }] },
+    dataLabels: { enabled: true, textAnchor: 'start',
+      formatter: (val, opts) => {
+        const pt = opts.w.config.series[opts.seriesIndex].data[opts.dataPointIndex];
+        return labelMap[pt.x + '_' + pt.y] || '';
       },
-      layout: { padding: { top: 20, right: 20, bottom: 4, left: 4 } },
-      scales: {
-        x: {
-          title: { display: true, text: 'VOLUME (ATENDIMENTOS)', font: { size: 10, weight: 700 }, color: chartColors().textMuted, padding: 6 },
-          grid: { color: chartColors().grid, drawBorder: false },
-          ticks: { font: { size: 11, weight: 500 }, color: chartColors().text, stepSize: 1, precision: 0 },
-          beginAtZero: true,
-          suggestedMax: Math.max(...points.map(p => p.x), 3) + 1
-        },
-        y: {
-          title: { display: true, text: 'CONVERSÃO %', font: { size: 10, weight: 700 }, color: chartColors().textMuted, padding: 6 },
-          grid: { color: chartColors().grid, drawBorder: false },
-          ticks: { font: { size: 11, weight: 500 }, callback: v => v + '%', color: chartColors().text, stepSize: 10 },
-          beginAtZero: true, max: 100
-        }
+      style: { fontSize: '10px', fontWeight: 600, colors: [chartColors().datalabel] } },
+    legend: { position: 'top', fontSize: '11px', fontWeight: 600, labels: { colors: chartColors().textStrong }, markers: { shape: 'circle', size: 5 } },
+    tooltip: { shared: false,
+      custom: ({ seriesIndex, dataPointIndex, w }) => {
+        const pt = w.config.series[seriesIndex].data[dataPointIndex];
+        const name = labelMap[pt.x + '_' + pt.y] || '';
+        return '<div style="padding:8px 12px;font-family:Satoshi,sans-serif;font-size:12px">' +
+               '<strong>' + name + '</strong><br>' +
+               'Atendimentos: ' + pt.x + '<br>' +
+               'Conversão: ' + pt.y + '%</div>';
       }
     }
   });
@@ -1832,96 +1643,39 @@ async function loadScatter(range, cachedData) {
 // ─── Tempo Médio vs Meta ───
 async function loadTempoMeta(range, cachedData) {
   const data = cachedData || (await sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end })).data;
-  const ctx = document.getElementById('chartTempoMeta');
-  if (charts.tempoMeta) charts.tempoMeta.destroy();
+  const el = document.querySelector('#chartTempoMeta');
   // Filtrar apenas vendedores com atendimentos (tempo > 0)
   const filtered = (data || []).filter(r => (r.tempo_medio_min || 0) > 0);
   if (filtered.length === 0) {
+    if (charts.tempoMeta) { try { charts.tempoMeta.destroy(); } catch(e) {} }
     charts.tempoMeta = null;
-    ctx.style.display = 'none';
+    if (el) el.style.display = 'none';
     return;
   }
-  ctx.style.display = '';
+  if (el) el.style.display = '';
 
   const names = filtered.map(r => (r.apelido || r.nome || '?').split(' ')[0]);
   const tempos = filtered.map(r => r.tempo_medio_min || 0);
   const metaTempo = metas.tempo_medio || 30;
   // Cor dinâmica: verde = abaixo da meta (bom), amarelo = perto, vermelho = acima
   const barColors = tempos.map(t => t <= metaTempo * 0.8 ? 'rgba(52,211,153,.65)' : t <= metaTempo ? 'rgba(251,191,36,.6)' : 'rgba(226,80,111,.55)');
-  const barBorders = tempos.map(t => t <= metaTempo * 0.8 ? '#34D399' : t <= metaTempo ? '#FBBF24' : '#e2506f');
 
-  charts.tempoMeta = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: names,
-      datasets: [{
-        label: 'Tempo Médio (min)', data: tempos,
-        backgroundColor: barColors,
-        borderColor: 'transparent',
-        borderWidth: 0,
-        borderRadius: 6,
-        barPercentage: 0.75
-      }]
-    },
-    plugins: [{
-      id: 'metaVertical',
-      afterDatasetsDraw(chart) {
-        const { ctx: c, scales: { x, y } } = chart;
-        const metaX = x.getPixelForValue(metaTempo);
-        c.save();
-        c.setLineDash([5, 4]);
-        c.strokeStyle = 'rgba(113,113,122,.35)';
-        c.lineWidth = 1;
-        c.beginPath();
-        c.moveTo(metaX, y.top);
-        c.lineTo(metaX, y.bottom);
-        c.stroke();
-        c.setLineDash([]);
-        c.font = "600 9px 'Satoshi'";
-        c.fillStyle = '#71717A';
-        c.textAlign = 'center';
-        c.fillText('Meta ' + metaTempo + 'min', metaX, y.top - 4);
-        c.restore();
-      }
-    }],
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      indexAxis: 'y',
-      layout: { padding: { top: 20, right: 40 } },
-      animation: { duration: 400 },
-      interaction: { mode: 'index', intersect: false, axis: 'y' },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          enabled: true,
-          callbacks: {
-            label: c => {
-              const v = c.parsed.x;
-              const diff = v - metaTempo;
-              const sign = diff > 0 ? '+' : '';
-              return ' ' + v + ' min (' + sign + Math.round(diff) + ' vs meta)';
-            }
-          }
-        },
-        datalabels: {
-          display: true,
-          anchor: 'end', align: 'end', offset: 4,
-          color: chartColors().datalabel,
-          font: { weight: 700, size: 11 },
-          formatter: v => Math.round(v) + 'min',
-          clamp: true
-        }
-      },
-      scales: {
-        x: {
-          beginAtZero: true,
-          suggestedMax: Math.max(...tempos, metaTempo) * 1.15,
-          grid: { color: chartColors().grid, drawBorder: false },
-          ticks: { font: { size: 11, weight: 500 }, callback: v => v + 'min', padding: 4, color: chartColors().text, stepSize: 5 }
-        },
-        y: { grid: { display: false }, ticks: { font: { size: 12, weight: 700 }, color: chartColors().textStrong } }
-      }
-    }
+  renderChart('tempoMeta', '#chartTempoMeta', {
+    chart: { type: 'bar', height: 340 },
+    series: [{ name: 'Tempo Médio (min)', data: tempos }],
+    plotOptions: { bar: { horizontal: true, borderRadius: 6, barHeight: '65%', distributed: true,
+      dataLabels: { position: 'top' } } },
+    colors: barColors,
+    xaxis: { labels: { formatter: v => v + 'min', style: { fontSize: '11px', fontWeight: 500 } },
+             categories: names },
+    yaxis: { labels: { style: { fontSize: '12px', fontWeight: 700, colors: [chartColors().textStrong] } } },
+    grid: { borderColor: chartColors().grid, strokeDashArray: 3, xaxis: { lines: { show: true } }, yaxis: { lines: { show: false } } },
+    annotations: { xaxis: [{ x: metaTempo, borderColor: '#71717A', strokeDashArray: 4,
+      label: { text: 'Meta ' + metaTempo + 'min', style: { fontSize: '10px', fontWeight: 600, background: 'transparent', color: '#71717A' }, orientation: 'horizontal' } }] },
+    dataLabels: { enabled: true, formatter: v => Math.round(v) + 'min', offsetX: 28,
+      style: { fontSize: '11px', fontWeight: 700, colors: [chartColors().datalabel] } },
+    legend: { show: false },
+    tooltip: { y: { formatter: v => Math.round(v) + ' min' } }
   });
 }
 
@@ -1939,155 +1693,56 @@ async function loadTrend(range) {
   }
   const { data, error } = await sb.rpc('get_daily_trend', { p_inicio: trendRange.start, p_fim: trendRange.end });
   if (error) { return; }
-  const ctx = document.getElementById('chartTrend');
-  if (charts.trend) charts.trend.destroy();
-  if (!data || data.length === 0) { charts.trend = null; return; }
+  if (!data || data.length === 0) { if (charts.trend) { try { charts.trend.destroy(); } catch(e) {} } charts.trend = null; return; }
 
   const todayStr = new Date().toISOString().split('T')[0];
-  const labels = data.map(d => {
+  const todayIdx = data.findIndex(d => d.dia === todayStr);
+  const xLabels = data.map((d, i) => {
     const dt = new Date(d.dia + 'T12:00:00');
     const label = dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-    return d.dia === todayStr ? label + ' ★' : label;
+    return i === todayIdx ? label + ' \u2605' : label;
   });
   const atend = data.map(d => d.total_atendimentos);
   const vendas = data.map(d => d.total_vendas);
   const conv = data.map(d => d.taxa_conversao || 0);
-  // Highlight today's point
-  const todayIdx = data.findIndex(d => d.dia === todayStr);
-  const pointRadiusAtend = data.map((d, i) => i === todayIdx ? 7 : 0);
-  const pointRadiusVendas = data.map((d, i) => i === todayIdx ? 7 : 0);
-  const pointRadiusConv = data.map((d, i) => i === todayIdx ? 6 : 0);
-  const pointBgAtend = data.map((d, i) => i === todayIdx ? '#3B82F6' : 'transparent');
-  const pointBgVendas = data.map((d, i) => i === todayIdx ? '#34D399' : 'transparent');
-  const pointBgConv = data.map((d, i) => i === todayIdx ? '#FBBF24' : 'transparent');
-  const pointBorderAtend = data.map((d, i) => i === todayIdx ? '#fff' : 'transparent');
-  const pointBorderVendas = data.map((d, i) => i === todayIdx ? '#fff' : 'transparent');
 
   // Meta line for conversion
   const metaConv = parseInt(localStorage.getItem('meta_conversao') || DEFAULT_METAS.conversao);
 
-  // Gradient fills
-  const canvas = ctx;
-  const ctxObj = canvas.getContext('2d');
-  const gradAtend = ctxObj.createLinearGradient(0, 0, 0, 300);
-  gradAtend.addColorStop(0, 'rgba(59,130,246,.2)');
-  gradAtend.addColorStop(1, 'rgba(59,130,246,.01)');
-  const gradVendas = ctxObj.createLinearGradient(0, 0, 0, 300);
-  gradVendas.addColorStop(0, 'rgba(52,211,153,.18)');
-  gradVendas.addColorStop(1, 'rgba(52,211,153,.01)');
+  const annotations = {};
+  if (metaConv > 0) {
+    annotations.yaxis = [{ y: metaConv, yAxisIndex: 1, borderColor: '#e2506f', strokeDashArray: 4, opacity: 0.3,
+      label: { text: 'Meta ' + metaConv + '%', style: { fontSize: '10px', fontWeight: 600, background: 'transparent', color: '#e2506f' }, position: 'left' } }];
+  }
 
-  // Plugin: meta conversion line (sutil)
-  const trendAnnotations = {
-    id: 'trendAnnotations',
-    afterDraw(chart) {
-      const { ctx: c, chartArea: area, scales } = chart;
-      const y1Scale = scales.y1;
-      if (!y1Scale) return;
-      const metaY = y1Scale.getPixelForValue(metaConv);
-      if (metaY >= area.top && metaY <= area.bottom) {
-        c.save();
-        c.strokeStyle = 'rgba(113,113,122,.3)';
-        c.lineWidth = 1;
-        c.setLineDash([6, 4]);
-        c.beginPath();
-        c.moveTo(area.left, metaY);
-        c.lineTo(area.right, metaY);
-        c.stroke();
-        c.setLineDash([]);
-        c.fillStyle = '#71717A';
-        c.font = "600 9px 'Satoshi'";
-        c.textAlign = 'right';
-        c.fillText('Meta ' + metaConv + '%', area.right - 4, metaY - 5);
-        c.restore();
-      }
-    }
-  };
-
-  charts.trend = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Atendimentos', data: atend, yAxisID: 'y',
-          borderColor: '#3B82F6', backgroundColor: gradAtend,
-          borderWidth: 2.5, pointRadius: pointRadiusAtend, pointHoverRadius: 8,
-          pointBackgroundColor: pointBgAtend, pointBorderColor: pointBorderAtend, pointBorderWidth: 2,
-          pointHoverBackgroundColor: '#3B82F6', pointHoverBorderColor: '#fff', pointHoverBorderWidth: 2,
-          tension: 0.4, fill: true
-        },
-        {
-          label: 'Vendas', data: vendas, yAxisID: 'y',
-          borderColor: '#34D399', backgroundColor: gradVendas,
-          borderWidth: 2.5, pointRadius: pointRadiusVendas, pointHoverRadius: 8,
-          pointBackgroundColor: pointBgVendas, pointBorderColor: pointBorderVendas, pointBorderWidth: 2,
-          pointHoverBackgroundColor: '#34D399', pointHoverBorderColor: '#fff', pointHoverBorderWidth: 2,
-          tension: 0.4, fill: true
-        },
-        {
-          label: 'Conversão %', data: conv, yAxisID: 'y1',
-          borderColor: '#FBBF24', backgroundColor: 'transparent',
-          borderWidth: 2, borderDash: [6, 3], pointRadius: pointRadiusConv, pointHoverRadius: 7,
-          pointBackgroundColor: pointBgConv,
-          pointHoverBackgroundColor: '#FBBF24',
-          tension: 0.4, fill: false
-        }
-      ]
-    },
-    plugins: [trendAnnotations],
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      animation: { duration: 800, easing: 'easeOutQuart' },
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, boxWidth: 8, color: chartColors().textStrong, font: { size: 11, weight: 600 } } },
-        tooltip: {
-          enabled: true,
-          callbacks: {
-            label: c => {
-              if (c.datasetIndex === 2) return ' ' + c.dataset.label + ': ' + c.parsed.y + '%';
-              return ' ' + c.dataset.label + ': ' + c.parsed.y;
-            },
-            afterBody: items => {
-              const idx = items[0]?.dataIndex;
-              if (idx != null && data[idx]?.ticket_medio) {
-                return [' Ticket: R$ ' + Number(data[idx].ticket_medio).toLocaleString('pt-BR', { minimumFractionDigits: 0 })];
-              }
-              return [];
-            }
-          }
-        },
-        datalabels: { display: false }
-      },
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: {
-            font: (ctx2) => {
-              const label = ctx2.tick?.label || '';
-              return label.includes('★') ? { size: 10, weight: 800 } : { size: 9, weight: 600 };
-            },
-            color: (ctx2) => {
-              const label = ctx2.tick?.label || '';
-              return label.includes('★') ? (isDarkTheme() ? '#fff' : '#18181B') : chartColors().text;
-            },
-            maxRotation: 45, autoSkipPadding: 8
-          }
-        },
-        y: {
-          beginAtZero: true, position: 'left',
-          grid: { color: chartColors().grid, drawBorder: false },
-          ticks: { font: { size: 10, weight: 500 }, stepSize: 1, padding: 8, color: chartColors().text },
-          title: { display: true, text: 'VOLUME', font: { size: 9, weight: 700 }, color: chartColors().textMuted }
-        },
-        y1: {
-          beginAtZero: true, max: 100, position: 'right',
-          grid: { drawOnChartArea: false },
-          ticks: { font: { size: 10, weight: 500 }, callback: v => v + '%', color: chartColors().text },
-          title: { display: true, text: 'CONVERSÃO', font: { size: 9, weight: 700 }, color: chartColors().textMuted }
-        }
-      }
-    }
+  renderChart('trend', '#chartTrend', {
+    chart: { type: 'line', height: 300 },
+    series: [
+      { name: 'Atendimentos', type: 'area', data: atend },
+      { name: 'Vendas', type: 'area', data: vendas },
+      { name: 'Conversão %', type: 'line', data: conv }
+    ],
+    xaxis: { categories: xLabels, labels: {
+      style: { fontSize: '10px', fontWeight: 500 },
+      rotate: -45, rotateAlways: false
+    } },
+    yaxis: [
+      { title: { text: 'VOLUME', style: { fontSize: '9px', fontWeight: 700, color: chartColors().textMuted } },
+        labels: { style: { fontSize: '10px', fontWeight: 500 } }, forceNiceScale: true },
+      { opposite: true, title: { text: 'CONVERSÃO', style: { fontSize: '9px', fontWeight: 700, color: chartColors().textMuted } },
+        labels: { formatter: v => Math.round(v) + '%', style: { fontSize: '10px', fontWeight: 500 } }, min: 0, max: 100 }
+    ],
+    stroke: { width: [2.5, 2.5, 2], curve: 'smooth', dashArray: [0, 0, 6] },
+    fill: { type: ['gradient', 'gradient', 'solid'],
+      gradient: { shadeIntensity: 1, opacityFrom: 0.25, opacityTo: 0.05, stops: [0, 100] } },
+    colors: ['#3B82F6', '#34D399', '#FBBF24'],
+    markers: { size: [0, 0, 0], hover: { size: 6 } },
+    grid: { borderColor: chartColors().grid, strokeDashArray: 3 },
+    legend: { position: 'top', fontSize: '11px', fontWeight: 600, labels: { colors: chartColors().textStrong }, markers: { shape: 'circle', size: 5 } },
+    annotations,
+    dataLabels: { enabled: false },
+    tooltip: { shared: true, intersect: false,
+      y: { formatter: (val, { seriesIndex }) => seriesIndex === 2 ? val + '%' : Math.round(val) } }
   });
 }
 
