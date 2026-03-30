@@ -793,6 +793,12 @@ window._showUpdateBanner = function() {
     </div>
   </div>
 
+  <!-- Preferenciais -->
+  <div class="chart-card" style="margin-bottom:var(--gap)">
+    <h3><i class="fa-solid fa-star" style="margin-right:6px;color:var(--accent-dim)"></i>Atendimentos Preferenciais por Vendedor</h3>
+    <div class="chart-box" id="chartPrefBox"><div id="chartPreferenciais"></div></div>
+  </div>
+
   <!-- Second charts row: Scatter + Tempo vs Meta -->
   <div class="charts-grid">
     <div class="chart-card">
@@ -1274,7 +1280,8 @@ async function loadAll() {
     loadFloor(),
     loadScatter(range, cachedRanking),
     loadTempoMeta(range, cachedRanking),
-    loadTrend(range)
+    loadTrend(range),
+    loadPreferenciais(range)
   ]);
   results.forEach((r, i) => { if (r.status === 'rejected') console.error('Dashboard load error [' + i + ']:', r.reason); });
   updateTimestamp();
@@ -1447,15 +1454,76 @@ async function loadHourly(range) {
     fill: { opacity: [0.75, 0.5, 0.2] },
     stroke: { width: [0, 0, 2], curve: 'smooth' },
     markers: { size: [0, 0, 3] },
-    grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { right: 20 } },
+    grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { left: 14, right: 20, top: 10 } },
     legend: { position: 'top', fontSize: '11px', fontWeight: 600, labels: { colors: chartColors().textStrong },
-              markers: { shape: 'circle', size: 5 } },
+              markers: { shape: 'circle', size: 5 }, itemMargin: { horizontal: 12 } },
     annotations,
     dataLabels: { enabled: false },
     tooltip: { shared: true, intersect: false,
       y: { formatter: (val) => val != null ? Math.round(val) : '' } }
   });
   } catch (err) { console.error('loadHourly error:', err); }
+}
+
+// ─── Preferenciais por vendedor ───
+async function loadPreferenciais(range) {
+  const query = sb.from('atendimentos')
+    .select('vendedor_id, preferencial, vendedores!inner(nome, apelido)')
+    .gte('inicio', range.start)
+    .lte('inicio', range.end)
+    .neq('resultado', 'em_andamento');
+  if (tenantId) query.eq('tenant_id', tenantId);
+  const { data, error } = await query;
+  const el = document.querySelector('#chartPreferenciais');
+  const box = document.getElementById('chartPrefBox');
+  if (error || !data || data.length === 0) {
+    if (el) el.parentElement.parentElement.style.display = 'none';
+    return;
+  }
+
+  // Agrupar por vendedor
+  const map = {};
+  data.forEach(a => {
+    const name = (a.vendedores?.apelido || a.vendedores?.nome || '').split(' ')[0];
+    if (!name) return;
+    if (!map[name]) map[name] = { pref: 0, normal: 0 };
+    if (a.preferencial) map[name].pref++;
+    else map[name].normal++;
+  });
+
+  const entries = Object.entries(map).sort((a, b) => b[1].pref - a[1].pref);
+  if (entries.every(([, v]) => v.pref === 0)) {
+    if (el) el.parentElement.parentElement.style.display = 'none';
+    return;
+  }
+  if (el) el.parentElement.parentElement.style.display = '';
+
+  const names = entries.map(([n]) => n);
+  const prefData = entries.map(([, v]) => v.pref);
+  const normalData = entries.map(([, v]) => v.normal);
+  const dynamicH = Math.max(220, entries.length * 45 + 60);
+  if (box) box.style.height = dynamicH + 'px';
+
+  renderChart('preferenciais', '#chartPreferenciais', {
+    chart: { type: 'bar', height: dynamicH },
+    series: [
+      { name: 'Preferencial', data: prefData },
+      { name: 'Normal', data: normalData }
+    ],
+    plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '60%', stacked: true } },
+    colors: ['#f59e0b', '#e2506f'],
+    xaxis: { labels: { style: { fontSize: '11px', fontWeight: 500 } }, categories: names },
+    yaxis: { labels: { style: { fontSize: '12px', fontWeight: 700, colors: [chartColors().textStrong] } } },
+    grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { right: 20 },
+            xaxis: { lines: { show: true } }, yaxis: { lines: { show: false } } },
+    dataLabels: { enabled: true, formatter: v => v > 0 ? v : '',
+      style: { fontSize: '11px', fontWeight: 700, colors: ['#fff'] } },
+    legend: { position: 'top', fontSize: '11px', fontWeight: 600,
+              labels: { colors: chartColors().textStrong },
+              markers: { shape: 'circle', size: 5 }, itemMargin: { horizontal: 12 } },
+    tooltip: { shared: true, intersect: false,
+      y: { formatter: v => v + ' atendimentos' } }
+  });
 }
 
 // ─── Ranking cards ───
@@ -1840,7 +1908,8 @@ async function loadTrend(range) {
     legend: { position: 'top', horizontalAlign: 'center', fontSize: '11px', fontWeight: 600,
               labels: { colors: chartColors().textStrong },
               markers: { shape: 'circle', size: 5 },
-              itemMargin: { horizontal: 16, vertical: 4 } },
+              itemMargin: { horizontal: 16, vertical: 0 },
+              floating: false, offsetY: 0 },
     annotations,
     dataLabels: { enabled: false },
     tooltip: { shared: true, intersect: false,
