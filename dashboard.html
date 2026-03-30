@@ -1467,8 +1467,9 @@ async function loadHourly(range) {
 
 // ─── Preferenciais por vendedor ───
 async function loadPreferenciais(range) {
+  try {
   const query = sb.from('atendimentos')
-    .select('vendedor_id, preferencial, vendedores!inner(nome, apelido)')
+    .select('vendedor_id, preferencial')
     .gte('inicio', range.start)
     .lte('inicio', range.end)
     .neq('resultado', 'em_andamento');
@@ -1480,11 +1481,17 @@ async function loadPreferenciais(range) {
     if (el) el.parentElement.parentElement.style.display = 'none';
     return;
   }
+  // Buscar nomes dos vendedores
+  const vendQuery = sb.from('vendedores').select('id, nome, apelido');
+  if (tenantId) vendQuery.eq('tenant_id', tenantId);
+  const { data: vendedores } = await vendQuery;
+  const vendMap = {};
+  (vendedores || []).forEach(v => { vendMap[v.id] = (v.apelido || v.nome || '').split(' ')[0]; });
 
   // Agrupar por vendedor
   const map = {};
   data.forEach(a => {
-    const name = (a.vendedores?.apelido || a.vendedores?.nome || '').split(' ')[0];
+    const name = vendMap[a.vendedor_id] || '';
     if (!name) return;
     if (!map[name]) map[name] = { pref: 0, normal: 0 };
     if (a.preferencial) map[name].pref++;
@@ -1524,6 +1531,7 @@ async function loadPreferenciais(range) {
     tooltip: { shared: true, intersect: false,
       y: { formatter: v => v + ' atendimentos' } }
   });
+  } catch (err) { console.error('loadPreferenciais error:', err); }
 }
 
 // ─── Ranking cards ───
