@@ -96,18 +96,22 @@ window.addEventListener('error', function(e) {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 18px;
+    padding: 10px 12px;
     background: #060606;
     border-bottom: 1px solid rgba(255,255,255,.08);
     box-shadow: 0 1px 3px rgba(0,0,0,.12);
-    gap: 12px;
+    gap: 8px;
     flex-wrap: nowrap;
-    overflow: hidden;
     color: #FFFFFF;
   }
   @media (max-width: 600px) {
     .t-header { padding: 8px 10px; }
     .t-header .header-title { display: none; }
+  }
+  /* Esconder botões menos importantes em telas menores */
+  @media (max-width: 900px) {
+    .t-header .tv-btn,
+    .t-header [title="Ranking do turno"] { display: none; }
   }
 
   /* Queue panel (left — Fila de Espera) */
@@ -732,7 +736,7 @@ window.addEventListener('error', function(e) {
   .tablet-layout.tv-mode .atend-timer {
     font-size: 16px !important;
   }
-  .tv-btn { min-height: 44px; padding: 0 12px; font-size: 14px; color: #FFFFFF; background: none; border: none; cursor: pointer; transition: color .2s; font-family: inherit; }
+  .tv-btn { min-height: 40px; padding: 0 8px; font-size: 13px; color: #FFFFFF; background: none; border: none; cursor: pointer; transition: color .2s; font-family: inherit; }
   .tv-btn.active { color: var(--success); }
 
   .queue-item.new-item {
@@ -890,36 +894,36 @@ window.addEventListener('error', function(e) {
       <img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:22px;width:auto">
       <span id="appVersion" style="font-family:var(--font-mono);font-size:9px;color:rgba(255,255,255,.5);opacity:.6;white-space:nowrap"></span>
     </div>
-    <div id="headerKpis" style="display:flex;align-items:center;gap:12px;font-family:var(--font-mono);font-weight:700;flex:1;justify-content:center;min-width:0;overflow:hidden">
+    <div id="headerKpis" style="display:flex;align-items:center;gap:10px;font-family:var(--font-mono);font-weight:700;flex:1;justify-content:center;min-width:0">
       <div style="display:flex;align-items:center;gap:6px" title="Atendimentos finalizados">
         <i class="fa-solid fa-users" style="font-size:14px;color:rgba(255,255,255,.6)"></i>
         <div style="display:flex;flex-direction:column;line-height:1.2">
-          <span id="statAtend" style="color:#FFFFFF;font-size:20px">0</span>
-          <span style="color:rgba(255,255,255,.5);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Atendidos</span>
+          <span id="statAtend" style="color:#FFFFFF;font-size:16px">0</span>
+          <span style="color:rgba(255,255,255,.5);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Atendidos</span>
         </div>
       </div>
       <div style="width:1px;height:24px;background:rgba(255,255,255,.15)"></div>
       <div style="display:flex;align-items:center;gap:6px" title="Vendas concretizadas">
         <i class="fa-solid fa-bag-shopping" style="font-size:14px;color:var(--success)"></i>
         <div style="display:flex;flex-direction:column;line-height:1.2">
-          <span id="statVendas" style="color:#FFFFFF;font-size:20px">0</span>
-          <span style="color:rgba(255,255,255,.5);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Vendas</span>
+          <span id="statVendas" style="color:#FFFFFF;font-size:16px">0</span>
+          <span style="color:rgba(255,255,255,.5);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Vendas</span>
         </div>
       </div>
       <div style="width:1px;height:24px;background:rgba(255,255,255,.15)"></div>
       <div style="display:flex;align-items:center;gap:6px" title="Taxa de conversão">
         <i class="fa-solid fa-chart-line" style="font-size:14px;color:var(--gold)"></i>
         <div style="display:flex;flex-direction:column;line-height:1.2">
-          <span id="statConv" style="color:#FFFFFF;font-size:20px">0%</span>
-          <span style="color:rgba(255,255,255,.5);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Conversão</span>
+          <span id="statConv" style="color:#FFFFFF;font-size:16px">0%</span>
+          <span style="color:rgba(255,255,255,.5);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Conversão</span>
         </div>
         <div style="width:60px;height:6px;border-radius:3px;background:rgba(255,255,255,.15);overflow:hidden;flex-shrink:0;margin-left:4px">
           <div id="convBar" style="height:100%;width:0%;border-radius:3px;background:#e2506f;transition:width .6s cubic-bezier(.4,0,.2,1)"></div>
         </div>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-      <button style="min-height:44px;padding:0 12px;font-size:14px;color:#FFFFFF;background:none;border:none;cursor:pointer" onclick="toggleMiniRanking()" title="Ranking do turno">
+    <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+      <button style="min-height:40px;padding:0 8px;font-size:13px;color:#FFFFFF;background:none;border:none;cursor:pointer" onclick="toggleMiniRanking()" title="Ranking do turno">
         <i class="fa-solid fa-trophy"></i>
       </button>
       <span class="live-clock" id="clock" style="font-size:16px">--:--</span>
@@ -933,10 +937,10 @@ window.addEventListener('error', function(e) {
       <button class="tv-btn" id="tvBtn" onclick="toggleTvMode()" title="Modo TV (painel)">
         <i class="fa-solid fa-tv"></i>
       </button>
-      <button class="btn btn-ghost" style="min-height:44px;padding:0 12px;font-size:14px;color:#FFFFFF" onclick="window._toggleTheme()" title="Modo claro/escuro">
+      <button class="btn btn-ghost" style="min-height:40px;padding:0 8px;font-size:13px;color:#FFFFFF" onclick="window._toggleTheme()" title="Modo claro/escuro">
         <i class="fa-solid fa-circle-half-stroke"></i>
       </button>
-      <button class="btn btn-ghost" style="min-height:44px;padding:0 12px;font-size:14px;color:#FFFFFF" onclick="handleLogout()" title="Sair">
+      <button class="btn btn-ghost" style="min-height:40px;padding:0 8px;font-size:13px;color:#FFFFFF" onclick="handleLogout()" title="Sair">
         <i class="fa-solid fa-right-from-bracket"></i>
       </button>
     </div>
@@ -1848,30 +1852,10 @@ async function addToQueueAt(vendedorId, beforeId) {
   });
 })();
 
-// ─── Confirmação antes de iniciar atendimento ───
+// ─── Enviar ao atendimento (click direto — sem modal para não travar fluxo) ───
 window.sendToAtendimento = function(vendedorId) {
   if (_tvMode) return;
-  if (_actionLock) return;
-  if (!currentTurno) { toast('Abra o turno primeiro', 'warning'); return; }
-  const v = vendedores.find(x => x.id === vendedorId);
-  if (!v) return;
-  const nome = v.apelido || v.nome;
-  let _confirmTimer = null;
-  const overlay = createModal('confirmAtendOverlay', `
-    <i class="fa-solid fa-headset" style="font-size:28px;color:var(--info);margin-bottom:12px"></i>
-    <h3 style="font-family:var(--font-mono);font-size:17px;font-weight:700;margin-bottom:6px">${nome}</h3>
-    <p style="font-size:14px;color:var(--text-muted);margin-bottom:20px">Iniciar atendimento?</p>
-    <div style="display:flex;gap:8px">
-      <button id="btnCancelAtend" class="btn btn-ghost" style="flex:1;min-height:48px;font-size:15px;font-weight:700">Cancelar</button>
-      <button id="btnConfirmAtend" class="btn btn-success" style="flex:1;min-height:48px;font-size:15px;font-weight:700">
-        <i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar
-      </button>
-    </div>
-  `, { zIndex: 1001, maxWidth: '380px', onClose: () => { clearTimeout(_confirmTimer); } });
-  overlay.querySelector('#btnCancelAtend').addEventListener('click', () => { clearTimeout(_confirmTimer); overlay.remove(); });
-  overlay.querySelector('#btnConfirmAtend').addEventListener('click', () => { clearTimeout(_confirmTimer); overlay.remove(); withLock(() => _doSendToAtendimento(vendedorId)); });
-  // Auto-dismiss após 5s
-  _confirmTimer = setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 5000);
+  withLock(() => _doSendToAtendimento(vendedorId));
 };
 
 // ─── Enviar vendedor específico ao atendimento (click ou drag) ───
