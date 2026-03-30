@@ -106,17 +106,12 @@ window._showUpdateBanner = function() {
   }
   .dash-header-logo {
     width: 42px; height: 42px;
-    border-radius: 8px;
-    background: #060606;
+    border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
-    font-family: var(--font-mono);
-    font-weight: 800; font-size: 14px;
-    color: #fff;
     flex-shrink: 0;
     overflow: hidden;
-    border: 1px solid rgba(255,255,255,.08);
   }
-  .dash-header-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
+  .dash-header-logo img { width: 100%; height: 100%; object-fit: contain; }
   .dash-header-title {
     font-family: var(--font-mono);
     font-size: 17px;
@@ -192,7 +187,7 @@ window._showUpdateBanner = function() {
     flex-wrap: wrap;
     background: var(--bg-surface);
   }
-  .kpi-grid {
+  .kpi-grid-hero {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--gap);
@@ -200,17 +195,16 @@ window._showUpdateBanner = function() {
   }
   .kpi-grid-secondary {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: var(--gap);
     margin-bottom: var(--gap);
   }
-  .kpi-card--gauge { text-align: center; }
   @media (max-width: 768px) {
-    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-    .kpi-grid-secondary { grid-template-columns: 1fr; }
+    .kpi-grid-hero { grid-template-columns: repeat(2, 1fr); }
+    .kpi-grid-secondary { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 480px) {
-    .kpi-grid { grid-template-columns: 1fr; }
+    .kpi-grid-hero { grid-template-columns: 1fr; }
     .kpi-grid-secondary { grid-template-columns: 1fr; }
   }
   .charts-grid {
@@ -341,7 +335,7 @@ window._showUpdateBanner = function() {
     box-shadow: 0 4px 20px rgba(0,0,0,.4);
   }
   .chart-card h3 i { font-size: 14px; opacity: .5; }
-  .chart-box { position: relative; height: 340px; z-index: 1; }
+  .chart-box { position: relative; height: 340px; z-index: 1; overflow: visible; }
   .ranking-table {
     width: 100%;
     border-collapse: collapse;
@@ -554,11 +548,12 @@ window._showUpdateBanner = function() {
   /* ─── Card fade-in ─── */
   @keyframes cardFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
   .kpi-card { animation: none; }
-  .kpi-grid .kpi-card:nth-child(1) { animation-delay: 0s; }
-  .kpi-grid .kpi-card:nth-child(2) { animation-delay: .05s; }
-  .kpi-grid .kpi-card:nth-child(3) { animation-delay: .1s; }
-  .kpi-grid .kpi-card:nth-child(4) { animation-delay: .15s; }
-  .kpi-grid .kpi-card:nth-child(5) { animation-delay: .2s; }
+  .kpi-grid-hero .kpi-card:nth-child(1) { animation-delay: 0s; }
+  .kpi-grid-hero .kpi-card:nth-child(2) { animation-delay: .05s; }
+  .kpi-grid-hero .kpi-card:nth-child(3) { animation-delay: .1s; }
+  .kpi-grid-secondary .kpi-card:nth-child(1) { animation-delay: .15s; }
+  .kpi-grid-secondary .kpi-card:nth-child(2) { animation-delay: .2s; }
+  .kpi-grid-secondary .kpi-card:nth-child(3) { animation-delay: .25s; }
 </style>
 </head>
 <body>
@@ -671,35 +666,30 @@ window._showUpdateBanner = function() {
     .marquee-pill .mp-status.fora { color:rgba(255,255,255,.4); }
   </style>
 
-  <!-- KPI Cards -->
-  <div class="kpi-grid" id="kpiGrid">
-    <div class="kpi-card kpi-card--gauge">
-      <div class="kpi-label"><i class="fa-solid fa-chart-line"></i> Taxa de Conversão</div>
-      <div id="gaugeConv" style="height:160px;margin:0 auto"></div>
-      <div class="kpi-compare" id="kpiConvCmp" style="margin-top:-8px"><div class="skeleton skeleton-kpi-compare"></div></div>
-      <div class="kpi-value" id="kpiConv" style="display:none"></div>
-    </div>
-    <div class="kpi-card kpi-card--gauge">
-      <div class="kpi-label"><i class="fa-solid fa-receipt"></i> Ticket Médio</div>
-      <div id="gaugeTicket" style="height:160px;margin:0 auto"></div>
-      <div class="kpi-compare" id="kpiTicketCmp" style="margin-top:-8px"><div class="skeleton skeleton-kpi-compare"></div></div>
-      <div class="kpi-value" id="kpiTicket" style="display:none"></div>
-    </div>
-    <div class="kpi-card kpi-card--gauge">
-      <div class="kpi-label"><i class="fa-solid fa-clock"></i> Tempo Médio</div>
-      <div id="gaugeTempo" style="height:160px;margin:0 auto"></div>
-      <div class="kpi-compare" id="kpiTimeCmp" style="margin-top:-8px"><div class="skeleton skeleton-kpi-compare"></div></div>
-      <div class="kpi-value" id="kpiTime" style="display:none"></div>
-    </div>
-  </div>
-  <!-- KPI Cards — Secondary Row -->
-  <div class="kpi-grid-secondary">
+  <!-- KPI Cards — Hero Row -->
+  <div class="kpi-grid-hero" id="kpiGrid">
     <div class="kpi-card">
       <div class="kpi-label"><i class="fa-solid fa-users"></i> Total Atendimentos</div>
       <div class="kpi-value" id="kpiTotal"><div class="skeleton skeleton-kpi-value"></div></div>
       <div class="kpi-compare" id="kpiTotalCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
       <div id="sparkAtend" style="width:100%;height:36px;margin-top:4px"></div>
     </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><i class="fa-solid fa-bag-shopping"></i> Total Vendas</div>
+      <div class="kpi-value" id="kpiVendas"><div class="skeleton skeleton-kpi-value"></div></div>
+      <div class="kpi-compare" id="kpiVendasCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><i class="fa-solid fa-chart-line"></i> Taxa de Conversão</div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="kpi-value" id="kpiConv"><div class="skeleton skeleton-kpi-value"></div></div>
+        <div id="gaugeConv" style="width:64px;height:64px;flex-shrink:0"></div>
+      </div>
+      <div class="kpi-compare" id="kpiConvCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+    </div>
+  </div>
+  <!-- KPI Cards — Secondary Row -->
+  <div class="kpi-grid-secondary">
     <div class="kpi-card">
       <div class="kpi-label"><i class="fa-solid fa-xmark"></i> Não Convertidos</div>
       <div style="display:flex;align-items:center;gap:10px">
@@ -708,13 +698,23 @@ window._showUpdateBanner = function() {
       </div>
       <div class="kpi-compare" id="kpiLossCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
     </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><i class="fa-solid fa-receipt"></i> Ticket Médio</div>
+      <div class="kpi-value" id="kpiTicket"><div class="skeleton skeleton-kpi-value"></div></div>
+      <div class="kpi-compare" id="kpiTicketCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><i class="fa-solid fa-clock"></i> Tempo Médio</div>
+      <div class="kpi-value" id="kpiTime"><div class="skeleton skeleton-kpi-value"></div></div>
+      <div class="kpi-compare" id="kpiTimeCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+    </div>
   </div>
 
   <!-- Charts row -->
   <div class="charts-grid">
     <div class="chart-card">
       <h3><i class="fa-solid fa-chart-pie" style="margin-right:6px;color:var(--accent-dim)"></i>Motivos de Perda</h3>
-      <div class="chart-box"><div id="chartMotivos"></div></div>
+      <div class="chart-box" style="height:400px"><div id="chartMotivos"></div></div>
     </div>
     <div class="chart-card">
       <h3><i class="fa-solid fa-chart-bar" style="margin-right:6px;color:var(--accent-dim)"></i>Fluxo por Hora</h3>
@@ -737,7 +737,7 @@ window._showUpdateBanner = function() {
   <!-- Trend Line -->
   <div class="chart-card" style="margin-bottom:var(--gap)">
     <h3><i class="fa-solid fa-chart-line" style="margin-right:6px;color:var(--accent-dim)"></i>Evolução Diária</h3>
-    <div class="chart-box" style="height:300px"><div id="chartTrend"></div></div>
+    <div class="chart-box" style="height:380px"><div id="chartTrend"></div></div>
   </div>
 
   <!-- Ranking -->
@@ -783,7 +783,9 @@ window._showUpdateBanner = function() {
 
   <!-- Footer -->
   <footer style="text-align:center;margin-top:40px;padding:32px 0;border-top:1px solid var(--border-subtle)">
-    <img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:36px;object-fit:contain;background:#060606;border-radius:10px;padding:8px 14px">
+    <div style="display:inline-block;background:#060606;border-radius:10px;padding:8px 14px">
+      <img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:20px;object-fit:contain;display:block">
+    </div>
     <div id="tenantSlugFooter" style="display:none;margin-top:8px;font-size:11px;color:#A1A1AA;font-weight:500;cursor:pointer" title="Clique para copiar">
       minhavez V3.1 · ID: <span id="tenantSlugValue"></span>
     </div>
@@ -855,8 +857,7 @@ if (tenant) {
       headerLogo.innerHTML = `<img src="${tenant.logo_url}" alt="${tenant.nome_loja || ''}">`;
     } else {
       headerLogo.style.background = '#060606';
-      headerLogo.style.borderRadius = '6px';
-      headerLogo.style.padding = '4px';
+      headerLogo.style.padding = '6px';
       headerLogo.innerHTML = `<img src="/assets/logo-minhavez-new.png" alt="minhavez">`;
     }
   }
@@ -911,6 +912,7 @@ let _cachedVendedores = [];
 // Cache KPI DOM refs (avoid repeated getElementById on realtime updates)
 const _kpi = {
   total: document.getElementById('kpiTotal'),
+  vendas: document.getElementById('kpiVendas'),
   conv: document.getElementById('kpiConv'),
   loss: document.getElementById('kpiLoss'),
   time: document.getElementById('kpiTime'),
@@ -1154,11 +1156,12 @@ async function loadAll() {
     const vendaValues = items.filter(a => a.resultado === 'venda' && a.valor_venda > 0).map(a => a.valor_venda);
     const ticketMed = vendaValues.length > 0 ? Math.round(vendaValues.reduce((a, b) => a + b, 0) / vendaValues.length) : 0;
     if (_kpi.total) _kpi.total.textContent = totAtend;
+    if (_kpi.vendas) _kpi.vendas.textContent = totVendas;
     if (_kpi.conv) _kpi.conv.textContent = conv + '%';
     if (_kpi.loss) _kpi.loss.textContent = totNaoConv;
     if (_kpi.time) _kpi.time.textContent = tempoMed + 'min';
     if (_kpi.ticket) _kpi.ticket.textContent = ticketMed > 0 ? 'R$ ' + ticketMed.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '—';
-    ['kpiTotalCmp', 'kpiConvCmp', 'kpiLossCmp', 'kpiTimeCmp', 'kpiTicketCmp'].forEach(id => {
+    ['kpiTotalCmp', 'kpiVendasCmp', 'kpiConvCmp', 'kpiLossCmp', 'kpiTimeCmp', 'kpiTicketCmp'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.innerHTML = '<span class="neutral">filtrado</span>';
     });
@@ -1201,6 +1204,7 @@ async function loadKPIs(range, prevRange) {
   const convAnterior = calcConv(p, prevTrocas.data);
 
   countUp(_kpi.total, d.total_atendimentos || 0);
+  countUp(_kpi.vendas, d.total_vendas || 0);
   countUp(_kpi.conv, convAtual, '%');
   countUp(_kpi.loss, d.total_nao_convertido || 0);
   countUp(_kpi.time, d.tempo_medio_min || 0, 'min');
@@ -1209,73 +1213,25 @@ async function loadKPIs(range, prevRange) {
   const pTicket = p.ticket_medio || 0;
   if (_kpi.ticket) _kpi.ticket.textContent = ticket > 0 ? 'R$ ' + ticket.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '—';
   renderCompare('kpiTotalCmp', d.total_atendimentos || 0, p.total_atendimentos || 0);
+  renderCompare('kpiVendasCmp', d.total_vendas || 0, p.total_vendas || 0);
   renderCompare('kpiConvCmp', convAtual, convAnterior);
   renderCompare('kpiLossCmp', d.total_nao_convertido || 0, p.total_nao_convertido || 0, true);
   renderCompare('kpiTimeCmp', d.tempo_medio_min || 0, p.tempo_medio_min || 0, true);
   if (ticket > 0 || pTicket > 0) renderCompare('kpiTicketCmp', ticket, pTicket);
 
-  // Gauges
+  // Mini gauge for Conversão (inline 64px)
   const convPct = parseFloat(convAtual) || 0;
   const convColor = convPct >= metas.conversao ? '#e2506f' : convPct >= metas.conversao * 0.7 ? '#f0758e' : '#D4D4D8';
   renderChart('gaugeConv', '#gaugeConv', {
-    chart: { type: 'radialBar', height: 170, sparkline: { enabled: true } },
+    chart: { type: 'radialBar', height: 64, sparkline: { enabled: true } },
     series: [Math.min(100, Math.round(convPct))],
     plotOptions: { radialBar: {
       startAngle: -135, endAngle: 135,
-      hollow: { size: '55%' },
+      hollow: { size: '50%' },
       track: { background: chartColors().trackBg, strokeWidth: '97%' },
-      dataLabels: {
-        name: { show: false },
-        value: { show: true, fontSize: '22px', fontWeight: 700, fontFamily: "'Satoshi', sans-serif",
-                 color: chartColors().centerText, offsetY: 8,
-                 formatter: () => convAtual + '%' }
-      }
+      dataLabels: { name: { show: false }, value: { show: false } }
     }},
     colors: [convColor],
-    stroke: { lineCap: 'round' }
-  });
-
-  const ticketVal = parseFloat(d.ticket_medio) || 0;
-  const ticketPct = metas.ticket_medio > 0 ? Math.min(100, Math.round(ticketVal / metas.ticket_medio * 100)) : 0;
-  const ticketColor = ticketPct >= 100 ? '#e2506f' : ticketPct >= 70 ? '#f0758e' : '#D4D4D8';
-  const ticketLabel = ticket > 0 ? 'R$ ' + ticket.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '—';
-  renderChart('gaugeTicket', '#gaugeTicket', {
-    chart: { type: 'radialBar', height: 170, sparkline: { enabled: true } },
-    series: [ticketPct],
-    plotOptions: { radialBar: {
-      startAngle: -135, endAngle: 135,
-      hollow: { size: '55%' },
-      track: { background: chartColors().trackBg, strokeWidth: '97%' },
-      dataLabels: {
-        name: { show: false },
-        value: { show: true, fontSize: '18px', fontWeight: 700, fontFamily: "'Satoshi', sans-serif",
-                 color: chartColors().centerText, offsetY: 8,
-                 formatter: () => ticketLabel }
-      }
-    }},
-    colors: [ticketColor],
-    stroke: { lineCap: 'round' }
-  });
-
-  const tempoVal = parseFloat(d.tempo_medio_min) || 0;
-  const tempoPct = metas.tempo_medio > 0 ? Math.min(100, Math.round((metas.tempo_medio / Math.max(tempoVal, 1)) * 100)) : 0;
-  const tempoColor = tempoVal <= metas.tempo_medio * 0.8 ? '#e2506f' : tempoVal <= metas.tempo_medio ? '#f0758e' : '#D4D4D8';
-  const tempoLabel = tempoVal > 0 ? Math.round(tempoVal * 10) / 10 + 'min' : '—';
-  renderChart('gaugeTempo', '#gaugeTempo', {
-    chart: { type: 'radialBar', height: 170, sparkline: { enabled: true } },
-    series: [tempoPct],
-    plotOptions: { radialBar: {
-      startAngle: -135, endAngle: 135,
-      hollow: { size: '55%' },
-      track: { background: chartColors().trackBg, strokeWidth: '97%' },
-      dataLabels: {
-        name: { show: false },
-        value: { show: true, fontSize: '20px', fontWeight: 700, fontFamily: "'Satoshi', sans-serif",
-                 color: chartColors().centerText, offsetY: 8,
-                 formatter: () => tempoLabel }
-      }
-    }},
-    colors: [tempoColor],
     stroke: { lineCap: 'round' }
   });
 
@@ -1315,7 +1271,7 @@ async function loadMotivos(range) {
   if (el) el.style.display = '';
 
   renderChart('motivos', '#chartMotivos', {
-    chart: { type: 'donut', height: 340 },
+    chart: { type: 'donut', height: 380 },
     series: values,
     labels: labels.map((l, i) => l + ' (' + values[i] + ')'),
     colors: colors,
@@ -1415,7 +1371,7 @@ async function loadHourly(range) {
     annotations.yaxis = [{ y: avgAtend, borderColor: 'rgba(0,0,0,.12)', strokeDashArray: 4,
       label: { text: (isMultiDay ? 'média/dia ' : 'média ') + avgAtend,
                style: { fontSize: '10px', fontWeight: 600, fontFamily: "'Satoshi'", color: '#71717A', background: 'rgba(0,0,0,.04)', borderColor: 'transparent', padding: { left: 6, right: 6, top: 2, bottom: 2 } },
-               position: 'right' } }];
+               position: 'left' } }];
   }
 
   renderChart('hourly', '#chartHourly', {
@@ -1428,7 +1384,7 @@ async function loadHourly(range) {
     fill: { opacity: [0.75, 0.5, 0.2] },
     stroke: { width: [0, 0, 2], curve: 'smooth' },
     markers: { size: [0, 0, 3] },
-    grid: { borderColor: chartColors().grid, strokeDashArray: 3 },
+    grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { right: 20 } },
     legend: { position: 'top', fontSize: '11px', fontWeight: 600, labels: { colors: chartColors().textStrong },
               markers: { shape: 'circle', size: 5 } },
     annotations,
@@ -1642,7 +1598,7 @@ async function loadScatter(range, cachedData) {
              labels: { style: { fontSize: '11px', fontWeight: 500 } }, tickAmount: 6 },
     yaxis: { title: { text: 'CONVERSÃO %', style: { fontSize: '10px', fontWeight: 700, color: chartColors().textMuted } },
              labels: { formatter: v => Math.round(v) + '%', style: { fontSize: '11px', fontWeight: 500 } }, min: 0, max: 100 },
-    grid: { borderColor: chartColors().grid, strokeDashArray: 3 },
+    grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { right: 30, top: 10 } },
     annotations: { yaxis: [{ y: metaConv, borderColor: '#71717A', strokeDashArray: 4,
       label: { text: 'Meta ' + metaConv + '%', style: { fontSize: '10px', fontWeight: 600, background: 'transparent', color: '#71717A' }, position: 'left' } }] },
     dataLabels: { enabled: true, textAnchor: 'start',
@@ -1694,10 +1650,10 @@ async function loadTempoMeta(range, cachedData) {
     xaxis: { labels: { formatter: v => v + 'min', style: { fontSize: '11px', fontWeight: 500 } },
              categories: names },
     yaxis: { labels: { style: { fontSize: '12px', fontWeight: 700, colors: [chartColors().textStrong] } } },
-    grid: { borderColor: chartColors().grid, strokeDashArray: 3, xaxis: { lines: { show: true } }, yaxis: { lines: { show: false } } },
+    grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { right: 40 }, xaxis: { lines: { show: true } }, yaxis: { lines: { show: false } } },
     annotations: { xaxis: [{ x: metaTempo, borderColor: '#71717A', strokeDashArray: 4,
       label: { text: 'Meta ' + metaTempo + 'min', style: { fontSize: '10px', fontWeight: 600, background: 'transparent', color: '#71717A' }, orientation: 'horizontal' } }] },
-    dataLabels: { enabled: true, formatter: v => Math.round(v) + 'min', offsetX: 28,
+    dataLabels: { enabled: true, formatter: v => Math.round(v) + 'min', offsetX: 0,
       style: { fontSize: '11px', fontWeight: 700, colors: [chartColors().datalabel] } },
     legend: { show: false },
     tooltip: { y: { formatter: v => Math.round(v) + ' min' } }
@@ -1741,7 +1697,7 @@ async function loadTrend(range) {
   }
 
   renderChart('trend', '#chartTrend', {
-    chart: { type: 'line', height: 300 },
+    chart: { type: 'line', height: 360 },
     series: [
       { name: 'Atendimentos', type: 'area', data: atend },
       { name: 'Vendas', type: 'area', data: vendas },
