@@ -1737,8 +1737,8 @@ async function loadScatter(range, cachedData) {
   const axisColor = isDarkTheme() ? 'rgba(255,255,255,.5)' : 'rgba(0,0,0,.5)';
 
   renderChart('scatter', '#chartScatter', {
-    chart: { type: 'scatter', height: 300, zoom: { enabled: false },
-      parentHeightOffset: 0 },
+    chart: { type: 'scatter', height: 340, zoom: { enabled: false },
+      parentHeightOffset: 0, offsetY: -10 },
     series: [
       { name: 'Acima da meta', data: series1 },
       { name: 'Perto da meta', data: series2 },
