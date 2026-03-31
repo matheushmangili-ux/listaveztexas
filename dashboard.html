@@ -1470,7 +1470,7 @@ async function loadHourly(range) {
     annotations.yaxis = [{ y: avgAtend, borderColor: _cc.grid, strokeDashArray: 4,
       label: { text: (isMultiDay ? 'média/dia ' : 'média ') + avgAtend,
                style: { fontSize: '10px', fontWeight: 600, fontFamily: "'Satoshi'", color: _cc.textMuted, background: _annBg, borderColor: 'transparent', padding: { left: 6, right: 6, top: 2, bottom: 2 } },
-               position: 'left', offsetX: 10 } }];
+               position: 'right', offsetX: -10, offsetY: -1 } }];
   }
 
   renderChart('hourly', '#chartHourly', {
