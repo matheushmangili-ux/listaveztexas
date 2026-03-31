@@ -2111,7 +2111,7 @@ async function _executeAtendimento(vendedorId, canalOrigemId) {
     if (canalOrigemId && data) {
       await sb.from('atendimentos').update({ canal_origem_id: canalOrigemId }).eq('id', data);
     }
-    const { data: atend } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('id', data).single();
+    const { data: atend } = await sb.from('atendimentos').select('*, vendedores(nome, apelido), canais_origem(nome, icone)').eq('id', data).single();
     activeAtendimentos.push(atend);
     renderActiveAtendimentos();
     await loadVendedores();
@@ -2925,7 +2925,7 @@ window.handleProximoCliente = async function() {
   try {
     const { data, error } = await sb.rpc('proximo_cliente', { p_turno_id: currentTurno.id, p_setor: currentSetor });
     if (error) throw error;
-    const { data: atend } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('id', data).single();
+    const { data: atend } = await sb.from('atendimentos').select('*, vendedores(nome, apelido), canais_origem(nome, icone)').eq('id', data).single();
     activeAtendimentos.push(atend);
     renderActiveAtendimentos();
     await loadVendedores();
@@ -2972,6 +2972,8 @@ function renderActiveAtendimentos() {
     card.id = 'atend-' + atend.id;
     const prefBadge = atend.preferencial ? '<span style="display:inline-block;background:var(--warning);color:#060606;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:6px;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle">PREF</span>' : '';
     const clientBadge = (atend._clientCount && atend._clientCount > 1) ? `<span style="display:inline-block;background:var(--info);color:#fff;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:6px;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle">${atend._clientCount} clientes</span>` : '';
+    const canal = atend.canais_origem;
+    const canalHtml = canal && canal.icone ? `<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;margin-left:auto;padding:4px 8px;border-radius:8px;background:var(--bg-surface);border:1px solid var(--border-subtle)" title="${canal.nome || 'Canal'}"><i class="${canal.icone}" style="font-size:14px;color:var(--accent)"></i><span style="font-size:10px;font-weight:600;color:var(--text-muted);max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${canal.nome}</span></div>` : '';
     card.dataset.atendId = atend.id;
     card.innerHTML = `
       <div class="atend-avatar">${initials(nome)}</div>
@@ -2979,7 +2981,8 @@ function renderActiveAtendimentos() {
         <div class="atend-name">${nome}${prefBadge}${clientBadge}</div>
         <div class="atend-timer" id="timer-${atend.id}">0min 0s</div>
       </div>
-      <i class="fa-solid fa-grip-vertical" style="color:var(--text-muted);font-size:14px;opacity:.3;flex-shrink:0;margin-left:auto"></i>`;
+      ${canalHtml}
+      <i class="fa-solid fa-grip-vertical" style="color:var(--text-muted);font-size:14px;opacity:.3;flex-shrink:0;${canalHtml ? 'margin-left:8px' : 'margin-left:auto'}"></i>`;
     list.appendChild(card);
   });
 
@@ -3273,7 +3276,7 @@ async function finalizeMultiOutcome() {
           await sb.from('vendedores').update({ status: 'em_atendimento', posicao_fila: null }).eq('id', vendedorId);
           const { data: novoAtend, error: errNovo } = await sb.from('atendimentos').insert({
             turno_id: currentTurno.id, vendedor_id: vendedorId, inicio: new Date().toISOString(), tenant_id: tenantId
-          }).select('*, vendedores(nome, apelido)').single();
+          }).select('*, vendedores(nome, apelido), canais_origem(nome, icone)').single();
           if (!errNovo && novoAtend) {
             activeAtendimentos.push(novoAtend);
             renderActiveAtendimentos();
@@ -3533,7 +3536,7 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor, con
         vendedor_id: vendedorId,
         inicio: new Date().toISOString(),
         tenant_id: tenantId
-      }).select('*, vendedores(nome, apelido)').single();
+      }).select('*, vendedores(nome, apelido), canais_origem(nome, icone)').single();
       if (!errNovo && novoAtend) {
         activeAtendimentos.push(novoAtend);
         renderActiveAtendimentos();
@@ -3869,7 +3872,7 @@ async function checkExistingTurno() {
 // ─── Check for active atendimentos (múltiplos) ───
 async function checkActiveAtendimentos() {
   if (!currentTurno) return;
-  const { data } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('turno_id', currentTurno.id).eq('resultado', 'em_andamento').order('inicio');
+  const { data } = await sb.from('atendimentos').select('*, vendedores(nome, apelido), canais_origem(nome, icone)').eq('turno_id', currentTurno.id).eq('resultado', 'em_andamento').order('inicio');
   activeAtendimentos = data || [];
   renderActiveAtendimentos();
 }
