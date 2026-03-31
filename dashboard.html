@@ -177,6 +177,7 @@ window._showUpdateBanner = function() {
     margin: 0 4px;
   }
   .dash-header-controls {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -479,6 +480,129 @@ window._showUpdateBanner = function() {
     box-shadow: 0 1px 3px rgba(0,0,0,.06);
     font-weight: 600;
   }
+
+  /* ─── Calendar Popover ─── */
+  .cal-popover {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 6px;
+    z-index: 999;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.15);
+    width: 280px;
+    font-family: var(--font-body);
+    user-select: none;
+  }
+  [data-theme="dark"] .cal-popover {
+    box-shadow: 0 12px 40px rgba(0,0,0,.45);
+  }
+  .cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .cal-month-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: capitalize;
+  }
+  .cal-nav {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: var(--bg-surface);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 11px;
+    transition: background 150ms;
+  }
+  .cal-nav:hover { background: var(--bg-deep); }
+  .cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .cal-weekdays span {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 4px 0;
+  }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+  .cal-day {
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 120ms, color 120ms;
+    font-family: var(--font-body);
+  }
+  .cal-day:hover { background: var(--bg-surface); }
+  .cal-day.other-month { color: var(--text-muted); opacity: .4; }
+  .cal-day.today { font-weight: 700; color: var(--accent); }
+  .cal-day.range-start,
+  .cal-day.range-end {
+    background: var(--accent) !important;
+    color: #fff !important;
+    font-weight: 700;
+  }
+  .cal-day.in-range {
+    background: rgba(226, 80, 111, .12);
+    border-radius: 4px;
+  }
+  .cal-day.range-start { border-radius: 8px 4px 4px 8px; }
+  .cal-day.range-end { border-radius: 4px 8px 8px 4px; }
+  .cal-day.range-start.range-end { border-radius: 8px; }
+  .cal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .cal-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .cal-clear {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: var(--font-body);
+    transition: color 150ms, background 150ms;
+  }
+  .cal-clear:hover { color: var(--accent); background: var(--bg-surface); }
+
   .rupture-item {
     display: flex;
     align-items: center;
@@ -697,13 +821,24 @@ window._showUpdateBanner = function() {
           <button data-period="ontem" onclick="setPeriod('ontem')">Ontem</button>
           <button data-period="semana" class="active" onclick="setPeriod('semana')">Semana</button>
           <button data-period="mes" onclick="setPeriod('mes')">Mês</button>
-          <button data-period="custom" onclick="setPeriod('custom')" title="Período personalizado"><i class="fa-solid fa-calendar-days" style="font-size:10px"></i></button>
+          <button data-period="custom" onclick="toggleCalendar(event)" title="Período personalizado" style="position:relative"><i class="fa-solid fa-calendar-days" style="font-size:10px"></i></button>
         </div>
-        <div id="customRangeWrap" style="display:none;align-items:center;gap:6px">
-          <input type="date" id="dashDateStart" style="font-size:11px;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text-primary);font-family:var(--font-body);font-weight:600">
-          <span style="font-size:11px;color:var(--text-muted);font-weight:600">até</span>
-          <input type="date" id="dashDateEnd" style="font-size:11px;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text-primary);font-family:var(--font-body);font-weight:600">
-          <button onclick="applyCustomRange()" style="padding:6px 12px;border:none;border-radius:var(--radius-sm);background:var(--accent);color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font-body)"><i class="fa-solid fa-check"></i></button>
+        <span id="customRangeLabel" style="display:none;font-size:11px;color:var(--text-muted);font-weight:600;font-family:var(--font-body)"></span>
+      </div>
+      <!-- Calendar Popover -->
+      <div id="calendarPopover" class="cal-popover" style="display:none">
+        <div class="cal-header">
+          <button class="cal-nav" onclick="calNav(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+          <span id="calMonthLabel" class="cal-month-label"></span>
+          <button class="cal-nav" onclick="calNav(1)"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+        <div class="cal-weekdays">
+          <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="cal-footer">
+          <span id="calSelectionHint" class="cal-hint">Clique no dia inicial</span>
+          <button class="cal-clear" onclick="calClear()">Limpar</button>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -1190,30 +1325,10 @@ window.clearFilters = function() {
 };
 
 window.setPeriod = function(p) {
-  const wrap = document.getElementById('customRangeWrap');
-  if (p === 'custom') {
-    wrap.style.display = 'flex';
-    // Pré-preencher com semana atual se vazio
-    const startEl = document.getElementById('dashDateStart');
-    const endEl = document.getElementById('dashDateEnd');
-    if (!startEl.value) {
-      const today = new Date();
-      endEl.value = today.toISOString().split('T')[0];
-      const weekAgo = new Date(today);
-      weekAgo.setDate(weekAgo.getDate() - 6);
-      startEl.value = weekAgo.toISOString().split('T')[0];
-    }
-    startEl.focus();
-    startEl.showPicker?.();
-    // Ativar botão custom
-    document.querySelectorAll('#periodTabs button').forEach(b => {
-      b.classList.toggle('active', b.dataset.period === 'custom');
-    });
-    return;
-  }
-  wrap.style.display = 'none';
+  closeCalendar();
   customRangeStart = null;
   customRangeEnd = null;
+  document.getElementById('customRangeLabel').style.display = 'none';
   currentPeriod = p;
   document.querySelectorAll('#periodTabs button').forEach(b => {
     b.classList.toggle('active', b.dataset.period === p);
@@ -1221,16 +1336,158 @@ window.setPeriod = function(p) {
   loadAll();
 };
 
-window.applyCustomRange = function() {
-  const startVal = document.getElementById('dashDateStart').value;
-  const endVal = document.getElementById('dashDateEnd').value;
-  if (!startVal || !endVal) { toast('Selecione as duas datas', 'warning'); return; }
-  if (startVal > endVal) { toast('Data inicial deve ser anterior à final', 'warning'); return; }
-  customRangeStart = startVal;
-  customRangeEnd = endVal;
-  currentPeriod = 'custom';
-  loadAll();
+/* ─── Calendar Popover Logic ─── */
+let _calViewYear, _calViewMonth;
+let _calPickStart = null, _calPickEnd = null;
+let _calStep = 0; // 0=pick start, 1=pick end
+
+function _fmt2(n) { return n < 10 ? '0' + n : '' + n; }
+function _dateStr(y, m, d) { return y + '-' + _fmt2(m + 1) + '-' + _fmt2(d); }
+
+const _monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                     'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function renderCalendar() {
+  const grid = document.getElementById('calGrid');
+  const label = document.getElementById('calMonthLabel');
+  const hint = document.getElementById('calSelectionHint');
+  label.textContent = _monthNames[_calViewMonth] + ' ' + _calViewYear;
+
+  const firstDay = new Date(_calViewYear, _calViewMonth, 1).getDay();
+  const daysInMonth = new Date(_calViewYear, _calViewMonth + 1, 0).getDate();
+  const daysInPrev = new Date(_calViewYear, _calViewMonth, 0).getDate();
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  let html = '';
+  // Previous month trailing days
+  for (let i = firstDay - 1; i >= 0; i--) {
+    const d = daysInPrev - i;
+    const m = _calViewMonth === 0 ? 11 : _calViewMonth - 1;
+    const y = _calViewMonth === 0 ? _calViewYear - 1 : _calViewYear;
+    const ds = _dateStr(y, m, d);
+    html += '<button class="cal-day other-month" data-date="' + ds + '" onclick="calPick(\'' + ds + '\')">' + d + '</button>';
+  }
+  // Current month
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = _dateStr(_calViewYear, _calViewMonth, d);
+    let cls = 'cal-day';
+    if (ds === todayStr) cls += ' today';
+    if (_calPickStart && _calPickEnd) {
+      if (ds === _calPickStart && ds === _calPickEnd) cls += ' range-start range-end';
+      else if (ds === _calPickStart) cls += ' range-start';
+      else if (ds === _calPickEnd) cls += ' range-end';
+      else if (ds > _calPickStart && ds < _calPickEnd) cls += ' in-range';
+    } else if (_calPickStart && ds === _calPickStart) {
+      cls += ' range-start range-end';
+    }
+    html += '<button class="' + cls + '" data-date="' + ds + '" onclick="calPick(\'' + ds + '\')">' + d + '</button>';
+  }
+  // Next month leading days
+  const totalCells = firstDay + daysInMonth;
+  const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let d = 1; d <= remaining; d++) {
+    const m = _calViewMonth === 11 ? 0 : _calViewMonth + 1;
+    const y = _calViewMonth === 11 ? _calViewYear + 1 : _calViewYear;
+    const ds = _dateStr(y, m, d);
+    html += '<button class="cal-day other-month" data-date="' + ds + '" onclick="calPick(\'' + ds + '\')">' + d + '</button>';
+  }
+  grid.innerHTML = html;
+
+  // Hint text
+  if (_calStep === 0) hint.textContent = 'Clique no dia inicial';
+  else hint.textContent = 'Clique no dia final';
+}
+
+window.calPick = function(dateStr) {
+  if (_calStep === 0) {
+    _calPickStart = dateStr;
+    _calPickEnd = null;
+    _calStep = 1;
+    renderCalendar();
+  } else {
+    if (dateStr < _calPickStart) {
+      // Clicked before start → swap: this becomes start
+      _calPickEnd = _calPickStart;
+      _calPickStart = dateStr;
+    } else {
+      _calPickEnd = dateStr;
+    }
+    _calStep = 0;
+    renderCalendar();
+    // Auto-apply
+    setTimeout(function() { applyCalendarRange(); }, 200);
+  }
 };
+
+function applyCalendarRange() {
+  customRangeStart = _calPickStart;
+  customRangeEnd = _calPickEnd;
+  currentPeriod = 'custom';
+  document.querySelectorAll('#periodTabs button').forEach(b => {
+    b.classList.toggle('active', b.dataset.period === 'custom');
+  });
+  // Show label
+  const lbl = document.getElementById('customRangeLabel');
+  const s = _calPickStart.split('-'), e = _calPickEnd.split('-');
+  if (_calPickStart === _calPickEnd) {
+    lbl.textContent = s[2] + '/' + s[1] + '/' + s[0];
+  } else {
+    lbl.textContent = s[2] + '/' + s[1] + ' — ' + e[2] + '/' + e[1] + '/' + e[0];
+  }
+  lbl.style.display = 'inline';
+  closeCalendar();
+  loadAll();
+}
+
+window.toggleCalendar = function(e) {
+  e && e.stopPropagation();
+  const pop = document.getElementById('calendarPopover');
+  if (pop.style.display === 'block') { closeCalendar(); return; }
+  const now = new Date();
+  _calViewYear = now.getFullYear();
+  _calViewMonth = now.getMonth();
+  _calStep = 0;
+  _calPickStart = customRangeStart;
+  _calPickEnd = customRangeEnd;
+  if (_calPickStart && _calPickEnd) _calStep = 0;
+  pop.style.display = 'block';
+  renderCalendar();
+  // Highlight custom tab
+  document.querySelectorAll('#periodTabs button').forEach(b => {
+    b.classList.toggle('active', b.dataset.period === 'custom');
+  });
+};
+
+function closeCalendar() {
+  document.getElementById('calendarPopover').style.display = 'none';
+}
+
+window.calNav = function(dir) {
+  _calViewMonth += dir;
+  if (_calViewMonth < 0) { _calViewMonth = 11; _calViewYear--; }
+  if (_calViewMonth > 11) { _calViewMonth = 0; _calViewYear++; }
+  renderCalendar();
+};
+
+window.calClear = function() {
+  _calPickStart = null;
+  _calPickEnd = null;
+  _calStep = 0;
+  customRangeStart = null;
+  customRangeEnd = null;
+  document.getElementById('customRangeLabel').style.display = 'none';
+  renderCalendar();
+};
+
+// Close calendar on outside click
+document.addEventListener('click', function(e) {
+  const pop = document.getElementById('calendarPopover');
+  if (pop && pop.style.display === 'block') {
+    if (!pop.contains(e.target) && !e.target.closest('[data-period="custom"]')) {
+      closeCalendar();
+    }
+  }
+});
 
 // ─── Previous period range (for comparison) ───
 function getPrevRange() {
