@@ -899,6 +899,9 @@ window.addEventListener('error', function(e) {
 
   /* Prevent 300ms tap delay on touch */
   * { touch-action: manipulation; }
+  /* Draggable items: desabilitar scroll nativo para permitir drag JS vertical */
+  .queue-item[draggable="true"],
+  .footer-card[draggable="true"] { touch-action: none; }
 
   /* Smooth scrolling for queue */
   .queue-panel, .service-panel { -webkit-overflow-scrolling: touch; }
@@ -2155,7 +2158,7 @@ window.onTouchDragStart = function(e) {
   };
 
   const onMove = (ev) => {
-    if (touchDragging) ev.preventDefault();
+    ev.preventDefault(); // Sempre prevenir scroll nativo durante possível drag
     const t = ev.touches[0];
     const dx = t.clientX - touchStartX;
     const dy = t.clientY - touchStartY;
