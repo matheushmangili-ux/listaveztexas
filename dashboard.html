@@ -697,9 +697,14 @@ window._showUpdateBanner = function() {
           <button data-period="ontem" onclick="setPeriod('ontem')">Ontem</button>
           <button data-period="semana" class="active" onclick="setPeriod('semana')">Semana</button>
           <button data-period="mes" onclick="setPeriod('mes')">Mês</button>
-          <button data-period="custom" onclick="setPeriod('custom')" title="Data específica"><i class="fa-solid fa-calendar-day" style="font-size:10px"></i></button>
+          <button data-period="custom" onclick="setPeriod('custom')" title="Período personalizado"><i class="fa-solid fa-calendar-days" style="font-size:10px"></i></button>
         </div>
-        <input type="date" id="dashDatePicker" style="display:none;font-size:11px;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text-primary);font-family:var(--font-body);font-weight:600" onchange="applyCustomDate()">
+        <div id="customRangeWrap" style="display:none;align-items:center;gap:6px">
+          <input type="date" id="dashDateStart" style="font-size:11px;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text-primary);font-family:var(--font-body);font-weight:600">
+          <span style="font-size:11px;color:var(--text-muted);font-weight:600">até</span>
+          <input type="date" id="dashDateEnd" style="font-size:11px;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text-primary);font-family:var(--font-body);font-weight:600">
+          <button onclick="applyCustomRange()" style="padding:6px 12px;border:none;border-radius:var(--radius-sm);background:var(--accent);color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font-body)"><i class="fa-solid fa-check"></i></button>
+        </div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <div class="filter-bar">
@@ -1119,9 +1124,9 @@ function countUp(el, endVal, suffix = '', duration = 800, formatter = null) {
 }
 
 function getRange() {
-  if (currentPeriod === 'custom' && customDate) {
-    const start = new Date(customDate + 'T00:00:00');
-    const end = new Date(customDate + 'T23:59:59');
+  if (currentPeriod === 'custom' && customRangeStart && customRangeEnd) {
+    const start = new Date(customRangeStart + 'T00:00:00');
+    const end = new Date(customRangeEnd + 'T23:59:59');
     return { start: start.toISOString(), end: end.toISOString() };
   }
   if (currentPeriod === 'ontem') return yesterdayRange();
@@ -1131,7 +1136,8 @@ function getRange() {
 }
 
 // ─── Period tabs ───
-let customDate = null;
+let customRangeStart = null;
+let customRangeEnd = null;
 
 // ─── Filters ───
 async function populateFilters() {
@@ -1184,15 +1190,30 @@ window.clearFilters = function() {
 };
 
 window.setPeriod = function(p) {
-  const picker = document.getElementById('dashDatePicker');
+  const wrap = document.getElementById('customRangeWrap');
   if (p === 'custom') {
-    picker.style.display = 'inline-block';
-    picker.focus();
-    picker.showPicker?.();
+    wrap.style.display = 'flex';
+    // Pré-preencher com semana atual se vazio
+    const startEl = document.getElementById('dashDateStart');
+    const endEl = document.getElementById('dashDateEnd');
+    if (!startEl.value) {
+      const today = new Date();
+      endEl.value = today.toISOString().split('T')[0];
+      const weekAgo = new Date(today);
+      weekAgo.setDate(weekAgo.getDate() - 6);
+      startEl.value = weekAgo.toISOString().split('T')[0];
+    }
+    startEl.focus();
+    startEl.showPicker?.();
+    // Ativar botão custom
+    document.querySelectorAll('#periodTabs button').forEach(b => {
+      b.classList.toggle('active', b.dataset.period === 'custom');
+    });
     return;
   }
-  picker.style.display = 'none';
-  customDate = null;
+  wrap.style.display = 'none';
+  customRangeStart = null;
+  customRangeEnd = null;
   currentPeriod = p;
   document.querySelectorAll('#periodTabs button').forEach(b => {
     b.classList.toggle('active', b.dataset.period === p);
@@ -1200,14 +1221,14 @@ window.setPeriod = function(p) {
   loadAll();
 };
 
-window.applyCustomDate = function() {
-  const picker = document.getElementById('dashDatePicker');
-  if (!picker.value) return;
-  customDate = picker.value;
+window.applyCustomRange = function() {
+  const startVal = document.getElementById('dashDateStart').value;
+  const endVal = document.getElementById('dashDateEnd').value;
+  if (!startVal || !endVal) { toast('Selecione as duas datas', 'warning'); return; }
+  if (startVal > endVal) { toast('Data inicial deve ser anterior à final', 'warning'); return; }
+  customRangeStart = startVal;
+  customRangeEnd = endVal;
   currentPeriod = 'custom';
-  document.querySelectorAll('#periodTabs button').forEach(b => {
-    b.classList.toggle('active', b.dataset.period === 'custom');
-  });
   loadAll();
 };
 
