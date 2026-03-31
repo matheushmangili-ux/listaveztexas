@@ -1399,6 +1399,7 @@ function renderCalendar() {
 }
 
 window.calPick = function(dateStr) {
+  _calJustClicked = true;
   if (_calStep === 0) {
     _calPickStart = dateStr;
     _calPickEnd = null;
@@ -1463,6 +1464,7 @@ function closeCalendar() {
 }
 
 window.calNav = function(dir) {
+  _calJustClicked = true;
   _calViewMonth += dir;
   if (_calViewMonth < 0) { _calViewMonth = 11; _calViewYear--; }
   if (_calViewMonth > 11) { _calViewMonth = 0; _calViewYear++; }
@@ -1470,6 +1472,7 @@ window.calNav = function(dir) {
 };
 
 window.calClear = function() {
+  _calJustClicked = true;
   _calPickStart = null;
   _calPickEnd = null;
   _calStep = 0;
@@ -1480,12 +1483,14 @@ window.calClear = function() {
 };
 
 // Close calendar on outside click
+let _calJustClicked = false;
 document.addEventListener('click', function(e) {
   const pop = document.getElementById('calendarPopover');
-  if (pop && pop.style.display === 'block') {
-    if (!pop.contains(e.target) && !e.target.closest('[data-period="custom"]')) {
-      closeCalendar();
-    }
+  if (!pop || pop.style.display !== 'block') return;
+  // Skip if a cal-day was just clicked (innerHTML rebuild detaches e.target)
+  if (_calJustClicked) { _calJustClicked = false; return; }
+  if (!pop.contains(e.target) && !e.target.closest('[data-period="custom"]')) {
+    closeCalendar();
   }
 });
 
