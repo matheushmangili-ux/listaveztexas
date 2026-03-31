@@ -200,6 +200,33 @@ window._showUpdateBanner = function() {
   .spark-tooltip .apexcharts-tooltip-text {
     font-family: var(--font-body) !important;
   }
+  /* ─── Dark Mode: ApexCharts tooltips ─── */
+  [data-theme="dark"] .apexcharts-tooltip {
+    background: #1E1E2E !important;
+    border-color: rgba(255,255,255,.1) !important;
+    color: rgba(255,255,255,.8) !important;
+  }
+  [data-theme="dark"] .apexcharts-tooltip-title {
+    background: #262638 !important;
+    border-color: rgba(255,255,255,.06) !important;
+    color: #fff !important;
+  }
+  [data-theme="dark"] .apexcharts-tooltip-series-group {
+    color: rgba(255,255,255,.8) !important;
+  }
+  [data-theme="dark"] .apexcharts-tooltip-text-y-value,
+  [data-theme="dark"] .apexcharts-tooltip-text-y-label {
+    color: rgba(255,255,255,.8) !important;
+  }
+  [data-theme="dark"] .apexcharts-xaxistooltip,
+  [data-theme="dark"] .apexcharts-yaxistooltip {
+    background: #1E1E2E !important;
+    border-color: rgba(255,255,255,.1) !important;
+    color: rgba(255,255,255,.8) !important;
+  }
+  [data-theme="dark"] .apexcharts-xaxistooltip-text {
+    color: rgba(255,255,255,.8) !important;
+  }
   .kpi-grid-hero {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1438,10 +1465,12 @@ async function loadHourly(range) {
 
   const annotations = {};
   if (avgAtend > 0) {
-    annotations.yaxis = [{ y: avgAtend, borderColor: 'rgba(0,0,0,.12)', strokeDashArray: 4,
+    const _cc = chartColors();
+    const _annBg = isDarkTheme() ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.04)';
+    annotations.yaxis = [{ y: avgAtend, borderColor: _cc.grid, strokeDashArray: 4,
       label: { text: (isMultiDay ? 'média/dia ' : 'média ') + avgAtend,
-               style: { fontSize: '10px', fontWeight: 600, fontFamily: "'Satoshi'", color: '#71717A', background: 'rgba(0,0,0,.04)', borderColor: 'transparent', padding: { left: 6, right: 6, top: 2, bottom: 2 } },
-               position: 'left' } }];
+               style: { fontSize: '10px', fontWeight: 600, fontFamily: "'Satoshi'", color: _cc.textMuted, background: _annBg, borderColor: 'transparent', padding: { left: 6, right: 6, top: 2, bottom: 2 } },
+               position: 'left', offsetX: 10 } }];
   }
 
   renderChart('hourly', '#chartHourly', {
@@ -1795,12 +1824,13 @@ async function loadScatter(range, cachedData) {
         var color = w.config.colors[seriesIndex];
         var xVal = Array.isArray(d) ? d[0] : (d.x || 0);
         var yVal = Array.isArray(d) ? d[1] : (d.y || 0);
-        return '<div style="padding:10px 14px;font-family:Satoshi,sans-serif;font-size:12px;line-height:1.6;min-width:140px">' +
+        var cc = chartColors();
+        return '<div style="padding:10px 14px;font-family:Satoshi,sans-serif;font-size:12px;line-height:1.6;min-width:140px;background:' + cc.tooltipBg + ';border-radius:8px">' +
                '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">' +
                '<span style="width:10px;height:10px;border-radius:50%;background:' + color + ';display:inline-block"></span>' +
-               '<strong style="font-size:13px">' + name + '</strong></div>' +
-               '<div style="color:#71717A">Atendimentos: <strong style="color:#18181B">' + xVal + '</strong></div>' +
-               '<div style="color:#71717A">Conversão: <strong style="color:#18181B">' + yVal + '%</strong></div></div>';
+               '<strong style="font-size:13px;color:' + cc.tooltipTitle + '">' + name + '</strong></div>' +
+               '<div style="color:' + cc.tooltipBody + '">Atendimentos: <strong style="color:' + cc.tooltipTitle + '">' + xVal + '</strong></div>' +
+               '<div style="color:' + cc.tooltipBody + '">Conversão: <strong style="color:' + cc.tooltipTitle + '">' + yVal + '%</strong></div></div>';
       }
     }
   });
@@ -1847,8 +1877,8 @@ async function loadTempoMeta(range, cachedData) {
              categories: names },
     yaxis: { labels: { style: { fontSize: '12px', fontWeight: 700, colors: [chartColors().textStrong] } } },
     grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { right: 40 }, xaxis: { lines: { show: true } }, yaxis: { lines: { show: false } } },
-    annotations: { xaxis: [{ x: metaTempo, borderColor: '#71717A', strokeDashArray: 4,
-      label: { text: 'Meta ' + metaTempo + 'min', style: { fontSize: '10px', fontWeight: 600, background: 'transparent', color: '#71717A' }, orientation: 'horizontal' } }] },
+    annotations: { xaxis: [{ x: metaTempo, borderColor: chartColors().textMuted, strokeDashArray: 4,
+      label: { text: 'Meta ' + metaTempo + 'min', style: { fontSize: '10px', fontWeight: 600, background: 'transparent', color: chartColors().textMuted }, orientation: 'horizontal' } }] },
     dataLabels: { enabled: true, formatter: v => Math.round(v) + 'min', offsetX: 0,
       style: { fontSize: '11px', fontWeight: 700, colors: [chartColors().datalabel] } },
     legend: { show: false },
