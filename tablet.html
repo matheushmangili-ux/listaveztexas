@@ -2769,7 +2769,7 @@ async function openTurnoSummary() {
   try {
     const turnoStart = currentTurno.abertura || currentTurno.created_at;
     const { data: stats } = await sb.rpc('get_conversion_stats', { p_inicio: turnoStart, p_fim: new Date().toISOString() });
-    const s = stats || { total_atendimentos: 0, vendas: 0, nao_convertido: 0, taxa_conversao: 0 };
+    const s = (Array.isArray(stats) ? stats[0] : stats) || { total_atendimentos: 0, total_vendas: 0, total_nao_convertido: 0, taxa_conversao: 0 };
     // Tempo médio
     const { data: atends } = await sb.from('atendimentos').select('inicio, fim').eq('turno_id', currentTurno.id).neq('resultado', 'em_andamento').not('fim', 'is', null);
     let tempoMedio = 0;
@@ -2790,7 +2790,7 @@ async function openTurnoSummary() {
       topVendedor = [...countMap.values()].sort((a, b) => b.vendas - a.vendas)[0];
     }
     const inQueueCount = vendedores.filter(v => v.status === 'disponivel' && v.posicao_fila != null).length;
-    const conv = Math.round((s.taxa_conversao || 0) * 100);
+    const conv = Math.round(s.taxa_conversao || 0);
     content.innerHTML = `
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
         <div style="background:var(--bg-surface);border-radius:10px;padding:14px;text-align:center">
@@ -2798,7 +2798,7 @@ async function openTurnoSummary() {
           <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Atendimentos</div>
         </div>
         <div style="background:var(--bg-surface);border-radius:10px;padding:14px;text-align:center">
-          <div style="font-family:var(--font-mono);font-size:24px;font-weight:800;color:var(--success)">${s.vendas}</div>
+          <div style="font-family:var(--font-mono);font-size:24px;font-weight:800;color:var(--success)">${s.total_vendas || 0}</div>
           <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Vendas</div>
         </div>
         <div style="background:var(--bg-surface);border-radius:10px;padding:14px;text-align:center">
