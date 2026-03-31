@@ -1936,20 +1936,21 @@ async function loadTrend(range) {
     series: [
       { name: 'Atendimentos', type: 'bar', data: atend },
       { name: 'Vendas', type: 'bar', data: vendas },
-      { name: 'Conversão', type: 'line', data: conv }
+      { name: 'Conversão', type: 'bar', data: conv }
     ],
     xaxis: { categories: xLabels, labels: { style: { fontSize: '11px', fontWeight: 600 } } },
     yaxis: [
       { labels: { style: { fontSize: '10px', fontWeight: 500 } }, forceNiceScale: true, min: 0 },
       { opposite: true,
         labels: { formatter: v => Math.round(v) + '%', style: { fontSize: '10px', fontWeight: 500 } }, min: 0, max: 100,
-        forceNiceScale: false }
+        forceNiceScale: false,
+        seriesName: 'Conversão' }
     ],
-    plotOptions: { bar: { borderRadius: 4, columnWidth: isSingleDay ? '35%' : '55%' } },
-    stroke: { width: [0, 0, 3], curve: 'smooth' },
-    fill: { opacity: [0.85, 0.5, 1] },
+    plotOptions: { bar: { borderRadius: 4, columnWidth: isSingleDay ? '45%' : '65%' } },
+    stroke: { width: [0, 0, 0] },
+    fill: { opacity: [0.85, 0.5, 0.7] },
     colors: ['#e2506f', '#D4D4D8', '#f59e0b'],
-    markers: { size: [0, 0, 5], strokeWidth: 2, strokeColors: '#fff', hover: { size: 7 } },
+    markers: { size: 0 },
     grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { left: 10, right: 10, bottom: 5 } },
     legend: { position: 'top', horizontalAlign: 'center', fontSize: '11px', fontWeight: 600,
               labels: { colors: chartColors().textStrong },

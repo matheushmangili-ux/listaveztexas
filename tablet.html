@@ -2543,11 +2543,10 @@ function updateTurnoSwitch(isOn) {
 window.toggleTurno = async function() {
   markLocal();
   if (currentTurno) {
-    // Bloquear se houver atendimentos ativos
+    // Avisar se houver atendimentos ativos (serão finalizados automaticamente)
     const activeCount = activeAtendimentos.length;
     if (activeCount > 0) {
-      toast(`Finalize ${activeCount} atendimento${activeCount > 1 ? 's' : ''} antes de encerrar o turno`, 'warning', 3000);
-      return;
+      toast(`${activeCount} atendimento(s) ativo(s) serão finalizados automaticamente`, 'warning', 3000);
     }
 
     openTurnoSummary();
@@ -2630,11 +2629,17 @@ window.confirmCloseTurno = async function() {
   const btn = document.getElementById('btnConfirmCloseTurno');
   if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Encerrando...'; }
   markLocal();
-  const fq = sb.from('vendedores').update({ status: 'fora', posicao_fila: null }).eq('ativo', true);
-  if (tenantId) fq.eq('tenant_id', tenantId);
-  const { error: e1 } = await fq;
-  const { error: e2 } = await sb.from('turnos').update({ fechamento: new Date().toISOString() }).eq('id', currentTurno.id);
-  if (e1 || e2) { toast('Erro ao fechar turno', 'error'); if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-power-off" style="margin-right:4px"></i>Encerrar Turno'; } return; }
+  // RPC atômica: finaliza atendimentos + reseta vendedores + fecha turno
+  const { data, error } = await sb.rpc('fechar_turno_seguro', { p_turno_id: currentTurno.id });
+  if (error) {
+    toast('Erro ao fechar turno: ' + (error.message || ''), 'error');
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-power-off" style="margin-right:4px"></i>Encerrar Turno'; }
+    return;
+  }
+  const result = typeof data === 'string' ? JSON.parse(data) : data;
+  if (result.atendimentos_finalizados > 0) {
+    toast(result.atendimentos_finalizados + ' atendimento(s) finalizado(s) automaticamente', 'warning', 3000);
+  }
   logPosition(null, 'turno', 'Turno encerrado');
   currentTurno = null;
   activeAtendimentos = [];
@@ -3847,6 +3852,16 @@ if (APP_CHANGELOG[0]) {
 })();
 
 // ─── Init ───
+// Cleanup de dados órfãos (atendimentos >8h, turnos antigos, vendedores presos)
+if (tenantId) {
+  try {
+    const { data: cleanup } = await sb.rpc('cleanup_dados_orfaos', { p_tenant_id: tenantId });
+    const cr = typeof cleanup === 'string' ? JSON.parse(cleanup) : cleanup;
+    if (cr && (cr.atendimentos_stale > 0 || cr.vendedores_stuck > 0 || cr.turnos_fechados > 0)) {
+      console.warn('[cleanup] Dados órfãos limpos:', cr);
+    }
+  } catch (e) { console.warn('[cleanup] erro:', e.message); }
+}
 await checkExistingTurno();
 await loadVendedores();
 await checkActiveAtendimentos();
