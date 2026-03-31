@@ -48,10 +48,10 @@ FROM tenants t
 CROSS JOIN (VALUES
   ('Meta',            'fa-brands fa-meta',      1),
   ('TikTok',          'fa-brands fa-tiktok',    2),
-  ('E-mail',          'fa-envelope',            3),
-  ('SMS',             'fa-comment-sms',         4),
-  ('Indicação',       'fa-handshake',           5),
-  ('Já sou cliente',  'fa-user-check',          6)
+  ('E-mail',          'fa-solid fa-envelope',      3),
+  ('SMS',             'fa-solid fa-comment-sms',   4),
+  ('Indicação',       'fa-solid fa-handshake',     5),
+  ('Já sou cliente',  'fa-solid fa-user-check',    6)
 ) AS c(nome, icone, ordem)
 WHERE NOT EXISTS (
   SELECT 1 FROM canais_origem co WHERE co.tenant_id = t.id AND co.nome = c.nome
@@ -64,10 +64,10 @@ BEGIN
   INSERT INTO canais_origem (tenant_id, nome, icone, tipo, ordem) VALUES
     (p_tenant_id, 'Meta',            'fa-brands fa-meta',      'fixo', 1),
     (p_tenant_id, 'TikTok',          'fa-brands fa-tiktok',    'fixo', 2),
-    (p_tenant_id, 'E-mail',          'fa-envelope',            'fixo', 3),
-    (p_tenant_id, 'SMS',             'fa-comment-sms',         'fixo', 4),
-    (p_tenant_id, 'Indicação',       'fa-handshake',           'fixo', 5),
-    (p_tenant_id, 'Já sou cliente',  'fa-user-check',          'fixo', 6);
+    (p_tenant_id, 'E-mail',          'fa-solid fa-envelope',      'fixo', 3),
+    (p_tenant_id, 'SMS',             'fa-solid fa-comment-sms',   'fixo', 4),
+    (p_tenant_id, 'Indicação',       'fa-solid fa-handshake',     'fixo', 5),
+    (p_tenant_id, 'Já sou cliente',  'fa-solid fa-user-check',    'fixo', 6);
 END;
 $$;
 
