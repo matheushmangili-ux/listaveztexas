@@ -924,6 +924,55 @@ window.addEventListener('error', function(e) {
   [data-theme="dark"] .fa-circle-half-stroke {
     color: var(--gold) !important;
   }
+
+  /* ─── Origin Modal ─── */
+  .origin-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.55);
+    display: none; align-items: center; justify-content: center;
+    z-index: 9999; opacity: 0; transition: opacity .2s;
+  }
+  .origin-overlay.show { opacity: 1; }
+  .origin-box {
+    background: var(--bg-card); border-radius: 16px; padding: 24px;
+    width: 90%; max-width: 400px; text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    transform: scale(.9); transition: transform .2s;
+  }
+  .origin-overlay.show .origin-box { transform: scale(1); }
+  .origin-title {
+    font-family: var(--font-body); font-size: 15px; font-weight: 700;
+    color: var(--text-primary); margin-bottom: 16px;
+  }
+  .origin-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    margin-bottom: 12px;
+  }
+  .origin-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 14px 8px; border: 2px solid var(--border-subtle);
+    border-radius: 12px; background: var(--bg-surface); cursor: pointer;
+    transition: border-color .15s, background .15s, transform .1s;
+    font-family: var(--font-body);
+  }
+  .origin-btn:active { transform: scale(.95); }
+  .origin-btn:hover { border-color: var(--accent); background: var(--bg-card); }
+  .origin-btn i { font-size: 20px; color: var(--accent); }
+  .origin-btn span { font-size: 11px; font-weight: 600; color: var(--text-primary); line-height: 1.2; }
+  .origin-sep {
+    font-size: 10px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: .08em;
+    margin: 8px 0; display: flex; align-items: center; gap: 8px;
+  }
+  .origin-sep::before, .origin-sep::after {
+    content: ''; flex: 1; height: 1px; background: var(--border-subtle);
+  }
+  .origin-skip {
+    padding: 10px 24px; border: 1px solid var(--border-subtle);
+    border-radius: 8px; background: transparent; color: var(--text-muted);
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: var(--font-body); transition: background .15s;
+  }
+  .origin-skip:hover { background: var(--bg-surface); }
 </style>
 </head>
 <body>
@@ -1271,6 +1320,8 @@ const _queueEntryTimes = new Map(); // vendedorId → { pos, time } para cold se
 const _pauseStartTimes = new Map(); // vendedorId → Date inicio da pausa
 const _positionLog = []; // { time, icon, vendedor, action, details } — max 200
 let _tvMode = localStorage.getItem('minhavez_tvMode') === '1' || new URLSearchParams(location.search).has('tv');
+let _canaisOrigem = [];
+let _pendingOriginVendedorId = null;
 
 // Cached DOM refs (evita querySelector repetido)
 const _queuePanel = document.querySelector('.queue-panel');
@@ -1910,8 +1961,92 @@ window.sendToAtendimento = function(vendedorId) {
   withLock(() => _doSendToAtendimento(vendedorId));
 };
 
+// ─── Carregar canais de origem ───
+async function loadCanaisOrigem() {
+  try {
+    const { data } = await sb.from('canais_origem')
+      .select('*')
+      .eq('tenant_id', tenantId)
+      .eq('ativo', true)
+      .order('ordem');
+    _canaisOrigem = data || [];
+  } catch (e) { console.warn('[canais_origem] erro:', e.message); _canaisOrigem = []; }
+}
+
+// ─── Mostrar modal de canal de origem ───
+function showOriginModal(vendedorId) {
+  _pendingOriginVendedorId = vendedorId;
+  const box = document.querySelector('.origin-box');
+  const fixos = _canaisOrigem.filter(c => c.tipo === 'fixo');
+  const eventos = _canaisOrigem.filter(c => c.tipo === 'evento');
+
+  let content = '<div class="origin-title">Como o cliente chegou?</div>';
+  content += '<div class="origin-grid">';
+  fixos.forEach(c => {
+    content += '<button class="origin-btn" onclick="confirmOrigin(\'' + c.id + '\')">' +
+               '<i class="' + c.icone + '"></i><span>' + c.nome + '</span></button>';
+  });
+  content += '</div>';
+
+  if (eventos.length > 0) {
+    content += '<div class="origin-sep">Eventos ativos</div>';
+    content += '<div class="origin-grid">';
+    eventos.forEach(c => {
+      content += '<button class="origin-btn" onclick="confirmOrigin(\'' + c.id + '\')">' +
+                 '<i class="' + c.icone + '"></i><span>' + c.nome + '</span></button>';
+    });
+    content += '</div>';
+  }
+
+  content += '<button class="origin-skip" onclick="confirmOrigin(null)">Não informado</button>';
+  box.innerHTML = content;
+
+  const overlay = document.getElementById('originOverlay');
+  overlay.style.display = 'flex';
+  requestAnimationFrame(() => overlay.classList.add('show'));
+}
+
+// ─── Confirmar canal de origem e iniciar atendimento ───
+window.confirmOrigin = async function(canalId) {
+  const overlay = document.getElementById('originOverlay');
+  overlay.classList.remove('show');
+  setTimeout(() => overlay.style.display = 'none', 200);
+
+  if (!_pendingOriginVendedorId) return;
+  const vendedorId = _pendingOriginVendedorId;
+  _pendingOriginVendedorId = null;
+
+  await withLock(async () => {
+    await _executeAtendimento(vendedorId, canalId);
+  });
+};
+
 // ─── Enviar vendedor específico ao atendimento (click ou drag) ───
 async function _doSendToAtendimento(vendedorId) {
+  if (!currentTurno) { toast('Abra o turno primeiro', 'warning'); return; }
+  let v = vendedores.find(x => x.id === vendedorId);
+  if (!v) return;
+  // Se vendedor está fora/pausa, colocar na fila primeiro
+  if (v.status === 'fora' || v.status === 'pausa') {
+    await addToQueue(vendedorId);
+    v = vendedores.find(x => x.id === vendedorId);
+    if (!v || v.posicao_fila == null) return;
+  }
+  if (v.status !== 'disponivel' || v.posicao_fila == null) {
+    toast((v.apelido || v.nome) + ' não está na fila (status: ' + v.status + ')', 'warning');
+    return;
+  }
+  // Se há canais configurados, mostrar modal de origem
+  if (_canaisOrigem.length > 0) {
+    showOriginModal(vendedorId);
+    return; // modal cuida do resto via confirmOrigin
+  }
+  // Sem canais configurados, vai direto
+  await _executeAtendimento(vendedorId, null);
+}
+
+// ─── Executar atendimento (lógica real após escolha de canal) ───
+async function _executeAtendimento(vendedorId, canalOrigemId) {
   if (!currentTurno) { toast('Abra o turno primeiro', 'warning'); return; }
   let v = vendedores.find(x => x.id === vendedorId);
   if (!v) return;
@@ -1941,6 +2076,10 @@ async function _doSendToAtendimento(vendedorId) {
       p_preferencial: isPreferencial
     });
     if (error) throw error;
+    // Se canal de origem foi selecionado, gravar no atendimento
+    if (canalOrigemId && data) {
+      await sb.from('atendimentos').update({ canal_origem_id: canalOrigemId }).eq('id', data);
+    }
     const { data: atend } = await sb.from('atendimentos').select('*, vendedores(nome, apelido)').eq('id', data).single();
     activeAtendimentos.push(atend);
     renderActiveAtendimentos();
@@ -1953,7 +2092,7 @@ async function _doSendToAtendimento(vendedorId) {
     toast('Erro: ' + (err.message || 'falha ao iniciar'), 'error');
     await loadVendedores();
   }
-};
+}
 
 // Touch drag fluido (ghost card segue o dedo)
 let touchDragEl = null;
@@ -3865,6 +4004,15 @@ if (tenantId) {
 await checkExistingTurno();
 await loadVendedores();
 await checkActiveAtendimentos();
+loadCanaisOrigem(); // carrega canais de origem em background
 </script>
+<!-- Origin Channel Modal -->
+<div class="origin-overlay" id="originOverlay">
+  <div class="origin-box">
+    <div class="origin-title">Como o cliente chegou?</div>
+    <div class="origin-grid" id="originGrid"></div>
+    <button class="origin-skip" onclick="confirmOrigin(null)">Não informado</button>
+  </div>
+</div>
 </body>
 </html>

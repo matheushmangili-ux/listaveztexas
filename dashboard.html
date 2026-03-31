@@ -64,6 +64,7 @@ window._showUpdateBanner = function() {
 };
 </script>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 <style>
   .dash-layout {
     max-width: 1280px;
@@ -987,6 +988,16 @@ window._showUpdateBanner = function() {
     </div>
   </div>
 
+  <!-- Origem dos Clientes (ECharts) -->
+  <div class="chart-card" style="margin-bottom:var(--gap)">
+    <h3><i class="fa-solid fa-signs-post" style="margin-right:6px;color:var(--accent-dim)"></i>Origem dos Clientes</h3>
+    <div class="chart-box" style="height:400px"><div id="chartOrigem" style="width:100%;height:100%"></div></div>
+    <p id="chartOrigemEmpty" style="display:none;text-align:center;padding:40px 20px;font-size:13px;color:var(--text-muted);font-family:var(--font-body)">
+      <i class="fa-solid fa-signs-post" style="font-size:24px;display:block;margin-bottom:8px;opacity:.4"></i>
+      Nenhum dado de origem registrado neste período
+    </p>
+  </div>
+
   <!-- Ranking -->
   <div class="chart-card" style="margin-bottom:var(--gap)">
     <div class="chart-card-header" onclick="toggleSection('ranking')">
@@ -1593,7 +1604,8 @@ async function loadAll() {
     loadScatter(range, cachedRanking),
     loadTempoMeta(range, cachedRanking),
     loadTrend(range),
-    loadPreferenciais(range)
+    loadPreferenciais(range),
+    loadOrigem(range)
   ]);
   results.forEach((r, i) => { if (r.status === 'rejected') console.error('Dashboard load error [' + i + ']:', r.reason); });
   updateTimestamp();
@@ -2301,6 +2313,130 @@ window.toggleSection = function(id) {
   });
 })();
 
+// ─── Origem dos Clientes (ECharts donut) ───
+let _echartsOrigem = null;
+
+async function loadOrigem(range) {
+  const container = document.getElementById('chartOrigem');
+  const emptyMsg = document.getElementById('chartOrigemEmpty');
+  if (!container) return;
+
+  const { data, error } = await sb.rpc('get_canal_stats', { p_inicio: range.start, p_fim: range.end });
+  if (error) { console.warn('Erro canais:', error.message); return; }
+
+  if (!data || data.length === 0) {
+    container.style.display = 'none';
+    if (emptyMsg) emptyMsg.style.display = 'block';
+    if (_echartsOrigem) { _echartsOrigem.dispose(); _echartsOrigem = null; }
+    return;
+  }
+
+  container.style.display = 'block';
+  if (emptyMsg) emptyMsg.style.display = 'none';
+
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const palette = ['#e2506f','#6366f1','#f59e0b','#10b981','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#f97316','#ef4444'];
+
+  const chartData = data.map((d, i) => ({
+    name: d.canal_nome || 'Não informado',
+    value: Number(d.total),
+    itemStyle: { color: palette[i % palette.length] }
+  }));
+
+  const total = chartData.reduce((s, d) => s + d.value, 0);
+
+  if (_echartsOrigem) _echartsOrigem.dispose();
+  _echartsOrigem = echarts.init(container);
+
+  const option = {
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: isDark ? '#1E1E2E' : '#fff',
+      borderColor: isDark ? 'rgba(255,255,255,.1)' : 'rgba(0,0,0,.08)',
+      textStyle: {
+        color: isDark ? 'rgba(255,255,255,.85)' : '#18181B',
+        fontFamily: 'Satoshi, sans-serif',
+        fontSize: 12
+      },
+      formatter: function(p) {
+        return '<strong>' + p.name + '</strong><br/>' +
+               p.value + ' atendimentos (' + p.percent.toFixed(1) + '%)';
+      }
+    },
+    legend: {
+      orient: 'vertical',
+      right: '5%',
+      top: 'center',
+      itemWidth: 10,
+      itemHeight: 10,
+      itemGap: 12,
+      textStyle: {
+        color: isDark ? 'rgba(255,255,255,.7)' : '#52525B',
+        fontFamily: 'Satoshi, sans-serif',
+        fontSize: 12,
+        fontWeight: 500
+      }
+    },
+    series: [{
+      type: 'pie',
+      radius: ['50%', '75%'],
+      center: ['35%', '50%'],
+      avoidLabelOverlap: true,
+      itemStyle: {
+        borderRadius: 6,
+        borderColor: isDark ? '#1a1a2e' : '#fff',
+        borderWidth: 3
+      },
+      label: {
+        show: false
+      },
+      emphasis: {
+        label: { show: false },
+        itemStyle: {
+          shadowBlur: 12,
+          shadowColor: 'rgba(0,0,0,.2)'
+        }
+      },
+      data: chartData
+    }],
+    graphic: [{
+      type: 'group',
+      left: '35%',
+      top: 'center',
+      children: [{
+        type: 'text',
+        style: {
+          text: total.toString(),
+          textAlign: 'center',
+          fill: isDark ? '#fff' : '#18181B',
+          fontSize: 28,
+          fontWeight: 700,
+          fontFamily: 'Satoshi, sans-serif',
+          y: -10
+        }
+      }, {
+        type: 'text',
+        style: {
+          text: 'total',
+          textAlign: 'center',
+          fill: isDark ? 'rgba(255,255,255,.4)' : '#a1a1aa',
+          fontSize: 11,
+          fontWeight: 500,
+          fontFamily: 'Satoshi, sans-serif',
+          y: 14
+        }
+      }]
+    }]
+  };
+
+  _echartsOrigem.setOption(option);
+}
+
+// Resize ECharts on window resize
+window.addEventListener('resize', function() {
+  if (_echartsOrigem) _echartsOrigem.resize();
+});
+
 // ─── Gestão de Vendedores ───
 async function loadVendedores() {
   const el = document.getElementById('vendedorList');
@@ -2620,6 +2756,7 @@ function debouncedReloadAtendimentos() {
       loadTempoMeta(range, data);
       loadMotivos(range);
       loadHourly(range);
+      loadOrigem(range);
       updateTimestamp();
     } finally {
       _isReloadingAtend = false;

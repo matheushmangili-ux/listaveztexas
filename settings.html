@@ -263,6 +263,78 @@
       grid-template-columns: 1fr 1fr;
     }
   }
+  /* ─── Canais de Origem ─── */
+  .canal-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-subtle);
+    font-family: var(--font-body);
+  }
+  .canal-row:last-child { border-bottom: none; }
+  .canal-row .canal-icon {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px; background: var(--bg-surface);
+    font-size: 15px; color: var(--accent);
+    flex-shrink: 0;
+  }
+  .canal-row .canal-info {
+    flex: 1; min-width: 0;
+  }
+  .canal-row .canal-name {
+    font-size: 13px; font-weight: 600; color: var(--text-primary);
+  }
+  .canal-row .canal-type {
+    font-size: 10px; color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: .04em; font-weight: 500;
+  }
+  .canal-toggle {
+    position: relative;
+    width: 40px; height: 22px;
+    background: var(--bg-deep);
+    border-radius: 11px;
+    border: none;
+    cursor: pointer;
+    transition: background .2s;
+    flex-shrink: 0;
+  }
+  .canal-toggle.active { background: var(--accent); }
+  .canal-toggle::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform .2s;
+  }
+  .canal-toggle.active::after { transform: translateX(18px); }
+  .canal-actions {
+    display: flex; gap: 4px;
+  }
+  .canal-actions button {
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    border: none; border-radius: 6px;
+    background: transparent; color: var(--text-muted);
+    cursor: pointer; font-size: 12px;
+    transition: background .15s, color .15s;
+  }
+  .canal-actions button:hover { background: var(--bg-surface); color: var(--text-primary); }
+  .canal-actions button.danger:hover { color: var(--danger, #ef4444); }
+  .icone-option {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--border-subtle);
+    border-radius: 8px; background: var(--bg-surface);
+    cursor: pointer; font-size: 15px; color: var(--text-secondary);
+    transition: border-color .15s, color .15s;
+  }
+  .icone-option:hover, .icone-option.selected {
+    border-color: var(--accent); color: var(--accent);
+  }
 </style>
 </head>
 <body>
@@ -377,6 +449,36 @@
         </div>
       </div>
 
+      <!-- Canais de Origem -->
+      <div class="settings-section">
+        <h2 class="section-title"><i class="fa-solid fa-signs-post"></i> Canais de Origem</h2>
+        <p class="section-desc" style="font-size:12px;color:var(--text-muted);margin:-8px 0 16px;font-family:var(--font-body)">
+          Canais fixos e eventos temporários — defina como os clientes chegam até a loja.
+        </p>
+
+        <!-- Fixed Channels -->
+        <div class="settings-card" style="margin-bottom:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <span style="font-size:12px;font-weight:700;color:var(--text-primary);font-family:var(--font-body)">Canais Fixos</span>
+          </div>
+          <div id="canaisFixosList"></div>
+        </div>
+
+        <!-- Events -->
+        <div class="settings-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <span style="font-size:12px;font-weight:700;color:var(--text-primary);font-family:var(--font-body)">Eventos</span>
+            <button class="btn btn-primary" onclick="showAddEvento()" style="padding:6px 14px;font-size:11px">
+              <i class="fa-solid fa-plus" style="margin-right:4px"></i> Novo Evento
+            </button>
+          </div>
+          <div id="canaisEventosList"></div>
+          <p id="canaisEventosEmpty" style="display:none;text-align:center;padding:20px;font-size:12px;color:var(--text-muted);font-family:var(--font-body)">
+            Nenhum evento cadastrado
+          </p>
+        </div>
+      </div>
+
       <!-- Danger Zone -->
       <div class="settings-section">
         <h2 style="color:var(--danger)"><i class="fa-solid fa-triangle-exclamation"></i> Zona de Perigo</h2>
@@ -419,6 +521,26 @@
       <button id="vmSave" class="btn btn-primary" onclick="saveVendor()">
         <i class="fa-solid fa-check"></i> Salvar
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Novo Evento -->
+<div class="modal-overlay" id="eventoModal" style="display:none">
+  <div class="modal-box" style="max-width:380px">
+    <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;color:var(--text-primary);font-family:var(--font-body)">Novo Evento</h3>
+    <div class="form-group">
+      <label class="form-label">Nome do evento</label>
+      <input type="text" id="eventoNome" class="form-input" placeholder="Ex: Feirão de Março" maxlength="40" style="font-size:13px">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Ícone</label>
+      <div id="eventoIconePicker" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-ghost" onclick="closeEventoModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEvento()">Salvar</button>
     </div>
   </div>
 </div>
@@ -470,6 +592,7 @@ let tenantSectors = [];
   renderVendorList();
   populateLinks();
   populatePlan();
+  loadCanais();
 
   document.getElementById('settingsLoader').style.display = 'none';
   document.getElementById('settingsContent').style.display = 'block';
@@ -674,6 +797,164 @@ window.handleLogout = async function() {
 document.getElementById('vendorModal').addEventListener('click', (e) => {
   if (e.target === e.currentTarget) closeVendorModal();
 });
+
+// Close evento modal on overlay click
+document.getElementById('eventoModal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeEventoModal();
+});
+
+// ─── Canais de Origem ───
+let _canais = [];
+let _editingEventoId = null;
+const _eventoIcOpts = [
+  'fa-calendar-star', 'fa-champagne-glasses', 'fa-gift', 'fa-tags',
+  'fa-fire', 'fa-bolt', 'fa-star', 'fa-heart',
+  'fa-music', 'fa-car', 'fa-trophy', 'fa-percent'
+];
+let _selectedIcone = 'fa-calendar-star';
+
+async function loadCanais() {
+  const { data } = await sb.from('canais_origem')
+    .select('*')
+    .eq('tenant_id', tenantId)
+    .order('tipo')
+    .order('ordem');
+  _canais = data || [];
+  renderCanais();
+}
+
+function renderCanais() {
+  const fixos = _canais.filter(c => c.tipo === 'fixo');
+  const eventos = _canais.filter(c => c.tipo === 'evento');
+
+  // Fixed channels
+  const fixosList = document.getElementById('canaisFixosList');
+  if (fixosList) {
+    fixosList.innerHTML = fixos.map(c => `
+      <div class="canal-row">
+        <div class="canal-icon"><i class="${c.icone}"></i></div>
+        <div class="canal-info">
+          <div class="canal-name">${c.nome}</div>
+        </div>
+        <button class="canal-toggle ${c.ativo ? 'active' : ''}" onclick="toggleCanal('${c.id}', ${!c.ativo})" title="${c.ativo ? 'Desativar' : 'Ativar'}"></button>
+      </div>
+    `).join('');
+  }
+
+  // Events
+  const eventosList = document.getElementById('canaisEventosList');
+  const eventosEmpty = document.getElementById('canaisEventosEmpty');
+  if (eventosList) {
+    if (eventos.length === 0) {
+      eventosList.innerHTML = '';
+      if (eventosEmpty) eventosEmpty.style.display = 'block';
+    } else {
+      if (eventosEmpty) eventosEmpty.style.display = 'none';
+      eventosList.innerHTML = eventos.map(c => `
+        <div class="canal-row">
+          <div class="canal-icon"><i class="fa-solid ${c.icone}"></i></div>
+          <div class="canal-info">
+            <div class="canal-name">${c.nome}</div>
+            <div class="canal-type">${c.ativo ? 'Ativo' : 'Inativo'}</div>
+          </div>
+          <button class="canal-toggle ${c.ativo ? 'active' : ''}" onclick="toggleCanal('${c.id}', ${!c.ativo})"></button>
+          <div class="canal-actions">
+            <button onclick="editEvento('${c.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+            <button class="danger" onclick="deleteEvento('${c.id}', '${c.nome}')" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+}
+
+window.toggleCanal = async function(id, newState) {
+  const { error } = await sb.from('canais_origem').update({ ativo: newState }).eq('id', id);
+  if (error) { toast('Erro ao atualizar canal', 'error'); return; }
+  const c = _canais.find(x => x.id === id);
+  if (c) c.ativo = newState;
+  renderCanais();
+  toast(newState ? 'Canal ativado' : 'Canal desativado', 'success');
+};
+
+window.showAddEvento = function() {
+  _editingEventoId = null;
+  _selectedIcone = 'fa-calendar-star';
+  document.getElementById('eventoNome').value = '';
+  renderIconePicker();
+  const modal = document.getElementById('eventoModal');
+  modal.style.display = 'flex';
+  modal.querySelector('h3').textContent = 'Novo Evento';
+  document.getElementById('eventoNome').focus();
+};
+
+window.editEvento = function(id) {
+  const c = _canais.find(x => x.id === id);
+  if (!c) return;
+  _editingEventoId = id;
+  _selectedIcone = c.icone;
+  document.getElementById('eventoNome').value = c.nome;
+  renderIconePicker();
+  const modal = document.getElementById('eventoModal');
+  modal.style.display = 'flex';
+  modal.querySelector('h3').textContent = 'Editar Evento';
+};
+
+window.closeEventoModal = function() {
+  document.getElementById('eventoModal').style.display = 'none';
+  _editingEventoId = null;
+};
+
+function renderIconePicker() {
+  const picker = document.getElementById('eventoIconePicker');
+  if (!picker) return;
+  picker.innerHTML = _eventoIcOpts.map(ic =>
+    `<button type="button" class="icone-option ${ic === _selectedIcone ? 'selected' : ''}" onclick="pickIcone('${ic}')">
+       <i class="fa-solid ${ic}"></i>
+     </button>`
+  ).join('');
+}
+
+window.pickIcone = function(ic) {
+  _selectedIcone = ic;
+  renderIconePicker();
+};
+
+window.saveEvento = async function() {
+  const nome = document.getElementById('eventoNome').value.trim();
+  if (!nome) { toast('Digite o nome do evento', 'warning'); return; }
+
+  if (_editingEventoId) {
+    const { error } = await sb.from('canais_origem')
+      .update({ nome, icone: _selectedIcone })
+      .eq('id', _editingEventoId);
+    if (error) { toast('Erro ao atualizar: ' + error.message, 'error'); return; }
+    toast('Evento atualizado', 'success');
+  } else {
+    const maxOrdem = _canais.reduce((max, c) => Math.max(max, c.ordem || 0), 0);
+    const { error } = await sb.from('canais_origem').insert({
+      tenant_id: tenantId,
+      nome,
+      icone: _selectedIcone,
+      tipo: 'evento',
+      ativo: true,
+      ordem: maxOrdem + 1
+    });
+    if (error) { toast('Erro ao criar: ' + error.message, 'error'); return; }
+    toast('Evento criado', 'success');
+  }
+
+  closeEventoModal();
+  await loadCanais();
+};
+
+window.deleteEvento = async function(id, nome) {
+  if (!confirm('Excluir o evento "' + nome + '"? Os dados históricos serão mantidos.')) return;
+  const { error } = await sb.from('canais_origem').delete().eq('id', id);
+  if (error) { toast('Erro ao excluir: ' + error.message, 'error'); return; }
+  toast('Evento excluído', 'success');
+  await loadCanais();
+};
 </script>
 </body>
 </html>
