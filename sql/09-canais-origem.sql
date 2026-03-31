@@ -46,12 +46,12 @@ INSERT INTO canais_origem (tenant_id, nome, icone, tipo, ordem)
 SELECT t.id, c.nome, c.icone, 'fixo', c.ordem
 FROM tenants t
 CROSS JOIN (VALUES
-  ('Instagram',       'fa-brands fa-instagram',   1),
-  ('Google',          'fa-brands fa-google',       2),
-  ('Indicacao',       'fa-handshake',              3),
-  ('Passou na frente','fa-person-walking',          4),
-  ('WhatsApp',        'fa-brands fa-whatsapp',     5),
-  ('Site',            'fa-globe',                   6)
+  ('Meta',            'fa-brands fa-meta',      1),
+  ('TikTok',          'fa-brands fa-tiktok',    2),
+  ('E-mail',          'fa-envelope',            3),
+  ('SMS',             'fa-comment-sms',         4),
+  ('Indicação',       'fa-handshake',           5),
+  ('Já sou cliente',  'fa-user-check',          6)
 ) AS c(nome, icone, ordem)
 WHERE NOT EXISTS (
   SELECT 1 FROM canais_origem co WHERE co.tenant_id = t.id AND co.nome = c.nome
@@ -62,12 +62,12 @@ CREATE OR REPLACE FUNCTION seed_canais_padrao(p_tenant_id UUID)
 RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
 BEGIN
   INSERT INTO canais_origem (tenant_id, nome, icone, tipo, ordem) VALUES
-    (p_tenant_id, 'Instagram',        'fa-brands fa-instagram',  'fixo', 1),
-    (p_tenant_id, 'Google',           'fa-brands fa-google',     'fixo', 2),
-    (p_tenant_id, 'Indicacao',        'fa-handshake',            'fixo', 3),
-    (p_tenant_id, 'Passou na frente', 'fa-person-walking',       'fixo', 4),
-    (p_tenant_id, 'WhatsApp',         'fa-brands fa-whatsapp',   'fixo', 5),
-    (p_tenant_id, 'Site',             'fa-globe',                'fixo', 6);
+    (p_tenant_id, 'Meta',            'fa-brands fa-meta',      'fixo', 1),
+    (p_tenant_id, 'TikTok',          'fa-brands fa-tiktok',    'fixo', 2),
+    (p_tenant_id, 'E-mail',          'fa-envelope',            'fixo', 3),
+    (p_tenant_id, 'SMS',             'fa-comment-sms',         'fixo', 4),
+    (p_tenant_id, 'Indicação',       'fa-handshake',           'fixo', 5),
+    (p_tenant_id, 'Já sou cliente',  'fa-user-check',          'fixo', 6);
 END;
 $$;
 
