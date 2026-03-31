@@ -2200,6 +2200,7 @@ window.onTouchDragStart = function(e) {
   const onEnd = async (ev) => {
     document.removeEventListener('touchmove', onMove);
     document.removeEventListener('touchend', onEnd);
+    document.removeEventListener('touchcancel', onEnd);
 
     // Destravar scroll
     document.body.style.overflow = '';
@@ -2210,25 +2211,38 @@ window.onTouchDragStart = function(e) {
     _dragRectsCache = null;
     queueList.classList.remove('dragging');
     _clearTouchIndicators();
+    // Ghost cleanup robusto — remove do DOM e elimina referência
     if (touchGhost) { touchGhost.remove(); touchGhost = null; }
-    if (touchDragEl) touchDragEl.style.opacity = '1';
+    // Restaurar opacidade no item original (pode estar detached se re-render aconteceu)
+    if (touchDragEl) {
+      touchDragEl.style.opacity = '1';
+      // Também restaurar no DOM atual por data-id (caso o elemento tenha sido recriado)
+      const liveEl = queueList.querySelector('[data-id="' + (touchDragId || '') + '"]');
+      if (liveEl && liveEl !== touchDragEl) liveEl.style.opacity = '1';
+    }
     queueList.style.background = '';
     footer?.classList.remove('drop-highlight'); hideFooterDropLabel();
 
     if (!touchDragging) {
-      // Foi um tap, não drag — não fazer nada (o onclick cuida)
       touchDragId = null; touchDragEl = null;
       return;
     }
 
-    const touch = ev.changedTouches[0];
-    const dropEl = document.elementFromPoint(touch.clientX, touch.clientY);
+    const touch = ev.changedTouches ? ev.changedTouches[0] : null;
 
     // IMPORTANTE: limpar flags de drag ANTES das ações async
-    // Caso contrário, renderFooter() fica bloqueado durante todo o await
     const _savedDragId = touchDragId;
     touchDragId = null; touchDragEl = null; touchDragging = false;
-    _lastFooterKey = ''; // Garantir que footer re-renderize após drag
+    _lastFooterKey = '';
+    _lastQueueKey = ''; // Forçar re-render da fila também
+
+    if (!touch) {
+      // touchcancel — sem posição, forçar re-render e sair
+      scheduleRender();
+      return;
+    }
+
+    const dropEl = document.elementFromPoint(touch.clientX, touch.clientY);
 
     if (dropEl && (dropEl.id === 'queueList' || dropEl.closest('#queueList'))) {
       const v = vendedores.find(x => x.id === _savedDragId);
@@ -2238,14 +2252,18 @@ window.onTouchDragStart = function(e) {
       if (isInQueue) { await reorderInQueue(_savedDragId, afterId); }
       else { await addToQueueAt(_savedDragId, afterId); }
     } else if (dropEl && (dropEl.id === 'servicePanel' || dropEl.closest('#servicePanel') || dropEl.closest('#activeList'))) {
-      await withLock(() => _doSendToAtendimento(_savedDragId)); // touch drag pula confirmação
+      await withLock(() => _doSendToAtendimento(_savedDragId));
     } else if (dropEl && (dropEl.id === 'statusFooter' || dropEl.closest('#statusFooter'))) {
       setTimeout(() => openSaida(_savedDragId), 50);
+    } else {
+      // Drop em área neutra — forçar re-render para restaurar estado visual
+      scheduleRender();
     }
   };
 
   document.addEventListener('touchmove', onMove, { passive: false });
   document.addEventListener('touchend', onEnd);
+  document.addEventListener('touchcancel', onEnd);
 };
 
 // ─── Atendimento card drag → Outcome Sheet ───
@@ -2626,6 +2644,20 @@ let _footerTimerInterval = setInterval(() => {
   _lastFooterKey = '';
   renderFooter();
 }, 60000);
+
+// ─── Safety: limpar ghosts órfãos a cada 3s ───
+setInterval(() => {
+  if (!touchDragging && !_atendTouchDragging) {
+    if (touchGhost) { touchGhost.remove(); touchGhost = null; }
+    if (_atendDragGhost) { _atendDragGhost.remove(); _atendDragGhost = null; }
+    // Restaurar overflow caso tenha ficado travado
+    if (document.body.style.overflow === 'hidden') {
+      document.body.style.overflow = '';
+      _queuePanel?.style.setProperty('overflow', '');
+      _servicePanel?.style.setProperty('overflow', '');
+    }
+  }
+}, 3000);
 
 // ─── Animated counter ───
 function animateValue(el, start, end, duration = 400, suffix = '') {
