@@ -83,6 +83,7 @@ window.addEventListener('error', function(e) {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto 1fr auto;
     height: 100vh;
+    height: 100dvh;
     gap: 0;
   }
   @media (max-width: 600px) {
@@ -163,7 +164,7 @@ window.addEventListener('error', function(e) {
     justify-content: center;
     gap: 4px;
   }
-  .setor-tab .tab-label { font-size: 11px; font-weight: 600; display: block; margin-top: 2px; text-transform: uppercase; letter-spacing: .05em; }
+  .setor-tab .tab-label { font-size: 12px; font-weight: 600; display: block; margin-top: 2px; text-transform: uppercase; letter-spacing: .05em; }
   .setor-tab i { color: var(--text-muted); }
   .setor-tab.active {
     background: #e2506f;
@@ -297,7 +298,7 @@ window.addEventListener('error', function(e) {
   }
   .turno-switch-label {
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 800;
     letter-spacing: .06em;
     color: #ef4444;
@@ -575,7 +576,7 @@ window.addEventListener('error', function(e) {
     border: 1px solid var(--border-subtle);
   }
   .quick-stat .val { font-family: var(--font-mono); font-weight: 700; font-size: 18px; }
-  .quick-stat .lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; margin-top: 2px; }
+  .quick-stat .lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; margin-top: 2px; }
 
   /* Outcome buttons */
   .outcome-row {
@@ -666,10 +667,10 @@ window.addEventListener('error', function(e) {
     top: -7px; right: 8px;
     background: var(--success);
     color: #060606;
-    font-size: 8px;
+    font-size: 10px;
     font-weight: 800;
     letter-spacing: .08em;
-    padding: 2px 6px;
+    padding: 3px 8px;
     border-radius: 4px;
     text-transform: uppercase;
     line-height: 1.2;
@@ -844,29 +845,56 @@ window.addEventListener('error', function(e) {
     z-index: 9998;
   }
 
+  /* ─── Tablet portrait (600-900px) — preserve 2-column, optimize spacing ─── */
+  @media (min-width: 601px) and (max-width: 900px) {
+    .t-header { padding: 8px 10px; gap: 6px; }
+    #headerKpis { gap: 8px; }
+    #headerKpis span[id^="stat"] { font-size: 15px !important; }
+    .live-clock { font-size: 14px !important; }
+    .queue-panel { padding: 10px 12px; }
+    .service-panel { padding: 10px 12px; }
+    .t-footer { min-height: 80px; padding: 8px 12px; }
+    .footer-card .fc-name { font-size: 11px; }
+    .footer-card .fc-status { font-size: 10px; }
+  }
+
   /* ─── Samsung Tablet / Chrome touch optimizations ─── */
   @media (pointer: coarse) {
     .footer-card { min-width: 80px; padding: 10px 12px; }
     .footer-card .fc-avatar { width: 52px; height: 52px; font-size: 17px; }
-    .queue-item { padding: 14px 16px; min-height: 52px; }
+    .queue-item { padding: 14px 16px; min-height: 56px; }
     .setor-tab { padding: 12px 10px; font-size: 20px; }
-    .motivo-option { padding: 16px; }
+    .motivo-option { padding: 16px; min-height: 56px; }
     .turno-switch-track { width: 56px; height: 30px; border-radius: 15px; }
     .turno-switch-thumb { width: 24px; height: 24px; top: 2px; border-radius: 12px; }
     .turno-switch.on .turno-switch-thumb { transform: translateX(26px); }
     .turno-switch:active .turno-switch-thumb { width: 30px; }
+    /* Origin modal larger touch targets */
+    .origin-btn { padding: 16px 10px; min-height: 72px; }
+    .origin-skip { min-height: 48px; padding: 12px 28px; font-size: 13px; }
   }
 
   /* ─── Small tablets / large phones (600-767px) ─── */
   @media (max-width: 767px) {
-    #headerKpis { gap: 10px; }
-    #headerKpis span[id^="stat"] { font-size: 16px !important; }
-    .live-clock { font-size: 14px !important; }
+    #headerKpis { gap: 8px; }
+    #headerKpis span[id^="stat"] { font-size: 14px !important; }
+    .live-clock { font-size: 13px !important; }
     .t-footer { min-height: 76px; padding: 8px 10px; gap: 8px; }
-    .footer-card { min-width: 60px; padding: 6px 8px; }
-    .footer-card .fc-avatar { width: 40px; height: 40px; font-size: 14px; }
+    .footer-card { min-width: 64px; padding: 8px 8px; }
+    .footer-card .fc-avatar { width: 44px; height: 44px; font-size: 14px; }
     .footer-card .fc-name { font-size: 10px; }
-    .footer-card .fc-status { font-size: 9px; }
+    .footer-card .fc-status { font-size: 10px; }
+    .modal-box { padding: 20px; }
+    .origin-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ─── Very small screens (<600px) — force single column ─── */
+  @media (max-width: 600px) {
+    .origin-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .origin-btn { padding: 14px 10px; }
+    .quick-stats { gap: 8px; flex-wrap: wrap; }
+    .quick-stat { padding: 6px 12px; }
+    .outcome-row { grid-template-columns: 1fr 1fr; gap: 8px; }
   }
 
   /* Prevent 300ms tap delay on touch */
@@ -1013,7 +1041,7 @@ window.addEventListener('error', function(e) {
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-      <button style="min-height:40px;padding:0 8px;font-size:13px;color:#FFFFFF;background:none;border:none;cursor:pointer" onclick="toggleMiniRanking()" title="Ranking do turno">
+      <button style="min-height:44px;min-width:44px;padding:0 10px;font-size:14px;color:#FFFFFF;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="toggleMiniRanking()" title="Ranking do turno">
         <i class="fa-solid fa-trophy"></i>
       </button>
       <span class="live-clock" id="clock" style="font-size:16px">--:--</span>
@@ -1027,10 +1055,10 @@ window.addEventListener('error', function(e) {
       <button class="tv-btn" id="tvBtn" onclick="toggleTvMode()" title="Modo TV (painel)">
         <i class="fa-solid fa-tv"></i>
       </button>
-      <button class="btn btn-ghost" style="min-height:40px;padding:0 8px;font-size:13px;color:#FFFFFF" onclick="window._toggleTheme()" title="Modo claro/escuro">
+      <button class="btn btn-ghost" style="min-height:44px;min-width:44px;padding:0 10px;font-size:14px;color:#FFFFFF;display:flex;align-items:center;justify-content:center" onclick="window._toggleTheme()" title="Modo claro/escuro">
         <i class="fa-solid fa-circle-half-stroke"></i>
       </button>
-      <button class="btn btn-ghost" style="min-height:40px;padding:0 8px;font-size:13px;color:#FFFFFF" onclick="handleLogout()" title="Sair">
+      <button class="btn btn-ghost" style="min-height:44px;min-width:44px;padding:0 10px;font-size:14px;color:#FFFFFF;display:flex;align-items:center;justify-content:center" onclick="handleLogout()" title="Sair">
         <i class="fa-solid fa-right-from-bracket"></i>
       </button>
     </div>
@@ -1046,7 +1074,7 @@ window.addEventListener('error', function(e) {
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:0 4px">
       <span style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em">Fila</span>
       <div style="display:flex;align-items:center;gap:8px">
-        <button onclick="openPosLog()" style="background:none;border:none;color:var(--text-muted);font-size:12px;cursor:pointer;padding:4px 6px;border-radius:6px;transition:background .15s" title="Histórico de movimentações"><i class="fa-solid fa-clock-rotate-left"></i></button>
+        <button onclick="openPosLog()" style="background:none;border:none;color:var(--text-muted);font-size:14px;cursor:pointer;padding:8px 10px;border-radius:8px;transition:background .15s;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center" title="Histórico de movimentações"><i class="fa-solid fa-clock-rotate-left"></i></button>
         <span id="queueCount" style="font-size:13px;font-weight:600;color:var(--text-muted)">0 na fila</span>
       </div>
     </div>
@@ -1749,7 +1777,7 @@ function renderQueueItem(v, pos, isActive, draggable) {
   // Botão de ação rápida: na fila → pode ir ao atendimento
   let actionHtml = '';
   if (draggable && currentTurno) {
-    actionHtml = `<button data-action="send-atend" data-vid="${v.id}" style="padding:4px 8px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-hover);color:var(--info);font-size:9px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font-body);transition:all .15s" title="Enviar ao atendimento"><i class="fa-solid fa-arrow-right" style="font-size:8px"></i></button>`;
+    actionHtml = `<button data-action="send-atend" data-vid="${v.id}" style="padding:8px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-hover);color:var(--info);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font-body);transition:all .15s;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center" title="Enviar ao atendimento"><i class="fa-solid fa-arrow-right" style="font-size:12px"></i></button>`;
   }
 
   const isNext = draggable && pos === 1;
