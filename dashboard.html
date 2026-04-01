@@ -2547,7 +2547,7 @@ window.addEventListener('resize', function() {
 
 // ─── Chart section tabs ───
 const CHART_TAB_KEY = 'minhavez_chart_tab';
-window.setChartTab = function setChartTab(section) {
+function setChartTab(section) {
   document.querySelectorAll('.chart-section').forEach(s => s.style.display = 'none');
   document.querySelectorAll('.chart-tab').forEach(b => b.classList.toggle('active', b.dataset.section === section));
   const el = document.getElementById('section-' + section);
@@ -2559,11 +2559,9 @@ window.setChartTab = function setChartTab(section) {
     if (_echartsOrigem) { try { _echartsOrigem.resize(); } catch(e) {} }
   }, 50);
 }
+window.setChartTab = setChartTab;
 // Restore last tab on load
-(function() {
-  const saved = localStorage.getItem(CHART_TAB_KEY) || 'geral';
-  setChartTab(saved);
-})();
+setChartTab(localStorage.getItem(CHART_TAB_KEY) || 'geral');
 
 // Sticky header shadow
 const _headerEl = document.querySelector('.dash-header');
