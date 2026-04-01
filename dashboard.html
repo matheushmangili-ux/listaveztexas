@@ -1052,7 +1052,7 @@ window._showUpdateBanner = function() {
     <div class="chart-card" style="margin-bottom:var(--gap)">
       <div class="chart-card-header" onclick="toggleSection('ranking')">
         <h3><i class="fa-solid fa-ranking-star" style="margin-right:6px;color:var(--accent-dim)"></i>Ranking Vendedores</h3>
-        <button class="collapse-btn" id="collapseBtn-ranking"><i class="fa-solid fa-chevron-down"></i></button>
+        <button class="collapse-btn" id="collapseBtn-ranking" onclick="event.stopPropagation();toggleSection('ranking')"><i class="fa-solid fa-chevron-down"></i></button>
       </div>
       <div class="chart-card-body" id="collapseBody-ranking" style="margin-top:16px">
         <div class="ranking-grid" id="rankingBody">
@@ -1085,7 +1085,7 @@ window._showUpdateBanner = function() {
       <div class="chart-card">
         <div class="chart-card-header" onclick="toggleSection('rupturas')">
           <h3><i class="fa-solid fa-box-open" style="margin-right:6px;color:var(--danger)"></i>Rupturas — Produtos em Falta</h3>
-          <button class="collapse-btn" id="collapseBtn-rupturas"><i class="fa-solid fa-chevron-down"></i></button>
+          <button class="collapse-btn" id="collapseBtn-rupturas" onclick="event.stopPropagation();toggleSection('rupturas')"><i class="fa-solid fa-chevron-down"></i></button>
         </div>
         <div class="chart-card-body" id="collapseBody-rupturas" style="margin-top:16px">
           <div id="ruptureList">
@@ -1099,7 +1099,7 @@ window._showUpdateBanner = function() {
       <div class="chart-card">
         <div class="chart-card-header" onclick="toggleSection('pausas')">
           <h3><i class="fa-solid fa-mug-hot" style="margin-right:6px;color:var(--warning)"></i>Pausas — Saídas da Fila</h3>
-          <button class="collapse-btn" id="collapseBtn-pausas"><i class="fa-solid fa-chevron-down"></i></button>
+          <button class="collapse-btn" id="collapseBtn-pausas" onclick="event.stopPropagation();toggleSection('pausas')"><i class="fa-solid fa-chevron-down"></i></button>
         </div>
         <div class="chart-card-body" id="collapseBody-pausas" style="margin-top:16px">
           <div id="pauseStatsList" style="max-height:340px;overflow-y:auto">
@@ -1116,7 +1116,7 @@ window._showUpdateBanner = function() {
           <button class="btn btn-gold" style="min-height:34px;padding:0 14px;font-size:11px" onclick="event.stopPropagation();openVendedorModal()">
             <i class="fa-solid fa-plus" style="font-size:9px;margin-right:4px"></i> Novo Vendedor
           </button>
-          <button class="collapse-btn" id="collapseBtn-gestao"><i class="fa-solid fa-chevron-down"></i></button>
+          <button class="collapse-btn" id="collapseBtn-gestao" onclick="event.stopPropagation();toggleSection('gestao')"><i class="fa-solid fa-chevron-down"></i></button>
         </div>
       </div>
       <div class="chart-card-body" id="collapseBody-gestao" style="margin-top:16px">
@@ -2416,7 +2416,7 @@ window.toggleSection = function(id) {
 
 // ─── Origem dos Clientes (ApexCharts donut) ───
 // Paleta suave alinhada ao dashboard
-const ORIGEM_PALETTE = ['#e2506f','#818cf8','#fb923c','#34d399','#60a5fa','#a78bfa','#f472b6','#2dd4bf'];
+const ORIGEM_PALETTE = ['#e2506f','#c43d5a','#f0758e','#D4D4D8','#A1A1AA','#818181','#60a5fa','#34d399'];
 
 async function loadOrigem(range) {
   const container = document.getElementById('chartOrigem');
@@ -2460,7 +2460,9 @@ async function loadOrigem(range) {
         }
       }
     },
-    dataLabels: { enabled: false },
+    dataLabels: { enabled: true, formatter: (val) => Math.round(val) + '%',
+                  dropShadow: { enabled: false },
+                  style: { fontSize: '11px', fontWeight: 700, fontFamily: "'Satoshi'" } },
     legend: { position: 'bottom', fontSize: '11px', fontWeight: 600, fontFamily: "'Satoshi'",
               labels: { colors: chartColors().textStrong } },
     stroke: { width: 2, colors: [isDarkTheme() ? '#18181B' : '#FFFFFF'] },
