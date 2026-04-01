@@ -2473,18 +2473,33 @@ async function loadOrigem(range) {
 
 // ─── Chart section tabs ───
 const CHART_TAB_KEY = 'minhavez_chart_tab';
+let _activeChartTab = null;
 function setChartTab(section) {
+  // Second click on active tab → collapse all
+  if (_activeChartTab === section) {
+    document.querySelectorAll('.chart-section').forEach(s => s.style.display = 'none');
+    document.querySelectorAll('.chart-tab').forEach(b => b.classList.remove('active'));
+    _activeChartTab = null;
+    localStorage.removeItem(CHART_TAB_KEY);
+    return;
+  }
   document.querySelectorAll('.chart-section').forEach(s => s.style.display = 'none');
   document.querySelectorAll('.chart-tab').forEach(b => b.classList.toggle('active', b.dataset.section === section));
   const el = document.getElementById('section-' + section);
   if (el) el.style.display = 'block';
+  _activeChartTab = section;
   localStorage.setItem(CHART_TAB_KEY, section);
   // ApexCharts renders 0px when container is display:none — force resize after reveal
   setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 50);
 }
 window.setChartTab = setChartTab;
 // Restore last tab on load
-setChartTab(localStorage.getItem(CHART_TAB_KEY) || 'geral');
+const _savedTab = localStorage.getItem(CHART_TAB_KEY);
+if (_savedTab) {
+  setChartTab(_savedTab);
+} else {
+  setChartTab('geral');
+}
 
 
 // ─── Gestão de Vendedores ───
