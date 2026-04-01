@@ -950,16 +950,26 @@ window._showUpdateBanner = function() {
     </div>
   </div>
 
-  <!-- Charts row -->
+  <!-- Charts row: Motivos de Perda + Origem dos Clientes (ambos donuts) -->
   <div class="charts-grid">
     <div class="chart-card">
       <h3><i class="fa-solid fa-chart-pie" style="margin-right:6px;color:var(--accent-dim)"></i>Motivos de Perda</h3>
-      <div class="chart-box" style="height:400px"><div id="chartMotivos"></div></div>
+      <div class="chart-box" style="height:280px"><div id="chartMotivos"></div></div>
     </div>
     <div class="chart-card">
-      <h3><i class="fa-solid fa-chart-bar" style="margin-right:6px;color:var(--accent-dim)"></i>Fluxo por Hora</h3>
-      <div class="chart-box"><div id="chartHourly"></div></div>
+      <h3><i class="fa-solid fa-signs-post" style="margin-right:6px;color:var(--accent-dim)"></i>Origem dos Clientes</h3>
+      <div class="chart-box" style="height:280px"><div id="chartOrigem" style="width:100%;height:100%"></div></div>
+      <p id="chartOrigemEmpty" style="display:none;text-align:center;padding:40px 20px;font-size:13px;color:var(--text-muted);font-family:var(--font-body)">
+        <i class="fa-solid fa-signs-post" style="font-size:24px;display:block;margin-bottom:8px;opacity:.4"></i>
+        Nenhum dado de origem registrado neste período
+      </p>
     </div>
+  </div>
+
+  <!-- Fluxo por Hora -->
+  <div class="chart-card" style="margin-bottom:var(--gap)">
+    <h3><i class="fa-solid fa-chart-bar" style="margin-right:6px;color:var(--accent-dim)"></i>Fluxo por Hora</h3>
+    <div class="chart-box"><div id="chartHourly"></div></div>
   </div>
 
   <!-- Preferenciais -->
@@ -968,16 +978,16 @@ window._showUpdateBanner = function() {
     <div class="chart-box" id="chartPrefBox"><div id="chartPreferenciais"></div></div>
   </div>
 
-  <!-- Scatter -->
-  <div class="chart-card" style="margin-bottom:var(--gap)">
-    <h3><i class="fa-solid fa-chart-scatter" style="margin-right:6px;color:var(--accent-dim)"></i>Volume × Conversão por Vendedor</h3>
-    <div class="chart-box"><div id="chartScatter"></div></div>
-  </div>
-
-  <!-- Tempo vs Meta -->
-  <div class="chart-card" style="margin-bottom:var(--gap)">
-    <h3><i class="fa-solid fa-stopwatch" style="margin-right:6px;color:var(--accent-dim)"></i>Tempo Médio por Vendedor</h3>
-    <div class="chart-box"><div id="chartTempoMeta"></div></div>
+  <!-- Charts row: Scatter + Tempo Médio (ambos por vendedor) -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3><i class="fa-solid fa-chart-scatter" style="margin-right:6px;color:var(--accent-dim)"></i>Volume × Conversão por Vendedor</h3>
+      <div class="chart-box"><div id="chartScatter"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><i class="fa-solid fa-stopwatch" style="margin-right:6px;color:var(--accent-dim)"></i>Tempo Médio por Vendedor</h3>
+      <div class="chart-box"><div id="chartTempoMeta"></div></div>
+    </div>
   </div>
 
   <!-- Trend Line -->
@@ -986,16 +996,6 @@ window._showUpdateBanner = function() {
     <div style="overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--accent-dim) transparent">
       <div class="chart-box" style="height:380px;min-width:700px"><div id="chartTrend"></div></div>
     </div>
-  </div>
-
-  <!-- Origem dos Clientes (ECharts) -->
-  <div class="chart-card" style="margin-bottom:var(--gap)">
-    <h3><i class="fa-solid fa-signs-post" style="margin-right:6px;color:var(--accent-dim)"></i>Origem dos Clientes</h3>
-    <div class="chart-box" style="height:400px"><div id="chartOrigem" style="width:100%;height:100%"></div></div>
-    <p id="chartOrigemEmpty" style="display:none;text-align:center;padding:40px 20px;font-size:13px;color:var(--text-muted);font-family:var(--font-body)">
-      <i class="fa-solid fa-signs-post" style="font-size:24px;display:block;margin-bottom:8px;opacity:.4"></i>
-      Nenhum dado de origem registrado neste período
-    </p>
   </div>
 
   <!-- Ranking -->
