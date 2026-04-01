@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/styles.css">
+<link rel="stylesheet" href="/css/dashboard.css">
 <meta name="theme-color" content="#F5F5F7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -65,779 +66,7 @@ window._showUpdateBanner = function() {
 </script>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
-<style>
-  .dash-layout {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 24px;
-    --gap: 16px;
-  }
-  /* ─── Header ─── */
-  .dash-header {
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: 16px;
-    padding: 0;
-    margin-bottom: var(--gap);
-    overflow: visible;
-    box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.03);
-  }
-  .dash-header-top {
-    border-radius: 16px 16px 0 0;
-    background: #060606;
-  }
-  .dash-header-controls {
-    border-radius: 0 0 16px 16px;
-  }
-  .dash-header-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 20px;
-    gap: 12px;
-    flex-wrap: wrap;
-    border-bottom: 1px solid rgba(255,255,255,.06);
-  }
-  .dash-header-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 0;
-  }
-  .dash-header-logo {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-  }
-  .dash-header-logo img { height: 38px; object-fit: contain; display: block; }
-  .dash-header-title {
-    font-family: var(--font-body);
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: .01em;
-    line-height: 1.2;
-    color: var(--text-secondary);
-  }
-  .dash-header-subtitle {
-    font-size: 11px;
-    color: rgba(255,255,255,.4);
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 1px;
-  }
-  .dash-header-actions {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .dash-header-actions .header-btn {
-    width: 36px; height: 36px;
-    display: flex; align-items: center; justify-content: center;
-    border: none;
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: rgba(255,255,255,.5);
-    font-size: 13px;
-    cursor: pointer;
-    transition: all .15s ease;
-    position: relative;
-    text-decoration: none;
-  }
-  .dash-header-actions .header-btn:hover {
-    background: rgba(255,255,255,.08);
-    color: #fff;
-  }
-  .dash-header-actions .header-btn:active {
-    transform: scale(.92);
-  }
-  .dash-header-actions .header-btn-label {
-    display: none;
-    position: absolute;
-    bottom: -24px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 9px;
-    font-weight: 600;
-    color: var(--text-muted);
-    white-space: nowrap;
-    background: rgba(255,255,255,.12);
-    padding: 2px 6px;
-    border-radius: 4px;
-    pointer-events: none;
-    z-index: 10;
-    color: rgba(255,255,255,.7);
-  }
-  .dash-header-actions .header-btn:hover .header-btn-label { display: block; }
-  .header-btn-divider {
-    width: 1px;
-    height: 20px;
-    background: rgba(255,255,255,.1);
-    margin: 0 4px;
-  }
-  .dash-header-controls {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 20px;
-    gap: 12px;
-    flex-wrap: wrap;
-    background: var(--bg-surface);
-  }
-  .kpi-spark {
-    width: 100px;
-    height: 48px;
-    flex-shrink: 0;
-  }
-  .spark-tooltip {
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    padding: 4px 8px !important;
-    border-radius: 6px !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,.12) !important;
-  }
-  .spark-tooltip .apexcharts-tooltip-text {
-    font-family: var(--font-body) !important;
-  }
-  /* ─── Dark Mode: ApexCharts tooltips ─── */
-  [data-theme="dark"] .apexcharts-tooltip {
-    background: #1E1E2E !important;
-    border-color: rgba(255,255,255,.1) !important;
-    color: rgba(255,255,255,.8) !important;
-  }
-  [data-theme="dark"] .apexcharts-tooltip-title {
-    background: #262638 !important;
-    border-color: rgba(255,255,255,.06) !important;
-    color: #fff !important;
-  }
-  [data-theme="dark"] .apexcharts-tooltip-series-group {
-    color: rgba(255,255,255,.8) !important;
-  }
-  [data-theme="dark"] .apexcharts-tooltip-text-y-value,
-  [data-theme="dark"] .apexcharts-tooltip-text-y-label {
-    color: rgba(255,255,255,.8) !important;
-  }
-  [data-theme="dark"] .apexcharts-xaxistooltip,
-  [data-theme="dark"] .apexcharts-yaxistooltip {
-    background: #1E1E2E !important;
-    border-color: rgba(255,255,255,.1) !important;
-    color: rgba(255,255,255,.8) !important;
-  }
-  [data-theme="dark"] .apexcharts-xaxistooltip-text {
-    color: rgba(255,255,255,.8) !important;
-  }
-  .kpi-grid-hero {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--gap);
-    margin-bottom: var(--gap);
-  }
-  .kpi-grid-secondary {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--gap);
-    margin-bottom: var(--gap);
-  }
-  @media (max-width: 768px) {
-    .kpi-grid-hero { grid-template-columns: repeat(2, 1fr); }
-    .kpi-grid-secondary { grid-template-columns: repeat(2, 1fr); }
-    .dash-header { top: 8px; }
-    .dash-layout { padding: 12px; }
-  }
-  @media (max-width: 480px) {
-    .kpi-grid-hero { grid-template-columns: 1fr; }
-    .kpi-grid-secondary { grid-template-columns: 1fr; }
-    .period-tabs button { padding: 7px 10px; font-size: 11px; }
-    .dash-header-controls { gap: 8px; }
-  }
-  .charts-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--gap);
-    margin-bottom: calc(var(--gap) * 1.5);
-  }
-  @media (max-width: 1024px) { .charts-grid { gap: 12px; } }
-  @media (max-width: 768px) { .charts-grid { grid-template-columns: 1fr; } }
 
-  /* ─── Collapsible Sections ─── */
-  .chart-card-header {
-    display: flex; align-items: center; justify-content: space-between;
-    cursor: pointer; user-select: none; gap: 8px;
-  }
-  .chart-card-header h3 { margin-bottom: 0; flex: 1; }
-  .collapse-btn {
-    width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border-subtle);
-    background: transparent; color: var(--text-muted); cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: transform .25s ease, background .15s ease;
-    flex-shrink: 0;
-  }
-  .collapse-btn:hover { background: rgba(255,255,255,.06); }
-  .collapse-btn i { font-size: 11px; transition: transform .25s ease; }
-  .collapse-btn.collapsed i { transform: rotate(-90deg); }
-  .chart-card-body {
-    overflow: hidden; transition: max-height .35s ease, opacity .25s ease;
-    max-height: 2000px; opacity: 1;
-  }
-  .chart-card-body.collapsed {
-    max-height: 0 !important; opacity: 0; margin-top: 0 !important;
-  }
-
-  /* ─── Ranking Cards ─── */
-  .ranking-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: var(--gap);
-  }
-  .rank-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 10px;
-    padding: 24px 16px 20px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,.04);
-    transition: transform .2s ease, box-shadow .2s ease, border-color .15s, background .15s;
-    position: relative;
-  }
-  .rank-card:hover {
-    border-color: var(--border-medium);
-    box-shadow: 0 4px 16px rgba(0,0,0,.08);
-    transform: translateY(-2px);
-  }
-  .rank-card.top-3 {
-    border-color: rgba(226,80,111,.15);
-    background: rgba(226,80,111,.02);
-  }
-  .rank-card.top-3:hover {
-    border-color: rgba(226,80,111,.3);
-  }
-  .rank-pos {
-    position: absolute;
-    top: 10px;
-    left: 12px;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-muted);
-    font-variant-numeric: tabular-nums;
-  }
-  .rank-avatar {
-    width: 52px; height: 52px;
-    border-radius: 50%;
-    background: var(--bg-elevated);
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--font-mono); font-weight: 700; font-size: 14px;
-    color: var(--accent);
-    flex-shrink: 0;
-    overflow: hidden;
-    border: 2px solid var(--border-subtle);
-  }
-  .rank-card.top-3 .rank-avatar {
-    border-color: rgba(226,80,111,.25);
-  }
-  .rank-name {
-    font-weight: 700;
-    font-size: 14px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-    line-height: 1.2;
-  }
-  .rank-conv-value {
-    font-family: var(--font-mono);
-    font-size: 22px;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -.02em;
-    line-height: 1;
-  }
-  .rank-conv-bar {
-    width: 100%; height: 4px;
-    background: var(--bg-elevated);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .rank-conv-fill {
-    height: 100%;
-    border-radius: 2px;
-    transition: width .5s ease;
-  }
-  .rank-stats {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    font-size: 11px;
-    color: var(--text-muted);
-  }
-  .rank-stats .stat-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1px;
-  }
-  .rank-stats .stat-val {
-    font-weight: 700;
-    font-size: 13px;
-    font-variant-numeric: tabular-nums;
-    color: var(--text-primary);
-  }
-  .rank-stats .stat-label {
-    font-size: 9px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    color: var(--text-muted);
-  }
-  .chart-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: 16px;
-    padding: 22px;
-    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
-    box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.03);
-    overflow: hidden;
-  }
-  .chart-card:hover {
-    border-color: var(--border-medium);
-    box-shadow: 0 4px 16px rgba(0,0,0,.08);
-  }
-  .kpi-compare {
-    font-size: 11px;
-    font-weight: 600;
-    margin-top: 8px;
-    min-height: 22px;
-  }
-  /* Badge styles now in css/styles.css */
-  .chart-card h3 {
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: rgba(0,0,0,.45);
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  [data-theme="dark"] .chart-card h3 { color: rgba(255,255,255,.5); }
-  [data-theme="dark"] .chart-card {
-    box-shadow: 0 1px 3px rgba(0,0,0,.2);
-  }
-  [data-theme="dark"] .chart-card:hover {
-    box-shadow: 0 4px 20px rgba(0,0,0,.4);
-  }
-  [data-theme="dark"] .rank-card:hover {
-    box-shadow: 0 4px 20px rgba(0,0,0,.4);
-  }
-  .chart-card h3 i { font-size: 14px; opacity: .5; }
-  .chart-box { position: relative; height: 340px; z-index: 1; overflow: visible; }
-  .ranking-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-  .ranking-table thead th {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    color: var(--text-muted);
-    padding: 10px 12px;
-    text-align: left;
-    border-bottom: 1px solid var(--border-subtle);
-  }
-  .ranking-table tbody td {
-    padding: 12px;
-    border-bottom: 1px solid var(--border-subtle);
-    font-weight: 500;
-  }
-  .ranking-table tbody tr:hover { background: var(--bg-hover); }
-  .ranking-table .mono { font-family: var(--font-mono); font-weight: 700; }
-  .period-tabs {
-    display: flex;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
-    padding: 3px;
-  }
-  .period-tabs button {
-    padding: 8px 16px;
-    background: transparent;
-    border: none;
-    border-radius: var(--radius-sm);
-    font-family: var(--font-body);
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: background 150ms ease, color 150ms ease;
-  }
-  .period-tabs button.active {
-    background: var(--bg-card);
-    color: var(--accent);
-    box-shadow: 0 1px 3px rgba(0,0,0,.06);
-    font-weight: 600;
-  }
-
-  /* ─── Calendar Popover ─── */
-  .cal-popover {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    margin-top: 6px;
-    z-index: 999;
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: 12px;
-    padding: 14px;
-    box-shadow: 0 12px 40px rgba(0,0,0,.15);
-    width: 280px;
-    font-family: var(--font-body);
-    user-select: none;
-  }
-  [data-theme="dark"] .cal-popover {
-    box-shadow: 0 12px 40px rgba(0,0,0,.45);
-  }
-  .cal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-  .cal-month-label {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-primary);
-    text-transform: capitalize;
-  }
-  .cal-nav {
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    background: var(--bg-surface);
-    border-radius: 6px;
-    color: var(--text-secondary);
-    cursor: pointer;
-    font-size: 11px;
-    transition: background 150ms;
-  }
-  .cal-nav:hover { background: var(--bg-deep); }
-  .cal-weekdays {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    text-align: center;
-    margin-bottom: 4px;
-  }
-  .cal-weekdays span {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--text-muted);
-    padding: 4px 0;
-  }
-  .cal-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 2px;
-  }
-  .cal-day {
-    width: 100%;
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    background: transparent;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: background 120ms, color 120ms;
-    font-family: var(--font-body);
-  }
-  .cal-day:hover { background: var(--bg-surface); }
-  .cal-day.other-month { color: var(--text-muted); opacity: .4; }
-  .cal-day.today { font-weight: 700; color: var(--accent); }
-  .cal-day.range-start,
-  .cal-day.range-end {
-    background: var(--accent) !important;
-    color: #fff !important;
-    font-weight: 700;
-  }
-  .cal-day.in-range {
-    background: rgba(226, 80, 111, .12);
-    border-radius: 4px;
-  }
-  .cal-day.range-start { border-radius: 8px 4px 4px 8px; }
-  .cal-day.range-end { border-radius: 4px 8px 8px 4px; }
-  .cal-day.range-start.range-end { border-radius: 8px; }
-  .cal-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 10px;
-    padding-top: 8px;
-    border-top: 1px solid var(--border-subtle);
-  }
-  .cal-hint {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-weight: 500;
-  }
-  .cal-clear {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-family: var(--font-body);
-    transition: color 150ms, background 150ms;
-  }
-  .cal-clear:hover { color: var(--accent); background: var(--bg-surface); }
-
-  .rupture-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--border-subtle);
-  }
-  .rupture-item:last-child { border-bottom: none; }
-  .rupture-count {
-    font-family: var(--font-mono);
-    font-weight: 700;
-    font-size: 16px;
-    color: var(--danger);
-    min-width: 36px;
-    text-align: center;
-  }
-  /* ─── Gestão de Vendedores ─── */
-  .vendedor-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
-    border-bottom: 1px solid var(--border-subtle);
-    transition: background .15s;
-  }
-  .vendedor-row:hover { background: var(--bg-hover); }
-  .vendedor-row:last-child { border-bottom: none; }
-  .led-track, #marqueeTrack { will-change: transform; transform: translateZ(0); }
-  .vendedor-avatar {
-    width: 36px; height: 36px; border-radius: var(--radius-sm);
-    background: var(--bg-elevated);
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--font-mono); font-weight: 700; font-size: 12px;
-    color: var(--accent); flex-shrink: 0;
-  }
-  .vendedor-info { flex: 1; min-width: 0; }
-  .vendedor-name { font-weight: 600; font-size: 13px; }
-  .vendedor-nick { font-size: 10px; color: var(--text-muted); }
-  .vendedor-actions { display: flex; gap: 6px; }
-  .vendedor-actions button {
-    width: 30px; height: 30px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);
-    background: var(--bg-surface); color: var(--text-muted); cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; transition: background-color .15s, color .15s, border-color .15s;
-  }
-  .vendedor-actions button:hover { background: var(--bg-elevated); color: var(--text-primary); }
-  .vendedor-actions button.btn-danger:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
-  .badge-ativo {
-    font-size: 9px; font-weight: 600; padding: 2px 8px; border-radius: var(--radius-sm);
-    text-transform: uppercase; letter-spacing: .04em;
-  }
-  .badge-ativo.on { background: rgba(52,211,153,.1); color: var(--success); }
-  .badge-ativo.off { background: rgba(248,113,113,.08); color: var(--danger); }
-  /* ─── LED Marquee (equipe no salão) ─── */
-  .led-marquee {
-    overflow: hidden;
-    position: relative;
-    background: var(--bg-deep);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
-    padding: 10px 0;
-  }
-  .led-track {
-    display: flex;
-    gap: 32px;
-    animation: marquee 20s linear infinite;
-    width: max-content;
-  }
-  .led-track:hover { animation-play-state: paused; }
-  .led-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-    padding: 4px 0;
-  }
-  .led-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .led-name { font-weight: 600; font-size: 13px; }
-  .led-status { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: .04em; }
-
-  /* ─── Export Menu ─── */
-  .export-menu {
-    position: absolute; top: 100%; right: 0; margin-top: 4px;
-    background: var(--bg-card); border: 1px solid var(--border-medium);
-    border-radius: var(--radius); padding: 4px; min-width: 180px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.4); z-index: 9000;
-    display: none;
-  }
-  .export-menu.open { display: block; animation: fadeIn .15s ease; }
-  .export-menu button {
-    display: flex; align-items: center; gap: 10px; width: 100%;
-    padding: 10px 14px; border: none; border-radius: var(--radius-sm);
-    background: transparent; color: var(--text-primary);
-    font-family: var(--font-body); font-size: 12px; font-weight: 600;
-    cursor: pointer; transition: background .15s;
-  }
-  .export-menu button:hover { background: var(--bg-hover); }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
-
-  /* ─── Modal ─── */
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,.55);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 1000; opacity: 0; pointer-events: none; transition: opacity .2s;
-  }
-  .modal-overlay.open { opacity: 1; pointer-events: auto; }
-  .modal-box {
-    background: var(--bg-card); border: 1px solid var(--border-medium);
-    border-radius: var(--radius); padding: 24px; width: 90%; max-width: 400px;
-    box-shadow: 0 8px 32px rgba(0,0,0,.12);
-  }
-  .modal-box h3 { font-family: var(--font-mono); font-size: 14px; font-weight: 700; margin-bottom: 16px; }
-  .modal-box label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .05em; }
-  .modal-box input {
-    width: 100%; padding: 10px 12px; border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm); background: var(--bg-surface); color: var(--text-primary);
-    font-family: var(--font-body); font-size: 13px; margin-bottom: 12px;
-  }
-  .modal-box input:focus { outline: none; border-color: var(--gold-dim); }
-  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
-
-  /* ─── Skeleton Loaders ─── */
-  .skeleton { position: relative; overflow: hidden; background: var(--bg-elevated); border-radius: var(--radius-sm); }
-  .skeleton::after {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.02) 30%, rgba(0,0,0,.04) 50%, rgba(0,0,0,.02) 70%, transparent 100%);
-    animation: skeletonShimmer 1.8s ease-in-out infinite;
-  }
-  @keyframes skeletonShimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-  .skeleton-kpi-value { width: 80px; height: 32px; margin-bottom: 4px; }
-  .skeleton-kpi-compare { width: 100px; height: 14px; }
-  .skeleton-chart { width: 100%; height: 240px; }
-  .skeleton-row { width: 100%; height: 48px; margin-bottom: 4px; }
-
-  /* ─── Filter bar ─── */
-  .filter-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .filter-bar select {
-    padding: 6px 12px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
-    background: var(--bg-surface); color: var(--text-primary); font-family: var(--font-body);
-    font-size: 11px; font-weight: 600; cursor: pointer;
-  }
-  .filter-bar select:focus { outline: none; border-color: var(--accent); }
-  .filter-bar label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
-  .filter-apply-btn {
-    padding: 6px 14px; border: 1px solid var(--accent); border-radius: var(--radius-sm);
-    background: var(--accent); color: #fff; font-family: var(--font-body);
-    font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;
-    transition: background-color .15s ease, transform .1s ease;
-  }
-  .filter-apply-btn:hover { filter: brightness(1.15); }
-  .filter-apply-btn:active { transform: scale(.97); }
-  .filter-clear-btn {
-    padding: 6px 8px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
-    background: var(--bg-surface); color: var(--text-muted); font-size: 11px; cursor: pointer;
-    transition: background-color .15s ease, border-color .15s ease;
-  }
-  .filter-clear-btn:hover { border-color: var(--danger); color: var(--danger); }
-
-  /* ─── Chart section tabs ─── */
-  .chart-tabs {
-    display: flex;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
-    padding: 4px;
-    margin-bottom: var(--gap);
-    width: fit-content;
-    gap: 2px;
-  }
-  .chart-tab {
-    padding: 9px 18px;
-    background: transparent;
-    border: none;
-    border-radius: var(--radius-sm);
-    font-family: var(--font-body);
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: background 150ms ease, color 150ms ease;
-    white-space: nowrap;
-  }
-  .chart-tab.active {
-    background: var(--bg-card);
-    color: var(--accent);
-    font-weight: 600;
-    box-shadow: 0 1px 3px rgba(0,0,0,.06);
-  }
-  .chart-tab:hover:not(.active) { color: var(--text-secondary); background: var(--bg-elevated); }
-  @media (max-width: 480px) {
-    .chart-tabs { width: 100%; }
-    .chart-tab { flex: 1; padding: 8px 10px; font-size: 11px; text-align: center; }
-    .chart-tab i { display: none; }
-  }
-
-  /* ─── Chart empty state ─── */
-  .chart-empty-state {
-    text-align: center;
-    padding: 32px 20px;
-    font-size: 13px;
-    color: var(--text-muted);
-    font-family: var(--font-body);
-    font-weight: 500;
-    margin: 0;
-  }
-  .chart-empty-state i {
-    display: block;
-    font-size: 22px;
-    margin-bottom: 8px;
-    opacity: .35;
-  }
-
-  /* ─── KPI hero variant ─── */
-  .kpi-card--hero .kpi-value { font-size: 2.6rem; }
-  .kpi-card--hero .kpi-label { color: var(--text-secondary); }
-
-  /* ─── Card fade-in ─── */
-  @keyframes cardFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-  .kpi-card { animation: none; }
-  .kpi-grid-hero .kpi-card:nth-child(1) { animation-delay: 0s; }
-  .kpi-grid-hero .kpi-card:nth-child(2) { animation-delay: .05s; }
-  .kpi-grid-hero .kpi-card:nth-child(3) { animation-delay: .1s; }
-  .kpi-grid-secondary .kpi-card:nth-child(1) { animation-delay: .15s; }
-  .kpi-grid-secondary .kpi-card:nth-child(2) { animation-delay: .2s; }
-  .kpi-grid-secondary .kpi-card:nth-child(3) { animation-delay: .25s; }
-</style>
 </head>
 <body>
 
@@ -1179,10 +408,11 @@ window._showUpdateBanner = function() {
 
 <script type="module">
 import { getSupabase } from '/js/supabase-config.js';
-import { requireRole, logout } from '/js/auth.js';
+import { requireRole, logout, getTenantId } from '/js/auth.js';
 import { STATUS_CONFIG, MOTIVOS, todayRange, yesterdayRange, weekRange, monthRange, initials, toast, initTheme, toggleTheme } from '/js/utils.js';
 import { loadTenant, applyBranding, tenantPath, getTenant, getSlug } from '/js/tenant.js';
-import { getTenantId } from '/js/auth.js';
+import { CHART_HEIGHT, CHART_TAB_KEY, METAS_KEY, DEFAULT_METAS, ORIGEM_PALETTE, PERIODS, SETOR_LABELS, ANIM } from '/js/dashboard-config.js';
+import { fetchSellerRanking, fetchConversionStats, fetchTrocas, fetchAtendimentosFiltrados, fetchLossReasons, fetchHourlyFlow, fetchPreferenciais, fetchRuptureLog, fetchPauseLog, fetchVendedores, fetchTodosVendedores, fetchCanalStats, fetchDrillMotivo, fetchExportData, fetchTrend, upsertVendedor, toggleVendedorAtivo, uploadFotoVendedor } from '/js/dashboard-api.js';
 initTheme();
 
 // Load tenant context
@@ -1230,13 +460,11 @@ if (!user) {
 const tenantId = user ? getTenantId(user) : null;
 
 let charts = {};
-let currentPeriod = 'semana';
+let currentPeriod = PERIODS.SEMANA;
 let filterSetor = '';
 let filterVendedor = '';
 
-// Metas configuráveis (salvas no localStorage, editáveis no futuro via settings)
-const METAS_KEY = 'minhavez_metas';
-const DEFAULT_METAS = { conversao: 70, tempo_medio: 30, ticket_medio: 3000 };
+// Metas configuráveis (salvas no localStorage, editáveis via settings)
 function getMetas() {
   try { return { ...DEFAULT_METAS, ...JSON.parse(localStorage.getItem(METAS_KEY) || '{}') }; } catch { return DEFAULT_METAS; }
 }
@@ -1338,14 +566,14 @@ function countUp(el, endVal, suffix = '', duration = 800, formatter = null) {
 }
 
 function getRange() {
-  if (currentPeriod === 'custom' && customRangeStart && customRangeEnd) {
+  if (currentPeriod === PERIODS.CUSTOM && customRangeStart && customRangeEnd) {
     const start = new Date(customRangeStart + 'T00:00:00');
     const end = new Date(customRangeEnd + 'T23:59:59');
     return { start: start.toISOString(), end: end.toISOString() };
   }
-  if (currentPeriod === 'ontem') return yesterdayRange();
-  if (currentPeriod === 'semana') return weekRange();
-  if (currentPeriod === 'mes') return monthRange();
+  if (currentPeriod === PERIODS.ONTEM) return yesterdayRange();
+  if (currentPeriod === PERIODS.SEMANA) return weekRange();
+  if (currentPeriod === PERIODS.MES) return monthRange();
   return todayRange();
 }
 
@@ -1361,10 +589,9 @@ async function populateFilters() {
   _cachedVendedores = data || [];
 
   const setores = [...new Set(_cachedVendedores.map(v => v.setor || 'loja'))];
-  const setorLabels = { loja: 'Vestuario', chapelaria: 'Chapelaria', selaria: 'Selaria' };
   const selSetor = document.getElementById('filterSetor');
   const selVend = document.getElementById('filterVendedor');
-  selSetor.innerHTML = '<option value="">Todos os setores</option>' + setores.map(s => `<option value="${s}">${setorLabels[s] || s}</option>`).join('');
+  selSetor.innerHTML = '<option value="">Todos os setores</option>' + setores.map(s => `<option value="${s}">${SETOR_LABELS[s] || s}</option>`).join('');
   updateVendedorFilter();
 }
 
@@ -1502,7 +729,7 @@ window.calPick = function(dateStr) {
 function applyCalendarRange() {
   customRangeStart = _calPickStart;
   customRangeEnd = _calPickEnd;
-  currentPeriod = 'custom';
+  currentPeriod = PERIODS.CUSTOM;
   document.querySelectorAll('#periodTabs button').forEach(b => {
     b.classList.toggle('active', b.dataset.period === 'custom');
   });
@@ -1785,7 +1012,7 @@ async function loadMotivos(range) {
 // ─── Hourly flow chart ───
 async function loadHourly(range) {
   try {
-  const isMultiDay = currentPeriod === 'semana' || currentPeriod === 'mes';
+  const isMultiDay = currentPeriod === PERIODS.SEMANA || currentPeriod === PERIODS.MES;
   // Load main data + today overlay in parallel
   const promises = [sb.rpc('get_hourly_flow', { p_inicio: range.start, p_fim: range.end })];
   if (isMultiDay) {
@@ -2003,7 +1230,7 @@ async function loadRanking(range, cachedData) {
 
 // ─── Ruptures ───
 async function loadRuptures(range) {
-  const { data, error } = await sb.rpc('get_rupture_log', { p_inicio: range.start, p_fim: range.end });
+  const { data, error } = await fetchRuptureLog(sb, range);
   if (error) { toast('Erro ao carregar rupturas: ' + error.message, 'error'); return; }
   const el = document.getElementById('ruptureList');
   if (!data || data.length === 0) {
@@ -2021,7 +1248,7 @@ async function loadRuptures(range) {
 
 // ─── Pause Log (individual pauses) ───
 async function loadPauseStats(range) {
-  const { data, error } = await sb.rpc('get_pause_log', { p_inicio: range.start, p_fim: range.end });
+  const { data, error } = await fetchPauseLog(sb, range);
   const el = document.getElementById('pauseStatsList');
   if (!el) return;
   if (error || !data || data.length === 0) {
@@ -2054,9 +1281,7 @@ async function loadPauseStats(range) {
 
 // ─── Floor (who's on now) — LED marquee ───
 async function loadFloor() {
-  const floorQ = sb.from('vendedores').select('*').eq('ativo', true);
-  if (tenantId) floorQ.eq('tenant_id', tenantId);
-  const { data, error } = await floorQ.order('nome');
+  const { data, error } = await fetchVendedores(sb, tenantId);
   if (error) { toast('Erro ao carregar equipe: ' + error.message, 'error'); return; }
   const el = document.getElementById('floorList');
   if (!data || data.length === 0) {
@@ -2278,7 +1503,7 @@ async function loadTempoMeta(range, cachedData) {
 async function loadTrend(range) {
   // Para trend, usar range mínimo de 7 dias para ter contexto visual
   let trendRange = range;
-  if (currentPeriod === 'hoje' || currentPeriod === 'ontem' || currentPeriod === 'custom') {
+  if (currentPeriod === PERIODS.HOJE || currentPeriod === PERIODS.ONTEM || currentPeriod === PERIODS.CUSTOM) {
     const end = new Date();
     end.setDate(end.getDate() + 1);
     end.setHours(0, 0, 0, 0);
@@ -2415,15 +1640,14 @@ window.toggleSection = function(id) {
 })();
 
 // ─── Origem dos Clientes (ApexCharts donut) ───
-// Paleta suave alinhada ao dashboard
-const ORIGEM_PALETTE = ['#e2506f','#c43d5a','#f0758e','#D4D4D8','#A1A1AA','#818181','#60a5fa','#34d399'];
+// ORIGEM_PALETTE imported from dashboard-config.js
 
 async function loadOrigem(range) {
   const container = document.getElementById('chartOrigem');
   const emptyMsg = document.getElementById('chartOrigemEmpty');
   if (!container) return;
 
-  const { data, error } = await sb.rpc('get_canal_stats', { p_inicio: range.start, p_fim: range.end });
+  const { data, error } = await fetchCanalStats(sb, range);
   if (error) { console.warn('Erro canais:', error.message); return; }
 
   if (!data || data.length === 0) {
@@ -2472,7 +1696,7 @@ async function loadOrigem(range) {
 }
 
 // ─── Chart section tabs ───
-const CHART_TAB_KEY = 'minhavez_chart_tab';
+// CHART_TAB_KEY imported from dashboard-config.js
 let _activeChartTab = null;
 function setChartTab(section) {
   // Second click on active tab → collapse all
@@ -2505,14 +1729,11 @@ if (_savedTab) {
 // ─── Gestão de Vendedores ───
 async function loadVendedores() {
   const el = document.getElementById('vendedorList');
-  const vq = sb.from('vendedores').select('*');
-  if (tenantId) vq.eq('tenant_id', tenantId);
-  const { data, error } = await vq.order('nome');
+  const { data, error } = await fetchTodosVendedores(sb);
   if (error || !data || data.length === 0) {
     el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum vendedor cadastrado</div>';
     return;
   }
-  const setorLabels = { loja: 'Vestuário', chapelaria: 'Chapelaria', selaria: 'Selaria' };
   el.innerHTML = data.map(v => {
     const avatarContent = v.foto_url
       ? `<img src="${v.foto_url}" style="width:100%;height:100%;object-fit:cover">`
@@ -2522,7 +1743,7 @@ async function loadVendedores() {
       <div class="vendedor-info">
         <div class="vendedor-name">${v.nome}</div>
         ${v.apelido ? '<div class="vendedor-nick">' + v.apelido + '</div>' : ''}
-        <div style="font-size:9px;color:var(--text-muted);font-weight:600;margin-top:1px">${setorLabels[v.setor] || 'Vestuário'}</div>
+        <div style="font-size:9px;color:var(--text-muted);font-weight:600;margin-top:1px">${SETOR_LABELS[v.setor] || 'Vestuário'}</div>
       </div>
       <span class="badge-ativo ${v.ativo ? 'on' : 'off'}">${v.ativo ? 'Ativo' : 'Inativo'}</span>
       <div class="vendedor-actions">
@@ -2672,7 +1893,8 @@ async function getExportData() {
 }
 
 function getPeriodLabel() {
-  return currentPeriod === 'hoje' ? 'Hoje' : currentPeriod === 'ontem' ? 'Ontem' : currentPeriod === 'semana' ? 'Semana' : currentPeriod === 'mes' ? 'Mês' : customDate;
+  const labels = { [PERIODS.HOJE]: 'Hoje', [PERIODS.ONTEM]: 'Ontem', [PERIODS.SEMANA]: 'Semana', [PERIODS.MES]: 'Mês' };
+  return labels[currentPeriod] ?? customDate;
 }
 
 // ─── Export CSV ───
@@ -2989,15 +2211,7 @@ window.openDrillMotivo = async function(motivo, label) {
   modal.classList.add('open');
 
   const range = getRange();
-  let q = sb.from('atendimentos')
-    .select('vendedor_nome, vendedor_apelido, criado_em, motivo_perda')
-    .eq('motivo_perda', motivo)
-    .gte('criado_em', range.start)
-    .lte('criado_em', range.end)
-    .order('criado_em', { ascending: false })
-    .limit(50);
-  if (tenantId) q = q.eq('tenant_id', tenantId);
-  const { data, error } = await q;
+  const { data, error } = await fetchDrillMotivo(sb, range, motivo, tenantId);
   if (error || !data || data.length === 0) {
     body.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum registro encontrado</div>';
     return;
