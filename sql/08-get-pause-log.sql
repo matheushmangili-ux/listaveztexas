@@ -12,8 +12,8 @@ DECLARE
   v_tenant uuid;
 BEGIN
   SELECT tenant_id INTO v_tenant FROM vendedores WHERE id = p_vendedor_id;
-  INSERT INTO pausas (vendedor_id, turno_id, motivo, tenant_id)
-  VALUES (p_vendedor_id, p_turno_id, p_motivo, v_tenant)
+  INSERT INTO pausas (vendedor_id, turno_id, motivo, inicio, tenant_id)
+  VALUES (p_vendedor_id, p_turno_id, p_motivo, now(), v_tenant)
   RETURNING id INTO v_id;
   RETURN v_id;
 END;

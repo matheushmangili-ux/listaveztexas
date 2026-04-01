@@ -79,15 +79,8 @@ window._showUpdateBanner = function() {
     border-radius: 16px;
     padding: 0;
     margin-bottom: var(--gap);
-    position: sticky;
-    top: 16px;
-    z-index: 200;
     overflow: visible;
     box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.03);
-    transition: box-shadow .2s ease;
-  }
-  .dash-header.is-stuck {
-    box-shadow: 0 4px 24px rgba(0,0,0,.10), 0 1px 4px rgba(0,0,0,.06);
   }
   .dash-header-top {
     border-radius: 16px 16px 0 0;
@@ -2491,15 +2484,6 @@ window.setChartTab = setChartTab;
 // Restore last tab on load
 setChartTab(localStorage.getItem(CHART_TAB_KEY) || 'geral');
 
-// Sticky header shadow
-const _headerEl = document.querySelector('.dash-header');
-if (_headerEl) {
-  const _stickyObserver = new IntersectionObserver(
-    ([e]) => _headerEl.classList.toggle('is-stuck', e.intersectionRatio < 1),
-    { threshold: [1], rootMargin: '-1px 0px 0px 0px' }
-  );
-  _stickyObserver.observe(_headerEl);
-}
 
 // ─── Gestão de Vendedores ───
 async function loadVendedores() {
