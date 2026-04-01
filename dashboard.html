@@ -79,9 +79,15 @@ window._showUpdateBanner = function() {
     border-radius: 16px;
     padding: 0;
     margin-bottom: var(--gap);
-    position: relative;
+    position: sticky;
+    top: 16px;
+    z-index: 200;
     overflow: visible;
     box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.03);
+    transition: box-shadow .2s ease;
+  }
+  .dash-header.is-stuck {
+    box-shadow: 0 4px 24px rgba(0,0,0,.10), 0 1px 4px rgba(0,0,0,.06);
   }
   .dash-header-top {
     border-radius: 16px 16px 0 0;
@@ -244,10 +250,14 @@ window._showUpdateBanner = function() {
   @media (max-width: 768px) {
     .kpi-grid-hero { grid-template-columns: repeat(2, 1fr); }
     .kpi-grid-secondary { grid-template-columns: repeat(2, 1fr); }
+    .dash-header { top: 8px; }
+    .dash-layout { padding: 12px; }
   }
   @media (max-width: 480px) {
     .kpi-grid-hero { grid-template-columns: 1fr; }
     .kpi-grid-secondary { grid-template-columns: 1fr; }
+    .period-tabs button { padding: 7px 10px; font-size: 11px; }
+    .dash-header-controls { gap: 8px; }
   }
   .charts-grid {
     display: grid;
@@ -255,6 +265,7 @@ window._showUpdateBanner = function() {
     gap: var(--gap);
     margin-bottom: calc(var(--gap) * 1.5);
   }
+  @media (max-width: 1024px) { .charts-grid { gap: 12px; } }
   @media (max-width: 768px) { .charts-grid { grid-template-columns: 1fr; } }
 
   /* ─── Collapsible Sections ─── */
@@ -766,6 +777,69 @@ window._showUpdateBanner = function() {
   }
   .filter-clear-btn:hover { border-color: var(--danger); color: var(--danger); }
 
+  /* ─── Chart section tabs ─── */
+  .chart-tabs {
+    display: flex;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 4px;
+    margin-bottom: var(--gap);
+    width: fit-content;
+    gap: 2px;
+  }
+  .chart-tab {
+    padding: 9px 18px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 150ms ease, color 150ms ease;
+    white-space: nowrap;
+  }
+  .chart-tab.active {
+    background: var(--bg-card);
+    color: var(--accent);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  .chart-tab:hover:not(.active) { color: var(--text-secondary); background: var(--bg-elevated); }
+  @media (max-width: 480px) {
+    .chart-tabs { width: 100%; }
+    .chart-tab { flex: 1; padding: 8px 10px; font-size: 11px; text-align: center; }
+    .chart-tab i { display: none; }
+  }
+
+  /* ─── Chart empty state ─── */
+  .chart-empty-state {
+    text-align: center;
+    padding: 32px 20px;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    font-weight: 500;
+    margin: 0;
+  }
+  .chart-empty-state i {
+    display: block;
+    font-size: 22px;
+    margin-bottom: 8px;
+    opacity: .35;
+  }
+
+  /* ─── KPI hero variant ─── */
+  .kpi-card--hero {
+    border-left: 3px solid var(--accent);
+    padding-left: 19px;
+  }
+  .kpi-card--hero .kpi-value { font-size: 2.6rem; }
+  .kpi-card--hero .kpi-label { color: var(--text-secondary); }
+  [data-theme="dark"] .kpi-card--hero { border-left-color: var(--accent); }
+
   /* ─── Card fade-in ─── */
   @keyframes cardFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
   .kpi-card { animation: none; }
@@ -905,7 +979,7 @@ window._showUpdateBanner = function() {
 
   <!-- KPI Cards — Hero Row -->
   <div class="kpi-grid-hero" id="kpiGrid">
-    <div class="kpi-card">
+    <div class="kpi-card kpi-card--hero">
       <div class="kpi-label"><i class="fa-solid fa-users"></i> Total Atendimentos</div>
       <div class="kpi-value" id="kpiTotal"><div class="skeleton skeleton-kpi-value"></div></div>
       <div class="kpi-compare" id="kpiTotalCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
@@ -915,7 +989,7 @@ window._showUpdateBanner = function() {
       <div class="kpi-value" id="kpiVendas"><div class="skeleton skeleton-kpi-value"></div></div>
       <div class="kpi-compare" id="kpiVendasCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
     </div>
-    <div class="kpi-card">
+    <div class="kpi-card kpi-card--hero">
       <div class="kpi-label"><i class="fa-solid fa-chart-line"></i> Taxa de Conversão</div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
         <div style="flex:1;min-width:0">
@@ -950,114 +1024,120 @@ window._showUpdateBanner = function() {
     </div>
   </div>
 
-  <!-- Charts row: Motivos de Perda + Origem dos Clientes (ambos donuts) -->
-  <div class="charts-grid">
-    <div class="chart-card">
-      <h3><i class="fa-solid fa-chart-pie" style="margin-right:6px;color:var(--accent-dim)"></i>Motivos de Perda</h3>
-      <div class="chart-box" style="height:340px"><div id="chartMotivos"></div></div>
+  <!-- Chart Section Tabs -->
+  <div class="chart-tabs" id="chartTabs">
+    <button class="chart-tab active" data-section="geral" onclick="setChartTab('geral')"><i class="fa-solid fa-chart-pie" style="margin-right:6px"></i>Visão Geral</button>
+    <button class="chart-tab" data-section="vendedor" onclick="setChartTab('vendedor')"><i class="fa-solid fa-users" style="margin-right:6px"></i>Por Vendedor</button>
+    <button class="chart-tab" data-section="operacional" onclick="setChartTab('operacional')"><i class="fa-solid fa-gears" style="margin-right:6px"></i>Operacional</button>
+  </div>
+
+  <!-- Section: Visão Geral -->
+  <div class="chart-section" id="section-geral">
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3><i class="fa-solid fa-chart-pie" style="margin-right:6px;color:var(--accent-dim)"></i>Motivos de Perda</h3>
+        <div class="chart-box" style="height:340px"><div id="chartMotivos"></div></div>
+        <p id="chartMotivosEmpty" class="chart-empty-state" style="display:none"><i class="fa-solid fa-face-smile-beam"></i>Nenhuma perda registrada neste período</p>
+      </div>
+      <div class="chart-card">
+        <h3><i class="fa-solid fa-signs-post" style="margin-right:6px;color:var(--accent-dim)"></i>Origem dos Clientes</h3>
+        <div class="chart-box" style="height:340px"><div id="chartOrigem" style="width:100%;height:100%"></div></div>
+        <p id="chartOrigemEmpty" class="chart-empty-state" style="display:none"><i class="fa-solid fa-signs-post"></i>Nenhum dado de origem registrado neste período</p>
+      </div>
     </div>
-    <div class="chart-card">
-      <h3><i class="fa-solid fa-signs-post" style="margin-right:6px;color:var(--accent-dim)"></i>Origem dos Clientes</h3>
-      <div class="chart-box" style="height:340px"><div id="chartOrigem" style="width:100%;height:100%"></div></div>
-      <p id="chartOrigemEmpty" style="display:none;text-align:center;padding:40px 20px;font-size:13px;color:var(--text-muted);font-family:var(--font-body)">
-        <i class="fa-solid fa-signs-post" style="font-size:24px;display:block;margin-bottom:8px;opacity:.4"></i>
-        Nenhum dado de origem registrado neste período
-      </p>
+    <div class="chart-card" style="margin-bottom:var(--gap)">
+      <h3><i class="fa-solid fa-chart-bar" style="margin-right:6px;color:var(--accent-dim)"></i>Fluxo por Hora</h3>
+      <div class="chart-box"><div id="chartHourly"></div></div>
+      <p id="chartHourlyEmpty" class="chart-empty-state" style="display:none"><i class="fa-solid fa-clock"></i>Sem fluxo de atendimentos neste período</p>
+    </div>
+    <div class="chart-card" style="margin-bottom:var(--gap)">
+      <h3><i class="fa-solid fa-chart-line" style="margin-right:6px;color:var(--accent-dim)"></i>Evolução Diária</h3>
+      <div style="overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--accent-dim) transparent">
+        <div class="chart-box" style="height:380px;min-width:700px"><div id="chartTrend"></div></div>
+      </div>
+      <p id="chartTrendEmpty" class="chart-empty-state" style="display:none"><i class="fa-solid fa-chart-line"></i>Sem evolução registrada neste período</p>
     </div>
   </div>
 
-  <!-- Fluxo por Hora -->
-  <div class="chart-card" style="margin-bottom:var(--gap)">
-    <h3><i class="fa-solid fa-chart-bar" style="margin-right:6px;color:var(--accent-dim)"></i>Fluxo por Hora</h3>
-    <div class="chart-box"><div id="chartHourly"></div></div>
-  </div>
-
-  <!-- Preferenciais -->
-  <div class="chart-card" style="margin-bottom:var(--gap)">
-    <h3><i class="fa-solid fa-star" style="margin-right:6px;color:var(--accent-dim)"></i>Atendimentos Preferenciais por Vendedor</h3>
-    <div class="chart-box" id="chartPrefBox"><div id="chartPreferenciais"></div></div>
-  </div>
-
-  <!-- Charts row: Scatter + Tempo Médio (ambos por vendedor) -->
-  <div class="charts-grid">
-    <div class="chart-card">
-      <h3><i class="fa-solid fa-chart-scatter" style="margin-right:6px;color:var(--accent-dim)"></i>Volume × Conversão por Vendedor</h3>
-      <div class="chart-box"><div id="chartScatter"></div></div>
+  <!-- Section: Por Vendedor -->
+  <div class="chart-section" id="section-vendedor" style="display:none">
+    <div class="chart-card" style="margin-bottom:var(--gap)">
+      <div class="chart-card-header" onclick="toggleSection('ranking')">
+        <h3><i class="fa-solid fa-ranking-star" style="margin-right:6px;color:var(--accent-dim)"></i>Ranking Vendedores</h3>
+        <button class="collapse-btn" id="collapseBtn-ranking"><i class="fa-solid fa-chevron-down"></i></button>
+      </div>
+      <div class="chart-card-body" id="collapseBody-ranking" style="margin-top:16px">
+        <div class="ranking-grid" id="rankingBody">
+          <div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text-muted)">Carregando...</div>
+        </div>
+      </div>
     </div>
-    <div class="chart-card">
-      <h3><i class="fa-solid fa-stopwatch" style="margin-right:6px;color:var(--accent-dim)"></i>Tempo Médio por Vendedor</h3>
-      <div class="chart-box"><div id="chartTempoMeta"></div></div>
+    <div class="chart-card" style="margin-bottom:var(--gap)">
+      <h3><i class="fa-solid fa-star" style="margin-right:6px;color:var(--accent-dim)"></i>Atendimentos Preferenciais por Vendedor</h3>
+      <div class="chart-box" id="chartPrefBox"><div id="chartPreferenciais"></div></div>
+      <p id="chartPrefEmpty" class="chart-empty-state" style="display:none"><i class="fa-solid fa-star"></i>Nenhum atendimento preferencial neste período</p>
     </div>
-  </div>
-
-  <!-- Trend Line -->
-  <div class="chart-card" style="margin-bottom:var(--gap)">
-    <h3><i class="fa-solid fa-chart-line" style="margin-right:6px;color:var(--accent-dim)"></i>Evolução Diária</h3>
-    <div style="overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--accent-dim) transparent">
-      <div class="chart-box" style="height:380px;min-width:700px"><div id="chartTrend"></div></div>
-    </div>
-  </div>
-
-  <!-- Ranking -->
-  <div class="chart-card" style="margin-bottom:var(--gap)">
-    <div class="chart-card-header" onclick="toggleSection('ranking')">
-      <h3><i class="fa-solid fa-ranking-star" style="margin-right:6px;color:var(--accent-dim)"></i>Ranking Vendedores</h3>
-      <button class="collapse-btn" id="collapseBtn-ranking"><i class="fa-solid fa-chevron-down"></i></button>
-    </div>
-    <div class="chart-card-body" id="collapseBody-ranking" style="margin-top:16px">
-      <div class="ranking-grid" id="rankingBody">
-        <div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text-muted)">Carregando...</div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3><i class="fa-solid fa-chart-scatter" style="margin-right:6px;color:var(--accent-dim)"></i>Volume × Conversão por Vendedor</h3>
+        <div class="chart-box"><div id="chartScatter"></div></div>
+        <p id="chartScatterEmpty" class="chart-empty-state" style="display:none"><i class="fa-solid fa-chart-scatter"></i>Sem dados de conversão neste período</p>
+      </div>
+      <div class="chart-card">
+        <h3><i class="fa-solid fa-stopwatch" style="margin-right:6px;color:var(--accent-dim)"></i>Tempo Médio por Vendedor</h3>
+        <div class="chart-box"><div id="chartTempoMeta"></div></div>
+        <p id="chartTempoEmpty" class="chart-empty-state" style="display:none"><i class="fa-solid fa-stopwatch"></i>Sem dados de tempo neste período</p>
       </div>
     </div>
   </div>
 
-  <!-- Bottom row: Ruptures + Pausas -->
-  <div class="charts-grid">
-    <div class="chart-card">
-      <div class="chart-card-header" onclick="toggleSection('rupturas')">
-        <h3><i class="fa-solid fa-box-open" style="margin-right:6px;color:var(--danger)"></i>Rupturas — Produtos em Falta</h3>
-        <button class="collapse-btn" id="collapseBtn-rupturas"><i class="fa-solid fa-chevron-down"></i></button>
+  <!-- Section: Operacional -->
+  <div class="chart-section" id="section-operacional" style="display:none">
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-card-header" onclick="toggleSection('rupturas')">
+          <h3><i class="fa-solid fa-box-open" style="margin-right:6px;color:var(--danger)"></i>Rupturas — Produtos em Falta</h3>
+          <button class="collapse-btn" id="collapseBtn-rupturas"><i class="fa-solid fa-chevron-down"></i></button>
+        </div>
+        <div class="chart-card-body" id="collapseBody-rupturas" style="margin-top:16px">
+          <div id="ruptureList">
+            <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">
+              <i class="fa-solid fa-check-circle" style="font-size:20px;margin-bottom:8px;display:block;color:var(--success);opacity:.4"></i>
+              Nenhuma ruptura registrada
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="chart-card-body" id="collapseBody-rupturas" style="margin-top:16px">
-        <div id="ruptureList">
-          <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">
-            <i class="fa-solid fa-check-circle" style="font-size:20px;margin-bottom:8px;display:block;color:var(--success);opacity:.4"></i>
-            Nenhuma ruptura registrada
+      <div class="chart-card">
+        <div class="chart-card-header" onclick="toggleSection('pausas')">
+          <h3><i class="fa-solid fa-mug-hot" style="margin-right:6px;color:var(--warning)"></i>Pausas — Saídas da Fila</h3>
+          <button class="collapse-btn" id="collapseBtn-pausas"><i class="fa-solid fa-chevron-down"></i></button>
+        </div>
+        <div class="chart-card-body" id="collapseBody-pausas" style="margin-top:16px">
+          <div id="pauseStatsList" style="max-height:340px;overflow-y:auto">
+            <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>
           </div>
         </div>
       </div>
     </div>
-    <div class="chart-card">
-      <div class="chart-card-header" onclick="toggleSection('pausas')">
-        <h3><i class="fa-solid fa-mug-hot" style="margin-right:6px;color:var(--warning)"></i>Pausas — Saídas da Fila</h3>
-        <button class="collapse-btn" id="collapseBtn-pausas"><i class="fa-solid fa-chevron-down"></i></button>
+    <div id="floorList" style="display:none"></div>
+    <div class="chart-card" style="margin-bottom:var(--gap)">
+      <div class="chart-card-header" onclick="toggleSection('gestao')">
+        <h3><i class="fa-solid fa-user-gear" style="margin-right:6px;color:var(--accent-dim)"></i>Gestão de Vendedores</h3>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button class="btn btn-gold" style="min-height:34px;padding:0 14px;font-size:11px" onclick="event.stopPropagation();openVendedorModal()">
+            <i class="fa-solid fa-plus" style="font-size:9px;margin-right:4px"></i> Novo Vendedor
+          </button>
+          <button class="collapse-btn" id="collapseBtn-gestao"><i class="fa-solid fa-chevron-down"></i></button>
+        </div>
       </div>
-      <div class="chart-card-body" id="collapseBody-pausas" style="margin-top:16px">
-        <div id="pauseStatsList" style="max-height:340px;overflow-y:auto">
+      <div class="chart-card-body" id="collapseBody-gestao" style="margin-top:16px">
+        <div id="vendedorList">
           <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>
         </div>
       </div>
     </div>
-  </div>
-  <div id="floorList" style="display:none"></div>
-
-  <!-- Gestão de Vendedores -->
-  <div class="chart-card" style="margin-bottom:var(--gap)">
-    <div class="chart-card-header" onclick="toggleSection('gestao')">
-      <h3><i class="fa-solid fa-user-gear" style="margin-right:6px;color:var(--accent-dim)"></i>Gestão de Vendedores</h3>
-      <div style="display:flex;align-items:center;gap:8px">
-        <button class="btn btn-gold" style="min-height:34px;padding:0 14px;font-size:11px" onclick="event.stopPropagation();openVendedorModal()">
-          <i class="fa-solid fa-plus" style="font-size:9px;margin-right:4px"></i> Novo Vendedor
-        </button>
-        <button class="collapse-btn" id="collapseBtn-gestao"><i class="fa-solid fa-chevron-down"></i></button>
-      </div>
-    </div>
-    <div class="chart-card-body" id="collapseBody-gestao" style="margin-top:16px">
-      <div id="vendedorList">
-        <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>
-      </div>
-    </div>
-  </div>
+  </div><!-- /section-operacional -->
 
   <!-- Footer -->
   <footer style="text-align:center;margin-top:40px;padding:32px 0;border-top:1px solid var(--border-subtle)">
@@ -1667,14 +1747,24 @@ async function loadMotivos(range) {
   const colors = (data || []).map(d => MOTIVOS[d.motivo]?.color || '#6b7280');
 
   const totalMotivos = values.reduce((a, b) => a + b, 0);
+  const emptyMotivos = document.getElementById('chartMotivosEmpty');
   if (totalMotivos === 0) {
     if (el) el.style.display = 'none';
+    if (emptyMotivos) emptyMotivos.style.display = 'block';
     return;
   }
   if (el) el.style.display = '';
+  if (emptyMotivos) emptyMotivos.style.display = 'none';
 
   renderChart('motivos', '#chartMotivos', {
-    chart: { type: 'donut', height: 320 },
+    chart: { type: 'donut', height: 320, cursor: 'pointer', events: {
+      dataPointSelection: function(event, chartCtx, config) {
+        const idx = config.dataPointIndex;
+        const motivo = (data || [])[idx]?.motivo;
+        const label = labels[idx];
+        if (motivo) openDrillMotivo(motivo, label);
+      }
+    }},
     series: values,
     labels: labels.map((l, i) => l + ' (' + values[i] + ')'),
     colors: colors,
@@ -1720,11 +1810,15 @@ async function loadHourly(range) {
   const todayHourlyData = isMultiDay ? (results[1]?.data || null) : null;
 
   const el = document.querySelector('#chartHourly');
+  const emptyHourly = document.getElementById('chartHourlyEmpty');
   if (!el) { console.error('[loadHourly] element not found'); return; }
   if (!data || data.length === 0) {
-    el.parentElement.insertAdjacentHTML('afterbegin', '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:13px">Sem dados de fluxo no período</div>');
+    el.style.display = 'none';
+    if (emptyHourly) emptyHourly.style.display = 'block';
     return;
   }
+  el.style.display = '';
+  if (emptyHourly) emptyHourly.style.display = 'none';
 
   // Calculate number of days in range for averaging
   const rangeStart = new Date(range.start);
@@ -2042,7 +2136,15 @@ async function loadScatter(range, cachedData) {
   const data = cachedData;
   // Filtrar apenas vendedores com atendimentos
   const filtered = (data || []).filter(r => (r.total_atendimentos || 0) > 0);
-  if (filtered.length === 0) { if (charts.scatter) { try { charts.scatter.destroy(); } catch(e) {} } charts.scatter = null; return; }
+  const emptyScatter = document.getElementById('chartScatterEmpty');
+  if (filtered.length === 0) {
+    if (charts.scatter) { try { charts.scatter.destroy(); } catch(e) {} } charts.scatter = null;
+    const el = document.querySelector('#chartScatter'); if (el) el.style.display = 'none';
+    if (emptyScatter) emptyScatter.style.display = 'block';
+    return;
+  }
+  const elScatter = document.querySelector('#chartScatter'); if (elScatter) elScatter.style.display = '';
+  if (emptyScatter) emptyScatter.style.display = 'none';
 
   const metaConv = metas.conversao || 70;
   const maxAtend = Math.max(...filtered.map(r => r.total_atendimentos || 0), 1);
@@ -2142,13 +2244,16 @@ async function loadTempoMeta(range, cachedData) {
   const el = document.querySelector('#chartTempoMeta');
   // Filtrar apenas vendedores com atendimentos (tempo > 0)
   const filtered = (data || []).filter(r => (r.tempo_medio_min || 0) > 0);
+  const emptyTempo = document.getElementById('chartTempoEmpty');
   if (filtered.length === 0) {
     if (charts.tempoMeta) { try { charts.tempoMeta.destroy(); } catch(e) {} }
     charts.tempoMeta = null;
     if (el) el.style.display = 'none';
+    if (emptyTempo) emptyTempo.style.display = 'block';
     return;
   }
   if (el) el.style.display = '';
+  if (emptyTempo) emptyTempo.style.display = 'none';
 
   const names = filtered.map(r => (r.apelido || r.nome || '?').split(' ')[0]);
   const tempos = filtered.map(r => r.tempo_medio_min || 0);
@@ -2195,7 +2300,15 @@ async function loadTrend(range) {
   }
   const { data, error } = await sb.rpc('get_daily_trend', { p_inicio: trendRange.start, p_fim: trendRange.end });
   if (error) { return; }
-  if (!data || data.length === 0) { if (charts.trend) { try { charts.trend.destroy(); } catch(e) {} } charts.trend = null; return; }
+  const emptyTrend = document.getElementById('chartTrendEmpty');
+  if (!data || data.length === 0) {
+    if (charts.trend) { try { charts.trend.destroy(); } catch(e) {} } charts.trend = null;
+    const elTrend = document.querySelector('#chartTrend'); if (elTrend) elTrend.style.display = 'none';
+    if (emptyTrend) emptyTrend.style.display = 'block';
+    return;
+  }
+  const elTrend = document.querySelector('#chartTrend'); if (elTrend) elTrend.style.display = '';
+  if (emptyTrend) emptyTrend.style.display = 'none';
 
   const todayStr = new Date().toISOString().split('T')[0];
   const todayIdx = data.findIndex(d => d.dia === todayStr);
@@ -2436,6 +2549,40 @@ async function loadOrigem(range) {
 window.addEventListener('resize', function() {
   if (_echartsOrigem) _echartsOrigem.resize();
 });
+
+// ─── Chart section tabs ───
+const CHART_TAB_KEY = 'minhavez_chart_tab';
+function setChartTab(section) {
+  document.querySelectorAll('.chart-section').forEach(s => s.style.display = 'none');
+  document.querySelectorAll('.chart-tab').forEach(b => b.classList.toggle('active', b.dataset.section === section));
+  const el = document.getElementById('section-' + section);
+  if (el) el.style.display = 'block';
+  localStorage.setItem(CHART_TAB_KEY, section);
+  // Resize charts that may have rendered in hidden container
+  requestAnimationFrame(() => {
+    if (charts.trend) { try { charts.trend.resetSeries && charts.trend.resetSeries(); } catch(e) {} }
+    if (charts.scatter) { try { charts.scatter.resetSeries && charts.scatter.resetSeries(); } catch(e) {} }
+    if (charts.tempoMeta) { try { charts.tempoMeta.resetSeries && charts.tempoMeta.resetSeries(); } catch(e) {} }
+    if (charts.preferenciais) { try { charts.preferenciais.resetSeries && charts.preferenciais.resetSeries(); } catch(e) {} }
+    if (_echartsOrigem) { try { _echartsOrigem.resize(); } catch(e) {} }
+    Object.values(charts).forEach(c => { try { c && c.windowResizeHandler && c.windowResizeHandler(); } catch(e) {} });
+  });
+}
+// Restore last tab on load
+(function() {
+  const saved = localStorage.getItem(CHART_TAB_KEY) || 'geral';
+  setChartTab(saved);
+})();
+
+// Sticky header shadow
+const _headerEl = document.querySelector('.dash-header');
+if (_headerEl) {
+  const _stickyObserver = new IntersectionObserver(
+    ([e]) => _headerEl.classList.toggle('is-stuck', e.intersectionRatio < 1),
+    { threshold: [1], rootMargin: '-1px 0px 0px 0px' }
+  );
+  _stickyObserver.observe(_headerEl);
+}
 
 // ─── Gestão de Vendedores ───
 async function loadVendedores() {
@@ -2912,6 +3059,58 @@ updateTimestamp();
 document.fonts.ready.then(() => {
   Object.values(charts).forEach(c => { if (c && c.update) c.update(); });
 });
+
+// ─── Drill-down: Motivos de Perda ───
+window.openDrillMotivo = async function(motivo, label) {
+  const modal = document.getElementById('drillModal');
+  const title = document.getElementById('drillTitle');
+  const body  = document.getElementById('drillBody');
+  if (!modal) return;
+  title.textContent = label || motivo;
+  body.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>';
+  modal.classList.add('open');
+
+  const range = getRange();
+  let q = sb.from('atendimentos')
+    .select('vendedor_nome, vendedor_apelido, criado_em, motivo_perda')
+    .eq('motivo_perda', motivo)
+    .gte('criado_em', range.start)
+    .lte('criado_em', range.end)
+    .order('criado_em', { ascending: false })
+    .limit(50);
+  if (tenantId) q = q.eq('tenant_id', tenantId);
+  const { data, error } = await q;
+  if (error || !data || data.length === 0) {
+    body.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum registro encontrado</div>';
+    return;
+  }
+  body.innerHTML = data.map(r => {
+    const nome = r.vendedor_apelido || r.vendedor_nome || '—';
+    const dt = new Date(r.criado_em);
+    const hora = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const dia = dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-subtle);font-size:13px">
+      <span style="font-weight:600;color:var(--text-primary)">${nome}</span>
+      <span style="color:var(--text-muted)">${dia} · ${hora}</span>
+    </div>`;
+  }).join('');
+};
+
+window.closeDrillModal = function() {
+  document.getElementById('drillModal')?.classList.remove('open');
+};
 </script>
+
+<!-- Modal Drill-down -->
+<div class="modal-overlay" id="drillModal" onclick="if(event.target===this)closeDrillModal()">
+  <div class="modal-box" style="max-width:480px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h3 id="drillTitle" style="margin:0;font-size:15px"></h3>
+      <button onclick="closeDrillModal()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="drillBody" style="max-height:400px;overflow-y:auto"></div>
+  </div>
+</div>
+
 </body>
 </html>
