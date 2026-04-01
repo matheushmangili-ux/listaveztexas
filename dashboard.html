@@ -2547,7 +2547,7 @@ window.addEventListener('resize', function() {
 
 // ─── Chart section tabs ───
 const CHART_TAB_KEY = 'minhavez_chart_tab';
-function setChartTab(section) {
+window.setChartTab = function setChartTab(section) {
   document.querySelectorAll('.chart-section').forEach(s => s.style.display = 'none');
   document.querySelectorAll('.chart-tab').forEach(b => b.classList.toggle('active', b.dataset.section === section));
   const el = document.getElementById('section-' + section);
