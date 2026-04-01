@@ -1036,7 +1036,7 @@ window._showUpdateBanner = function() {
       </div>
       <div class="chart-card">
         <h3><i class="fa-solid fa-signs-post" style="margin-right:6px;color:var(--accent-dim)"></i>Origem dos Clientes</h3>
-        <div class="chart-box" style="height:340px"><div id="chartOrigem" style="width:100%;height:100%"></div></div>
+        <div class="chart-box" style="height:340px"><div id="chartOrigem"></div></div>
         <p id="chartOrigemEmpty" class="chart-empty-state" style="display:none"><i class="fa-solid fa-signs-post"></i>Nenhum dado de origem registrado neste período</p>
       </div>
     </div>
@@ -2421,8 +2421,9 @@ window.toggleSection = function(id) {
   });
 })();
 
-// ─── Origem dos Clientes (ECharts donut) ───
-let _echartsOrigem = null;
+// ─── Origem dos Clientes (ApexCharts donut) ───
+// Paleta suave alinhada ao dashboard
+const ORIGEM_PALETTE = ['#e2506f','#818cf8','#fb923c','#34d399','#60a5fa','#a78bfa','#f472b6','#2dd4bf'];
 
 async function loadOrigem(range) {
   const container = document.getElementById('chartOrigem');
@@ -2435,115 +2436,45 @@ async function loadOrigem(range) {
   if (!data || data.length === 0) {
     container.style.display = 'none';
     if (emptyMsg) emptyMsg.style.display = 'block';
-    if (_echartsOrigem) { _echartsOrigem.dispose(); _echartsOrigem = null; }
     return;
   }
 
   container.style.display = 'block';
   if (emptyMsg) emptyMsg.style.display = 'none';
 
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const palette = ['#e2506f','#6366f1','#f59e0b','#10b981','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#f97316','#ef4444'];
+  const labels = data.map(d => d.canal_nome || 'Não informado');
+  const values = data.map(d => Number(d.total));
+  const colors = data.map((_, i) => ORIGEM_PALETTE[i % ORIGEM_PALETTE.length]);
+  const total = values.reduce((a, b) => a + b, 0);
 
-  const chartData = data.map((d, i) => ({
-    name: d.canal_nome || 'Não informado',
-    value: Number(d.total),
-    itemStyle: { color: palette[i % palette.length] }
-  }));
-
-  const total = chartData.reduce((s, d) => s + d.value, 0);
-
-  if (_echartsOrigem) _echartsOrigem.dispose();
-  _echartsOrigem = echarts.init(container);
-
-  const option = {
-    tooltip: {
-      trigger: 'item',
-      backgroundColor: isDark ? '#1E1E2E' : '#fff',
-      borderColor: isDark ? 'rgba(255,255,255,.1)' : 'rgba(0,0,0,.08)',
-      textStyle: {
-        color: isDark ? 'rgba(255,255,255,.85)' : '#18181B',
-        fontFamily: 'Satoshi, sans-serif',
-        fontSize: 12
-      },
-      formatter: function(p) {
-        return '<strong>' + p.name + '</strong><br/>' +
-               p.value + ' atendimentos (' + p.percent.toFixed(1) + '%)';
+  renderChart('origem', '#chartOrigem', {
+    chart: { type: 'donut', height: 320 },
+    series: values,
+    labels: labels.map((l, i) => l + ' (' + values[i] + ')'),
+    colors,
+    plotOptions: {
+      pie: {
+        donut: {
+          size: '68%',
+          labels: {
+            show: true,
+            name: { show: true, fontSize: '10px', fontWeight: 600, color: chartColors().textMuted, offsetY: -8 },
+            value: { show: true, fontSize: '28px', fontWeight: 700, color: chartColors().centerText, offsetY: 4,
+                     formatter: () => String(total) },
+            total: { show: true, label: 'TOTAL', fontSize: '10px', fontWeight: 600, color: chartColors().textMuted,
+                     formatter: () => String(total) }
+          }
+        }
       }
     },
-    legend: {
-      orient: 'vertical',
-      right: '5%',
-      top: 'center',
-      itemWidth: 10,
-      itemHeight: 10,
-      itemGap: 12,
-      textStyle: {
-        color: isDark ? 'rgba(255,255,255,.7)' : '#52525B',
-        fontFamily: 'Satoshi, sans-serif',
-        fontSize: 12,
-        fontWeight: 500
-      }
-    },
-    series: [{
-      type: 'pie',
-      radius: ['50%', '75%'],
-      center: ['35%', '50%'],
-      avoidLabelOverlap: true,
-      itemStyle: {
-        borderRadius: 6,
-        borderColor: isDark ? '#1a1a2e' : '#fff',
-        borderWidth: 3
-      },
-      label: {
-        show: false
-      },
-      emphasis: {
-        label: { show: false },
-        itemStyle: {
-          shadowBlur: 12,
-          shadowColor: 'rgba(0,0,0,.2)'
-        }
-      },
-      data: chartData
-    }],
-    graphic: [{
-      type: 'group',
-      left: '35%',
-      top: 'center',
-      children: [{
-        type: 'text',
-        style: {
-          text: total.toString(),
-          textAlign: 'center',
-          fill: isDark ? '#fff' : '#18181B',
-          fontSize: 28,
-          fontWeight: 700,
-          fontFamily: 'Satoshi, sans-serif',
-          y: -10
-        }
-      }, {
-        type: 'text',
-        style: {
-          text: 'total',
-          textAlign: 'center',
-          fill: isDark ? 'rgba(255,255,255,.4)' : '#a1a1aa',
-          fontSize: 11,
-          fontWeight: 500,
-          fontFamily: 'Satoshi, sans-serif',
-          y: 14
-        }
-      }]
-    }]
-  };
-
-  _echartsOrigem.setOption(option);
+    dataLabels: { enabled: false },
+    legend: { position: 'bottom', fontSize: '11px', fontWeight: 600, fontFamily: "'Satoshi'",
+              labels: { colors: chartColors().textStrong } },
+    stroke: { width: 2, colors: [isDarkTheme() ? '#18181B' : '#FFFFFF'] },
+    tooltip: { y: { formatter: (val) => val + ' atendimentos' } },
+    states: { hover: { filter: { type: 'darken', value: 0.85 } }, active: { filter: { type: 'none' } } }
+  });
 }
-
-// Resize ECharts on window resize
-window.addEventListener('resize', function() {
-  if (_echartsOrigem) _echartsOrigem.resize();
-});
 
 // ─── Chart section tabs ───
 const CHART_TAB_KEY = 'minhavez_chart_tab';
@@ -2554,10 +2485,7 @@ function setChartTab(section) {
   if (el) el.style.display = 'block';
   localStorage.setItem(CHART_TAB_KEY, section);
   // ApexCharts renders 0px when container is display:none — force resize after reveal
-  setTimeout(() => {
-    window.dispatchEvent(new Event('resize'));
-    if (_echartsOrigem) { try { _echartsOrigem.resize(); } catch(e) {} }
-  }, 50);
+  setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 50);
 }
 window.setChartTab = setChartTab;
 // Restore last tab on load
