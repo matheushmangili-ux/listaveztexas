@@ -832,13 +832,8 @@ window._showUpdateBanner = function() {
   }
 
   /* ─── KPI hero variant ─── */
-  .kpi-card--hero {
-    border-left: 3px solid var(--accent);
-    padding-left: 19px;
-  }
   .kpi-card--hero .kpi-value { font-size: 2.6rem; }
   .kpi-card--hero .kpi-label { color: var(--text-secondary); }
-  [data-theme="dark"] .kpi-card--hero { border-left-color: var(--accent); }
 
   /* ─── Card fade-in ─── */
   @keyframes cardFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -2558,15 +2553,11 @@ function setChartTab(section) {
   const el = document.getElementById('section-' + section);
   if (el) el.style.display = 'block';
   localStorage.setItem(CHART_TAB_KEY, section);
-  // Resize charts that may have rendered in hidden container
-  requestAnimationFrame(() => {
-    if (charts.trend) { try { charts.trend.resetSeries && charts.trend.resetSeries(); } catch(e) {} }
-    if (charts.scatter) { try { charts.scatter.resetSeries && charts.scatter.resetSeries(); } catch(e) {} }
-    if (charts.tempoMeta) { try { charts.tempoMeta.resetSeries && charts.tempoMeta.resetSeries(); } catch(e) {} }
-    if (charts.preferenciais) { try { charts.preferenciais.resetSeries && charts.preferenciais.resetSeries(); } catch(e) {} }
+  // ApexCharts renders 0px when container is display:none — force resize after reveal
+  setTimeout(() => {
+    window.dispatchEvent(new Event('resize'));
     if (_echartsOrigem) { try { _echartsOrigem.resize(); } catch(e) {} }
-    Object.values(charts).forEach(c => { try { c && c.windowResizeHandler && c.windowResizeHandler(); } catch(e) {} });
-  });
+  }, 50);
 }
 // Restore last tab on load
 (function() {
