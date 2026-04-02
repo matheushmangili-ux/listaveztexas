@@ -3803,7 +3803,7 @@ window.toggleTvMode = function() {
 };
 function applyTvMode() {
   const layout = document.querySelector('.tablet-layout');
-  const btn = document.getElementById('tvBtn');
+  const btn = document.getElementById('tvMenuBtn');
   if (layout) layout.classList.toggle('tv-mode', _tvMode);
   if (btn) btn.classList.toggle('active', _tvMode);
   // Forçar re-render para esconder/mostrar elementos dinâmicos
