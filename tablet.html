@@ -3831,7 +3831,7 @@ window.toggleMoreMenu = function() {
   // Atualizar label do tema
   if (open) {
     const lbl = document.getElementById('themeLabel');
-    if (lbl) lbl.textContent = isDarkTheme() ? 'Modo Claro' : 'Modo Escuro';
+    if (lbl) lbl.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? 'Modo Claro' : 'Modo Escuro';
   }
 };
 document.addEventListener('click', function(e) {
