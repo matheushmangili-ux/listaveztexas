@@ -109,9 +109,8 @@ window.addEventListener('error', function(e) {
     .t-header { padding: 8px 10px; }
     .t-header .header-title { display: none; }
   }
-  /* Esconder botões menos importantes em telas menores */
+  /* Esconder ranking em telas menores */
   @media (max-width: 900px) {
-    .t-header .tv-btn,
     .t-header [title="Ranking do turno"] { display: none; }
   }
 
@@ -681,6 +680,19 @@ window.addEventListener('error', function(e) {
     50% { box-shadow: 0 0 0 4px rgba(34,197,94,0); }
   }
 
+  /* ─── Atend count badge ─── */
+  .atend-count-badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+    border-radius: 6px;
+    padding: 1px 6px;
+    line-height: 1.4;
+    flex-shrink: 0;
+  }
+
   /* ─── Cold seller indicator ─── */
   .queue-item.cold-seller {
     background: rgba(59,130,246,.04);
@@ -739,6 +751,30 @@ window.addEventListener('error', function(e) {
   }
   .tv-btn { min-height: 40px; padding: 0 8px; font-size: 13px; color: #FFFFFF; background: none; border: none; cursor: pointer; transition: color .2s; font-family: inherit; }
   .tv-btn.active { color: var(--success); }
+
+  /* ─── More menu ─── */
+  .more-btn {
+    min-height: 44px; min-width: 44px; padding: 0 10px;
+    font-size: 16px; color: #FFFFFF; background: none; border: none;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .more-menu {
+    position: absolute; top: calc(100% + 8px); right: 0; z-index: 2000;
+    background: var(--bg-card); border: 1px solid var(--border-subtle);
+    border-radius: 12px; padding: 6px 0; min-width: 180px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.25);
+    animation: moreMenuIn .15s ease;
+  }
+  @keyframes moreMenuIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+  .more-menu button {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    padding: 12px 16px; font-size: 14px; font-weight: 600;
+    font-family: 'Satoshi', sans-serif; color: var(--text-strong);
+    background: none; border: none; cursor: pointer; transition: background .15s;
+  }
+  .more-menu button:hover { background: var(--bg-elevated); }
+  .more-menu button i { width: 18px; text-align: center; font-size: 14px; color: var(--text-muted); }
+  .more-menu-divider { height: 1px; background: var(--border-subtle); margin: 4px 0; }
 
   .queue-item.new-item {
     animation: slideIn .25s ease both;
@@ -1055,15 +1091,23 @@ window.addEventListener('error', function(e) {
         <span class="turno-switch-label" id="turnoSwitchLabel">OFF</span>
         <span class="turno-pulse-dot" id="turnoPulse"></span>
       </div>
-      <button class="tv-btn" id="tvBtn" onclick="toggleTvMode()" title="Modo TV (painel)">
-        <i class="fa-solid fa-tv"></i>
-      </button>
-      <button class="btn btn-ghost" style="min-height:44px;min-width:44px;padding:0 10px;font-size:14px;color:#FFFFFF;display:flex;align-items:center;justify-content:center" onclick="window._toggleTheme()" title="Modo claro/escuro">
-        <i class="fa-solid fa-circle-half-stroke"></i>
-      </button>
-      <button class="btn btn-ghost" style="min-height:44px;min-width:44px;padding:0 10px;font-size:14px;color:#FFFFFF;display:flex;align-items:center;justify-content:center" onclick="handleLogout()" title="Sair">
-        <i class="fa-solid fa-right-from-bracket"></i>
-      </button>
+      <div style="position:relative">
+        <button class="more-btn" onclick="toggleMoreMenu()" title="Mais opções">
+          <i class="fa-solid fa-ellipsis-vertical"></i>
+        </button>
+        <div id="moreMenu" class="more-menu" style="display:none">
+          <button onclick="window._toggleTheme();toggleMoreMenu()">
+            <i class="fa-solid fa-circle-half-stroke"></i> <span id="themeLabel">Modo Escuro</span>
+          </button>
+          <button id="tvMenuBtn" onclick="toggleTvMode();toggleMoreMenu()">
+            <i class="fa-solid fa-tv"></i> Modo TV
+          </button>
+          <div class="more-menu-divider"></div>
+          <button onclick="handleLogout()">
+            <i class="fa-solid fa-right-from-bracket" style="color:#ef4444"></i> Sair
+          </button>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -1789,12 +1833,18 @@ function renderQueueItem(v, pos, isActive, draggable) {
   // Cold seller: >20min na fila sem ser chamado
   const coldClass = (draggable && _queueEntryTimes.has(v.id) && (Date.now() - _queueEntryTimes.get(v.id).time > 20 * 60 * 1000)) ? ' cold-seller' : '';
 
+  const atendCount = _vendorAtendCount[v.id] || 0;
+  const countBadge = atendCount > 0 ? `<span class="atend-count-badge" title="${atendCount} atendimento${atendCount > 1 ? 's' : ''} no turno">${atendCount}</span>` : '';
+
   return `<div class="queue-item ${v.status}${isActive ? ' active' : ''}${nextClass}${coldClass}" data-id="${v.id}" ${dragAttr} style="${dragStyle};position:relative">
     ${nextBadge}
     ${draggable ? '<i class="fa-solid fa-grip-vertical" style="color:var(--text-muted);font-size:10px;opacity:.4;margin-right:2px"></i>' : ''}
     ${posHtml}
     <div style="flex:1;min-width:0">
-      <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.apelido || v.nome}</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.apelido || v.nome}</span>
+        ${countBadge}
+      </div>
       <div style="font-size:10px;color:${cfg.color};font-weight:600;text-transform:uppercase;letter-spacing:.05em">${cfg.short}</div>
     </div>
     ${timerHtml}
@@ -2709,15 +2759,17 @@ function animateValue(el, start, end, duration = 400, suffix = '') {
 // ─── Quick stats ───
 let _prevStats = { total: 0, vendas: 0, conv: 0 };
 let _statsThrottle = 0;
+let _vendorAtendCount = {}; // vendedor_id → count de atendimentos finalizados no turno
 async function updateQuickStats() {
   const now = Date.now();
   if (now - _statsThrottle < 2000) return; // Max 1 query / 2s
   _statsThrottle = now;
   if (!currentTurno) return;
   // Queries leves com count em vez de trazer todos os registros
-  const [totalRes, vendasRes] = await Promise.all([
+  const [totalRes, vendasRes, perVendor] = await Promise.all([
     sb.from('atendimentos').select('id', { count: 'exact', head: true }).eq('turno_id', currentTurno.id).neq('resultado', 'em_andamento'),
-    sb.from('atendimentos').select('id', { count: 'exact', head: true }).eq('turno_id', currentTurno.id).eq('resultado', 'venda')
+    sb.from('atendimentos').select('id', { count: 'exact', head: true }).eq('turno_id', currentTurno.id).eq('resultado', 'venda'),
+    sb.from('atendimentos').select('vendedor_id').eq('turno_id', currentTurno.id).neq('resultado', 'em_andamento')
   ]);
   const total = totalRes.count || 0;
   const vendas = vendasRes.count || 0;
@@ -2732,6 +2784,14 @@ async function updateQuickStats() {
     bar.style.background = conv >= 50 ? 'var(--success)' : conv >= 30 ? 'var(--warning)' : 'var(--accent)';
   }
   _prevStats = { total, vendas, conv };
+  // Contagem por vendedor para badge nos cards
+  const newCounts = {};
+  if (perVendor.data) {
+    perVendor.data.forEach(r => { newCounts[r.vendedor_id] = (newCounts[r.vendedor_id] || 0) + 1; });
+  }
+  const changed = JSON.stringify(newCounts) !== JSON.stringify(_vendorAtendCount);
+  _vendorAtendCount = newCounts;
+  if (changed) { _lastQueueKey = ''; _lastFooterKey = ''; scheduleRender(); }
 }
 
 // ─── Turno Switch ───
@@ -3761,6 +3821,26 @@ window._toggleTheme = function() {
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.content = next === 'dark' ? '#060606' : '#F5F5F7';
 };
+
+// ─── More menu (three dots) ───
+window.toggleMoreMenu = function() {
+  const m = document.getElementById('moreMenu');
+  if (!m) return;
+  const open = m.style.display === 'none';
+  m.style.display = open ? 'block' : 'none';
+  // Atualizar label do tema
+  if (open) {
+    const lbl = document.getElementById('themeLabel');
+    if (lbl) lbl.textContent = isDarkTheme() ? 'Modo Claro' : 'Modo Escuro';
+  }
+};
+document.addEventListener('click', function(e) {
+  const m = document.getElementById('moreMenu');
+  if (!m || m.style.display === 'none') return;
+  if (!e.target.closest('.more-btn') && !e.target.closest('.more-menu')) {
+    m.style.display = 'none';
+  }
+});
 
 // ─── Session timeout (30min inactivity) ───
 let _lastActivity = Date.now();
