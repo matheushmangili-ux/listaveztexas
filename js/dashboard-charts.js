@@ -6,6 +6,7 @@
 import { fetchCanalStats, fetchDrillMotivo, fetchRuptureLog, fetchPauseLog, fetchVendedores, fetchTodosVendedores } from '/js/dashboard-api.js';
 import { CHART_HEIGHT, CHART_TAB_KEY, ORIGEM_PALETTE, ANIM, DEFAULT_METAS, PERIODS } from '/js/dashboard-config.js';
 import { STATUS_CONFIG, MOTIVOS, initials, toast, todayRange } from '/js/utils.js';
+import { CHART_RESIZE_DELAY } from '/js/constants.js';
 
 let _ctx = null;
 
@@ -1017,7 +1018,7 @@ export function setChartTab(section) {
   _activeChartTab = section;
   localStorage.setItem(CHART_TAB_KEY, section);
   // ApexCharts renders 0px when container is display:none — force resize after reveal
-  setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 50);
+  setTimeout(() => { window.dispatchEvent(new Event('resize')); }, CHART_RESIZE_DELAY);
 }
 
 // ─── _firstLoad management ───

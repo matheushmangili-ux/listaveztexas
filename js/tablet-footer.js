@@ -4,6 +4,7 @@
 // ============================================
 
 import { STATUS_CONFIG, SAIDA_COLORS, PAUSE_LIMITS, initials, toast } from '/js/utils.js';
+import { FOOTER_TIMER_INTERVAL, INPUT_FOCUS_DELAY, Z_MENU } from '/js/constants.js';
 
 let _ctx = null;
 let _footerDropLabel = null;
@@ -32,7 +33,7 @@ export function initFooter(ctx) {
     if (document.hidden || !_ctx.currentTurno) return;
     _lastFooterKey = '';
     renderFooter();
-  }, 60000);
+  }, FOOTER_TIMER_INTERVAL);
 }
 
 /** Clear footer timer (call on page unload) */
@@ -224,7 +225,7 @@ function openConfirmFila(vendedorId) {
 
   const menu = document.createElement('div');
   menu.id = 'footerMenu';
-  menu.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--bg-card);border:1px solid var(--border-medium);border-radius:16px;padding:20px;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.2);min-width:280px;text-align:center;color:var(--text-primary)';
+  menu.style.cssText = `position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--bg-card);border:1px solid var(--border-medium);border-radius:16px;padding:20px;z-index:${Z_MENU};box-shadow:0 4px 20px rgba(0,0,0,.2);min-width:280px;text-align:center;color:var(--text-primary)`;
 
   menu.innerHTML = `
     <div style="font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:6px">${nome}</div>
@@ -244,7 +245,7 @@ function openConfirmFila(vendedorId) {
       if (!menu.contains(e.target)) closeConfirmFila();
     };
     document.addEventListener('click', _confirmFilaOutsideHandler);
-  }, 100);
+  }, INPUT_FOCUS_DELAY);
 }
 
 async function confirmAddToQueue(vendedorId) {

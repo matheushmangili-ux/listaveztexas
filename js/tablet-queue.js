@@ -5,6 +5,7 @@
 
 import { STATUS_CONFIG, SAIDA_COLORS, formatTime, initials, toast } from '/js/utils.js';
 import { renderFooter, invalidateFooter, showFooterDropLabel, hideFooterDropLabel } from '/js/tablet-footer.js';
+import { COLD_SELLER_TIMEOUT, ATTENDANCE_DANGER_SECONDS, DRAG_THRESHOLD_QUEUE, DRAG_GHOST_Y_OFFSET, Z_DRAG_GHOST, TOAST_SHORT } from '/js/constants.js';
 
 let _ctx = null;
 
@@ -120,7 +121,7 @@ export function renderQueue() {
   // Build key para detectar mudanças reais
   const _nowMin = Math.floor(Date.now() / 60000);
   const queueKey = (_ctx.currentTurno ? '1' : '0') + '|' + inQueue.map(v => {
-    const cold = _ctx.queueEntryTimes.has(v.id) && (Date.now() - _ctx.queueEntryTimes.get(v.id).time > 20 * 60 * 1000);
+    const cold = _ctx.queueEntryTimes.has(v.id) && (Date.now() - _ctx.queueEntryTimes.get(v.id).time > COLD_SELLER_TIMEOUT);
     return v.id + (cold ? ':C' : '');
   }).join(',') + '|' + pausa.map(v => v.id + ':' + (_ctx.saidaMotivos[v.id] || '')).join(',') + '|' + _nowMin;
   if (queueKey === _lastQueueKey) return;
@@ -185,7 +186,7 @@ function renderQueueItem(v, pos, isActive, draggable) {
     if (atend && atend.inicio) {
       const startMs = new Date(atend.inicio).getTime();
       const elapsed = isNaN(startMs) ? 0 : (Date.now() - startMs) / 1000;
-      const clr = elapsed > 2400 ? 'var(--danger)' : 'var(--text-primary)';
+      const clr = elapsed > ATTENDANCE_DANGER_SECONDS ? 'var(--danger)' : 'var(--text-primary)';
       timerHtml = `<span data-sidebar-timer="${atend.id}" style="font-family:var(--font-mono);font-weight:700;font-size:11px;color:${clr};margin-left:auto;flex-shrink:0">${formatTime(elapsed)}</span>`;
     }
   }
@@ -198,7 +199,7 @@ function renderQueueItem(v, pos, isActive, draggable) {
   const isNext = draggable && pos === 1;
   const nextClass = isNext ? ' next-in-line' : '';
   const nextBadge = isNext ? '<span class="next-badge">PRÓXIMO</span>' : '';
-  const coldClass = (draggable && _ctx.queueEntryTimes.has(v.id) && (Date.now() - _ctx.queueEntryTimes.get(v.id).time > 20 * 60 * 1000)) ? ' cold-seller' : '';
+  const coldClass = (draggable && _ctx.queueEntryTimes.has(v.id) && (Date.now() - _ctx.queueEntryTimes.get(v.id).time > COLD_SELLER_TIMEOUT)) ? ' cold-seller' : '';
 
   const atendCount = _ctx.vendorAtendCount[v.id] || 0;
   const countBadge = atendCount > 0 ? `<span class="atend-count-badge" title="${atendCount} atendimento${atendCount > 1 ? 's' : ''} no turno">${atendCount}</span>` : '';
@@ -355,7 +356,7 @@ async function addToQueueAt(vendedorId, beforeId) {
   });
   invalidateFooter();
   scheduleRender();
-  toast((target?.apelido || target?.nome || 'Vendedor') + ' entrou na fila', 'success', 1500);
+  toast((target?.apelido || target?.nome || 'Vendedor') + ' entrou na fila', 'success', TOAST_SHORT);
 
   const { error } = await _ctx.sb.rpc('reordenar_fila', { p_ids: ids });
   if (error) { toast('Erro ao salvar: ' + error.message, 'error'); await _ctx.loadVendedores(); }
@@ -407,7 +408,7 @@ function onTouchDragStart(e) {
     const dx = t.clientX - touchStartX;
     const dy = t.clientY - touchStartY;
 
-    if (!touchDragging && Math.abs(dx) + Math.abs(dy) > 8) {
+    if (!touchDragging && Math.abs(dx) + Math.abs(dy) > DRAG_THRESHOLD_QUEUE) {
       touchDragging = true;
       item.style.opacity = '0.3';
       queueList.classList.add('dragging');
@@ -418,11 +419,11 @@ function onTouchDragStart(e) {
       cacheDragRects(queueList);
 
       _ghostInitX = t.clientX - itemW / 2;
-      _ghostInitY = t.clientY - 30;
+      _ghostInitY = t.clientY - DRAG_GHOST_Y_OFFSET;
 
       touchGhost = item.cloneNode(true);
       touchGhost.style.cssText = `
-        position:fixed;z-index:9999;pointer-events:none;
+        position:fixed;z-index:${Z_DRAG_GHOST};pointer-events:none;
         opacity:.9;will-change:transform;
         box-shadow:0 4px 16px rgba(0,0,0,.3);
         border:1px solid var(--success);border-radius:10px;
@@ -436,7 +437,7 @@ function onTouchDragStart(e) {
 
     if (touchDragging && touchGhost) {
       const gx = t.clientX - itemW / 2;
-      const gy = t.clientY - 30;
+      const gy = t.clientY - DRAG_GHOST_Y_OFFSET;
       touchGhost.style.transform = `translate3d(${gx}px,${gy}px,0) scale(1.05)`;
 
       const now = performance.now();
