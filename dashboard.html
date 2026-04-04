@@ -426,6 +426,32 @@ function getMetas() {
 function setMetas(m) { localStorage.setItem(METAS_KEY, JSON.stringify(m)); }
 const metas = getMetas();
 
+// ─── Period tabs ───
+let customRangeStart = null;
+let customRangeEnd = null;
+
+function getRange() {
+  if (currentPeriod === PERIODS.CUSTOM && customRangeStart && customRangeEnd) {
+    const start = new Date(customRangeStart + 'T00:00:00');
+    const end = new Date(customRangeEnd + 'T23:59:59');
+    return { start: start.toISOString(), end: end.toISOString() };
+  }
+  if (currentPeriod === PERIODS.ONTEM) return yesterdayRange();
+  if (currentPeriod === PERIODS.SEMANA) return weekRange();
+  if (currentPeriod === PERIODS.MES) return monthRange();
+  return todayRange();
+}
+
+function getPrevRange() {
+  const r = getRange();
+  const start = new Date(r.start);
+  const end = new Date(r.end);
+  const duration = end - start;
+  const prevEnd = new Date(start);
+  const prevStart = new Date(start.getTime() - duration);
+  return { start: prevStart.toISOString(), end: prevEnd.toISOString() };
+}
+
 // Cache de dados para filtros e exports (evita refetch)
 let _cachedRanking = [];
 let _cachedStats = {};
@@ -463,7 +489,213 @@ initDashboardCharts({
   updateTimestamp
 });
 
-// Chart functions imported from /js/dashboard-charts.js
+// ─── Filters ───
+async function populateFilters() {
+  const vq = sb.from('vendedores').select('id, nome, apelido, setor').eq('ativo', true);
+  if (tenantId) vq.eq('tenant_id', tenantId);
+  const { data } = await vq.order('nome');
+  _cachedVendedores = data || [];
+
+  const setores = [...new Set(_cachedVendedores.map(v => v.setor || 'loja'))];
+  const selSetor = document.getElementById('filterSetor');
+  selSetor.innerHTML = '<option value="">Todos os setores</option>' + setores.map(s => `<option value="${s}">${SETOR_LABELS[s] || s}</option>`).join('');
+  updateVendedorFilter();
+}
+
+function updateVendedorFilter() {
+  const selVend = document.getElementById('filterVendedor');
+  const filtered = filterSetor ? _cachedVendedores.filter(v => (v.setor || 'loja') === filterSetor) : _cachedVendedores;
+  selVend.innerHTML = '<option value="">Todos os vendedores</option>' + filtered.map(v => `<option value="${v.id}">${v.apelido || v.nome}</option>`).join('');
+}
+
+window.onSetorChange = function() {
+  filterSetor = document.getElementById('filterSetor').value;
+  updateVendedorFilter();
+  if (filterVendedor && !document.querySelector(`#filterVendedor option[value="${filterVendedor}"]`)) {
+    filterVendedor = '';
+    document.getElementById('filterVendedor').value = '';
+  }
+};
+
+window.applyFilters = function() {
+  filterSetor = document.getElementById('filterSetor').value;
+  filterVendedor = document.getElementById('filterVendedor').value;
+  const clearBtn = document.getElementById('filterClearBtn');
+  if (clearBtn) clearBtn.style.display = (filterSetor || filterVendedor) ? '' : 'none';
+  loadAll();
+};
+
+window.clearFilters = function() {
+  filterSetor = '';
+  filterVendedor = '';
+  document.getElementById('filterSetor').value = '';
+  document.getElementById('filterVendedor').value = '';
+  updateVendedorFilter();
+  const clearBtn = document.getElementById('filterClearBtn');
+  if (clearBtn) clearBtn.style.display = 'none';
+  loadAll();
+};
+
+window.setPeriod = function(p) {
+  closeCalendar();
+  customRangeStart = null;
+  customRangeEnd = null;
+  document.getElementById('customRangeLabel').style.display = 'none';
+  currentPeriod = p;
+  document.querySelectorAll('#periodTabs button').forEach(b => {
+    b.classList.toggle('active', b.dataset.period === p);
+  });
+  loadAll();
+};
+
+/* ─── Calendar Popover Logic ─── */
+let _calViewYear, _calViewMonth;
+let _calPickStart = null, _calPickEnd = null;
+let _calStep = 0;
+
+function _fmt2(n) { return n < 10 ? '0' + n : '' + n; }
+function _dateStr(y, m, d) { return y + '-' + _fmt2(m + 1) + '-' + _fmt2(d); }
+
+const _monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                     'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function renderCalendar() {
+  const grid = document.getElementById('calGrid');
+  const label = document.getElementById('calMonthLabel');
+  const hint = document.getElementById('calSelectionHint');
+  label.textContent = _monthNames[_calViewMonth] + ' ' + _calViewYear;
+
+  const firstDay = new Date(_calViewYear, _calViewMonth, 1).getDay();
+  const daysInMonth = new Date(_calViewYear, _calViewMonth + 1, 0).getDate();
+  const daysInPrev = new Date(_calViewYear, _calViewMonth, 0).getDate();
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  let html = '';
+  for (let i = firstDay - 1; i >= 0; i--) {
+    const d = daysInPrev - i;
+    const m = _calViewMonth === 0 ? 11 : _calViewMonth - 1;
+    const y = _calViewMonth === 0 ? _calViewYear - 1 : _calViewYear;
+    const ds = _dateStr(y, m, d);
+    html += '<button class="cal-day other-month" data-date="' + ds + '" onclick="calPick(\'' + ds + '\')">' + d + '</button>';
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = _dateStr(_calViewYear, _calViewMonth, d);
+    let cls = 'cal-day';
+    if (ds === todayStr) cls += ' today';
+    if (_calPickStart && _calPickEnd) {
+      if (ds === _calPickStart && ds === _calPickEnd) cls += ' range-start range-end';
+      else if (ds === _calPickStart) cls += ' range-start';
+      else if (ds === _calPickEnd) cls += ' range-end';
+      else if (ds > _calPickStart && ds < _calPickEnd) cls += ' in-range';
+    } else if (_calPickStart && ds === _calPickStart) {
+      cls += ' range-start range-end';
+    }
+    html += '<button class="' + cls + '" data-date="' + ds + '" onclick="calPick(\'' + ds + '\')">' + d + '</button>';
+  }
+  const totalCells = firstDay + daysInMonth;
+  const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let d = 1; d <= remaining; d++) {
+    const m = _calViewMonth === 11 ? 0 : _calViewMonth + 1;
+    const y = _calViewMonth === 11 ? _calViewYear + 1 : _calViewYear;
+    const ds = _dateStr(y, m, d);
+    html += '<button class="cal-day other-month" data-date="' + ds + '" onclick="calPick(\'' + ds + '\')">' + d + '</button>';
+  }
+  grid.innerHTML = html;
+
+  if (_calStep === 0) hint.textContent = 'Clique no dia inicial';
+  else hint.textContent = 'Clique no dia final';
+}
+
+window.calPick = function(dateStr) {
+  _calJustClicked = true;
+  if (_calStep === 0) {
+    _calPickStart = dateStr;
+    _calPickEnd = null;
+    _calStep = 1;
+    renderCalendar();
+  } else {
+    if (dateStr < _calPickStart) {
+      _calPickEnd = _calPickStart;
+      _calPickStart = dateStr;
+    } else {
+      _calPickEnd = dateStr;
+    }
+    _calStep = 0;
+    renderCalendar();
+    setTimeout(function() { applyCalendarRange(); }, 200);
+  }
+};
+
+function applyCalendarRange() {
+  customRangeStart = _calPickStart;
+  customRangeEnd = _calPickEnd;
+  currentPeriod = PERIODS.CUSTOM;
+  document.querySelectorAll('#periodTabs button').forEach(b => {
+    b.classList.toggle('active', b.dataset.period === 'custom');
+  });
+  const lbl = document.getElementById('customRangeLabel');
+  const s = _calPickStart.split('-'), e = _calPickEnd.split('-');
+  if (_calPickStart === _calPickEnd) {
+    lbl.textContent = s[2] + '/' + s[1] + '/' + s[0];
+  } else {
+    lbl.textContent = s[2] + '/' + s[1] + ' — ' + e[2] + '/' + e[1] + '/' + e[0];
+  }
+  lbl.style.display = 'inline';
+  closeCalendar();
+  loadAll();
+}
+
+window.toggleCalendar = function(e) {
+  e && e.stopPropagation();
+  const pop = document.getElementById('calendarPopover');
+  if (pop.style.display === 'block') { closeCalendar(); return; }
+  const now = new Date();
+  _calViewYear = now.getFullYear();
+  _calViewMonth = now.getMonth();
+  _calStep = 0;
+  _calPickStart = customRangeStart;
+  _calPickEnd = customRangeEnd;
+  if (_calPickStart && _calPickEnd) _calStep = 0;
+  pop.style.display = 'block';
+  renderCalendar();
+  document.querySelectorAll('#periodTabs button').forEach(b => {
+    b.classList.toggle('active', b.dataset.period === 'custom');
+  });
+};
+
+function closeCalendar() {
+  document.getElementById('calendarPopover').style.display = 'none';
+}
+
+window.calNav = function(dir) {
+  _calJustClicked = true;
+  _calViewMonth += dir;
+  if (_calViewMonth < 0) { _calViewMonth = 11; _calViewYear--; }
+  if (_calViewMonth > 11) { _calViewMonth = 0; _calViewYear++; }
+  renderCalendar();
+};
+
+window.calClear = function() {
+  _calJustClicked = true;
+  _calPickStart = null;
+  _calPickEnd = null;
+  _calStep = 0;
+  customRangeStart = null;
+  customRangeEnd = null;
+  document.getElementById('customRangeLabel').style.display = 'none';
+  renderCalendar();
+};
+
+let _calJustClicked = false;
+document.addEventListener('click', function(e) {
+  const pop = document.getElementById('calendarPopover');
+  if (!pop || pop.style.display !== 'block') return;
+  if (_calJustClicked) { _calJustClicked = false; return; }
+  if (!pop.contains(e.target) && !e.target.closest('[data-period="custom"]')) {
+    closeCalendar();
+  }
+});
+
 // ─── Gestão de Vendedores ───
 async function loadVendedores() {
   const el = document.getElementById('vendedorList');
@@ -900,6 +1132,35 @@ await document.fonts.ready;
 await Promise.all([loadAll(), loadVendedores()]);
 setFirstLoadDone();
 updateTimestamp();
+
+// ─── Theme & Logout ───
+window.handleLogout = function() { logout(); };
+window.toggleTheme = function() {
+  const next = toggleTheme();
+  loadAll();
+};
+
+// ─── Collapsible Sections ───
+window.toggleSection = function(id) {
+  const btn = document.getElementById('collapseBtn-' + id);
+  const body = document.getElementById('collapseBody-' + id);
+  if (!btn || !body) return;
+  const isCollapsed = body.classList.toggle('collapsed');
+  btn.classList.toggle('collapsed', isCollapsed);
+  const stored = JSON.parse(localStorage.getItem('lv-collapsed') || '{}');
+  stored[id] = isCollapsed;
+  localStorage.setItem('lv-collapsed', JSON.stringify(stored));
+};
+// Restore collapsed state on load
+(function restoreCollapsed() {
+  const stored = JSON.parse(localStorage.getItem('lv-collapsed') || '{}');
+  Object.entries(stored).forEach(([id, collapsed]) => {
+    if (!collapsed) return;
+    const btn = document.getElementById('collapseBtn-' + id);
+    const body = document.getElementById('collapseBody-' + id);
+    if (btn && body) { btn.classList.add('collapsed'); body.classList.add('collapsed'); }
+  });
+})();
 
 // ─── Drill-down: Motivos de Perda ───
 window.openDrillMotivo = async function(motivo, label) {
