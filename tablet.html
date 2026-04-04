@@ -33,6 +33,11 @@ window.addEventListener('error', function(e) {
 </head>
 <body>
 
+<div id="offlineBanner" class="offline-banner" style="display:none" role="alert" aria-live="assertive">
+  <i class="fa-solid fa-triangle-exclamation"></i>
+  <span>Conexão em tempo real perdida. Dados podem estar desatualizados. Reconectando...</span>
+</div>
+
 <div class="tablet-layout">
   <!-- HEADER -->
   <header class="t-header">
@@ -915,9 +920,16 @@ let _rtChannel = sb.channel(_rtChannelName)
   })
   .subscribe((status) => {
     if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+      const banner = document.getElementById('offlineBanner');
+      if (banner) banner.style.display = 'flex';
       clearTimeout(timers.reconnect);
-      timers.reconnect = setTimeout(() => { if (_rtChannel) _rtChannel.subscribe(); }, RT_RECONNECT_DELAY);
-      toast('Reconectando...', 'warning', TOAST_MEDIUM);
+      const delay = Math.min(RT_RECONNECT_DELAY * Math.pow(2, (ui._rtRetries || 0)), 60000);
+      ui._rtRetries = (ui._rtRetries || 0) + 1;
+      timers.reconnect = setTimeout(() => { if (_rtChannel) _rtChannel.subscribe(); }, delay);
+    } else if (status === 'SUBSCRIBED') {
+      const banner = document.getElementById('offlineBanner');
+      if (banner) banner.style.display = 'none';
+      ui._rtRetries = 0;
     }
   });
 
