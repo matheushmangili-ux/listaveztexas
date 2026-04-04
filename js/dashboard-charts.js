@@ -656,6 +656,13 @@ function renderHeaderMarquee(vendedoresData) {
       <span class="mp-status${isFora ? ' fora' : ''}" style="color:${isFora ? '' : cfg.color}">${cfg.short}${pos}</span>
     </div>`;
   }).join('');
+  // Se poucos vendedores, mostrar estático sem marquee
+  if (vendedoresData.length <= 4) {
+    track.innerHTML = pills;
+    track.style.animation = 'none';
+    track.style.transform = 'none';
+    return;
+  }
   // Triplicar para loop suave (garante que -50% sempre funcione)
   track.innerHTML = pills + pills + pills;
   const speed = Math.max(15, vendedoresData.length * 3);
