@@ -8,6 +8,23 @@ const STRIPE_WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET')!
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
 const BASE_URL = Deno.env.get('BASE_URL') || 'https://listaveztexas.vercel.app'
 
+function hexToUint8Array(hex: string): Uint8Array {
+  const bytes = new Uint8Array(hex.length / 2)
+  for (let i = 0; i < hex.length; i += 2) {
+    bytes[i / 2] = parseInt(hex.slice(i, i + 2), 16)
+  }
+  return bytes
+}
+
+function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false
+  let result = 0
+  for (let i = 0; i < a.length; i++) {
+    result |= a[i] ^ b[i]
+  }
+  return result === 0
+}
+
 async function verifyStripeSignature(payload: string, signature: string): Promise<boolean> {
   // Parse the signature header
   const parts = signature.split(',').reduce((acc: Record<string, string>, part) => {
@@ -21,6 +38,10 @@ async function verifyStripeSignature(payload: string, signature: string): Promis
 
   if (!timestamp || !expectedSig) return false
 
+  // Replay protection: reject webhooks older than 300 seconds
+  const webhookAge = Math.floor(Date.now() / 1000) - parseInt(timestamp, 10)
+  if (webhookAge > 300 || webhookAge < -300) return false
+
   // Create signed payload
   const signedPayload = `${timestamp}.${payload}`
 
@@ -33,9 +54,12 @@ async function verifyStripeSignature(payload: string, signature: string): Promis
     ['sign']
   )
   const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(signedPayload))
-  const computedSig = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('')
 
-  return computedSig === expectedSig
+  // Timing-safe comparison of computed vs expected signature bytes
+  const computedBytes = new Uint8Array(sig)
+  const expectedBytes = hexToUint8Array(expectedSig)
+
+  return timingSafeEqual(computedBytes, expectedBytes)
 }
 
 async function sendEmail(to: string, subject: string, html: string) {
@@ -180,6 +204,19 @@ Deno.serve(async (req) => {
         { auth: { autoRefreshToken: false, persistSession: false } }
       )
 
+      // Idempotency: skip if a token for this Stripe session already exists
+      const { data: existing } = await supabaseAdmin
+        .from('onboarding_tokens')
+        .select('token')
+        .eq('stripe_session_id', session.id)
+        .maybeSingle()
+
+      if (existing) {
+        return new Response(JSON.stringify({ received: true, token: existing.token }), {
+          status: 200, headers: { 'Content-Type': 'application/json' }
+        })
+      }
+
       // Generate onboarding token
       const token = crypto.randomUUID()
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
@@ -256,6 +293,38 @@ Deno.serve(async (req) => {
 </body>
 </html>`
         )
+      }
+    }
+
+    // Handle invoice.paid — reactivate tenant after a previously failed payment recovers
+    if (event.type === 'invoice.paid') {
+      const invoice = event.data.object
+      if (invoice.subscription) {
+        const supabaseAdmin = createClient(
+          Deno.env.get('SUPABASE_URL')!,
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+          { auth: { autoRefreshToken: false, persistSession: false } }
+        )
+        await supabaseAdmin
+          .from('tenants')
+          .update({ status: 'active' })
+          .eq('stripe_subscription_id', invoice.subscription)
+      }
+    }
+
+    // Handle customer.subscription.updated — reactivate tenant when subscription becomes active again
+    if (event.type === 'customer.subscription.updated') {
+      const subscription = event.data.object
+      if (subscription.status === 'active') {
+        const supabaseAdmin = createClient(
+          Deno.env.get('SUPABASE_URL')!,
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+          { auth: { autoRefreshToken: false, persistSession: false } }
+        )
+        await supabaseAdmin
+          .from('tenants')
+          .update({ status: 'active' })
+          .eq('stripe_subscription_id', subscription.id)
       }
     }
 
