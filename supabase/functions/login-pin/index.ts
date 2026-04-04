@@ -1,12 +1,14 @@
 // login-pin Edge Function
 // Tenant-scoped PIN authentication with brute-force protection
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { corsHeaders } from '../_shared/cors.ts'
+import { getCorsHeaders } from '../_shared/cors.ts'
 
 const MAX_ATTEMPTS = 5
 const LOCKOUT_MINUTES = 15
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req)
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }

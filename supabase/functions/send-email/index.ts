@@ -1,11 +1,13 @@
 // send-email Edge Function
 // Generic email sender via Resend — called after setup completion
-import { corsHeaders } from '../_shared/cors.ts'
+import { getCorsHeaders } from '../_shared/cors.ts'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
 const BASE_URL = Deno.env.get('BASE_URL') || 'https://listaveztexas.vercel.app'
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req)
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }

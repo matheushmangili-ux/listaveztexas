@@ -1,6 +1,6 @@
 // create-checkout Edge Function
 // Creates a Stripe Checkout Session for purchasing a MinhaVez plan
-import { corsHeaders } from '../_shared/cors.ts'
+import { getCorsHeaders } from '../_shared/cors.ts'
 
 const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY')!
 const BASE_URL = Deno.env.get('BASE_URL') || 'https://listaveztexas.vercel.app'
@@ -25,6 +25,8 @@ async function stripeRequest(endpoint: string, body: Record<string, string>) {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req)
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
