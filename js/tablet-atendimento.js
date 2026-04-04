@@ -10,6 +10,7 @@ import { createModal, currencyInputHTML, parseCurrency } from '/js/ui.js';
 import { fireVendaCelebration, fireEpicTrocaAnimation } from '/js/tablet-celebrations.js';
 import { invalidateQueue, scheduleRender, isTouchDragging, getTouchGhost, setTouchGhost } from '/js/tablet-queue.js';
 import { invalidateFooter } from '/js/tablet-footer.js';
+import { GHOST_CLEANUP_INTERVAL, OVERLAY_HIDE_DELAY, OUTCOME_OPEN_DELAY, INPUT_FOCUS_DELAY, ACTION_LOCK_RESET, ATTENDANCE_DANGER_SECONDS, DRAG_THRESHOLD_ATENDIMENTO, DRAG_GHOST_Y_OFFSET, Z_DRAG_GHOST, TROCA_PREMIUM_VALUE, TOAST_SHORT, TOAST_MEDIUM } from '/js/constants.js';
 
 let _ctx = null;
 
@@ -60,7 +61,7 @@ export function initAtendimento(ctx) {
   window.selectMotivo = selectMotivo;
   window.confirmMotivo = confirmMotivo;
 
-  // Ghost cleanup interval (cleans orphaned drag ghosts every 3s)
+  // Ghost cleanup interval (cleans orphaned drag ghosts)
   setInterval(() => {
     if (!isTouchDragging() && !_atendTouchDragging) {
       const _tg = getTouchGhost(); if (_tg) { _tg.remove(); setTouchGhost(null); }
@@ -71,7 +72,7 @@ export function initAtendimento(ctx) {
         _ctx.servicePanel?.style.setProperty('overflow', '');
       }
     }
-  }, 3000);
+  }, GHOST_CLEANUP_INTERVAL);
 }
 
 // ─── Carregar canais de origem ───
@@ -126,7 +127,7 @@ function showOriginModal(vendedorId) {
 async function confirmOrigin(canalId) {
   const overlay = document.getElementById('originOverlay');
   overlay.classList.remove('show');
-  setTimeout(() => overlay.style.display = 'none', 200);
+  setTimeout(() => overlay.style.display = 'none', OVERLAY_HIDE_DELAY);
 
   if (!_pendingOriginVendedorId) return;
   const vendedorId = _pendingOriginVendedorId;
@@ -187,7 +188,7 @@ async function _executeAtendimento(vendedorId, canalOrigemId) {
   try {
     _ctx.markLocal();
     const prefLabel = isPreferencial ? ' (preferencial)' : '';
-    toast((v.apelido || v.nome) + ' iniciando atendimento' + prefLabel + '...', 'info', 1500);
+    toast((v.apelido || v.nome) + ' iniciando atendimento' + prefLabel + '...', 'info', TOAST_SHORT);
     const { data, error } = await _ctx.sb.rpc('iniciar_atendimento_vendedor', {
       p_turno_id: _ctx.currentTurno.id,
       p_vendedor_id: vendedorId,
@@ -205,7 +206,7 @@ async function _executeAtendimento(vendedorId, canalOrigemId) {
     playSound('atendimento');
     if (navigator.vibrate) navigator.vibrate(200);
     _ctx.logPosition(v, 'atendimento', isPreferencial ? 'Preferencial' : 'Da vez');
-    toast((v.apelido || v.nome) + ' em atendimento' + prefLabel, 'success', 2000);
+    toast((v.apelido || v.nome) + ' em atendimento' + prefLabel, 'success', TOAST_MEDIUM);
   } catch (err) {
     toast('Erro: ' + (err.message || 'falha ao iniciar'), 'error');
     await _ctx.loadVendedores();
@@ -239,28 +240,28 @@ function initAtendDrag() {
       const dx = t.clientX - startX;
       const dy = t.clientY - startY;
 
-      if (!_atendTouchDragging && Math.abs(dx) + Math.abs(dy) > 12) {
+      if (!_atendTouchDragging && Math.abs(dx) + Math.abs(dy) > DRAG_THRESHOLD_ATENDIMENTO) {
         _atendTouchDragging = true;
         card.style.opacity = '0.3';
         document.body.style.overflow = 'hidden';
 
         _atendDragGhost = card.cloneNode(true);
         _atendDragGhost.style.cssText = `
-          position:fixed;z-index:9999;pointer-events:none;
+          position:fixed;z-index:${Z_DRAG_GHOST};pointer-events:none;
           opacity:.9;will-change:transform;
           box-shadow:0 4px 16px rgba(0,0,0,.3);
           border:1px solid var(--info);border-radius:10px;
           background:var(--bg-card);
           width:${cardW}px;
           left:0;top:0;
-          transform:translate3d(${t.clientX - cardW/2}px,${t.clientY - 30}px,0) scale(1.05);
+          transform:translate3d(${t.clientX - cardW/2}px,${t.clientY - DRAG_GHOST_Y_OFFSET}px,0) scale(1.05);
         `;
         document.body.appendChild(_atendDragGhost);
       }
 
       if (_atendTouchDragging && _atendDragGhost) {
         if (_atendDragRafId) cancelAnimationFrame(_atendDragRafId);
-        const gx = t.clientX - cardW/2, gy = t.clientY - 30;
+        const gx = t.clientX - cardW/2, gy = t.clientY - DRAG_GHOST_Y_OFFSET;
         _atendDragRafId = requestAnimationFrame(() => {
           if (_atendDragGhost) _atendDragGhost.style.transform = `translate3d(${gx}px,${gy}px,0) scale(1.05)`;
         });
@@ -297,7 +298,7 @@ function initAtendDrag() {
       const droppedOnQueue = dropEl && (dropEl.id === 'queueList' || dropEl.closest('#queueList') || dropEl.id === 'queuePanel' || dropEl.closest('#queuePanel'));
 
       if (droppedOnQueue) {
-        setTimeout(() => openOutcomeSheet(atendId), 50);
+        setTimeout(() => openOutcomeSheet(atendId), OUTCOME_OPEN_DELAY);
       }
       // If not dropped on queue, snap back (do nothing)
 
@@ -429,7 +430,7 @@ export function renderActiveAtendimentos() {
       const timeStr = formatTime(elapsed);
       if (timeStr === ref.lastText) { if (ref.main || ref.side) allDetached = false; return; }
       ref.lastText = timeStr;
-      const isDanger = elapsed > 2400;
+      const isDanger = elapsed > ATTENDANCE_DANGER_SECONDS;
       if (ref.main && !ref.main.isConnected) ref.main = null;
       if (!ref.main) ref.main = document.getElementById('timer-' + id) || null;
       if (ref.main) { ref.main.textContent = timeStr; ref.main.className = 'atend-timer' + (isDanger ? ' danger' : ''); allDetached = false; }
@@ -590,7 +591,7 @@ function multiPickOutcome(resultado) {
           <button onclick="multiSubmitVenda(false)" class="btn btn-success" style="flex:1;min-height:40px;font-size:12px"><i class="fa-solid fa-check" style="margin-right:4px"></i>OK</button>
         </div>
       </div>`;
-    setTimeout(() => document.getElementById('multiValorInput')?.focus(), 100);
+    setTimeout(() => document.getElementById('multiValorInput')?.focus(), INPUT_FOCUS_DELAY);
   } else if (resultado === 'nao_convertido') {
     _multiResults.push({ resultado: 'nao_convertido' });
     showMultiStep();
@@ -606,7 +607,7 @@ function multiPickOutcome(resultado) {
           <button onclick="multiSubmitTroca(false)" class="btn btn-warning" style="flex:1;min-height:40px;font-size:12px"><i class="fa-solid fa-check" style="margin-right:4px"></i>OK</button>
         </div>
       </div>`;
-    setTimeout(() => document.getElementById('multiTrocaInput')?.focus(), 100);
+    setTimeout(() => document.getElementById('multiTrocaInput')?.focus(), INPUT_FOCUS_DELAY);
   }
 }
 
@@ -696,7 +697,7 @@ async function finalizeMultiOutcome() {
           if (!errNovo && novoAtend) {
             _ctx.activeAtendimentos.push(novoAtend);
             renderActiveAtendimentos();
-            toast('Novo atendimento iniciado', 'info', 1500);
+            toast('Novo atendimento iniciado', 'info', TOAST_SHORT);
           }
         }
         await _ctx.loadVendedores();
@@ -735,7 +736,7 @@ function openTrocaDiferenca(atendId) {
 
 function showTrocaValor(atendId) {
   document.getElementById('trocaValorBox').style.display = '';
-  setTimeout(() => document.getElementById('trocaValorInput')?.focus(), 100);
+  setTimeout(() => document.getElementById('trocaValorInput')?.focus(), INPUT_FOCUS_DELAY);
 }
 
 async function submitTroca(atendId, comDiferenca) {
@@ -751,7 +752,7 @@ async function submitTroca(atendId, comDiferenca) {
   const vendedorId = atend.vendedor_id;
 
   // Se diferença >= R$1.000, volta pro 1º da fila (sem perguntar continuar)
-  if (comDiferenca && valor >= 1000) {
+  if (comDiferenca && valor >= TROCA_PREMIUM_VALUE) {
     await finalize('troca', null, null, null, atendId, valor, false);
     if (vendedorId) {
       const v2 = _ctx.vendedores.find(v => v.id === vendedorId);
@@ -787,7 +788,7 @@ function openValorVenda(atendId) {
       </button>
     </div>
   `);
-  setTimeout(() => document.getElementById('valorVendaInput')?.focus(), 100);
+  setTimeout(() => document.getElementById('valorVendaInput')?.focus(), INPUT_FOCUS_DELAY);
 }
 
 function submitValorVenda(atendId) {
@@ -852,7 +853,7 @@ async function answerContinuar(continuar, count) {
     if (atend) {
       atend._clientCount = count;
       renderActiveAtendimentos();
-      toast(count + ' clientes simultâneos', 'info', 1500);
+      toast(count + ' clientes simultâneos', 'info', TOAST_SHORT);
     }
   }
 }
@@ -901,7 +902,7 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor, con
       if (!errNovo && novoAtend) {
         _ctx.activeAtendimentos.push(novoAtend);
         renderActiveAtendimentos();
-        toast('Novo atendimento iniciado', 'info', 1500);
+        toast('Novo atendimento iniciado', 'info', TOAST_SHORT);
       }
     }
 
@@ -909,7 +910,7 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor, con
   } catch (e) {
     toast('Erro: ' + e.message, 'error');
   } finally {
-    setTimeout(() => { _ctx.actionLock = false; }, 300);
+    setTimeout(() => { _ctx.actionLock = false; }, ACTION_LOCK_RESET);
   }
 }
 

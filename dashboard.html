@@ -368,6 +368,7 @@ import { CHART_HEIGHT, CHART_TAB_KEY, METAS_KEY, DEFAULT_METAS, ORIGEM_PALETTE, 
 import { showChangelog, setVersionLabel } from '/js/changelog.js';
 import { fetchSellerRanking, fetchConversionStats, fetchTrocas, fetchAtendimentosFiltrados, fetchLossReasons, fetchHourlyFlow, fetchPreferenciais, fetchRuptureLog, fetchPauseLog, fetchVendedores, fetchTodosVendedores, fetchCanalStats, fetchDrillMotivo, fetchExportData, fetchTrend, upsertVendedor, toggleVendedorAtivo, uploadFotoVendedor } from '/js/dashboard-api.js';
 import { initDashboardCharts, loadAll, loadKPIs, loadMotivos, loadHourly, loadPreferenciais, loadRanking, loadRuptures, loadPauseStats, loadFloor, loadScatter, loadTempoMeta, loadTrend, loadOrigem, setChartTab, setFirstLoadDone, formatTempo } from '/js/dashboard-charts.js';
+import { SESSION_TIMEOUT_DASHBOARD, SESSION_CHECK_INTERVAL, RT_DASHBOARD_DEBOUNCE, TOAST_SHORT, CHART_RESIZE_DELAY } from '/js/constants.js';
 initTheme();
 
 // Load tenant context
@@ -744,11 +745,11 @@ let _lastActivity = Date.now();
   document.addEventListener(evt, () => { _lastActivity = Date.now(); }, { passive: true });
 });
 setInterval(() => {
-  if (Date.now() - _lastActivity > 8 * 60 * 60 * 1000) {
+  if (Date.now() - _lastActivity > SESSION_TIMEOUT_DASHBOARD) {
     toast('Sessão expirada por inatividade', 'warning');
-    setTimeout(() => logout(), 1500);
+    setTimeout(() => logout(), TOAST_SHORT);
   }
-}, 60000);
+}, SESSION_CHECK_INTERVAL);
 
 // ─── Realtime dashboard updates (partial — só recarrega o que mudou) ───
 let _rtVendTimer = null;
@@ -756,7 +757,7 @@ let _rtAtendTimer = null;
 let _isReloadingAtend = false;
 function debouncedReloadVendedores() {
   clearTimeout(_rtVendTimer);
-  _rtVendTimer = setTimeout(() => { loadFloor(); loadVendedores(); }, 500);
+  _rtVendTimer = setTimeout(() => { loadFloor(); loadVendedores(); }, RT_DASHBOARD_DEBOUNCE);
 }
 function debouncedReloadAtendimentos() {
   clearTimeout(_rtAtendTimer);

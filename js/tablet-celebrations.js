@@ -4,6 +4,7 @@
 // ============================================
 
 import { playSound } from '/js/sound.js';
+import { CELEBRATION_FLASH_SHOW, CELEBRATION_FLASH_FADE, CELEBRATION_EPIC_SHOW, CELEBRATION_EPIC_FADE, Z_DRAG_GHOST } from '/js/constants.js';
 
 let _epicOverlay = null;
 let _epicRaf = null;
@@ -14,7 +15,7 @@ let _epicRaf = null;
  */
 export function fireVendaCelebration() {
   const flash = document.createElement('div');
-  flash.style.cssText = 'position:fixed;inset:0;z-index:9999;pointer-events:none;display:flex;align-items:center;justify-content:center;background:rgba(52,211,153,.08)';
+  flash.style.cssText = `position:fixed;inset:0;z-index:${Z_DRAG_GHOST};pointer-events:none;display:flex;align-items:center;justify-content:center;background:rgba(52,211,153,.08)`;
   flash.innerHTML = `
     <div style="display:flex;flex-direction:column;align-items:center;animation:popIn .4s cubic-bezier(.2,.8,.3,1) both">
       <i class="fa-solid fa-circle-check" style="font-size:56px;color:var(--success);margin-bottom:8px;filter:drop-shadow(0 0 20px rgba(52,211,153,.5))"></i>
@@ -58,8 +59,8 @@ export function fireVendaCelebration() {
   setTimeout(() => {
     flash.style.transition = 'opacity .4s';
     flash.style.opacity = '0';
-    setTimeout(() => flash.remove(), 400);
-  }, 1200);
+    setTimeout(() => flash.remove(), CELEBRATION_FLASH_FADE);
+  }, CELEBRATION_FLASH_SHOW);
 }
 
 /**
@@ -75,7 +76,7 @@ export function fireEpicTrocaAnimation(nome, valor) {
 
   const overlay = document.createElement('div');
   _epicOverlay = overlay;
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.75)';
+  overlay.style.cssText = `position:fixed;inset:0;z-index:${Z_DRAG_GHOST};display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.75)`;
 
   const cvs = document.createElement('canvas');
   cvs.style.cssText = 'position:absolute;inset:0;width:100%;height:100%';
@@ -136,6 +137,6 @@ export function fireEpicTrocaAnimation(nome, valor) {
     if (_epicRaf) { cancelAnimationFrame(_epicRaf); _epicRaf = null; }
     overlay.style.transition = 'opacity .5s';
     overlay.style.opacity = '0';
-    setTimeout(() => { overlay.remove(); if (_epicOverlay === overlay) _epicOverlay = null; }, 500);
-  }, 6000);
+    setTimeout(() => { overlay.remove(); if (_epicOverlay === overlay) _epicOverlay = null; }, CELEBRATION_EPIC_FADE);
+  }, CELEBRATION_EPIC_SHOW);
 }

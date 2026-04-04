@@ -36,39 +36,39 @@ window.addEventListener('error', function(e) {
 <div class="tablet-layout">
   <!-- HEADER -->
   <header class="t-header">
-    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+    <div class="flex-center gap-8 shrink-0">
       <img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:30px;width:auto">
-      <span id="appVersion" style="font-family:var(--font-mono);font-size:9px;color:rgba(255,255,255,.5);opacity:.6;white-space:nowrap"></span>
+      <span id="appVersion" class="mono fs-9" style="color:rgba(255,255,255,.5);opacity:.6;white-space:nowrap"></span>
     </div>
-    <div id="headerKpis" style="display:flex;align-items:center;gap:10px;font-family:var(--font-mono);font-weight:700;flex:1;justify-content:center;min-width:0">
+    <div id="headerKpis" class="flex-center gap-10 mono fw-700" style="flex:1;justify-content:center;min-width:0">
       <div style="display:flex;align-items:center;gap:6px" title="Atendimentos finalizados">
         <i class="fa-solid fa-users" style="font-size:14px;color:rgba(255,255,255,.6)"></i>
-        <div style="display:flex;flex-direction:column;line-height:1.2">
+        <div class="flex-col" style="line-height:1.2">
           <span id="statAtend" style="color:#FFFFFF;font-size:16px">0</span>
-          <span style="color:rgba(255,255,255,.5);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Atendidos</span>
+          <span class="fs-9 fw-600 uppercase" style="color:rgba(255,255,255,.5)">Atendidos</span>
         </div>
       </div>
       <div style="width:1px;height:24px;background:rgba(255,255,255,.15)"></div>
       <div style="display:flex;align-items:center;gap:6px" title="Vendas concretizadas">
         <i class="fa-solid fa-bag-shopping" style="font-size:14px;color:var(--success)"></i>
-        <div style="display:flex;flex-direction:column;line-height:1.2">
+        <div class="flex-col" style="line-height:1.2">
           <span id="statVendas" style="color:#FFFFFF;font-size:16px">0</span>
-          <span style="color:rgba(255,255,255,.5);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Vendas</span>
+          <span class="fs-9 fw-600 uppercase" style="color:rgba(255,255,255,.5)">Vendas</span>
         </div>
       </div>
       <div style="width:1px;height:24px;background:rgba(255,255,255,.15)"></div>
       <div style="display:flex;align-items:center;gap:6px" title="Taxa de conversão">
         <i class="fa-solid fa-chart-line" style="font-size:14px;color:var(--gold)"></i>
-        <div style="display:flex;flex-direction:column;line-height:1.2">
+        <div class="flex-col" style="line-height:1.2">
           <span id="statConv" style="color:#FFFFFF;font-size:16px">0%</span>
-          <span style="color:rgba(255,255,255,.5);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Conversão</span>
+          <span class="fs-9 fw-600 uppercase" style="color:rgba(255,255,255,.5)">Conversão</span>
         </div>
         <div style="width:60px;height:6px;border-radius:3px;background:rgba(255,255,255,.15);overflow:hidden;flex-shrink:0;margin-left:4px">
           <div id="convBar" style="height:100%;width:0%;border-radius:3px;background:#e2506f;transition:width .6s cubic-bezier(.4,0,.2,1)"></div>
         </div>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+    <div class="flex-center gap-4 shrink-0">
       <button style="min-height:44px;min-width:44px;padding:0 10px;font-size:14px;color:#FFFFFF;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="toggleMiniRanking()" title="Ranking do turno">
         <i class="fa-solid fa-trophy"></i>
       </button>
@@ -102,16 +102,16 @@ window.addEventListener('error', function(e) {
 
   <!-- QUEUE PANEL (left) -->
   <aside class="queue-panel" id="queuePanel">
-    <div id="setorTabs" style="display:flex;gap:6px;margin-bottom:12px;padding:0 2px">
+    <div id="setorTabs" class="flex-center gap-6 mb-12" style="padding:0 2px">
       <button class="setor-tab active" data-setor="loja" onclick="setSetor('loja')"><i class="fa-solid fa-store"></i><span class="tab-label">Loja</span></button>
       <button class="setor-tab" data-setor="chapelaria" onclick="setSetor('chapelaria')"><i class="fa-solid fa-hat-cowboy"></i><span class="tab-label">Chapelaria</span></button>
       <button class="setor-tab" data-setor="selaria" onclick="setSetor('selaria')"><i class="fa-solid fa-horse"></i><span class="tab-label">Selaria</span></button>
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:0 4px">
-      <span style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em">Fila</span>
-      <div style="display:flex;align-items:center;gap:8px">
+    <div class="flex-between mb-8" style="padding:0 4px">
+      <span class="fs-13 fw-700 text-muted uppercase" style="letter-spacing:.1em">Fila</span>
+      <div class="flex-center gap-8">
         <button onclick="openPosLog()" style="background:none;border:none;color:var(--text-muted);font-size:14px;cursor:pointer;padding:8px 10px;border-radius:8px;transition:background .15s;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center" title="Histórico de movimentações"><i class="fa-solid fa-clock-rotate-left"></i></button>
-        <span id="queueCount" style="font-size:13px;font-weight:600;color:var(--text-muted)">0 na fila</span>
+        <span id="queueCount" class="fs-13 fw-600 text-muted">0 na fila</span>
       </div>
     </div>
     <div class="queue-list" id="queueList">
@@ -126,12 +126,12 @@ window.addEventListener('error', function(e) {
   <main class="service-panel" id="servicePanel">
     <div class="panel-header">
       <span><i class="fa-solid fa-headset" style="margin-right:4px"></i>Em Atendimento</span>
-      <span id="activeCount" style="font-size:12px;color:var(--text-muted)">0 ativos</span>
+      <span id="activeCount" class="fs-12 text-muted">0 ativos</span>
     </div>
 
     <!-- Atendimentos ativos (múltiplos simultâneos) -->
-    <div id="activeList" style="display:flex;flex-direction:column;gap:10px;flex:1">
-      <p id="activeLabel" style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;display:none"></p>
+    <div id="activeList" class="flex-col gap-10 flex-1">
+      <p id="activeLabel" class="fs-10 fw-700 text-muted uppercase hidden" style="letter-spacing:.1em"></p>
     </div>
   </main>
 
@@ -145,56 +145,56 @@ window.addEventListener('error', function(e) {
 <div class="bottom-sheet-overlay" id="motivoOverlay" onclick="closeMotivos()"></div>
 <div class="bottom-sheet" id="motivoSheet">
   <div class="bottom-sheet-handle"></div>
-  <h3 style="font-family:var(--font-mono);font-size:18px;font-weight:700;margin-bottom:6px">Motivo da não conversão</h3>
-  <p style="font-size:14px;color:var(--text-secondary);margin-bottom:20px">Selecione o motivo principal</p>
+  <h3 class="mono fs-18 fw-700 mb-8">Motivo da não conversão</h3>
+  <p class="fs-14 text-secondary mb-16">Selecione o motivo principal</p>
 
   <div style="display:flex;flex-direction:column;gap:8px" id="motivoList">
     <div class="motivo-option" data-motivo="preco" onclick="selectMotivo(this)">
       <i class="fa-solid fa-tag" style="color:#f59e0b"></i>
       <div>
-        <div style="font-weight:700;font-size:16px">Preço</div>
-        <div style="font-size:13px;color:var(--text-muted)">Cliente achou caro</div>
+        <div class="fw-700 fs-16">Preço</div>
+        <div class="fs-13 text-muted">Cliente achou caro</div>
       </div>
     </div>
     <div class="motivo-option" data-motivo="ruptura" onclick="selectMotivo(this)">
       <i class="fa-solid fa-box-open" style="color:#ef4444"></i>
       <div>
-        <div style="font-weight:700;font-size:16px">Ruptura</div>
-        <div style="font-size:13px;color:var(--text-muted)">Produto em falta / sem estoque</div>
+        <div class="fw-700 fs-16">Ruptura</div>
+        <div class="fs-13 text-muted">Produto em falta / sem estoque</div>
       </div>
     </div>
     <div class="motivo-option" data-motivo="indecisao" onclick="selectMotivo(this)">
       <i class="fa-solid fa-face-meh" style="color:var(--text-muted)"></i>
       <div>
-        <div style="font-weight:700;font-size:16px">Indecisão</div>
-        <div style="font-size:13px;color:var(--text-muted)">Cliente vai pensar / voltar depois</div>
+        <div class="fw-700 fs-16">Indecisão</div>
+        <div class="fs-13 text-muted">Cliente vai pensar / voltar depois</div>
       </div>
     </div>
     <div class="motivo-option" data-motivo="so_olhando" onclick="selectMotivo(this)">
       <i class="fa-solid fa-eye" style="color:#6b7280"></i>
       <div>
-        <div style="font-weight:700;font-size:16px">Só olhando</div>
-        <div style="font-size:13px;color:var(--text-muted)">Sem intenção de compra</div>
+        <div class="fw-700 fs-16">Só olhando</div>
+        <div class="fs-13 text-muted">Sem intenção de compra</div>
       </div>
     </div>
     <div class="motivo-option" data-motivo="outro" onclick="selectMotivo(this)">
       <i class="fa-solid fa-ellipsis" style="color:#374151"></i>
       <div>
-        <div style="font-weight:700;font-size:16px">Outro</div>
-        <div style="font-size:13px;color:var(--text-muted)">Motivo diferente</div>
+        <div class="fw-700 fs-16">Outro</div>
+        <div class="fs-13 text-muted">Motivo diferente</div>
       </div>
     </div>
   </div>
 
   <!-- Ruptura: campo produto (hidden) -->
-  <div id="rupturaField" style="display:none;margin-top:16px">
-    <label style="display:block;font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Qual produto?</label>
+  <div id="rupturaField" class="hidden mt-16">
+    <label class="block fs-13 fw-700 text-muted uppercase mb-4" style="letter-spacing:.08em">Qual produto?</label>
     <input id="rupturaInput" class="input" type="text" placeholder="Ex: Chapéu Pralana 6X" autocomplete="off">
   </div>
 
   <!-- Outro: campo detalhe (hidden) -->
-  <div id="outroField" style="display:none;margin-top:16px">
-    <label style="display:block;font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Descreva o motivo</label>
+  <div id="outroField" class="hidden mt-16">
+    <label class="block fs-13 fw-700 text-muted uppercase mb-4" style="letter-spacing:.08em">Descreva o motivo</label>
     <input id="outroInput" class="input" type="text" placeholder="Ex: Cliente errou de loja" autocomplete="off">
   </div>
 
@@ -208,36 +208,36 @@ window.addEventListener('error', function(e) {
 <div class="bottom-sheet-overlay" id="outcomeOverlay" onclick="closeOutcomeSheet()"></div>
 <div class="bottom-sheet" id="outcomeSheet">
   <div class="bottom-sheet-handle"></div>
-  <h3 style="font-family:var(--font-mono);font-size:18px;font-weight:700;margin-bottom:6px">Resultado do atendimento</h3>
-  <p style="font-size:14px;color:var(--text-secondary);margin-bottom:20px" id="outcomeVendorName"></p>
+  <h3 class="mono fs-18 fw-700 mb-8">Resultado do atendimento</h3>
+  <p class="fs-14 text-secondary mb-16" id="outcomeVendorName"></p>
 
-  <div style="display:flex;flex-direction:column;gap:8px">
+  <div class="flex-col gap-8">
     <div class="motivo-option" onclick="selectOutcome('venda')">
       <i class="fa-solid fa-shopping-bag" style="color:var(--success);font-size:20px;width:28px;text-align:center"></i>
       <div>
-        <div style="font-weight:700;font-size:16px">Venda</div>
-        <div style="font-size:13px;color:var(--text-muted)">Cliente comprou</div>
+        <div class="fw-700 fs-16">Venda</div>
+        <div class="fs-13 text-muted">Cliente comprou</div>
       </div>
     </div>
     <div class="motivo-option" onclick="selectOutcome('troca')">
       <i class="fa-solid fa-arrow-right-arrow-left" style="color:var(--info);font-size:20px;width:28px;text-align:center"></i>
       <div>
-        <div style="font-weight:700;font-size:16px">Troca</div>
-        <div style="font-size:13px;color:var(--text-muted)">Cliente trocou produto</div>
+        <div class="fw-700 fs-16">Troca</div>
+        <div class="fs-13 text-muted">Cliente trocou produto</div>
       </div>
     </div>
     <div class="motivo-option" onclick="selectOutcome('nao_convertido')">
       <i class="fa-solid fa-xmark" style="color:var(--warning);font-size:20px;width:28px;text-align:center"></i>
       <div>
-        <div style="font-weight:700;font-size:16px">Não Converteu</div>
-        <div style="font-size:13px;color:var(--text-muted)">Cliente saiu sem comprar</div>
+        <div class="fw-700 fs-16">Não Converteu</div>
+        <div class="fs-13 text-muted">Cliente saiu sem comprar</div>
       </div>
     </div>
     <div class="motivo-option" onclick="selectOutcome('cancelar')">
       <i class="fa-solid fa-rotate-left" style="color:var(--danger);font-size:20px;width:28px;text-align:center"></i>
       <div>
-        <div style="font-weight:700;font-size:16px">Cancelar Atendimento</div>
-        <div style="font-size:13px;color:var(--text-muted)">Vendedor volta ao 1º da fila</div>
+        <div class="fw-700 fs-16">Cancelar Atendimento</div>
+        <div class="fs-13 text-muted">Vendedor volta ao 1º da fila</div>
       </div>
     </div>
   </div>
@@ -247,10 +247,10 @@ window.addEventListener('error', function(e) {
 <div class="bottom-sheet-overlay" id="checkinOverlay" onclick="closeCheckin()"></div>
 <div class="bottom-sheet" id="checkinSheet" style="max-height:90vh">
   <div class="bottom-sheet-handle"></div>
-  <h3 style="font-family:var(--font-mono);font-size:16px;font-weight:700;margin-bottom:4px">Check-in do Turno</h3>
-  <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">Selecione os vendedores presentes</p>
-  <div id="checkinList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px"></div>
-  <div style="display:flex;gap:8px">
+  <h3 class="mono fs-16 fw-700 mb-4">Check-in do Turno</h3>
+  <p class="fs-13 text-secondary mb-16">Selecione os vendedores presentes</p>
+  <div id="checkinList" class="flex-col gap-6 mb-16"></div>
+  <div class="flex-center gap-8">
     <button class="btn btn-ghost" style="flex:1" onclick="closeCheckin()">Cancelar</button>
     <button class="btn btn-success" style="flex:1" id="btnCheckin" onclick="confirmCheckin()">
       <i class="fa-solid fa-check" style="margin-right:4px"></i>Iniciar Turno
@@ -262,50 +262,50 @@ window.addEventListener('error', function(e) {
 <div class="bottom-sheet-overlay" id="saidaOverlay" onclick="closeSaida()"></div>
 <div class="bottom-sheet" id="saidaSheet">
   <div class="bottom-sheet-handle"></div>
-  <h3 style="font-family:var(--font-mono);font-size:16px;font-weight:700;margin-bottom:4px">Saindo da fila</h3>
-  <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px" id="saidaNome">Selecione o motivo</p>
+  <h3 class="mono fs-16 fw-700 mb-4">Saindo da fila</h3>
+  <p class="fs-13 text-secondary mb-16" id="saidaNome">Selecione o motivo</p>
 
-  <div style="display:flex;flex-direction:column;gap:8px">
+  <div class="flex-col gap-8">
     <div class="motivo-option" onclick="confirmSaida('almoco')">
       <i class="fa-solid fa-utensils" style="color:#f59e0b"></i>
       <div>
-        <div style="font-weight:700;font-size:14px">Almoço</div>
-        <div style="font-size:11px;color:var(--text-muted)">Saiu para almoçar</div>
+        <div class="fw-700 fs-14">Almoço</div>
+        <div class="fs-11 text-muted">Saiu para almoçar</div>
       </div>
     </div>
     <div class="motivo-option" onclick="confirmSaida('banheiro')">
       <i class="fa-solid fa-restroom" style="color:#60a5fa"></i>
       <div>
-        <div style="font-weight:700;font-size:14px">Banheiro</div>
-        <div style="font-size:11px;color:var(--text-muted)">Pausa rápida</div>
+        <div class="fw-700 fs-14">Banheiro</div>
+        <div class="fs-11 text-muted">Pausa rápida</div>
       </div>
     </div>
     <div class="motivo-option" onclick="confirmSaida('reuniao')">
       <i class="fa-solid fa-people-group" style="color:var(--text-muted)"></i>
       <div>
-        <div style="font-weight:700;font-size:14px">Reunião</div>
-        <div style="font-size:11px;color:var(--text-muted)">Chamado para reunião interna</div>
+        <div class="fw-700 fs-14">Reunião</div>
+        <div class="fs-11 text-muted">Chamado para reunião interna</div>
       </div>
     </div>
     <div class="motivo-option" onclick="confirmSaida('operacional')">
       <i class="fa-solid fa-wrench" style="color:#8b5cf6"></i>
       <div>
-        <div style="font-weight:700;font-size:14px">Operacional</div>
-        <div style="font-size:11px;color:var(--text-muted)">Demanda solicitada pela gerência</div>
+        <div class="fw-700 fs-14">Operacional</div>
+        <div class="fs-11 text-muted">Demanda solicitada pela gerência</div>
       </div>
     </div>
     <div class="motivo-option" onclick="confirmSaida('finalizar')">
       <i class="fa-solid fa-door-open" style="color:#f87171"></i>
       <div>
-        <div style="font-weight:700;font-size:14px">Finalizar o dia</div>
-        <div style="font-size:11px;color:var(--text-muted)">Encerrou o expediente</div>
+        <div class="fw-700 fs-14">Finalizar o dia</div>
+        <div class="fs-11 text-muted">Encerrou o expediente</div>
       </div>
     </div>
     <div class="motivo-option" onclick="confirmSaida('outro')">
       <i class="fa-solid fa-ellipsis" style="color:#64748b"></i>
       <div>
-        <div style="font-weight:700;font-size:14px">Outro motivo</div>
-        <div style="font-size:11px;color:var(--text-muted)">Motivo diferente</div>
+        <div class="fw-700 fs-14">Outro motivo</div>
+        <div class="fs-11 text-muted">Motivo diferente</div>
       </div>
     </div>
   </div>
@@ -313,18 +313,18 @@ window.addEventListener('error', function(e) {
 
 <!-- Mini Ranking Dropdown (fora do header para não afetar flex) -->
 <div id="miniRankingDropdown" style="display:none;position:fixed;top:56px;right:120px;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;padding:16px;z-index:998;box-shadow:0 8px 32px rgba(0,0,0,.2);min-width:260px;max-width:320px">
-  <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:10px"><i class="fa-solid fa-trophy" style="color:#FBBF24;margin-right:4px"></i>Ranking do Turno</div>
-  <div id="miniRankingList" style="display:flex;flex-direction:column;gap:6px"></div>
+  <div class="fs-11 fw-800 uppercase text-muted mb-8" style="letter-spacing:.1em"><i class="fa-solid fa-trophy mr-4" style="color:#FBBF24"></i>Ranking do Turno</div>
+  <div id="miniRankingList" class="flex-col gap-6"></div>
 </div>
 
 <!-- Bottom Sheet: Resumo do Turno -->
 <div class="bottom-sheet-overlay" id="turnoSummaryOverlay" onclick="closeTurnoSummary()"></div>
 <div class="bottom-sheet" id="turnoSummarySheet" style="max-height:80vh">
   <div class="bottom-sheet-handle"></div>
-  <h3 style="font-family:var(--font-mono);font-size:16px;font-weight:700;margin-bottom:4px"><i class="fa-solid fa-flag-checkered" style="margin-right:6px"></i>Encerrar Turno</h3>
-  <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">Resumo do turno atual</p>
+  <h3 class="mono fs-16 fw-700 mb-4"><i class="fa-solid fa-flag-checkered mr-4"></i>Encerrar Turno</h3>
+  <p class="fs-13 text-secondary mb-16">Resumo do turno atual</p>
   <div id="turnoSummaryContent" style="margin-bottom:20px"></div>
-  <div style="display:flex;gap:8px">
+  <div class="flex-center gap-8">
     <button class="btn btn-ghost" style="flex:1;min-height:48px" onclick="closeTurnoSummary()">Voltar</button>
     <button class="btn" style="flex:1;min-height:48px;background:var(--danger);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer" id="btnConfirmCloseTurno" onclick="confirmCloseTurno()">
       <i class="fa-solid fa-power-off" style="margin-right:4px"></i>Encerrar Turno
@@ -336,8 +336,8 @@ window.addEventListener('error', function(e) {
 <div class="bottom-sheet-overlay" id="posLogOverlay" onclick="closePosLog()"></div>
 <div class="bottom-sheet" id="posLogSheet" style="max-height:80vh">
   <div class="bottom-sheet-handle"></div>
-  <h3 style="font-family:var(--font-mono);font-size:16px;font-weight:700;margin-bottom:4px"><i class="fa-solid fa-clock-rotate-left" style="margin-right:6px"></i>Histórico da Sessão</h3>
-  <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">Movimentações registradas nesta sessão</p>
+  <h3 class="mono fs-16 fw-700 mb-4"><i class="fa-solid fa-clock-rotate-left mr-4"></i>Histórico da Sessão</h3>
+  <p class="fs-13 text-secondary mb-12">Movimentações registradas nesta sessão</p>
   <div id="posLogList" style="max-height:50vh;overflow-y:auto;display:flex;flex-direction:column;gap:4px"></div>
 </div>
 
@@ -357,6 +357,7 @@ import { initTurno, updateTurnoSwitch, checkExistingTurno } from '/js/tablet-tur
 import { initFooter, renderFooter, invalidateFooter, clearFooterTimer, showFooterDropLabel, hideFooterDropLabel } from '/js/tablet-footer.js';
 import { initQueue, renderQueue, scheduleRender, invalidateQueue, getDraggedId, setDraggedId, isTouchDragging, getTouchGhost, setTouchGhost, cleanupQueue, resetDragState } from '/js/tablet-queue.js';
 import { initAtendimento, renderActiveAtendimentos, checkActiveAtendimentos, doSendToAtendimento, loadCanaisOrigem, clearAtendTimers, isAtendTouchDragging, resetAtendDragState } from '/js/tablet-atendimento.js';
+import { SESSION_TIMEOUT_TABLET, SESSION_CHECK_INTERVAL, CLOCK_UPDATE_INTERVAL, AUTO_SYNC_INTERVAL, QUICK_STATS_INTERVAL, ACTION_LOCK_SAFETY, LOCAL_ACTION_DEBOUNCE, RT_VENDEDOR_DEBOUNCE, RT_RECONNECT_DELAY, TOAST_SHORT, TOAST_MEDIUM } from '/js/constants.js';
 initTheme();
 // Sync theme-color meta with saved theme
 { const _t = document.documentElement.getAttribute('data-theme') || 'light';
@@ -402,12 +403,12 @@ let _reconnectTimer = null; // Previne empilhamento de timeouts de reconexão
 async function withLock(fn) {
   if (_actionLock) return;
   _actionLock = true;
-  const safety = setTimeout(() => { _actionLock = false; }, 8000); // fallback se travar
+  const safety = setTimeout(() => { _actionLock = false; }, ACTION_LOCK_SAFETY); // fallback se travar
   try { await fn(); } finally { clearTimeout(safety); _actionLock = false; }
 }
 
 // Marcar que uma ação local está em andamento (evita re-render do realtime)
-function markLocal() { _localAction = true; clearTimeout(_localActionTimer); _localActionTimer = setTimeout(() => { _localAction = false; }, 2000); }
+function markLocal() { _localAction = true; clearTimeout(_localActionTimer); _localActionTimer = setTimeout(() => { _localAction = false; }, LOCAL_ACTION_DEBOUNCE); }
 
 window.setSetor = function(setor) {
   currentSetor = setor;
@@ -522,7 +523,7 @@ function updateClock() {
   if (text !== _lastClockText) { _clockEl.textContent = text; _lastClockText = text; }
 }
 updateClock();
-let _clockInterval = setInterval(updateClock, 15000);
+let _clockInterval = setInterval(updateClock, CLOCK_UPDATE_INTERVAL);
 
 // ─── Load vendedores ───
 let _loadingVendedores = false;
@@ -874,11 +875,11 @@ let _lastActivity = Date.now();
   document.addEventListener(evt, () => { _lastActivity = Date.now(); }, { passive: true });
 });
 let _sessionInterval = setInterval(() => {
-  if (Date.now() - _lastActivity > 30 * 60 * 1000) {
+  if (Date.now() - _lastActivity > SESSION_TIMEOUT_TABLET) {
     toast('Sessão expirada por inatividade', 'warning');
-    setTimeout(() => logout(), 1500);
+    setTimeout(() => logout(), TOAST_SHORT);
   }
-}, 60000);
+}, SESSION_CHECK_INTERVAL);
 
 // ─── Realtime (debounced, ignora ação local) ───
 let _rtVendTimer = null;
@@ -888,17 +889,17 @@ let _rtChannel = sb.channel(_rtChannelName)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vendedores', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined }, () => {
     if (_localAction) return;
     clearTimeout(_rtVendTimer);
-    _rtVendTimer = setTimeout(loadVendedores, 300);
+    _rtVendTimer = setTimeout(loadVendedores, RT_VENDEDOR_DEBOUNCE);
   })
   .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined }, () => {
     if (_localAction) return;
     clearTimeout(_rtAtendTimer);
-    _rtAtendTimer = setTimeout(() => { updateQuickStats(); checkActiveAtendimentos(); }, 300);
+    _rtAtendTimer = setTimeout(() => { updateQuickStats(); checkActiveAtendimentos(); }, RT_VENDEDOR_DEBOUNCE);
   })
   .subscribe((status) => {
     if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
       clearTimeout(_reconnectTimer);
-      _reconnectTimer = setTimeout(() => { if (_rtChannel) _rtChannel.subscribe(); }, 3000);
+      _reconnectTimer = setTimeout(() => { if (_rtChannel) _rtChannel.subscribe(); }, RT_RECONNECT_DELAY);
       toast('Reconectando...', 'warning', 2000);
     }
   });
@@ -910,7 +911,7 @@ setInterval(() => {
   _localAction = false;
   loadVendedores();
   checkActiveAtendimentos();
-}, 30000);
+}, AUTO_SYNC_INTERVAL);
 
 // ─── Visibility: pause timer when hidden, refetch on return ───
 document.addEventListener('visibilitychange', () => {
@@ -934,9 +935,9 @@ document.addEventListener('visibilitychange', () => {
     // Reconectar timers (limpar antes para evitar duplicação)
     updateClock();
     clearInterval(_clockInterval);
-    _clockInterval = setInterval(updateClock, 15000);
+    _clockInterval = setInterval(updateClock, CLOCK_UPDATE_INTERVAL);
     clearInterval(_sessionInterval);
-    _sessionInterval = setInterval(() => { if (currentTurno) updateQuickStats(); }, 60000);
+    _sessionInterval = setInterval(() => { if (currentTurno) updateQuickStats(); }, QUICK_STATS_INTERVAL);
     // Invalidar cache e forçar re-render
     invalidateQueue();
     invalidateFooter();
