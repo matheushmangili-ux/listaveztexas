@@ -102,11 +102,7 @@ window.addEventListener('error', function(e) {
 
   <!-- QUEUE PANEL (left) -->
   <aside class="queue-panel" id="queuePanel">
-    <div id="setorTabs" class="flex-center gap-6 mb-12" style="padding:0 2px">
-      <button class="setor-tab active" data-setor="loja" onclick="setSetor('loja')"><i class="fa-solid fa-store"></i><span class="tab-label">Loja</span></button>
-      <button class="setor-tab" data-setor="chapelaria" onclick="setSetor('chapelaria')"><i class="fa-solid fa-hat-cowboy"></i><span class="tab-label">Chapelaria</span></button>
-      <button class="setor-tab" data-setor="selaria" onclick="setSetor('selaria')"><i class="fa-solid fa-horse"></i><span class="tab-label">Selaria</span></button>
-    </div>
+    <div id="setorTabs" class="flex-center gap-6 mb-12" style="padding:0 2px"></div>
     <div class="flex-between mb-8" style="padding:0 4px">
       <span class="fs-13 fw-700 text-muted uppercase" style="letter-spacing:.1em">Fila</span>
       <div class="flex-center gap-8">
@@ -369,6 +365,18 @@ const tenant = await loadTenant();
 if (tenant) applyBranding(tenant);
 const tenantId = tenant?.id || null;
 
+// Render setor tabs dynamically from tenant config
+const SETOR_ICONS = { loja: 'fa-store', chapelaria: 'fa-hat-cowboy', selaria: 'fa-horse' };
+const SETOR_LABELS = { loja: 'Loja', chapelaria: 'Chapelaria', selaria: 'Selaria' };
+const tenantSetores = tenant?.setores || ['loja'];
+const setorTabsEl = document.getElementById('setorTabs');
+if (setorTabsEl) {
+  setorTabsEl.innerHTML = tenantSetores.map((s, i) =>
+    `<button class="setor-tab${i === 0 ? ' active' : ''}" data-setor="${s}" onclick="setSetor('${s}')"><i class="fa-solid ${SETOR_ICONS[s] || 'fa-store'}"></i><span class="tab-label">${SETOR_LABELS[s] || s}</span></button>`
+  ).join('');
+  if (tenantSetores.length <= 1) setorTabsEl.style.display = 'none';
+}
+
 const sb = getSupabase();
 let user;
 try {
@@ -377,6 +385,13 @@ try {
 if (!user) {
   window.handleLogout = () => { window.location.href = tenantPath('/login'); };
   window._toggleTheme = () => { toggleTheme(); };
+}
+
+// Guard: JWT tenant must match URL tenant — force re-login if mismatched
+const jwtTenantId = user ? getTenantId(user) : null;
+if (tenant && jwtTenantId && jwtTenantId !== tenant.id) {
+  await sb.auth.signOut();
+  window.location.href = tenantPath('/login');
 }
 
 // ─── Grouped state objects ───

@@ -413,7 +413,14 @@ if (!user) {
     loadAll();
   };
 }
-const tenantId = user ? getTenantId(user) : null;
+const tenantId = tenant?.id || (user ? getTenantId(user) : null);
+
+// Guard: if JWT tenant_id doesn't match URL tenant, force re-login
+const jwtTenantId = user ? getTenantId(user) : null;
+if (tenant && jwtTenantId && jwtTenantId !== tenant.id) {
+  await sb.auth.signOut();
+  window.location.href = tenantPath('/login');
+}
 
 let currentPeriod = PERIODS.SEMANA;
 let filterSetor = '';
