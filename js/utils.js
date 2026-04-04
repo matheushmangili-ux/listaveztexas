@@ -17,6 +17,17 @@ export const STATUS_CONFIG = {
   fora: { label: 'Fora', short: 'FORA', color: '#71717A', bg: 'rgba(113,113,122,.1)', icon: 'fa-door-open' }
 };
 
+export const SAIDA_COLORS = {
+  almoco: { color: '#FBBF24', label: 'Almoço', labelFull: 'Em almoço' },
+  banheiro: { color: '#60A5FA', label: 'Banheiro', labelFull: 'Banheiro' },
+  reuniao: { color: '#A1A1AA', label: 'Reunião', labelFull: 'Em reunião' },
+  operacional: { color: '#8b5cf6', label: 'Operacional', labelFull: 'Operacional' },
+  finalizar: { color: '#F87171', label: 'Finalizou', labelFull: 'Encerrou' },
+  outro: { color: '#71717A', label: 'Fora', labelFull: 'Fora' }
+};
+
+export const PAUSE_LIMITS = { almoco: 60, banheiro: 15, reuniao: 30, operacional: 45 }; // minutos
+
 export function formatTime(seconds) {
   if (!seconds || !isFinite(seconds)) return '0min 0s';
   const h = Math.floor(seconds / 3600);
