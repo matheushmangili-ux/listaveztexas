@@ -364,7 +364,8 @@ import { getSupabase } from '/js/supabase-config.js';
 import { requireRole, logout, getTenantId } from '/js/auth.js';
 import { STATUS_CONFIG, MOTIVOS, todayRange, yesterdayRange, weekRange, monthRange, initials, toast, initTheme, toggleTheme } from '/js/utils.js';
 import { loadTenant, applyBranding, tenantPath, getTenant, getSlug } from '/js/tenant.js';
-import { CHART_HEIGHT, CHART_TAB_KEY, METAS_KEY, DEFAULT_METAS, ORIGEM_PALETTE, PERIODS, SETOR_LABELS, ANIM } from '/js/dashboard-config.js';
+import { CHART_HEIGHT, CHART_TAB_KEY, METAS_KEY, DEFAULT_METAS, ORIGEM_PALETTE, PERIODS, ANIM } from '/js/dashboard-config.js';
+const setorLabel = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 import { showChangelog, setVersionLabel } from '/js/changelog.js';
 import { fetchSellerRanking, fetchConversionStats, fetchTrocas, fetchAtendimentosFiltrados, fetchLossReasons, fetchHourlyFlow, fetchPreferenciais, fetchRuptureLog, fetchPauseLog, fetchVendedores, fetchTodosVendedores, fetchCanalStats, fetchDrillMotivo, fetchExportData, fetchTrend, upsertVendedor, toggleVendedorAtivo, uploadFotoVendedor } from '/js/dashboard-api.js';
 import { initDashboardCharts, loadAll, loadKPIs, loadMotivos, loadHourly, loadPreferenciais, loadRanking, loadRuptures, loadPauseStats, loadFloor, loadScatter, loadTempoMeta, loadTrend, loadOrigem, setChartTab, setFirstLoadDone, formatTempo } from '/js/dashboard-charts.js';
@@ -505,7 +506,7 @@ async function populateFilters() {
 
   const setores = [...new Set(_cachedVendedores.map(v => v.setor || 'loja'))];
   const selSetor = document.getElementById('filterSetor');
-  selSetor.innerHTML = '<option value="">Todos os setores</option>' + setores.map(s => `<option value="${s}">${SETOR_LABELS[s] || s}</option>`).join('');
+  selSetor.innerHTML = '<option value="">Todos os setores</option>' + setores.map(s => `<option value="${s}">${setorLabel(s)}</option>`).join('');
   updateVendedorFilter();
 }
 
@@ -720,7 +721,7 @@ async function loadVendedores() {
       <div class="vendedor-info">
         <div class="vendedor-name">${v.nome}</div>
         ${v.apelido ? '<div class="vendedor-nick">' + v.apelido + '</div>' : ''}
-        <div style="font-size:9px;color:var(--text-muted);font-weight:600;margin-top:1px">${SETOR_LABELS[v.setor] || 'Vestuário'}</div>
+        <div style="font-size:9px;color:var(--text-muted);font-weight:600;margin-top:1px">${setorLabel(v.setor || 'loja')}</div>
       </div>
       <span class="badge-ativo ${v.ativo ? 'on' : 'off'}">${v.ativo ? 'Ativo' : 'Inativo'}</span>
       <div class="vendedor-actions">

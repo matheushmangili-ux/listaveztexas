@@ -19,13 +19,6 @@ export const PERIODS = {
   CUSTOM: 'custom'
 };
 
-// Setor labels (must match values in the database)
-export const SETOR_LABELS = {
-  loja: 'Vestuário',
-  chapelaria: 'Chapelaria',
-  selaria: 'Selaria'
-};
-
 // Animation durations (ms)
 export const ANIM = {
   COUNT_UP: 1200,
