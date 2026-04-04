@@ -1,7 +1,10 @@
 // login-pin Edge Function
-// Tenant-scoped PIN authentication
+// Tenant-scoped PIN authentication with brute-force protection
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
+
+const MAX_ATTEMPTS = 5
+const LOCKOUT_MINUTES = 15
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -22,6 +25,27 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
+
+    // --- Brute-force check ---
+    const now = new Date()
+
+    const { data: attemptRow } = await supabaseAdmin
+      .from('pin_login_attempts')
+      .select('attempts, locked_until')
+      .eq('slug', slug)
+      .maybeSingle()
+
+    if (attemptRow?.locked_until) {
+      const lockedUntil = new Date(attemptRow.locked_until)
+      if (now < lockedUntil) {
+        const minutesLeft = Math.ceil((lockedUntil.getTime() - now.getTime()) / 60000)
+        return new Response(
+          JSON.stringify({ error: `Muitas tentativas. Tente novamente em ${minutesLeft} minuto${minutesLeft !== 1 ? 's' : ''}.` }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    }
+    // --- End brute-force check ---
 
     // Resolve tenant from slug
     const { data: tenant, error: tenantErr } = await supabaseAdmin
@@ -46,10 +70,40 @@ Deno.serve(async (req) => {
       .maybeSingle()
 
     if (!vendedor) {
-      return new Response(JSON.stringify({ error: 'PIN inválido' }), {
-        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
+      // Record failed attempt
+      const currentAttempts = (attemptRow?.attempts ?? 0) + 1
+      const lockedUntil = currentAttempts >= MAX_ATTEMPTS
+        ? new Date(now.getTime() + LOCKOUT_MINUTES * 60 * 1000).toISOString()
+        : null
+
+      await supabaseAdmin
+        .from('pin_login_attempts')
+        .upsert(
+          { slug, attempts: currentAttempts, locked_until: lockedUntil, updated_at: now.toISOString() },
+          { onConflict: 'slug' }
+        )
+
+      if (currentAttempts >= MAX_ATTEMPTS) {
+        return new Response(
+          JSON.stringify({ error: `Muitas tentativas. Tente novamente em ${LOCKOUT_MINUTES} minutos.` }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      const remaining = MAX_ATTEMPTS - currentAttempts
+      return new Response(
+        JSON.stringify({ error: `PIN inválido. ${remaining} tentativa${remaining !== 1 ? 's' : ''} restante${remaining !== 1 ? 's' : ''}.` }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
+
+    // PIN correct — reset attempt counter
+    await supabaseAdmin
+      .from('pin_login_attempts')
+      .upsert(
+        { slug, attempts: 0, locked_until: null, updated_at: now.toISOString() },
+        { onConflict: 'slug' }
+      )
 
     // Find the recepcionista auth user for this tenant
     const { data: tenantUser } = await supabaseAdmin
