@@ -356,6 +356,7 @@ import { fireVendaCelebration, fireEpicTrocaAnimation } from '/js/tablet-celebra
 import { initTurno, updateTurnoSwitch, checkExistingTurno } from '/js/tablet-turno.js';
 import { initFooter, renderFooter, invalidateFooter, clearFooterTimer, showFooterDropLabel, hideFooterDropLabel } from '/js/tablet-footer.js';
 import { initQueue, renderQueue, scheduleRender, invalidateQueue, getDraggedId, setDraggedId, isTouchDragging, getTouchGhost, setTouchGhost, cleanupQueue, resetDragState } from '/js/tablet-queue.js';
+import { initAtendimento, renderActiveAtendimentos, checkActiveAtendimentos, doSendToAtendimento, loadCanaisOrigem, clearAtendTimers, isAtendTouchDragging, resetAtendDragState } from '/js/tablet-atendimento.js';
 initTheme();
 // Sync theme-color meta with saved theme
 { const _t = document.documentElement.getAttribute('data-theme') || 'light';
@@ -379,8 +380,6 @@ if (!user) {
 
 let currentTurno = null;
 let activeAtendimentos = [];
-const _savedQueuePositions = new Map(); // vendedorId → posicao_fila antes do atendimento
-let timerInterval = null;
 let vendedores = [];
 let currentSetor = 'loja';
 let _localAction = false; // Flag: ignora realtime quando ação é local
@@ -391,8 +390,6 @@ const _queueEntryTimes = new Map(); // vendedorId → { pos, time } para cold se
 const _pauseStartTimes = new Map(); // vendedorId → Date inicio da pausa
 const _positionLog = []; // { time, icon, vendedor, action, details } — max 200
 let _tvMode = localStorage.getItem('minhavez_tvMode') === '1' || new URLSearchParams(location.search).has('tv');
-let _canaisOrigem = [];
-let _pendingOriginVendedorId = null;
 
 // Cached DOM refs (evita querySelector repetido)
 const _queuePanel = document.querySelector('.queue-panel');
@@ -490,8 +487,30 @@ initQueue({
   openSaida,
   returnFromPause: (...args) => window.returnFromPause(...args),
   withLock,
-  doSendToAtendimento: (...args) => _doSendToAtendimento(...args),
+  doSendToAtendimento: (...args) => doSendToAtendimento(...args),
   updateQuickStats
+});
+
+// ─── Atendimento module init ───
+initAtendimento({
+  sb,
+  get currentTurno() { return currentTurno; },
+  get activeAtendimentos() { return activeAtendimentos; },
+  set activeAtendimentos(v) { activeAtendimentos = v; },
+  get vendedores() { return vendedores; },
+  get tenantId() { return tenantId; },
+  get currentSetor() { return currentSetor; },
+  get tvMode() { return _tvMode; },
+  get actionLock() { return _actionLock; },
+  set actionLock(v) { _actionLock = v; },
+  queueList: _queueList,
+  queuePanel: _queuePanel,
+  servicePanel: _servicePanel,
+  markLocal,
+  logPosition,
+  loadVendedores,
+  addToQueue,
+  withLock
 });
 
 // ─── Clock ───
@@ -558,272 +577,7 @@ async function loadVendedores() {
 // Queue rendering, drag-and-drop imported from /js/tablet-queue.js
 
 
-// ─── Carregar canais de origem ───
-async function loadCanaisOrigem() {
-  try {
-    const { data } = await sb.from('canais_origem')
-      .select('*')
-      .eq('tenant_id', tenantId)
-      .eq('ativo', true)
-      .order('ordem');
-    _canaisOrigem = data || [];
-  } catch (e) { console.warn('[canais_origem] erro:', e.message); _canaisOrigem = []; }
-}
-
-// ─── Mostrar modal de canal de origem ───
-function showOriginModal(vendedorId) {
-  _pendingOriginVendedorId = vendedorId;
-  const box = document.querySelector('.origin-box');
-  const fixos = _canaisOrigem.filter(c => c.tipo === 'fixo');
-  const eventos = _canaisOrigem.filter(c => c.tipo === 'evento');
-
-  let content = '<div class="origin-title">Como o cliente chegou?</div>';
-  content += '<div class="origin-grid">';
-  fixos.forEach(c => {
-    content += '<button class="origin-btn" onclick="confirmOrigin(\'' + c.id + '\')">' +
-               '<i class="' + c.icone + '"></i><span>' + c.nome + '</span></button>';
-  });
-  content += '</div>';
-
-  if (eventos.length > 0) {
-    content += '<div class="origin-sep">Eventos ativos</div>';
-    content += '<div class="origin-grid">';
-    eventos.forEach(c => {
-      content += '<button class="origin-btn" onclick="confirmOrigin(\'' + c.id + '\')">' +
-                 '<i class="' + c.icone + '"></i><span>' + c.nome + '</span></button>';
-    });
-    content += '</div>';
-  }
-
-  content += '<button class="origin-skip" onclick="confirmOrigin(null)">Não informado</button>';
-  box.innerHTML = content;
-
-  const overlay = document.getElementById('originOverlay');
-  overlay.style.display = 'flex';
-  requestAnimationFrame(() => overlay.classList.add('show'));
-}
-
-// ─── Confirmar canal de origem e iniciar atendimento ───
-window.confirmOrigin = async function(canalId) {
-  const overlay = document.getElementById('originOverlay');
-  overlay.classList.remove('show');
-  setTimeout(() => overlay.style.display = 'none', 200);
-
-  if (!_pendingOriginVendedorId) return;
-  const vendedorId = _pendingOriginVendedorId;
-  _pendingOriginVendedorId = null;
-
-  await withLock(async () => {
-    await _executeAtendimento(vendedorId, canalId);
-  });
-};
-
-// ─── Enviar vendedor específico ao atendimento (click ou drag) ───
-async function _doSendToAtendimento(vendedorId) {
-  if (!currentTurno) { toast('Abra o turno primeiro', 'warning'); return; }
-  let v = vendedores.find(x => x.id === vendedorId);
-  if (!v) return;
-  // Se vendedor está fora/pausa, colocar na fila primeiro
-  if (v.status === 'fora' || v.status === 'pausa') {
-    await addToQueue(vendedorId);
-    v = vendedores.find(x => x.id === vendedorId);
-    if (!v || v.posicao_fila == null) return;
-  }
-  if (v.status !== 'disponivel' || v.posicao_fila == null) {
-    toast((v.apelido || v.nome) + ' não está na fila (status: ' + v.status + ')', 'warning');
-    return;
-  }
-  // Se há canais configurados, mostrar modal de origem
-  if (_canaisOrigem.length > 0) {
-    showOriginModal(vendedorId);
-    return; // modal cuida do resto via confirmOrigin
-  }
-  // Sem canais configurados, vai direto
-  await _executeAtendimento(vendedorId, null);
-}
-
-// ─── Executar atendimento (lógica real após escolha de canal) ───
-async function _executeAtendimento(vendedorId, canalOrigemId) {
-  if (!currentTurno) { toast('Abra o turno primeiro', 'warning'); return; }
-  let v = vendedores.find(x => x.id === vendedorId);
-  if (!v) return;
-  // Se vendedor está fora/pausa, colocar na fila primeiro
-  if (v.status === 'fora' || v.status === 'pausa') {
-    await addToQueue(vendedorId);
-    v = vendedores.find(x => x.id === vendedorId);
-    if (!v || v.posicao_fila == null) return;
-  }
-  if (v.status !== 'disponivel' || v.posicao_fila == null) {
-    toast((v.apelido || v.nome) + ' não está na fila (status: ' + v.status + ')', 'warning');
-    return;
-  }
-  // Se não é o primeiro da fila, é atendimento preferencial
-  const setor = v.setor || 'loja';
-  const fila = vendedores.filter(x => (x.setor || 'loja') === setor && x.status === 'disponivel' && x.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
-  const isPreferencial = fila.length > 0 && fila[0].id !== vendedorId;
-  // Salvar posição original para restaurar se cancelar
-  _savedQueuePositions.set(vendedorId, v.posicao_fila);
-  try {
-    markLocal();
-    const prefLabel = isPreferencial ? ' (preferencial)' : '';
-    toast((v.apelido || v.nome) + ' iniciando atendimento' + prefLabel + '...', 'info', 1500);
-    const { data, error } = await sb.rpc('iniciar_atendimento_vendedor', {
-      p_turno_id: currentTurno.id,
-      p_vendedor_id: vendedorId,
-      p_preferencial: isPreferencial
-    });
-    if (error) throw error;
-    // Se canal de origem foi selecionado, gravar no atendimento
-    if (canalOrigemId && data) {
-      await sb.from('atendimentos').update({ canal_origem_id: canalOrigemId }).eq('id', data);
-    }
-    const { data: atend } = await sb.from('atendimentos').select('*, vendedores(nome, apelido), canais_origem(nome, icone)').eq('id', data).single();
-    activeAtendimentos.push(atend);
-    renderActiveAtendimentos();
-    await loadVendedores();
-    playSound('atendimento');
-    if (navigator.vibrate) navigator.vibrate(200);
-    logPosition(v, 'atendimento', isPreferencial ? 'Preferencial' : 'Da vez');
-    toast((v.apelido || v.nome) + ' em atendimento' + prefLabel, 'success', 2000);
-  } catch (err) {
-    toast('Erro: ' + (err.message || 'falha ao iniciar'), 'error');
-    await loadVendedores();
-  }
-}
-
-// Touch drag imported from /js/tablet-queue.js
-
-
-// ─── Atendimento card drag → Outcome Sheet ───
-let _atendDragInit = false;
-let _atendDragId = null;
-let _atendDragGhost = null;
-let _atendTouchDragging = false;
-let _atendDragRafId = null;
-
-function initAtendDrag() {
-  const activeList = document.getElementById('activeList');
-  if (!activeList || _atendDragInit) return;
-  _atendDragInit = true;
-
-  activeList.addEventListener('touchstart', e => {
-    if (_tvMode) return;
-    const card = e.target.closest('.atend-card');
-    if (!card) return;
-    const atendId = card.dataset.atendId;
-    if (!atendId) return;
-
-    _atendDragId = atendId;
-    _atendTouchDragging = false;
-    const touch = e.touches[0];
-    const startX = touch.clientX;
-    const startY = touch.clientY;
-    const cardW = card.offsetWidth;
-
-    const onMove = (ev) => {
-      if (_atendTouchDragging) ev.preventDefault();
-      const t = ev.touches[0];
-      const dx = t.clientX - startX;
-      const dy = t.clientY - startY;
-
-      if (!_atendTouchDragging && Math.abs(dx) + Math.abs(dy) > 12) {
-        _atendTouchDragging = true;
-        card.style.opacity = '0.3';
-        document.body.style.overflow = 'hidden';
-
-        _atendDragGhost = card.cloneNode(true);
-        _atendDragGhost.style.cssText = `
-          position:fixed;z-index:9999;pointer-events:none;
-          opacity:.9;will-change:transform;
-          box-shadow:0 4px 16px rgba(0,0,0,.3);
-          border:1px solid var(--info);border-radius:10px;
-          background:var(--bg-card);
-          width:${cardW}px;
-          left:0;top:0;
-          transform:translate3d(${t.clientX - cardW/2}px,${t.clientY - 30}px,0) scale(1.05);
-        `;
-        document.body.appendChild(_atendDragGhost);
-      }
-
-      if (_atendTouchDragging && _atendDragGhost) {
-        if (_atendDragRafId) cancelAnimationFrame(_atendDragRafId);
-        const gx = t.clientX - cardW/2, gy = t.clientY - 30;
-        _atendDragRafId = requestAnimationFrame(() => {
-          if (_atendDragGhost) _atendDragGhost.style.transform = `translate3d(${gx}px,${gy}px,0) scale(1.05)`;
-        });
-
-        const elUnder = document.elementFromPoint(t.clientX, t.clientY);
-        const overQueue = elUnder && (elUnder.id === 'queueList' || elUnder.closest('#queueList') || elUnder.id === 'queuePanel' || elUnder.closest('#queuePanel'));
-        if (overQueue) {
-          _queueList.style.background = 'rgba(96,165,250,.06)';
-        } else {
-          _queueList.style.background = '';
-        }
-      }
-    };
-
-    const onEnd = (ev) => {
-      document.removeEventListener('touchmove', onMove);
-      document.removeEventListener('touchend', onEnd);
-      document.body.style.overflow = '';
-      if (_atendDragRafId) { cancelAnimationFrame(_atendDragRafId); _atendDragRafId = null; }
-      if (_atendDragGhost) { _atendDragGhost.remove(); _atendDragGhost = null; }
-      card.style.opacity = '1';
-      _queueList.style.background = '';
-
-      if (!_atendTouchDragging) {
-        // Tap — open outcome sheet directly
-        _atendDragId = null;
-        openOutcomeSheet(atendId);
-        return;
-      }
-
-      const touch2 = ev.changedTouches[0];
-      const dropEl = document.elementFromPoint(touch2.clientX, touch2.clientY);
-      const droppedOnQueue = dropEl && (dropEl.id === 'queueList' || dropEl.closest('#queueList') || dropEl.id === 'queuePanel' || dropEl.closest('#queuePanel'));
-
-      if (droppedOnQueue) {
-        setTimeout(() => openOutcomeSheet(atendId), 50);
-      }
-      // If not dropped on queue, snap back (do nothing)
-
-      _atendDragId = null;
-      _atendTouchDragging = false;
-    };
-
-    document.addEventListener('touchmove', onMove, { passive: false });
-    document.addEventListener('touchend', onEnd);
-  }, { passive: true });
-}
-
-// ─── Outcome Sheet logic ───
-let _outcomeAtendId = null;
-
-function openOutcomeSheet(atendId) {
-  _outcomeAtendId = atendId;
-  const atend = activeAtendimentos.find(a => a.id === atendId);
-  const nome = atend?.vendedores?.apelido || atend?.vendedores?.nome || 'Vendedor';
-  document.getElementById('outcomeVendorName').textContent = nome;
-  document.getElementById('outcomeOverlay').classList.add('open');
-  document.getElementById('outcomeSheet').classList.add('open');
-}
-
-window.closeOutcomeSheet = function() {
-  document.getElementById('outcomeOverlay').classList.remove('open');
-  document.getElementById('outcomeSheet').classList.remove('open');
-  _outcomeAtendId = null;
-};
-
-window.selectOutcome = function(resultado) {
-  const atendId = _outcomeAtendId;
-  closeOutcomeSheet();
-  if (!atendId) return;
-  if (resultado === 'cancelar') {
-    cancelarAtendimento(atendId);
-  } else {
-    handleOutcome(resultado, atendId);
-  }
-};
+// Atendimento functions imported from /js/tablet-atendimento.js
 
 async function addToQueue(vendedorId) {
   const v = vendedores.find(x => x.id === vendedorId);
@@ -923,19 +677,7 @@ window.finalizarTodos = async function() {
 
 // Footer imported from /js/tablet-footer.js
 
-// ─── Safety: limpar ghosts órfãos a cada 3s ───
-setInterval(() => {
-  if (!isTouchDragging() && !_atendTouchDragging) {
-    const _tg = getTouchGhost(); if (_tg) { _tg.remove(); setTouchGhost(null); }
-    if (_atendDragGhost) { _atendDragGhost.remove(); _atendDragGhost = null; }
-    // Restaurar overflow caso tenha ficado travado
-    if (document.body.style.overflow === 'hidden') {
-      document.body.style.overflow = '';
-      _queuePanel?.style.setProperty('overflow', '');
-      _servicePanel?.style.setProperty('overflow', '');
-    }
-  }
-}, 3000);
+// Ghost cleanup imported from /js/tablet-atendimento.js
 
 // ─── Animated counter ───
 function animateValue(el, start, end, duration = 400, suffix = '') {
@@ -993,620 +735,8 @@ async function updateQuickStats() {
 
 // Turno functions imported from /js/tablet-turno.js
 
-// ─── Próximo cliente ───
-window.handleProximoCliente = async function() {
-  if (!currentTurno) return;
-  try {
-    const { data, error } = await sb.rpc('proximo_cliente', { p_turno_id: currentTurno.id, p_setor: currentSetor });
-    if (error) throw error;
-    const { data: atend } = await sb.from('atendimentos').select('*, vendedores(nome, apelido), canais_origem(nome, icone)').eq('id', data).single();
-    activeAtendimentos.push(atend);
-    renderActiveAtendimentos();
-    await loadVendedores();
-  } catch (e) {
-    toast(e.message || 'Nenhum vendedor disponível', 'warning');
-  }
-};
-
-function renderActiveAtendimentos() {
-  clearInterval(timerInterval); timerInterval = null;
-  const list = document.getElementById('activeList');
-  if (!list) return;
-
-  // Preservar activeLabel (é filho de activeList, não pode ser destruído pelo replaceChildren)
-  let label = document.getElementById('activeLabel');
-  list.replaceChildren(); // limpa todos os filhos de uma vez
-  // Recriar activeLabel se foi destruído pelo replaceChildren
-  if (!label || !label.isConnected) {
-    label = document.createElement('p');
-    label.id = 'activeLabel';
-    label.style.cssText = 'font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;display:none';
-  }
-  list.appendChild(label); // sempre reinserir no topo
-
-  const countEl = document.getElementById('activeCount');
-  if (countEl) countEl.textContent = activeAtendimentos.length + ' ativo' + (activeAtendimentos.length !== 1 ? 's' : '');
-
-  if (activeAtendimentos.length === 0) {
-    label.style.display = 'none';
-    const empty = document.createElement('div');
-    empty.className = 'service-empty';
-    empty.innerHTML = '<i class="fa-solid fa-arrow-left" style="font-size:24px;margin-bottom:8px;opacity:.3"></i>Arraste vendedores da fila para iniciar atendimento';
-    list.appendChild(empty);
-    return;
-  }
-  label.style.display = 'block';
-
-  activeAtendimentos.forEach(atend => {
-    const v = atend.vendedores;
-    if (!v) return;
-    const nome = v.apelido || v.nome;
-    const card = document.createElement('div');
-    card.className = 'atend-card';
-    card.id = 'atend-' + atend.id;
-    const prefBadge = atend.preferencial ? '<span style="display:inline-block;background:var(--warning);color:#060606;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:6px;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle">PREF</span>' : '';
-    const clientBadge = (atend._clientCount && atend._clientCount > 1) ? `<span style="display:inline-block;background:var(--info);color:#fff;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:6px;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle">${atend._clientCount} clientes</span>` : '';
-    const canal = atend.canais_origem;
-    const canalHtml = canal && canal.icone ? `<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;margin-left:auto;padding:4px 8px;border-radius:8px;background:var(--bg-surface);border:1px solid var(--border-subtle)" title="${canal.nome || 'Canal'}"><i class="${canal.icone}" style="font-size:14px;color:var(--accent)"></i><span style="font-size:10px;font-weight:600;color:var(--text-muted);max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${canal.nome}</span></div>` : '';
-    card.dataset.atendId = atend.id;
-    card.innerHTML = `
-      <div class="atend-avatar">${initials(nome)}</div>
-      <div class="atend-info">
-        <div class="atend-name">${nome}${prefBadge}${clientBadge}</div>
-        <div class="atend-timer" id="timer-${atend.id}">0min 0s</div>
-      </div>
-      ${canalHtml}
-      <i class="fa-solid fa-grip-vertical" style="color:var(--text-muted);font-size:14px;opacity:.3;flex-shrink:0;${canalHtml ? 'margin-left:8px' : 'margin-left:auto'}"></i>`;
-    list.appendChild(card);
-  });
-
-  // Timer global para todos os atendimentos (painel + sidebar)
-  // Cache de referências DOM para evitar queries a cada segundo
-  clearInterval(timerInterval); timerInterval = null;
-  const _timerRefs = new Map();
-  activeAtendimentos.forEach(atend => {
-    _timerRefs.set(atend.id, {
-      main: document.getElementById('timer-' + atend.id),
-      side: document.querySelector(`[data-sidebar-timer="${atend.id}"]`),
-      startMs: new Date(atend.inicio).getTime(),
-      lastText: ''
-    });
-  });
-  timerInterval = setInterval(() => {
-    const now = Date.now();
-    let allDetached = true;
-    _timerRefs.forEach((ref, id) => {
-      const elapsed = (now - ref.startMs) / 1000;
-      const timeStr = formatTime(elapsed);
-      if (timeStr === ref.lastText) { if (ref.main || ref.side) allDetached = false; return; }
-      ref.lastText = timeStr;
-      const isDanger = elapsed > 2400;
-      // Se main desconectou, tentar UMA vez re-encontrar; se não achar, desistir
-      if (ref.main && !ref.main.isConnected) ref.main = null;
-      if (!ref.main) ref.main = document.getElementById('timer-' + id) || null;
-      if (ref.main) { ref.main.textContent = timeStr; ref.main.className = 'atend-timer' + (isDanger ? ' danger' : ''); allDetached = false; }
-      if (ref.side && !ref.side.isConnected) ref.side = null;
-      if (!ref.side) ref.side = document.querySelector(`[data-sidebar-timer="${id}"]`) || null;
-      if (ref.side) { ref.side.textContent = timeStr; ref.side.style.color = isDanger ? 'var(--danger)' : 'var(--text-primary)'; allDetached = false; }
-    });
-    // Se todos os refs sumiram do DOM, parar o interval
-    if (allDetached && _timerRefs.size > 0) { clearInterval(timerInterval); timerInterval = null; }
-  }, 1000);
-
-  initAtendDrag();
-}
-
-function removeAtendimento(atendId) {
-  activeAtendimentos = activeAtendimentos.filter(a => a.id !== atendId);
-  const card = document.getElementById('atend-' + atendId);
-  if (card) card.remove();
-  if (activeAtendimentos.length === 0) {
-    clearInterval(timerInterval); timerInterval = null;
-    const label = document.getElementById('activeLabel');
-    if (label) label.style.display = 'none';
-  }
-}
-
-// ─── Cancelar atendimento (voltar vendedor à posição original) ───
-window.cancelarAtendimento = async function(atendId) {
-  if (_actionLock) return;
-  _actionLock = true;
-  try {
-    const atend = activeAtendimentos.find(a => a.id === atendId);
-    if (!atend) { toast('Atendimento não encontrado', 'warning'); return; }
-    const vendedorId = atend.vendedor_id;
-    const v = vendedores.find(x => x.id === vendedorId);
-    if (!v) { toast('Vendedor não encontrado', 'warning'); return; }
-
-    // Deletar atendimento (foi engano, não conta)
-    markLocal();
-    await sb.from('atendimentos').delete().eq('id', atendId);
-
-    // Devolver vendedor à posição original (ou 1º se não tiver salva)
-    const setor = v.setor || 'loja';
-    const savedPos = _savedQueuePositions.get(vendedorId) || 1;
-    _savedQueuePositions.delete(vendedorId);
-    const inQueue = vendedores
-      .filter(x => (x.setor || 'loja') === setor && x.status === 'disponivel' && x.posicao_fila != null)
-      .sort((a, b) => a.posicao_fila - b.posicao_fila);
-
-    // Inserir na posição salva (ajustada ao tamanho atual da fila)
-    const insertIdx = Math.min(savedPos - 1, inQueue.length);
-    const before = inQueue.slice(0, insertIdx).map(x => x.id);
-    const after = inQueue.slice(insertIdx).map(x => x.id);
-    const newOrder = [...before, vendedorId, ...after];
-
-    // Optimistic: update local state
-    v.status = 'disponivel';
-    v.posicao_fila = insertIdx + 1;
-    after.forEach((id, i) => {
-      const x = vendedores.find(vx => vx.id === id);
-      if (x) x.posicao_fila = insertIdx + 2 + i;
-    });
-
-    removeAtendimento(atendId);
-    invalidateQueue(); invalidateFooter();
-    scheduleRender();
-
-    // Persist: set status + posição first, then reorder
-    const { error: errUp } = await sb.from('vendedores').update({ status: 'disponivel', posicao_fila: insertIdx + 1 }).eq('id', vendedorId);
-    if (errUp) { toast('Erro ao atualizar vendedor: ' + errUp.message, 'error'); }
-    const { error: errReo } = await sb.rpc('reordenar_fila', { p_ids: newOrder });
-    if (errReo) { toast('Erro ao reordenar: ' + errReo.message, 'error'); }
-    await loadVendedores();
-    logPosition(v, 'cancelar', 'Voltou para #' + (insertIdx + 1));
-    toast('Atendimento cancelado — vendedor voltou à posição #' + (insertIdx + 1), 'info');
-  } catch (e) {
-    toast('Erro ao cancelar: ' + e.message, 'error');
-  } finally {
-    _actionLock = false;
-  }
-};
-
-// ─── Outcomes ───
-let pendingOutcome = null;
-let pendingAtendimentoId = null;
-
-window.handleOutcome = function(resultado, atendId) {
-  if (_actionLock) return;
-  const atend = activeAtendimentos.find(a => a.id === atendId);
-  // Multi-client: abrir popup de resultado para cada cliente
-  if (atend && atend._clientCount && atend._clientCount > 1) {
-    openMultiOutcome(atendId, atend._clientCount);
-    return;
-  }
-  pendingAtendimentoId = atendId;
-  if (resultado === 'nao_convertido') {
-    openMotivos();
-    return;
-  }
-  if (resultado === 'venda') {
-    openValorVenda(atendId);
-    return;
-  }
-  if (resultado === 'troca') {
-    openTrocaDiferenca(atendId);
-    return;
-  }
-  finalize(resultado, null, null, null, atendId);
-};
-
-// ─── Multi-client outcome popup ───
-let _multiResults = []; // { resultado, motivo, detalhe, produto, valor }
-let _multiAtendId = null;
-let _multiTotal = 0;
-let _multiCurrent = 0;
-
-function openMultiOutcome(atendId, total) {
-  _multiAtendId = atendId;
-  _multiTotal = total;
-  _multiCurrent = 0;
-  _multiResults = [];
-  showMultiStep();
-}
-
-function showMultiStep() {
-  document.getElementById('multiOutcomeOverlay')?.remove();
-  _multiCurrent++;
-  if (_multiCurrent > _multiTotal) {
-    finalizeMultiOutcome();
-    return;
-  }
-  createModal('multiOutcomeOverlay', `
-    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">
-      <span style="background:var(--info);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px">${_multiCurrent} de ${_multiTotal}</span>
-    </div>
-    <h3 style="font-family:var(--font-mono);font-size:17px;font-weight:700;margin-bottom:6px">Cliente ${_multiCurrent}</h3>
-    <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px">Qual foi o resultado?</p>
-    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
-      <button onclick="multiPickOutcome('venda')" class="motivo-option" style="min-height:48px">
-        <i class="fa-solid fa-check" style="color:var(--success);font-size:18px"></i><span style="font-weight:600;font-size:15px">Venda</span>
-      </button>
-      <button onclick="multiPickOutcome('nao_convertido')" class="motivo-option" style="min-height:48px">
-        <i class="fa-solid fa-xmark" style="color:var(--danger);font-size:18px"></i><span style="font-weight:600;font-size:15px">Não converteu</span>
-      </button>
-      <button onclick="multiPickOutcome('troca')" class="motivo-option" style="min-height:48px">
-        <i class="fa-solid fa-rotate" style="color:var(--warning);font-size:18px"></i><span style="font-weight:600;font-size:15px">Troca</span>
-      </button>
-    </div>
-    <div id="multiDetailBox" style="display:none"></div>
-  `, { zIndex: 1002, maxWidth: '400px' });
-}
-
-window.multiPickOutcome = function(resultado) {
-  if (resultado === 'venda') {
-    // Mostrar campo de valor
-    const box = document.getElementById('multiDetailBox');
-    box.style.display = '';
-    box.innerHTML = `
-      <div style="border-top:1px solid var(--border-subtle);padding-top:12px;margin-top:4px">
-        <p style="font-size:10px;color:var(--text-muted);margin-bottom:6px;font-weight:600">Valor da venda (opcional)</p>
-        ${currencyInputHTML('multiValorInput')}
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button onclick="multiSubmitVenda(true)" class="btn btn-ghost" style="flex:1;min-height:40px;font-size:12px">Pular</button>
-          <button onclick="multiSubmitVenda(false)" class="btn btn-success" style="flex:1;min-height:40px;font-size:12px"><i class="fa-solid fa-check" style="margin-right:4px"></i>OK</button>
-        </div>
-      </div>`;
-    setTimeout(() => document.getElementById('multiValorInput')?.focus(), 100);
-  } else if (resultado === 'nao_convertido') {
-    _multiResults.push({ resultado: 'nao_convertido' });
-    showMultiStep();
-  } else if (resultado === 'troca') {
-    // Mostrar campo de valor da troca
-    const box = document.getElementById('multiDetailBox');
-    box.style.display = '';
-    box.innerHTML = `
-      <div style="border-top:1px solid var(--border-subtle);padding-top:12px;margin-top:4px">
-        <p style="font-size:10px;color:var(--text-muted);margin-bottom:6px;font-weight:600">Diferença de valor (opcional)</p>
-        ${currencyInputHTML('multiTrocaInput')}
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button onclick="multiSubmitTroca(true)" class="btn btn-ghost" style="flex:1;min-height:40px;font-size:12px">Sem diferença</button>
-          <button onclick="multiSubmitTroca(false)" class="btn btn-warning" style="flex:1;min-height:40px;font-size:12px"><i class="fa-solid fa-check" style="margin-right:4px"></i>OK</button>
-        </div>
-      </div>`;
-    setTimeout(() => document.getElementById('multiTrocaInput')?.focus(), 100);
-  }
-};
-
-window.multiSubmitVenda = function(skip) {
-  const valor = skip ? null : parseCurrency(document.getElementById('multiValorInput')?.value);
-  _multiResults.push({ resultado: 'venda', valor });
-  showMultiStep();
-};
-
-window.multiSubmitTroca = function(skip) {
-  const valor = skip ? null : parseCurrency(document.getElementById('multiTrocaInput')?.value);
-  _multiResults.push({ resultado: 'troca', valor });
-  showMultiStep();
-};
-
-async function finalizeMultiOutcome() {
-  document.getElementById('multiOutcomeOverlay')?.remove();
-  const atendId = _multiAtendId;
-  const atend = activeAtendimentos.find(a => a.id === atendId);
-  const vendedorId = atend?.vendedor_id;
-  if (vendedorId) _savedQueuePositions.delete(vendedorId);
-  if (!atendId || _multiResults.length === 0) return;
-
-  markLocal();
-  let vendaCount = 0, trocaCount = 0, naoCount = 0;
-  try {
-    // Primeiro resultado: finalizar o atendimento original
-    const first = _multiResults[0];
-    await sb.rpc('finalizar_atendimento', {
-      p_atendimento_id: atendId,
-      p_resultado: first.resultado,
-      p_motivo: first.motivo || null,
-      p_motivo_detalhe: first.detalhe || null,
-      p_produto_ruptura: first.produto || null,
-      p_valor_venda: first.valor ?? null
-    });
-    if (first.resultado === 'venda') vendaCount++;
-    else if (first.resultado === 'troca') trocaCount++;
-    else naoCount++;
-
-    // Demais resultados: criar e finalizar atendimentos adicionais
-    for (let i = 1; i < _multiResults.length; i++) {
-      const r = _multiResults[i];
-      const { data: novoId } = await sb.from('atendimentos').insert({
-        turno_id: currentTurno.id,
-        vendedor_id: vendedorId,
-        inicio: atend.inicio,
-        tenant_id: tenantId
-      }).select('id').single();
-      if (novoId) {
-        await sb.rpc('finalizar_atendimento', {
-          p_atendimento_id: novoId.id,
-          p_resultado: r.resultado,
-          p_motivo: r.motivo || null,
-          p_motivo_detalhe: r.detalhe || null,
-          p_produto_ruptura: r.produto || null,
-          p_valor_venda: r.valor ?? null
-        });
-      }
-      if (r.resultado === 'venda') vendaCount++;
-      else if (r.resultado === 'troca') trocaCount++;
-      else naoCount++;
-    }
-
-    removeAtendimento(atendId);
-    pendingAtendimentoId = null;
-
-    // Resumo
-    const parts = [];
-    if (vendaCount) parts.push(vendaCount + ' venda' + (vendaCount > 1 ? 's' : ''));
-    if (trocaCount) parts.push(trocaCount + ' troca' + (trocaCount > 1 ? 's' : ''));
-    if (naoCount) parts.push(naoCount + ' não conv.');
-    toast(parts.join(', ') || 'Finalizado', vendaCount > 0 ? 'success' : 'warning');
-
-    if (vendaCount > 0) { playSound('venda'); fireVendaCelebration(); }
-    else if (naoCount > 0) { playSound('fail'); }
-
-    // Perguntar se quer continuar
-    askContinuar(atendId,
-      async () => { await loadVendedores(); },
-      async () => {
-        if (vendedorId && currentTurno) {
-          await sb.from('vendedores').update({ status: 'em_atendimento', posicao_fila: null }).eq('id', vendedorId);
-          const { data: novoAtend, error: errNovo } = await sb.from('atendimentos').insert({
-            turno_id: currentTurno.id, vendedor_id: vendedorId, inicio: new Date().toISOString(), tenant_id: tenantId
-          }).select('*, vendedores(nome, apelido), canais_origem(nome, icone)').single();
-          if (!errNovo && novoAtend) {
-            activeAtendimentos.push(novoAtend);
-            renderActiveAtendimentos();
-            toast('Novo atendimento iniciado', 'info', 1500);
-          }
-        }
-        await loadVendedores();
-      }
-    );
-  } catch (e) {
-    toast('Erro: ' + e.message, 'error');
-    await loadVendedores();
-  }
-}
-
-// ─── Troca com diferença ───
-function openTrocaDiferenca(atendId) {
-  createModal('trocaOverlay', `
-    <i class="fa-solid fa-rotate" style="font-size:28px;color:var(--warning);margin-bottom:12px"></i>
-    <h3 style="font-family:var(--font-mono);font-size:17px;font-weight:700;margin-bottom:6px">Troca</h3>
-    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Houve diferença de valor na troca?</p>
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <button class="btn" style="flex:1;min-height:44px;background:var(--bg-hover);color:var(--text-primary);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);font-weight:700;cursor:pointer" onclick="submitTroca('${atendId}',false)">
-        Sem diferença
-      </button>
-      <button class="btn" style="flex:1;min-height:44px;background:var(--warning);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer" onclick="showTrocaValor('${atendId}')">
-        Com diferença
-      </button>
-    </div>
-    <div id="trocaValorBox" style="display:none">
-      ${currencyInputHTML('trocaValorInput')}
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Acima de R$ 1.000 o vendedor volta para o 1º da fila</p>
-      <button class="btn" style="width:100%;min-height:44px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer" onclick="submitTroca('${atendId}',true)">
-        <i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar
-      </button>
-    </div>
-  `);
-}
-
-window.showTrocaValor = function(atendId) {
-  document.getElementById('trocaValorBox').style.display = '';
-  setTimeout(() => document.getElementById('trocaValorInput')?.focus(), 100);
-};
-
-window.submitTroca = async function(atendId, comDiferenca) {
-  let valor = null;
-  if (comDiferenca) {
-    const input = document.getElementById('trocaValorInput');
-    valor = input ? parseCurrency(input.value) || 0 : 0;
-  }
-  document.getElementById('trocaOverlay')?.remove();
-
-  const atend = activeAtendimentos.find(a => a.id === atendId);
-  if (!atend) { toast('Atendimento não encontrado', 'warning'); return; }
-  const vendedorId = atend.vendedor_id;
-
-  // Se diferença >= R$1.000, volta pro 1º da fila (sem perguntar continuar)
-  if (comDiferenca && valor >= 1000) {
-    await finalize('troca', null, null, null, atendId, valor, false);
-    if (vendedorId) {
-      const v2 = vendedores.find(v => v.id === vendedorId);
-      const setor = v2?.setor || 'loja';
-      // Troca >= R$1.000 → vendedor volta pro 1º da fila (premiação) — 1 RPC batch
-      const inQueue = vendedores.filter(v => (v.setor || 'loja') === setor && v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
-      const newOrder = [vendedorId, ...inQueue.filter(v => v.id !== vendedorId).map(v => v.id)];
-      const { error: errReorder } = await sb.rpc('reordenar_fila', { p_ids: newOrder });
-      if (errReorder) { toast('Erro ao reordenar', 'error'); }
-      await loadVendedores();
-      // EPIC achievement animation!
-      fireEpicTrocaAnimation(v2?.apelido || v2?.nome || 'Vendedor', valor);
-    }
-  } else {
-    askContinuar(atendId, () => finalize('troca', null, null, null, atendId, valor, false), () => finalize('troca', null, null, null, atendId, valor, true));
-  }
-};
-
-function openValorVenda(atendId) {
-  createModal('valorOverlay', `
-    <i class="fa-solid fa-dollar-sign" style="font-size:28px;color:var(--success);margin-bottom:12px"></i>
-    <h3 style="font-family:var(--font-mono);font-size:17px;font-weight:700;margin-bottom:6px">Valor da Venda</h3>
-    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Opcional — deixe vazio se não souber</p>
-    ${currencyInputHTML('valorVendaInput')}
-    <div style="display:flex;gap:8px;margin-top:16px">
-      <button class="btn btn-ghost" style="flex:1;min-height:44px" onclick="document.getElementById('valorOverlay').remove();askContinuar('${atendId}',()=>finalize('venda',null,null,null,'${atendId}',null,false),()=>finalize('venda',null,null,null,'${atendId}',null,true))">
-        Pular
-      </button>
-      <button class="btn" style="flex:1;min-height:44px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer" onclick="submitValorVenda('${atendId}')">
-        <i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar
-      </button>
-    </div>
-  `);
-  setTimeout(() => document.getElementById('valorVendaInput')?.focus(), 100);
-}
-
-// ─── Modal helper ───
-// createModal, currencyInputHTML, parseCurrency imported from /js/ui.js
-
-window.submitValorVenda = function(atendId) {
-  const input = document.getElementById('valorVendaInput');
-  const valor = input ? parseCurrency(input.value) : null;
-  document.getElementById('valorOverlay')?.remove();
-  askContinuar(atendId, () => finalize('venda', null, null, null, atendId, valor, false), () => finalize('venda', null, null, null, atendId, valor, true));
-};
-
-// ─── Popup "Continuar atendendo?" ───
-let _continuarCallbacks = { onNo: null, onYes: null };
-
-window.finalize = finalize;
-window.askContinuar = askContinuar;
-function askContinuar(atendId, onNo, onYes) {
-  const atend = activeAtendimentos.find(a => a.id === atendId);
-  const vendedorId = atend?.vendedor_id;
-  const v = vendedorId ? vendedores.find(x => x.id === vendedorId) : (atend?.vendedores || null);
-  const nome = v ? (v.apelido || v.nome) : 'Vendedor';
-  _continuarCallbacks = { onNo, onYes, atendId, vendedorId };
-
-  createModal('continuarOverlay', `
-    <i class="fa-solid fa-rotate-right" style="font-size:28px;color:var(--info);margin-bottom:12px"></i>
-    <h3 style="font-family:var(--font-mono);font-size:17px;font-weight:700;margin-bottom:6px">${nome}</h3>
-    <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px">Continuar atendendo?</p>
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <button class="btn btn-ghost" style="flex:1;min-height:48px;font-size:15px;font-weight:700" onclick="answerContinuar(false)">
-        <i class="fa-solid fa-list-ol" style="margin-right:4px"></i>Voltar à fila
-      </button>
-      <button class="btn btn-success" style="flex:1;min-height:48px;font-size:15px;font-weight:700" onclick="showMultiAtend()">
-        <i class="fa-solid fa-arrow-right" style="margin-right:4px"></i>Continuar
-      </button>
-    </div>
-    <div id="multiAtendBox" style="display:none">
-      <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px;font-weight:600">Quantos atendimentos simultâneos?</p>
-      <div style="display:flex;gap:6px;justify-content:center">
-        ${[1,2,3,4].map(n => `<button onclick="answerContinuar(true,${n})" style="width:48px;height:48px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-family:var(--font-mono);font-size:18px;font-weight:800;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center" onmouseenter="this.style.background='var(--success)';this.style.color='#fff';this.style.transform='scale(1.1)';this.style.borderColor='var(--success)'" onmouseleave="this.style.background='var(--bg-elevated)';this.style.color='var(--text-primary)';this.style.transform='';this.style.borderColor='var(--border-subtle)'">${n}</button>`).join('')}
-      </div>
-    </div>
-  `, { zIndex: 1001, maxWidth: '380px', onClose: () => answerContinuar(false) });
-}
-
-window.showMultiAtend = function() {
-  const box = document.getElementById('multiAtendBox');
-  if (box) { box.style.display = ''; box.style.animation = 'slideUp .2s ease both'; }
-};
-
-window.answerContinuar = async function(continuar, count) {
-  document.getElementById('continuarOverlay')?.remove();
-  if (!continuar) {
-    const cb = _continuarCallbacks.onNo;
-    _continuarCallbacks = { onNo: null, onYes: null };
-    if (cb) cb();
-    return;
-  }
-  // Criar múltiplos atendimentos
-  const vendedorId = _continuarCallbacks.vendedorId;
-  const onYes = _continuarCallbacks.onYes;
-  _continuarCallbacks = { onNo: null, onYes: null };
-  if (onYes) await onYes();
-
-  // Se count > 1, marcar o atendimento existente com a quantidade de clientes
-  if (count && count > 1 && vendedorId) {
-    const atend = activeAtendimentos.find(a => a.vendedor_id === vendedorId);
-    if (atend) {
-      atend._clientCount = count;
-      renderActiveAtendimentos();
-      toast(count + ' clientes simultâneos', 'info', 1500);
-    }
-  }
-};
-
-async function finalize(resultado, motivo, detalhe, produto, atendId, valor, continuar) {
-  const id = atendId || pendingAtendimentoId;
-  if (!id || _actionLock) return;
-  _actionLock = true;
-  markLocal();
-  try {
-    // Guardar info do vendedor antes de finalizar
-    const atendInfo = activeAtendimentos.find(a => a.id === id);
-    const vendedorId = atendInfo?.vendedor_id;
-    if (vendedorId) _savedQueuePositions.delete(vendedorId);
-
-    const { error } = await sb.rpc('finalizar_atendimento', {
-      p_atendimento_id: id,
-      p_resultado: resultado,
-      p_motivo: motivo || null,
-      p_motivo_detalhe: detalhe || null,
-      p_produto_ruptura: produto || null,
-      p_valor_venda: valor ?? null
-    });
-    if (error) throw error;
-    const msg = resultado === 'venda' ? 'Venda registrada!' : resultado === 'troca' ? 'Troca registrada.' : 'Não conversão registrada.';
-    const type = resultado === 'venda' ? 'success' : 'warning';
-    toast(msg, type);
-    if (resultado === 'venda') { playSound('venda'); fireVendaCelebration(); }
-    else if (resultado === 'nao_convertido') { playSound('fail'); }
-    const fv = vendedorId ? vendedores.find(x => x.id === vendedorId) : null;
-    logPosition(fv || atendInfo?.vendedores, 'finalizar', resultado + (valor ? ' R$' + valor : ''));
-    removeAtendimento(id);
-    pendingAtendimentoId = null;
-
-    if (continuar && vendedorId && currentTurno) {
-      // Criar novo atendimento imediato para o mesmo vendedor
-      await sb.from('vendedores').update({ status: 'em_atendimento', posicao_fila: null }).eq('id', vendedorId);
-      const { data: novoAtend, error: errNovo } = await sb.from('atendimentos').insert({
-        turno_id: currentTurno.id,
-        vendedor_id: vendedorId,
-        inicio: new Date().toISOString(),
-        tenant_id: tenantId
-      }).select('*, vendedores(nome, apelido), canais_origem(nome, icone)').single();
-      if (!errNovo && novoAtend) {
-        activeAtendimentos.push(novoAtend);
-        renderActiveAtendimentos();
-        toast('Novo atendimento iniciado', 'info', 1500);
-      }
-    }
-
-    await loadVendedores();
-  } catch (e) {
-    toast('Erro: ' + e.message, 'error');
-  } finally {
-    setTimeout(() => { _actionLock = false; }, 300);
-  }
-}
-
-// ─── Motivos bottom sheet ───
-function openMotivos() {
-  document.getElementById('motivoOverlay').classList.add('open');
-  document.getElementById('motivoSheet').classList.add('open');
-  document.getElementById('motivoList')?.querySelectorAll('.motivo-option').forEach(o => o.classList.remove('selected'));
-  document.getElementById('rupturaField').style.display = 'none';
-  document.getElementById('outroField').style.display = 'none';
-  document.getElementById('btnConfirmMotivo').disabled = true;
-  pendingOutcome = null;
-}
-
-window.closeMotivos = function() {
-  document.getElementById('motivoOverlay').classList.remove('open');
-  document.getElementById('motivoSheet').classList.remove('open');
-};
-
-window.selectMotivo = function(el) {
-  document.getElementById('motivoList')?.querySelectorAll('.motivo-option').forEach(o => o.classList.remove('selected'));
-  el.classList.add('selected');
-  pendingOutcome = el.dataset.motivo;
-  document.getElementById('rupturaField').style.display = pendingOutcome === 'ruptura' ? 'block' : 'none';
-  document.getElementById('outroField').style.display = pendingOutcome === 'outro' ? 'block' : 'none';
-  document.getElementById('btnConfirmMotivo').disabled = false;
-  if (pendingOutcome === 'ruptura') document.getElementById('rupturaInput').focus();
-  if (pendingOutcome === 'outro') document.getElementById('outroInput').focus();
-};
-
-window.confirmMotivo = function() {
-  if (!pendingOutcome || !pendingAtendimentoId) return;
-  const produto = pendingOutcome === 'ruptura' ? document.getElementById('rupturaInput').value.trim() : null;
-  const detalhe = pendingOutcome === 'outro' ? document.getElementById('outroInput').value.trim() : null;
-  const atendId = pendingAtendimentoId;
-  closeMotivos();
-  askContinuar(atendId, () => finalize('nao_convertido', pendingOutcome, detalhe, produto, atendId, null, false), () => finalize('nao_convertido', pendingOutcome, detalhe, produto, atendId, null, true));
-};
+// Próximo cliente, renderActiveAtendimentos, outcome sheet,
+// multi-client, troca, venda, motivos imported from /js/tablet-atendimento.js
 
 // ─── Position Log (histórico da sessão) ───
 window.openPosLog = function() {
@@ -1785,7 +915,7 @@ setInterval(() => {
 // ─── Visibility: pause timer when hidden, refetch on return ───
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
-    clearInterval(timerInterval); timerInterval = null;
+    clearAtendTimers();
     clearInterval(_clockInterval); _clockInterval = null;
     clearInterval(_sessionInterval); _sessionInterval = null;
     resetDragState();
@@ -1796,8 +926,7 @@ document.addEventListener('visibilitychange', () => {
     // Resetar TODOS os flags de drag (inclusive ghosts órfãos)
     _localAction = false;
     resetDragState();
-    _atendTouchDragging = false;
-    if (_atendDragGhost) { _atendDragGhost.remove(); _atendDragGhost = null; }
+    resetAtendDragState();
     document.body.style.overflow = '';
     clearTimeout(_localActionTimer);
     _loadingVendedores = false;
@@ -1822,20 +951,14 @@ document.addEventListener('visibilitychange', () => {
 
 // checkExistingTurno imported from /js/tablet-turno.js
 
-// ─── Check for active atendimentos (múltiplos) ───
-async function checkActiveAtendimentos() {
-  if (!currentTurno) return;
-  const { data } = await sb.from('atendimentos').select('*, vendedores(nome, apelido), canais_origem(nome, icone)').eq('turno_id', currentTurno.id).eq('resultado', 'em_andamento').order('inicio');
-  activeAtendimentos = data || [];
-  renderActiveAtendimentos();
-}
+// checkActiveAtendimentos imported from /js/tablet-atendimento.js
 
 // ─── Cleanup on page unload (timers, realtime, observers) ───
 window.addEventListener('beforeunload', () => {
   clearInterval(_clockInterval);
   clearInterval(_sessionInterval);
   clearFooterTimer();
-  clearInterval(timerInterval); timerInterval = null;
+  clearAtendTimers();
   clearTimeout(_rtVendTimer);
   clearTimeout(_rtAtendTimer);
   clearTimeout(_reconnectTimer);
