@@ -349,6 +349,7 @@ import { getSupabase } from '/js/supabase-config.js';
 import { requireRole, logout, getTenantId } from '/js/auth.js';
 import { STATUS_CONFIG, MOTIVOS, formatTime, initials, toast, elapsedSince, initTheme, toggleTheme } from '/js/utils.js';
 import { loadTenant, applyBranding, tenantPath } from '/js/tenant.js';
+import { showChangelog, setVersionLabel } from '/js/changelog.js';
 initTheme();
 // Sync theme-color meta with saved theme
 { const _t = document.documentElement.getAttribute('data-theme') || 'light';
@@ -3080,50 +3081,9 @@ const APP_CHANGELOG = [
   // ↑ Adicione novas versões ACIMA desta linha ↑
 ];
 
-// Mostrar versão no header
-if (APP_CHANGELOG[0]) {
-  const vEl = document.getElementById('appVersion');
-  if (vEl) vEl.textContent = 'v' + APP_CHANGELOG[0].version;
-}
-
-(function showChangelog() {
-  const latest = APP_CHANGELOG[0];
-  if (!latest) return;
-  const storageKey = 'minhavez_update_seen_' + latest.version;
-  if (localStorage.getItem(storageKey)) return;
-
-  const listHtml = latest.items.map(c =>
-    `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-subtle)">
-      <i class="fa-solid ${c.icon}" style="font-size:14px;color:var(--accent);width:20px;text-align:center;flex-shrink:0"></i>
-      <span style="font-size:13px;color:var(--text-secondary);line-height:1.3">${c.text}</span>
-    </div>`
-  ).join('');
-
-  const dateStr = latest.date ? new Date(latest.date + 'T00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
-
-  const popupHtml = `
-    <div style="text-align:center;margin-bottom:16px">
-      <div style="font-size:28px;margin-bottom:8px">🎉</div>
-      <h3 style="font-family:var(--font-mono);font-size:18px;font-weight:700;margin:0 0 4px">Novidades v${latest.version}</h3>
-      <p style="font-size:12px;color:var(--text-muted);margin:0">minhavez foi atualizado!${dateStr ? ' — ' + dateStr : ''}</p>
-    </div>
-    <div style="margin-bottom:20px">${listHtml}</div>
-    <button id="btnCloseUpdate" class="btn" style="width:100%;padding:12px;font-size:14px;font-weight:700;background:var(--accent);color:#060606;border:none;border-radius:var(--radius-sm);cursor:pointer">
-      Entendi, vamos lá!
-    </button>
-  `;
-
-  createModal('updatePopup', popupHtml, {
-    zIndex: 1003,
-    maxWidth: '400px',
-    onClose: () => { localStorage.setItem(storageKey, '1'); }
-  });
-
-  document.getElementById('btnCloseUpdate')?.addEventListener('click', () => {
-    localStorage.setItem(storageKey, '1');
-    document.getElementById('updatePopup')?.remove();
-  });
-})();
+// Mostrar versão no header + popup de novidades
+setVersionLabel(APP_CHANGELOG, 'appVersion');
+showChangelog(APP_CHANGELOG, 'minhavez_update_seen_', { createModal });
 
 // ─── Init ───
 // Cleanup de dados órfãos (atendimentos >8h, turnos antigos, vendedores presos)
