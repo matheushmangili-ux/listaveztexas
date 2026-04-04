@@ -699,7 +699,7 @@ document.addEventListener('click', function(e) {
 // ─── Gestão de Vendedores ───
 async function loadVendedores() {
   const el = document.getElementById('vendedorList');
-  const { data, error } = await fetchTodosVendedores(sb);
+  const { data, error } = await fetchTodosVendedores(sb, tenantId);
   if (error || !data || data.length === 0) {
     el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum vendedor cadastrado</div>';
     return;
@@ -808,7 +808,7 @@ window.saveVendedor = async function() {
       const url = await uploadFoto(id, fotoFile);
       if (url) update.foto_url = url;
     }
-    const { error } = await sb.from('vendedores').update(update).eq('id', id);
+    const { error } = await sb.from('vendedores').update(update).eq('id', id).eq('tenant_id', tenantId);
     if (error) { toast('Erro ao atualizar: ' + error.message, 'error'); savingVendedor = false; return; }
     toast('Vendedor atualizado', 'success');
   } else {
@@ -818,7 +818,7 @@ window.saveVendedor = async function() {
     if (error) { toast('Erro ao cadastrar: ' + error.message, 'error'); savingVendedor = false; return; }
     if (fotoFile && inserted) {
       const url = await uploadFoto(inserted.id, fotoFile);
-      if (url) await sb.from('vendedores').update({ foto_url: url }).eq('id', inserted.id);
+      if (url) await sb.from('vendedores').update({ foto_url: url }).eq('id', inserted.id).eq('tenant_id', tenantId);
     }
     toast('Vendedor cadastrado', 'success');
   }
@@ -829,7 +829,7 @@ window.saveVendedor = async function() {
 };
 
 window.toggleVendedor = async function(id, isAtivo) {
-  const { error } = await sb.from('vendedores').update({ ativo: !isAtivo }).eq('id', id);
+  const { error } = await sb.from('vendedores').update({ ativo: !isAtivo }).eq('id', id).eq('tenant_id', tenantId);
   if (error) { toast('Erro: ' + error.message, 'error'); return; }
   toast(isAtivo ? 'Vendedor desativado' : 'Vendedor ativado', 'success');
   loadVendedores();
@@ -838,7 +838,7 @@ window.toggleVendedor = async function(id, isAtivo) {
 
 window.deleteVendedor = async function(id, nome) {
   if (!confirm('Desativar "' + nome + '"? O vendedor será removido da fila mas seu histórico será preservado.')) return;
-  const { error } = await sb.from('vendedores').update({ ativo: false, status: 'fora', posicao_fila: null }).eq('id', id);
+  const { error } = await sb.from('vendedores').update({ ativo: false, status: 'fora', posicao_fila: null }).eq('id', id).eq('tenant_id', tenantId);
   if (error) { toast('Erro: ' + error.message, 'error'); return; }
   toast('Vendedor desativado — histórico preservado', 'success');
   await loadVendedores();

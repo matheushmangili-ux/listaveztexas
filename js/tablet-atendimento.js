@@ -500,7 +500,7 @@ async function cancelarAtendimento(atendId) {
     scheduleRender();
 
     // Persist: set status + posição first, then reorder
-    const { error: errUp } = await _ctx.sb.from('vendedores').update({ status: 'disponivel', posicao_fila: insertIdx + 1 }).eq('id', vendedorId);
+    const { error: errUp } = await _ctx.sb.from('vendedores').update({ status: 'disponivel', posicao_fila: insertIdx + 1 }).eq('id', vendedorId).eq('tenant_id', _ctx.tenantId);
     if (errUp) { toast('Erro ao atualizar vendedor: ' + errUp.message, 'error'); }
     const { error: errReo } = await _ctx.sb.rpc('reordenar_fila', { p_ids: newOrder });
     if (errReo) { toast('Erro ao reordenar: ' + errReo.message, 'error'); }
@@ -690,7 +690,7 @@ async function finalizeMultiOutcome() {
       async () => { await _ctx.loadVendedores(); },
       async () => {
         if (vendedorId && _ctx.currentTurno) {
-          await _ctx.sb.from('vendedores').update({ status: 'em_atendimento', posicao_fila: null }).eq('id', vendedorId);
+          await _ctx.sb.from('vendedores').update({ status: 'em_atendimento', posicao_fila: null }).eq('id', vendedorId).eq('tenant_id', _ctx.tenantId);
           const { data: novoAtend, error: errNovo } = await _ctx.sb.from('atendimentos').insert({
             turno_id: _ctx.currentTurno.id, vendedor_id: vendedorId, inicio: new Date().toISOString(), tenant_id: _ctx.tenantId
           }).select('*, vendedores(nome, apelido), canais_origem(nome, icone)').single();
@@ -892,7 +892,7 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor, con
 
     if (continuar && vendedorId && _ctx.currentTurno) {
       // Criar novo atendimento imediato para o mesmo vendedor
-      await _ctx.sb.from('vendedores').update({ status: 'em_atendimento', posicao_fila: null }).eq('id', vendedorId);
+      await _ctx.sb.from('vendedores').update({ status: 'em_atendimento', posicao_fila: null }).eq('id', vendedorId).eq('tenant_id', _ctx.tenantId);
       const { data: novoAtend, error: errNovo } = await _ctx.sb.from('atendimentos').insert({
         turno_id: _ctx.currentTurno.id,
         vendedor_id: vendedorId,

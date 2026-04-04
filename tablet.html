@@ -615,7 +615,7 @@ async function addToQueue(vendedorId) {
   scheduleRender();
   logPosition(v, 'fila', 'Posição #' + newPos);
   toast((v?.apelido || v?.nome || 'Vendedor') + ' entrou na fila', 'success', TOAST_SHORT);
-  const { error } = await sb.from('vendedores').update({ status: 'disponivel', posicao_fila: newPos }).eq('id', vendedorId);
+  const { error } = await sb.from('vendedores').update({ status: 'disponivel', posicao_fila: newPos }).eq('id', vendedorId).eq('tenant_id', tenantId);
   if (error) { toast('Erro ao salvar: ' + error.message, 'error'); await loadVendedores(); }
 }
 
@@ -659,7 +659,7 @@ window.confirmSaida = async function(motivo) {
   state.pauseStartTimes.set(state.pendingSaidaId, new Date());
   markLocal();
   const savedId = state.pendingSaidaId;
-  const { error } = await sb.from('vendedores').update({ status: newStatus, posicao_fila: null }).eq('id', savedId);
+  const { error } = await sb.from('vendedores').update({ status: newStatus, posicao_fila: null }).eq('id', savedId).eq('tenant_id', tenantId);
   if (error) { toast('Erro ao registrar saída', 'error'); closeSaida(); return; }
   if (state.turno) {
     sb.rpc('registrar_pausa', { p_vendedor_id: savedId, p_turno_id: state.turno.id, p_motivo: motivo });
@@ -681,7 +681,7 @@ window.finalizarTodos = async function() {
   if (!confirm('Remover todos os ' + ativos.length + ' vendedores da fila?')) return;
   const ids = ativos.map(v => v.id);
   markLocal();
-  const { error } = await sb.from('vendedores').update({ status: 'fora', posicao_fila: null }).in('id', ids);
+  const { error } = await sb.from('vendedores').update({ status: 'fora', posicao_fila: null }).in('id', ids).eq('tenant_id', tenantId);
   if (error) { toast('Erro ao remover vendedores', 'error'); return; }
   ids.forEach(id => delete state.saidaMotivos[id]);
   toast('Todos removidos da fila', 'info');

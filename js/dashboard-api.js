@@ -76,8 +76,10 @@ export async function fetchVendedores(sb, tenantId) {
 }
 
 /** Todos os vendedores incluindo inativos (gestão) */
-export async function fetchTodosVendedores(sb) {
-  return sb.from('vendedores').select('*').order('nome');
+export async function fetchTodosVendedores(sb, tenantId) {
+  let q = sb.from('vendedores').select('*');
+  if (tenantId) q = q.eq('tenant_id', tenantId);
+  return q.order('nome');
 }
 
 /** Origem dos clientes (canal) */
@@ -121,16 +123,20 @@ export async function fetchScatterData(sb, range) {
 }
 
 /** Salva ou atualiza um vendedor */
-export async function upsertVendedor(sb, payload, id = null) {
+export async function upsertVendedor(sb, payload, id = null, tenantId = null) {
   if (id) {
-    return sb.from('vendedores').update(payload).eq('id', id);
+    let q = sb.from('vendedores').update(payload).eq('id', id);
+    if (tenantId) q = q.eq('tenant_id', tenantId);
+    return q;
   }
   return sb.from('vendedores').insert(payload);
 }
 
 /** Alterna status ativo/inativo de um vendedor */
-export async function toggleVendedorAtivo(sb, id, ativo) {
-  return sb.from('vendedores').update({ ativo }).eq('id', id);
+export async function toggleVendedorAtivo(sb, id, ativo, tenantId = null) {
+  let q = sb.from('vendedores').update({ ativo }).eq('id', id);
+  if (tenantId) q = q.eq('tenant_id', tenantId);
+  return q;
 }
 
 /** Upload de foto do vendedor */
