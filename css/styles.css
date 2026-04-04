@@ -1,6 +1,27 @@
 /* ============================================
-   MinhaVez — Theme
+   MinhaVez — Theme & Design Tokens
    Visual: clean, light, moderno
+   ============================================
+
+   VARIÁVEIS CSS DISPONÍVEIS (fonte da verdade):
+   ─────────────────────────────────────────────
+   Backgrounds:  --bg-deep, --bg-surface, --bg-card, --bg-elevated, --bg-hover
+   Borders:      --border-subtle, --border-medium, --border-strong
+   Text:         --text-primary, --text-secondary, --text-muted
+   Accent:       --accent, --accent-bright, --accent-dim
+   Gold:         --gold, --gold-bright, --gold-dim
+   Status:       --success, --success-bg, --warning, --warning-bg,
+                 --danger, --danger-bg, --info, --info-bg
+   Fonts:        --font-body, --font-mono
+   Radius:       --radius (14px), --radius-sm (8px), --radius-lg (20px)
+   Touch:        --touch-min (48px)
+   Transition:   --transition (150ms ease)
+
+   NÃO EXISTEM (não usar):
+   --text-strong, --bg-primary, --color-*, --font-sans (exceto landing)
+
+   Específicas do dashboard (em dashboard.css):
+   --gap (16px)
    ============================================ */
 /* Font: Satoshi (Fontshare) loaded via <link> in HTML */
 
