@@ -15,57 +15,9 @@
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/update-checker.js"></script>
 <script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').then(reg => {
-    if (reg.waiting) window._showUpdateBanner();
-    reg.addEventListener('updatefound', () => {
-      const nw = reg.installing;
-      if (!nw) return;
-      nw.addEventListener('statechange', () => {
-        if (nw.state === 'installed' && navigator.serviceWorker.controller) window._showUpdateBanner();
-      });
-    });
-    // Checar updates do SW a cada 5 min
-    setInterval(() => reg.update(), 5 * 60 * 1000);
-  }).catch(() => {});
-}
-// Detecção de update por hash do HTML (funciona independente do SW)
-(function() {
-  let _pageHash = null;
-  async function checkForUpdate() {
-    try {
-      const res = await fetch('/tablet.html', { cache: 'no-store', headers: { 'Range': 'bytes=0-512' } });
-      const text = await res.text();
-      const hash = text.length + '|' + text.slice(0, 200);
-      if (_pageHash === null) { _pageHash = hash; return; }
-      if (hash !== _pageHash) window._showUpdateBanner();
-    } catch(e) {}
-  }
-  // Checar a cada 2 minutos + ao voltar de tab oculta
-  setTimeout(checkForUpdate, 3000);
-  setInterval(checkForUpdate, 2 * 60 * 1000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(checkForUpdate, 1000); });
-})();
-window._showUpdateBanner = function() {
-  if (document.getElementById('updateBanner')) return;
-  // Cooldown: não mostrar banner nos primeiros 10s após um reload por update
-  const lastUpdate = sessionStorage.getItem('_updateClickedAt');
-  if (lastUpdate && (Date.now() - parseInt(lastUpdate)) < 10000) return;
-  const banner = document.createElement('div');
-  banner.id = 'updateBanner';
-  banner.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--accent,#facc15);color:#060606;padding:12px 20px;border-radius:12px;font-family:Satoshi,sans-serif;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;box-shadow:0 4px 24px rgba(0,0,0,.3);cursor:pointer;animation:slideUpBanner .3s ease';
-  banner.innerHTML = '<i class="fa-solid fa-arrow-rotate-right"></i> Atualização disponível — toque para atualizar';
-  banner.addEventListener('click', () => {
-    sessionStorage.setItem('_updateClickedAt', String(Date.now()));
-    banner.textContent = 'Atualizando...';
-    location.reload();
-  });
-  document.body.appendChild(banner);
-  const style = document.createElement('style');
-  style.textContent = '@keyframes slideUpBanner{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}';
-  document.head.appendChild(style);
-};
+initUpdateChecker('/tablet.html', { bannerText: 'Atualização disponível — toque para atualizar' });
 // Error logging (sem auto-reload para evitar loops)
 window.addEventListener('error', function(e) {
   const el = document.getElementById('toastContainer');
