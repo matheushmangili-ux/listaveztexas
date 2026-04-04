@@ -446,6 +446,15 @@
             </div>
             <span id="planVendorCount" class="value">0 / 10</span>
           </div>
+          <div class="settings-row" style="margin-top:4px">
+            <div>
+              <div class="label">Faturamento</div>
+              <div class="sublabel">Trocar plano, cartão ou cancelar</div>
+            </div>
+            <button id="btnBillingPortal" class="btn btn-ghost" style="font-size:12px;padding:6px 12px" onclick="openBillingPortal()">
+              <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:11px"></i> Gerenciar
+            </button>
+          </div>
         </div>
       </div>
 
@@ -684,6 +693,36 @@ function populateLinks() {
 window.copyText = function(id) {
   navigator.clipboard.writeText(document.getElementById(id).textContent)
     .then(() => toast('Copiado!', 'success'));
+};
+
+// Billing Portal
+window.openBillingPortal = async function() {
+  const btn = document.getElementById('btnBillingPortal');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="font-size:11px"></i> Aguarde...';
+  try {
+    const { data: { session } } = await _supabase.auth.getSession();
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/create-billing-portal`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+        'apikey': SUPABASE_ANON_KEY
+      }
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      toast(data.error || 'Erro ao abrir portal de faturamento', 'error');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square" style="font-size:11px"></i> Gerenciar';
+    }
+  } catch (err) {
+    toast('Erro ao conectar com o servidor', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square" style="font-size:11px"></i> Gerenciar';
+  }
 };
 
 // Plan

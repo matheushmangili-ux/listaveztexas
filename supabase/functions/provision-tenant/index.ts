@@ -124,7 +124,9 @@ Deno.serve(async (req) => {
         owner_user_id: ownerUserId,
         setores,
         status: 'active',
-        cor_primaria: '#E11D48'
+        cor_primaria: '#E11D48',
+        stripe_customer_id: onboardingToken?.stripe_customer_id ?? null,
+        stripe_subscription_id: onboardingToken?.stripe_subscription_id ?? null
       })
       .select()
       .single()
