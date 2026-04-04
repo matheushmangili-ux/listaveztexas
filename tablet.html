@@ -357,7 +357,7 @@ import { initTurno, updateTurnoSwitch, checkExistingTurno } from '/js/tablet-tur
 import { initFooter, renderFooter, invalidateFooter, clearFooterTimer, showFooterDropLabel, hideFooterDropLabel } from '/js/tablet-footer.js';
 import { initQueue, renderQueue, scheduleRender, invalidateQueue, getDraggedId, setDraggedId, isTouchDragging, getTouchGhost, setTouchGhost, cleanupQueue, resetDragState } from '/js/tablet-queue.js';
 import { initAtendimento, renderActiveAtendimentos, checkActiveAtendimentos, doSendToAtendimento, loadCanaisOrigem, clearAtendTimers, isAtendTouchDragging, resetAtendDragState } from '/js/tablet-atendimento.js';
-import { SESSION_TIMEOUT_TABLET, SESSION_CHECK_INTERVAL, CLOCK_UPDATE_INTERVAL, AUTO_SYNC_INTERVAL, QUICK_STATS_INTERVAL, ACTION_LOCK_SAFETY, LOCAL_ACTION_DEBOUNCE, RT_VENDEDOR_DEBOUNCE, RT_RECONNECT_DELAY, TOAST_SHORT, TOAST_MEDIUM } from '/js/constants.js';
+import { SESSION_TIMEOUT_TABLET, SESSION_CHECK_INTERVAL, CLOCK_UPDATE_INTERVAL, AUTO_SYNC_INTERVAL, QUICK_STATS_INTERVAL, ACTION_LOCK_SAFETY, LOCAL_ACTION_DEBOUNCE, RT_VENDEDOR_DEBOUNCE, RT_RECONNECT_DELAY, TOAST_SHORT, TOAST_MEDIUM, INPUT_FOCUS_DELAY } from '/js/constants.js';
 initTheme();
 // Sync theme-color meta with saved theme
 { const _t = document.documentElement.getAttribute('data-theme') || 'light';
@@ -379,41 +379,65 @@ if (!user) {
   window._toggleTheme = () => { toggleTheme(); };
 }
 
-let currentTurno = null;
-let activeAtendimentos = [];
-let vendedores = [];
-let currentSetor = 'loja';
-let _localAction = false; // Flag: ignora realtime quando ação é local
-let _localActionTimer = null;
-let _renderPending = false; // Debounce render
-let _actionLock = false; // Previne double-tap em ações críticas
-const _queueEntryTimes = new Map(); // vendedorId → { pos, time } para cold seller
-const _pauseStartTimes = new Map(); // vendedorId → Date inicio da pausa
-const _positionLog = []; // { time, icon, vendedor, action, details } — max 200
-let _tvMode = localStorage.getItem('minhavez_tvMode') === '1' || new URLSearchParams(location.search).has('tv');
+// ─── Grouped state objects ───
+const state = {
+  turno: null,                // turno aberto atual
+  atendimentos: [],           // atendimentos ativos
+  vendedores: [],             // lista de vendedores
+  setor: 'loja',              // setor ativo
+  saidaMotivos: {},           // vendedorId → motivo key
+  pendingSaidaId: null,       // vendedorId aguardando confirmação de saída
+  vendorAtendCount: {},       // vendedor_id → count de atendimentos no turno
+  queueEntryTimes: new Map(), // vendedorId → { pos, time } para cold seller
+  pauseStartTimes: new Map(), // vendedorId → Date inicio da pausa
+  positionLog: [],            // { time, icon, vendedor, action, details } — max 200
+};
+
+const ui = {
+  tvMode: localStorage.getItem('minhavez_tvMode') === '1' || new URLSearchParams(location.search).has('tv'),
+  actionLock: false,          // previne double-tap em ações críticas
+  localAction: false,         // ignora realtime quando ação é local
+  renderPending: false,       // debounce render
+  loadingVendedores: false,   // previne concurrent loads
+  miniRankingOpen: false,
+  miniRankingOutside: null,   // click-outside handler ref
+  prevStats: { total: 0, vendas: 0, conv: 0 },
+  statsThrottle: 0,
+};
+
+const timers = {
+  clock: null,
+  session: null,
+  rtVend: null,
+  rtAtend: null,
+  reconnect: null,
+  localAction: null,
+};
 
 // Cached DOM refs (evita querySelector repetido)
-const _queuePanel = document.querySelector('.queue-panel');
-const _servicePanel = document.querySelector('.service-panel');
-const _queueList = document.getElementById('queueList');
-const _statusFooter = document.getElementById('statusFooter');
-let _reconnectTimer = null; // Previne empilhamento de timeouts de reconexão
+const dom = {
+  queuePanel: document.querySelector('.queue-panel'),
+  servicePanel: document.querySelector('.service-panel'),
+  queueList: document.getElementById('queueList'),
+  statusFooter: document.getElementById('statusFooter'),
+  clockEl: document.getElementById('clock'),
+};
 
 // Lock para ações críticas (previne double-tap)
 async function withLock(fn) {
-  if (_actionLock) return;
-  _actionLock = true;
-  const safety = setTimeout(() => { _actionLock = false; }, ACTION_LOCK_SAFETY); // fallback se travar
-  try { await fn(); } finally { clearTimeout(safety); _actionLock = false; }
+  if (ui.actionLock) return;
+  ui.actionLock = true;
+  const safety = setTimeout(() => { ui.actionLock = false; }, ACTION_LOCK_SAFETY);
+  try { await fn(); } finally { clearTimeout(safety); ui.actionLock = false; }
 }
 
 // Marcar que uma ação local está em andamento (evita re-render do realtime)
-function markLocal() { _localAction = true; clearTimeout(_localActionTimer); _localActionTimer = setTimeout(() => { _localAction = false; }, LOCAL_ACTION_DEBOUNCE); }
+function markLocal() { ui.localAction = true; clearTimeout(timers.localAction); timers.localAction = setTimeout(() => { ui.localAction = false; }, LOCAL_ACTION_DEBOUNCE); }
 
 window.setSetor = function(setor) {
-  currentSetor = setor;
+  state.setor = setor;
   document.querySelectorAll('.setor-tab').forEach(t => t.classList.toggle('active', t.dataset.setor === setor));
-  invalidateQueue(); invalidateFooter(); // Forçar re-render no novo setor
+  invalidateQueue(); invalidateFooter();
   renderQueue();
   renderFooter();
 };
@@ -422,8 +446,8 @@ window.setSetor = function(setor) {
 function logPosition(vendedor, action, details) {
   const nome = vendedor ? (vendedor.apelido || vendedor.nome) : '?';
   const icons = { fila: 'fa-list-ol', atendimento: 'fa-headset', pausa: 'fa-pause', retorno: 'fa-arrow-rotate-left', saida: 'fa-door-open', cancelar: 'fa-xmark', finalizar: 'fa-check', turno: 'fa-clock' };
-  _positionLog.unshift({ time: new Date(), icon: icons[action] || 'fa-circle', vendedor: nome, action, details: details || '' });
-  if (_positionLog.length > 200) _positionLog.length = 200;
+  state.positionLog.unshift({ time: new Date(), icon: icons[action] || 'fa-circle', vendedor: nome, action, details: details || '' });
+  if (state.positionLog.length > 200) state.positionLog.length = 200;
 }
 
 // Sound effects imported from /js/sound.js
@@ -433,15 +457,15 @@ function logPosition(vendedor, action, details) {
 // ─── Turno module init ───
 initTurno({
   sb,
-  get currentTurno() { return currentTurno; },
-  set currentTurno(v) { currentTurno = v; },
-  get activeAtendimentos() { return activeAtendimentos; },
-  set activeAtendimentos(v) { activeAtendimentos = v; },
-  get vendedores() { return vendedores; },
-  get currentSetor() { return currentSetor; },
+  get currentTurno() { return state.turno; },
+  set currentTurno(v) { state.turno = v; },
+  get activeAtendimentos() { return state.atendimentos; },
+  set activeAtendimentos(v) { state.atendimentos = v; },
+  get vendedores() { return state.vendedores; },
+  get currentSetor() { return state.setor; },
   get tenantId() { return tenantId; },
-  pauseStartTimes: _pauseStartTimes,
-  queueEntryTimes: _queueEntryTimes,
+  pauseStartTimes: state.pauseStartTimes,
+  queueEntryTimes: state.queueEntryTimes,
   markLocal,
   logPosition,
   renderActiveAtendimentos,
@@ -450,17 +474,17 @@ initTurno({
 
 // ─── Footer module init ───
 initFooter({
-  statusFooter: _statusFooter,
-  get currentTurno() { return currentTurno; },
-  get vendedores() { return vendedores; },
-  get currentSetor() { return currentSetor; },
-  get activeAtendimentos() { return activeAtendimentos; },
-  get tvMode() { return _tvMode; },
+  statusFooter: dom.statusFooter,
+  get currentTurno() { return state.turno; },
+  get vendedores() { return state.vendedores; },
+  get currentSetor() { return state.setor; },
+  get activeAtendimentos() { return state.atendimentos; },
+  get tvMode() { return ui.tvMode; },
   get draggedId() { return getDraggedId(); },
   set draggedId(v) { setDraggedId(v); },
   get touchDragging() { return isTouchDragging(); },
-  get saidaMotivos() { return saidaMotivos; },
-  pauseStartTimes: _pauseStartTimes,
+  get saidaMotivos() { return state.saidaMotivos; },
+  pauseStartTimes: state.pauseStartTimes,
   openSaida,
   get onTouchDragStart() { return window.onTouchDragStart; },
   addToQueue
@@ -469,20 +493,20 @@ initFooter({
 // ─── Queue module init ───
 initQueue({
   sb,
-  get currentTurno() { return currentTurno; },
-  get vendedores() { return vendedores; },
-  get currentSetor() { return currentSetor; },
-  get activeAtendimentos() { return activeAtendimentos; },
-  get tvMode() { return _tvMode; },
-  get renderPending() { return _renderPending; },
-  set renderPending(v) { _renderPending = v; },
-  queueList: _queueList,
-  queuePanel: _queuePanel,
-  servicePanel: _servicePanel,
-  statusFooter: _statusFooter,
-  get saidaMotivos() { return saidaMotivos; },
-  queueEntryTimes: _queueEntryTimes,
-  get vendorAtendCount() { return _vendorAtendCount; },
+  get currentTurno() { return state.turno; },
+  get vendedores() { return state.vendedores; },
+  get currentSetor() { return state.setor; },
+  get activeAtendimentos() { return state.atendimentos; },
+  get tvMode() { return ui.tvMode; },
+  get renderPending() { return ui.renderPending; },
+  set renderPending(v) { ui.renderPending = v; },
+  queueList: dom.queueList,
+  queuePanel: dom.queuePanel,
+  servicePanel: dom.servicePanel,
+  statusFooter: dom.statusFooter,
+  get saidaMotivos() { return state.saidaMotivos; },
+  queueEntryTimes: state.queueEntryTimes,
+  get vendorAtendCount() { return state.vendorAtendCount; },
   markLocal,
   loadVendedores,
   openSaida,
@@ -495,18 +519,18 @@ initQueue({
 // ─── Atendimento module init ───
 initAtendimento({
   sb,
-  get currentTurno() { return currentTurno; },
-  get activeAtendimentos() { return activeAtendimentos; },
-  set activeAtendimentos(v) { activeAtendimentos = v; },
-  get vendedores() { return vendedores; },
+  get currentTurno() { return state.turno; },
+  get activeAtendimentos() { return state.atendimentos; },
+  set activeAtendimentos(v) { state.atendimentos = v; },
+  get vendedores() { return state.vendedores; },
   get tenantId() { return tenantId; },
-  get currentSetor() { return currentSetor; },
-  get tvMode() { return _tvMode; },
-  get actionLock() { return _actionLock; },
-  set actionLock(v) { _actionLock = v; },
-  queueList: _queueList,
-  queuePanel: _queuePanel,
-  servicePanel: _servicePanel,
+  get currentSetor() { return state.setor; },
+  get tvMode() { return ui.tvMode; },
+  get actionLock() { return ui.actionLock; },
+  set actionLock(v) { ui.actionLock = v; },
+  queueList: dom.queueList,
+  queuePanel: dom.queuePanel,
+  servicePanel: dom.servicePanel,
   markLocal,
   logPosition,
   loadVendedores,
@@ -515,21 +539,19 @@ initAtendimento({
 });
 
 // ─── Clock ───
-const _clockEl = document.getElementById('clock');
 let _lastClockText = '';
 function updateClock() {
   const now = new Date();
   const text = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-  if (text !== _lastClockText) { _clockEl.textContent = text; _lastClockText = text; }
+  if (text !== _lastClockText) { dom.clockEl.textContent = text; _lastClockText = text; }
 }
 updateClock();
-let _clockInterval = setInterval(updateClock, CLOCK_UPDATE_INTERVAL);
+timers.clock = setInterval(updateClock, CLOCK_UPDATE_INTERVAL);
 
 // ─── Load vendedores ───
-let _loadingVendedores = false;
 async function loadVendedores() {
-  if (_loadingVendedores) return;
-  _loadingVendedores = true;
+  if (ui.loadingVendedores) return;
+  ui.loadingVendedores = true;
   try {
   const vq = sb.from('vendedores').select('*').eq('ativo', true);
   if (tenantId) vq.eq('tenant_id', tenantId);
@@ -537,7 +559,7 @@ async function loadVendedores() {
   if (error) {
     const backup = localStorage.getItem('minhavez_vendedores');
     if (backup) {
-      vendedores = JSON.parse(backup);
+      state.vendedores = JSON.parse(backup);
       toast('Offline — usando dados locais', 'warning');
     } else {
       toast('Erro ao carregar vendedores', 'error');
@@ -545,31 +567,31 @@ async function loadVendedores() {
     scheduleRender();
     return;
   }
-  vendedores = data || [];
-  try { localStorage.setItem('minhavez_vendedores', JSON.stringify(vendedores)); } catch(e) {}
+  state.vendedores = data || [];
+  try { localStorage.setItem('minhavez_vendedores', JSON.stringify(state.vendedores)); } catch(e) {}
   // Carregar motivos de pausa do banco apenas para vendedores sem motivo local
-  const pausadosSemMotivo = vendedores.filter(v => v.status === 'pausa' && !saidaMotivos[v.id]);
+  const pausadosSemMotivo = state.vendedores.filter(v => v.status === 'pausa' && !state.saidaMotivos[v.id]);
   if (pausadosSemMotivo.length > 0) {
     const { data: pausas } = await sb.from('pausas').select('vendedor_id, motivo, inicio').is('fim', null).in('vendedor_id', pausadosSemMotivo.map(v => v.id));
     if (pausas) {
       pausas.forEach(p => {
-        saidaMotivos[p.vendedor_id] = p.motivo;
-        if (p.inicio) _pauseStartTimes.set(p.vendedor_id, new Date(p.inicio));
+        state.saidaMotivos[p.vendedor_id] = p.motivo;
+        if (p.inicio) state.pauseStartTimes.set(p.vendedor_id, new Date(p.inicio));
       });
     }
   }
   // Limpar motivos e timers de vendedores que não estão mais em pausa
-  Object.keys(saidaMotivos).forEach(id => {
-    const v = vendedores.find(x => x.id === id);
-    if (!v || (v.status !== 'pausa' && v.status !== 'fora')) { delete saidaMotivos[id]; _pauseStartTimes.delete(id); }
+  Object.keys(state.saidaMotivos).forEach(id => {
+    const v = state.vendedores.find(x => x.id === id);
+    if (!v || (v.status !== 'pausa' && v.status !== 'fora')) { delete state.saidaMotivos[id]; state.pauseStartTimes.delete(id); }
   });
-  for (const [id] of _pauseStartTimes) {
-    const v = vendedores.find(x => x.id === id);
-    if (!v || v.status !== 'pausa') _pauseStartTimes.delete(id);
+  for (const [id] of state.pauseStartTimes) {
+    const v = state.vendedores.find(x => x.id === id);
+    if (!v || v.status !== 'pausa') state.pauseStartTimes.delete(id);
   }
   scheduleRender();
   } finally {
-    _loadingVendedores = false;
+    ui.loadingVendedores = false;
   }
 }
 
@@ -581,46 +603,40 @@ async function loadVendedores() {
 // Atendimento functions imported from /js/tablet-atendimento.js
 
 async function addToQueue(vendedorId) {
-  const v = vendedores.find(x => x.id === vendedorId);
+  const v = state.vendedores.find(x => x.id === vendedorId);
   const setor = v?.setor || 'loja';
-  const setorQueue = vendedores.filter(x => (x.setor || 'loja') === setor && x.posicao_fila != null);
+  const setorQueue = state.vendedores.filter(x => (x.setor || 'loja') === setor && x.posicao_fila != null);
   const maxPos = Math.max(0, ...setorQueue.map(x => x.posicao_fila));
   const newPos = maxPos + 1;
   markLocal();
-  // Update otimista: atualiza local e renderiza imediatamente
   if (v) { v.status = 'disponivel'; v.posicao_fila = newPos; }
-  invalidateQueue(); // forçar re-render da fila
-  invalidateFooter(); // forçar re-render do footer
+  invalidateQueue();
+  invalidateFooter();
   scheduleRender();
   logPosition(v, 'fila', 'Posição #' + newPos);
-  toast((v?.apelido || v?.nome || 'Vendedor') + ' entrou na fila', 'success', 1500);
-  // Banco em background
+  toast((v?.apelido || v?.nome || 'Vendedor') + ' entrou na fila', 'success', TOAST_SHORT);
   const { error } = await sb.from('vendedores').update({ status: 'disponivel', posicao_fila: newPos }).eq('id', vendedorId);
   if (error) { toast('Erro ao salvar: ' + error.message, 'error'); await loadVendedores(); }
 }
 
 // ─── Retornar da pausa ───
 window.returnFromPause = async function(vendedorId) {
-  delete saidaMotivos[vendedorId];
-  _pauseStartTimes.delete(vendedorId);
-  invalidateQueue(); invalidateFooter(); // forçar re-render
-  // Registrar retorno no log
+  delete state.saidaMotivos[vendedorId];
+  state.pauseStartTimes.delete(vendedorId);
+  invalidateQueue(); invalidateFooter();
   try { sb.rpc('registrar_retorno', { p_vendedor_id: vendedorId }); } catch(e) {}
   await addToQueue(vendedorId);
-  const v = vendedores.find(x => x.id === vendedorId);
+  const v = state.vendedores.find(x => x.id === vendedorId);
   playSound('retorno');
   logPosition(v, 'retorno', 'Voltou da pausa');
-  toast((v?.apelido || v?.nome || 'Vendedor') + ' voltou à fila', 'success', 1500);
+  toast((v?.apelido || v?.nome || 'Vendedor') + ' voltou à fila', 'success', TOAST_SHORT);
 };
 
 // ─── Remover da fila (com motivo) ───
-// SAIDA_COLORS, PAUSE_LIMITS imported from /js/utils.js
-const saidaMotivos = {}; // vendedorId → motivo key
-let pendingSaidaId = null;
 
 function openSaida(vendedorId) {
-  pendingSaidaId = vendedorId;
-  const v = vendedores.find(x => x.id === vendedorId);
+  state.pendingSaidaId = vendedorId;
+  const v = state.vendedores.find(x => x.id === vendedorId);
   const nome = v ? (v.apelido || v.nome) : 'Vendedor';
   document.getElementById('saidaNome').textContent = nome + ' — selecione o motivo';
   document.getElementById('saidaOverlay').classList.add('open');
@@ -630,48 +646,44 @@ function openSaida(vendedorId) {
 window.closeSaida = function() {
   document.getElementById('saidaOverlay').classList.remove('open');
   document.getElementById('saidaSheet').classList.remove('open');
-  pendingSaidaId = null;
-  // Forçar re-render completo para restaurar DOM stale (fix: último item arrastado pro footer)
+  state.pendingSaidaId = null;
   invalidateQueue();
   invalidateFooter();
   scheduleRender();
 };
 
 window.confirmSaida = async function(motivo) {
-  if (!pendingSaidaId) return;
+  if (!state.pendingSaidaId) return;
   const newStatus = motivo === 'banheiro' || motivo === 'reuniao' || motivo === 'operacional' ? 'pausa' : 'fora';
-  saidaMotivos[pendingSaidaId] = motivo;
-  _pauseStartTimes.set(pendingSaidaId, new Date());
+  state.saidaMotivos[state.pendingSaidaId] = motivo;
+  state.pauseStartTimes.set(state.pendingSaidaId, new Date());
   markLocal();
-  const savedId = pendingSaidaId;
+  const savedId = state.pendingSaidaId;
   const { error } = await sb.from('vendedores').update({ status: newStatus, posicao_fila: null }).eq('id', savedId);
   if (error) { toast('Erro ao registrar saída', 'error'); closeSaida(); return; }
-  // Registrar pausa no log (fire-and-forget — motivo já está em saidaMotivos)
-  if (currentTurno) {
-    sb.rpc('registrar_pausa', { p_vendedor_id: savedId, p_turno_id: currentTurno.id, p_motivo: motivo });
+  if (state.turno) {
+    sb.rpc('registrar_pausa', { p_vendedor_id: savedId, p_turno_id: state.turno.id, p_motivo: motivo });
   }
-  const sv = vendedores.find(x => x.id === savedId);
+  const sv = state.vendedores.find(x => x.id === savedId);
   logPosition(sv, 'saida', SAIDA_COLORS[motivo]?.label || 'Saída');
-  toast(SAIDA_COLORS[motivo]?.label || 'Saiu da fila', 'info', 2000);
+  toast(SAIDA_COLORS[motivo]?.label || 'Saiu da fila', 'info', TOAST_MEDIUM);
   closeSaida();
-  // Preservar motivo local antes de recarregar
   const savedMotivo = motivo;
   await loadVendedores();
-  saidaMotivos[savedId] = savedMotivo;
+  state.saidaMotivos[savedId] = savedMotivo;
   scheduleRender();
 };
 
 // ─── Finalizar Todos ───
 window.finalizarTodos = async function() {
-  const ativos = vendedores.filter(v => v.status !== 'fora' && v.status !== 'em_atendimento');
+  const ativos = state.vendedores.filter(v => v.status !== 'fora' && v.status !== 'em_atendimento');
   if (ativos.length === 0) { toast('Nenhum vendedor na fila', 'warning'); return; }
   if (!confirm('Remover todos os ' + ativos.length + ' vendedores da fila?')) return;
   const ids = ativos.map(v => v.id);
   markLocal();
   const { error } = await sb.from('vendedores').update({ status: 'fora', posicao_fila: null }).in('id', ids);
   if (error) { toast('Erro ao remover vendedores', 'error'); return; }
-  // Limpar motivos de saída
-  ids.forEach(id => delete saidaMotivos[id]);
+  ids.forEach(id => delete state.saidaMotivos[id]);
   toast('Todos removidos da fila', 'info');
   await loadVendedores();
 };
@@ -697,40 +709,34 @@ function animateValue(el, start, end, duration = 400, suffix = '') {
 }
 
 // ─── Quick stats ───
-let _prevStats = { total: 0, vendas: 0, conv: 0 };
-let _statsThrottle = 0;
-let _vendorAtendCount = {}; // vendedor_id → count de atendimentos finalizados no turno
 async function updateQuickStats() {
   const now = Date.now();
-  if (now - _statsThrottle < 2000) return; // Max 1 query / 2s
-  _statsThrottle = now;
-  if (!currentTurno) return;
-  // Queries leves com count em vez de trazer todos os registros
+  if (now - ui.statsThrottle < 2000) return;
+  ui.statsThrottle = now;
+  if (!state.turno) return;
   const [totalRes, vendasRes, perVendor] = await Promise.all([
-    sb.from('atendimentos').select('id', { count: 'exact', head: true }).eq('turno_id', currentTurno.id).neq('resultado', 'em_andamento'),
-    sb.from('atendimentos').select('id', { count: 'exact', head: true }).eq('turno_id', currentTurno.id).eq('resultado', 'venda'),
-    sb.from('atendimentos').select('vendedor_id').eq('turno_id', currentTurno.id).neq('resultado', 'em_andamento')
+    sb.from('atendimentos').select('id', { count: 'exact', head: true }).eq('turno_id', state.turno.id).neq('resultado', 'em_andamento'),
+    sb.from('atendimentos').select('id', { count: 'exact', head: true }).eq('turno_id', state.turno.id).eq('resultado', 'venda'),
+    sb.from('atendimentos').select('vendedor_id').eq('turno_id', state.turno.id).neq('resultado', 'em_andamento')
   ]);
   const total = totalRes.count || 0;
   const vendas = vendasRes.count || 0;
   const conv = total > 0 ? Math.round(vendas / total * 100) : 0;
-  animateValue(document.getElementById('statAtend'), _prevStats.total, total);
-  animateValue(document.getElementById('statVendas'), _prevStats.vendas, vendas);
-  animateValue(document.getElementById('statConv'), _prevStats.conv, conv, 400, '%');
-  // Progress bar
+  animateValue(document.getElementById('statAtend'), ui.prevStats.total, total);
+  animateValue(document.getElementById('statVendas'), ui.prevStats.vendas, vendas);
+  animateValue(document.getElementById('statConv'), ui.prevStats.conv, conv, 400, '%');
   const bar = document.getElementById('convBar');
   if (bar) {
     bar.style.width = conv + '%';
     bar.style.background = conv >= 50 ? 'var(--success)' : conv >= 30 ? 'var(--warning)' : 'var(--accent)';
   }
-  _prevStats = { total, vendas, conv };
-  // Contagem por vendedor para badge nos cards
+  ui.prevStats = { total, vendas, conv };
   const newCounts = {};
   if (perVendor.data) {
     perVendor.data.forEach(r => { newCounts[r.vendedor_id] = (newCounts[r.vendedor_id] || 0) + 1; });
   }
-  const changed = JSON.stringify(newCounts) !== JSON.stringify(_vendorAtendCount);
-  _vendorAtendCount = newCounts;
+  const changed = JSON.stringify(newCounts) !== JSON.stringify(state.vendorAtendCount);
+  state.vendorAtendCount = newCounts;
   if (changed) { invalidateQueue(); invalidateFooter(); scheduleRender(); }
 }
 
@@ -742,10 +748,10 @@ async function updateQuickStats() {
 // ─── Position Log (histórico da sessão) ───
 window.openPosLog = function() {
   const list = document.getElementById('posLogList');
-  if (_positionLog.length === 0) {
+  if (state.positionLog.length === 0) {
     list.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px">Nenhuma movimentação registrada nesta sessão</div>';
   } else {
-    list.innerHTML = _positionLog.map(entry => {
+    list.innerHTML = state.positionLog.map(entry => {
       const h = String(entry.time.getHours()).padStart(2, '0');
       const m = String(entry.time.getMinutes()).padStart(2, '0');
       const s = String(entry.time.getSeconds()).padStart(2, '0');
@@ -768,17 +774,15 @@ window.closePosLog = function() {
 };
 
 // ─── Mini Ranking (troféu) ───
-let _miniRankingOpen = false;
-let _miniRankingOutside = null;
 window.toggleMiniRanking = async function() {
   const dd = document.getElementById('miniRankingDropdown');
   if (!dd) return;
-  if (_miniRankingOpen) { closeMiniRanking(); return; }
-  if (!currentTurno) { toast('Abra o turno para ver o ranking', 'warning'); return; }
-  _miniRankingOpen = true;
+  if (ui.miniRankingOpen) { closeMiniRanking(); return; }
+  if (!state.turno) { toast('Abra o turno para ver o ranking', 'warning'); return; }
+  ui.miniRankingOpen = true;
   dd.style.display = '';
   // Query atendimentos do turno
-  const { data } = await sb.from('atendimentos').select('vendedor_id, resultado, vendedores(nome, apelido)').eq('turno_id', currentTurno.id).neq('resultado', 'em_andamento');
+  const { data } = await sb.from('atendimentos').select('vendedor_id, resultado, vendedores(nome, apelido)').eq('turno_id', state.turno.id).neq('resultado', 'em_andamento');
   if (!data || data.length === 0) {
     document.getElementById('miniRankingList').innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px">Nenhum atendimento finalizado</div>';
   } else {
@@ -806,40 +810,40 @@ window.toggleMiniRanking = async function() {
   }
   // Fechar ao clicar fora
   setTimeout(() => {
-    _miniRankingOutside = (e) => {
+    ui.miniRankingOutside = (e) => {
       if (!dd.contains(e.target) && !e.target.closest('[onclick*="toggleMiniRanking"]')) closeMiniRanking();
     };
-    document.addEventListener('click', _miniRankingOutside);
-  }, 100);
+    document.addEventListener('click', ui.miniRankingOutside);
+  }, INPUT_FOCUS_DELAY);
 };
 function closeMiniRanking() {
-  _miniRankingOpen = false;
+  ui.miniRankingOpen = false;
   const dd = document.getElementById('miniRankingDropdown');
   if (dd) dd.style.display = 'none';
-  if (_miniRankingOutside) { document.removeEventListener('click', _miniRankingOutside); _miniRankingOutside = null; }
+  if (ui.miniRankingOutside) { document.removeEventListener('click', ui.miniRankingOutside); ui.miniRankingOutside = null; }
 }
 
 // Footer card tap + confirm fila imported from /js/tablet-footer.js
 
 // ─── TV Mode ───
 window.toggleTvMode = function() {
-  _tvMode = !_tvMode;
-  localStorage.setItem('minhavez_tvMode', _tvMode ? '1' : '0');
+  ui.tvMode = !ui.tvMode;
+  localStorage.setItem('minhavez_tvMode', ui.tvMode ? '1' : '0');
   applyTvMode();
-  toast(_tvMode ? 'Modo TV ativado' : 'Modo TV desativado', 'info', 1500);
+  toast(ui.tvMode ? 'Modo TV ativado' : 'Modo TV desativado', 'info', TOAST_SHORT);
 };
 function applyTvMode() {
   const layout = document.querySelector('.tablet-layout');
   const btn = document.getElementById('tvMenuBtn');
-  if (layout) layout.classList.toggle('tv-mode', _tvMode);
-  if (btn) btn.classList.toggle('active', _tvMode);
+  if (layout) layout.classList.toggle('tv-mode', ui.tvMode);
+  if (btn) btn.classList.toggle('active', ui.tvMode);
   // Forçar re-render para esconder/mostrar elementos dinâmicos
   invalidateQueue();
   invalidateFooter();
   scheduleRender();
 }
 // Aplicar modo TV ao carregar
-if (_tvMode) requestAnimationFrame(() => applyTvMode());
+if (ui.tvMode) requestAnimationFrame(() => applyTvMode());
 
 // ─── Logout ───
 window.handleLogout = function() { logout(); };
@@ -874,7 +878,7 @@ let _lastActivity = Date.now();
 ['click','keydown','touchstart','scroll'].forEach(evt => {
   document.addEventListener(evt, () => { _lastActivity = Date.now(); }, { passive: true });
 });
-let _sessionInterval = setInterval(() => {
+timers.session = setInterval(() => {
   if (Date.now() - _lastActivity > SESSION_TIMEOUT_TABLET) {
     toast('Sessão expirada por inatividade', 'warning');
     setTimeout(() => logout(), TOAST_SHORT);
@@ -882,33 +886,31 @@ let _sessionInterval = setInterval(() => {
 }, SESSION_CHECK_INTERVAL);
 
 // ─── Realtime (debounced, ignora ação local) ───
-let _rtVendTimer = null;
-let _rtAtendTimer = null;
 const _rtChannelName = `tablet-sync-${tenantId || 'default'}`;
 let _rtChannel = sb.channel(_rtChannelName)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vendedores', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined }, () => {
-    if (_localAction) return;
-    clearTimeout(_rtVendTimer);
-    _rtVendTimer = setTimeout(loadVendedores, RT_VENDEDOR_DEBOUNCE);
+    if (ui.localAction) return;
+    clearTimeout(timers.rtVend);
+    timers.rtVend = setTimeout(loadVendedores, RT_VENDEDOR_DEBOUNCE);
   })
   .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined }, () => {
-    if (_localAction) return;
-    clearTimeout(_rtAtendTimer);
-    _rtAtendTimer = setTimeout(() => { updateQuickStats(); checkActiveAtendimentos(); }, RT_VENDEDOR_DEBOUNCE);
+    if (ui.localAction) return;
+    clearTimeout(timers.rtAtend);
+    timers.rtAtend = setTimeout(() => { updateQuickStats(); checkActiveAtendimentos(); }, RT_VENDEDOR_DEBOUNCE);
   })
   .subscribe((status) => {
     if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-      clearTimeout(_reconnectTimer);
-      _reconnectTimer = setTimeout(() => { if (_rtChannel) _rtChannel.subscribe(); }, RT_RECONNECT_DELAY);
-      toast('Reconectando...', 'warning', 2000);
+      clearTimeout(timers.reconnect);
+      timers.reconnect = setTimeout(() => { if (_rtChannel) _rtChannel.subscribe(); }, RT_RECONNECT_DELAY);
+      toast('Reconectando...', 'warning', TOAST_MEDIUM);
     }
   });
 
 // ─── Auto-sync: recarrega dados a cada 30s (funciona sempre, independente de tab/app switch) ───
 setInterval(() => {
-  if (document.hidden || !currentTurno) return;
-  _loadingVendedores = false;
-  _localAction = false;
+  if (document.hidden || !state.turno) return;
+  ui.loadingVendedores = false;
+  ui.localAction = false;
   loadVendedores();
   checkActiveAtendimentos();
 }, AUTO_SYNC_INTERVAL);
@@ -917,33 +919,29 @@ setInterval(() => {
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     clearAtendTimers();
-    clearInterval(_clockInterval); _clockInterval = null;
-    clearInterval(_sessionInterval); _sessionInterval = null;
+    clearInterval(timers.clock); timers.clock = null;
+    clearInterval(timers.session); timers.session = null;
     resetDragState();
     document.body.style.overflow = '';
-    _queuePanel?.style.setProperty('overflow', '');
-    _servicePanel?.style.setProperty('overflow', '');
+    dom.queuePanel?.style.setProperty('overflow', '');
+    dom.servicePanel?.style.setProperty('overflow', '');
   } else {
-    // Resetar TODOS os flags de drag (inclusive ghosts órfãos)
-    _localAction = false;
+    ui.localAction = false;
     resetDragState();
     resetAtendDragState();
     document.body.style.overflow = '';
-    clearTimeout(_localActionTimer);
-    _loadingVendedores = false;
-    _actionLock = false;
-    // Reconectar timers (limpar antes para evitar duplicação)
+    clearTimeout(timers.localAction);
+    ui.loadingVendedores = false;
+    ui.actionLock = false;
     updateClock();
-    clearInterval(_clockInterval);
-    _clockInterval = setInterval(updateClock, CLOCK_UPDATE_INTERVAL);
-    clearInterval(_sessionInterval);
-    _sessionInterval = setInterval(() => { if (currentTurno) updateQuickStats(); }, QUICK_STATS_INTERVAL);
-    // Invalidar cache e forçar re-render
+    clearInterval(timers.clock);
+    timers.clock = setInterval(updateClock, CLOCK_UPDATE_INTERVAL);
+    clearInterval(timers.session);
+    timers.session = setInterval(() => { if (state.turno) updateQuickStats(); }, QUICK_STATS_INTERVAL);
     invalidateQueue();
     invalidateFooter();
     scheduleRender();
-    if (activeAtendimentos.length > 0) renderActiveAtendimentos();
-    // Buscar dados frescos do banco
+    if (state.atendimentos.length > 0) renderActiveAtendimentos();
     loadVendedores();
     checkActiveAtendimentos();
     updateQuickStats();
@@ -956,13 +954,13 @@ document.addEventListener('visibilitychange', () => {
 
 // ─── Cleanup on page unload (timers, realtime, observers) ───
 window.addEventListener('beforeunload', () => {
-  clearInterval(_clockInterval);
-  clearInterval(_sessionInterval);
+  clearInterval(timers.clock);
+  clearInterval(timers.session);
   clearFooterTimer();
   clearAtendTimers();
-  clearTimeout(_rtVendTimer);
-  clearTimeout(_rtAtendTimer);
-  clearTimeout(_reconnectTimer);
+  clearTimeout(timers.rtVend);
+  clearTimeout(timers.rtAtend);
+  clearTimeout(timers.reconnect);
   cleanupQueue();
   try { if (_rtChannel) { _rtChannel.unsubscribe(); sb.removeChannel(_rtChannel); _rtChannel = null; } } catch(e) {}
 });
