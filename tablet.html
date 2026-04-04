@@ -355,6 +355,7 @@ import { createModal, currencyInputHTML, parseCurrency } from '/js/ui.js';
 import { fireVendaCelebration, fireEpicTrocaAnimation } from '/js/tablet-celebrations.js';
 import { initTurno, updateTurnoSwitch, checkExistingTurno } from '/js/tablet-turno.js';
 import { initFooter, renderFooter, invalidateFooter, clearFooterTimer, showFooterDropLabel, hideFooterDropLabel } from '/js/tablet-footer.js';
+import { initQueue, renderQueue, scheduleRender, invalidateQueue, getDraggedId, setDraggedId, isTouchDragging, getTouchGhost, setTouchGhost, cleanupQueue, resetDragState } from '/js/tablet-queue.js';
 initTheme();
 // Sync theme-color meta with saved theme
 { const _t = document.documentElement.getAttribute('data-theme') || 'light';
@@ -414,7 +415,7 @@ function markLocal() { _localAction = true; clearTimeout(_localActionTimer); _lo
 window.setSetor = function(setor) {
   currentSetor = setor;
   document.querySelectorAll('.setor-tab').forEach(t => t.classList.toggle('active', t.dataset.setor === setor));
-  _lastQueueKey = ''; invalidateFooter(); // Forçar re-render no novo setor
+  invalidateQueue(); invalidateFooter(); // Forçar re-render no novo setor
   renderQueue();
   renderFooter();
 };
@@ -457,14 +458,40 @@ initFooter({
   get currentSetor() { return currentSetor; },
   get activeAtendimentos() { return activeAtendimentos; },
   get tvMode() { return _tvMode; },
-  get draggedId() { return draggedId; },
-  set draggedId(v) { draggedId = v; },
-  get touchDragging() { return touchDragging; },
+  get draggedId() { return getDraggedId(); },
+  set draggedId(v) { setDraggedId(v); },
+  get touchDragging() { return isTouchDragging(); },
   saidaMotivos,
   pauseStartTimes: _pauseStartTimes,
   openSaida,
   get onTouchDragStart() { return window.onTouchDragStart; },
   addToQueue
+});
+
+// ─── Queue module init ───
+initQueue({
+  sb,
+  get currentTurno() { return currentTurno; },
+  get vendedores() { return vendedores; },
+  get currentSetor() { return currentSetor; },
+  get activeAtendimentos() { return activeAtendimentos; },
+  get tvMode() { return _tvMode; },
+  get renderPending() { return _renderPending; },
+  set renderPending(v) { _renderPending = v; },
+  queueList: _queueList,
+  queuePanel: _queuePanel,
+  servicePanel: _servicePanel,
+  statusFooter: _statusFooter,
+  saidaMotivos,
+  queueEntryTimes: _queueEntryTimes,
+  get vendorAtendCount() { return _vendorAtendCount; },
+  markLocal,
+  loadVendedores,
+  openSaida,
+  returnFromPause: (...args) => window.returnFromPause(...args),
+  withLock,
+  doSendToAtendimento: (...args) => _doSendToAtendimento(...args),
+  updateQuickStats
 });
 
 // ─── Clock ───
@@ -526,331 +553,10 @@ async function loadVendedores() {
   }
 }
 
-// Batch render — evita múltiplos re-renders no mesmo frame
-function scheduleRender() {
-  if (_renderPending) return;
-  _renderPending = true;
-  requestAnimationFrame(() => {
-    _renderPending = false;
-    renderQueue();
-    renderFooter();
-    updateQuickStats();
-  });
-}
+// scheduleRender imported from /js/tablet-queue.js
 
-// ─── Render queue (incremental DOM diff) ───
-let _lastQueueKey = ''; // Cache key para skip se nada mudou
-function renderQueue() {
-  const list = _queueList;
-  const allVendedores = vendedores || [];
-  const setorVendedores = allVendedores.filter(v => (v.setor || 'loja') === currentSetor);
-  const inQueue = setorVendedores.filter(v => v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
-  const pausa = setorVendedores.filter(v => v.status === 'pausa');
+// Queue rendering, drag-and-drop imported from /js/tablet-queue.js
 
-  document.getElementById('queueCount').textContent = inQueue.length + ' na fila';
-
-  // Atualizar cold seller tracking
-  const currentIds = new Set(inQueue.map(v => v.id));
-  // Remover vendedores que saíram da fila
-  for (const [id] of _queueEntryTimes) {
-    if (!currentIds.has(id)) _queueEntryTimes.delete(id);
-  }
-  // Adicionar novos ou atualizar posição
-  inQueue.forEach(v => {
-    const entry = _queueEntryTimes.get(v.id);
-    if (!entry) {
-      _queueEntryTimes.set(v.id, { pos: v.posicao_fila, time: Date.now() });
-    } else if (entry.pos !== v.posicao_fila) {
-      // Posição mudou = reset timer
-      entry.pos = v.posicao_fila;
-      entry.time = Date.now();
-    }
-  });
-
-  // Build key para detectar mudanças reais (inclui cold-seller state)
-  const _nowMin = Math.floor(Date.now() / 60000); // minuto global p/ cold seller
-  const queueKey = (currentTurno ? '1' : '0') + '|' + inQueue.map(v => {
-    const cold = _queueEntryTimes.has(v.id) && (Date.now() - _queueEntryTimes.get(v.id).time > 20 * 60 * 1000);
-    return v.id + (cold ? ':C' : '');
-  }).join(',') + '|' + pausa.map(v => v.id + ':' + (saidaMotivos[v.id] || '')).join(',') + '|' + _nowMin;
-  if (queueKey === _lastQueueKey) return; // nada mudou
-  _lastQueueKey = queueKey;
-
-  if (!currentTurno) {
-    list.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text-muted);font-size:13px"><i class="fa-solid fa-users-slash" style="font-size:24px;margin-bottom:8px;display:block;opacity:.3"></i>Abra o turno para iniciar</div>';
-    return;
-  }
-
-  // Build new HTML via DocumentFragment (1 reflow instead of N)
-  const frag = document.createDocumentFragment();
-
-  inQueue.forEach((v, i) => {
-    const div = document.createElement('div');
-    div.innerHTML = renderQueueItem(v, i + 1, false, true);
-    frag.appendChild(div.firstElementChild);
-  });
-  if (inQueue.length === 0) {
-    const empty = document.createElement('div');
-    empty.style.cssText = 'text-align:center;padding:32px 16px;color:var(--text-muted);font-size:13px';
-    empty.innerHTML = '<i class="fa-solid fa-arrow-up-from-bracket" style="display:block;font-size:24px;margin-bottom:10px;opacity:.4"></i><strong>Fila vazia</strong><br><span style="font-size:11px;opacity:.6;margin-top:4px;display:inline-block">Arraste vendedores do rodapé ou toque neles para adicionar</span>';
-    frag.appendChild(empty);
-  }
-
-  if (pausa.length > 0) {
-    const header = document.createElement('div');
-    header.style.cssText = 'font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px;border-top:1px solid var(--border-subtle);margin-top:4px';
-    header.innerHTML = '<i class="fa-solid fa-pause" style="margin-right:4px"></i>Em pausa';
-    frag.appendChild(header);
-    pausa.forEach(v => {
-      const motivoKey = saidaMotivos[v.id];
-      const motivoColor = motivoKey ? (SAIDA_COLORS[motivoKey]?.color || STATUS_CONFIG.pausa.color) : STATUS_CONFIG.pausa.color;
-      const motivoLabel = motivoKey ? (SAIDA_COLORS[motivoKey]?.label || 'Pausa') : 'Pausa';
-      const div = document.createElement('div');
-      div.innerHTML = `<div class="queue-item" data-id="${v.id}" data-action="return-pause" draggable="true" style="cursor:grab;opacity:.8;border-left:3px solid ${motivoColor}">
-        <div class="queue-position" style="background:${motivoColor}20;color:${motivoColor}"><i class="fa-solid ${STATUS_CONFIG.pausa.icon}" style="font-size:11px"></i></div>
-        <div style="flex:1;min-width:0">
-          <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.apelido || v.nome}</div>
-          <div style="font-size:10px;color:${motivoColor};font-weight:600;text-transform:uppercase;letter-spacing:.05em">${motivoLabel}</div>
-        </div>
-        <i class="fa-solid fa-arrow-rotate-left" style="color:var(--success);font-size:12px;opacity:.6" title="Voltar à fila"></i>
-      </div>`;
-      frag.appendChild(div.firstElementChild);
-    });
-  }
-
-  list.innerHTML = '';
-  list.appendChild(frag);
-  initDragAndDrop();
-}
-
-function renderQueueItem(v, pos, isActive, draggable) {
-  const cfg = STATUS_CONFIG[v.status] || STATUS_CONFIG.fora;
-  const ini = initials(v.apelido || v.nome);
-  const dragAttr = draggable ? 'draggable="true"' : '';
-  const dragStyle = draggable ? 'cursor:grab;' : '';
-  const posHtml = pos ? `<div class="queue-position" style="background:${cfg.bg};color:${cfg.color}">${pos}</div>` : `<div class="queue-position" style="background:${cfg.bg};color:${cfg.color}"><i class="fa-solid ${cfg.icon}" style="font-size:11px"></i></div>`;
-
-  // Timer para quem está atendendo
-  let timerHtml = '';
-  if (v.status === 'em_atendimento') {
-    const atend = activeAtendimentos.find(a => a.vendedor_id === v.id);
-    if (atend && atend.inicio) {
-      const startMs = new Date(atend.inicio).getTime();
-      const elapsed = isNaN(startMs) ? 0 : (Date.now() - startMs) / 1000;
-      const clr = elapsed > 2400 ? 'var(--danger)' : 'var(--text-primary)';
-      timerHtml = `<span data-sidebar-timer="${atend.id}" style="font-family:var(--font-mono);font-weight:700;font-size:11px;color:${clr};margin-left:auto;flex-shrink:0">${formatTime(elapsed)}</span>`;
-    }
-  }
-
-  // Botão de ação rápida: na fila → pode ir ao atendimento
-  let actionHtml = '';
-  if (draggable && currentTurno) {
-    actionHtml = `<button data-action="send-atend" data-vid="${v.id}" style="padding:8px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-hover);color:var(--info);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font-body);transition:all .15s;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center" title="Enviar ao atendimento"><i class="fa-solid fa-arrow-right" style="font-size:12px"></i></button>`;
-  }
-
-  const isNext = draggable && pos === 1;
-  const nextClass = isNext ? ' next-in-line' : '';
-  const nextBadge = isNext ? '<span class="next-badge">PRÓXIMO</span>' : '';
-  // Cold seller: >20min na fila sem ser chamado
-  const coldClass = (draggable && _queueEntryTimes.has(v.id) && (Date.now() - _queueEntryTimes.get(v.id).time > 20 * 60 * 1000)) ? ' cold-seller' : '';
-
-  const atendCount = _vendorAtendCount[v.id] || 0;
-  const countBadge = atendCount > 0 ? `<span class="atend-count-badge" title="${atendCount} atendimento${atendCount > 1 ? 's' : ''} no turno">${atendCount}</span>` : '';
-
-  return `<div class="queue-item ${v.status}${isActive ? ' active' : ''}${nextClass}${coldClass}" data-id="${v.id}" ${dragAttr} style="${dragStyle};position:relative">
-    ${nextBadge}
-    ${draggable ? '<i class="fa-solid fa-grip-vertical" style="color:var(--text-muted);font-size:10px;opacity:.4;margin-right:2px"></i>' : ''}
-    ${posHtml}
-    <div style="flex:1;min-width:0">
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.apelido || v.nome}</span>
-        ${countBadge}
-      </div>
-      <div style="font-size:10px;color:${cfg.color};font-weight:600;text-transform:uppercase;letter-spacing:.05em">${cfg.short}</div>
-    </div>
-    ${timerHtml}
-    ${actionHtml}
-  </div>`;
-}
-
-// ─── Drag and Drop (desktop + touch) ───
-let draggedId = null;
-
-let _dragDropInitialized = false;
-let _itemObserver = null;
-function initDragAndDrop() {
-  const dropzone = _queueList;
-  if (!dropzone) return;
-  if (_dragDropInitialized) return; // Event delegation no dropzone só precisa de 1 vez
-  _dragDropInitialized = true;
-
-  // ─── Event delegation: clicks + drags no queue list (1 listener em vez de N) ───
-  dropzone.addEventListener('click', e => {
-    const actionBtn = e.target.closest('[data-action="send-atend"]');
-    if (actionBtn) { e.stopPropagation(); sendToAtendimento(actionBtn.dataset.vid); return; }
-    const pauseItem = e.target.closest('[data-action="return-pause"]');
-    if (pauseItem) { returnFromPause(pauseItem.dataset.id); return; }
-  });
-  dropzone.addEventListener('dragstart', e => {
-    const item = e.target.closest('.queue-item');
-    if (!item) return;
-    draggedId = item.dataset.id;
-    e.dataTransfer.effectAllowed = 'move';
-  });
-  // Limpar draggedId se drag cancelado sem drop (previne renderFooter bloqueado)
-  dropzone.addEventListener('dragend', () => { draggedId = null; });
-  dropzone.addEventListener('touchstart', e => {
-    const item = e.target.closest('.queue-item');
-    if (item) onTouchDragStart(e);
-  }, { passive: true });
-
-  // Helper para limpar indicadores de drag (evita querySelectorAll repetido)
-  let _cachedQueueItems = null;
-  const getCachedItems = () => _cachedQueueItems || (_cachedQueueItems = [...dropzone.querySelectorAll('.queue-item')]);
-  const clearDragIndicators = () => { getCachedItems().forEach(el => el.classList.remove('drag-above', 'drag-below')); };
-  // Invalidar cache quando DOM muda — desconectar observer anterior
-  if (_itemObserver) _itemObserver.disconnect();
-  _itemObserver = new MutationObserver(() => { _cachedQueueItems = null; });
-  _itemObserver.observe(dropzone, { childList: true });
-
-  let _prevDragAfter = null;
-  dropzone.addEventListener('dragover', e => {
-    e.preventDefault();
-    dropzone.classList.add('dragging');
-    dropzone.style.background = 'rgba(34,197,94,.05)';
-    const after = getDragAfterElement(dropzone, e.clientY);
-    if (after !== _prevDragAfter) {
-      clearDragIndicators();
-      if (after) after.classList.add('drag-above');
-      else { const items = getCachedItems(); if (items.length > 0) items[items.length-1].classList.add('drag-below'); }
-      _prevDragAfter = after;
-    }
-  });
-  dropzone.addEventListener('dragleave', () => {
-    dropzone.classList.remove('dragging');
-    dropzone.style.background = '';
-    clearDragIndicators();
-    _prevDragAfter = null;
-  });
-  dropzone.addEventListener('drop', async e => {
-    e.preventDefault();
-    dropzone.classList.remove('dragging');
-    dropzone.style.background = '';
-    clearDragIndicators();
-    _prevDragAfter = null;
-    if (!draggedId) return;
-
-    const v = vendedores.find(x => x.id === draggedId);
-    const isInQueue = v && v.status === 'disponivel' && v.posicao_fila != null;
-    const afterEl = getDragAfterElement(dropzone, e.clientY);
-    const afterId = afterEl?.dataset.id || null;
-
-    if (isInQueue) {
-      await reorderInQueue(draggedId, afterId);
-    } else {
-      await addToQueueAt(draggedId, afterId);
-    }
-    draggedId = null;
-  });
-}
-
-// Drop zone label helpers moved to /js/tablet-footer.js
-
-// Cache de rects para evitar reflow durante drag
-let _dragRectsCache = null;
-let _dragRectsCacheTime = 0;
-
-function cacheDragRects(container) {
-  const items = [...container.querySelectorAll('.queue-item:not([style*="opacity: 0.3"])')];
-  _dragRectsCache = items.map(el => ({ el, rect: el.getBoundingClientRect() }));
-  _dragRectsCacheTime = performance.now();
-}
-
-function getDragAfterElement(container, y) {
-  // Scroll travado durante drag = rects estáveis, cachear até drag terminar
-  if (!_dragRectsCache) cacheDragRects(container);
-  return _dragRectsCache.reduce((closest, { el, rect }) => {
-    const offset = y - rect.top - rect.height / 2;
-    if (offset < 0 && offset > closest.offset) return { offset, element: el };
-    return closest;
-  }, { offset: Number.NEGATIVE_INFINITY }).element || null;
-}
-
-async function reorderInQueue(movedId, beforeId) {
-  const moved = vendedores.find(v => v.id === movedId);
-  const setor = moved?.setor || 'loja';
-  const inQueue = vendedores.filter(v => (v.setor || 'loja') === setor && v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
-  const ordered = inQueue.filter(v => v.id !== movedId);
-  const beforeIdx = beforeId ? ordered.findIndex(v => v.id === beforeId) : ordered.length;
-  if (!moved) return;
-  ordered.splice(beforeIdx >= 0 ? beforeIdx : ordered.length, 0, moved);
-
-  const ids = ordered.map(v => v.id);
-
-  // Optimistic: atualizar posições locais e renderizar imediatamente
-  markLocal();
-  ids.forEach((id, i) => {
-    const vv = vendedores.find(x => x.id === id);
-    if (vv) vv.posicao_fila = i + 1;
-  });
-  _lastQueueKey = ''; invalidateFooter();
-  scheduleRender();
-
-  // Persistir no banco em background
-  const { error } = await sb.rpc('reordenar_fila', { p_ids: ids });
-  if (error) { toast('Erro ao reordenar: ' + error.message, 'error'); await loadVendedores(); }
-}
-
-async function addToQueueAt(vendedorId, beforeId) {
-  delete saidaMotivos[vendedorId];
-  const target = vendedores.find(x => x.id === vendedorId);
-  const setor = target?.setor || 'loja';
-  const inQueue = vendedores.filter(v => (v.setor || 'loja') === setor && v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);
-  const beforeIdx = beforeId ? inQueue.findIndex(v => v.id === beforeId) : inQueue.length;
-  const insertAt = beforeIdx >= 0 ? beforeIdx : inQueue.length;
-
-  // Montar nova ordem com o vendedor inserido na posição certa
-  const newOrder = [...inQueue];
-  newOrder.splice(insertAt, 0, { id: vendedorId });
-  const ids = newOrder.map(v => v.id);
-
-  // Update otimista: atualiza local e renderiza imediatamente
-  markLocal();
-  if (target) { target.status = 'disponivel'; }
-  ids.forEach((id, i) => {
-    const vv = vendedores.find(x => x.id === id);
-    if (vv) vv.posicao_fila = i + 1;
-  });
-  invalidateFooter();
-  scheduleRender();
-  toast((target?.apelido || target?.nome || 'Vendedor') + ' entrou na fila', 'success', 1500);
-
-  // Banco em background
-  const { error } = await sb.rpc('reordenar_fila', { p_ids: ids });
-  if (error) { toast('Erro ao salvar: ' + error.message, 'error'); await loadVendedores(); }
-}
-
-// Service panel como drop zone (desktop drag)
-(function initServiceDrop() {
-  const sp = document.getElementById('servicePanel');
-  if (!sp) return;
-  sp.addEventListener('dragover', e => { e.preventDefault(); sp.classList.add('drop-active'); });
-  sp.addEventListener('dragleave', () => sp.classList.remove('drop-active'));
-  sp.addEventListener('drop', async e => {
-    e.preventDefault();
-    sp.classList.remove('drop-active');
-    const id = draggedId;
-    draggedId = null;
-    if (!id) return;
-    await withLock(() => _doSendToAtendimento(id)); // drag pula confirmação
-  });
-})();
-
-// ─── Enviar ao atendimento (click direto — sem modal para não travar fluxo) ───
-window.sendToAtendimento = function(vendedorId) {
-  if (_tvMode) return;
-  withLock(() => _doSendToAtendimento(vendedorId));
-};
 
 // ─── Carregar canais de origem ───
 async function loadCanaisOrigem() {
@@ -985,177 +691,8 @@ async function _executeAtendimento(vendedorId, canalOrigemId) {
   }
 }
 
-// Touch drag fluido (ghost card segue o dedo)
-let touchDragEl = null;
-let touchDragId = null;
-let touchGhost = null;
-let touchStartX = 0, touchStartY = 0;
-let touchDragging = false;
-let _ghostInitX = 0, _ghostInitY = 0;
-let _dragRafId = null;
-let _lastDropCheck = 0;
+// Touch drag imported from /js/tablet-queue.js
 
-window.onTouchDragStart = function(e) {
-  if (_tvMode) return;
-  const item = e.target.closest('.queue-item') || e.target.closest('.footer-card');
-  if (!item || item.closest('#activeList')) return; // ignora atend-cards (handled by initAtendDrag)
-  touchDragId = item.dataset.id;
-  touchDragEl = item;
-  touchDragging = false;
-
-  const touch = e.touches[0];
-  touchStartX = touch.clientX;
-  touchStartY = touch.clientY;
-
-  // Cache do layout para evitar reflows durante drag
-  const itemW = item.offsetWidth;
-  const queueList = _queueList;
-  const footer = _statusFooter;
-  let _prevAfter = null;
-  let _markedEl = null;
-  const _clearTouchIndicators = () => {
-    if (_markedEl) { _markedEl.classList.remove('drag-above', 'drag-below'); _markedEl = null; }
-  };
-
-  const onMove = (ev) => {
-    ev.preventDefault(); // Sempre prevenir scroll nativo durante possível drag
-    const t = ev.touches[0];
-    const dx = t.clientX - touchStartX;
-    const dy = t.clientY - touchStartY;
-
-    // Só inicia drag se mover > 8px (evita taps acidentais)
-    if (!touchDragging && Math.abs(dx) + Math.abs(dy) > 8) {
-      touchDragging = true;
-      item.style.opacity = '0.3';
-      queueList.classList.add('dragging'); // Ativa will-change nos items
-
-      // Travar scroll durante drag
-      document.body.style.overflow = 'hidden';
-      _queuePanel?.style.setProperty('overflow', 'hidden');
-      _servicePanel?.style.setProperty('overflow', 'hidden');
-      // Pre-cachear rects (scroll travado = rects estáveis)
-      cacheDragRects(queueList);
-
-      _ghostInitX = t.clientX - itemW / 2;
-      _ghostInitY = t.clientY - 30;
-
-      // Criar ghost card com transform (GPU accelerated)
-      touchGhost = item.cloneNode(true);
-      touchGhost.style.cssText = `
-        position:fixed;z-index:9999;pointer-events:none;
-        opacity:.9;will-change:transform;
-        box-shadow:0 4px 16px rgba(0,0,0,.3);
-        border:1px solid var(--success);border-radius:10px;
-        background:var(--bg-card);
-        width:${itemW}px;
-        left:0;top:0;
-        transform:translate3d(${_ghostInitX}px,${_ghostInitY}px,0) scale(1.05);
-      `;
-      document.body.appendChild(touchGhost);
-    }
-
-    if (touchDragging && touchGhost) {
-      // Mover ghost via transform (sem reflow)
-      const gx = t.clientX - itemW / 2;
-      const gy = t.clientY - 30;
-      touchGhost.style.transform = `translate3d(${gx}px,${gy}px,0) scale(1.05)`;
-
-      // Throttle drop zone detection (~60ms)
-      const now = performance.now();
-      if (now - _lastDropCheck < 60) return;
-      _lastDropCheck = now;
-
-      const elUnder = document.elementFromPoint(t.clientX, t.clientY);
-
-      if (elUnder && (elUnder.id === 'queueList' || elUnder.closest('#queueList'))) {
-        queueList.style.background = 'rgba(34,197,94,.05)';
-        footer?.classList.remove('drop-highlight'); hideFooterDropLabel();
-        const after = getDragAfterElement(queueList, t.clientY);
-        if (after !== _prevAfter) {
-          _clearTouchIndicators();
-          if (after) { after.classList.add('drag-above'); _markedEl = after; }
-          _prevAfter = after;
-        }
-      } else if (elUnder && (elUnder.id === 'statusFooter' || elUnder.closest('#statusFooter'))) {
-        footer?.classList.add('drop-highlight'); showFooterDropLabel();
-        queueList.style.background = '';
-        _clearTouchIndicators(); _prevAfter = null;
-      } else {
-        queueList.style.background = '';
-        footer?.classList.remove('drop-highlight'); hideFooterDropLabel();
-        _clearTouchIndicators(); _prevAfter = null;
-      }
-    }
-  };
-
-  const onEnd = async (ev) => {
-    document.removeEventListener('touchmove', onMove);
-    document.removeEventListener('touchend', onEnd);
-    document.removeEventListener('touchcancel', onEnd);
-
-    // Destravar scroll
-    document.body.style.overflow = '';
-    _queuePanel?.style.setProperty('overflow', '');
-    _servicePanel?.style.setProperty('overflow', '');
-
-    // Limpar visual + cache
-    _dragRectsCache = null;
-    queueList.classList.remove('dragging');
-    _clearTouchIndicators();
-    // Ghost cleanup robusto — remove do DOM e elimina referência
-    if (touchGhost) { touchGhost.remove(); touchGhost = null; }
-    // Restaurar opacidade no item original (pode estar detached se re-render aconteceu)
-    if (touchDragEl) {
-      touchDragEl.style.opacity = '1';
-      // Também restaurar no DOM atual por data-id (caso o elemento tenha sido recriado)
-      const liveEl = queueList.querySelector('[data-id="' + (touchDragId || '') + '"]');
-      if (liveEl && liveEl !== touchDragEl) liveEl.style.opacity = '1';
-    }
-    queueList.style.background = '';
-    footer?.classList.remove('drop-highlight'); hideFooterDropLabel();
-
-    if (!touchDragging) {
-      touchDragId = null; touchDragEl = null;
-      return;
-    }
-
-    const touch = ev.changedTouches ? ev.changedTouches[0] : null;
-
-    // IMPORTANTE: limpar flags de drag ANTES das ações async
-    const _savedDragId = touchDragId;
-    touchDragId = null; touchDragEl = null; touchDragging = false;
-    invalidateFooter();
-    _lastQueueKey = ''; // Forçar re-render da fila também
-
-    if (!touch) {
-      // touchcancel — sem posição, forçar re-render e sair
-      scheduleRender();
-      return;
-    }
-
-    const dropEl = document.elementFromPoint(touch.clientX, touch.clientY);
-
-    if (dropEl && (dropEl.id === 'queueList' || dropEl.closest('#queueList'))) {
-      const v = vendedores.find(x => x.id === _savedDragId);
-      const isInQueue = v && v.status === 'disponivel' && v.posicao_fila != null;
-      const afterEl = getDragAfterElement(queueList, touch.clientY);
-      const afterId = afterEl?.dataset.id || null;
-      if (isInQueue) { await reorderInQueue(_savedDragId, afterId); }
-      else { await addToQueueAt(_savedDragId, afterId); }
-    } else if (dropEl && (dropEl.id === 'servicePanel' || dropEl.closest('#servicePanel') || dropEl.closest('#activeList'))) {
-      await withLock(() => _doSendToAtendimento(_savedDragId));
-    } else if (dropEl && (dropEl.id === 'statusFooter' || dropEl.closest('#statusFooter'))) {
-      setTimeout(() => openSaida(_savedDragId), 50);
-    } else {
-      // Drop em área neutra — forçar re-render para restaurar estado visual
-      scheduleRender();
-    }
-  };
-
-  document.addEventListener('touchmove', onMove, { passive: false });
-  document.addEventListener('touchend', onEnd);
-  document.addEventListener('touchcancel', onEnd);
-};
 
 // ─── Atendimento card drag → Outcome Sheet ───
 let _atendDragInit = false;
@@ -1297,7 +834,7 @@ async function addToQueue(vendedorId) {
   markLocal();
   // Update otimista: atualiza local e renderiza imediatamente
   if (v) { v.status = 'disponivel'; v.posicao_fila = newPos; }
-  _lastQueueKey = ''; // forçar re-render da fila
+  invalidateQueue(); // forçar re-render da fila
   invalidateFooter(); // forçar re-render do footer
   scheduleRender();
   logPosition(v, 'fila', 'Posição #' + newPos);
@@ -1311,7 +848,7 @@ async function addToQueue(vendedorId) {
 window.returnFromPause = async function(vendedorId) {
   delete saidaMotivos[vendedorId];
   _pauseStartTimes.delete(vendedorId);
-  _lastQueueKey = ''; invalidateFooter(); // forçar re-render
+  invalidateQueue(); invalidateFooter(); // forçar re-render
   // Registrar retorno no log
   try { sb.rpc('registrar_retorno', { p_vendedor_id: vendedorId }); } catch(e) {}
   await addToQueue(vendedorId);
@@ -1349,7 +886,7 @@ window.closeSaida = function() {
   document.getElementById('saidaSheet').classList.remove('open');
   pendingSaidaId = null;
   // Forçar re-render completo para restaurar DOM stale (fix: último item arrastado pro footer)
-  _lastQueueKey = '';
+  invalidateQueue();
   invalidateFooter();
   scheduleRender();
 };
@@ -1397,8 +934,8 @@ window.finalizarTodos = async function() {
 
 // ─── Safety: limpar ghosts órfãos a cada 3s ───
 setInterval(() => {
-  if (!touchDragging && !_atendTouchDragging) {
-    if (touchGhost) { touchGhost.remove(); touchGhost = null; }
+  if (!isTouchDragging() && !_atendTouchDragging) {
+    const _tg = getTouchGhost(); if (_tg) { _tg.remove(); setTouchGhost(null); }
     if (_atendDragGhost) { _atendDragGhost.remove(); _atendDragGhost = null; }
     // Restaurar overflow caso tenha ficado travado
     if (document.body.style.overflow === 'hidden') {
@@ -1460,7 +997,7 @@ async function updateQuickStats() {
   }
   const changed = JSON.stringify(newCounts) !== JSON.stringify(_vendorAtendCount);
   _vendorAtendCount = newCounts;
-  if (changed) { _lastQueueKey = ''; invalidateFooter(); scheduleRender(); }
+  if (changed) { invalidateQueue(); invalidateFooter(); scheduleRender(); }
 }
 
 // Turno functions imported from /js/tablet-turno.js
@@ -1617,7 +1154,7 @@ window.cancelarAtendimento = async function(atendId) {
     });
 
     removeAtendimento(atendId);
-    _lastQueueKey = ''; invalidateFooter();
+    invalidateQueue(); invalidateFooter();
     scheduleRender();
 
     // Persist: set status + posição first, then reorder
@@ -2175,7 +1712,7 @@ function applyTvMode() {
   if (layout) layout.classList.toggle('tv-mode', _tvMode);
   if (btn) btn.classList.toggle('active', _tvMode);
   // Forçar re-render para esconder/mostrar elementos dinâmicos
-  _lastQueueKey = '';
+  invalidateQueue();
   invalidateFooter();
   scheduleRender();
 }
@@ -2260,26 +1797,14 @@ document.addEventListener('visibilitychange', () => {
     clearInterval(timerInterval); timerInterval = null;
     clearInterval(_clockInterval); _clockInterval = null;
     clearInterval(_sessionInterval); _sessionInterval = null;
-    if (touchDragging) {
-      if (touchGhost) { touchGhost.remove(); touchGhost = null; }
-      if (touchDragEl) touchDragEl.style.opacity = '1';
-      document.body.style.overflow = '';
-      _queuePanel?.style.setProperty('overflow', '');
-      _servicePanel?.style.setProperty('overflow', '');
-      touchDragging = false; touchDragId = null; touchDragEl = null;
-      draggedId = null; // Limpar drag desktop também
-      _dragRectsCache = null;
-    }
-    // Sempre limpar draggedId ao ocultar tab (previne renderFooter bloqueado)
-    draggedId = null;
+    resetDragState();
+    document.body.style.overflow = '';
+    _queuePanel?.style.setProperty('overflow', '');
+    _servicePanel?.style.setProperty('overflow', '');
   } else {
     // Resetar TODOS os flags de drag (inclusive ghosts órfãos)
     _localAction = false;
-    draggedId = null;
-    touchDragging = false;
-    touchDragId = null;
-    if (touchDragEl) { touchDragEl.style.opacity = '1'; touchDragEl = null; }
-    if (touchGhost) { touchGhost.remove(); touchGhost = null; }
+    resetDragState();
     _atendTouchDragging = false;
     if (_atendDragGhost) { _atendDragGhost.remove(); _atendDragGhost = null; }
     document.body.style.overflow = '';
@@ -2293,7 +1818,7 @@ document.addEventListener('visibilitychange', () => {
     clearInterval(_sessionInterval);
     _sessionInterval = setInterval(() => { if (currentTurno) updateQuickStats(); }, 60000);
     // Invalidar cache e forçar re-render
-    _lastQueueKey = '';
+    invalidateQueue();
     invalidateFooter();
     scheduleRender();
     if (activeAtendimentos.length > 0) renderActiveAtendimentos();
@@ -2323,7 +1848,7 @@ window.addEventListener('beforeunload', () => {
   clearTimeout(_rtVendTimer);
   clearTimeout(_rtAtendTimer);
   clearTimeout(_reconnectTimer);
-  if (_itemObserver) _itemObserver.disconnect();
+  cleanupQueue();
   try { if (_rtChannel) { _rtChannel.unsubscribe(); sb.removeChannel(_rtChannel); _rtChannel = null; } } catch(e) {}
 });
 
