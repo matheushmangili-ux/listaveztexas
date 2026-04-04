@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { token, nome_loja, slug, setores, vendedores } = await req.json()
+    const { token, nome_loja, slug, setores, vendedores, owner_email, owner_password } = await req.json()
 
     // Validate required fields
     if (!nome_loja || !slug || !setores?.length || !vendedores?.length) {
@@ -73,23 +73,30 @@ Deno.serve(async (req) => {
     const planLimits: Record<string, number> = { starter: 5, pro: 15, advanced: 30 }
     const maxVendedores = planLimits[plano] || 15
 
-    // If we have an owner email from token, create or find owner auth user
+    // Create or find owner auth user
     let ownerUserId: string | null = null
-    let ownerSession: { access_token: string; refresh_token: string } | null = null
 
-    if (ownerEmail) {
+    // Prefer email/password from wizard; fall back to token email
+    const finalOwnerEmail = owner_email || ownerEmail
+    const finalOwnerPassword = owner_password || crypto.randomUUID().slice(0, 16)
+
+    if (finalOwnerEmail) {
       // Check if user already exists
       const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
-      const existingUser = existingUsers?.users?.find(u => u.email === ownerEmail)
+      const existingUser = existingUsers?.users?.find(u => u.email === finalOwnerEmail)
 
       if (existingUser) {
         ownerUserId = existingUser.id
+        // Update password if provided from wizard
+        if (owner_password) {
+          await supabaseAdmin.auth.admin.updateUserById(existingUser.id, {
+            password: owner_password
+          })
+        }
       } else {
-        // Create owner auth user with a temporary password
-        const tempPassword = crypto.randomUUID().slice(0, 16)
         const { data: newUser, error: createErr } = await supabaseAdmin.auth.admin.createUser({
-          email: ownerEmail,
-          password: tempPassword,
+          email: finalOwnerEmail,
+          password: finalOwnerPassword,
           email_confirm: true,
           user_metadata: { user_role: 'owner' }
         })
@@ -100,6 +107,7 @@ Deno.serve(async (req) => {
         }
         ownerUserId = newUser.user!.id
       }
+      ownerEmail = finalOwnerEmail
     }
 
     // Create tenant
@@ -215,6 +223,7 @@ Deno.serve(async (req) => {
       tenant_id: tenantId,
       slug,
       nome_loja,
+      owner_email: ownerEmail,
       rec_email: recEmail,
       rec_password: recPassword
     }), {

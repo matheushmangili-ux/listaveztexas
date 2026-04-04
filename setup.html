@@ -361,6 +361,8 @@
     <div class="progress-step" data-step="3">3</div>
     <div class="progress-line" data-line="3"></div>
     <div class="progress-step" data-step="4">4</div>
+    <div class="progress-line" data-line="4"></div>
+    <div class="progress-step" data-step="5">5</div>
   </div>
 
   <div class="setup-box">
@@ -447,15 +449,46 @@
       </div>
     </div>
 
-    <!-- Step 4: Review -->
+    <!-- Step 4: Account -->
     <div class="step-panel" data-panel="4">
+      <h2 class="step-title">Sua Conta</h2>
+      <p class="step-desc">Crie seu acesso de administrador para gerenciar a loja</p>
+
+      <div class="form-group">
+        <label class="form-label">Seu email</label>
+        <input id="ownerEmail" class="input" type="email" placeholder="seu@email.com" autocomplete="email">
+        <div class="form-hint">Você usará este email para fazer login no dashboard</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input id="ownerPassword" class="input" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" minlength="6">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Confirmar senha</label>
+        <input id="ownerPasswordConfirm" class="input" type="password" placeholder="Repita a senha" autocomplete="new-password">
+      </div>
+
+      <div class="step-nav">
+        <button class="btn btn-ghost" onclick="goStep(3)">
+          <i class="fa-solid fa-arrow-left"></i> Voltar
+        </button>
+        <button class="btn btn-primary" onclick="goStep(5)">
+          Próximo <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 5: Review -->
+    <div class="step-panel" data-panel="5">
       <h2 class="step-title">Revisão</h2>
       <p class="step-desc">Confirme os dados antes de criar sua loja</p>
 
       <div id="reviewContent"></div>
 
       <div class="step-nav">
-        <button class="btn btn-ghost" onclick="goStep(3)">
+        <button class="btn btn-ghost" onclick="goStep(4)">
           <i class="fa-solid fa-arrow-left"></i> Voltar
         </button>
         <button id="btnCreate" class="btn btn-primary" onclick="createTenant()">
@@ -464,8 +497,8 @@
       </div>
     </div>
 
-    <!-- Step 5: Success -->
-    <div class="step-panel" data-panel="5">
+    <!-- Step 6: Success -->
+    <div class="step-panel" data-panel="6">
       <div class="success-panel">
         <div class="success-icon">
           <i class="fa-solid fa-check"></i>
@@ -490,6 +523,18 @@
           <div class="url-card">
             <span class="url-text" id="urlLogin"></span>
             <button class="copy-btn" onclick="copyUrl('urlLogin')"><i class="fa-solid fa-copy"></i> Copiar</button>
+          </div>
+
+          <div class="gold-line" style="margin:20px 0"></div>
+
+          <label class="form-label">Seu acesso (administrador)</label>
+          <div class="url-card">
+            <span class="url-text" id="credEmail" style="color:var(--text-primary)"></span>
+            <button class="copy-btn" onclick="copyUrl('credEmail')"><i class="fa-solid fa-copy"></i> Copiar</button>
+          </div>
+          <div class="form-hint" style="margin-top:8px;color:var(--text-muted)">
+            <i class="fa-solid fa-lock" style="margin-right:4px"></i>
+            Use a senha que você definiu para fazer login na aba "Email"
           </div>
         </div>
 
@@ -628,8 +673,17 @@ window.goStep = function(step) {
       const valid = validateVendors();
       if (!valid) return;
     }
+    if (currentStep === 4) {
+      const email = document.getElementById('ownerEmail').value.trim();
+      const pass = document.getElementById('ownerPassword').value;
+      const pass2 = document.getElementById('ownerPasswordConfirm').value;
+      if (!email) { showError('Digite seu email'); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('Email inválido'); return; }
+      if (!pass || pass.length < 6) { showError('A senha deve ter pelo menos 6 caracteres'); return; }
+      if (pass !== pass2) { showError('As senhas não conferem'); return; }
+    }
   }
-  if (step === 4) buildReview();
+  if (step === 5) buildReview();
   currentStep = step;
   // Update panels
   document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
@@ -746,6 +800,8 @@ function buildReview() {
   const name = document.getElementById('storeName').value.trim();
   const slug = document.getElementById('storeSlug').value.trim();
 
+  const ownerEmail = document.getElementById('ownerEmail').value.trim();
+
   document.getElementById('reviewContent').innerHTML = `
     <div class="review-card">
       <h3><i class="fa-solid fa-store" style="margin-right:6px"></i>Loja</h3>
@@ -767,6 +823,11 @@ function buildReview() {
         </div>
       `).join('')}
     </div>
+    <div class="review-card">
+      <h3><i class="fa-solid fa-user-shield" style="margin-right:6px"></i>Conta do administrador</h3>
+      <div class="review-item"><span class="label">Email</span><span class="value">${ownerEmail}</span></div>
+      <div class="review-item"><span class="label">Senha</span><span class="value">••••••</span></div>
+    </div>
   `;
 }
 
@@ -779,6 +840,8 @@ window.createTenant = async function() {
 
   const name = document.getElementById('storeName').value.trim();
   const slug = document.getElementById('storeSlug').value.trim();
+  const ownerEmail = document.getElementById('ownerEmail').value.trim();
+  const ownerPassword = document.getElementById('ownerPassword').value;
 
   try {
     // Call provision-tenant Edge Function
@@ -793,7 +856,9 @@ window.createTenant = async function() {
         nome_loja: name,
         slug,
         setores: sectors,
-        vendedores: vendors.map(v => ({ nome: v.nome, setor: v.setor, pin: v.pin }))
+        vendedores: vendors.map(v => ({ nome: v.nome, setor: v.setor, pin: v.pin })),
+        owner_email: ownerEmail,
+        owner_password: ownerPassword
       })
     });
 
@@ -805,17 +870,18 @@ window.createTenant = async function() {
     document.getElementById('urlTablet').textContent = `${baseUrl}/${slug}/tablet`;
     document.getElementById('urlDashboard').textContent = `${baseUrl}/${slug}/dashboard`;
     document.getElementById('urlLogin').textContent = `${baseUrl}/${slug}/login`;
+    document.getElementById('credEmail').textContent = ownerEmail;
 
-    // If we got session tokens, sign in
-    if (result.access_token) {
-      await sb.auth.setSession({
-        access_token: result.access_token,
-        refresh_token: result.refresh_token
-      });
-    }
+    // Auto-login with the credentials the user just set
+    try {
+      const { data } = await sb.auth.signInWithPassword({ email: ownerEmail, password: ownerPassword });
+      if (data?.session) {
+        toast('Loja criada e login realizado!', 'success');
+      }
+    } catch(_) { /* login will happen manually */ }
 
     toast('Loja criada com sucesso!', 'success');
-    goStep(5);
+    goStep(6);
   } catch (e) {
     showError(e.message);
     btn.disabled = false;

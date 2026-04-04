@@ -227,6 +227,9 @@ if ('serviceWorker' in navigator) {
         <i class="fa-solid fa-right-to-bracket"></i>
         Entrar
       </button>
+      <div style="text-align:center;margin-top:14px">
+        <a id="forgotLink" href="/forgot-password" style="font-size:12px;color:#e2506f;text-decoration:none;font-weight:500">Esqueci minha senha</a>
+      </div>
     </div>
 
   </div>
@@ -242,11 +245,16 @@ import { loadTenant, applyBranding, getSlug } from '/js/tenant.js';
 
 // Load tenant context from URL slug
 const tenant = await loadTenant();
+const slug = getSlug();
 if (tenant) {
   applyBranding(tenant);
-  // Update store name in UI
   const sub = document.querySelector('.login-box p');
   if (sub) sub.textContent = tenant.nome_loja.toUpperCase();
+}
+// Set slug-aware forgot password link
+if (slug) {
+  const fLink = document.getElementById('forgotLink');
+  if (fLink) fLink.href = `/${slug}/forgot-password`;
 }
 
 // Check if already logged in
