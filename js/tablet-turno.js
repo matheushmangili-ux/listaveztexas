@@ -3,7 +3,7 @@
 // Open/close turno, check-in, turno summary
 // ============================================
 
-import { toast, initials } from '/js/utils.js';
+import { toast, initials, escapeHtml } from '/js/utils.js';
 
 let _ctx = null;
 
@@ -101,7 +101,7 @@ async function openTurnoSummary() {
       </div>
       ${topVendedor ? `<div style="background:rgba(251,191,36,.08);border-radius:10px;padding:12px;text-align:center;margin-bottom:12px">
         <span style="font-size:18px;margin-right:6px">🏆</span>
-        <span style="font-weight:700;font-size:14px">${topVendedor.nome}</span>
+        <span style="font-weight:700;font-size:14px">${escapeHtml(topVendedor.nome)}</span>
         <span style="font-family:var(--font-mono);font-size:13px;color:var(--success);margin-left:6px">${topVendedor.vendas} venda${topVendedor.vendas > 1 ? 's' : ''}</span>
       </div>` : ''}
       ${inQueueCount > 0 ? `<div style="background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.2);border-radius:10px;padding:10px;text-align:center;font-size:13px;color:var(--warning);font-weight:600">
@@ -157,7 +157,7 @@ function openCheckin() {
     return `<label class="checkin-item" data-id="${v.id}">
       <div style="display:flex;align-items:center;gap:12px;flex:1">
         <div style="width:36px;height:36px;border-radius:10px;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:12px;color:var(--text-secondary);flex-shrink:0">${ini}</div>
-        <span style="font-weight:600;font-size:14px">${nome}</span>
+        <span style="font-weight:600;font-size:14px">${escapeHtml(nome)}</span>
       </div>
       <input type="checkbox" class="checkin-toggle" value="${v.id}" style="display:none">
       <div class="checkin-switch">

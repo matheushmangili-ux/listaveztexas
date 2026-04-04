@@ -28,6 +28,16 @@ export const SAIDA_COLORS = {
 
 export const PAUSE_LIMITS = { almoco: 60, banheiro: 15, reuniao: 30, operacional: 45 }; // minutos
 
+export function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export function formatTime(seconds) {
   if (!seconds || !isFinite(seconds)) return '0min 0s';
   const h = Math.floor(seconds / 3600);

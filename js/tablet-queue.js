@@ -3,7 +3,7 @@
 // renderQueue, drag desktop + touch
 // ============================================
 
-import { STATUS_CONFIG, SAIDA_COLORS, formatTime, initials, toast } from '/js/utils.js';
+import { STATUS_CONFIG, SAIDA_COLORS, formatTime, initials, toast, escapeHtml } from '/js/utils.js';
 import { renderFooter, invalidateFooter, showFooterDropLabel, hideFooterDropLabel } from '/js/tablet-footer.js';
 import { COLD_SELLER_TIMEOUT, ATTENDANCE_DANGER_SECONDS, DRAG_THRESHOLD_QUEUE, DRAG_GHOST_Y_OFFSET, Z_DRAG_GHOST, TOAST_SHORT } from '/js/constants.js';
 
@@ -159,8 +159,8 @@ export function renderQueue() {
       div.innerHTML = `<div class="queue-item" data-id="${v.id}" data-action="return-pause" draggable="true" style="cursor:grab;opacity:.8;border-left:3px solid ${motivoColor}">
         <div class="queue-position" style="background:${motivoColor}20;color:${motivoColor}"><i class="fa-solid ${STATUS_CONFIG.pausa.icon}" style="font-size:11px"></i></div>
         <div style="flex:1;min-width:0">
-          <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.apelido || v.nome}</div>
-          <div style="font-size:10px;color:${motivoColor};font-weight:600;text-transform:uppercase;letter-spacing:.05em">${motivoLabel}</div>
+          <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(v.apelido || v.nome)}</div>
+          <div style="font-size:10px;color:${motivoColor};font-weight:600;text-transform:uppercase;letter-spacing:.05em">${escapeHtml(motivoLabel)}</div>
         </div>
         <i class="fa-solid fa-arrow-rotate-left" style="color:var(--success);font-size:12px;opacity:.6" title="Voltar à fila"></i>
       </div>`;
@@ -210,7 +210,7 @@ function renderQueueItem(v, pos, isActive, draggable) {
     ${posHtml}
     <div style="flex:1;min-width:0">
       <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.apelido || v.nome}</span>
+        <span style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(v.apelido || v.nome)}</span>
         ${countBadge}
       </div>
       <div style="font-size:10px;color:${cfg.color};font-weight:600;text-transform:uppercase;letter-spacing:.05em">${cfg.short}</div>

@@ -4,7 +4,7 @@
 // multi-client, troca, venda, motivos, finalize
 // ============================================
 
-import { toast, formatTime, initials } from '/js/utils.js';
+import { toast, formatTime, initials, escapeHtml } from '/js/utils.js';
 import { playSound } from '/js/sound.js';
 import { createModal, currencyInputHTML, parseCurrency } from '/js/ui.js';
 import { fireVendaCelebration, fireEpicTrocaAnimation } from '/js/tablet-celebrations.js';
@@ -100,7 +100,7 @@ function showOriginModal(vendedorId) {
   content += '<div class="origin-grid">';
   fixos.forEach(c => {
     content += '<button class="origin-btn" onclick="confirmOrigin(\'' + c.id + '\')">' +
-               '<i class="' + c.icone + '"></i><span>' + c.nome + '</span></button>';
+               '<i class="' + escapeHtml(c.icone) + '"></i><span>' + escapeHtml(c.nome) + '</span></button>';
   });
   content += '</div>';
 
@@ -109,7 +109,7 @@ function showOriginModal(vendedorId) {
     content += '<div class="origin-grid">';
     eventos.forEach(c => {
       content += '<button class="origin-btn" onclick="confirmOrigin(\'' + c.id + '\')">' +
-                 '<i class="' + c.icone + '"></i><span>' + c.nome + '</span></button>';
+                 '<i class="' + escapeHtml(c.icone) + '"></i><span>' + escapeHtml(c.nome) + '</span></button>';
     });
     content += '</div>';
   }
@@ -398,12 +398,12 @@ export function renderActiveAtendimentos() {
     const prefBadge = atend.preferencial ? '<span style="display:inline-block;background:var(--warning);color:#060606;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:6px;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle">PREF</span>' : '';
     const clientBadge = (atend._clientCount && atend._clientCount > 1) ? `<span style="display:inline-block;background:var(--info);color:#fff;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:6px;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle">${atend._clientCount} clientes</span>` : '';
     const canal = atend.canais_origem;
-    const canalHtml = canal && canal.icone ? `<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;margin-left:auto;padding:4px 8px;border-radius:8px;background:var(--bg-surface);border:1px solid var(--border-subtle)" title="${canal.nome || 'Canal'}"><i class="${canal.icone}" style="font-size:14px;color:var(--accent)"></i><span style="font-size:10px;font-weight:600;color:var(--text-muted);max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${canal.nome}</span></div>` : '';
+    const canalHtml = canal && canal.icone ? `<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;margin-left:auto;padding:4px 8px;border-radius:8px;background:var(--bg-surface);border:1px solid var(--border-subtle)" title="${escapeHtml(canal.nome || 'Canal')}"><i class="${escapeHtml(canal.icone)}" style="font-size:14px;color:var(--accent)"></i><span style="font-size:10px;font-weight:600;color:var(--text-muted);max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(canal.nome)}</span></div>` : '';
     card.dataset.atendId = atend.id;
     card.innerHTML = `
       <div class="atend-avatar">${initials(nome)}</div>
       <div class="atend-info">
-        <div class="atend-name">${nome}${prefBadge}${clientBadge}</div>
+        <div class="atend-name">${escapeHtml(nome)}${prefBadge}${clientBadge}</div>
         <div class="atend-timer" id="timer-${atend.id}">0min 0s</div>
       </div>
       ${canalHtml}

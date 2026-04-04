@@ -5,6 +5,7 @@
 
 import { playSound } from '/js/sound.js';
 import { CELEBRATION_FLASH_SHOW, CELEBRATION_FLASH_FADE, CELEBRATION_EPIC_SHOW, CELEBRATION_EPIC_FADE, Z_DRAG_GHOST } from '/js/constants.js';
+import { escapeHtml } from '/js/utils.js';
 
 let _epicOverlay = null;
 let _epicRaf = null;
@@ -87,7 +88,7 @@ export function fireEpicTrocaAnimation(nome, valor) {
   card.innerHTML = `
     <div style="font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#a78bfa;margin-bottom:12px;animation:epicGlow 1.5s ease infinite alternate">CONQUISTA DESBLOQUEADA</div>
     <div style="font-size:48px;margin-bottom:8px;animation:epicBounce .8s cubic-bezier(.2,.8,.3,1) .3s both">💎</div>
-    <div style="font-family:var(--font-mono);font-size:20px;font-weight:800;color:#e879f9;margin-bottom:4px;text-shadow:0 0 20px rgba(232,121,249,.4)">${nome}</div>
+    <div style="font-family:var(--font-mono);font-size:20px;font-weight:800;color:#e879f9;margin-bottom:4px;text-shadow:0 0 20px rgba(232,121,249,.4)">${escapeHtml(nome)}</div>
     <div style="font-size:13px;color:#c4b5fd;font-weight:600;margin-bottom:16px">Troca com diferença épica</div>
     <div style="font-family:var(--font-mono);font-size:32px;font-weight:800;color:#f0abfc;text-shadow:0 0 30px rgba(240,171,252,.4);animation:epicPulse 1s ease infinite alternate">R$ ${Number(valor).toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
     <div style="margin-top:16px;font-size:10px;color:#7c3aed;font-weight:700;letter-spacing:.1em">1º DA FILA GARANTIDO</div>

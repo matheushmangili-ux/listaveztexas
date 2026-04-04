@@ -5,7 +5,7 @@
 
 import { fetchCanalStats, fetchDrillMotivo, fetchRuptureLog, fetchPauseLog, fetchVendedores, fetchTodosVendedores } from '/js/dashboard-api.js';
 import { CHART_HEIGHT, CHART_TAB_KEY, ORIGEM_PALETTE, ANIM, DEFAULT_METAS, PERIODS } from '/js/dashboard-config.js';
-import { STATUS_CONFIG, MOTIVOS, initials, toast, todayRange } from '/js/utils.js';
+import { STATUS_CONFIG, MOTIVOS, initials, toast, todayRange, escapeHtml } from '/js/utils.js';
 import { CHART_RESIZE_DELAY } from '/js/constants.js';
 
 let _ctx = null;
@@ -527,7 +527,7 @@ export async function loadRanking(range, cachedData) {
     return `<div class="rank-card${isTop ? ' top-3' : ''}">
       <div class="rank-pos">${medal || '#' + (i + 1)}</div>
       <div class="rank-avatar">${avatarContent}</div>
-      <div class="rank-name">${r.apelido || r.nome.split(' ')[0]}</div>
+      <div class="rank-name">${escapeHtml(r.apelido || r.nome.split(' ')[0])}</div>
       <div class="rank-conv-value" style="color:${convColor}">${cv}%</div>
       <div class="rank-conv-bar"><div class="rank-conv-fill" style="width:${barW}%;background:${convColor}"></div></div>
       <div class="rank-stats">
@@ -561,7 +561,7 @@ export async function loadRuptures(range) {
   }
   el.innerHTML = data.map(r => `<div class="rupture-item">
     <div>
-      <div style="font-weight:600;font-size:13px">${r.produto}</div>
+      <div style="font-weight:600;font-size:13px">${escapeHtml(r.produto)}</div>
       <div style="font-size:10px;color:var(--text-muted)">${r.total} ${r.total === 1 ? 'registro' : 'registros'}</div>
     </div>
     <div class="rupture-count">${r.total}</div>
@@ -594,7 +594,7 @@ export async function loadPauseStats(range) {
       <div style="display:flex;align-items:center;gap:10px">
         <i class="fa-solid ${motIcon}" style="font-size:14px;color:${motColor};width:18px;text-align:center;flex-shrink:0"></i>
         <div>
-          <div style="font-weight:600;font-size:13px">${r.vendedor_nome}${emPausa ? ' <i class="fa-solid fa-circle" style="font-size:6px;color:var(--warning);vertical-align:middle;margin-left:4px;animation:dotPulse 2s ease-in-out infinite"></i>' : ''}</div>
+          <div style="font-weight:600;font-size:13px">${escapeHtml(r.vendedor_nome)}${emPausa ? ' <i class="fa-solid fa-circle" style="font-size:6px;color:var(--warning);vertical-align:middle;margin-left:4px;animation:dotPulse 2s ease-in-out infinite"></i>' : ''}</div>
           <div style="font-size:10px;color:var(--text-muted)">${motLabel} · ${horaInicio} → ${horaFim}</div>
         </div>
       </div>
@@ -620,7 +620,7 @@ export async function loadFloor() {
     const cfg = STATUS_CONFIG[v.status] || STATUS_CONFIG.fora;
     return `<div class="led-item">
       <div class="led-dot" style="background:${cfg.color};color:${cfg.color}"></div>
-      <span class="led-name" style="color:var(--text-primary)">${v.apelido || v.nome}</span>
+      <span class="led-name" style="color:var(--text-primary)">${escapeHtml(v.apelido || v.nome)}</span>
       <span class="led-status" style="color:${cfg.color}">${cfg.short}</span>
     </div>`;
   }).join('');
@@ -652,7 +652,7 @@ function renderHeaderMarquee(vendedoresData) {
     const isOnTime = v.status === 'disponivel';
     return `<div class="marquee-pill">
       <div class="mp-dot${isOnTime ? ' pulse-on' : ''}" style="background:${cfg.color}"></div>
-      <span class="mp-name">${v.apelido || v.nome.split(' ')[0]}</span>
+      <span class="mp-name">${escapeHtml(v.apelido || v.nome.split(' ')[0])}</span>
       <span class="mp-status${isFora ? ' fora' : ''}" style="color:${isFora ? '' : cfg.color}">${cfg.short}${pos}</span>
     </div>`;
   }).join('');

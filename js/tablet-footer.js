@@ -3,7 +3,7 @@
 // Render, events, confirm-fila popup
 // ============================================
 
-import { STATUS_CONFIG, SAIDA_COLORS, PAUSE_LIMITS, initials, toast } from '/js/utils.js';
+import { STATUS_CONFIG, SAIDA_COLORS, PAUSE_LIMITS, initials, toast, escapeHtml } from '/js/utils.js';
 import { FOOTER_TIMER_INTERVAL, INPUT_FOCUS_DELAY, Z_MENU } from '/js/constants.js';
 
 let _ctx = null;
@@ -138,7 +138,7 @@ export function renderFooter() {
 
     const ini = initials(v.apelido || v.nome);
     const avatarContent = v.foto_url
-      ? `<img src="${v.foto_url}" alt="${v.apelido || v.nome}" loading="lazy" width="48" height="48">`
+      ? `<img src="${v.foto_url}" alt="${escapeHtml(v.apelido || v.nome)}" loading="lazy" width="48" height="48">`
       : ini;
 
     // Avatar color by status
@@ -151,7 +151,7 @@ export function renderFooter() {
 
     return `<div class="footer-card${inQueueClass}${pauseExceededClass}" data-id="${v.id}" ${dragAttr}>
       <div class="fc-avatar" style="background:${avatarBg}">${avatarContent}</div>
-      <span class="fc-name">${firstName}</span>
+      <span class="fc-name">${escapeHtml(firstName)}</span>
       <span class="fc-status" style="color:${statusColor}">${statusLabel}</span>
     </div>`;
   }).join('');
@@ -228,7 +228,7 @@ function openConfirmFila(vendedorId) {
   menu.style.cssText = `position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--bg-card);border:1px solid var(--border-medium);border-radius:16px;padding:20px;z-index:${Z_MENU};box-shadow:0 4px 20px rgba(0,0,0,.2);min-width:280px;text-align:center;color:var(--text-primary)`;
 
   menu.innerHTML = `
-    <div style="font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:6px">${nome}</div>
+    <div style="font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:6px">${escapeHtml(nome)}</div>
     <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Colocar na fila de atendimento?</div>
     <div style="display:flex;gap:10px">
       <button onclick="closeConfirmFila()" style="flex:1;padding:12px;border:1px solid var(--border-subtle);border-radius:12px;background:var(--bg-hover);color:var(--text-muted);font-weight:600;font-size:14px;cursor:pointer;font-family:var(--font-body)">Cancelar</button>
