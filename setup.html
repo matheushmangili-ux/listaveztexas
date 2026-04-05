@@ -553,7 +553,7 @@
 <button onclick="document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');localStorage.setItem('lv-theme',document.documentElement.getAttribute('data-theme'))" style="position:fixed;top:16px;right:16px;width:32px;height:32px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-card);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;font-size:13px" title="Modo claro/escuro"><i class="fa-solid fa-circle-half-stroke"></i></button>
 
 <script type="module">
-import { getSupabase } from '/js/supabase-config.js';
+import { getSupabase, SUPABASE_URL, SUPABASE_ANON_KEY } from '/js/supabase-config.js';
 import { toast, initTheme } from '/js/utils.js';
 initTheme();
 
@@ -879,6 +879,16 @@ window.createTenant = async function() {
         toast('Loja criada e login realizado!', 'success');
       }
     } catch(_) { /* login will happen manually */ }
+
+    // Send setup-complete email (fire-and-forget — não bloqueia o fluxo)
+    fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify({ type: 'setup-complete', to: ownerEmail, slug, plano: result.plano || 'pro' })
+    }).catch(() => { /* silently ignore — email é best-effort */ });
 
     toast('Loja criada com sucesso!', 'success');
     goStep(6);
