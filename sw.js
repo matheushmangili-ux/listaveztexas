@@ -1,7 +1,21 @@
-// Minha Vez — Service Worker v6 (network-first, lightweight)
-const CACHE_NAME = 'minhavez-v8';
+// Minha Vez — Service Worker v9 (network-first, offline-capable)
+const CACHE_NAME = 'minhavez-v9';
 const STATIC_ASSETS = [
+  '/tablet.html',
   '/css/styles.css',
+  '/css/tablet.css',
+  '/js/constants.js',
+  '/js/utils.js',
+  '/js/supabase-config.js',
+  '/js/tenant.js',
+  '/js/ui.js',
+  '/js/sound.js',
+  '/js/update-checker.js',
+  '/js/tablet-atendimento.js',
+  '/js/tablet-celebrations.js',
+  '/js/tablet-footer.js',
+  '/js/tablet-queue.js',
+  '/js/tablet-turno.js',
   '/assets/logo-minhavez-web.png',
   '/manifest.json'
 ];
@@ -22,20 +36,18 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// Fetch: network-first for everything, cache fallback only for static assets
+// Fetch: network-first for everything, cache fallback for offline
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Skip external requests
+  // Skip Supabase API/realtime/auth — never intercept these
   if (url.hostname.includes('supabase')) return;
+
+  // Skip external CDN resources (fonts, font-awesome, supabase-js CDN)
   if (url.hostname.includes('cdn') || url.hostname.includes('cdnjs')) return;
   if (url.hostname.includes('fonts')) return;
 
-  // HTML/JS: always network, no cache
-  const isPage = e.request.destination === 'document' || url.pathname.endsWith('.html') || url.pathname.endsWith('.js') || url.pathname === '/';
-  if (isPage) return; // Let browser handle directly — no SW interception
-
-  // Static assets: network-first with cache fallback
+  // Network-first with cache fallback for all same-origin requests
   e.respondWith(
     fetch(e.request)
       .then(response => {
