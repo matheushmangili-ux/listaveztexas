@@ -73,17 +73,20 @@ window.addEventListener('error', function(e) {
         </div>
       </div>
     </div>
-    <div class="flex-center gap-4 shrink-0">
-      <button style="min-height:44px;min-width:44px;padding:0 10px;font-size:14px;color:#FFFFFF;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="toggleMiniRanking()" title="Ranking do turno">
-        <i class="fa-solid fa-trophy"></i>
+    <div class="flex-center gap-8 shrink-0">
+      <!-- Clock pill -->
+      <div class="clock-pill">
+        <span class="live-clock" id="clock">--:--</span>
+      </div>
+      <!-- Ranking card -->
+      <button class="action-card ranking-card" onclick="toggleMiniRanking()" title="Ranking do turno">
+        <i class="fa-solid fa-ranking-star"></i>
+        <span>Ranking</span>
       </button>
-      <span class="live-clock" id="clock" style="font-size:16px">--:--</span>
-      <div class="turno-switch" id="turnoSwitch" onclick="toggleTurno()">
-        <div class="turno-switch-track" id="turnoTrack">
-          <div class="turno-switch-thumb" id="turnoThumb"></div>
-        </div>
-        <span class="turno-switch-label" id="turnoSwitchLabel">OFF</span>
-        <span class="turno-pulse-dot" id="turnoPulse"></span>
+      <!-- Iniciar / Encerrar turno card -->
+      <div class="action-card turno-card" id="turnoSwitch" onclick="toggleTurno()">
+        <i class="fa-solid fa-play" id="turnoIcon"></i>
+        <span id="turnoSwitchLabel">Iniciar</span>
       </div>
       <div style="position:relative">
         <button class="more-btn" onclick="toggleMoreMenu()" title="Mais opções">
@@ -562,8 +565,13 @@ initAtendimento({
 let _lastClockText = '';
 function updateClock() {
   const now = new Date();
-  const text = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-  if (text !== _lastClockText) { dom.clockEl.textContent = text; _lastClockText = text; }
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const text = h + m;
+  if (text !== _lastClockText) {
+    dom.clockEl.innerHTML = h + '<span class="clock-colon">:</span>' + m;
+    _lastClockText = text;
+  }
 }
 updateClock();
 timers.clock = setInterval(updateClock, CLOCK_UPDATE_INTERVAL);

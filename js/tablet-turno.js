@@ -27,8 +27,10 @@ export function initTurno(ctx) {
 export function updateTurnoSwitch(isOn) {
   const sw = document.getElementById('turnoSwitch');
   const label = document.getElementById('turnoSwitchLabel');
+  const icon = document.getElementById('turnoIcon');
   if (sw) sw.classList.toggle('on', isOn);
-  if (label) label.textContent = isOn ? 'ON' : 'OFF';
+  if (label) label.textContent = isOn ? 'Encerrar' : 'Iniciar';
+  if (icon) icon.className = isOn ? 'fa-solid fa-stop' : 'fa-solid fa-play';
 }
 
 // ─── Toggle turno (open or show summary to close) ───

@@ -31,7 +31,7 @@
   }
   /* Esconder ranking em telas menores */
   @media (max-width: 900px) {
-    .t-header [title="Ranking do turno"] { display: none; }
+    .ranking-card { display: none; }
   }
 
   /* Queue panel (left — Fila de Espera) */
@@ -150,19 +150,76 @@
     min-height: 88px;
     flex-shrink: 0;
   }
-  /* ─── Turno Toggle Switch ─── */
-  .turno-switch {
-    display: flex;
+  /* ─── Action Cards (header: Ranking + Iniciar/Encerrar) ─── */
+  .action-card {
+    display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 7px;
+    padding: 9px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: var(--font-sans);
     cursor: pointer;
+    border: 1px solid transparent;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
-    padding: 4px;
+    white-space: nowrap;
+    letter-spacing: .01em;
+    transition: all .18s cubic-bezier(.16,1,.3,1);
+    min-height: 40px;
+    text-decoration: none;
+    background: none;
+    color: inherit;
   }
-  .turno-switch:active .turno-switch-thumb {
-    width: 26px;
+  .action-card:active { transform: scale(.95); }
+
+  /* Ranking — outlined rose */
+  .ranking-card {
+    background: rgba(226,80,111,.1);
+    color: #f0758e;
+    border-color: rgba(226,80,111,.2);
   }
+  .ranking-card:hover {
+    background: rgba(226,80,111,.18);
+    border-color: rgba(226,80,111,.36);
+  }
+
+  /* Turno card — Iniciar (OFF): filled rose */
+  .turno-card {
+    background: #e2506f;
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 0 20px rgba(226,80,111,.35);
+  }
+  .turno-card:hover {
+    background: #c43d5a;
+    box-shadow: 0 0 28px rgba(226,80,111,.5);
+  }
+
+  /* Turno card — Encerrar (ON): danger outlined */
+  .turno-card.on {
+    background: rgba(239,68,68,.1);
+    color: #f87171;
+    border-color: rgba(239,68,68,.28);
+    box-shadow: none;
+  }
+  .turno-card.on:hover {
+    background: rgba(239,68,68,.18);
+    border-color: rgba(239,68,68,.45);
+  }
+
+  /* ─── Clock Pill ─── */
+  .clock-pill {
+    display: flex;
+    align-items: center;
+    padding: 7px 14px;
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 10px;
+  }
+
+  /* ─── (legacy shell — kept for TV mode selector compat) ─── */
   .turno-switch-track {
     position: relative;
     width: 48px;
@@ -649,7 +706,9 @@
   /* ─── TV Mode ─── */
   .tablet-layout.tv-mode .t-footer,
   .tablet-layout.tv-mode #setorTabs,
-  .tablet-layout.tv-mode .turno-switch,
+  .tablet-layout.tv-mode .turno-card,
+  .tablet-layout.tv-mode .ranking-card,
+  .tablet-layout.tv-mode .clock-pill,
   .tablet-layout.tv-mode [data-action="send-atend"],
   .tablet-layout.tv-mode .fa-grip-vertical,
   .tablet-layout.tv-mode .outcome-btn,
@@ -821,10 +880,8 @@
     .queue-item { padding: 14px 16px; min-height: 56px; }
     .setor-tab { padding: 12px 10px; font-size: 20px; }
     .motivo-option { padding: 16px; min-height: 56px; }
-    .turno-switch-track { width: 56px; height: 30px; border-radius: 15px; }
-    .turno-switch-thumb { width: 24px; height: 24px; top: 2px; border-radius: 12px; }
-    .turno-switch.on .turno-switch-thumb { transform: translateX(26px); }
-    .turno-switch:active .turno-switch-thumb { width: 30px; }
+    .action-card { font-size: 12px; padding: 8px 13px; }
+    .clock-pill { padding: 7px 12px; }
     /* Origin modal larger touch targets */
     .origin-btn { padding: 16px 10px; min-height: 72px; }
     .origin-skip { min-height: 48px; padding: 12px 28px; font-size: 13px; }
@@ -865,10 +922,19 @@
   /* Live clock */
   .live-clock {
     font-family: var(--font-mono);
-    font-size: 16px;
-    font-weight: 600;
-    color: rgba(255,255,255,.7);
-    letter-spacing: 1px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #FAFAFA;
+    letter-spacing: 2px;
+  }
+  /* Blinking colon */
+  @keyframes clock-blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: .25; }
+  }
+  .live-clock .clock-colon {
+    display: inline-block;
+    animation: clock-blink 1s step-start infinite;
   }
 
   /* ─── Dark Mode (tablet overrides) ─── */
@@ -887,20 +953,7 @@
   [data-theme="dark"] .modal-overlay {
     background: rgba(0,0,0,.7);
   }
-  [data-theme="dark"] .turno-switch-track {
-    background: linear-gradient(180deg, #3f3f46 0%, #27272a 100%);
-    border-color: rgba(255,255,255,.1);
-  }
-  [data-theme="dark"] .turno-switch-thumb {
-    background: linear-gradient(180deg, #e4e4e7 0%, #d4d4d8 50%, #a1a1aa 100%);
-  }
-  [data-theme="dark"] .turno-switch.on .turno-switch-track {
-    background: linear-gradient(180deg, #52525b 0%, #3f3f46 60%, #27272a 100%);
-    border-color: rgba(255,255,255,.12);
-  }
-  [data-theme="dark"] .turno-switch.on .turno-switch-thumb {
-    background: linear-gradient(180deg, #e4e4e7 0%, #d4d4d8 40%, #a1a1aa 100%);
-  }
+  /* Dark mode action cards — same style applies universally, no overrides needed */
   [data-theme="dark"] ::-webkit-scrollbar-thumb {
     background: rgba(255,255,255,.12);
   }

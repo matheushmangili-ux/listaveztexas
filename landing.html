@@ -19,16 +19,16 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --bg-deep: #FFFFFF;
-  --bg-surface: #F5F5F7;
-  --bg-card: #FFFFFF;
-  --bg-elevated: #F0F0F2;
-  --bg-hover: #E8E8EC;
-  --border-subtle: rgba(0,0,0,.06);
-  --border-medium: rgba(0,0,0,.1);
-  --text-primary: #1A1A1A;
-  --text-secondary: #52525B;
-  --text-muted: #A1A1AA;
+  --bg-deep: #09090B;
+  --bg-surface: #111113;
+  --bg-card: #18181B;
+  --bg-elevated: #27272A;
+  --bg-hover: #3F3F46;
+  --border-subtle: rgba(255,255,255,.07);
+  --border-medium: rgba(255,255,255,.12);
+  --text-primary: #FAFAFA;
+  --text-secondary: #A1A1AA;
+  --text-muted: #71717A;
   --accent: #e2506f;
   --accent-bright: #f0758e;
   --accent-dim: #c43d5a;
@@ -45,8 +45,8 @@
 html { scroll-behavior: smooth; }
 body {
   font-family: var(--font-sans);
-  background: #FFFFFF;
-  color: #1A1A1A;
+  background: var(--bg-deep);
+  color: var(--text-primary);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
@@ -107,27 +107,27 @@ body {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   padding: 16px 32px;
   display: flex; align-items: center; justify-content: space-between;
-  background: rgba(255,255,255,.7);
+  background: rgba(9,9,11,.8);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-subtle);
   transition: all .3s ease;
 }
 .nav.scrolled {
   padding: 12px 32px;
-  background: rgba(255,255,255,.95);
-  box-shadow: 0 1px 10px rgba(0,0,0,.06);
+  background: rgba(9,9,11,.98);
+  box-shadow: 0 1px 20px rgba(0,0,0,.4);
 }
 .nav-logo {
   display: flex; align-items: center;
   text-decoration: none;
 }
-.nav-logo img { height: 40px; width: auto; }
+.nav-logo img { height: 52px; width: auto; }
 .nav-links { display: flex; align-items: center; gap: 24px; }
 .nav-links a {
-  color: #52525B; text-decoration: none; font-size: 14px; font-weight: 500;
+  color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500;
   transition: color .2s;
 }
-.nav-links a:hover { color: #1A1A1A; }
+.nav-links a:hover { color: var(--text-primary); }
 .nav-cta {
   background: var(--accent) !important; color: #fff !important; padding: 10px 24px !important;
   border-radius: 8px; font-weight: 600 !important; font-size: 14px !important;
@@ -163,15 +163,16 @@ section { position: relative; z-index: 1; }
 }
 .hero-content {
   text-align: center;
-  max-width: 1100px;
+  max-width: 1300px;
+  width: 100%;
   position: relative;
-  padding: 0 32px;
+  padding: 0 16px;
 }
 .hero-badge {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 8px 20px;
-  background: rgba(0,0,0,.03);
-  border: 1px solid rgba(0,0,0,.08);
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
   border-radius: 100px;
   font-size: 13px; font-weight: 600;
   color: var(--text-secondary);
@@ -189,7 +190,7 @@ section { position: relative; z-index: 1; }
   line-height: 1.15;
   letter-spacing: -.035em;
   margin-bottom: 36px;
-  color: #1A1A1A;
+  color: var(--text-primary);
 }
 .hero h1 .highlight {
   display: block;
@@ -201,7 +202,7 @@ section { position: relative; z-index: 1; }
 }
 .hero p {
   font-size: clamp(17px, 2.2vw, 22px);
-  color: #52525B;
+  color: var(--text-secondary);
   line-height: 1.7;
   max-width: 720px;
   margin: 0 auto 52px;
@@ -229,12 +230,12 @@ section { position: relative; z-index: 1; }
   box-shadow: 0 8px 40px rgba(226,80,111,.3), 0 0 0 4px rgba(226,80,111,.1);
 }
 .btn-ghost {
-  background: transparent; color: #1A1A1A;
-  border: 1px solid rgba(0,0,0,.15);
+  background: transparent; color: var(--text-primary);
+  border: 1px solid var(--border-medium);
 }
 .btn-ghost:hover {
-  background: rgba(0,0,0,.03); color: #1A1A1A;
-  border-color: rgba(0,0,0,.2);
+  background: rgba(255,255,255,.06); color: var(--text-primary);
+  border-color: rgba(255,255,255,.2);
   transform: translateY(-2px);
 }
 
@@ -423,10 +424,10 @@ section { position: relative; z-index: 1; }
   letter-spacing: -.02em;
   max-width: 700px;
   margin: 0 auto;
-  color: #1A1A1A;
+  color: var(--text-primary);
 }
 .section-header p {
-  color: #52525B;
+  color: var(--text-secondary);
   font-size: 17px;
   max-width: 550px;
   margin: 16px auto 0;
@@ -439,13 +440,13 @@ section { position: relative; z-index: 1; }
 }
 .pain-card {
   padding: 28px;
-  background: #FFFFFF;
-  border: 1px solid rgba(0,0,0,.06);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
   transition: all .3s cubic-bezier(.16,1,.3,1);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,.04);
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
 }
 .pain-card::before {
   content: '';
@@ -457,7 +458,7 @@ section { position: relative; z-index: 1; }
 .pain-card:hover {
   transform: translateY(-4px);
   border-color: var(--border-medium);
-  box-shadow: 0 8px 24px rgba(0,0,0,.08);
+  box-shadow: 0 8px 24px rgba(0,0,0,.3);
 }
 .pain-card:hover::before { opacity: 1; }
 .pain-icon {
@@ -484,12 +485,12 @@ section { position: relative; z-index: 1; }
 }
 .feature-card {
   padding: 32px;
-  background: #FFFFFF;
-  border: 1px solid rgba(0,0,0,.06);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   transition: all .3s cubic-bezier(.16,1,.3,1);
   position: relative;
-  box-shadow: 0 2px 8px rgba(0,0,0,.04);
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
 }
 .feature-card:hover {
   transform: translateY(-4px);
@@ -540,12 +541,12 @@ section { position: relative; z-index: 1; }
   display: flex; align-items: center; justify-content: center;
   width: 64px; height: 64px;
   margin: 0 auto 20px;
-  background: #FFFFFF;
+  background: var(--bg-card);
   border: 2px solid #e2506f;
   border-radius: 50%;
   font-family: var(--font-mono);
   font-size: 24px; font-weight: 800;
-  color: #1A1A1A;
+  color: var(--text-primary);
   position: relative;
   transition: all .3s;
 }
@@ -588,13 +589,13 @@ section { position: relative; z-index: 1; }
 .price-card {
   flex: 1; min-width: 280px; max-width: 360px;
   padding: 36px;
-  background: #FFFFFF;
-  border: 1px solid rgba(0,0,0,.06);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   text-align: center;
   transition: all .3s cubic-bezier(.16,1,.3,1);
   position: relative;
-  box-shadow: 0 2px 12px rgba(0,0,0,.05);
+  box-shadow: 0 2px 12px rgba(0,0,0,.3);
 }
 .price-card.featured {
   border-color: var(--accent);
@@ -639,7 +640,7 @@ section { position: relative; z-index: 1; }
   padding: 8px 0;
   font-size: 14px;
   color: var(--text-secondary);
-  border-bottom: 1px solid rgba(0,0,0,.06);
+  border-bottom: 1px solid var(--border-subtle);
 }
 .price-features li:last-child { border: none; }
 .price-features li i {
@@ -685,11 +686,11 @@ section { position: relative; z-index: 1; }
   margin: 0 auto;
   text-align: center;
   padding: 48px;
-  background: #FFFFFF;
-  border: 1px solid rgba(0,0,0,.06);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   position: relative;
-  box-shadow: 0 2px 12px rgba(0,0,0,.05);
+  box-shadow: 0 2px 12px rgba(0,0,0,.3);
 }
 .testimonial-card::before {
   content: '\201C';
@@ -832,7 +833,7 @@ section { position: relative; z-index: 1; }
 <!-- Navigation -->
 <nav class="nav" id="nav">
   <a href="#" class="nav-logo">
-    <img src="/assets/234538172.png" alt="MinhaVez" style="height:36px;width:auto;background:#0a0a0a;border-radius:10px;padding:4px 10px">
+    <img src="/assets/logo-minhavez-new.png" alt="MinhaVez">
   </a>
   <div class="nav-links">
     <a href="#problema">Problema</a>
@@ -874,80 +875,137 @@ section { position: relative; z-index: 1; }
       <span style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted)"><i class="fa-solid fa-check" style="color:var(--success);font-size:11px"></i> Funciona no tablet que você já tem</span>
     </div>
 
-    <!-- Device mockup -->
+    <!-- Device mockup — Dashboard real MinhaVez -->
     <div class="hero-device reveal-scale">
       <div class="device-frame">
+        <!-- Browser chrome -->
         <div class="device-bar">
           <div class="device-dot r"></div>
           <div class="device-dot y"></div>
           <div class="device-dot g"></div>
-          <span style="flex:1;text-align:center;font-size:12px;color:var(--text-muted)">MinhaVez — Painel</span>
+          <span style="flex:1;text-align:center;font-size:11px;color:var(--text-muted);font-family:var(--font-mono)">minhavez.app/texascenter/dashboard</span>
         </div>
-        <div class="device-screen">
-          <div class="mock-sidebar">
-            <div class="mock-queue-item">
-              <span class="mock-pos">1</span>
+        <!-- App header -->
+        <div style="background:#0d0d0f;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06)">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:13px;font-weight:800;color:#FAFAFA;letter-spacing:-.02em">MinhaVez</span>
+            <span style="font-size:10px;color:#71717A;background:rgba(255,255,255,.05);padding:2px 8px;border-radius:4px;border:1px solid rgba(255,255,255,.06)">Texas Center</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="width:7px;height:7px;border-radius:50%;background:#22C55E;display:inline-block"></span>
+            <span style="font-size:11px;color:#71717A">Turno ativo · 08h42</span>
+          </div>
+        </div>
+        <div class="device-screen" style="padding:16px;gap:14px">
+          <!-- Left: fila de vendedores -->
+          <div class="mock-sidebar" style="width:160px">
+            <div style="font-size:9px;font-weight:700;color:#71717A;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;padding:0 4px">Fila · próximo</div>
+            <div class="mock-queue-item" style="border-color:rgba(226,80,111,.2);background:rgba(226,80,111,.07)">
+              <span class="mock-pos" style="color:var(--accent-bright)">1</span>
               <div class="mock-avatar" style="background:linear-gradient(135deg,#e2506f,#f0758e)">RM</div>
-              <span>Rafael M.</span>
+              <div style="min-width:0">
+                <div style="font-size:12px;font-weight:600;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Rafael M.</div>
+                <div style="font-size:10px;color:#71717A">Calçados</div>
+              </div>
             </div>
             <div class="mock-queue-item">
               <span class="mock-pos">2</span>
               <div class="mock-avatar" style="background:linear-gradient(135deg,#059669,#34D399)">JC</div>
-              <span>Julia C.</span>
+              <div style="min-width:0">
+                <div style="font-size:12px;font-weight:600;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Julia C.</div>
+                <div style="font-size:10px;color:#71717A">Roupas</div>
+              </div>
             </div>
             <div class="mock-queue-item">
               <span class="mock-pos">3</span>
               <div class="mock-avatar" style="background:linear-gradient(135deg,#2563EB,#60A5FA)">AS</div>
-              <span>André S.</span>
+              <div style="min-width:0">
+                <div style="font-size:12px;font-weight:600;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">André S.</div>
+                <div style="font-size:10px;color:#71717A">Roupas</div>
+              </div>
             </div>
             <div class="mock-queue-item">
               <span class="mock-pos">4</span>
               <div class="mock-avatar" style="background:linear-gradient(135deg,#D97706,#FBBF24)">LC</div>
-              <span>Lucas C.</span>
+              <div style="min-width:0">
+                <div style="font-size:12px;font-weight:600;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Lucas C.</div>
+                <div style="font-size:10px;color:#71717A">Calçados</div>
+              </div>
             </div>
-            <div class="mock-queue-item">
+            <div class="mock-queue-item" style="opacity:.5">
               <span class="mock-pos">5</span>
               <div class="mock-avatar" style="background:linear-gradient(135deg,#7C3AED,#A78BFA)">TS</div>
-              <span>Thiago S.</span>
+              <div style="min-width:0">
+                <div style="font-size:12px;font-weight:600;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Thiago S.</div>
+                <div style="font-size:10px;color:#F87171">Pausa</div>
+              </div>
             </div>
           </div>
-          <div class="mock-main">
-            <div class="mock-stat-row">
-              <div class="mock-stat">
+          <!-- Right: KPIs + chart + ranking -->
+          <div class="mock-main" style="gap:10px">
+            <!-- KPI row -->
+            <div class="mock-stat-row" style="gap:8px">
+              <div class="mock-stat" style="padding:10px 12px">
                 <div class="mock-stat-label">Atendimentos</div>
-                <div class="mock-stat-value counter" data-target="47">0</div>
+                <div class="mock-stat-value counter" data-target="47" style="font-size:20px">0</div>
+                <div style="font-size:9px;color:#71717A;margin-top:2px">hoje</div>
               </div>
-              <div class="mock-stat">
+              <div class="mock-stat" style="padding:10px 12px">
                 <div class="mock-stat-label">Vendas</div>
-                <div class="mock-stat-value green counter" data-target="32">0</div>
+                <div class="mock-stat-value green counter" data-target="32" style="font-size:20px">0</div>
+                <div style="font-size:9px;color:#22C55E;margin-top:2px">+4 vs ontem</div>
               </div>
-              <div class="mock-stat">
+              <div class="mock-stat" style="padding:10px 12px">
                 <div class="mock-stat-label">Conversão</div>
-                <div class="mock-stat-value red">68<span style="font-size:14px">%</span></div>
+                <div class="mock-stat-value red" style="font-size:20px">68<span style="font-size:12px">%</span></div>
+                <div style="font-size:9px;color:#71717A;margin-top:2px">ticket R$420</div>
               </div>
             </div>
-            <div class="mock-chart">
-              <div class="mock-stat-label">Vendas por hora</div>
-              <div class="mock-chart-line">
-                <svg viewBox="0 0 300 60" preserveAspectRatio="none">
-                  <polyline
-                    fill="none"
-                    stroke="var(--accent-bright)"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    points="0,50 30,42 60,45 90,30 120,35 150,15 180,20 210,10 240,18 270,8 300,12"
-                    style="filter:drop-shadow(0 0 6px var(--accent-glow))"
-                  />
-                  <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="var(--accent-bright)" stop-opacity=".2"/>
-                    <stop offset="100%" stop-color="var(--accent-bright)" stop-opacity="0"/>
-                  </linearGradient>
-                  <polygon
-                    fill="url(#chartGrad)"
-                    points="0,50 30,42 60,45 90,30 120,35 150,15 180,20 210,10 240,18 270,8 300,12 300,60 0,60"
-                  />
+            <!-- Chart -->
+            <div class="mock-chart" style="padding:12px;min-height:70px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                <div class="mock-stat-label" style="margin:0">Vendas por hora</div>
+                <div style="font-size:9px;color:#71717A">Hoje vs ontem</div>
+              </div>
+              <div class="mock-chart-line" style="height:50px;position:static">
+                <svg viewBox="0 0 300 50" preserveAspectRatio="none" style="width:100%;height:100%">
+                  <defs>
+                    <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#f0758e" stop-opacity=".25"/>
+                      <stop offset="100%" stop-color="#f0758e" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <!-- Ontem (sutil) -->
+                  <polyline fill="none" stroke="rgba(255,255,255,.12)" stroke-width="1.5" stroke-dasharray="4,3"
+                    points="0,42 30,38 60,40 90,32 120,35 150,28 180,30 210,22 240,26 270,18 300,20"/>
+                  <!-- Hoje -->
+                  <polyline fill="none" stroke="#f0758e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    points="0,44 30,38 60,40 90,26 120,30 150,12 180,16 210,8 240,14 270,6 300,10"
+                    style="filter:drop-shadow(0 0 6px rgba(240,117,142,.4))"/>
+                  <polygon fill="url(#chartGrad)"
+                    points="0,44 30,38 60,40 90,26 120,30 150,12 180,16 210,8 240,14 270,6 300,10 300,50 0,50"/>
                 </svg>
+              </div>
+            </div>
+            <!-- Ranking mini -->
+            <div style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:8px;padding:10px 12px;opacity:0;animation:fadeUp .5s cubic-bezier(.16,1,.3,1) 1.4s forwards">
+              <div style="font-size:9px;font-weight:700;color:#71717A;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Ranking · Top vendedores</div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-family:var(--font-mono);font-size:10px;color:var(--accent-bright);font-weight:700;min-width:12px">1</span>
+                  <div style="flex:1;background:rgba(255,255,255,.04);border-radius:3px;height:6px;overflow:hidden"><div style="width:100%;height:100%;background:linear-gradient(90deg,#e2506f,#f0758e);border-radius:3px"></div></div>
+                  <span style="font-size:10px;color:#A1A1AA;min-width:18px;text-align:right">14</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-family:var(--font-mono);font-size:10px;color:#A1A1AA;font-weight:700;min-width:12px">2</span>
+                  <div style="flex:1;background:rgba(255,255,255,.04);border-radius:3px;height:6px;overflow:hidden"><div style="width:78%;height:100%;background:rgba(255,255,255,.2);border-radius:3px"></div></div>
+                  <span style="font-size:10px;color:#71717A;min-width:18px;text-align:right">11</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-family:var(--font-mono);font-size:10px;color:#71717A;font-weight:700;min-width:12px">3</span>
+                  <div style="flex:1;background:rgba(255,255,255,.04);border-radius:3px;height:6px;overflow:hidden"><div style="width:50%;height:100%;background:rgba(255,255,255,.12);border-radius:3px"></div></div>
+                  <span style="font-size:10px;color:#71717A;min-width:18px;text-align:right">7</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1284,11 +1342,11 @@ section { position: relative; z-index: 1; }
 
 <!-- ═══════════ EMAIL CHECKOUT MODAL ═══════════ -->
 <div id="checkoutModal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.7);align-items:center;justify-content:center;padding:24px">
-  <div style="background:#FFFFFF;border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:36px;width:100%;max-width:420px;position:relative;animation:fadeIn .25s ease">
+  <div style="background:#18181B;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:36px;width:100%;max-width:420px;position:relative;animation:fadeIn .25s ease">
     <button onclick="closeCheckoutModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#71717A;font-size:18px;cursor:pointer;padding:4px"><i class="fa-solid fa-xmark"></i></button>
     <div style="text-align:center;margin-bottom:24px">
       <div style="width:48px;height:48px;border-radius:50%;background:rgba(226,80,111,.1);border:1px solid rgba(226,80,111,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:20px;color:#e2506f"><i class="fa-solid fa-cart-shopping"></i></div>
-      <h3 style="font-size:18px;font-weight:700;color:#1A1A1A;margin:0 0 4px" id="modalPlanTitle">Plano Profissional</h3>
+      <h3 style="font-size:18px;font-weight:700;color:#FAFAFA;margin:0 0 4px" id="modalPlanTitle">Plano Profissional</h3>
       <p style="font-size:13px;color:#71717A;margin:0" id="modalPlanPrice">R$ 199/mês</p>
     </div>
     <div id="modalRedeMsg" style="display:none;text-align:center;padding:16px;background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.15);border-radius:8px;margin-bottom:16px">
@@ -1298,7 +1356,7 @@ section { position: relative; z-index: 1; }
     <div id="modalCheckoutForm">
       <div style="margin-bottom:16px">
         <label style="display:block;font-size:11px;font-weight:600;color:#71717A;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Seu e-mail</label>
-        <input id="checkoutEmail" type="email" placeholder="seu@email.com" style="width:100%;min-height:48px;padding:0 16px;background:#F5F5F7;border:1px solid rgba(0,0,0,.1);border-radius:6px;color:#1A1A1A;font-family:Satoshi,sans-serif;font-size:14px;outline:none;box-sizing:border-box" autocomplete="email">
+        <input id="checkoutEmail" type="email" placeholder="seu@email.com" style="width:100%;min-height:48px;padding:0 16px;background:#09090B;border:1px solid rgba(255,255,255,.12);border-radius:6px;color:#FAFAFA;font-family:Satoshi,sans-serif;font-size:14px;outline:none;box-sizing:border-box" autocomplete="email">
         <p style="font-size:11px;color:#71717A;margin:6px 0 0">Enviaremos o link de configuração para este e-mail</p>
       </div>
       <button id="btnCheckout" onclick="startCheckout()" style="width:100%;min-height:48px;background:#e2506f;color:#fff;border:none;border-radius:6px;font-family:Satoshi,sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s">
@@ -1314,7 +1372,7 @@ section { position: relative; z-index: 1; }
   <div class="container">
     <div class="footer-inner">
       <div class="footer-brand">
-        <img src="/assets/234538172.png" alt="MinhaVez" style="height:28px;width:auto;background:#0a0a0a;border-radius:8px;padding:3px 8px"> &copy; 2026
+        <img src="/assets/logo-minhavez-new.png" alt="MinhaVez" style="height:32px;width:auto"> &copy; 2026
       </div>
       <div class="footer-links">
         <a href="#funcionalidades">Funcionalidades</a>
@@ -1480,7 +1538,7 @@ async function startCheckout() {
     document.getElementById('checkoutEmail').focus();
     return;
   }
-  document.getElementById('checkoutEmail').style.borderColor = 'rgba(0,0,0,.1)';
+  document.getElementById('checkoutEmail').style.borderColor = 'rgba(255,255,255,.12)';
 
   const btn = document.getElementById('btnCheckout');
   btn.disabled = true;
