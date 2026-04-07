@@ -983,6 +983,17 @@ window.addEventListener('beforeunload', () => {
 // O popup aparece automaticamente 1x por versão para cada usuário.
 const APP_CHANGELOG = [
   {
+    version: '4.2.0',
+    date: '2026-04-07',
+    items: [
+      { icon: 'fa-wifi', text: 'Suporte offline real — o tablet continua funcionando sem internet e reconecta automaticamente' },
+      { icon: 'fa-mobile-screen', text: 'PWA habilitado — agora é possível instalar o sistema como app na tela inicial do tablet' },
+      { icon: 'fa-shield-halved', text: 'Proteção contra força bruta no PIN — bloqueio automático após tentativas inválidas' },
+      { icon: 'fa-bug', text: 'Correção: ícone do sistema carregava com fundo preto no logo' },
+      { icon: 'fa-wrench', text: 'Correção: Service Worker instalava com erro silencioso (logo inexistente no cache)' }
+    ]
+  },
+  {
     version: '4.1.0',
     date: '2026-04-06',
     items: [
