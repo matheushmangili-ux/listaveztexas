@@ -70,7 +70,7 @@ async function sendEmail(to: string, subject: string, html: string) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      from: 'MinhaVez <noreply@minhavez.com.br>',
+      from: 'MinhaVez <onboarding@resend.dev>',
       to: [to],
       subject,
       html

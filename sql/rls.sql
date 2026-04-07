@@ -85,6 +85,13 @@ CREATE POLICY "tenant_users_update" ON tenant_users FOR UPDATE TO authenticated
 CREATE POLICY "tenant_users_delete" ON tenant_users FOR DELETE TO authenticated
   USING (tenant_id = get_my_tenant_id());
 
+-- ─── Onboarding Tokens (leitura pública para setup pós-compra) ───
+-- Permite que setup.html faça polling por session_id antes do usuário estar autenticado
+ALTER TABLE onboarding_tokens ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "onboarding_tokens_read_anon" ON onboarding_tokens
+  FOR SELECT TO anon
+  USING (used = false AND expires_at > now());
+
 -- Habilitar Realtime nas tabelas que o tablet precisa
 ALTER PUBLICATION supabase_realtime ADD TABLE vendedores;
 ALTER PUBLICATION supabase_realtime ADD TABLE atendimentos;

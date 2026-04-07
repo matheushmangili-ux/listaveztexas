@@ -193,17 +193,6 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Create PIN entries in tenant_users for each vendor
-    for (const v of vendedores) {
-      const { error: pinErr } = await supabaseAdmin.from('tenant_users').insert({
-        tenant_id: tenantId,
-        user_id: recUser?.user?.id || null,
-        role: 'recepcionista',
-        pin: v.pin
-      })
-      // Ignore duplicate PIN errors silently
-    }
-
     // Mark onboarding token as used
     if (onboardingToken) {
       await supabaseAdmin

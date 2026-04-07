@@ -832,7 +832,7 @@ section { position: relative; z-index: 1; }
 <!-- Navigation -->
 <nav class="nav" id="nav">
   <a href="#" class="nav-logo">
-    <img src="/assets/logo-minhavez-new.png" alt="MinhaVez" style="height:40px;width:auto;background:#060606;border-radius:8px;padding:4px 8px">
+    <img src="/assets/234538172.png" alt="MinhaVez" style="height:36px;width:auto;background:#0a0a0a;border-radius:10px;padding:4px 10px">
   </a>
   <div class="nav-links">
     <a href="#problema">Problema</a>
@@ -848,7 +848,7 @@ section { position: relative; z-index: 1; }
   <div class="hero-content">
     <div class="hero-badge reveal">
       <i class="fa-solid fa-circle"></i>
-      Usado em operação real de loja
+      Usado na Texas Center em operação real desde Jan/2026
     </div>
     <h1 class="reveal">
       Chega de fila<br>no papel.<br>
@@ -861,12 +861,17 @@ section { position: relative; z-index: 1; }
     <div class="hero-actions reveal">
       <a href="#precos" class="btn btn-primary">
         <i class="fa-solid fa-rocket"></i>
-        Comece agora
+        Quero organizar minha equipe
       </a>
       <a href="#funcionalidades" class="btn btn-ghost">
         <i class="fa-solid fa-play"></i>
         Ver funcionalidades
       </a>
+    </div>
+    <div class="reveal" style="display:flex;align-items:center;justify-content:center;gap:24px;margin-top:24px;flex-wrap:wrap">
+      <span style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted)"><i class="fa-solid fa-check" style="color:var(--success);font-size:11px"></i> Sem contrato de fidelidade</span>
+      <span style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted)"><i class="fa-solid fa-check" style="color:var(--success);font-size:11px"></i> Cancele quando quiser</span>
+      <span style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted)"><i class="fa-solid fa-check" style="color:var(--success);font-size:11px"></i> Funciona no tablet que você já tem</span>
     </div>
 
     <!-- Device mockup -->
@@ -972,9 +977,9 @@ section { position: relative; z-index: 1; }
         <div class="proof-stat-label">Tempo de carregamento</div>
       </div>
       <div class="proof-stat">
-        <i class="fa-solid fa-clock proof-stat-icon"></i>
-        <div class="proof-stat-number counter" data-target="24" data-suffix="/7">0</div>
-        <div class="proof-stat-label">Disponibilidade</div>
+        <i class="fa-solid fa-circle-check proof-stat-icon"></i>
+        <div class="proof-stat-number">99.9%</div>
+        <a href="https://stats.uptimerobot.com/ucUpfDLMqI" target="_blank" rel="noopener" class="proof-stat-label" style="color:inherit;text-decoration:none;border-bottom:1px dashed currentColor;cursor:pointer;">Disponibilidade — ver status</a>
       </div>
     </div>
   </div>
@@ -1199,7 +1204,7 @@ section { position: relative; z-index: 1; }
           <li style="color:var(--text-muted)"><i class="fa-solid fa-xmark" style="color:var(--text-muted)"></i> Exportação CSV/PDF</li>
           <li style="color:var(--text-muted)"><i class="fa-solid fa-xmark" style="color:var(--text-muted)"></i> Suporte prioritário</li>
         </ul>
-        <button class="price-btn primary" onclick="openCheckoutModal('starter')">Começar agora</button>
+        <button class="price-btn primary" onclick="openCheckoutModal('starter')">Escolher Básico</button>
         <p style="font-size:11px;color:var(--text-muted);margin-top:12px">Sem contrato. Cancele quando quiser.</p>
       </div>
       <!-- PROFISSIONAL -->
@@ -1220,7 +1225,7 @@ section { position: relative; z-index: 1; }
           <li><i class="fa-solid fa-check"></i> Exportação CSV/PDF</li>
           <li><i class="fa-solid fa-check"></i> Suporte prioritário</li>
         </ul>
-        <button class="price-btn primary" onclick="openCheckoutModal('pro')">Começar agora</button>
+        <button class="price-btn primary" onclick="openCheckoutModal('pro')">Quero o Profissional</button>
         <p style="font-size:11px;color:var(--text-muted);margin-top:12px">Sem contrato. Cancele quando quiser.</p>
       </div>
       <!-- AVANÇADO -->
@@ -1240,7 +1245,7 @@ section { position: relative; z-index: 1; }
           <li><i class="fa-solid fa-check"></i> Exportação CSV/PDF</li>
           <li><i class="fa-solid fa-check"></i> Suporte prioritário + onboarding</li>
         </ul>
-        <button class="price-btn primary" onclick="openCheckoutModal('advanced')">Começar agora</button>
+        <button class="price-btn primary" onclick="openCheckoutModal('advanced')">Escolher Avançado</button>
         <p style="font-size:11px;color:var(--text-muted);margin-top:12px">Sem contrato. Cancele quando quiser.</p>
       </div>
     </div>
@@ -1248,19 +1253,31 @@ section { position: relative; z-index: 1; }
 </section>
 
 <!-- ═══════════ CTA ═══════════ -->
-<section class="cta" id="contato">
-  <div class="container">
-    <h2 class="reveal">Pronto pra organizar<br>a vez na sua loja?</h2>
-    <p class="reveal">Planos a partir de R$ 49,90/mês. Sem contrato, cancele quando quiser.</p>
+<section id="contato" style="background:linear-gradient(135deg,#0a0a0a 0%,#1a0810 100%);padding:100px 0;position:relative;overflow:hidden;z-index:1">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(226,80,111,.15) 0%,transparent 65%);pointer-events:none"></div>
+  <div class="container" style="text-align:center;position:relative">
+    <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 16px;background:rgba(226,80,111,.12);border:1px solid rgba(226,80,111,.25);border-radius:100px;font-size:12px;font-weight:600;color:#f0758e;margin-bottom:28px;text-transform:uppercase;letter-spacing:.08em">
+      <i class="fa-solid fa-tags"></i> Promoção de lançamento
+    </div>
+    <h2 class="reveal" style="font-size:clamp(36px,6vw,64px);font-weight:900;letter-spacing:-.03em;color:#FAFAFA;margin-bottom:16px;line-height:1.1">
+      Pronto pra organizar<br>
+      <span style="background:linear-gradient(135deg,#e2506f,#f0758e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">a vez na sua loja?</span>
+    </h2>
+    <p class="reveal" style="font-size:18px;color:#71717A;margin-bottom:44px;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.6">A partir de <strong style="color:#FAFAFA">R$ 49,90/mês</strong>. Sem contrato, cancele quando quiser.</p>
     <div class="hero-actions reveal">
-      <button class="btn btn-primary" onclick="openCheckoutModal('pro')" style="font-size:16px;padding:16px 32px;min-height:56px">
+      <button class="btn btn-primary" onclick="openCheckoutModal('pro')" style="font-size:17px;padding:18px 40px;min-height:60px">
         <i class="fa-solid fa-rocket"></i>
         Começar agora
       </button>
-      <a href="mailto:contato@minhavez.com.br" class="btn btn-ghost" style="font-size:16px;padding:16px 32px;min-height:56px">
+      <a href="mailto:contato@minhavez.com.br" style="display:inline-flex;align-items:center;gap:8px;font-size:15px;color:#71717A;text-decoration:none;padding:18px 24px;transition:color .2s" onmouseover="this.style.color='#FAFAFA'" onmouseout="this.style.color='#71717A'">
         <i class="fa-solid fa-envelope"></i>
         Dúvidas? Fale conosco
       </a>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:28px;margin-top:32px;flex-wrap:wrap">
+      <span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#52525B"><i class="fa-solid fa-shield-halved" style="color:#71717A;font-size:11px"></i> Stripe · pagamento seguro</span>
+      <span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#52525B"><i class="fa-solid fa-rotate-left" style="color:#71717A;font-size:11px"></i> Cancele a qualquer momento</span>
+      <span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#52525B"><i class="fa-solid fa-bolt" style="color:#71717A;font-size:11px"></i> Ativo em menos de 5 minutos</span>
     </div>
   </div>
 </section>
@@ -1297,7 +1314,7 @@ section { position: relative; z-index: 1; }
   <div class="container">
     <div class="footer-inner">
       <div class="footer-brand">
-        <img src="/assets/logo-minhavez-new.png" alt="MinhaVez"> &copy; 2025
+        <img src="/assets/234538172.png" alt="MinhaVez" style="height:28px;width:auto;background:#0a0a0a;border-radius:8px;padding:3px 8px"> &copy; 2026
       </div>
       <div class="footer-links">
         <a href="#funcionalidades">Funcionalidades</a>
