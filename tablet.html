@@ -42,28 +42,28 @@ window.addEventListener('error', function(e) {
   <!-- HEADER -->
   <header class="t-header">
     <div class="flex-center gap-8 shrink-0">
-      <img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:30px;width:auto;mix-blend-mode:screen">
+      <img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:42px;width:auto;background:#09090B;border-radius:10px;padding:4px 10px">
       <span id="appVersion" class="mono fs-9" style="color:rgba(255,255,255,.5);opacity:.6;white-space:nowrap"></span>
     </div>
     <div id="headerKpis" class="flex-center gap-16 mono fw-700" style="flex:1;justify-content:center;min-width:0">
       <div style="display:flex;align-items:center;gap:6px" title="Atendimentos finalizados">
-        <i class="fa-solid fa-users" style="font-size:14px;color:var(--accent-bright)"></i>
+        <i class="fa-solid fa-users" style="font-size:15px;color:var(--accent-bright)"></i>
         <div class="flex-col" style="line-height:1.2">
-          <span id="statAtend" style="color:#FFFFFF;font-size:16px">0</span>
+          <span id="statAtend" style="color:#FFFFFF;font-size:18px">0</span>
           <span class="fs-9 fw-600 uppercase" style="color:rgba(255,255,255,.5)">Atendidos</span>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:6px" title="Vendas concretizadas">
-        <i class="fa-solid fa-bag-shopping" style="font-size:14px;color:var(--accent-bright)"></i>
+        <i class="fa-solid fa-bag-shopping" style="font-size:15px;color:var(--accent-bright)"></i>
         <div class="flex-col" style="line-height:1.2">
-          <span id="statVendas" style="color:#FFFFFF;font-size:16px">0</span>
+          <span id="statVendas" style="color:#FFFFFF;font-size:18px">0</span>
           <span class="fs-9 fw-600 uppercase" style="color:rgba(255,255,255,.5)">Vendas</span>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:6px" title="Taxa de conversão">
-        <i class="fa-solid fa-chart-line" style="font-size:14px;color:var(--accent-bright)"></i>
+        <i class="fa-solid fa-chart-line" style="font-size:15px;color:var(--accent-bright)"></i>
         <div class="flex-col" style="line-height:1.2">
-          <span id="statConv" style="color:#FFFFFF;font-size:16px">0%</span>
+          <span id="statConv" style="color:#FFFFFF;font-size:18px">0%</span>
           <span class="fs-9 fw-600 uppercase" style="color:rgba(255,255,255,.5)">Conversão</span>
         </div>
         <div style="width:60px;height:6px;border-radius:3px;background:rgba(255,255,255,.15);overflow:hidden;flex-shrink:0;margin-left:4px">
@@ -998,6 +998,16 @@ window.addEventListener('beforeunload', () => {
 // Para cada deploy, basta adicionar um objeto { version, date, items[] } no início.
 // O popup aparece automaticamente 1x por versão para cada usuário.
 const APP_CHANGELOG = [
+  {
+    version: '4.1.0',
+    date: '2026-04-06',
+    items: [
+      { icon: 'fa-ranking-star', text: 'Header redesenhado — botões "Iniciar" e "Ranking" substituem o toggle e o troféu' },
+      { icon: 'fa-palette', text: 'Ícones dos KPIs (Atendidos, Vendas, Conversão) unificados em rosa' },
+      { icon: 'fa-text-height', text: 'Fonte dos KPIs no header aumentada para melhor leitura no tablet' },
+      { icon: 'fa-stop', text: 'Botão "Encerrar" aparece em vermelho quando o turno está ativo — distinção clara de ação destrutiva' }
+    ]
+  },
   {
     version: '4.0.0',
     date: '2026-03-30',
