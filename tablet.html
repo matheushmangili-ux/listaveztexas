@@ -408,6 +408,7 @@ const state = {
   vendorAtendCount: {},       // vendedor_id → count de atendimentos no turno
   queueEntryTimes: new Map(), // vendedorId → { pos, time } para cold seller
   pauseStartTimes: new Map(), // vendedorId → Date inicio da pausa
+  savedPositions:  new Map(), // vendedorId → posicao_fila antes da pausa (para restaurar ao voltar)
   positionLog: [],            // { time, icon, vendedor, action, details } — max 200
 };
 
@@ -630,16 +631,68 @@ async function addToQueue(vendedorId) {
   if (error) { toast('Erro ao salvar: ' + error.message, 'error'); await loadVendedores(); }
 }
 
+// ─── Restaurar posição original ao voltar da pausa ───
+async function returnToSavedPosition(vendedorId) {
+  const v = state.vendedores.find(x => x.id === vendedorId);
+  if (!v) return;
+  const setor = v.setor || 'loja';
+  const savedPos = state.savedPositions.get(vendedorId);
+  state.savedPositions.delete(vendedorId);
+
+  // Vendedores atualmente na fila, ordenados por posição
+  const inQueue = state.vendedores
+    .filter(x => x.id !== vendedorId && (x.setor || 'loja') === setor && x.posicao_fila != null)
+    .sort((a, b) => a.posicao_fila - b.posicao_fila);
+
+  // Quantos ainda estão à frente da posição original?
+  const insertIdx = savedPos != null
+    ? inQueue.filter(x => x.posicao_fila < savedPos).length
+    : inQueue.length; // sem posição salva → vai para o final
+
+  // Reconstruir fila com o vendedor reinserido na posição correta
+  const newOrder = [...inQueue.slice(0, insertIdx), v, ...inQueue.slice(insertIdx)];
+
+  // Re-normalizar posições 1, 2, 3, ...
+  const toUpdate = [];
+  newOrder.forEach((vendor, i) => {
+    const newPos = i + 1;
+    if (vendor.posicao_fila !== newPos) {
+      vendor.posicao_fila = newPos;
+      if (vendor.id !== vendedorId) toUpdate.push({ id: vendor.id, posicao_fila: newPos });
+    }
+  });
+  v.status = 'disponivel';
+  v.posicao_fila = insertIdx + 1;
+
+  markLocal();
+  invalidateQueue();
+  invalidateFooter();
+  scheduleRender();
+
+  // Salvar no banco — vendedor retornando primeiro
+  const { error } = await sb.from('vendedores')
+    .update({ status: 'disponivel', posicao_fila: v.posicao_fila })
+    .eq('id', vendedorId).eq('tenant_id', tenantId);
+  if (error) { toast('Erro ao salvar: ' + error.message, 'error'); await loadVendedores(); return; }
+
+  // Atualizar posições dos vendedores deslocados
+  for (const u of toUpdate) {
+    await sb.from('vendedores')
+      .update({ posicao_fila: u.posicao_fila })
+      .eq('id', u.id).eq('tenant_id', tenantId);
+  }
+}
+
 // ─── Retornar da pausa ───
 window.returnFromPause = async function(vendedorId) {
   delete state.saidaMotivos[vendedorId];
   state.pauseStartTimes.delete(vendedorId);
   invalidateQueue(); invalidateFooter();
   try { sb.rpc('registrar_retorno', { p_vendedor_id: vendedorId }); } catch(e) {}
-  await addToQueue(vendedorId);
+  await returnToSavedPosition(vendedorId);
   const v = state.vendedores.find(x => x.id === vendedorId);
   playSound('retorno');
-  logPosition(v, 'retorno', 'Voltou da pausa');
+  logPosition(v, 'retorno', 'Voltou à posição #' + (v?.posicao_fila ?? '?'));
   toast((v?.apelido || v?.nome || 'Vendedor') + ' voltou à fila', 'success', TOAST_SHORT);
 };
 
@@ -668,6 +721,11 @@ window.confirmSaida = async function(motivo) {
   const newStatus = motivo === 'banheiro' || motivo === 'reuniao' || motivo === 'operacional' ? 'pausa' : 'fora';
   state.saidaMotivos[state.pendingSaidaId] = motivo;
   state.pauseStartTimes.set(state.pendingSaidaId, new Date());
+  // Salvar posição na fila antes de zerá-la — usada para restaurar ao retornar
+  if (newStatus === 'pausa') {
+    const svTemp = state.vendedores.find(x => x.id === state.pendingSaidaId);
+    if (svTemp?.posicao_fila != null) state.savedPositions.set(state.pendingSaidaId, svTemp.posicao_fila);
+  }
   markLocal();
   const savedId = state.pendingSaidaId;
   const { error } = await sb.from('vendedores').update({ status: newStatus, posicao_fila: null }).eq('id', savedId).eq('tenant_id', tenantId);
