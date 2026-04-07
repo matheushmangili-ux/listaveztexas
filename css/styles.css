@@ -311,7 +311,7 @@ body {
   border-color: var(--info);
   background: var(--info-bg);
 }
-.queue-item.disponivel { border-left: 3px solid var(--success); }
+
 .queue-item.em_atendimento { border-left: 3px solid var(--info); }
 .queue-item.pausa { border-left: 3px solid var(--warning); }
 .queue-item.fora { border-left: 3px solid var(--text-muted); opacity: .5; }

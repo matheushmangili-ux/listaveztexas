@@ -673,7 +673,8 @@ window.confirmSaida = async function(motivo) {
   const { error } = await sb.from('vendedores').update({ status: newStatus, posicao_fila: null }).eq('id', savedId).eq('tenant_id', tenantId);
   if (error) { toast('Erro ao registrar saída', 'error'); closeSaida(); return; }
   if (state.turno) {
-    sb.rpc('registrar_pausa', { p_vendedor_id: savedId, p_turno_id: state.turno.id, p_motivo: motivo });
+    const { error: pausaErr } = await sb.rpc('registrar_pausa', { p_vendedor_id: savedId, p_turno_id: state.turno.id, p_motivo: motivo });
+    if (pausaErr) console.error('[pausas] registrar_pausa:', pausaErr.message);
   }
   const sv = state.vendedores.find(x => x.id === savedId);
   logPosition(sv, 'saida', SAIDA_COLORS[motivo]?.label || 'Saída');
