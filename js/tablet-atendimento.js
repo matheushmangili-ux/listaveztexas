@@ -404,7 +404,7 @@ export function renderActiveAtendimentos() {
       <div class="atend-avatar">${initials(nome)}</div>
       <div class="atend-info">
         <div class="atend-name">${escapeHtml(nome)}${prefBadge}${clientBadge}</div>
-        <div class="atend-timer" id="timer-${atend.id}">0min 0s</div>
+        <div class="atend-timer" id="timer-${atend.id}">${formatTime((Date.now() - new Date(atend.inicio).getTime()) / 1000)}</div>
       </div>
       ${canalHtml}
       <i class="fa-solid fa-grip-vertical" style="color:var(--text-muted);font-size:14px;opacity:.3;flex-shrink:0;${canalHtml ? 'margin-left:8px' : 'margin-left:auto'}"></i>`;
