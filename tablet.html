@@ -45,25 +45,23 @@ window.addEventListener('error', function(e) {
       <img src="/assets/logo-minhavez-new.png" alt="minhavez" style="height:30px;width:auto;mix-blend-mode:screen">
       <span id="appVersion" class="mono fs-9" style="color:rgba(255,255,255,.5);opacity:.6;white-space:nowrap"></span>
     </div>
-    <div id="headerKpis" class="flex-center gap-10 mono fw-700" style="flex:1;justify-content:center;min-width:0">
+    <div id="headerKpis" class="flex-center gap-16 mono fw-700" style="flex:1;justify-content:center;min-width:0">
       <div style="display:flex;align-items:center;gap:6px" title="Atendimentos finalizados">
-        <i class="fa-solid fa-users" style="font-size:14px;color:rgba(255,255,255,.6)"></i>
+        <i class="fa-solid fa-users" style="font-size:14px;color:var(--accent-bright)"></i>
         <div class="flex-col" style="line-height:1.2">
           <span id="statAtend" style="color:#FFFFFF;font-size:16px">0</span>
           <span class="fs-9 fw-600 uppercase" style="color:rgba(255,255,255,.5)">Atendidos</span>
         </div>
       </div>
-      <div style="width:1px;height:24px;background:rgba(255,255,255,.15)"></div>
       <div style="display:flex;align-items:center;gap:6px" title="Vendas concretizadas">
-        <i class="fa-solid fa-bag-shopping" style="font-size:14px;color:var(--success)"></i>
+        <i class="fa-solid fa-bag-shopping" style="font-size:14px;color:var(--accent-bright)"></i>
         <div class="flex-col" style="line-height:1.2">
           <span id="statVendas" style="color:#FFFFFF;font-size:16px">0</span>
           <span class="fs-9 fw-600 uppercase" style="color:rgba(255,255,255,.5)">Vendas</span>
         </div>
       </div>
-      <div style="width:1px;height:24px;background:rgba(255,255,255,.15)"></div>
       <div style="display:flex;align-items:center;gap:6px" title="Taxa de conversão">
-        <i class="fa-solid fa-chart-line" style="font-size:14px;color:var(--gold)"></i>
+        <i class="fa-solid fa-chart-line" style="font-size:14px;color:var(--accent-bright)"></i>
         <div class="flex-col" style="line-height:1.2">
           <span id="statConv" style="color:#FFFFFF;font-size:16px">0%</span>
           <span class="fs-9 fw-600 uppercase" style="color:rgba(255,255,255,.5)">Conversão</span>
@@ -74,10 +72,6 @@ window.addEventListener('error', function(e) {
       </div>
     </div>
     <div class="flex-center gap-8 shrink-0">
-      <!-- Clock pill -->
-      <div class="clock-pill">
-        <span class="live-clock" id="clock">--:--</span>
-      </div>
       <!-- Ranking card -->
       <button class="action-card ranking-card" onclick="toggleMiniRanking()" title="Ranking do turno">
         <i class="fa-solid fa-ranking-star"></i>
