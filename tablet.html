@@ -555,20 +555,9 @@ initAtendimento({
   withLock
 });
 
-// ─── Clock ───
-let _lastClockText = '';
-function updateClock() {
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2, '0');
-  const m = String(now.getMinutes()).padStart(2, '0');
-  const text = h + m;
-  if (text !== _lastClockText) {
-    dom.clockEl.innerHTML = h + '<span class="clock-colon">:</span>' + m;
-    _lastClockText = text;
-  }
-}
-updateClock();
-timers.clock = setInterval(updateClock, CLOCK_UPDATE_INTERVAL);
+// ─── Clock (element removed from header — kept for compat) ───
+function updateClock() {}
+timers.clock = null;
 
 // ─── Load vendedores ───
 async function loadVendedores() {
