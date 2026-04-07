@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="/css/tablet.css">
 <meta name="theme-color" content="#F5F5F7">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.json">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -355,7 +356,7 @@ import { initTurno, updateTurnoSwitch, checkExistingTurno } from '/js/tablet-tur
 import { initFooter, renderFooter, invalidateFooter, clearFooterTimer, showFooterDropLabel, hideFooterDropLabel } from '/js/tablet-footer.js';
 import { initQueue, renderQueue, scheduleRender, invalidateQueue, getDraggedId, setDraggedId, isTouchDragging, getTouchGhost, setTouchGhost, cleanupQueue, resetDragState } from '/js/tablet-queue.js';
 import { initAtendimento, renderActiveAtendimentos, checkActiveAtendimentos, doSendToAtendimento, loadCanaisOrigem, clearAtendTimers, isAtendTouchDragging, resetAtendDragState } from '/js/tablet-atendimento.js';
-import { SESSION_TIMEOUT_TABLET, SESSION_CHECK_INTERVAL, CLOCK_UPDATE_INTERVAL, AUTO_SYNC_INTERVAL, QUICK_STATS_INTERVAL, ACTION_LOCK_SAFETY, LOCAL_ACTION_DEBOUNCE, RT_VENDEDOR_DEBOUNCE, RT_RECONNECT_DELAY, TOAST_SHORT, TOAST_MEDIUM, INPUT_FOCUS_DELAY } from '/js/constants.js';
+import { SESSION_TIMEOUT_TABLET, SESSION_CHECK_INTERVAL, AUTO_SYNC_INTERVAL, QUICK_STATS_INTERVAL, ACTION_LOCK_SAFETY, LOCAL_ACTION_DEBOUNCE, RT_VENDEDOR_DEBOUNCE, RT_RECONNECT_DELAY, TOAST_SHORT, TOAST_MEDIUM, INPUT_FOCUS_DELAY } from '/js/constants.js';
 initTheme();
 // Sync theme-color meta with saved theme
 { const _t = document.documentElement.getAttribute('data-theme') || 'light';
@@ -423,7 +424,6 @@ const ui = {
 };
 
 const timers = {
-  clock: null,
   session: null,
   rtVend: null,
   rtAtend: null,
@@ -437,7 +437,7 @@ const dom = {
   servicePanel: document.querySelector('.service-panel'),
   queueList: document.getElementById('queueList'),
   statusFooter: document.getElementById('statusFooter'),
-  clockEl: document.getElementById('clock'),
+
 };
 
 // Lock para ações críticas (previne double-tap)
@@ -937,7 +937,6 @@ setInterval(() => {
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     clearAtendTimers();
-    clearInterval(timers.clock); timers.clock = null;
     clearInterval(timers.session); timers.session = null;
     resetDragState();
     document.body.style.overflow = '';
@@ -951,9 +950,6 @@ document.addEventListener('visibilitychange', () => {
     clearTimeout(timers.localAction);
     ui.loadingVendedores = false;
     ui.actionLock = false;
-    updateClock();
-    clearInterval(timers.clock);
-    timers.clock = setInterval(updateClock, CLOCK_UPDATE_INTERVAL);
     clearInterval(timers.session);
     timers.session = setInterval(() => { if (state.turno) updateQuickStats(); }, QUICK_STATS_INTERVAL);
     invalidateQueue();
@@ -972,7 +968,6 @@ document.addEventListener('visibilitychange', () => {
 
 // ─── Cleanup on page unload (timers, realtime, observers) ───
 window.addEventListener('beforeunload', () => {
-  clearInterval(timers.clock);
   clearInterval(timers.session);
   clearFooterTimer();
   clearAtendTimers();

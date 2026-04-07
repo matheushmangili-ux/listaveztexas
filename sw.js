@@ -16,7 +16,7 @@ const STATIC_ASSETS = [
   '/js/tablet-footer.js',
   '/js/tablet-queue.js',
   '/js/tablet-turno.js',
-  '/assets/logo-minhavez-web.png',
+  '/assets/logo-minhavez-new.png',
   '/manifest.json'
 ];
 
