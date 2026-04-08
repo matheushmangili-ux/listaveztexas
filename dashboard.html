@@ -307,7 +307,7 @@
         </div>
       </div>
     </div>
-    <div id="floorList" style="display:none"></div>
+    <!-- Floor list rendered via header marquee -->
     <div class="chart-card" style="margin-bottom:var(--gap)">
       <div class="chart-card-header" onclick="toggleSection('gestao')">
         <h3><i class="fa-solid fa-user-gear" style="margin-right:6px;color:var(--accent-dim)"></i>Gestão de Vendedores</h3>
@@ -403,7 +403,7 @@ if (tenant) {
   const headerLogo = document.getElementById('headerLogo');
   if (headerTitle && tenant.nome_loja) headerTitle.textContent = tenant.nome_loja;
   if (headerLogo && tenant.logo_url) {
-    headerLogo.innerHTML = `<img src="${tenant.logo_url}" alt="${tenant.nome_loja || ''}">`;
+    headerLogo.innerHTML = `<img src="${escapeHtml(tenant.logo_url)}" alt="${escapeHtml(tenant.nome_loja || '')}">`;
   }
   // Show tenant slug in footer for support
   const slugEl = document.getElementById('tenantSlugFooter');
@@ -731,7 +731,7 @@ async function loadVendedores() {
   }
   el.innerHTML = data.map(v => {
     const avatarContent = v.foto_url
-      ? `<img src="${v.foto_url}" style="width:100%;height:100%;object-fit:cover">`
+      ? `<img src="${escapeHtml(v.foto_url)}" alt="" style="width:100%;height:100%;object-fit:cover">`
       : initials(v.nome);
     return `<div class="vendedor-row">
       <div class="vendedor-avatar" style="overflow:hidden">${avatarContent}</div>
@@ -1236,8 +1236,8 @@ window.openDrillMotivo = async function(motivo, label) {
     return;
   }
   body.innerHTML = data.map(r => {
-    const nome = r.vendedor_apelido || r.vendedor_nome || '—';
-    const dt = new Date(r.criado_em);
+    const nome = r.vendedores?.apelido || r.vendedores?.nome || '—';
+    const dt = new Date(r.inicio);
     const hora = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     const dia = dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-subtle);font-size:13px">

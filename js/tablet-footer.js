@@ -138,7 +138,7 @@ export function renderFooter() {
 
     const ini = initials(v.apelido || v.nome);
     const avatarContent = v.foto_url
-      ? `<img src="${v.foto_url}" alt="${escapeHtml(v.apelido || v.nome)}" loading="lazy" width="48" height="48">`
+      ? `<img src="${escapeHtml(v.foto_url)}" alt="${escapeHtml(v.apelido || v.nome)}" loading="lazy" width="48" height="48">`
       : ini;
 
     // Avatar color by status

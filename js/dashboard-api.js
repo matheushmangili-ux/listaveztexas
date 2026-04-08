@@ -90,11 +90,11 @@ export async function fetchCanalStats(sb, range) {
 /** Atendimentos de um motivo de perda (drill-down) */
 export async function fetchDrillMotivo(sb, range, motivo, tenantId) {
   let q = sb.from('atendimentos')
-    .select('vendedor_nome, vendedor_apelido, criado_em, motivo_perda')
+    .select('vendedor_id, inicio, motivo_perda, vendedores(nome, apelido)')
     .eq('motivo_perda', motivo)
-    .gte('criado_em', range.start)
-    .lte('criado_em', range.end)
-    .order('criado_em', { ascending: false })
+    .gte('inicio', range.start)
+    .lt('inicio', range.end)
+    .order('inicio', { ascending: false })
     .limit(50);
   if (tenantId) q = q.eq('tenant_id', tenantId);
   return q;

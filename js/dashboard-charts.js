@@ -471,7 +471,7 @@ export async function loadPreferenciais(range) {
     .gte('inicio', range.start)
     .lt('inicio', range.end)
     .neq('resultado', 'em_andamento');
-  if (tenantId) query.eq('tenant_id', tenantId);
+  if (tenantId) query = query.eq('tenant_id', tenantId);
   const { data, error } = await query;
   const el = document.querySelector('#chartPreferenciais');
   const box = document.getElementById('chartPrefBox');
@@ -480,8 +480,8 @@ export async function loadPreferenciais(range) {
     return;
   }
   // Buscar nomes dos vendedores
-  const vendQuery = sb.from('vendedores').select('id, nome, apelido');
-  if (tenantId) vendQuery.eq('tenant_id', tenantId);
+  let vendQuery = sb.from('vendedores').select('id, nome, apelido');
+  if (tenantId) vendQuery = vendQuery.eq('tenant_id', tenantId);
   const { data: vendedores } = await vendQuery;
   const vendMap = {};
   (vendedores || []).forEach(v => { vendMap[v.id] = (v.apelido || v.nome || '').split(' ')[0]; });
@@ -550,8 +550,8 @@ export async function loadRanking(range, cachedData) {
   }
 
   // Buscar fotos dos vendedores
-  const vendQuery = sb.from('vendedores').select('id, foto_url, apelido').eq('ativo', true);
-  if (tenantId) vendQuery.eq('tenant_id', tenantId);
+  let vendQuery = sb.from('vendedores').select('id, foto_url, apelido').eq('ativo', true);
+  if (tenantId) vendQuery = vendQuery.eq('tenant_id', tenantId);
   const { data: vendedoresData } = await vendQuery;
   const fotoMap = {};
   (vendedoresData || []).forEach(v => { fotoMap[v.id] = v.foto_url; });
@@ -568,7 +568,7 @@ export async function loadRanking(range, cachedData) {
     const isTop = i < 3;
     const foto = fotoMap[r.vendedor_id];
     const avatarContent = foto
-      ? `<img src="${foto}" style="width:100%;height:100%;object-fit:cover">`
+      ? `<img src="${escapeHtml(foto)}" alt="" style="width:100%;height:100%;object-fit:cover">`
       : initials(r.nome);
     const tm = r.tempo_medio_min || 0;
     const tmColor = tempoColor(tm, tempoMeta);

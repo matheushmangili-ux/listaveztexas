@@ -2,16 +2,21 @@
 -- Corrigir RPCs de pausas para usar tabela correta (pausas)
 -- A tabela pausas_log nunca foi criada no banco real
 -- Colunas reais: id, vendedor_id, turno_id, motivo, inicio, fim, tenant_id
+-- TODAS as funções filtram por tenant_id via get_my_tenant_id()
 -- ============================================
 
--- RPC: registrar pausa (corrigida para tabela pausas)
+-- RPC: registrar pausa (com validação de tenant)
 CREATE OR REPLACE FUNCTION registrar_pausa(p_vendedor_id uuid, p_turno_id uuid, p_motivo text)
 RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE
   v_id uuid;
   v_tenant uuid;
 BEGIN
-  SELECT tenant_id INTO v_tenant FROM vendedores WHERE id = p_vendedor_id;
+  v_tenant := get_my_tenant_id();
+  -- Validar que o vendedor pertence ao tenant do caller
+  IF NOT EXISTS (SELECT 1 FROM vendedores WHERE id = p_vendedor_id AND tenant_id = v_tenant) THEN
+    RAISE EXCEPTION 'Vendedor não encontrado';
+  END IF;
   INSERT INTO pausas (vendedor_id, turno_id, motivo, inicio, tenant_id)
   VALUES (p_vendedor_id, p_turno_id, p_motivo, now(), v_tenant)
   RETURNING id INTO v_id;
@@ -19,18 +24,19 @@ BEGIN
 END;
 $$;
 
--- RPC: registrar retorno de pausa (corrigida para tabela pausas)
+-- RPC: registrar retorno de pausa (com filtro de tenant)
 CREATE OR REPLACE FUNCTION registrar_retorno(p_vendedor_id uuid)
 RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
 BEGIN
   UPDATE pausas
   SET fim = now()
   WHERE vendedor_id = p_vendedor_id
-    AND fim IS NULL;
+    AND fim IS NULL
+    AND tenant_id = get_my_tenant_id();
 END;
 $$;
 
--- RPC: log detalhado de pausas por período
+-- RPC: log detalhado de pausas por período (com filtro de tenant)
 CREATE OR REPLACE FUNCTION get_pause_log(p_inicio timestamptz, p_fim timestamptz)
 RETURNS TABLE(
   id uuid,
@@ -53,6 +59,7 @@ RETURNS TABLE(
   FROM pausas p
   JOIN vendedores v ON v.id = p.vendedor_id
   WHERE p.inicio BETWEEN p_inicio AND p_fim
+    AND p.tenant_id = get_my_tenant_id()
   ORDER BY p.inicio DESC;
 $$;
 

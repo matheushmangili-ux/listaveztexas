@@ -26,6 +26,7 @@ BEGIN
         ROUND(AVG(EXTRACT(EPOCH FROM (fim - inicio)) / 60) FILTER (WHERE fim IS NOT NULL)::NUMERIC, 1),
         ROUND(AVG(valor_venda) FILTER (WHERE resultado = 'venda' AND valor_venda IS NOT NULL AND valor_venda > 0)::NUMERIC, 0)
     FROM atendimentos
-    WHERE inicio >= p_inicio AND inicio < p_fim;
+    WHERE inicio >= p_inicio AND inicio < p_fim
+      AND tenant_id = get_my_tenant_id();
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

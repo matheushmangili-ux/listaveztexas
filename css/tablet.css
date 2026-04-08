@@ -165,7 +165,7 @@
     border-radius: 10px;
     font-size: 13px;
     font-weight: 700;
-    font-family: var(--font-sans);
+    font-family: var(--font-body);
     cursor: pointer;
     border: 1px solid transparent;
     -webkit-tap-highlight-color: transparent;

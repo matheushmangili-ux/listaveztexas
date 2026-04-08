@@ -122,30 +122,32 @@ function closeTurnoSummary() {
 
 async function confirmCloseTurno() {
   const btn = document.getElementById('btnConfirmCloseTurno');
+  const resetBtn = () => { if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-power-off" style="margin-right:4px"></i>Encerrar Turno'; } };
   if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Encerrando...'; }
-  _ctx.markLocal();
-  // RPC atômica: finaliza atendimentos + reseta vendedores + fecha turno
-  const { data, error } = await _ctx.sb.rpc('fechar_turno_seguro', { p_turno_id: _ctx.currentTurno.id });
-  if (error) {
-    toast('Erro ao fechar turno: ' + (error.message || ''), 'error');
-    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-power-off" style="margin-right:4px"></i>Encerrar Turno'; }
-    return;
+  try {
+    _ctx.markLocal();
+    const { data, error } = await _ctx.sb.rpc('fechar_turno_seguro', { p_turno_id: _ctx.currentTurno.id });
+    if (error) { toast('Erro ao fechar turno: ' + (error.message || ''), 'error'); resetBtn(); return; }
+    const result = typeof data === 'string' ? JSON.parse(data) : data;
+    if (result.atendimentos_finalizados > 0) {
+      toast(result.atendimentos_finalizados + ' atendimento(s) finalizado(s) automaticamente', 'warning', 3000);
+    }
+    _ctx.logPosition(null, 'turno', 'Turno encerrado');
+    _ctx.currentTurno = null;
+    _ctx.activeAtendimentos = [];
+    _ctx.pauseStartTimes.clear();
+    _ctx.queueEntryTimes.clear();
+    _ctx.renderActiveAtendimentos();
+    updateTurnoSwitch(false);
+    closeTurnoSummary();
+    toast('Turno encerrado', 'info');
+    await _ctx.loadVendedores();
+  } catch (e) {
+    toast('Erro inesperado ao fechar turno', 'error');
+    console.error('confirmCloseTurno:', e);
+  } finally {
+    resetBtn();
   }
-  const result = typeof data === 'string' ? JSON.parse(data) : data;
-  if (result.atendimentos_finalizados > 0) {
-    toast(result.atendimentos_finalizados + ' atendimento(s) finalizado(s) automaticamente', 'warning', 3000);
-  }
-  _ctx.logPosition(null, 'turno', 'Turno encerrado');
-  _ctx.currentTurno = null;
-  _ctx.activeAtendimentos = [];
-  _ctx.pauseStartTimes.clear();
-  _ctx.queueEntryTimes.clear();
-  _ctx.renderActiveAtendimentos();
-  updateTurnoSwitch(false);
-  closeTurnoSummary();
-  toast('Turno encerrado', 'info');
-  await _ctx.loadVendedores();
-  if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-power-off" style="margin-right:4px"></i>Encerrar Turno'; }
 }
 
 // ─── Check-in de abertura ───
@@ -191,34 +193,37 @@ async function confirmCheckin() {
   if (checked.length === 0) { toast('Selecione pelo menos um vendedor', 'warning'); return; }
 
   const btn = document.getElementById('btnCheckin');
+  const resetBtn = () => { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-check" style="margin-right:4px"></i>Iniciar Turno'; };
   btn.disabled = true;
   btn.innerHTML = '<div class="spinner"></div> Abrindo...';
 
-  // Criar turno
-  const { data, error } = await _ctx.sb.from('turnos').insert({ data: new Date().toISOString().split('T')[0], tenant_id: _ctx.tenantId }).select().single();
-  if (error) { toast('Erro ao abrir turno', 'error'); btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-check" style="margin-right:4px"></i>Iniciar Turno'; return; }
-  _ctx.currentTurno = data;
+  try {
+    const { data, error } = await _ctx.sb.from('turnos').insert({ data: new Date().toISOString().split('T')[0], tenant_id: _ctx.tenantId }).select().single();
+    if (error) { toast('Erro ao abrir turno', 'error'); resetBtn(); return; }
+    _ctx.currentTurno = data;
 
-  // Colocar vendedores selecionados na fila (1 RPC batch)
-  _ctx.markLocal();
-  const { error: errFila } = await _ctx.sb.rpc('reordenar_fila', { p_ids: checked });
-  if (errFila) { toast('Erro ao montar fila', 'error'); return; }
+    _ctx.markLocal();
+    const { error: errFila } = await _ctx.sb.rpc('reordenar_fila', { p_ids: checked });
+    if (errFila) { toast('Erro ao montar fila', 'error'); resetBtn(); return; }
 
-  updateTurnoSwitch(true);
-  closeCheckin();
-  await _ctx.loadVendedores();
-  toast(`Turno aberto com ${checked.length} vendedor${checked.length > 1 ? 'es' : ''}!`, 'success');
-
-  btn.disabled = false;
-  btn.innerHTML = '<i class="fa-solid fa-check" style="margin-right:4px"></i>Iniciar Turno';
+    updateTurnoSwitch(true);
+    closeCheckin();
+    await _ctx.loadVendedores();
+    toast(`Turno aberto com ${checked.length} vendedor${checked.length > 1 ? 'es' : ''}!`, 'success');
+  } catch (e) {
+    toast('Erro inesperado ao abrir turno', 'error');
+    console.error('confirmCheckin:', e);
+  } finally {
+    resetBtn();
+  }
 }
 
 // ─── Check for existing open turno ───
 
 export async function checkExistingTurno() {
   const today = new Date().toISOString().split('T')[0];
-  const tq = _ctx.sb.from('turnos').select('*').eq('data', today).is('fechamento', null);
-  if (_ctx.tenantId) tq.eq('tenant_id', _ctx.tenantId);
+  let tq = _ctx.sb.from('turnos').select('*').eq('data', today).is('fechamento', null);
+  if (_ctx.tenantId) tq = tq.eq('tenant_id', _ctx.tenantId);
   const { data } = await tq.order('abertura', { ascending: false }).limit(1);
   if (data && data.length > 0) {
     _ctx.currentTurno = data[0];

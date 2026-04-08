@@ -473,7 +473,7 @@
   cursor: pointer; transition: background .15s;
 }
 .export-menu button:hover { background: var(--bg-hover); }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+/* fadeIn defined in styles.css */
 
 /* ─── Modal ─── */
 .modal-overlay {
@@ -514,8 +514,7 @@
 @media (max-width: 768px) {
   .kpi-grid-hero { grid-template-columns: repeat(2, 1fr); }
   .kpi-grid-secondary { grid-template-columns: repeat(2, 1fr); }
-  .dash-layout { padding: 12px; }
-  .dash-header-controls { gap: 8px; }
+  .dash-topbar { gap: 8px; }
 }
 @media (max-width: 480px) {
   .kpi-grid-hero { grid-template-columns: 1fr; }
