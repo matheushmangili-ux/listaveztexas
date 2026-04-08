@@ -1,8 +1,12 @@
 // Minha Vez — Service Worker v9 (network-first, offline-capable)
-const CACHE_NAME = 'minhavez-v9';
+const CACHE_NAME = 'minhavez-v10';
 const STATIC_ASSETS = [
   '/tablet.html',
+  '/index.html',
+  '/dashboard.html',
+  '/settings.html',
   '/css/styles.css',
+  '/css/dashboard.css',
   '/css/tablet.css',
   '/js/constants.js',
   '/js/utils.js',
@@ -16,6 +20,11 @@ const STATIC_ASSETS = [
   '/js/tablet-footer.js',
   '/js/tablet-queue.js',
   '/js/tablet-turno.js',
+  '/js/auth.js',
+  '/js/dashboard-api.js',
+  '/js/dashboard-charts.js',
+  '/js/dashboard-config.js',
+  '/js/changelog.js',
   '/assets/logo-minhavez-new.png',
   '/manifest.json'
 ];

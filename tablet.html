@@ -74,17 +74,17 @@ window.addEventListener('error', function(e) {
     </div>
     <div class="flex-center gap-8 shrink-0">
       <!-- Ranking card -->
-      <button class="action-card ranking-card" onclick="toggleMiniRanking()" title="Ranking do turno">
+      <button class="action-card ranking-card" onclick="toggleMiniRanking()" title="Ranking do turno" aria-label="Ver ranking do turno">
         <i class="fa-solid fa-ranking-star"></i>
         <span>Ranking</span>
       </button>
       <!-- Iniciar / Encerrar turno card -->
-      <div class="action-card turno-card" id="turnoSwitch" onclick="toggleTurno()">
+      <div class="action-card turno-card" id="turnoSwitch" onclick="toggleTurno()" role="button" aria-label="Iniciar ou encerrar turno">
         <i class="fa-solid fa-play" id="turnoIcon"></i>
         <span id="turnoSwitchLabel">Iniciar</span>
       </div>
       <div style="position:relative">
-        <button class="more-btn" onclick="toggleMoreMenu()" title="Mais opções">
+        <button class="more-btn" onclick="toggleMoreMenu()" title="Mais opções" aria-label="Mais opções">
           <i class="fa-solid fa-ellipsis-vertical"></i>
         </button>
         <div id="moreMenu" class="more-menu" style="display:none">
@@ -109,7 +109,7 @@ window.addEventListener('error', function(e) {
     <div class="flex-between mb-8" style="padding:0 4px">
       <span class="fs-13 fw-700 text-muted uppercase" style="letter-spacing:.1em">Fila</span>
       <div class="flex-center gap-8">
-        <button onclick="openPosLog()" style="background:none;border:none;color:var(--text-muted);font-size:14px;cursor:pointer;padding:8px 10px;border-radius:8px;transition:background .15s;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center" title="Histórico de movimentações"><i class="fa-solid fa-clock-rotate-left"></i></button>
+        <button onclick="openPosLog()" style="background:none;border:none;color:var(--text-muted);font-size:14px;cursor:pointer;padding:8px 10px;border-radius:8px;transition:background .15s;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center" title="Histórico de movimentações" aria-label="Histórico de movimentações"><i class="fa-solid fa-clock-rotate-left"></i></button>
         <span id="queueCount" class="fs-13 fw-600 text-muted">0 na fila</span>
       </div>
     </div>

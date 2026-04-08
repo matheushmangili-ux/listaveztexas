@@ -174,7 +174,14 @@ if ('serviceWorker' in navigator) {
 
 <div class="particles-bg" id="particles"></div>
 <div class="login-container">
-  <div class="login-box">
+  <!-- Loading overlay while tenant loads -->
+  <div id="loginLoader" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:10;background:#FFFFFF">
+    <div style="text-align:center">
+      <div class="spinner" style="width:32px;height:32px;margin:0 auto 12px;border-width:3px"></div>
+      <p style="font-size:13px;color:#A1A1AA;font-weight:500">Carregando...</p>
+    </div>
+  </div>
+  <div class="login-box" style="opacity:0;transition:opacity .3s ease" id="loginBox">
     <!-- Brand -->
     <div class="brand-mark" style="text-align:center;margin-bottom:32px">
       <div style="display:inline-block;background:#060606;border-radius:14px;padding:18px 28px">
@@ -186,7 +193,7 @@ if ('serviceWorker' in navigator) {
 
     <!-- Tabs -->
     <div class="tab-switch">
-      <button class="active" onclick="switchTab('pin')">PIN Rapido</button>
+      <button class="active" onclick="switchTab('pin')">PIN Rápido</button>
       <button onclick="switchTab('email')">Email</button>
     </div>
 
@@ -236,7 +243,7 @@ if ('serviceWorker' in navigator) {
 </div>
 
 <div id="toastContainer"></div>
-<span class="version-tag">v1.1</span>
+<span class="version-tag" id="versionTag">v1.1</span>
 
 <script type="module">
 import { login, loginWithPin, getUser, redirectByRole } from '/js/auth.js';
@@ -251,6 +258,9 @@ if (tenant) {
   const sub = document.querySelector('.login-box p');
   if (sub) sub.textContent = tenant.nome_loja.toUpperCase();
 }
+// Reveal login box, hide loader
+document.getElementById('loginLoader').style.display = 'none';
+document.getElementById('loginBox').style.opacity = '1';
 // Set slug-aware forgot password link
 if (slug) {
   const fLink = document.getElementById('forgotLink');
@@ -297,7 +307,6 @@ function getPin() {
 function checkPinComplete() {
   const pin = getPin();
   document.getElementById('btnPin').disabled = pin.length < 4;
-  if (pin.length === 4) handlePinLogin();
 }
 
 function showError(msg) {

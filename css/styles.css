@@ -51,6 +51,10 @@
   --danger-bg: rgba(239,68,68,.08);
   --info: #3B82F6;
   --info-bg: rgba(59,130,246,.06);
+  --status-disponivel: #34D399;
+  --status-atendendo: #60A5FA;
+  --status-pausa: #FBBF24;
+  --status-fora: #71717A;
   --font-body: 'Satoshi', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
   --radius: 14px;
@@ -312,9 +316,9 @@ body {
   background: var(--info-bg);
 }
 
-.queue-item.em_atendimento { border-left: 3px solid var(--info); }
-.queue-item.pausa { border-left: 3px solid var(--warning); }
-.queue-item.fora { border-left: 3px solid var(--text-muted); opacity: .5; }
+.queue-item.em_atendimento { border-left: 3px solid var(--status-atendendo); }
+.queue-item.pausa { border-left: 3px solid var(--status-pausa); }
+.queue-item.fora { border-left: 3px solid var(--status-fora); opacity: .5; }
 
 .queue-position {
   width: 28px;

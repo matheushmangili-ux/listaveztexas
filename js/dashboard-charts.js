@@ -42,9 +42,9 @@ function isDarkTheme() {
 function chartColors() {
   const dark = isDarkTheme();
   return {
-    text: dark ? 'rgba(255,255,255,.55)' : 'rgba(0,0,0,.55)',
-    textStrong: dark ? 'rgba(255,255,255,.7)' : 'rgba(0,0,0,.7)',
-    textMuted: dark ? 'rgba(255,255,255,.4)' : 'rgba(0,0,0,.35)',
+    text: dark ? 'rgba(255,255,255,.7)' : 'rgba(0,0,0,.55)',
+    textStrong: dark ? 'rgba(255,255,255,.85)' : 'rgba(0,0,0,.7)',
+    textMuted: dark ? 'rgba(255,255,255,.5)' : 'rgba(0,0,0,.35)',
     grid: dark ? 'rgba(255,255,255,.04)' : 'rgba(0,0,0,.06)',
     tooltipBg: dark ? '#1E1E2E' : '#FFFFFF',
     tooltipTitle: dark ? '#fff' : '#18181B',
