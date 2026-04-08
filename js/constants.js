@@ -5,16 +5,10 @@
 
 // ─── Timeouts & Intervals (ms) ───
 
-export const SW_UPDATE_INTERVAL = 5 * 60 * 1000;         // 5 min — service worker update check
-export const HTML_HASH_POLL_INTERVAL = 2 * 60 * 1000;    // 2 min — page hash polling for updates
-export const UPDATE_CHECK_INITIAL_DELAY = 3000;           // delay before first update check
-export const UPDATE_CHECK_VISIBILITY_DELAY = 1000;        // delay on tab visibility change
-
 export const SESSION_TIMEOUT_TABLET = 30 * 60 * 1000;    // 30 min — inactivity logout (tablet)
 export const SESSION_TIMEOUT_DASHBOARD = 8 * 60 * 60 * 1000; // 8h — inactivity logout (dashboard/TV)
 export const SESSION_CHECK_INTERVAL = 60000;              // 1 min — check inactivity
 
-export const CLOCK_UPDATE_INTERVAL = 15000;               // 15s — header clock refresh
 export const FOOTER_TIMER_INTERVAL = 60000;               // 1 min — footer pause/atend timers
 export const AUTO_SYNC_INTERVAL = 30000;                  // 30s — periodic data reload
 export const QUICK_STATS_INTERVAL = 60000;                // 1 min — quick stats update
@@ -34,10 +28,8 @@ export const OUTCOME_OPEN_DELAY = 50;                     // delay before openin
 
 // ─── Toast Durations (ms) ───
 
-export const TOAST_DEFAULT = 4000;
 export const TOAST_SHORT = 1500;
 export const TOAST_MEDIUM = 2000;
-export const TOAST_LONG = 5000;
 
 // ─── Celebration Durations (ms) ───
 

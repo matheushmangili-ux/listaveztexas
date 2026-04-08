@@ -40,6 +40,31 @@ function buildTooltip(title, rows, color) {
   return html;
 }
 
+// ─── Shared donut chart config factory ───
+function donutConfig({ labels, values, colors, total, centerLabel, tooltipFn, events }) {
+  const cc = chartColors();
+  return {
+    chart: { type: 'donut', height: 280, ...(events ? { events } : {}) },
+    series: values,
+    labels: labels.map((l, i) => l + ' (' + values[i] + ')'),
+    colors,
+    plotOptions: {
+      pie: { expandOnClick: true, donut: { size: '68%', labels: {
+        show: true,
+        name: { show: true, fontSize: '10px', fontWeight: 600, color: cc.textMuted, offsetY: -8 },
+        value: { show: true, fontSize: '28px', fontWeight: 700, color: cc.centerText, offsetY: 4, formatter: () => String(total) },
+        total: { show: true, label: centerLabel, fontSize: '10px', fontWeight: 600, color: cc.textMuted, formatter: () => String(total) }
+      }}}
+    },
+    dataLabels: { enabled: true, formatter: v => Math.round(v) + '%', dropShadow: { enabled: false },
+                  style: { fontSize: '11px', fontWeight: 700, fontFamily: "'Satoshi'" } },
+    legend: { position: 'bottom', fontSize: '11px', fontWeight: 600, fontFamily: "'Satoshi'", labels: { colors: cc.textStrong } },
+    stroke: { width: 2, colors: [isDarkTheme() ? '#18181B' : '#FFFFFF'] },
+    tooltip: { custom: tooltipFn },
+    states: { hover: { filter: { type: 'darken', value: 0.82 } }, active: { filter: { type: 'none' } } }
+  };
+}
+
 /**
  * Initialize dashboard charts module with shared dependencies.
  * @param {object} ctx - Context with state accessors and helpers
@@ -306,53 +331,23 @@ export async function loadMotivos(range) {
   if (el) el.style.display = '';
   if (emptyMotivos) emptyMotivos.style.display = 'none';
 
-  renderChart('motivos', '#chartMotivos', {
-    chart: { type: 'donut', height: 280, events: {
+  renderChart('motivos', '#chartMotivos', donutConfig({
+    labels, values, colors, total: totalMotivos, centerLabel: 'PERDAS',
+    events: {
       dataPointSelection: function(event, chartCtx, config) {
         const idx = config.dataPointIndex;
         const motivo = (data || [])[idx]?.motivo;
-        const label = labels[idx];
-        if (motivo) openDrillMotivo(motivo, label);
+        if (motivo) openDrillMotivo(motivo, labels[idx]);
       },
       dataPointMouseEnter: function(event) { event.target.style.cursor = 'pointer'; }
-    }},
-    series: values,
-    labels: labels.map((l, i) => l + ' (' + values[i] + ')'),
-    colors: colors,
-    plotOptions: {
-      pie: {
-        expandOnClick: true,
-        donut: {
-          size: '68%',
-          labels: {
-            show: true,
-            name: { show: true, fontSize: '10px', fontWeight: 600, color: chartColors().textMuted, offsetY: -8 },
-            value: { show: true, fontSize: '28px', fontWeight: 700, color: chartColors().centerText, offsetY: 4,
-                     formatter: () => String(totalMotivos) },
-            total: { show: true, label: 'PERDAS', fontSize: '10px', fontWeight: 600, color: chartColors().textMuted,
-                     formatter: () => String(totalMotivos) }
-          }
-        }
-      }
     },
-    dataLabels: { enabled: true, formatter: (val) => Math.round(val) + '%',
-                  dropShadow: { enabled: false },
-                  style: { fontSize: '11px', fontWeight: 700, fontFamily: "'Satoshi'" } },
-    legend: { position: 'bottom', fontSize: '11px', fontWeight: 600, fontFamily: "'Satoshi'",
-              labels: { colors: chartColors().textStrong } },
-    stroke: { width: 2, colors: [isDarkTheme() ? '#18181B' : '#FFFFFF'] },
-    tooltip: {
-      custom: function({ series, seriesIndex, dataPointIndex, w }) {
-        const val = series[seriesIndex];
-        const pct = Math.round(val / totalMotivos * 100);
-        const label = labels[dataPointIndex];
-        const color = colors[dataPointIndex];
-        return buildTooltip(label, [['Registros', val], ['Percentual', pct + '%']], color) +
-          '<div style="padding:0 14px 8px;font-size:10px;color:' + chartColors().textMuted + ';font-family:Satoshi,sans-serif">Clique para detalhes</div>';
-      }
-    },
-    states: { hover: { filter: { type: 'darken', value: 0.82 } }, active: { filter: { type: 'none' } } }
-  });
+    tooltipFn: function({ series, seriesIndex, dataPointIndex }) {
+      const val = series[seriesIndex];
+      const pct = Math.round(val / totalMotivos * 100);
+      return buildTooltip(labels[dataPointIndex], [['Registros', val], ['Percentual', pct + '%']], colors[dataPointIndex]) +
+        '<div style="padding:0 14px 8px;font-size:10px;color:' + chartColors().textMuted + ';font-family:Satoshi,sans-serif">Clique para detalhes</div>';
+    }
+  }));
 }
 
 // ─── Hourly flow chart ───
@@ -1046,41 +1041,14 @@ export async function loadOrigem(range) {
   const colors = data.map((_, i) => ORIGEM_PALETTE[i % ORIGEM_PALETTE.length]);
   const total = values.reduce((a, b) => a + b, 0);
 
-  renderChart('origem', '#chartOrigem', {
-    chart: { type: 'donut', height: 280 },
-    series: values,
-    labels: labels.map((l, i) => l + ' (' + values[i] + ')'),
-    colors,
-    plotOptions: {
-      pie: {
-        expandOnClick: true,
-        donut: {
-          size: '68%',
-          labels: {
-            show: true,
-            name: { show: true, fontSize: '10px', fontWeight: 600, color: chartColors().textMuted, offsetY: -8 },
-            value: { show: true, fontSize: '28px', fontWeight: 700, color: chartColors().centerText, offsetY: 4,
-                     formatter: () => String(total) },
-            total: { show: true, label: 'TOTAL', fontSize: '10px', fontWeight: 600, color: chartColors().textMuted,
-                     formatter: () => String(total) }
-          }
-        }
-      }
-    },
-    dataLabels: { enabled: true, formatter: (val) => Math.round(val) + '%',
-                  dropShadow: { enabled: false },
-                  style: { fontSize: '11px', fontWeight: 700, fontFamily: "'Satoshi'" } },
-    legend: { position: 'bottom', fontSize: '11px', fontWeight: 600, fontFamily: "'Satoshi'",
-              labels: { colors: chartColors().textStrong } },
-    stroke: { width: 2, colors: [isDarkTheme() ? '#18181B' : '#FFFFFF'] },
-    tooltip: {
-      custom: function({ series, seriesIndex, dataPointIndex }) {
-        const val = series[seriesIndex];
-        const pct = Math.round(val / total * 100);
-        return buildTooltip(labels[dataPointIndex], [['Clientes', val], ['Percentual', pct + '%']], colors[dataPointIndex]);
-      }
-    },
-    states: { hover: { filter: { type: 'darken', value: 0.82 } }, active: { filter: { type: 'none' } } }
+  renderChart('origem', '#chartOrigem', donutConfig({
+    labels, values, colors, total, centerLabel: 'TOTAL',
+    tooltipFn: function({ series, seriesIndex, dataPointIndex }) {
+      const val = series[seriesIndex];
+      const pct = Math.round(val / total * 100);
+      return buildTooltip(labels[dataPointIndex], [['Clientes', val], ['Percentual', pct + '%']], colors[dataPointIndex]);
+    }
+  })
   });
 }
 

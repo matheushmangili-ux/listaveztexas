@@ -67,16 +67,12 @@ export function cleanupQueue() {
 
 /** Reset all drag state (call on visibilitychange) */
 export function resetDragState() {
-  if (touchDragging) {
-    if (touchGhost) { touchGhost.remove(); touchGhost = null; }
-    if (touchDragEl) touchDragEl.style.opacity = '1';
-    touchDragging = false; touchDragId = null; touchDragEl = null;
-  }
-  draggedId = null;
-  _dragRectsCache = null;
   if (touchGhost) { touchGhost.remove(); touchGhost = null; }
   if (touchDragEl) { touchDragEl.style.opacity = '1'; touchDragEl = null; }
-  touchDragging = false; touchDragId = null;
+  draggedId = null;
+  touchDragId = null;
+  touchDragging = false;
+  _dragRectsCache = null;
 }
 
 // ─── Batch render ───

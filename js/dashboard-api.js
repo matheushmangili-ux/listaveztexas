@@ -117,11 +117,6 @@ export async function fetchTrend(sb, range) {
   return sb.rpc('get_daily_trend', { p_inicio: range.start, p_fim: range.end });
 }
 
-/** Scatter: dados por vendedor para análise de volume × conversão */
-export async function fetchScatterData(sb, range) {
-  return sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end });
-}
-
 /** Salva ou atualiza um vendedor */
 export async function upsertVendedor(sb, payload, id = null, tenantId = null) {
   if (id) {

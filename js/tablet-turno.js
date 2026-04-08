@@ -81,7 +81,11 @@ async function openTurnoSummary() {
       topVendedor = [...countMap.values()].sort((a, b) => b.vendas - a.vendas)[0];
     }
     const inQueueCount = _ctx.vendedores.filter(v => v.status === 'disponivel' && v.posicao_fila != null).length;
-    const conv = Math.round(s.taxa_conversao || 0);
+    // Conversão inclui vendas + trocas com valor (mesma fórmula do dashboard)
+    const { data: trocasData } = await _ctx.sb.from('atendimentos').select('valor_venda').eq('turno_id', _ctx.currentTurno.id).eq('resultado', 'troca');
+    const trocasComValor = (trocasData || []).filter(t => t.valor_venda && t.valor_venda > 0).length;
+    const totalReal = s.total_atendimentos || 0;
+    const conv = totalReal > 0 ? Math.round(((s.total_vendas || 0) + trocasComValor) / totalReal * 100) : 0;
     content.innerHTML = `
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
         <div style="background:var(--bg-surface);border-radius:10px;padding:14px;text-align:center">

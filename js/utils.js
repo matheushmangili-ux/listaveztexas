@@ -47,26 +47,6 @@ export function formatTime(seconds) {
   return m + 'min ' + s + 's';
 }
 
-export function formatTimeLong(seconds) {
-  if (!seconds || !isFinite(seconds)) return '0min';
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  if (h > 0) return h + 'h ' + m + 'min';
-  return m + 'min';
-}
-
-export function formatDateBR(d) {
-  const dt = new Date(d);
-  return String(dt.getDate()).padStart(2, '0') + '/' +
-    String(dt.getMonth() + 1).padStart(2, '0') + '/' +
-    dt.getFullYear();
-}
-
-export function formatHora(d) {
-  const dt = new Date(d);
-  return String(dt.getHours()).padStart(2, '0') + ':' + String(dt.getMinutes()).padStart(2, '0');
-}
-
 export function elapsedSince(isoDate) {
   return (Date.now() - new Date(isoDate).getTime()) / 1000;
 }
@@ -123,28 +103,6 @@ export function toggleTheme() {
   document.documentElement.setAttribute('data-theme', next);
   localStorage.setItem('lv-theme', next);
   return next;
-}
-
-// Debounce for button protection
-export function debounce(fn, ms) {
-  let timer;
-  return function (...args) {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn.apply(this, args), ms);
-  };
-}
-
-// Texas Flag Loader HTML
-export function texasLoaderHTML(text) {
-  return `<div class="texas-loader">
-    <svg viewBox="0 0 64 44">
-      <rect class="flag-outline" x="1" y="1" width="62" height="42" rx="3"/>
-      <line class="flag-lines" x1="20" y1="1" x2="20" y2="43"/>
-      <line class="flag-lines" x1="20" y1="22" x2="63" y2="22"/>
-      <polygon class="flag-star" points="10,14 11.8,19.5 17.5,19.5 12.8,23 14.7,28.5 10,25 5.3,28.5 7.2,23 2.5,19.5 8.2,19.5"/>
-    </svg>
-    ${text ? '<span class="texas-loader-text">' + escapeHtml(text) + '</span>' : ''}
-  </div>`;
 }
 
 // Toast notification
