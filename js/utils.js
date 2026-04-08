@@ -3,11 +3,11 @@
 // ============================================
 
 export const MOTIVOS = {
-  preco: { label: 'Preço', icon: 'fa-tag', color: '#e2506f' },
-  ruptura: { label: 'Ruptura', icon: 'fa-box-open', color: '#c43d5a' },
-  indecisao: { label: 'Indecisão', icon: 'fa-face-meh', color: '#f0758e' },
-  so_olhando: { label: 'Só olhando', icon: 'fa-eye', color: '#D4D4D8' },
-  outro: { label: 'Outro', icon: 'fa-ellipsis', color: '#A1A1AA' }
+  preco: { label: 'Preço', icon: 'fa-tag', color: '#F59E0B' },
+  ruptura: { label: 'Ruptura', icon: 'fa-box-open', color: '#EF4444' },
+  indecisao: { label: 'Indecisão', icon: 'fa-face-meh', color: '#8B5CF6' },
+  so_olhando: { label: 'Só olhando', icon: 'fa-eye', color: '#6B7280' },
+  outro: { label: 'Outro', icon: 'fa-ellipsis', color: '#94A3B8' }
 };
 
 export const STATUS_CONFIG = {

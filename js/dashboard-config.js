@@ -7,8 +7,8 @@ export const CHART_TAB_KEY = 'minhavez_chart_tab';
 export const METAS_KEY = 'minhavez_metas';
 export const DEFAULT_METAS = { conversao: 70, tempo_medio: 30, ticket_medio: 3000 };
 
-// Donut chart palette: pinks/reds → grays (aligned with MOTIVOS palette)
-export const ORIGEM_PALETTE = ['#e2506f','#c43d5a','#f0758e','#D4D4D8','#A1A1AA','#818181','#60a5fa','#34d399'];
+// Donut chart palette: diverse colors for distinct category identification
+export const ORIGEM_PALETTE = ['#3B82F6','#22C55E','#F59E0B','#8B5CF6','#EC4899','#06B6D4','#F97316','#64748B'];
 
 // Period identifiers
 export const PERIODS = {

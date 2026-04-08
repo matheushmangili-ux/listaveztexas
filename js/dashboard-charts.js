@@ -34,7 +34,7 @@ function buildTooltip(title, rows, color) {
     html += `<strong style="font-size:13px;color:${cc.tooltipTitle}">${escapeHtml(title)}</strong></div>`;
   }
   rows.forEach(([label, value]) => {
-    html += `<div style="color:${cc.tooltipBody}">${escapeHtml(label)}: <strong style="color:${cc.tooltipTitle}">${value}</strong></div>`;
+    html += `<div style="color:${cc.tooltipBody}">${escapeHtml(label)}: <strong style="color:${cc.tooltipTitle}">${escapeHtml(String(value))}</strong></div>`;
   });
   html += '</div>';
   return html;
@@ -469,7 +469,7 @@ export async function loadPreferenciais(range) {
   const query = sb.from('atendimentos')
     .select('vendedor_id, preferencial')
     .gte('inicio', range.start)
-    .lte('inicio', range.end)
+    .lt('inicio', range.end)
     .neq('resultado', 'em_andamento');
   if (tenantId) query.eq('tenant_id', tenantId);
   const { data, error } = await query;

@@ -83,6 +83,10 @@
   --gold: #e2506f;
   --gold-bright: #f0758e;
   --gold-dim: #a8304d;
+  --status-disponivel: #34D399;
+  --status-atendendo: #60A5FA;
+  --status-pausa: #FBBF24;
+  --status-fora: #71717A;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
