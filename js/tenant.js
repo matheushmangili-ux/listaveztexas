@@ -68,6 +68,14 @@ export function getTenant() {
 }
 
 /**
+ * Clear cached tenant and slug (call on logout or tenant switch).
+ */
+export function clearTenantCache() {
+  _tenantCache = null;
+  _slug = null;
+}
+
+/**
  * Apply tenant branding (accent color, page title).
  */
 export function applyBranding(tenant) {

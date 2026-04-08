@@ -99,7 +99,7 @@ function showOriginModal(vendedorId) {
   let content = '<div class="origin-title">Como o cliente chegou?</div>';
   content += '<div class="origin-grid">';
   fixos.forEach(c => {
-    content += '<button class="origin-btn" onclick="confirmOrigin(\'' + c.id + '\')">' +
+    content += '<button class="origin-btn" data-canal-id="' + escapeHtml(c.id) + '">' +
                '<i class="' + escapeHtml(c.icone) + '"></i><span>' + escapeHtml(c.nome) + '</span></button>';
   });
   content += '</div>';
@@ -108,14 +108,22 @@ function showOriginModal(vendedorId) {
     content += '<div class="origin-sep">Eventos ativos</div>';
     content += '<div class="origin-grid">';
     eventos.forEach(c => {
-      content += '<button class="origin-btn" onclick="confirmOrigin(\'' + c.id + '\')">' +
+      content += '<button class="origin-btn" data-canal-id="' + escapeHtml(c.id) + '">' +
                  '<i class="' + escapeHtml(c.icone) + '"></i><span>' + escapeHtml(c.nome) + '</span></button>';
     });
     content += '</div>';
   }
 
-  content += '<button class="origin-skip" onclick="confirmOrigin(null)">Não informado</button>';
+  content += '<button class="origin-skip" data-canal-id="">Não informado</button>';
   box.innerHTML = content;
+
+  // Event delegation instead of inline onclick
+  box.onclick = (e) => {
+    const btn = e.target.closest('[data-canal-id]');
+    if (!btn) return;
+    const canalId = btn.dataset.canalId || null;
+    confirmOrigin(canalId);
+  };
 
   const overlay = document.getElementById('originOverlay');
   overlay.style.display = 'flex';

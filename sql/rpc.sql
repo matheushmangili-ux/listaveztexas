@@ -12,9 +12,12 @@ DECLARE
     v_atendimento_id UUID;
     v_tenant_id UUID;
 BEGIN
-    SELECT id, tenant_id INTO v_vendedor_id, v_tenant_id
+    v_tenant_id := get_my_tenant_id();
+
+    SELECT id INTO v_vendedor_id
     FROM vendedores
     WHERE status = 'disponivel' AND posicao_fila IS NOT NULL AND ativo = true
+      AND tenant_id = v_tenant_id
     ORDER BY posicao_fila ASC
     LIMIT 1
     FOR UPDATE SKIP LOCKED;
@@ -43,12 +46,15 @@ DECLARE
     v_atendimento_id UUID;
     v_tenant_id UUID;
 BEGIN
-    SELECT id, tenant_id INTO v_vendedor_id, v_tenant_id
+    v_tenant_id := get_my_tenant_id();
+
+    SELECT id INTO v_vendedor_id
     FROM vendedores
     WHERE status = 'disponivel'
       AND posicao_fila IS NOT NULL
       AND ativo = true
       AND COALESCE(setor, 'loja') = p_setor
+      AND tenant_id = v_tenant_id
     ORDER BY posicao_fila ASC
     LIMIT 1
     FOR UPDATE SKIP LOCKED;
@@ -83,15 +89,14 @@ DECLARE
     v_tenant_id UUID;
     v_max_pos INT;
 BEGIN
+    v_tenant_id := get_my_tenant_id();
+
     SELECT vendedor_id INTO v_vendedor_id
-    FROM atendimentos WHERE id = p_atendimento_id;
+    FROM atendimentos WHERE id = p_atendimento_id AND tenant_id = v_tenant_id;
 
     IF v_vendedor_id IS NULL THEN
         RAISE EXCEPTION 'Atendimento nao encontrado';
     END IF;
-
-    -- Get tenant_id from vendedor
-    SELECT tenant_id INTO v_tenant_id FROM vendedores WHERE id = v_vendedor_id;
 
     UPDATE atendimentos SET
         fim = now(),

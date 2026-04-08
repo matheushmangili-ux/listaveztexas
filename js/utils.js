@@ -143,7 +143,7 @@ export function texasLoaderHTML(text) {
       <line class="flag-lines" x1="20" y1="22" x2="63" y2="22"/>
       <polygon class="flag-star" points="10,14 11.8,19.5 17.5,19.5 12.8,23 14.7,28.5 10,25 5.3,28.5 7.2,23 2.5,19.5 8.2,19.5"/>
     </svg>
-    ${text ? '<span class="texas-loader-text">' + text + '</span>' : ''}
+    ${text ? '<span class="texas-loader-text">' + escapeHtml(text) + '</span>' : ''}
   </div>`;
 }
 
@@ -166,7 +166,7 @@ export function toast(msg, type = 'info', duration = 4000) {
   const s = styles[type] || styles.info;
   const el = document.createElement('div');
   el.style.cssText = `display:flex;align-items:center;gap:14px;padding:16px 20px;border-radius:12px;border:1px solid ${s.border};background:${s.bg};color:${s.text};font-size:15px;font-weight:600;font-family:var(--font-body);box-shadow:0 4px 16px rgba(0,0,0,.35);animation:toastIn .25s ease forwards;min-width:300px;max-width:460px`;
-  el.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}" style="font-size:18px;flex-shrink:0"></i><span>${msg}</span>`;
+  el.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}" style="font-size:18px;flex-shrink:0"></i><span>${escapeHtml(msg)}</span>`;
   container.appendChild(el);
   setTimeout(() => {
     el.style.animation = 'toastOut .3s ease forwards';

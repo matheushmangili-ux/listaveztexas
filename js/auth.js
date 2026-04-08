@@ -2,7 +2,7 @@
 // MinhaVez — Auth Module (Multi-Tenant)
 // ============================================
 import { getSupabase } from './supabase-config.js';
-import { getSlug, tenantPath } from './tenant.js';
+import { getSlug, tenantPath, clearTenantCache } from './tenant.js';
 
 const sb = getSupabase();
 
@@ -42,6 +42,7 @@ export async function loginWithPin(pin) {
 export async function logout() {
   await sb.auth.signOut();
   const slug = getSlug();
+  clearTenantCache();
   window.location.href = slug ? `/${slug}/login` : '/landing.html';
 }
 

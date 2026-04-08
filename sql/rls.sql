@@ -85,6 +85,17 @@ CREATE POLICY "tenant_users_update" ON tenant_users FOR UPDATE TO authenticated
 CREATE POLICY "tenant_users_delete" ON tenant_users FOR DELETE TO authenticated
   USING (tenant_id = get_my_tenant_id());
 
+-- ─── Canais de Origem ───
+ALTER TABLE canais_origem ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "canais_origem_select" ON canais_origem FOR SELECT TO authenticated
+  USING (tenant_id = get_my_tenant_id());
+CREATE POLICY "canais_origem_insert" ON canais_origem FOR INSERT TO authenticated
+  WITH CHECK (tenant_id = get_my_tenant_id());
+CREATE POLICY "canais_origem_update" ON canais_origem FOR UPDATE TO authenticated
+  USING (tenant_id = get_my_tenant_id());
+CREATE POLICY "canais_origem_delete" ON canais_origem FOR DELETE TO authenticated
+  USING (tenant_id = get_my_tenant_id());
+
 -- ─── Onboarding Tokens (leitura pública para setup pós-compra) ───
 -- Permite que setup.html faça polling por session_id antes do usuário estar autenticado
 ALTER TABLE onboarding_tokens ENABLE ROW LEVEL SECURITY;

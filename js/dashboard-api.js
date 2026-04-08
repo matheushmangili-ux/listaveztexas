@@ -52,7 +52,7 @@ export async function fetchPreferenciais(sb, range, tenantId) {
   let q = sb.from('atendimentos')
     .select('vendedor_id, preferencial')
     .gte('inicio', range.start)
-    .lte('inicio', range.end)
+    .lt('inicio', range.end)
     .neq('resultado', 'em_andamento');
   if (tenantId) q = q.eq('tenant_id', tenantId);
   return q;
@@ -102,13 +102,13 @@ export async function fetchDrillMotivo(sb, range, motivo, tenantId) {
 
 /** Dados para export (ranking + motivos) */
 export async function fetchExportData(sb, range) {
-  const [ranking, motivos] = await Promise.all([
+  const [ranking, motivos] = await Promise.allSettled([
     sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end }),
     sb.rpc('get_loss_reasons', { p_inicio: range.start, p_fim: range.end })
   ]);
   return {
-    ranking: ranking.data || [],
-    motivos: motivos.data || []
+    ranking: ranking.status === 'fulfilled' ? (ranking.value.data || []) : [],
+    motivos: motivos.status === 'fulfilled' ? (motivos.value.data || []) : []
   };
 }
 
