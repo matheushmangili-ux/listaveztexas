@@ -307,7 +307,7 @@ export async function loadMotivos(range) {
   if (emptyMotivos) emptyMotivos.style.display = 'none';
 
   renderChart('motivos', '#chartMotivos', {
-    chart: { type: 'donut', height: 320, events: {
+    chart: { type: 'donut', height: 280, events: {
       dataPointSelection: function(event, chartCtx, config) {
         const idx = config.dataPointIndex;
         const motivo = (data || [])[idx]?.motivo;
@@ -436,7 +436,7 @@ export async function loadHourly(range) {
   }
 
   renderChart('hourly', '#chartHourly', {
-    chart: { type: 'bar', height: 340, stacked: false },
+    chart: { type: 'bar', height: 300, stacked: false },
     series,
     xaxis: { categories: hours, labels: { style: { fontSize: '11px', fontWeight: 500 } } },
     yaxis: { labels: { style: { fontSize: '11px', fontWeight: 500 } }, forceNiceScale: true },
@@ -631,25 +631,39 @@ export async function loadPauseStats(range) {
   const motivoLabels = { almoco: 'Almoço', banheiro: 'Banheiro', reuniao: 'Reunião', operacional: 'Operacional', outro: 'Outro' };
   const motivoIcons = { almoco: 'fa-utensils', banheiro: 'fa-restroom', reuniao: 'fa-people-group', operacional: 'fa-wrench', outro: 'fa-ellipsis' };
   const motivoColors = { almoco: '#f59e0b', banheiro: '#60a5fa', reuniao: '#A1A1AA', operacional: '#8b5cf6', outro: '#64748b' };
-  el.innerHTML = data.map(r => {
+
+  // Table header
+  let html = `<table style="width:100%;border-collapse:collapse;font-size:12px">
+    <thead><tr style="border-bottom:1px solid var(--border-subtle)">
+      <th style="text-align:left;padding:8px 10px;font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em">Vendedor</th>
+      <th style="text-align:left;padding:8px 10px;font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em">Motivo</th>
+      <th style="text-align:center;padding:8px 10px;font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em">Período</th>
+      <th style="text-align:right;padding:8px 10px;font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em">Duração</th>
+    </tr></thead><tbody>`;
+
+  html += data.map(r => {
     const horaInicio = new Date(r.inicio).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     const emPausa = !r.fim;
-    const horaFim = r.fim ? new Date(r.fim).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '<span style="color:var(--warning);font-weight:700">em pausa</span>';
+    const horaFim = r.fim ? new Date(r.fim).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
     const dur = Math.round(r.duracao_min || 0);
     const motLabel = motivoLabels[r.motivo] || r.motivo || '—';
     const motIcon = motivoIcons[r.motivo] || 'fa-ellipsis';
     const motColor = motivoColors[r.motivo] || '#64748b';
-    return `<div class="rupture-item" ${emPausa ? 'style="background:rgba(245,158,11,.06);border-left:3px solid var(--warning);padding-left:12px"' : ''}>
-      <div style="display:flex;align-items:center;gap:10px">
-        <i class="fa-solid ${motIcon}" style="font-size:14px;color:${motColor};width:18px;text-align:center;flex-shrink:0"></i>
-        <div>
-          <div style="font-weight:600;font-size:13px">${escapeHtml(r.vendedor_nome)}${emPausa ? ' <i class="fa-solid fa-circle" style="font-size:6px;color:var(--warning);vertical-align:middle;margin-left:4px;animation:dotPulse 2s ease-in-out infinite"></i>' : ''}</div>
-          <div style="font-size:10px;color:var(--text-muted)">${motLabel} · ${horaInicio} → ${horaFim}</div>
-        </div>
-      </div>
-      <div class="rupture-count" style="color:${emPausa ? 'var(--warning)' : 'var(--text-muted)'}">${formatTempo(dur)}</div>
-    </div>`;
+    const rowBg = emPausa ? 'background:rgba(245,158,11,.04);' : '';
+    const durColor = emPausa ? 'var(--warning)' : dur > 60 ? 'var(--danger)' : 'var(--text-primary)';
+    const periodoHtml = emPausa
+      ? `${horaInicio} → <span style="color:var(--warning);font-weight:700">agora</span>`
+      : `${horaInicio} → ${horaFim}`;
+    return `<tr style="border-bottom:1px solid var(--border-subtle);${rowBg}transition:background .15s">
+      <td style="padding:10px;font-weight:600">${escapeHtml(r.vendedor_nome)}${emPausa ? ' <i class="fa-solid fa-circle" style="font-size:5px;color:var(--warning);vertical-align:middle;margin-left:3px;animation:dotPulse 2s ease-in-out infinite"></i>' : ''}</td>
+      <td style="padding:10px"><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:6px;background:${motColor}18;color:${motColor};font-size:11px;font-weight:600"><i class="fa-solid ${motIcon}" style="font-size:10px"></i>${escapeHtml(motLabel)}</span></td>
+      <td style="padding:10px;text-align:center;font-family:var(--font-mono);font-size:11px;font-weight:500;color:var(--text-secondary)">${periodoHtml}</td>
+      <td style="padding:10px;text-align:right;font-family:var(--font-mono);font-weight:700;color:${durColor}">${formatTempo(dur)}</td>
+    </tr>`;
   }).join('');
+
+  html += '</tbody></table>';
+  el.innerHTML = html;
 }
 
 // ─── Floor (who's on now) — LED marquee ───
@@ -771,7 +785,7 @@ export async function loadScatter(range, cachedData) {
   const axisColor = isDarkTheme() ? 'rgba(255,255,255,.5)' : 'rgba(0,0,0,.5)';
 
   renderChart('scatter', '#chartScatter', {
-    chart: { type: 'scatter', height: 340, zoom: { enabled: false } },
+    chart: { type: 'scatter', height: 280, zoom: { enabled: false } },
     series: [
       { name: 'Acima da meta', data: series1 },
       { name: 'Perto da meta', data: series2 },
@@ -865,8 +879,8 @@ export async function loadTempoMeta(range, cachedData) {
   // Cor semântica: verde = abaixo da meta (bom), amarelo = perto, vermelho = acima
   const barColors = tempos.map(t => tempoColor(t, metaTempo));
 
-  // Altura dinâmica: 50px por vendedor, mínimo 200px, máximo 600px
-  const dynamicHeight = Math.max(200, Math.min(600, filtered.length * 50 + 60));
+  // Altura dinâmica: 38px por vendedor, mínimo 180px, máximo 400px
+  const dynamicHeight = Math.max(180, Math.min(400, filtered.length * 38 + 50));
   // Ajustar o container
   const chartBox = el?.parentElement;
   if (chartBox) chartBox.style.height = dynamicHeight + 'px';
@@ -874,7 +888,7 @@ export async function loadTempoMeta(range, cachedData) {
   renderChart('tempoMeta', '#chartTempoMeta', {
     chart: { type: 'bar', height: dynamicHeight },
     series: [{ name: 'Tempo Médio (min)', data: tempos }],
-    plotOptions: { bar: { horizontal: true, borderRadius: 6, barHeight: '65%', distributed: true,
+    plotOptions: { bar: { horizontal: true, borderRadius: 5, barHeight: '55%', distributed: true,
       dataLabels: { position: 'top' } } },
     colors: barColors,
     xaxis: { labels: { formatter: v => v + 'min', style: { fontSize: '11px', fontWeight: 500 } },
@@ -946,7 +960,7 @@ export async function loadTrend(range) {
   const isSingleDay = xLabels.length <= 2;
 
   renderChart('trend', '#chartTrend', {
-    chart: { type: 'line', height: 340, stacked: false },
+    chart: { type: 'line', height: 300, stacked: false },
     series: [
       { name: 'Atendimentos', type: 'bar', data: atend },
       { name: 'Vendas', type: 'bar', data: vendas },
@@ -1033,7 +1047,7 @@ export async function loadOrigem(range) {
   const total = values.reduce((a, b) => a + b, 0);
 
   renderChart('origem', '#chartOrigem', {
-    chart: { type: 'donut', height: 320 },
+    chart: { type: 'donut', height: 280 },
     series: values,
     labels: labels.map((l, i) => l + ' (' + values[i] + ')'),
     colors,

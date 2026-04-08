@@ -201,7 +201,7 @@
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: 16px;
-  padding: 22px;
+  padding: 20px;
   transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
   box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.03);
 }
@@ -210,18 +210,18 @@
   box-shadow: 0 4px 16px rgba(0,0,0,.08);
 }
 .chart-card h3 {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
   color: rgba(0,0,0,.45);
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.chart-card h3 i { font-size: 14px; opacity: .5; }
-.chart-box { position: relative; height: 340px; z-index: 1; overflow: hidden; }
+.chart-card h3 i { font-size: 13px; opacity: .5; }
+.chart-box { position: relative; height: 300px; z-index: 1; overflow: hidden; }
 [data-theme="dark"] .chart-card h3 { color: rgba(255,255,255,.5); }
 [data-theme="dark"] .chart-card { box-shadow: 0 1px 3px rgba(0,0,0,.2); }
 [data-theme="dark"] .chart-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.4); }
@@ -231,32 +231,32 @@
   display: flex;
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
+  border-radius: 12px;
   padding: 4px;
   margin-bottom: var(--gap);
   width: fit-content;
   gap: 2px;
 }
 .chart-tab {
-  padding: 9px 18px;
+  padding: 10px 22px;
   background: transparent;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 10px;
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 500;
   color: var(--text-muted);
   cursor: pointer;
-  transition: background 150ms ease, color 150ms ease;
+  transition: all 200ms ease;
   white-space: nowrap;
 }
 .chart-tab.active {
-  background: var(--bg-card);
-  color: var(--accent);
-  font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(226,80,111,.3);
 }
-.chart-tab:hover:not(.active) { color: var(--text-secondary); background: var(--bg-elevated); }
+.chart-tab:hover:not(.active) { color: var(--text-primary); background: var(--bg-elevated); }
 
 /* ─── Chart Empty State ─── */
 .chart-empty-state {
