@@ -395,6 +395,22 @@
         </button>
       </div>
 
+      <!-- Dashboard -->
+      <div class="settings-section">
+        <h2><i class="fa-solid fa-chart-line"></i> Dashboard</h2>
+        <div class="settings-card">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Localização (exibida no relógio do dashboard)</label>
+            <div style="display:flex;gap:8px">
+              <input id="settLocation" class="input" type="text" placeholder="Ex: São Paulo, SP" maxlength="40" style="max-width:260px;min-height:36px;font-size:13px">
+              <button class="btn btn-ghost" onclick="saveLocation()" style="min-height:36px;padding:0 12px;font-size:12px">
+                <i class="fa-solid fa-floppy-disk"></i> Salvar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Links -->
       <div class="settings-section">
         <h2><i class="fa-solid fa-link"></i> Links</h2>
@@ -613,6 +629,9 @@ let tenantSectors = [];
   document.getElementById('colorSwatch').style.background = color;
   tenantSectors = tenant.setores || ['loja'];
 
+  // Load saved location
+  document.getElementById('settLocation').value = localStorage.getItem('minhavez_location') || '';
+
   renderSettSectors();
   renderVendorList();
   populateLinks();
@@ -666,6 +685,14 @@ window.addSettSector = function() {
 window.removeSettSector = function(idx) {
   tenantSectors.splice(idx, 1);
   renderSettSectors();
+};
+
+// Save dashboard location
+window.saveLocation = function() {
+  const loc = document.getElementById('settLocation').value.trim();
+  if (loc) localStorage.setItem('minhavez_location', loc);
+  else localStorage.removeItem('minhavez_location');
+  toast('Localização salva', 'success');
 };
 
 // Save store settings

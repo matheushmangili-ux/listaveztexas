@@ -25,43 +25,53 @@
 <body>
 
 <div class="dash-layout">
-  <!-- Header -->
-  <div class="dash-header">
-    <!-- Top: Brand + Actions -->
-    <div class="dash-header-top">
-      <div class="dash-header-brand">
-        <div class="dash-header-logo" id="headerLogo"><img src="/assets/logo-minhavez-new.png" alt="minhavez"></div>
-        <div class="dash-header-subtitle">
-          <span id="dashDate"></span>
-          <span id="lastUpdateIndicator" style="opacity:.6"></span>
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:16px">
-        <div class="dash-header-title" id="headerTitle"></div>
-        <div class="dash-header-actions">
-        <a id="linkTablet" href="/tablet.html" class="header-btn" title="Tablet">
-          <i class="fa-solid fa-tablet-screen-button"></i>
-          <span class="header-btn-label">Tablet</span>
-        </a>
-        <a id="linkSettings" href="/settings.html" class="header-btn" title="Configurações">
-          <i class="fa-solid fa-gear"></i>
-          <span class="header-btn-label">Config</span>
-        </a>
-        <div class="header-btn-divider"></div>
-        <button class="header-btn" onclick="toggleTheme()" title="Alternar tema" aria-label="Alternar tema claro/escuro">
-          <i class="fa-solid fa-circle-half-stroke"></i>
-          <span class="header-btn-label">Tema</span>
-        </button>
-        <button class="header-btn" onclick="handleLogout()" title="Sair" aria-label="Sair da conta">
-          <i class="fa-solid fa-right-from-bracket"></i>
-          <span class="header-btn-label">Sair</span>
-        </button>
-        </div>
-      </div>
+  <!-- Sidebar -->
+  <aside class="dash-sidebar" id="dashSidebar">
+    <div class="sidebar-brand">
+      <div class="dash-header-logo" id="headerLogo"><img src="/assets/logo-minhavez-new.png" alt="minhavez"></div>
     </div>
-    <!-- Bottom: Controls -->
-    <div class="dash-header-controls">
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <div class="sidebar-meta">
+      <span id="dashDate"></span>
+      <span id="lastUpdateIndicator" style="opacity:.6"></span>
+    </div>
+    <div class="dash-header-title" id="headerTitle"></div>
+
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Navegação</span>
+      <a id="linkTablet" href="/tablet.html" class="sidebar-link" title="Tablet">
+        <i class="fa-solid fa-tablet-screen-button"></i>
+        <span>Tablet</span>
+      </a>
+      <a id="linkSettings" href="/settings.html" class="sidebar-link" title="Configurações">
+        <i class="fa-solid fa-gear"></i>
+        <span>Configurações</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-spacer"></div>
+
+    <div class="sidebar-footer">
+      <button class="sidebar-link" onclick="toggleTheme()" aria-label="Alternar tema claro/escuro">
+        <i class="fa-solid fa-circle-half-stroke"></i>
+        <span>Tema</span>
+      </button>
+      <button class="sidebar-link sidebar-link--danger" onclick="handleLogout()" aria-label="Sair da conta">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span>Sair</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Mobile header (hidden on desktop) -->
+  <button class="dash-mobile-toggle" id="sidebarToggle" onclick="document.getElementById('dashSidebar').classList.toggle('open')" aria-label="Abrir menu">
+    <i class="fa-solid fa-bars"></i>
+  </button>
+
+  <!-- Main content -->
+  <div class="dash-main">
+    <!-- Topbar: Controls -->
+    <div class="dash-topbar">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1;min-width:0">
         <div class="period-tabs" id="periodTabs">
           <button data-period="hoje" class="active" onclick="setPeriod('hoje')">Hoje</button>
           <button data-period="ontem" onclick="setPeriod('ontem')">Ontem</button>
@@ -97,15 +107,15 @@
           <select id="filterVendedor">
             <option value="">Todos</option>
           </select>
-          <button class="filter-apply-btn" onclick="applyFilters()" title="Aplicar filtros" style="padding:6px 14px;background:#e2506f;color:#fff;border:1px solid #e2506f;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:var(--font-body)">
+          <button class="filter-apply-btn" onclick="applyFilters()" title="Aplicar filtros">
             <i class="fa-solid fa-filter"></i> Aplicar
           </button>
-          <button class="filter-clear-btn" id="filterClearBtn" onclick="clearFilters()" title="Limpar filtros" style="display:none;padding:6px 8px;background:var(--bg-surface);color:var(--text-muted);border:1px solid var(--border-subtle);border-radius:4px;font-size:11px;cursor:pointer">
+          <button class="filter-clear-btn" id="filterClearBtn" onclick="clearFilters()" title="Limpar filtros" style="display:none">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
         <div style="position:relative;display:inline-block" id="exportDropdown">
-          <button onclick="document.getElementById('exportMenu').classList.toggle('open')" title="Exportar dados" style="padding:6px 14px;background:#e2506f;color:#fff;border:1px solid #e2506f;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:var(--font-body)">
+          <button class="filter-apply-btn" onclick="document.getElementById('exportMenu').classList.toggle('open')" title="Exportar dados">
             <i class="fa-solid fa-file-export"></i> Exportar
           </button>
           <div id="exportMenu" class="export-menu">
@@ -114,8 +124,14 @@
           </div>
         </div>
       </div>
+      <!-- Clock widget -->
+      <div class="topbar-clock" id="topbarClock">
+        <i class="fa-solid fa-clock" style="font-size:11px;opacity:.5"></i>
+        <span id="clockTime" style="font-family:var(--font-mono);font-weight:700;font-size:14px">--:--</span>
+        <span id="clockDate" style="font-size:11px;color:var(--text-muted);font-weight:500"></span>
+        <span id="clockLocation" style="font-size:10px;color:var(--text-muted);font-weight:500;display:none"></span>
+      </div>
     </div>
-  </div>
 
   <!-- Status Marquee -->
   <div id="statusMarquee" style="overflow:hidden;white-space:nowrap;margin-bottom:var(--gap);background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:14px;padding:10px 0;position:relative">
@@ -1146,6 +1162,27 @@ showChangelog(APP_CHANGELOG, 'minhavez_dash_update_seen_');
 
 // ─── Init ───
 document.getElementById('dashDate').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+
+// ─── Topbar Clock ───
+(function initClock() {
+  const clockTime = document.getElementById('clockTime');
+  const clockDate = document.getElementById('clockDate');
+  const clockLocation = document.getElementById('clockLocation');
+  function tick() {
+    const now = new Date();
+    if (clockTime) clockTime.textContent = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    if (clockDate) clockDate.textContent = now.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+  }
+  tick();
+  setInterval(tick, 15000);
+  // Load saved location from settings
+  const savedLocation = localStorage.getItem('minhavez_location');
+  if (savedLocation && clockLocation) {
+    clockLocation.textContent = savedLocation;
+    clockLocation.style.display = '';
+  }
+})();
+
 await populateFilters();
 // Wait for Satoshi font to load before rendering charts
 await document.fonts.ready;
@@ -1226,5 +1263,7 @@ window.closeDrillModal = function() {
   </div>
 </div>
 
+  </div><!-- /dash-main -->
+</div><!-- /dash-layout -->
 </body>
 </html>
