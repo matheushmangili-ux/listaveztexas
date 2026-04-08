@@ -17,6 +17,29 @@ let _activeChartTab = null;
 
 const CHART_PALETTE = ['#e2506f', '#c43d5a', '#f0758e', '#D4D4D8', '#A1A1AA', '#71717A'];
 
+// ─── Semantic tempo colors based on meta threshold ───
+function tempoColor(minutes, meta) {
+  if (minutes <= meta) return '#22C55E';
+  if (minutes <= meta * 1.3) return '#F59E0B';
+  return '#EF4444';
+}
+
+// ─── Unified custom tooltip builder ───
+function buildTooltip(title, rows, color) {
+  const cc = chartColors();
+  let html = `<div style="padding:10px 14px;font-family:Satoshi,sans-serif;font-size:12px;line-height:1.6;min-width:140px;background:${cc.tooltipBg};border:1px solid ${cc.tooltipBorder};border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15)">`;
+  if (title) {
+    html += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">`;
+    if (color) html += `<span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0"></span>`;
+    html += `<strong style="font-size:13px;color:${cc.tooltipTitle}">${escapeHtml(title)}</strong></div>`;
+  }
+  rows.forEach(([label, value]) => {
+    html += `<div style="color:${cc.tooltipBody}">${escapeHtml(label)}: <strong style="color:${cc.tooltipTitle}">${value}</strong></div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
 /**
  * Initialize dashboard charts module with shared dependencies.
  * @param {object} ctx - Context with state accessors and helpers
@@ -284,19 +307,21 @@ export async function loadMotivos(range) {
   if (emptyMotivos) emptyMotivos.style.display = 'none';
 
   renderChart('motivos', '#chartMotivos', {
-    chart: { type: 'donut', height: 320, cursor: 'pointer', events: {
+    chart: { type: 'donut', height: 320, events: {
       dataPointSelection: function(event, chartCtx, config) {
         const idx = config.dataPointIndex;
         const motivo = (data || [])[idx]?.motivo;
         const label = labels[idx];
         if (motivo) openDrillMotivo(motivo, label);
-      }
+      },
+      dataPointMouseEnter: function(event) { event.target.style.cursor = 'pointer'; }
     }},
     series: values,
     labels: labels.map((l, i) => l + ' (' + values[i] + ')'),
     colors: colors,
     plotOptions: {
       pie: {
+        expandOnClick: true,
         donut: {
           size: '68%',
           labels: {
@@ -316,8 +341,17 @@ export async function loadMotivos(range) {
     legend: { position: 'bottom', fontSize: '11px', fontWeight: 600, fontFamily: "'Satoshi'",
               labels: { colors: chartColors().textStrong } },
     stroke: { width: 2, colors: [isDarkTheme() ? '#18181B' : '#FFFFFF'] },
-    tooltip: { y: { formatter: (val) => val + ' registros' } },
-    states: { hover: { filter: { type: 'darken', value: 0.85 } }, active: { filter: { type: 'none' } } }
+    tooltip: {
+      custom: function({ series, seriesIndex, dataPointIndex, w }) {
+        const val = series[seriesIndex];
+        const pct = Math.round(val / totalMotivos * 100);
+        const label = labels[dataPointIndex];
+        const color = colors[dataPointIndex];
+        return buildTooltip(label, [['Registros', val], ['Percentual', pct + '%']], color) +
+          '<div style="padding:0 14px 8px;font-size:10px;color:' + chartColors().textMuted + ';font-family:Satoshi,sans-serif">Clique para detalhes</div>';
+      }
+    },
+    states: { hover: { filter: { type: 'darken', value: 0.82 } }, active: { filter: { type: 'none' } } }
   });
 }
 
@@ -391,6 +425,16 @@ export async function loadHourly(range) {
                position: 'right', offsetX: -10, offsetY: -1 } }];
   }
 
+  // Annotation for current hour (only for today/single day)
+  const currentHour = new Date().getHours();
+  const currentHourLabel = currentHour + 'h';
+  const hourIdx = hours.indexOf(currentHourLabel);
+  if (hourIdx >= 0 && !isMultiDay) {
+    if (!annotations.xaxis) annotations.xaxis = [];
+    annotations.xaxis.push({ x: currentHourLabel, borderColor: '#EF4444', strokeDashArray: 3,
+      label: { text: 'agora', style: { fontSize: '9px', fontWeight: 700, background: '#EF4444', color: '#fff', padding: { left: 5, right: 5, top: 2, bottom: 2 } }, orientation: 'horizontal', offsetY: -5 } });
+  }
+
   renderChart('hourly', '#chartHourly', {
     chart: { type: 'bar', height: 340, stacked: false },
     series,
@@ -398,7 +442,11 @@ export async function loadHourly(range) {
     yaxis: { labels: { style: { fontSize: '11px', fontWeight: 500 } }, forceNiceScale: true },
     plotOptions: { bar: { borderRadius: 6, columnWidth: '60%' } },
     colors: ['#e2506f', '#D4D4D8', '#c43d5a'],
-    fill: { opacity: [0.75, 0.5, 0.2] },
+    fill: {
+      type: ['gradient', 'solid', 'solid'],
+      gradient: { shade: 'dark', type: 'vertical', shadeIntensity: 0.2, opacityFrom: 0.9, opacityTo: 0.65, stops: [0, 100] },
+      opacity: [0.9, 0.5, 0.2]
+    },
     stroke: { width: [0, 0, 2], curve: 'smooth' },
     markers: { size: [0, 0, 3] },
     grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { left: 14, right: 20, top: 10 } },
@@ -468,7 +516,7 @@ export async function loadPreferenciais(range) {
       { name: 'Normal', data: normalData }
     ],
     plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '60%', stacked: true } },
-    colors: ['#f59e0b', '#e2506f'],
+    colors: ['#f59e0b', '#94A3B8'],
     xaxis: { labels: { style: { fontSize: '11px', fontWeight: 500 } }, categories: names },
     yaxis: { labels: { style: { fontSize: '12px', fontWeight: 700, colors: [chartColors().textStrong] } } },
     grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { right: 20 },
@@ -523,8 +571,9 @@ export async function loadRanking(range, cachedData) {
       ? `<img src="${foto}" style="width:100%;height:100%;object-fit:cover">`
       : initials(r.nome);
     const tm = r.tempo_medio_min || 0;
-    const tmColor = tm <= tempoMeta ? 'var(--success)' : tm <= tempoMeta * 1.3 ? 'var(--warning)' : 'var(--danger)';
-    return `<div class="rank-card${isTop ? ' top-3' : ''}">
+    const tmColor = tempoColor(tm, tempoMeta);
+    const delay = Math.min(i * 60, 400);
+    return `<div class="rank-card${isTop ? ' top-3' : ''}" style="animation:cardFadeIn .4s ease ${delay}ms both">
       <div class="rank-pos">${medal || '#' + (i + 1)}</div>
       <div class="rank-avatar">${avatarContent}</div>
       <div class="rank-name">${escapeHtml(r.apelido || r.nome.split(' ')[0])}</div>
@@ -540,7 +589,7 @@ export async function loadRanking(range, cachedData) {
           <span class="stat-label">Vendas</span>
         </div>
         <div class="stat-item">
-          <span class="stat-val" style="color:${tmColor}">${tm}<span style="font-size:9px">min</span></span>
+          <span class="stat-val" style="color:${tmColor};transition:color .3s">${tm}<span style="font-size:9px">min</span></span>
           <span class="stat-label">Tempo</span>
         </div>
       </div>
@@ -759,25 +808,27 @@ export async function loadScatter(range, cachedData) {
             padding: { right: 20, top: 10, left: 10, bottom: 10 } },
     annotations: { yaxis: [{ y: metaConv, borderColor: '#e2506f', strokeDashArray: 5, opacity: 0.6,
       label: { text: 'Meta ' + metaConv + '%', style: { fontSize: '10px', fontWeight: 700, fontFamily: "'Satoshi'", background: 'rgba(226,80,111,.12)', color: '#e2506f', padding: { left: 6, right: 6, top: 2, bottom: 2 } }, position: 'right', offsetX: -10 } }] },
-    dataLabels: { enabled: false },
+    dataLabels: {
+      enabled: filtered.length <= 12,
+      formatter: function(val, { seriesIndex, dataPointIndex }) {
+        return allNames[seriesIndex]?.[dataPointIndex] || '';
+      },
+      textAnchor: 'start',
+      offsetX: 6,
+      style: { fontSize: '10px', fontWeight: 600, colors: [chartColors().textStrong] }
+    },
     legend: { position: 'top', fontSize: '11px', fontWeight: 600, labels: { colors: chartColors().textStrong },
               markers: { shape: 'circle', size: 5 }, offsetY: -5 },
     tooltip: {
       shared: false,
       intersect: true,
       custom: function({ seriesIndex, dataPointIndex, w }) {
-        var d = w.config.series[seriesIndex].data[dataPointIndex];
-        var name = allNames[seriesIndex] && allNames[seriesIndex][dataPointIndex] ? allNames[seriesIndex][dataPointIndex] : '';
-        var color = w.config.colors[seriesIndex];
-        var xVal = Array.isArray(d) ? d[0] : (d.x || 0);
-        var yVal = Array.isArray(d) ? d[1] : (d.y || 0);
-        var cc = chartColors();
-        return '<div style="padding:10px 14px;font-family:Satoshi,sans-serif;font-size:12px;line-height:1.6;min-width:140px;background:' + cc.tooltipBg + ';border-radius:8px">' +
-               '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">' +
-               '<span style="width:10px;height:10px;border-radius:50%;background:' + color + ';display:inline-block"></span>' +
-               '<strong style="font-size:13px;color:' + cc.tooltipTitle + '">' + name + '</strong></div>' +
-               '<div style="color:' + cc.tooltipBody + '">Atendimentos: <strong style="color:' + cc.tooltipTitle + '">' + xVal + '</strong></div>' +
-               '<div style="color:' + cc.tooltipBody + '">Conversão: <strong style="color:' + cc.tooltipTitle + '">' + yVal + '%</strong></div></div>';
+        const d = w.config.series[seriesIndex].data[dataPointIndex];
+        const name = allNames[seriesIndex]?.[dataPointIndex] || '';
+        const color = w.config.colors[seriesIndex];
+        const xVal = Array.isArray(d) ? d[0] : (d.x || 0);
+        const yVal = Array.isArray(d) ? d[1] : (d.y || 0);
+        return buildTooltip(name, [['Atendimentos', xVal], ['Conversão', yVal + '%']], color);
       }
     }
   });
@@ -811,8 +862,8 @@ export async function loadTempoMeta(range, cachedData) {
   const names = filtered.map(r => (r.apelido || r.nome || '?').split(' ')[0]);
   const tempos = filtered.map(r => r.tempo_medio_min || 0);
   const metaTempo = metas.tempo_medio || 30;
-  // Cor dinâmica: verde = abaixo da meta (bom), amarelo = perto, vermelho = acima
-  const barColors = tempos.map(t => t <= metaTempo * 0.8 ? 'rgba(226,80,111,.6)' : t <= metaTempo ? 'rgba(240,117,142,.5)' : 'rgba(212,212,216,.6)');
+  // Cor semântica: verde = abaixo da meta (bom), amarelo = perto, vermelho = acima
+  const barColors = tempos.map(t => tempoColor(t, metaTempo));
 
   // Altura dinâmica: 50px por vendedor, mínimo 200px, máximo 600px
   const dynamicHeight = Math.max(200, Math.min(600, filtered.length * 50 + 60));
@@ -899,7 +950,7 @@ export async function loadTrend(range) {
     series: [
       { name: 'Atendimentos', type: 'bar', data: atend },
       { name: 'Vendas', type: 'bar', data: vendas },
-      { name: 'Conversão', type: 'column', data: conv }
+      { name: 'Conversão', type: 'area', data: conv }
     ],
     xaxis: { categories: xLabels, labels: { style: { fontSize: '11px', fontWeight: 600 } } },
     yaxis: [
@@ -910,10 +961,14 @@ export async function loadTrend(range) {
         forceNiceScale: false }
     ],
     plotOptions: { bar: { borderRadius: 4, columnWidth: isSingleDay ? '50%' : '65%' } },
-    stroke: { width: [0, 0, 0] },
-    fill: { opacity: [0.85, 0.5, 0.65] },
+    stroke: { width: [0, 0, 2.5], curve: ['straight', 'straight', 'smooth'] },
+    fill: {
+      type: ['solid', 'solid', 'gradient'],
+      opacity: [0.85, 0.5, 1],
+      gradient: { shade: 'light', type: 'vertical', shadeIntensity: 0.3, opacityFrom: 0.4, opacityTo: 0.05, stops: [0, 95] }
+    },
     colors: ['#e2506f', '#D4D4D8', '#f59e0b'],
-    markers: { size: 0 },
+    markers: { size: [0, 0, 4], strokeWidth: 2, strokeColors: '#fff', hover: { sizeOffset: 2 } },
     grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { left: 10, right: 10, bottom: 5 } },
     legend: { position: 'top', horizontalAlign: 'center', fontSize: '11px', fontWeight: 600,
               labels: { colors: chartColors().textStrong },
@@ -984,6 +1039,7 @@ export async function loadOrigem(range) {
     colors,
     plotOptions: {
       pie: {
+        expandOnClick: true,
         donut: {
           size: '68%',
           labels: {
@@ -1003,8 +1059,14 @@ export async function loadOrigem(range) {
     legend: { position: 'bottom', fontSize: '11px', fontWeight: 600, fontFamily: "'Satoshi'",
               labels: { colors: chartColors().textStrong } },
     stroke: { width: 2, colors: [isDarkTheme() ? '#18181B' : '#FFFFFF'] },
-    tooltip: { y: { formatter: (val) => val + ' atendimentos' } },
-    states: { hover: { filter: { type: 'darken', value: 0.85 } }, active: { filter: { type: 'none' } } }
+    tooltip: {
+      custom: function({ series, seriesIndex, dataPointIndex }) {
+        const val = series[seriesIndex];
+        const pct = Math.round(val / total * 100);
+        return buildTooltip(labels[dataPointIndex], [['Clientes', val], ['Percentual', pct + '%']], colors[dataPointIndex]);
+      }
+    },
+    states: { hover: { filter: { type: 'darken', value: 0.82 } }, active: { filter: { type: 'none' } } }
   });
 }
 
