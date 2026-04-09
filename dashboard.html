@@ -112,14 +112,13 @@
           <button class="cal-clear" onclick="calClear()">Limpar</button>
         </div>
       </div>
-      <!-- Clock -->
+      <!-- Clock LED -->
       <div class="topbar-clock" id="topbarClock">
-        <i class="fa-solid fa-clock" style="font-size:10px;opacity:.4"></i>
-        <strong id="clockTime" style="font-family:var(--font-mono);font-size:13px">--:--</strong>
+        <span id="clockHour">--</span><span class="clock-colon">:</span><span id="clockMin">--</span>
         <span class="topbar-clock-sep"></span>
-        <span id="clockDate" style="font-size:11px;color:var(--text-muted)"></span>
+        <span class="clock-label" id="clockDate"></span>
         <span class="topbar-clock-sep" id="clockLocSep" style="display:none"></span>
-        <span id="clockLocation" style="display:none;font-size:10px;color:var(--text-muted)"><i class="fa-solid fa-location-dot" style="margin-right:3px;font-size:9px"></i><span id="clockLocText"></span></span>
+        <span class="clock-label" id="clockLocation" style="display:none"><i class="fa-solid fa-location-dot" style="margin-right:3px;font-size:8px"></i><span id="clockLocText"></span></span>
       </div>
     </div>
 
@@ -1131,11 +1130,13 @@ document.getElementById('dashDate').textContent = new Date().toLocaleDateString(
 
 // ─── Topbar Clock LED ───
 (function initClock() {
-  const clockTime = document.getElementById('clockTime');
+  const clockH = document.getElementById('clockHour');
+  const clockM = document.getElementById('clockMin');
   const clockDate = document.getElementById('clockDate');
   function tick() {
     const now = new Date();
-    if (clockTime) clockTime.textContent = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    if (clockH) clockH.textContent = String(now.getHours()).padStart(2, '0');
+    if (clockM) clockM.textContent = String(now.getMinutes()).padStart(2, '0');
     if (clockDate) clockDate.textContent = now.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
   }
   tick();
