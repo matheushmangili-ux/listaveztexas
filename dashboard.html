@@ -84,9 +84,9 @@
 
   <!-- Main content -->
   <div class="dash-main">
-    <!-- Topbar: Controls -->
+    <!-- Topbar: Period + Clock -->
     <div class="dash-topbar">
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1;min-width:0">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
         <div class="period-tabs" id="periodTabs">
           <button data-period="hoje" class="active" onclick="setPeriod('hoje')">Hoje</button>
           <button data-period="ontem" onclick="setPeriod('ontem')">Ontem</button>
@@ -112,41 +112,42 @@
           <button class="cal-clear" onclick="calClear()">Limpar</button>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <div class="filter-bar">
-          <label>Setor:</label>
-          <select id="filterSetor" onchange="onSetorChange()">
-            <option value="">Todos</option>
-          </select>
-          <label>Vendedor:</label>
-          <select id="filterVendedor">
-            <option value="">Todos</option>
-          </select>
-          <button class="filter-apply-btn" onclick="applyFilters()" title="Aplicar filtros">
-            <i class="fa-solid fa-filter"></i> Aplicar
-          </button>
-          <button class="filter-clear-btn" id="filterClearBtn" onclick="clearFilters()" title="Limpar filtros" style="display:none">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-        <div style="position:relative;display:inline-block" id="exportDropdown">
-          <button class="filter-apply-btn" onclick="document.getElementById('exportMenu').classList.toggle('open')" title="Exportar dados">
-            <i class="fa-solid fa-file-export"></i> Exportar
-          </button>
-          <div id="exportMenu" class="export-menu">
-            <button onclick="exportCSV();document.getElementById('exportMenu').classList.remove('open')"><i class="fa-solid fa-file-csv" style="color:var(--success)"></i> Exportar CSV</button>
-            <button onclick="exportPDF();document.getElementById('exportMenu').classList.remove('open')"><i class="fa-solid fa-file-pdf" style="color:var(--danger)"></i> Exportar PDF</button>
-          </div>
-        </div>
+      <!-- Clock -->
+      <div class="topbar-clock" id="topbarClock">
+        <i class="fa-solid fa-clock" style="font-size:10px;opacity:.4"></i>
+        <strong id="clockTime" style="font-family:var(--font-mono);font-size:13px">--:--</strong>
+        <span class="topbar-clock-sep"></span>
+        <span id="clockDate" style="font-size:11px;color:var(--text-muted)"></span>
+        <span class="topbar-clock-sep" id="clockLocSep" style="display:none"></span>
+        <span id="clockLocation" style="display:none;font-size:10px;color:var(--text-muted)"><i class="fa-solid fa-location-dot" style="margin-right:3px;font-size:9px"></i><span id="clockLocText"></span></span>
       </div>
-      <!-- Clock LED marquee -->
-      <div class="topbar-led" id="topbarClock">
-        <div class="topbar-led-content" id="topbarLedTrack">
-          <span class="topbar-led-item"><i class="fa-solid fa-clock" style="margin-right:4px;opacity:.5"></i><strong id="clockTime">--:--</strong></span>
-          <span class="topbar-led-sep"></span>
-          <span class="topbar-led-item" id="clockDate"></span>
-          <span class="topbar-led-sep" id="clockLocSep" style="display:none"></span>
-          <span class="topbar-led-item" id="clockLocation" style="display:none"><i class="fa-solid fa-location-dot" style="margin-right:3px;font-size:9px"></i><span id="clockLocText"></span></span>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="dash-filterbar">
+      <div class="filter-bar">
+        <label>Setor:</label>
+        <select id="filterSetor" onchange="onSetorChange()">
+          <option value="">Todos os setores</option>
+        </select>
+        <label>Vendedor:</label>
+        <select id="filterVendedor">
+          <option value="">Todos os vendedores</option>
+        </select>
+        <button class="filter-apply-btn" onclick="applyFilters()" title="Aplicar filtros">
+          <i class="fa-solid fa-filter"></i> Aplicar
+        </button>
+        <button class="filter-clear-btn" id="filterClearBtn" onclick="clearFilters()" title="Limpar filtros" style="display:none">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div style="position:relative;display:inline-block" id="exportDropdown">
+        <button class="filter-apply-btn" onclick="document.getElementById('exportMenu').classList.toggle('open')" title="Exportar dados">
+          <i class="fa-solid fa-file-export"></i> Exportar
+        </button>
+        <div id="exportMenu" class="export-menu">
+          <button onclick="exportCSV();document.getElementById('exportMenu').classList.remove('open')"><i class="fa-solid fa-file-csv" style="color:var(--success)"></i> CSV</button>
+          <button onclick="exportPDF();document.getElementById('exportMenu').classList.remove('open')"><i class="fa-solid fa-file-pdf" style="color:var(--danger)"></i> PDF</button>
         </div>
       </div>
     </div>
@@ -325,23 +326,7 @@
         </div>
       </div>
     </div>
-    <!-- Floor list rendered via header marquee -->
-    <div class="chart-card" style="margin-bottom:var(--gap)">
-      <div class="chart-card-header" onclick="toggleSection('gestao')">
-        <h3><i class="fa-solid fa-user-gear" style="margin-right:6px;color:var(--accent-dim)"></i>Gestão de Vendedores</h3>
-        <div style="display:flex;align-items:center;gap:8px">
-          <button class="btn btn-gold" style="min-height:34px;padding:0 14px;font-size:11px" onclick="event.stopPropagation();openVendedorModal()">
-            <i class="fa-solid fa-plus" style="font-size:9px;margin-right:4px"></i> Novo Vendedor
-          </button>
-          <button class="collapse-btn" id="collapseBtn-gestao" onclick="event.stopPropagation();toggleSection('gestao')"><i class="fa-solid fa-chevron-down"></i></button>
-        </div>
-      </div>
-      <div class="chart-card-body" id="collapseBody-gestao" style="margin-top:16px">
-        <div id="vendedorList">
-          <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>
-        </div>
-      </div>
-    </div>
+    <!-- Gestão de Vendedores movida para Settings > Equipe -->
   </div><!-- /section-operacional -->
 
   <!-- Footer -->
@@ -353,43 +338,6 @@
       minhavez V3.1 · ID: <span id="tenantSlugValue"></span>
     </div>
   </footer>
-</div>
-
-<!-- Modal Vendedor -->
-<div class="modal-overlay" id="vendedorModal">
-  <div class="modal-box">
-    <h3 id="modalTitle">Novo Vendedor</h3>
-    <input type="hidden" id="vendedorEditId">
-    <label>Nome Completo *</label>
-    <input type="text" id="vendedorNome" placeholder="Ex: Luiz Alberto">
-    <label>Apelido (exibido na fila)</label>
-    <input type="text" id="vendedorApelido" placeholder="Ex: Luiz">
-    <label>Departamento</label>
-    <select id="vendedorSetor" style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);color:var(--text-primary);font-size:13px;font-weight:600;margin-bottom:12px;font-family:var(--font-body)">
-      <option value="loja">Vestuário</option>
-      <option value="chapelaria">Chapelaria</option>
-      <option value="selaria">Selaria</option>
-    </select>
-    <label>Foto (opcional)</label>
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-      <div id="vendedorFotoPreview" style="width:48px;height:48px;border-radius:var(--radius-sm);background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid var(--border-subtle)">
-        <i class="fa-solid fa-user" style="color:var(--text-muted);font-size:18px"></i>
-      </div>
-      <label style="cursor:pointer;padding:6px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);font-size:11px;font-weight:600;color:var(--text-secondary);margin:0">
-        <i class="fa-solid fa-camera" style="margin-right:4px"></i>Escolher foto
-        <input type="file" id="vendedorFoto" accept="image/*" style="display:none" onchange="previewFoto(this)">
-      </label>
-    </div>
-    <label>PIN Rápido (4 dígitos)</label>
-    <input type="text" id="vendedorPin" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="Ex: 1234" style="letter-spacing:8px;font-family:var(--font-mono);font-weight:700">
-    <p style="font-size:10px;color:var(--text-muted);margin-top:-8px;margin-bottom:12px">Opcional. Permite login rápido pelo PIN na tela inicial.</p>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" style="min-height:36px;padding:0 16px;font-size:12px" onclick="closeVendedorModal()">Cancelar</button>
-      <button class="btn btn-gold" style="min-height:36px;padding:0 16px;font-size:12px" onclick="saveVendedor()">
-        <i class="fa-solid fa-check" style="font-size:10px;margin-right:4px"></i> Salvar
-      </button>
-    </div>
-  </div>
 </div>
 
 <div id="toastContainer"></div>
