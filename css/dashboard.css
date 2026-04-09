@@ -20,8 +20,8 @@
 
 /* ─── Sidebar ─── */
 .dash-sidebar {
-  background: #060606;
-  border-right: 1px solid rgba(255,255,255,.06);
+  background: var(--bg-card);
+  border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   padding: 24px 16px;
@@ -49,12 +49,13 @@
   font-family: var(--font-body); width: 100%; text-align: left;
 }
 .sidebar-link i { font-size: 13px; width: 18px; text-align: center; flex-shrink: 0; opacity: .7; }
-.sidebar-link:hover { background: rgba(226,80,111,.08); color: rgba(255,255,255,.85); filter: brightness(1.15); }
+.sidebar-link:hover { background: var(--accent); color: #fff; filter: brightness(1.15); }
+.sidebar-link:hover i { opacity: 1; }
 .sidebar-link:active { transform: scale(.97); }
 .sidebar-link--active {
-  background: rgba(226,80,111,.1); color: var(--accent); font-weight: 600;
+  background: var(--accent); color: #fff; font-weight: 700;
 }
-.sidebar-link--active i { opacity: 1; color: var(--accent); }
+.sidebar-link--active i { opacity: 1; color: #fff; }
 .sidebar-link--danger:hover { color: #F87171; background: rgba(248,113,113,.08); }
 .sidebar-spacer { flex: 1; }
 .sidebar-info {
