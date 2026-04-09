@@ -31,7 +31,6 @@
     <div class="sidebar-brand">
       <div class="dash-header-logo" id="headerLogo"><img src="/assets/logo-minhavez-new.png" alt="minhavez"></div>
     </div>
-    <div class="sidebar-store" id="headerTitle"></div>
 
     <!-- Nav -->
     <nav class="sidebar-nav">
@@ -1124,14 +1123,13 @@ showChangelog(APP_CHANGELOG, 'minhavez_dash_update_seen_');
   const clockEl = document.getElementById('greetingClock');
   const cityEl = document.getElementById('greetingCity');
   const tempEl = document.getElementById('greetingTemp');
-  const storeEl = document.getElementById('headerTitle');
+  const storeName = tenant?.nome_loja || '';
 
   function updateGreeting() {
     const now = new Date();
     const h = now.getHours();
     const saudacao = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
-    const nome = storeEl ? storeEl.textContent.trim() : '';
-    if (greetEl) greetEl.textContent = nome ? `${saudacao}, ${nome}` : saudacao;
+    if (greetEl) greetEl.textContent = storeName ? `${saudacao}, ${storeName}` : saudacao;
     if (clockEl) clockEl.textContent = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   }
 
