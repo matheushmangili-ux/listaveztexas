@@ -1141,7 +1141,7 @@ showChangelog(APP_CHANGELOG, 'minhavez_dash_update_seen_');
   // Auto-detect city + temperature via IP geolocation
   async function fetchGeoAndTemp() {
     try {
-      const geoRes = await fetch('https://ipapi.co/json/');
+      const geoRes = await fetch('https://ipwho.is/');
       const geo = await geoRes.json();
       if (geo.city && cityEl) cityEl.innerHTML = '<i class="fa-solid fa-location-dot"></i> ' + geo.city;
       if (geo.latitude && geo.longitude) {
