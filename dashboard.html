@@ -119,6 +119,8 @@
         <span class="clock-label" id="clockDate"></span>
         <span class="topbar-clock-sep" id="clockLocSep" style="display:none"></span>
         <span class="clock-label" id="clockLocation" style="display:none"><i class="fa-solid fa-location-dot" style="margin-right:3px;font-size:8px"></i><span id="clockLocText"></span></span>
+        <span class="topbar-clock-sep" id="clockTempSep" style="display:none"></span>
+        <span id="clockTemp" style="display:none;color:var(--accent);font-size:13px;font-weight:700;text-shadow:0 0 6px rgba(226,80,111,.3)"></span>
       </div>
     </div>
 
@@ -1146,9 +1148,40 @@ document.getElementById('dashDate').textContent = new Date().toLocaleDateString(
     const locEl = document.getElementById('clockLocation');
     const locSep = document.getElementById('clockLocSep');
     const locText = document.getElementById('clockLocText');
-    if (locEl) { locEl.style.display = ''; }
-    if (locSep) { locSep.style.display = ''; }
-    if (locText) { locText.textContent = savedLocation; }
+    if (locEl) locEl.style.display = '';
+    if (locSep) locSep.style.display = '';
+    if (locText) locText.textContent = savedLocation;
+  }
+  // ─── Temperatura via Open-Meteo (gratuita, sem API key) ───
+  const savedLat = localStorage.getItem('minhavez_lat');
+  const savedLon = localStorage.getItem('minhavez_lon');
+  async function fetchTemp(lat, lon) {
+    try {
+      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+      const data = await res.json();
+      const temp = Math.round(data.current_weather?.temperature ?? 0);
+      const tempEl = document.getElementById('clockTemp');
+      const tempSep = document.getElementById('clockTempSep');
+      if (tempEl) { tempEl.textContent = temp + '°C'; tempEl.style.display = ''; }
+      if (tempSep) tempSep.style.display = '';
+    } catch (e) { console.warn('Temp fetch failed:', e); }
+  }
+  if (savedLat && savedLon) {
+    fetchTemp(savedLat, savedLon);
+    setInterval(() => fetchTemp(savedLat, savedLon), 30 * 60 * 1000);
+  } else if (savedLocation) {
+    // Geocode location name → lat/lon via Open-Meteo
+    try {
+      const geo = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(savedLocation)}&count=1&language=pt`);
+      const geoData = await geo.json();
+      if (geoData.results?.[0]) {
+        const { latitude, longitude } = geoData.results[0];
+        localStorage.setItem('minhavez_lat', latitude);
+        localStorage.setItem('minhavez_lon', longitude);
+        fetchTemp(latitude, longitude);
+        setInterval(() => fetchTemp(latitude, longitude), 30 * 60 * 1000);
+      }
+    } catch (e) { console.warn('Geocode failed:', e); }
   }
 })();
 
