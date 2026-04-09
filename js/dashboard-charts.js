@@ -212,7 +212,7 @@ export async function loadAll() {
   if (hasFilter) {
     // Query direta para KPIs precisos do vendedor/setor filtrado
     let aq = sb.from('atendimentos')
-      .select('resultado, valor_venda, inicio, fim')
+      .select('resultado, valor_venda, inicio, fim, preferencial')
       .gte('inicio', range.start).lt('inicio', range.end)
       .neq('resultado', 'em_andamento');
     if (tenantId) aq = aq.eq('tenant_id', tenantId);
@@ -231,15 +231,13 @@ export async function loadAll() {
     const conv = totAtend > 0 ? Math.round((totVendas + trocasComValor) / totAtend * 1000) / 10 : 0;
     const tempos = items.filter(a => a.inicio && a.fim).map(a => (new Date(a.fim) - new Date(a.inicio)) / 60000);
     const tempoMed = tempos.length > 0 ? Math.round(tempos.reduce((a, b) => a + b, 0) / tempos.length * 10) / 10 : 0;
-    const vendaValues = items.filter(a => a.resultado === 'venda' && a.valor_venda > 0).map(a => a.valor_venda);
-    const ticketMed = vendaValues.length > 0 ? Math.round(vendaValues.reduce((a, b) => a + b, 0) / vendaValues.length) : 0;
     if (_kpi.total) _kpi.total.textContent = totAtend;
     if (_kpi.vendas) _kpi.vendas.textContent = totVendas;
     if (_kpi.conv) _kpi.conv.textContent = conv + '%';
     if (_kpi.loss) _kpi.loss.textContent = totNaoConv;
     if (_kpi.time) _kpi.time.textContent = formatTempo(tempoMed);
-    if (_kpi.ticket) _kpi.ticket.textContent = ticketMed > 0 ? 'R$ ' + ticketMed.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '—';
-    ['kpiTotalCmp', 'kpiVendasCmp', 'kpiConvCmp', 'kpiLossCmp', 'kpiTimeCmp', 'kpiTicketCmp'].forEach(id => {
+    if (_kpi.pref) _kpi.pref.textContent = items.filter(a => a.preferencial).length;
+    ['kpiTotalCmp', 'kpiVendasCmp', 'kpiConvCmp', 'kpiLossCmp', 'kpiTimeCmp', 'kpiPrefCmp'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.innerHTML = '<span class="neutral">filtrado</span>';
     });
@@ -266,11 +264,16 @@ export async function loadKPIs(range, prevRange) {
   const sb = _ctx.sb;
   const _kpi = _ctx.kpi;
 
-  const [curr, prev, currTrocas, prevTrocas] = await Promise.all([
+  const tenantId = _ctx.tenantId;
+  let prefQ = sb.from('atendimentos').select('preferencial').gte('inicio', range.start).lt('inicio', range.end).neq('resultado', 'em_andamento');
+  let prevPrefQ = sb.from('atendimentos').select('preferencial').gte('inicio', prevRange.start).lt('inicio', prevRange.end).neq('resultado', 'em_andamento');
+  if (tenantId) { prefQ = prefQ.eq('tenant_id', tenantId); prevPrefQ = prevPrefQ.eq('tenant_id', tenantId); }
+  const [curr, prev, currTrocas, prevTrocas, currPrefRes, prevPrefRes] = await Promise.all([
     sb.rpc('get_conversion_stats', { p_inicio: range.start, p_fim: range.end }),
     sb.rpc('get_conversion_stats', { p_inicio: prevRange.start, p_fim: prevRange.end }),
     sb.from('atendimentos').select('valor_venda').eq('resultado', 'troca').gte('inicio', range.start).lt('inicio', range.end),
-    sb.from('atendimentos').select('valor_venda').eq('resultado', 'troca').gte('inicio', prevRange.start).lt('inicio', prevRange.end)
+    sb.from('atendimentos').select('valor_venda').eq('resultado', 'troca').gte('inicio', prevRange.start).lt('inicio', prevRange.end),
+    prefQ, prevPrefQ
   ]);
   if (curr.error || !curr.data || curr.data.length === 0) return;
   const d = curr.data[0];
@@ -291,16 +294,16 @@ export async function loadKPIs(range, prevRange) {
   countUp(_kpi.conv, convAtual, '%');
   countUp(_kpi.loss, d.total_nao_convertido || 0);
   countUp(_kpi.time, d.tempo_medio_min || 0, '', 800, formatTempo);
-  // Ticket médio
-  const ticket = d.ticket_medio || 0;
-  const pTicket = p.ticket_medio || 0;
-  if (_kpi.ticket) _kpi.ticket.textContent = ticket > 0 ? 'R$ ' + ticket.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '—';
+  // Fidelizados
+  const prefCurr = (currPrefRes.data || []).filter(a => a.preferencial).length;
+  const prefPrev = (prevPrefRes.data || []).filter(a => a.preferencial).length;
+  countUp(_kpi.pref, prefCurr);
   renderCompare('kpiTotalCmp', d.total_atendimentos || 0, p.total_atendimentos || 0);
   renderCompare('kpiVendasCmp', d.total_vendas || 0, p.total_vendas || 0);
   renderCompare('kpiConvCmp', convAtual, convAnterior);
   renderCompare('kpiLossCmp', d.total_nao_convertido || 0, p.total_nao_convertido || 0, true);
   renderCompare('kpiTimeCmp', d.tempo_medio_min || 0, p.tempo_medio_min || 0, true);
-  if (ticket > 0 || pTicket > 0) renderCompare('kpiTicketCmp', ticket, pTicket);
+  renderCompare('kpiPrefCmp', prefCurr, prefPrev);
 
   // ─── KPI Sparklines (Conversão + Tempo) ───
   // Sparklines are populated from trend data in loadTrend()
@@ -456,31 +459,8 @@ export async function loadHourly(range) {
 }
 
 // ─── Preferenciais por vendedor ───
-export async function loadPreferenciais(range) {
-  const sb = _ctx.sb;
-  const tenantId = _ctx.tenantId;
-
-  try {
-    let query = sb.from('atendimentos')
-      .select('preferencial')
-      .gte('inicio', range.start)
-      .lt('inicio', range.end)
-      .neq('resultado', 'em_andamento');
-    if (tenantId) query = query.eq('tenant_id', tenantId);
-    const { data, error } = await query;
-
-    const countEl = document.getElementById('prefCount');
-    const percentEl = document.getElementById('prefPercent');
-    const totalEl = document.getElementById('prefTotal');
-
-    const total = data ? data.length : 0;
-    const pref = data ? data.filter(a => a.preferencial).length : 0;
-    const pct = total > 0 ? Math.round((pref / total) * 100) : 0;
-
-    if (countEl) countEl.textContent = pref;
-    if (percentEl) percentEl.textContent = pct + '%';
-    if (totalEl) totalEl.textContent = total;
-  } catch (err) { console.error('loadPreferenciais error:', err); }
+export async function loadPreferenciais() {
+  // Fidelizados data is now loaded in loadKPIs — this is a no-op placeholder
 }
 
 // ─── Ranking cards ───
@@ -511,41 +491,44 @@ export async function loadRanking(range, cachedData) {
 
   const tempoMeta = parseInt(localStorage.getItem('meta_tempo_medio') || DEFAULT_METAS.tempo_medio);
 
-  body.innerHTML = data.map((r, i) => {
-    const cv = r.taxa_conversao || 0;
-    const convColor = cv >= metaConv ? '#e2506f' : cv >= metaConv * 0.6 ? '#f0758e' : '#D4D4D8';
-    const barW = Math.min(cv, 100);
-    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
-    const isTop = i < 3;
-    const foto = fotoMap[r.vendedor_id];
-    const avatarContent = foto
-      ? `<img src="${escapeHtml(foto)}" alt="" style="width:100%;height:100%;object-fit:cover">`
-      : initials(r.nome);
-    const tm = r.tempo_medio_min || 0;
-    const tmColor = tempoColor(tm, tempoMeta);
-    const delay = Math.min(i * 60, 400);
-    return `<div class="rank-card${isTop ? ' top-3' : ''}" style="animation:cardFadeIn .4s ease ${delay}ms both">
-      <div class="rank-pos">${medal || '#' + (i + 1)}</div>
-      <div class="rank-avatar">${avatarContent}</div>
-      <div class="rank-name">${escapeHtml(r.apelido || r.nome.split(' ')[0])}</div>
-      <div class="rank-conv-value" style="color:${convColor}">${cv}%</div>
-      <div class="rank-conv-bar"><div class="rank-conv-fill" style="width:${barW}%;background:${convColor}"></div></div>
-      <div class="rank-stats">
-        <div class="stat-item">
-          <span class="stat-val">${r.total_atendimentos || 0}</span>
-          <span class="stat-label">Atend</span>
+  body.innerHTML = `<div class="rank-list">
+    <div class="rank-list-header">
+      <span class="rl-pos">#</span>
+      <span class="rl-name">Vendedor</span>
+      <span class="rl-bar">Conversão</span>
+      <span class="rl-stat">Atend</span>
+      <span class="rl-stat">Vendas</span>
+      <span class="rl-stat">Tempo</span>
+    </div>
+    ${data.map((r, i) => {
+      const cv = r.taxa_conversao || 0;
+      const convColor = cv >= metaConv ? 'var(--accent)' : cv >= metaConv * 0.6 ? 'var(--accent-bright)' : 'var(--text-muted)';
+      const barW = Math.min(cv, 100);
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
+      const isTop = i < 3;
+      const foto = fotoMap[r.vendedor_id];
+      const avatarContent = foto
+        ? `<img src="${escapeHtml(foto)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+        : initials(r.nome);
+      const tm = r.tempo_medio_min || 0;
+      const tmColor = tempoColor(tm, tempoMeta);
+      const delay = Math.min(i * 50, 300);
+      return `<div class="rank-row${isTop ? ' rank-row--top' : ''}" style="animation:cardFadeIn .35s ease ${delay}ms both">
+        <span class="rl-pos">${medal || (i + 1)}</span>
+        <div class="rl-name">
+          <div class="rl-avatar">${avatarContent}</div>
+          <span>${escapeHtml(r.apelido || r.nome.split(' ')[0])}</span>
         </div>
-        <div class="stat-item">
-          <span class="stat-val">${r.total_vendas || 0}</span>
-          <span class="stat-label">Vendas</span>
+        <div class="rl-bar">
+          <div class="rl-bar-track"><div class="rl-bar-fill" style="width:${barW}%;background:${convColor}"></div></div>
+          <span class="rl-bar-val" style="color:${convColor}">${cv}%</span>
         </div>
-        <div class="stat-item">
-          <span class="stat-val" style="color:${tmColor};transition:color .3s">${tm}<span style="font-size:9px">min</span></span>
-          <span class="stat-label">Tempo</span>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+        <span class="rl-stat">${r.total_atendimentos || 0}</span>
+        <span class="rl-stat">${r.total_vendas || 0}</span>
+        <span class="rl-stat" style="color:${tmColor}">${tm}<span style="font-size:9px;opacity:.7">min</span></span>
+      </div>`;
+    }).join('')}
+  </div>`;
 }
 
 // ─── Ruptures ───

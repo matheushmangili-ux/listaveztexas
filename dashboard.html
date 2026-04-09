@@ -205,9 +205,9 @@
       <div class="kpi-compare" id="kpiLossCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-label"><i class="fa-solid fa-receipt"></i> Ticket Médio</div>
-      <div class="kpi-value" id="kpiTicket"><div class="skeleton skeleton-kpi-value"></div></div>
-      <div class="kpi-compare" id="kpiTicketCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+      <div class="kpi-label"><i class="fa-solid fa-star" style="color:var(--warning)"></i> Fidelizados</div>
+      <div class="kpi-value" id="kpiPref"><div class="skeleton skeleton-kpi-value"></div></div>
+      <div class="kpi-compare" id="kpiPrefCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label"><i class="fa-solid fa-clock"></i> Tempo Médio</div>
@@ -266,25 +266,6 @@
       <div class="chart-card-body" id="collapseBody-ranking" style="margin-top:16px">
         <div class="ranking-grid" id="rankingBody">
           <div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text-muted)">Carregando...</div>
-        </div>
-      </div>
-    </div>
-    <div class="chart-card pref-card" style="margin-bottom:var(--gap)">
-      <h3><i class="fa-solid fa-star" style="margin-right:6px;color:var(--warning)"></i>Clientes Fidelizados</h3>
-      <div id="prefContent" style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
-        <div>
-          <div id="prefCount" style="font-family:var(--font-body);font-size:2.4rem;font-weight:700;letter-spacing:-.025em;line-height:1;color:var(--text-primary)">0</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:6px">atendimentos preferenciais</div>
-        </div>
-        <div id="prefMeta" style="display:flex;gap:20px">
-          <div style="text-align:center">
-            <div id="prefPercent" style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--warning)">0%</div>
-            <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px">do total</div>
-          </div>
-          <div style="text-align:center">
-            <div id="prefTotal" style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--text-secondary)">0</div>
-            <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px">total geral</div>
-          </div>
         </div>
       </div>
     </div>
@@ -461,7 +442,7 @@ const _kpi = {
   conv: document.getElementById('kpiConv'),
   loss: document.getElementById('kpiLoss'),
   time: document.getElementById('kpiTime'),
-  ticket: document.getElementById('kpiTicket')
+  pref: document.getElementById('kpiPref')
 };
 
 // ─── Dashboard Charts module init ───
