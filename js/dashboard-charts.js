@@ -668,28 +668,10 @@ export async function loadFloor() {
 
   const { data, error } = await fetchVendedores(sb, tenantId);
   if (error) { toast('Erro ao carregar equipe: ' + error.message, 'error'); return; }
-  const el = document.getElementById('floorList');
   if (!data || data.length === 0) {
-    el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum vendedor cadastrado</div>';
+    renderHeaderMarquee([]);
     return;
   }
-
-  const items = data.map(v => {
-    const cfg = STATUS_CONFIG[v.status] || STATUS_CONFIG.fora;
-    return `<div class="led-item">
-      <div class="led-dot" style="background:${cfg.color};color:${cfg.color}"></div>
-      <span class="led-name" style="color:var(--text-primary)">${escapeHtml(v.apelido || v.nome)}</span>
-      <span class="led-status" style="color:${cfg.color}">${cfg.short}</span>
-    </div>`;
-  }).join('');
-
-  // Duplicar para loop contínuo
-  const speed = Math.max(12, data.length * 3);
-  el.innerHTML = `<div class="led-marquee">
-    <div class="led-track" style="animation-duration:${speed}s">
-      ${items}${items}
-    </div>
-  </div>`;
 
   // Atualizar marquee do header
   renderHeaderMarquee(data);
