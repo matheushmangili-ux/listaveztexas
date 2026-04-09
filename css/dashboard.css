@@ -85,7 +85,6 @@
 .dash-main {
   padding: var(--space-xl) var(--space-xl);
   overflow-y: auto;
-  max-width: 1200px;
 }
 
 /* ─── Topbar (period + filters + greeting) ─── */
