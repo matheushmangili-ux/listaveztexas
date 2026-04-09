@@ -724,6 +724,8 @@ window.confirmSaida = async function(motivo) {
   const { error } = await sb.from('vendedores').update({ status: newStatus, posicao_fila: null }).eq('id', savedId).eq('tenant_id', tenantId);
   if (error) { toast('Erro ao registrar saída', 'error'); closeSaida(); return; }
   if (state.turno) {
+    // Fechar qualquer pausa anterior aberta antes de criar a nova
+    await sb.rpc('registrar_retorno', { p_vendedor_id: savedId });
     const { error: pausaErr } = await sb.rpc('registrar_pausa', { p_vendedor_id: savedId, p_turno_id: state.turno.id, p_motivo: motivo });
     if (pausaErr) console.error('[pausas] registrar_pausa:', pausaErr.message);
   }
@@ -746,6 +748,8 @@ window.finalizarTodos = async function() {
   markLocal();
   const { error } = await sb.from('vendedores').update({ status: 'fora', posicao_fila: null }).in('id', ids).eq('tenant_id', tenantId);
   if (error) { toast('Erro ao remover vendedores', 'error'); return; }
+  // Fechar todas as pausas abertas dos vendedores removidos
+  await Promise.all(ids.map(id => sb.rpc('registrar_retorno', { p_vendedor_id: id })));
   ids.forEach(id => delete state.saidaMotivos[id]);
   toast('Todos removidos da fila', 'info');
   await loadVendedores();
