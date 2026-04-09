@@ -52,17 +52,6 @@
 
     <div class="sidebar-spacer"></div>
 
-    <!-- Info -->
-    <div class="sidebar-info">
-      <div class="sidebar-info-row">
-        <i class="fa-solid fa-calendar-day"></i>
-        <span id="dashDate"></span>
-      </div>
-      <div class="sidebar-info-row">
-        <i class="fa-solid fa-rotate"></i>
-        <span id="lastUpdateIndicator">—</span>
-      </div>
-    </div>
 
     <!-- Footer -->
     <div class="sidebar-footer">
@@ -112,10 +101,16 @@
           <button class="cal-clear" onclick="calClear()">Limpar</button>
         </div>
       </div>
-      <!-- Greeting -->
+      <!-- Greeting + Info -->
       <div class="topbar-greeting" id="topbarGreeting">
         <span class="greeting-text" id="greetingText"></span>
-        <span class="greeting-date" id="greetingDate"></span>
+        <span class="greeting-meta">
+          <span id="greetingCity"><i class="fa-solid fa-location-dot"></i> —</span>
+          <span class="greeting-sep">·</span>
+          <span id="greetingClock">--:--</span>
+          <span class="greeting-sep">·</span>
+          <span id="greetingTemp"><i class="fa-solid fa-temperature-half"></i> —</span>
+        </span>
       </div>
     </div>
 
@@ -1122,23 +1117,58 @@ const APP_CHANGELOG = [
 
 showChangelog(APP_CHANGELOG, 'minhavez_dash_update_seen_');
 
-// ─── Init ───
-document.getElementById('dashDate').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
-
-// ─── Topbar Greeting ───
+// ─── Topbar Greeting + City / Clock / Temp ───
 (function initGreeting() {
   const greetEl = document.getElementById('greetingText');
-  const dateEl = document.getElementById('greetingDate');
+  const clockEl = document.getElementById('greetingClock');
+  const cityEl = document.getElementById('greetingCity');
+  const tempEl = document.getElementById('greetingTemp');
   const storeEl = document.getElementById('headerTitle');
-  function update() {
-    const h = new Date().getHours();
+
+  function updateGreeting() {
+    const now = new Date();
+    const h = now.getHours();
     const saudacao = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
     const nome = storeEl ? storeEl.textContent.trim() : '';
     if (greetEl) greetEl.textContent = nome ? `${saudacao}, ${nome}` : saudacao;
-    if (dateEl) dateEl.textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
+    if (clockEl) clockEl.textContent = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   }
-  update();
-  setInterval(update, 60000);
+
+  // City from localStorage
+  const savedCity = localStorage.getItem('minhavez_location');
+  if (savedCity && cityEl) cityEl.innerHTML = '<i class="fa-solid fa-location-dot"></i> ' + savedCity;
+
+  // Temperature via Open-Meteo
+  const savedLat = localStorage.getItem('minhavez_lat');
+  const savedLon = localStorage.getItem('minhavez_lon');
+  async function fetchTemp(lat, lon) {
+    try {
+      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+      const data = await res.json();
+      const t = Math.round(data.current_weather?.temperature ?? 0);
+      if (tempEl) tempEl.innerHTML = '<i class="fa-solid fa-temperature-half"></i> ' + t + '°C';
+    } catch (e) { console.warn('Temp fetch failed:', e); }
+  }
+  if (savedLat && savedLon) {
+    fetchTemp(savedLat, savedLon);
+    setInterval(() => fetchTemp(savedLat, savedLon), 30 * 60 * 1000);
+  } else if (savedCity) {
+    fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(savedCity)}&count=1&language=pt`)
+      .then(r => r.json())
+      .then(geo => {
+        if (geo.results?.[0]) {
+          const { latitude, longitude } = geo.results[0];
+          localStorage.setItem('minhavez_lat', latitude);
+          localStorage.setItem('minhavez_lon', longitude);
+          fetchTemp(latitude, longitude);
+          setInterval(() => fetchTemp(latitude, longitude), 30 * 60 * 1000);
+        }
+      })
+      .catch(e => console.warn('Geocode failed:', e));
+  }
+
+  updateGreeting();
+  setInterval(updateGreeting, 15000);
 })();
 
 await populateFilters();
