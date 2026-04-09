@@ -551,7 +551,7 @@ export async function loadRuptures(range) {
   </div>`).join('');
 }
 
-// ─── Pause Log (individual pauses) ───
+// ─── Pause Log (semantic cards) ───
 export async function loadPauseStats(range) {
   const sb = _ctx.sb;
 
@@ -566,38 +566,41 @@ export async function loadPauseStats(range) {
   const motivoIcons = { almoco: 'fa-utensils', banheiro: 'fa-restroom', reuniao: 'fa-people-group', operacional: 'fa-wrench', outro: 'fa-ellipsis' };
   const motivoColors = { almoco: '#f59e0b', banheiro: '#60a5fa', reuniao: '#A1A1AA', operacional: '#8b5cf6', outro: '#64748b' };
 
-  // Table header
-  let html = `<table style="width:100%;border-collapse:collapse;font-size:12px">
-    <thead><tr style="border-bottom:1px solid var(--border-subtle)">
-      <th style="text-align:left;padding:8px 10px;font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em">Vendedor</th>
-      <th style="text-align:left;padding:8px 10px;font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em">Motivo</th>
-      <th style="text-align:center;padding:8px 10px;font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em">Período</th>
-      <th style="text-align:right;padding:8px 10px;font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em">Duração</th>
-    </tr></thead><tbody>`;
-
-  html += data.map(r => {
-    const horaInicio = new Date(r.inicio).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  el.innerHTML = data.map(r => {
+    const hrSaida = new Date(r.inicio).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     const emPausa = !r.fim;
-    const horaFim = r.fim ? new Date(r.fim).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
+    const hrRetorno = r.fim ? new Date(r.fim).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '—';
     const dur = Math.round(r.duracao_min || 0);
     const motLabel = motivoLabels[r.motivo] || r.motivo || '—';
     const motIcon = motivoIcons[r.motivo] || 'fa-ellipsis';
     const motColor = motivoColors[r.motivo] || '#64748b';
-    const rowBg = emPausa ? 'background:rgba(245,158,11,.04);' : '';
     const durColor = emPausa ? 'var(--warning)' : dur > 60 ? 'var(--danger)' : 'var(--text-primary)';
-    const periodoHtml = emPausa
-      ? `${horaInicio} → <span style="color:var(--warning);font-weight:700">agora</span>`
-      : `${horaInicio} → ${horaFim}`;
-    return `<tr style="border-bottom:1px solid var(--border-subtle);${rowBg}transition:background .15s">
-      <td style="padding:10px;font-weight:600">${escapeHtml(r.vendedor_nome)}${emPausa ? ' <i class="fa-solid fa-circle" style="font-size:5px;color:var(--warning);vertical-align:middle;margin-left:3px;animation:dotPulse 2s ease-in-out infinite"></i>' : ''}</td>
-      <td style="padding:10px"><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:6px;background:${motColor}18;color:${motColor};font-size:11px;font-weight:600"><i class="fa-solid ${motIcon}" style="font-size:10px"></i>${escapeHtml(motLabel)}</span></td>
-      <td style="padding:10px;text-align:center;font-family:var(--font-mono);font-size:11px;font-weight:500;color:var(--text-secondary)">${periodoHtml}</td>
-      <td style="padding:10px;text-align:right;font-family:var(--font-mono);font-weight:700;color:${durColor}">${formatTempo(dur)}</td>
-    </tr>`;
-  }).join('');
+    const activeClass = emPausa ? ' pause-log-entry--active' : '';
+    const statusHtml = emPausa
+      ? `<span class="pause-log-status pause-log-status--active"><i class="fa-solid fa-circle" style="font-size:5px;animation:dotPulse 2s ease-in-out infinite"></i>Em pausa</span>`
+      : `<span class="pause-log-status pause-log-status--done"><i class="fa-solid fa-check" style="font-size:8px"></i>Concluído</span>`;
 
-  html += '</tbody></table>';
-  el.innerHTML = html;
+    return `<article class="pause-log-entry${activeClass}">
+      <div class="pause-log-header">
+        <span class="pause-log-name">${escapeHtml(r.vendedor_nome)}</span>
+        ${statusHtml}
+      </div>
+      <div class="pause-log-motivo" style="background:${motColor}18;color:${motColor}">
+        <i class="fa-solid ${motIcon}" style="font-size:10px"></i>${escapeHtml(motLabel)}
+      </div>
+      <div class="pause-log-meta">
+        <div class="pause-log-field">
+          <span class="pause-log-label">Saída</span>
+          <span class="pause-log-time">${hrSaida}</span>
+        </div>
+        <div class="pause-log-field">
+          <span class="pause-log-label">Retorno</span>
+          <span class="pause-log-time" style="${emPausa ? 'color:var(--warning)' : ''}">${hrRetorno}</span>
+        </div>
+        <span class="pause-log-duration" style="color:${durColor}">${formatTempo(dur)}</span>
+      </div>
+    </article>`;
+  }).join('');
 }
 
 // ─── Floor (who's on now) — LED marquee ───

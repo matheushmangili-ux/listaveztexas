@@ -302,11 +302,11 @@
       </div>
       <div class="chart-card">
         <div class="chart-card-header" onclick="toggleSection('pausas')">
-          <h3><i class="fa-solid fa-mug-hot" style="margin-right:6px;color:var(--warning)"></i>Pausas — Saídas da Fila</h3>
+          <h3><i class="fa-solid fa-clipboard-list" style="margin-right:6px;color:var(--warning)"></i>Log de Pausas</h3>
           <button class="collapse-btn" id="collapseBtn-pausas" onclick="event.stopPropagation();toggleSection('pausas')"><i class="fa-solid fa-chevron-down"></i></button>
         </div>
         <div class="chart-card-body" id="collapseBody-pausas" style="margin-top:16px">
-          <div id="pauseStatsList" style="max-height:360px;overflow-y:auto">
+          <div id="pauseStatsList" class="pause-log" style="max-height:420px;overflow-y:auto">
             <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>
           </div>
         </div>

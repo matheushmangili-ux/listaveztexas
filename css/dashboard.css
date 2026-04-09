@@ -468,6 +468,60 @@
 .rupture-item:last-child { border-bottom: none; }
 .rupture-count { font-family: var(--font-mono); font-weight: 700; font-size: 16px; color: var(--danger); min-width: 36px; text-align: center; }
 
+/* ─── Pause Log ─── */
+.pause-log { display: flex; flex-direction: column; gap: 8px; }
+.pause-log-entry {
+  padding: 12px 14px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle); background: var(--bg-elevated);
+  transition: background .15s, border-color .15s;
+}
+.pause-log-entry:hover { background: var(--bg-hover); }
+.pause-log-entry--active {
+  border-color: rgba(245,158,11,.18);
+  background: rgba(245,158,11,.04);
+}
+.pause-log-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+}
+.pause-log-name {
+  font-weight: 600; font-size: 13px; color: var(--text-primary);
+  display: flex; align-items: center; gap: 6px;
+}
+.pause-log-status {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 2px 8px; border-radius: 4px;
+}
+.pause-log-status--active {
+  color: var(--warning); background: rgba(245,158,11,.1);
+}
+.pause-log-status--done {
+  color: var(--text-muted); background: var(--bg-surface); opacity: .7;
+}
+.pause-log-motivo {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 6px;
+  font-size: 11px; font-weight: 600; margin-bottom: 10px;
+}
+.pause-log-meta {
+  display: flex; align-items: center; gap: 20px;
+  font-size: 11px; color: var(--text-secondary);
+}
+.pause-log-field {
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.pause-log-label {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--text-muted);
+}
+.pause-log-time {
+  font-family: var(--font-mono); font-weight: 600; font-size: 12px;
+}
+.pause-log-duration {
+  margin-left: auto; font-family: var(--font-mono);
+  font-weight: 700; font-size: 13px;
+}
+
 /* ─── Gestão de Vendedores ─── */
 .vendedor-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--border-subtle); transition: background .15s; }
 .vendedor-row:hover { background: var(--bg-hover); }
