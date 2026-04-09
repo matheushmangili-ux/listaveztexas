@@ -73,72 +73,73 @@
 
   <!-- Main content -->
   <div class="dash-main">
-    <!-- Topbar: Period + Clock -->
+    <!-- Topbar: Period + Filters + Greeting -->
     <div class="dash-topbar">
-      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
-        <div class="period-tabs" id="periodTabs">
-          <button data-period="hoje" class="active" onclick="setPeriod('hoje')">Hoje</button>
-          <button data-period="ontem" onclick="setPeriod('ontem')">Ontem</button>
-          <button data-period="semana" onclick="setPeriod('semana')">Semana</button>
-          <button data-period="mes" onclick="setPeriod('mes')">Mês</button>
-          <button data-period="custom" onclick="toggleCalendar(event)" title="Período personalizado" style="position:relative"><i class="fa-solid fa-calendar-days" style="font-size:10px"></i></button>
+      <!-- Row 1: Period tabs + Greeting -->
+      <div class="topbar-row">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <div class="period-tabs" id="periodTabs">
+            <button data-period="hoje" class="active" onclick="setPeriod('hoje')">Hoje</button>
+            <button data-period="ontem" onclick="setPeriod('ontem')">Ontem</button>
+            <button data-period="semana" onclick="setPeriod('semana')">Semana</button>
+            <button data-period="mes" onclick="setPeriod('mes')">Mês</button>
+            <button data-period="custom" onclick="toggleCalendar(event)" title="Período personalizado" style="position:relative"><i class="fa-solid fa-calendar-days" style="font-size:10px"></i></button>
+          </div>
+          <span id="customRangeLabel" style="display:none;font-size:11px;color:var(--text-muted);font-weight:600;font-family:var(--font-body)"></span>
         </div>
-        <span id="customRangeLabel" style="display:none;font-size:11px;color:var(--text-muted);font-weight:600;font-family:var(--font-body)"></span>
-      </div>
-      <!-- Calendar Popover -->
-      <div id="calendarPopover" class="cal-popover" style="display:none">
-        <div class="cal-header">
-          <button class="cal-nav" onclick="calNav(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-          <span id="calMonthLabel" class="cal-month-label"></span>
-          <button class="cal-nav" onclick="calNav(1)"><i class="fa-solid fa-chevron-right"></i></button>
+        <!-- Calendar Popover -->
+        <div id="calendarPopover" class="cal-popover" style="display:none">
+          <div class="cal-header">
+            <button class="cal-nav" onclick="calNav(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+            <span id="calMonthLabel" class="cal-month-label"></span>
+            <button class="cal-nav" onclick="calNav(1)"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+          <div class="cal-weekdays">
+            <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <div class="cal-footer">
+            <span id="calSelectionHint" class="cal-hint">Clique no dia inicial</span>
+            <button class="cal-clear" onclick="calClear()">Limpar</button>
+          </div>
         </div>
-        <div class="cal-weekdays">
-          <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+        <div class="topbar-greeting" id="topbarGreeting">
+          <span class="greeting-text" id="greetingText"></span>
+          <span class="greeting-meta">
+            <span id="greetingCity"><i class="fa-solid fa-location-dot"></i> —</span>
+            <span class="greeting-sep">·</span>
+            <span id="greetingClock">--:--</span>
+            <span class="greeting-sep">·</span>
+            <span id="greetingTemp"><i class="fa-solid fa-temperature-half"></i> —</span>
+          </span>
         </div>
-        <div class="cal-grid" id="calGrid"></div>
-        <div class="cal-footer">
-          <span id="calSelectionHint" class="cal-hint">Clique no dia inicial</span>
-          <button class="cal-clear" onclick="calClear()">Limpar</button>
+      </div>
+      <!-- Row 2: Filters + Export -->
+      <div class="topbar-row">
+        <div class="filter-bar">
+          <label>Setor:</label>
+          <select id="filterSetor" onchange="onSetorChange()">
+            <option value="">Todos os setores</option>
+          </select>
+          <label>Vendedor:</label>
+          <select id="filterVendedor">
+            <option value="">Todos os vendedores</option>
+          </select>
+          <button class="filter-apply-btn" onclick="applyFilters()" title="Aplicar filtros">
+            <i class="fa-solid fa-filter"></i> Aplicar
+          </button>
+          <button class="filter-clear-btn" id="filterClearBtn" onclick="clearFilters()" title="Limpar filtros" style="display:none">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
         </div>
-      </div>
-      <!-- Greeting + Info -->
-      <div class="topbar-greeting" id="topbarGreeting">
-        <span class="greeting-text" id="greetingText"></span>
-        <span class="greeting-meta">
-          <span id="greetingCity"><i class="fa-solid fa-location-dot"></i> —</span>
-          <span class="greeting-sep">·</span>
-          <span id="greetingClock">--:--</span>
-          <span class="greeting-sep">·</span>
-          <span id="greetingTemp"><i class="fa-solid fa-temperature-half"></i> —</span>
-        </span>
-      </div>
-    </div>
-
-    <!-- Filter bar -->
-    <div class="dash-filterbar">
-      <div class="filter-bar">
-        <label>Setor:</label>
-        <select id="filterSetor" onchange="onSetorChange()">
-          <option value="">Todos os setores</option>
-        </select>
-        <label>Vendedor:</label>
-        <select id="filterVendedor">
-          <option value="">Todos os vendedores</option>
-        </select>
-        <button class="filter-apply-btn" onclick="applyFilters()" title="Aplicar filtros">
-          <i class="fa-solid fa-filter"></i> Aplicar
-        </button>
-        <button class="filter-clear-btn" id="filterClearBtn" onclick="clearFilters()" title="Limpar filtros" style="display:none">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-      <div style="position:relative;display:inline-block" id="exportDropdown">
-        <button class="filter-apply-btn" onclick="document.getElementById('exportMenu').classList.toggle('open')" title="Exportar dados">
-          <i class="fa-solid fa-file-export"></i> Exportar
-        </button>
-        <div id="exportMenu" class="export-menu">
-          <button onclick="exportCSV();document.getElementById('exportMenu').classList.remove('open')"><i class="fa-solid fa-file-csv" style="color:var(--success)"></i> CSV</button>
-          <button onclick="exportPDF();document.getElementById('exportMenu').classList.remove('open')"><i class="fa-solid fa-file-pdf" style="color:var(--danger)"></i> PDF</button>
+        <div style="position:relative;display:inline-block" id="exportDropdown">
+          <button class="filter-apply-btn" onclick="document.getElementById('exportMenu').classList.toggle('open')" title="Exportar dados">
+            <i class="fa-solid fa-file-export"></i> Exportar
+          </button>
+          <div id="exportMenu" class="export-menu">
+            <button onclick="exportCSV();document.getElementById('exportMenu').classList.remove('open')"><i class="fa-solid fa-file-csv" style="color:var(--success)"></i> CSV</button>
+            <button onclick="exportPDF();document.getElementById('exportMenu').classList.remove('open')"><i class="fa-solid fa-file-pdf" style="color:var(--danger)"></i> PDF</button>
+          </div>
         </div>
       </div>
     </div>
