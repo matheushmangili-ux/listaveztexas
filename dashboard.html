@@ -1171,17 +1171,18 @@ document.getElementById('dashDate').textContent = new Date().toLocaleDateString(
     setInterval(() => fetchTemp(savedLat, savedLon), 30 * 60 * 1000);
   } else if (savedLocation) {
     // Geocode location name → lat/lon via Open-Meteo
-    try {
-      const geo = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(savedLocation)}&count=1&language=pt`);
-      const geoData = await geo.json();
-      if (geoData.results?.[0]) {
-        const { latitude, longitude } = geoData.results[0];
-        localStorage.setItem('minhavez_lat', latitude);
-        localStorage.setItem('minhavez_lon', longitude);
-        fetchTemp(latitude, longitude);
-        setInterval(() => fetchTemp(latitude, longitude), 30 * 60 * 1000);
-      }
-    } catch (e) { console.warn('Geocode failed:', e); }
+    fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(savedLocation)}&count=1&language=pt`)
+      .then(r => r.json())
+      .then(geoData => {
+        if (geoData.results?.[0]) {
+          const { latitude, longitude } = geoData.results[0];
+          localStorage.setItem('minhavez_lat', latitude);
+          localStorage.setItem('minhavez_lon', longitude);
+          fetchTemp(latitude, longitude);
+          setInterval(() => fetchTemp(latitude, longitude), 30 * 60 * 1000);
+        }
+      })
+      .catch(e => console.warn('Geocode failed:', e));
   }
 })();
 
