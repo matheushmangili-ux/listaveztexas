@@ -1048,8 +1048,7 @@ export async function loadOrigem(range) {
       const pct = Math.round(val / total * 100);
       return buildTooltip(labels[dataPointIndex], [['Clientes', val], ['Percentual', pct + '%']], colors[dataPointIndex]);
     }
-  })
-  });
+  }));
 }
 
 // ─── Chart section tabs ───
