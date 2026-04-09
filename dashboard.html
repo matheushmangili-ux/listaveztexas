@@ -1138,18 +1138,27 @@ showChangelog(APP_CHANGELOG, 'minhavez_dash_update_seen_');
     if (clockEl) clockEl.textContent = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   }
 
-  // Auto-detect city + temperature via IP geolocation
+  // Auto-detect city + temperature via IP geolocation (fallback chain)
+  async function fetchGeo() {
+    const apis = ['https://get.geojs.io/v1/ip/geo.json', 'https://ipwho.is/'];
+    for (const url of apis) {
+      try {
+        const r = await fetch(url);
+        const d = await r.json();
+        if (d.city && d.latitude && d.longitude) return d;
+      } catch(e) { /* try next */ }
+    }
+    return null;
+  }
   async function fetchGeoAndTemp() {
     try {
-      const geoRes = await fetch('https://ipwho.is/');
-      const geo = await geoRes.json();
-      if (geo.city && cityEl) cityEl.innerHTML = '<i class="fa-solid fa-location-dot"></i> ' + geo.city;
-      if (geo.latitude && geo.longitude) {
-        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${geo.latitude}&longitude=${geo.longitude}&current_weather=true`);
-        const weather = await weatherRes.json();
-        const t = Math.round(weather.current_weather?.temperature ?? 0);
-        if (tempEl) tempEl.innerHTML = '<i class="fa-solid fa-temperature-half"></i> ' + t + '°C';
-      }
+      const geo = await fetchGeo();
+      if (!geo) return;
+      if (cityEl) cityEl.innerHTML = '<i class="fa-solid fa-location-dot"></i> ' + geo.city;
+      const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${geo.latitude}&longitude=${geo.longitude}&current_weather=true`);
+      const weather = await weatherRes.json();
+      const t = Math.round(weather.current_weather?.temperature ?? 0);
+      if (tempEl) tempEl.innerHTML = '<i class="fa-solid fa-temperature-half"></i> ' + t + '°C';
     } catch (e) { console.warn('Geo/temp fetch failed:', e); }
   }
   fetchGeoAndTemp();
