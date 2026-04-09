@@ -27,22 +27,24 @@
 <div class="dash-layout">
   <!-- Sidebar -->
   <aside class="dash-sidebar" id="dashSidebar">
+    <!-- Brand -->
     <div class="sidebar-brand">
       <div class="dash-header-logo" id="headerLogo"><img src="/assets/logo-minhavez-new.png" alt="minhavez"></div>
     </div>
-    <div class="sidebar-meta">
-      <span id="dashDate"></span>
-      <span id="lastUpdateIndicator" style="opacity:.6"></span>
-    </div>
-    <div class="dash-header-title" id="headerTitle"></div>
+    <div class="sidebar-store" id="headerTitle"></div>
 
+    <!-- Nav -->
     <nav class="sidebar-nav">
-      <span class="sidebar-section-label">Navegação</span>
-      <a id="linkTablet" href="/tablet.html" class="sidebar-link" title="Tablet">
+      <span class="sidebar-section-label">Menu</span>
+      <a class="sidebar-link sidebar-link--active" href="#" onclick="event.preventDefault()">
+        <i class="fa-solid fa-chart-pie"></i>
+        <span>Dashboard</span>
+      </a>
+      <a id="linkTablet" href="/tablet.html" class="sidebar-link">
         <i class="fa-solid fa-tablet-screen-button"></i>
         <span>Tablet</span>
       </a>
-      <a id="linkSettings" href="/settings.html" class="sidebar-link" title="Configurações">
+      <a id="linkSettings" href="/settings.html" class="sidebar-link">
         <i class="fa-solid fa-gear"></i>
         <span>Configurações</span>
       </a>
@@ -50,12 +52,25 @@
 
     <div class="sidebar-spacer"></div>
 
+    <!-- Info -->
+    <div class="sidebar-info">
+      <div class="sidebar-info-row">
+        <i class="fa-solid fa-calendar-day"></i>
+        <span id="dashDate"></span>
+      </div>
+      <div class="sidebar-info-row">
+        <i class="fa-solid fa-rotate"></i>
+        <span id="lastUpdateIndicator">—</span>
+      </div>
+    </div>
+
+    <!-- Footer -->
     <div class="sidebar-footer">
-      <button class="sidebar-link" onclick="toggleTheme()" aria-label="Alternar tema claro/escuro">
+      <button class="sidebar-link" onclick="toggleTheme()" aria-label="Alternar tema">
         <i class="fa-solid fa-circle-half-stroke"></i>
         <span>Tema</span>
       </button>
-      <button class="sidebar-link sidebar-link--danger" onclick="handleLogout()" aria-label="Sair da conta">
+      <button class="sidebar-link sidebar-link--danger" onclick="handleLogout()" aria-label="Sair">
         <i class="fa-solid fa-right-from-bracket"></i>
         <span>Sair</span>
       </button>
@@ -124,12 +139,15 @@
           </div>
         </div>
       </div>
-      <!-- Clock widget -->
-      <div class="topbar-clock" id="topbarClock">
-        <i class="fa-solid fa-clock" style="font-size:11px;opacity:.5"></i>
-        <span id="clockTime" style="font-family:var(--font-mono);font-weight:700;font-size:14px">--:--</span>
-        <span id="clockDate" style="font-size:11px;color:var(--text-muted);font-weight:500"></span>
-        <span id="clockLocation" style="font-size:10px;color:var(--text-muted);font-weight:500;display:none"></span>
+      <!-- Clock LED marquee -->
+      <div class="topbar-led" id="topbarClock">
+        <div class="topbar-led-content" id="topbarLedTrack">
+          <span class="topbar-led-item"><i class="fa-solid fa-clock" style="margin-right:4px;opacity:.5"></i><strong id="clockTime">--:--</strong></span>
+          <span class="topbar-led-sep"></span>
+          <span class="topbar-led-item" id="clockDate"></span>
+          <span class="topbar-led-sep" id="clockLocSep" style="display:none"></span>
+          <span class="topbar-led-item" id="clockLocation" style="display:none"><i class="fa-solid fa-location-dot" style="margin-right:3px;font-size:9px"></i><span id="clockLocText"></span></span>
+        </div>
       </div>
     </div>
 
@@ -1163,23 +1181,25 @@ showChangelog(APP_CHANGELOG, 'minhavez_dash_update_seen_');
 // ─── Init ───
 document.getElementById('dashDate').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
 
-// ─── Topbar Clock ───
+// ─── Topbar Clock LED ───
 (function initClock() {
   const clockTime = document.getElementById('clockTime');
   const clockDate = document.getElementById('clockDate');
-  const clockLocation = document.getElementById('clockLocation');
   function tick() {
     const now = new Date();
     if (clockTime) clockTime.textContent = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    if (clockDate) clockDate.textContent = now.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+    if (clockDate) clockDate.textContent = now.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
   }
   tick();
   setInterval(tick, 15000);
-  // Load saved location from settings
   const savedLocation = localStorage.getItem('minhavez_location');
-  if (savedLocation && clockLocation) {
-    clockLocation.textContent = savedLocation;
-    clockLocation.style.display = '';
+  if (savedLocation) {
+    const locEl = document.getElementById('clockLocation');
+    const locSep = document.getElementById('clockLocSep');
+    const locText = document.getElementById('clockLocText');
+    if (locEl) { locEl.style.display = ''; }
+    if (locSep) { locSep.style.display = ''; }
+    if (locText) { locText.textContent = savedLocation; }
   }
 })();
 

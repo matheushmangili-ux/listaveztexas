@@ -17,6 +17,26 @@
 <script src="/js/update-checker.js"></script>
 <script>initUpdateChecker('/settings.html');</script>
 <style>
+  .settings-tabs {
+    display: flex; background: var(--bg-surface); border: 1px solid var(--border-subtle);
+    border-radius: 12px; padding: 4px; margin-bottom: 24px; gap: 2px; flex-wrap: wrap;
+  }
+  .settings-tab {
+    flex: 1; padding: 10px 16px; background: transparent; border: none;
+    border-radius: 10px; font-family: var(--font-body); font-size: 13px;
+    font-weight: 500; color: var(--text-muted); cursor: pointer;
+    transition: all .15s ease; display: flex; align-items: center;
+    justify-content: center; gap: 6px; white-space: nowrap;
+  }
+  .settings-tab.active {
+    background: var(--accent); color: #fff; font-weight: 700;
+    box-shadow: 0 2px 8px rgba(226,80,111,.3);
+  }
+  .settings-tab:hover:not(.active) { background: var(--bg-elevated); color: var(--text-primary); }
+  .settings-tab i { font-size: 12px; }
+  .settings-tab-panel { animation: fadeIn .2s ease; }
+  @media (max-width: 480px) { .settings-tab { padding: 8px 10px; font-size: 12px; } .settings-tab i { display: none; } }
+
   .settings-layout {
     min-height: 100vh;
     display: flex;
@@ -362,6 +382,17 @@
     <!-- Content (hidden until loaded) -->
     <div id="settingsContent" style="display:none">
 
+      <!-- Tabs de seção -->
+      <div class="settings-tabs" id="settingsTabs">
+        <button class="settings-tab active" data-tab="geral" onclick="switchSettingsTab('geral')"><i class="fa-solid fa-store"></i> Geral</button>
+        <button class="settings-tab" data-tab="equipe" onclick="switchSettingsTab('equipe')"><i class="fa-solid fa-users"></i> Equipe</button>
+        <button class="settings-tab" data-tab="canais" onclick="switchSettingsTab('canais')"><i class="fa-solid fa-signs-post"></i> Canais</button>
+        <button class="settings-tab" data-tab="conta" onclick="switchSettingsTab('conta')"><i class="fa-solid fa-crown"></i> Conta</button>
+      </div>
+
+      <!-- TAB: Geral -->
+      <div class="settings-tab-panel active" id="tab-geral">
+
       <!-- Store Info -->
       <div class="settings-section">
         <h2><i class="fa-solid fa-store"></i> Loja</h2>
@@ -439,7 +470,10 @@
         </div>
       </div>
 
-      <!-- Vendors -->
+      </div><!-- /tab-geral -->
+
+      <!-- TAB: Equipe -->
+      <div class="settings-tab-panel" id="tab-equipe" style="display:none">
       <div class="settings-section">
         <h2><i class="fa-solid fa-users"></i> Vendedores</h2>
         <div id="vendorMgmtList" class="vendor-mgmt-list"></div>
@@ -448,7 +482,46 @@
         </button>
       </div>
 
-      <!-- Plan -->
+      </div><!-- /tab-equipe -->
+
+      <!-- TAB: Canais -->
+      <div class="settings-tab-panel" id="tab-canais" style="display:none">
+      <div class="settings-section">
+        <h2><i class="fa-solid fa-signs-post"></i> Canais de Origem</h2>
+        <p style="font-size:12px;color:var(--text-muted);margin:-8px 0 16px">
+          Defina os canais de aquisição e eventos temporários que aparecem ao iniciar um atendimento.
+        </p>
+        <div class="settings-card" style="margin-bottom:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div>
+              <span style="font-size:13px;font-weight:700;color:var(--text-primary)"><i class="fa-solid fa-satellite-dish" style="margin-right:6px;color:var(--accent);font-size:12px"></i>Canais</span>
+              <p style="font-size:11px;color:var(--text-muted);margin-top:2px">De onde o cliente soube da loja</p>
+            </div>
+            <button class="btn btn-primary" onclick="showAddCanal()" style="padding:6px 14px;font-size:11px">
+              <i class="fa-solid fa-plus" style="margin-right:4px"></i> Novo Canal
+            </button>
+          </div>
+          <div id="canaisFixosList"></div>
+          <p id="canaisFixosEmpty" style="display:none;text-align:center;padding:20px;font-size:12px;color:var(--text-muted)">Nenhum canal cadastrado</p>
+        </div>
+        <div class="settings-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div>
+              <span style="font-size:13px;font-weight:700;color:var(--text-primary)"><i class="fa-solid fa-calendar-star" style="margin-right:6px;color:var(--accent);font-size:12px"></i>Eventos</span>
+              <p style="font-size:11px;color:var(--text-muted);margin-top:2px">Ações temporárias — ative durante o evento</p>
+            </div>
+            <button class="btn btn-primary" onclick="showAddEvento()" style="padding:6px 14px;font-size:11px">
+              <i class="fa-solid fa-plus" style="margin-right:4px"></i> Novo Evento
+            </button>
+          </div>
+          <div id="canaisEventosList"></div>
+          <p id="canaisEventosEmpty" style="display:none;text-align:center;padding:20px;font-size:12px;color:var(--text-muted)">Nenhum evento cadastrado</p>
+        </div>
+      </div>
+      </div><!-- /tab-canais -->
+
+      <!-- TAB: Conta -->
+      <div class="settings-tab-panel" id="tab-conta" style="display:none">
       <div class="settings-section">
         <h2><i class="fa-solid fa-crown"></i> Plano</h2>
         <div class="settings-card">
@@ -478,49 +551,7 @@
         </div>
       </div>
 
-      <!-- Canais de Origem -->
-      <div class="settings-section">
-        <h2 class="section-title"><i class="fa-solid fa-signs-post"></i> Canais de Origem</h2>
-        <p class="section-desc" style="font-size:12px;color:var(--text-muted);margin:-8px 0 16px;font-family:var(--font-body)">
-          Defina os canais de aquisição e eventos temporários que aparecem ao iniciar um atendimento.
-        </p>
-
-        <!-- Canais -->
-        <div class="settings-card" style="margin-bottom:16px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-            <div>
-              <span style="font-size:13px;font-weight:700;color:var(--text-primary);font-family:var(--font-body)"><i class="fa-solid fa-satellite-dish" style="margin-right:6px;color:var(--accent);font-size:12px"></i>Canais</span>
-              <p style="font-size:11px;color:var(--text-muted);margin-top:2px;font-family:var(--font-body)">De onde o cliente soube da loja</p>
-            </div>
-            <button class="btn btn-primary" onclick="showAddCanal()" style="padding:6px 14px;font-size:11px">
-              <i class="fa-solid fa-plus" style="margin-right:4px"></i> Novo Canal
-            </button>
-          </div>
-          <div id="canaisFixosList"></div>
-          <p id="canaisFixosEmpty" style="display:none;text-align:center;padding:20px;font-size:12px;color:var(--text-muted);font-family:var(--font-body)">
-            Nenhum canal cadastrado
-          </p>
-        </div>
-
-        <!-- Eventos -->
-        <div class="settings-card">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-            <div>
-              <span style="font-size:13px;font-weight:700;color:var(--text-primary);font-family:var(--font-body)"><i class="fa-solid fa-calendar-star" style="margin-right:6px;color:var(--accent);font-size:12px"></i>Eventos</span>
-              <p style="font-size:11px;color:var(--text-muted);margin-top:2px;font-family:var(--font-body)">Ações temporárias — ative durante o evento</p>
-            </div>
-            <button class="btn btn-primary" onclick="showAddEvento()" style="padding:6px 14px;font-size:11px">
-              <i class="fa-solid fa-plus" style="margin-right:4px"></i> Novo Evento
-            </button>
-          </div>
-          <div id="canaisEventosList"></div>
-          <p id="canaisEventosEmpty" style="display:none;text-align:center;padding:20px;font-size:12px;color:var(--text-muted);font-family:var(--font-body)">
-            Nenhum evento cadastrado
-          </p>
-        </div>
-      </div>
-
-      <!-- Danger Zone -->
+      <!-- Danger Zone (inside tab-conta) -->
       <div class="settings-section">
         <h2 style="color:var(--danger)"><i class="fa-solid fa-triangle-exclamation"></i> Zona de Perigo</h2>
         <div class="settings-card" style="border-color:rgba(248,113,113,.15)">
@@ -535,6 +566,7 @@
           </div>
         </div>
       </div>
+      </div><!-- /tab-conta -->
 
     </div>
   </div>
@@ -688,6 +720,16 @@ window.removeSettSector = function(idx) {
 };
 
 // Save dashboard location
+// ─── Settings tabs ───
+window.switchSettingsTab = function(tab) {
+  document.querySelectorAll('.settings-tab-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.settings-tab').forEach(b => b.classList.remove('active'));
+  const panel = document.getElementById('tab-' + tab);
+  if (panel) panel.style.display = '';
+  const btn = document.querySelector(`.settings-tab[data-tab="${tab}"]`);
+  if (btn) btn.classList.add('active');
+};
+
 window.saveLocation = function() {
   const loc = document.getElementById('settLocation').value.trim();
   if (loc) localStorage.setItem('minhavez_location', loc);
