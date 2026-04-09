@@ -461,69 +461,25 @@ export async function loadPreferenciais(range) {
   const tenantId = _ctx.tenantId;
 
   try {
-  const query = sb.from('atendimentos')
-    .select('vendedor_id, preferencial')
-    .gte('inicio', range.start)
-    .lt('inicio', range.end)
-    .neq('resultado', 'em_andamento');
-  if (tenantId) query = query.eq('tenant_id', tenantId);
-  const { data, error } = await query;
-  const el = document.querySelector('#chartPreferenciais');
-  const box = document.getElementById('chartPrefBox');
-  if (error || !data || data.length === 0) {
-    if (el) el.parentElement.parentElement.style.display = 'none';
-    return;
-  }
-  // Buscar nomes dos vendedores
-  let vendQuery = sb.from('vendedores').select('id, nome, apelido');
-  if (tenantId) vendQuery = vendQuery.eq('tenant_id', tenantId);
-  const { data: vendedores } = await vendQuery;
-  const vendMap = {};
-  (vendedores || []).forEach(v => { vendMap[v.id] = (v.apelido || v.nome || '').split(' ')[0]; });
+    let query = sb.from('atendimentos')
+      .select('preferencial')
+      .gte('inicio', range.start)
+      .lt('inicio', range.end)
+      .neq('resultado', 'em_andamento');
+    if (tenantId) query = query.eq('tenant_id', tenantId);
+    const { data, error } = await query;
 
-  // Agrupar por vendedor
-  const map = {};
-  data.forEach(a => {
-    const name = vendMap[a.vendedor_id] || '';
-    if (!name) return;
-    if (!map[name]) map[name] = { pref: 0, normal: 0 };
-    if (a.preferencial) map[name].pref++;
-    else map[name].normal++;
-  });
+    const countEl = document.getElementById('prefCount');
+    const percentEl = document.getElementById('prefPercent');
+    const totalEl = document.getElementById('prefTotal');
 
-  const entries = Object.entries(map).sort((a, b) => b[1].pref - a[1].pref);
-  if (entries.every(([, v]) => v.pref === 0)) {
-    if (el) el.parentElement.parentElement.style.display = 'none';
-    return;
-  }
-  if (el) el.parentElement.parentElement.style.display = '';
+    const total = data ? data.length : 0;
+    const pref = data ? data.filter(a => a.preferencial).length : 0;
+    const pct = total > 0 ? Math.round((pref / total) * 100) : 0;
 
-  const names = entries.map(([n]) => n);
-  const prefData = entries.map(([, v]) => v.pref);
-  const normalData = entries.map(([, v]) => v.normal);
-  const dynamicH = Math.max(220, entries.length * 45 + 60);
-  if (box) box.style.height = dynamicH + 'px';
-
-  renderChart('preferenciais', '#chartPreferenciais', {
-    chart: { type: 'bar', height: dynamicH },
-    series: [
-      { name: 'Preferencial', data: prefData },
-      { name: 'Normal', data: normalData }
-    ],
-    plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '60%', stacked: true } },
-    colors: ['#f59e0b', '#94A3B8'],
-    xaxis: { labels: { style: { fontSize: '11px', fontWeight: 500 } }, categories: names },
-    yaxis: { labels: { style: { fontSize: '12px', fontWeight: 700, colors: [chartColors().textStrong] } } },
-    grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { right: 20 },
-            xaxis: { lines: { show: true } }, yaxis: { lines: { show: false } } },
-    dataLabels: { enabled: true, formatter: v => v > 0 ? v : '',
-      style: { fontSize: '11px', fontWeight: 700, colors: ['#fff'] } },
-    legend: { position: 'top', fontSize: '11px', fontWeight: 600,
-              labels: { colors: chartColors().textStrong },
-              markers: { shape: 'circle', size: 5 }, itemMargin: { horizontal: 12 } },
-    tooltip: { shared: true, intersect: false,
-      y: { formatter: v => v + ' atendimentos' } }
-  });
+    if (countEl) countEl.textContent = pref;
+    if (percentEl) percentEl.textContent = pct + '%';
+    if (totalEl) totalEl.textContent = total;
   } catch (err) { console.error('loadPreferenciais error:', err); }
 }
 

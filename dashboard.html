@@ -269,10 +269,24 @@
         </div>
       </div>
     </div>
-    <div class="chart-card" style="margin-bottom:var(--gap)">
-      <h3><i class="fa-solid fa-star" style="margin-right:6px;color:var(--accent-dim)"></i>Atendimentos Preferenciais por Vendedor</h3>
-      <div class="chart-box" id="chartPrefBox"><div id="chartPreferenciais"></div></div>
-      <p id="chartPrefEmpty" class="chart-empty-state" style="display:none"><i class="fa-solid fa-star"></i>Nenhum atendimento preferencial neste período</p>
+    <div class="chart-card pref-card" style="margin-bottom:var(--gap)">
+      <h3><i class="fa-solid fa-star" style="margin-right:6px;color:var(--warning)"></i>Clientes Fidelizados</h3>
+      <div id="prefContent" style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+        <div>
+          <div id="prefCount" style="font-family:var(--font-body);font-size:2.4rem;font-weight:700;letter-spacing:-.025em;line-height:1;color:var(--text-primary)">0</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:6px">atendimentos preferenciais</div>
+        </div>
+        <div id="prefMeta" style="display:flex;gap:20px">
+          <div style="text-align:center">
+            <div id="prefPercent" style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--warning)">0%</div>
+            <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px">do total</div>
+          </div>
+          <div style="text-align:center">
+            <div id="prefTotal" style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--text-secondary)">0</div>
+            <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px">total geral</div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="charts-grid">
       <div class="chart-card">
