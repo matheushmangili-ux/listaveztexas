@@ -1134,38 +1134,22 @@ showChangelog(APP_CHANGELOG, 'minhavez_dash_update_seen_');
     if (clockEl) clockEl.textContent = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   }
 
-  // City from localStorage
-  const savedCity = localStorage.getItem('minhavez_location');
-  if (savedCity && cityEl) cityEl.innerHTML = '<i class="fa-solid fa-location-dot"></i> ' + savedCity;
-
-  // Temperature via Open-Meteo
-  const savedLat = localStorage.getItem('minhavez_lat');
-  const savedLon = localStorage.getItem('minhavez_lon');
-  async function fetchTemp(lat, lon) {
+  // Auto-detect city + temperature via IP geolocation
+  async function fetchGeoAndTemp() {
     try {
-      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
-      const data = await res.json();
-      const t = Math.round(data.current_weather?.temperature ?? 0);
-      if (tempEl) tempEl.innerHTML = '<i class="fa-solid fa-temperature-half"></i> ' + t + '°C';
-    } catch (e) { console.warn('Temp fetch failed:', e); }
+      const geoRes = await fetch('https://ipapi.co/json/');
+      const geo = await geoRes.json();
+      if (geo.city && cityEl) cityEl.innerHTML = '<i class="fa-solid fa-location-dot"></i> ' + geo.city;
+      if (geo.latitude && geo.longitude) {
+        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${geo.latitude}&longitude=${geo.longitude}&current_weather=true`);
+        const weather = await weatherRes.json();
+        const t = Math.round(weather.current_weather?.temperature ?? 0);
+        if (tempEl) tempEl.innerHTML = '<i class="fa-solid fa-temperature-half"></i> ' + t + '°C';
+      }
+    } catch (e) { console.warn('Geo/temp fetch failed:', e); }
   }
-  if (savedLat && savedLon) {
-    fetchTemp(savedLat, savedLon);
-    setInterval(() => fetchTemp(savedLat, savedLon), 30 * 60 * 1000);
-  } else if (savedCity) {
-    fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(savedCity)}&count=1&language=pt`)
-      .then(r => r.json())
-      .then(geo => {
-        if (geo.results?.[0]) {
-          const { latitude, longitude } = geo.results[0];
-          localStorage.setItem('minhavez_lat', latitude);
-          localStorage.setItem('minhavez_lon', longitude);
-          fetchTemp(latitude, longitude);
-          setInterval(() => fetchTemp(latitude, longitude), 30 * 60 * 1000);
-        }
-      })
-      .catch(e => console.warn('Geocode failed:', e));
-  }
+  fetchGeoAndTemp();
+  setInterval(fetchGeoAndTemp, 30 * 60 * 1000);
 
   updateGreeting();
   setInterval(updateGreeting, 15000);
