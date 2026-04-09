@@ -367,6 +367,17 @@
 }
 .cal-clear:hover { color: var(--accent); background: var(--bg-surface); }
 
+/* ─── Filter Card ─── */
+.topbar-filter-card {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+  padding: 10px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
+}
+
 /* ─── Filter Bar ─── */
 .filter-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .filter-bar select {
