@@ -140,7 +140,7 @@ function ensureInitialNode() {
 function ensureEmptyNode() {
   if (!_queueEmptyNode) {
     _queueEmptyNode = htmlToElement(
-      '<div class="queue-empty-state"><i class="fa-solid fa-arrow-up-from-bracket"></i><strong>Fila vazia</strong><br><span>Arraste vendedores do rodapé ou toque neles para adicionar</span></div>'
+      '<div class="queue-empty-state"><div class="queue-empty-icon"><i class="fa-solid fa-check"></i></div><strong>Todo mundo ocupado!</strong><span>Arraste alguém do rodapé ou toque num vendedor para colocar na fila</span></div>'
     );
   }
   return _queueEmptyNode;

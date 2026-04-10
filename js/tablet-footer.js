@@ -180,6 +180,8 @@ function applyFooterCardData(node, cd) {
   let cls = 'footer-card';
   if (cd.inQueue || cd.atendendo) cls += ' in-queue';
   if (cd.pauseExceeded) cls += ' pause-exceeded';
+  // Preserve transient enter animation class se presente
+  if (node.classList.contains('new-item')) cls += ' new-item';
   if (node.className !== cls) node.className = cls;
 
   // Draggable attr
@@ -296,6 +298,11 @@ export function renderFooter() {
     } else {
       node = createFooterCardNode(cd);
       _footerCardState.set(cd.id, { key: cd.key, node });
+      // Animação de entrada — classe removida após o fim da animação pra
+      // não interferir com o próximo diff (applyFooterCardData preserva
+      // a classe se presente, mas removemos pra manter o DOM limpo)
+      node.classList.add('new-item');
+      setTimeout(() => node.classList.remove('new-item'), 400);
     }
     // Reorder se necessário (e insere novos)
     if (prev.nextSibling !== node) {
