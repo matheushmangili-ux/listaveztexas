@@ -24,6 +24,13 @@ let _itemObserver = null;
 let _dragRectsCache = null;
 let _dragRectsCacheTime = 0;
 
+// Per-item diffing state
+const _queueItemState = new Map(); // id -> { key, node }
+const _pauseItemState = new Map(); // id -> { key, node }
+let _queueEmptyNode = null;
+let _queueInitialNode = null;
+let _queuePauseHeader = null;
+
 // Touch drag state
 let touchDragEl = null;
 let touchDragId = null;
@@ -114,6 +121,51 @@ export function scheduleRender() {
 
 // ─── Render queue ───
 
+/** Parse an HTML string into a single element. */
+function htmlToElement(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.firstElementChild;
+}
+
+function ensureInitialNode() {
+  if (!_queueInitialNode) {
+    _queueInitialNode = htmlToElement(
+      '<div class="queue-blank-state"><i class="fa-solid fa-users-slash"></i>Abra o turno para iniciar</div>'
+    );
+  }
+  return _queueInitialNode;
+}
+
+function ensureEmptyNode() {
+  if (!_queueEmptyNode) {
+    _queueEmptyNode = htmlToElement(
+      '<div class="queue-empty-state"><i class="fa-solid fa-arrow-up-from-bracket"></i><strong>Fila vazia</strong><br><span>Arraste vendedores do rodapé ou toque neles para adicionar</span></div>'
+    );
+  }
+  return _queueEmptyNode;
+}
+
+function ensurePauseHeader() {
+  if (!_queuePauseHeader) {
+    _queuePauseHeader = htmlToElement(
+      '<div class="queue-pause-header"><i class="fa-solid fa-pause"></i>Em pausa</div>'
+    );
+  }
+  return _queuePauseHeader;
+}
+
+function renderPauseItemHtml(v, motivoColor, motivoLabel) {
+  return `<div class="queue-item queue-item-pause" data-id="${v.id}" data-action="return-pause" draggable="true" style="border-left:3px solid ${motivoColor}">
+    <div class="queue-position" style="background:${motivoColor}20;color:${motivoColor}"><i class="fa-solid ${STATUS_CONFIG.pausa.icon}"></i></div>
+    <div class="queue-item-body">
+      <div class="queue-item-name">${escapeHtml(v.apelido || v.nome)}</div>
+      <div class="queue-item-pause-label" style="color:${motivoColor}">${escapeHtml(motivoLabel)}</div>
+    </div>
+    <i class="fa-solid fa-arrow-rotate-left queue-pause-return" title="Voltar à fila"></i>
+  </div>`;
+}
+
 export function renderQueue() {
   const list = _ctx.queueList;
   const allVendedores = _ctx.vendedores || [];
@@ -123,7 +175,11 @@ export function renderQueue() {
     .sort((a, b) => a.posicao_fila - b.posicao_fila);
   const pausa = setorVendedores.filter((v) => v.status === 'pausa');
 
-  document.getElementById('queueCount').textContent = inQueue.length + ' na fila';
+  const countEl = document.getElementById('queueCount');
+  if (countEl) {
+    const txt = inQueue.length + ' na fila';
+    if (countEl.textContent !== txt) countEl.textContent = txt;
+  }
 
   // Atualizar cold seller tracking
   const currentIds = new Set(inQueue.map((v) => v.id));
@@ -159,54 +215,86 @@ export function renderQueue() {
   if (queueKey === _lastQueueKey) return;
   _lastQueueKey = queueKey;
 
+  // Sem turno → estado inicial, zera caches
   if (!_ctx.currentTurno) {
-    list.innerHTML =
-      '<div style="text-align:center;padding:40px 0;color:var(--text-muted);font-size:13px"><i class="fa-solid fa-users-slash" style="font-size:24px;margin-bottom:8px;display:block;opacity:.3"></i>Abra o turno para iniciar</div>';
+    _queueItemState.clear();
+    _pauseItemState.clear();
+    list.replaceChildren(ensureInitialNode());
     return;
   }
 
-  const frag = document.createDocumentFragment();
-
+  // Constrói a lista de nós desejados, na ordem de exibição
+  const desired = [];
   inQueue.forEach((v, i) => {
-    const div = document.createElement('div');
-    div.innerHTML = renderQueueItem(v, i + 1, false, true);
-    frag.appendChild(div.firstElementChild);
+    const pos = i + 1;
+    const cold =
+      _ctx.queueEntryTimes.has(v.id) && Date.now() - _ctx.queueEntryTimes.get(v.id).time > COLD_SELLER_TIMEOUT;
+    const count = _ctx.vendorAtendCount[v.id] || 0;
+    const atendForTimer =
+      v.status === 'em_atendimento' ? _ctx.activeAtendimentos.find((a) => a.vendedor_id === v.id) : null;
+    const atendId = atendForTimer ? atendForTimer.id : '';
+    const key = [v.id, v.status, pos, v.apelido || v.nome, cold ? 1 : 0, count, atendId].join('|');
+    const cached = _queueItemState.get(v.id);
+    let node;
+    if (cached && cached.key === key && cached.node.parentNode === list) {
+      node = cached.node;
+    } else {
+      node = htmlToElement(renderQueueItem(v, pos, false, true));
+      _queueItemState.set(v.id, { key, node });
+    }
+    desired.push(node);
   });
-  if (inQueue.length === 0) {
-    const empty = document.createElement('div');
-    empty.style.cssText = 'text-align:center;padding:32px 16px;color:var(--text-muted);font-size:13px';
-    empty.innerHTML =
-      '<i class="fa-solid fa-arrow-up-from-bracket" style="display:block;font-size:24px;margin-bottom:10px;opacity:.4"></i><strong>Fila vazia</strong><br><span style="font-size:11px;opacity:.6;margin-top:4px;display:inline-block">Arraste vendedores do rodapé ou toque neles para adicionar</span>';
-    frag.appendChild(empty);
-  }
+
+  if (inQueue.length === 0) desired.push(ensureEmptyNode());
 
   if (pausa.length > 0) {
-    const header = document.createElement('div');
-    header.style.cssText =
-      'font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px;border-top:1px solid var(--border-subtle);margin-top:4px';
-    header.innerHTML = '<i class="fa-solid fa-pause" style="margin-right:4px"></i>Em pausa';
-    frag.appendChild(header);
+    desired.push(ensurePauseHeader());
     pausa.forEach((v) => {
       const motivoKey = _ctx.saidaMotivos[v.id];
       const motivoColor = motivoKey
         ? SAIDA_COLORS[motivoKey]?.color || STATUS_CONFIG.pausa.color
         : STATUS_CONFIG.pausa.color;
       const motivoLabel = motivoKey ? SAIDA_COLORS[motivoKey]?.label || 'Pausa' : 'Pausa';
-      const div = document.createElement('div');
-      div.innerHTML = `<div class="queue-item" data-id="${v.id}" data-action="return-pause" draggable="true" style="cursor:grab;opacity:.8;border-left:3px solid ${motivoColor}">
-        <div class="queue-position" style="background:${motivoColor}20;color:${motivoColor}"><i class="fa-solid ${STATUS_CONFIG.pausa.icon}" style="font-size:11px"></i></div>
-        <div style="flex:1;min-width:0">
-          <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(v.apelido || v.nome)}</div>
-          <div style="font-size:10px;color:${motivoColor};font-weight:600;text-transform:uppercase;letter-spacing:.05em">${escapeHtml(motivoLabel)}</div>
-        </div>
-        <i class="fa-solid fa-arrow-rotate-left" style="color:var(--success);font-size:12px;opacity:.6" title="Voltar à fila"></i>
-      </div>`;
-      frag.appendChild(div.firstElementChild);
+      const key = [v.id, v.apelido || v.nome, motivoKey || '', motivoColor, motivoLabel].join('|');
+      const cached = _pauseItemState.get(v.id);
+      let node;
+      if (cached && cached.key === key && cached.node.parentNode === list) {
+        node = cached.node;
+      } else {
+        node = htmlToElement(renderPauseItemHtml(v, motivoColor, motivoLabel));
+        _pauseItemState.set(v.id, { key, node });
+      }
+      desired.push(node);
     });
   }
 
-  list.innerHTML = '';
-  list.appendChild(frag);
+  // Reconcilia o DOM: insere/reordena na ordem desejada
+  let prev = null;
+  for (const node of desired) {
+    const target = prev ? prev.nextSibling : list.firstChild;
+    if (target !== node) {
+      list.insertBefore(node, target);
+    }
+    prev = node;
+  }
+  // Remove nós stale após o último desejado
+  while (prev && prev.nextSibling) {
+    list.removeChild(prev.nextSibling);
+  }
+  if (!prev && list.firstChild) {
+    list.replaceChildren();
+  }
+
+  // Limpa entries stale dos caches
+  const queueIds = new Set(inQueue.map((v) => v.id));
+  for (const [id] of _queueItemState) {
+    if (!queueIds.has(id)) _queueItemState.delete(id);
+  }
+  const pauseIds = new Set(pausa.map((v) => v.id));
+  for (const [id] of _pauseItemState) {
+    if (!pauseIds.has(id)) _pauseItemState.delete(id);
+  }
+
   initDragAndDrop();
 }
 

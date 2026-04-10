@@ -1581,6 +1581,66 @@
   display: block;
   opacity: 0.3;
 }
+.queue-empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.queue-empty-state > i {
+  display: block;
+  font-size: 24px;
+  margin-bottom: 10px;
+  opacity: 0.4;
+}
+.queue-empty-state > span {
+  font-size: 11px;
+  opacity: 0.6;
+  margin-top: 4px;
+  display: inline-block;
+}
+.queue-pause-header {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 10px 8px 4px;
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 4px;
+}
+.queue-pause-header > i {
+  margin-right: 4px;
+}
+.queue-item-pause {
+  cursor: grab;
+  opacity: 0.8;
+}
+.queue-item-pause > .queue-position > i {
+  font-size: 11px;
+}
+.queue-item-body {
+  flex: 1;
+  min-width: 0;
+}
+.queue-item-name {
+  font-weight: 700;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.queue-item-pause-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.queue-pause-return {
+  color: var(--success);
+  font-size: 12px;
+  opacity: 0.6;
+}
 
 .panel-header-icon {
   margin-right: 4px;
