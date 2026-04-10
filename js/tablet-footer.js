@@ -12,6 +12,9 @@ let _lastFooterKey = '';
 let _footerTimerInterval = null;
 let _confirmFilaOutsideHandler = null;
 let _confirmFilaTimeout = null;
+// Per-card state para diffing: id -> { key, node }
+const _footerCardState = new Map();
+let _footerTitleEl = null;
 
 /**
  * Initialize footer module with shared dependencies.
@@ -46,6 +49,12 @@ export function invalidateFooter() {
   _lastFooterKey = '';
 }
 
+/** Reset card cache (use after full footer wipe, e.g. setor change). */
+function resetFooterCardState() {
+  _footerCardState.clear();
+  _footerTitleEl = null;
+}
+
 // ─── Drop zone label helpers ───
 
 export function showFooterDropLabel() {
@@ -65,6 +74,175 @@ export function hideFooterDropLabel() {
 }
 
 // ─── Render footer (vendedores com status) ───
+
+/** Build a CardData object from vendedor + context. */
+function buildFooterCardData(v, atendMap) {
+  const inQueue = v.status === 'disponivel' && v.posicao_fila != null;
+  const atendendo = v.status === 'em_atendimento';
+  let statusLabel, statusColor;
+
+  if (atendendo) {
+    const atend = atendMap.get(v.id);
+    const mins = atend && atend.inicio ? Math.floor((Date.now() - new Date(atend.inicio).getTime()) / 60000) : 0;
+    statusLabel = mins > 0 ? 'Atendendo (' + mins + 'min)' : 'Atendendo';
+    statusColor = 'var(--info)';
+  } else if (inQueue) {
+    statusLabel = 'Na fila (#' + v.posicao_fila + ')';
+    statusColor = 'var(--success)';
+  } else if (v.status === 'pausa') {
+    const m = _ctx.saidaMotivos[v.id];
+    const sc = SAIDA_COLORS[m] || SAIDA_COLORS.outro;
+    const pauseStart = _ctx.pauseStartTimes.get(v.id);
+    const pauseMins = pauseStart ? Math.floor((Date.now() - pauseStart.getTime()) / 60000) : 0;
+    statusLabel = sc.label + (pauseMins > 0 ? ' (' + pauseMins + 'min)' : '');
+    statusColor = sc.color;
+  } else if (v.status === 'disponivel') {
+    statusLabel = 'Disponível';
+    statusColor = '#64748b';
+  } else {
+    const m = _ctx.saidaMotivos[v.id];
+    const sc = SAIDA_COLORS[m] || SAIDA_COLORS.outro;
+    statusLabel = sc.labelFull;
+    statusColor = sc.color;
+  }
+
+  // Pause exceeded check
+  let pauseExceeded = false;
+  if (v.status === 'pausa') {
+    const pm = _ctx.saidaMotivos[v.id];
+    const pStart = _ctx.pauseStartTimes.get(v.id);
+    const pMins = pStart ? Math.floor((Date.now() - pStart.getTime()) / 60000) : 0;
+    const pLimit = PAUSE_LIMITS[pm] || 60;
+    if (pMins >= pLimit) pauseExceeded = true;
+  }
+
+  const draggable = !inQueue && !atendendo;
+  const firstName = v.apelido || v.nome.split(' ')[0];
+
+  // Avatar color by status
+  let avatarBg = '#4b5563';
+  if (atendendo) avatarBg = '#3b82f6';
+  else if (inQueue) avatarBg = '#22c55e';
+  else if (v.status === 'pausa') avatarBg = statusColor;
+
+  // Fingerprint — tudo que altera a saída renderizada
+  const key = [
+    v.id,
+    v.status,
+    v.posicao_fila || '',
+    statusLabel,
+    statusColor,
+    avatarBg,
+    firstName,
+    v.foto_url || '',
+    inQueue ? 1 : 0,
+    atendendo ? 1 : 0,
+    pauseExceeded ? 1 : 0,
+    draggable ? 1 : 0
+  ].join('|');
+
+  return {
+    id: v.id,
+    key,
+    inQueue,
+    atendendo,
+    pauseExceeded,
+    draggable,
+    statusLabel,
+    statusColor,
+    avatarBg,
+    firstName,
+    fotoUrl: v.foto_url || '',
+    fullName: v.apelido || v.nome
+  };
+}
+
+/** Create a brand-new footer card DOM node from card data. */
+function createFooterCardNode(cd) {
+  const node = document.createElement('div');
+  node.dataset.id = cd.id;
+  const avatar = document.createElement('div');
+  avatar.className = 'fc-avatar';
+  const name = document.createElement('span');
+  name.className = 'fc-name';
+  const status = document.createElement('span');
+  status.className = 'fc-status';
+  node.appendChild(avatar);
+  node.appendChild(name);
+  node.appendChild(status);
+  applyFooterCardData(node, cd);
+  return node;
+}
+
+/** Apply card data to an existing DOM node (idempotent). */
+function applyFooterCardData(node, cd) {
+  // Classes
+  let cls = 'footer-card';
+  if (cd.inQueue || cd.atendendo) cls += ' in-queue';
+  if (cd.pauseExceeded) cls += ' pause-exceeded';
+  if (node.className !== cls) node.className = cls;
+
+  // Draggable attr
+  if (cd.draggable) {
+    if (node.getAttribute('draggable') !== 'true') node.setAttribute('draggable', 'true');
+  } else if (node.hasAttribute('draggable')) {
+    node.removeAttribute('draggable');
+  }
+
+  // Avatar bg
+  const avatar = node.firstChild;
+  if (avatar.style.background !== cd.avatarBg) avatar.style.background = cd.avatarBg;
+
+  // Avatar content (img vs initials)
+  const hasImg = avatar.firstChild && avatar.firstChild.tagName === 'IMG';
+  if (cd.fotoUrl) {
+    if (!hasImg) {
+      avatar.textContent = '';
+      const img = document.createElement('img');
+      img.loading = 'lazy';
+      img.width = 48;
+      img.height = 48;
+      img.src = cd.fotoUrl;
+      img.alt = cd.fullName;
+      avatar.appendChild(img);
+    } else {
+      const img = avatar.firstChild;
+      if (img.src !== cd.fotoUrl) img.src = cd.fotoUrl;
+      if (img.alt !== cd.fullName) img.alt = cd.fullName;
+    }
+  } else {
+    const ini = initials(cd.fullName);
+    if (hasImg || avatar.textContent !== ini) {
+      avatar.textContent = ini;
+    }
+  }
+
+  // Name + status
+  const name = avatar.nextSibling;
+  if (name.textContent !== cd.firstName) name.textContent = cd.firstName;
+  const status = name.nextSibling;
+  if (status.textContent !== cd.statusLabel) status.textContent = cd.statusLabel;
+  if (status.style.color !== cd.statusColor) status.style.color = cd.statusColor;
+}
+
+/** Ensure the footer title block exists and reflects the vendor count. */
+function ensureFooterTitle(footer, count) {
+  if (!_footerTitleEl || _footerTitleEl.parentNode !== footer) {
+    _footerTitleEl = document.createElement('div');
+    _footerTitleEl.className = 'footer-title';
+    const lbl = document.createElement('span');
+    lbl.className = 'footer-title-label';
+    lbl.textContent = 'Vendedores';
+    const cnt = document.createElement('span');
+    cnt.className = 'footer-title-count';
+    _footerTitleEl.appendChild(lbl);
+    _footerTitleEl.appendChild(cnt);
+    footer.insertBefore(_footerTitleEl, footer.firstChild);
+  }
+  const cntEl = _footerTitleEl.lastChild;
+  const str = String(count);
+  if (cntEl.textContent !== str) cntEl.textContent = str;
+}
 
 export function renderFooter() {
   const footer = _ctx.statusFooter;
@@ -96,76 +274,43 @@ export function renderFooter() {
   if (footerKey === _lastFooterKey) return;
   _lastFooterKey = footerKey;
 
-  const cards = setorVendedores
-    .map((v) => {
-      const inQueue = v.status === 'disponivel' && v.posicao_fila != null;
-      const atendendo = v.status === 'em_atendimento';
-      let statusLabel, statusColor;
+  // Se o footer foi esvaziado/reconstruído externamente (ex: toggleTvMode),
+  // o cache fica obsoleto. Detectamos checando se ainda contém os nós.
+  if (_footerTitleEl && _footerTitleEl.parentNode !== footer) resetFooterCardState();
 
-      if (atendendo) {
-        const atend = _atendMap.get(v.id);
-        const mins = atend && atend.inicio ? Math.floor((Date.now() - new Date(atend.inicio).getTime()) / 60000) : 0;
-        statusLabel = mins > 0 ? 'Atendendo (' + mins + 'min)' : 'Atendendo';
-        statusColor = 'var(--info)';
-      } else if (inQueue) {
-        statusLabel = 'Na fila (#' + v.posicao_fila + ')';
-        statusColor = 'var(--success)';
-      } else if (v.status === 'pausa') {
-        const m = _ctx.saidaMotivos[v.id];
-        const sc = SAIDA_COLORS[m] || SAIDA_COLORS.outro;
-        const pauseStart = _ctx.pauseStartTimes.get(v.id);
-        const pauseMins = pauseStart ? Math.floor((Date.now() - pauseStart.getTime()) / 60000) : 0;
-        statusLabel = sc.label + (pauseMins > 0 ? ' (' + pauseMins + 'min)' : '');
-        statusColor = sc.color;
-      } else if (v.status === 'disponivel') {
-        statusLabel = 'Disponível';
-        statusColor = '#64748b';
-      } else {
-        const m = _ctx.saidaMotivos[v.id];
-        const sc = SAIDA_COLORS[m] || SAIDA_COLORS.outro;
-        statusLabel = sc.labelFull;
-        statusColor = sc.color;
+  ensureFooterTitle(footer, setorVendedores.length);
+
+  const seen = new Set();
+  let prev = _footerTitleEl;
+  for (const v of setorVendedores) {
+    const cd = buildFooterCardData(v, _atendMap);
+    seen.add(cd.id);
+    const cached = _footerCardState.get(cd.id);
+    let node;
+    if (cached && cached.node.parentNode === footer) {
+      node = cached.node;
+      if (cached.key !== cd.key) {
+        applyFooterCardData(node, cd);
+        cached.key = cd.key;
       }
+    } else {
+      node = createFooterCardNode(cd);
+      _footerCardState.set(cd.id, { key: cd.key, node });
+    }
+    // Reorder se necessário (e insere novos)
+    if (prev.nextSibling !== node) {
+      footer.insertBefore(node, prev.nextSibling);
+    }
+    prev = node;
+  }
 
-      // Pause exceeded check
-      let pauseExceededClass = '';
-      if (v.status === 'pausa') {
-        const pm = _ctx.saidaMotivos[v.id];
-        const pStart = _ctx.pauseStartTimes.get(v.id);
-        const pMins = pStart ? Math.floor((Date.now() - pStart.getTime()) / 60000) : 0;
-        const pLimit = PAUSE_LIMITS[pm] || 60;
-        if (pMins >= pLimit) pauseExceededClass = ' pause-exceeded';
-      }
-
-      const inQueueClass = inQueue || atendendo ? ' in-queue' : '';
-      const dragAttr = !inQueue && !atendendo ? 'draggable="true"' : '';
-
-      const ini = initials(v.apelido || v.nome);
-      const avatarContent = v.foto_url
-        ? `<img src="${escapeHtml(v.foto_url)}" alt="${escapeHtml(v.apelido || v.nome)}" loading="lazy" width="48" height="48">`
-        : ini;
-
-      // Avatar color by status
-      let avatarBg = '#4b5563'; // cinza = fora
-      if (atendendo)
-        avatarBg = '#3b82f6'; // azul
-      else if (inQueue)
-        avatarBg = '#22c55e'; // verde
-      else if (v.status === 'pausa') avatarBg = statusColor;
-
-      const firstName = v.apelido || v.nome.split(' ')[0];
-
-      return `<div class="footer-card${inQueueClass}${pauseExceededClass}" data-id="${v.id}" ${dragAttr}>
-      <div class="fc-avatar" style="background:${avatarBg}">${avatarContent}</div>
-      <span class="fc-name">${escapeHtml(firstName)}</span>
-      <span class="fc-status" style="color:${statusColor}">${statusLabel}</span>
-    </div>`;
-    })
-    .join('');
-
-  const footerTitle = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:64px;padding:6px 8px;flex-shrink:0"><span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);white-space:nowrap">Vendedores</span><span style="font-size:13px;font-weight:700;color:var(--text-secondary);font-family:var(--font-mono)">${setorVendedores.length}</span></div>`;
-
-  footer.innerHTML = footerTitle + cards;
+  // Remove nós obsoletos (vendedores que sumiram do setor atual)
+  for (const [id, cached] of _footerCardState) {
+    if (!seen.has(id)) {
+      if (cached.node.parentNode === footer) cached.node.remove();
+      _footerCardState.delete(id);
+    }
+  }
 }
 
 // ─── Footer event delegation ───
