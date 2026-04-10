@@ -61,13 +61,6 @@ export async function loadTenant() {
 }
 
 /**
- * Get cached tenant (call loadTenant first).
- */
-export function getTenant() {
-  return _tenantCache;
-}
-
-/**
  * Clear cached tenant and slug (call on logout or tenant switch).
  */
 export function clearTenantCache() {

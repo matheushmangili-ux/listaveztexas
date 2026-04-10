@@ -332,11 +332,11 @@
 import { getSupabase } from '/js/supabase-config.js';
 import { requireRole, logout, getTenantId } from '/js/auth.js';
 import { STATUS_CONFIG, MOTIVOS, todayRange, yesterdayRange, weekRange, monthRange, initials, toast, initTheme, toggleTheme } from '/js/utils.js';
-import { loadTenant, applyBranding, tenantPath, getTenant, getSlug } from '/js/tenant.js';
+import { loadTenant, applyBranding, tenantPath, getSlug } from '/js/tenant.js';
 import { CHART_HEIGHT, CHART_TAB_KEY, METAS_KEY, DEFAULT_METAS, ORIGEM_PALETTE, PERIODS, ANIM } from '/js/dashboard-config.js';
 const setorLabel = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 import { showChangelog, setVersionLabel } from '/js/changelog.js';
-import { fetchSellerRanking, fetchConversionStats, fetchTrocas, fetchAtendimentosFiltrados, fetchLossReasons, fetchHourlyFlow, fetchPreferenciais, fetchRuptureLog, fetchPauseLog, fetchVendedores, fetchTodosVendedores, fetchCanalStats, fetchDrillMotivo, fetchExportData, fetchTrend, upsertVendedor, toggleVendedorAtivo, uploadFotoVendedor } from '/js/dashboard-api.js';
+import { fetchTodosVendedores, fetchDrillMotivo } from '/js/dashboard-api.js';
 import { initDashboardCharts, loadAll, loadKPIs, loadMotivos, loadHourly, loadPreferenciais, loadRanking, loadRuptures, loadPauseStats, loadFloor, loadScatter, loadTempoMeta, loadTrend, loadOrigem, setChartTab, setFirstLoadDone, formatTempo } from '/js/dashboard-charts.js';
 import { SESSION_TIMEOUT_DASHBOARD, SESSION_CHECK_INTERVAL, RT_DASHBOARD_DEBOUNCE, TOAST_SHORT, CHART_RESIZE_DELAY } from '/js/constants.js';
 initTheme();

@@ -1,6 +1,6 @@
 // Minha Vez — Service Worker (network-first, offline-capable)
 // Bump CACHE_VERSION on each deploy to bust stale caches
-const CACHE_VERSION = '11';
+const CACHE_VERSION = '12';
 const CACHE_NAME = 'minhavez-v' + CACHE_VERSION;
 const STATIC_ASSETS = [
   '/tablet.html',

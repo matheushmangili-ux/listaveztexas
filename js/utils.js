@@ -47,10 +47,6 @@ export function formatTime(seconds) {
   return m + 'min ' + s + 's';
 }
 
-export function elapsedSince(isoDate) {
-  return (Date.now() - new Date(isoDate).getTime()) / 1000;
-}
-
 export function todayRange() {
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());

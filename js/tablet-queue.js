@@ -335,7 +335,11 @@ async function reorderInQueue(movedId, beforeId) {
 async function addToQueueAt(vendedorId, beforeId) {
   delete _ctx.saidaMotivos[vendedorId];
   // Fechar pausa aberta ao voltar pra fila (drag-and-drop)
-  try { await _ctx.sb.rpc('registrar_retorno', { p_vendedor_id: vendedorId }); } catch(e) {}
+  try {
+    await _ctx.sb.rpc('registrar_retorno', { p_vendedor_id: vendedorId });
+  } catch (e) {
+    console.warn('[registrar_retorno] falhou:', e?.message || e);
+  }
   const target = _ctx.vendedores.find(x => x.id === vendedorId);
   const setor = target?.setor || 'loja';
   const inQueue = _ctx.vendedores.filter(v => (v.setor || 'loja') === setor && v.status === 'disponivel' && v.posicao_fila != null).sort((a, b) => a.posicao_fila - b.posicao_fila);

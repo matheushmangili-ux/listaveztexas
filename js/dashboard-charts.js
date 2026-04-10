@@ -187,15 +187,16 @@ export async function loadAll() {
   // Carregar ranking + KPIs em paralelo (são independentes)
   let rankRes;
   try {
-    [rankRes] = await Promise.allSettled([
+    const [rankResult, kpiResult] = await Promise.allSettled([
       sb.rpc('get_seller_ranking', { p_inicio: range.start, p_fim: range.end }),
       hasFilter ? Promise.resolve(null) : loadKPIs(range, prevRange)
-    ]).then(results => {
-      if (results[1].status === 'rejected') console.error('KPI load error:', results[1].reason);
-      return [results[0].status === 'fulfilled' ? results[0].value : { data: [], error: results[0].reason }];
-    });
+    ]);
+    if (kpiResult.status === 'rejected') console.error('[loadKPIs] erro:', kpiResult.reason);
+    rankRes = rankResult.status === 'fulfilled'
+      ? rankResult.value
+      : { data: [], error: rankResult.reason };
   } catch (fetchErr) {
-    console.error('loadAll fetch error:', fetchErr);
+    console.error('[loadAll] fetch erro:', fetchErr);
     toast('Erro de conexão. Verifique sua internet e recarregue.', 'error');
     return;
   }
