@@ -40,10 +40,15 @@ export async function loginWithPin(pin) {
 }
 
 export async function logout() {
-  await sb.auth.signOut();
   const slug = getSlug();
+  const target = slug ? `/${slug}/login` : '/landing.html';
+  try {
+    await sb.auth.signOut({ scope: 'local' });
+  } catch (e) {
+    console.warn('[logout] signOut error:', e);
+  }
   clearTenantCache();
-  window.location.href = slug ? `/${slug}/login` : '/landing.html';
+  window.location.replace(target);
 }
 
 export async function getUser() {

@@ -1176,7 +1176,13 @@ setFirstLoadDone();
 updateTimestamp();
 
 // ─── Theme & Logout ───
-window.handleLogout = function() { logout(); };
+window.handleLogout = async function() {
+  try { await logout(); }
+  catch (e) {
+    console.error('[handleLogout]', e);
+    window.location.replace('/landing.html');
+  }
+};
 window.toggleTheme = function() {
   const next = toggleTheme();
   loadAll();
