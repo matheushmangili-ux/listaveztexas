@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -10,7 +10,7 @@
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,600,700,800,900&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/styles.css?v=5">
-<meta name="theme-color" content="#FFFFFF">
+<meta name="theme-color" content="#060606">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -18,6 +18,7 @@
 <script src="/js/update-checker.js"></script>
 <script>initUpdateChecker('/index.html');</script>
 <style>
+  body { background: var(--bg-deep); }
   .login-container {
     min-height: 100vh;
     display: flex;
@@ -29,23 +30,40 @@
     background: var(--bg-deep);
     color: var(--text-primary);
   }
-  /* Logo watermark — removed */
-  /* Subtle pink glow */
+  /* Pink spotlight behind the card */
+  .login-container::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 720px; height: 720px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(226,80,111,.22) 0%, rgba(226,80,111,.08) 35%, transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(12px);
+    animation: heroGlow 5s ease-in-out infinite alternate;
+  }
+  /* Secondary soft halo */
   .login-container::after {
     content: '';
     position: absolute;
-    top: -200px; left: 50%; transform: translateX(-50%);
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(226,80,111,.06) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    width: 340px; height: 340px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(240,117,142,.18) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
-    animation: heroGlow 4s ease-in-out infinite alternate;
+    animation: heroPulse 3.2s ease-in-out infinite alternate;
   }
   @keyframes heroGlow {
-    0% { opacity: .4; transform: translateX(-50%) scale(1); }
-    100% { opacity: .8; transform: translateX(-50%) scale(1.15); }
+    0% { opacity: .65; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
   }
-  /* Floating particles */
+  @keyframes heroPulse {
+    0% { opacity: .4; }
+    100% { opacity: .85; }
+  }
+  /* Floating sparks */
   .particles-bg {
     position: fixed; inset: 0; z-index: 0;
     pointer-events: none; overflow: hidden;
@@ -53,15 +71,16 @@
   .particle {
     position: absolute;
     width: 2px; height: 2px;
-    background: rgba(226,80,111,.3);
+    background: rgba(240,117,142,.7);
     border-radius: 50%;
     opacity: 0;
+    box-shadow: 0 0 6px rgba(226,80,111,.6), 0 0 12px rgba(226,80,111,.3);
     animation: particleUp linear infinite;
   }
   @keyframes particleUp {
     0% { opacity: 0; transform: translateY(100vh) scale(0); }
-    10% { opacity: .35; }
-    90% { opacity: .35; }
+    10% { opacity: .9; }
+    90% { opacity: .9; }
     100% { opacity: 0; transform: translateY(-10vh) scale(1); }
   }
   .login-box {
@@ -69,10 +88,15 @@
     max-width: 380px;
     position: relative;
     z-index: 1;
-    background: var(--bg-card);
-    box-shadow: 0 4px 24px rgba(0,0,0,.06);
+    background: rgba(22,22,25,.72);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    box-shadow:
+      0 20px 60px rgba(0,0,0,.55),
+      0 0 0 1px rgba(226,80,111,.12),
+      0 0 80px rgba(226,80,111,.08);
     border-radius: 20px;
-    border: 1px solid var(--border-subtle);
+    border: 1px solid rgba(255,255,255,.06);
     padding: 32px;
   }
   .brand-mark img {
@@ -80,7 +104,8 @@
     opacity: 1 !important;
   }
   .gold-line {
-    background: rgba(0,0,0,.06);
+    background: linear-gradient(90deg, transparent, rgba(226,80,111,.35), transparent);
+    height: 1px;
   }
   .tab-switch {
     display: flex;
@@ -355,24 +380,27 @@ document.getElementById('passInput')?.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') handleEmailLogin();
 });
 
-// Floating particles — pink tones on white
+// Floating pink sparks on dark background
 (function initParticles() {
   const c = document.getElementById('particles');
   if (!c) return;
-  const n = window.innerWidth < 768 ? 12 : 22;
+  const n = window.innerWidth < 768 ? 18 : 34;
   for (let i = 0; i < n; i++) {
     const p = document.createElement('div');
     p.className = 'particle';
     p.style.left = Math.random() * 100 + '%';
-    p.style.animationDuration = (8 + Math.random() * 14) + 's';
-    p.style.animationDelay = Math.random() * 8 + 's';
-    p.style.width = p.style.height = (1 + Math.random() * 2) + 'px';
-    if (Math.random() > 0.7) {
-      p.style.background = 'rgba(226,80,111,.15)';
-    } else if (Math.random() > 0.85) {
-      p.style.background = 'var(--success, #34D399)';
+    p.style.animationDuration = (7 + Math.random() * 13) + 's';
+    p.style.animationDelay = Math.random() * 10 + 's';
+    const size = 1 + Math.random() * 2.5;
+    p.style.width = p.style.height = size + 'px';
+    const r = Math.random();
+    if (r > 0.75) {
+      p.style.background = 'rgba(255,180,196,.9)';
+      p.style.boxShadow = '0 0 8px rgba(240,117,142,.8), 0 0 16px rgba(226,80,111,.5)';
+    } else if (r > 0.4) {
+      p.style.background = 'rgba(240,117,142,.8)';
     } else {
-      p.style.background = 'rgba(226,80,111,.25)';
+      p.style.background = 'rgba(226,80,111,.6)';
     }
     c.appendChild(p);
   }
