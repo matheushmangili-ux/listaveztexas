@@ -2,7 +2,7 @@
 // Cache-first para estáticos (CSS, JS, imagens) — economiza banda
 // Network-first para HTML e APIs — sempre pega a versão mais fresca
 // Bump CACHE_VERSION a cada deploy
-const CACHE_VERSION = '15';
+const CACHE_VERSION = '16';
 const CACHE_NAME = 'minhavez-v' + CACHE_VERSION;
 const STATIC_ASSETS = [
   '/tablet.html',

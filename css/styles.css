@@ -55,6 +55,19 @@
   --status-atendendo: #60a5fa;
   --status-pausa: #fbbf24;
   --status-fora: #71717a;
+  /* Motivos de perda (semantic colors) */
+  --motivo-preco: #f59e0b;
+  --motivo-ruptura: #ef4444;
+  --motivo-indecisao: #8b5cf6;
+  --motivo-so-olhando: #6b7280;
+  --motivo-outro: #94a3b8;
+  /* Motivos de saída/pausa */
+  --saida-almoco: #fbbf24;
+  --saida-banheiro: #60a5fa;
+  --saida-reuniao: #a1a1aa;
+  --saida-operacional: #8b5cf6;
+  --saida-finalizar: #f87171;
+  --saida-outro: #64748b;
   --font-body: 'Satoshi', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
   --radius: 14px;
@@ -94,6 +107,17 @@
   --status-atendendo: #60a5fa;
   --status-pausa: #fbbf24;
   --status-fora: #71717a;
+  --motivo-preco: #f59e0b;
+  --motivo-ruptura: #ef4444;
+  --motivo-indecisao: #a78bfa;
+  --motivo-so-olhando: #9ca3af;
+  --motivo-outro: #94a3b8;
+  --saida-almoco: #fbbf24;
+  --saida-banheiro: #60a5fa;
+  --saida-reuniao: #a1a1aa;
+  --saida-operacional: #a78bfa;
+  --saida-finalizar: #f87171;
+  --saida-outro: #94a3b8;
 }
 
 * {
