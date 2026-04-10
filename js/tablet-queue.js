@@ -363,6 +363,8 @@ function initDragAndDrop() {
 
 // ─── Drag helpers ───
 
+const DRAG_RECTS_CACHE_TTL = 200; // ms — invalida pra absorver scroll durante drag
+
 function cacheDragRects(container) {
   const items = [...container.querySelectorAll('.queue-item:not([style*="opacity: 0.3"])')];
   _dragRectsCache = items.map((el) => ({ el, rect: el.getBoundingClientRect() }));
@@ -370,7 +372,10 @@ function cacheDragRects(container) {
 }
 
 function getDragAfterElement(container, y) {
-  if (!_dragRectsCache) cacheDragRects(container);
+  const now = performance.now();
+  if (!_dragRectsCache || now - _dragRectsCacheTime > DRAG_RECTS_CACHE_TTL) {
+    cacheDragRects(container);
+  }
   return (
     _dragRectsCache.reduce(
       (closest, { el, rect }) => {
@@ -492,11 +497,20 @@ function onTouchDragStart(e) {
   const footer = _ctx.statusFooter;
   let _prevAfter = null;
   let _markedEl = null;
+  let _pendingGhostX = 0;
+  let _pendingGhostY = 0;
+  let _ghostRafPending = false;
   const _clearTouchIndicators = () => {
     if (_markedEl) {
       _markedEl.classList.remove('drag-above', 'drag-below');
       _markedEl = null;
     }
+  };
+
+  const _paintGhost = () => {
+    _ghostRafPending = false;
+    if (!touchGhost) return;
+    touchGhost.style.transform = `translate3d(${_pendingGhostX}px,${_pendingGhostY}px,0) scale(1.05)`;
   };
 
   const onMove = (ev) => {
@@ -518,12 +532,16 @@ function onTouchDragStart(e) {
       _ghostInitX = t.clientX - itemW / 2;
       _ghostInitY = t.clientY - DRAG_GHOST_Y_OFFSET;
 
-      touchGhost = item.cloneNode(true);
+      // Ghost simplificado — só o header do card (nome + avatar), mais leve
+      touchGhost = document.createElement('div');
+      touchGhost.setAttribute('aria-hidden', 'true');
+      const header = item.querySelector('.queue-item-header') || item.querySelector('.footer-card') || item;
+      touchGhost.innerHTML = header.outerHTML;
       touchGhost.style.cssText = `
         position:fixed;z-index:${Z_DRAG_GHOST};pointer-events:none;
-        opacity:.9;will-change:transform;
-        box-shadow:0 4px 16px rgba(0,0,0,.3);
-        border:1px solid var(--success);border-radius:10px;
+        opacity:.92;will-change:transform;
+        box-shadow:0 6px 20px rgba(0,0,0,.25);
+        border:1px solid var(--success);border-radius:var(--radius);
         background:var(--bg-card);
         width:${itemW}px;
         left:0;top:0;
@@ -533,9 +551,12 @@ function onTouchDragStart(e) {
     }
 
     if (touchDragging && touchGhost) {
-      const gx = t.clientX - itemW / 2;
-      const gy = t.clientY - DRAG_GHOST_Y_OFFSET;
-      touchGhost.style.transform = `translate3d(${gx}px,${gy}px,0) scale(1.05)`;
+      _pendingGhostX = t.clientX - itemW / 2;
+      _pendingGhostY = t.clientY - DRAG_GHOST_Y_OFFSET;
+      if (!_ghostRafPending) {
+        _ghostRafPending = true;
+        requestAnimationFrame(_paintGhost);
+      }
 
       const now = performance.now();
       if (now - _lastDropCheck < 60) return;

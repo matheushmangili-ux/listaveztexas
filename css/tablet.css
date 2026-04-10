@@ -760,18 +760,31 @@
   border-left: 3px solid rgba(59, 130, 246, 0.3);
 }
 
-/* ─── Pause exceeded ─── */
+/* ─── Pause exceeded (GPU-friendly pulse) ─── */
 .footer-card.pause-exceeded {
+  position: relative;
   border: 1.5px solid var(--danger) !important;
+}
+.footer-card.pause-exceeded::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: var(--radius);
+  border: 2px solid var(--danger);
+  opacity: 0;
+  pointer-events: none;
   animation: pauseExceededPulse 1.5s ease infinite;
+  will-change: opacity, transform;
 }
 @keyframes pauseExceededPulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.2);
+    opacity: 0.35;
+    transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
+    opacity: 0;
+    transform: scale(1.05);
   }
 }
 

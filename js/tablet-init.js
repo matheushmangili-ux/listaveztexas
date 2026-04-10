@@ -227,6 +227,9 @@ initTurno({
   queueEntryTimes: state.queueEntryTimes,
   markLocal,
   logPosition,
+  clearPositionLog: () => {
+    state.positionLog = [];
+  },
   renderActiveAtendimentos,
   loadVendedores
 });

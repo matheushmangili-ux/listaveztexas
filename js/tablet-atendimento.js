@@ -44,7 +44,65 @@ let _multiTotal = 0;
 let _multiCurrent = 0;
 let _continuarCallbacks = { onNo: null, onYes: null };
 let _timerInterval = null;
+let _timerRefs = new Map();
 const _savedQueuePositions = new Map();
+
+function _tickAtendTimers() {
+  const now = Date.now();
+  let allDetached = true;
+  _timerRefs.forEach((ref, id) => {
+    const elapsed = (now - ref.startMs) / 1000;
+    const timeStr = formatTime(elapsed);
+    if (timeStr === ref.lastText) {
+      if (ref.main || ref.side) allDetached = false;
+      return;
+    }
+    ref.lastText = timeStr;
+    const isDanger = elapsed > ATTENDANCE_DANGER_SECONDS;
+    if (ref.main && !ref.main.isConnected) ref.main = null;
+    if (!ref.main) ref.main = document.getElementById('timer-' + id) || null;
+    if (ref.main) {
+      ref.main.textContent = timeStr;
+      ref.main.className = 'atend-timer' + (isDanger ? ' danger' : '');
+      allDetached = false;
+    }
+    if (ref.side && !ref.side.isConnected) ref.side = null;
+    if (!ref.side) ref.side = document.querySelector(`[data-sidebar-timer="${id}"]`) || null;
+    if (ref.side) {
+      ref.side.textContent = timeStr;
+      ref.side.style.color = isDanger ? 'var(--danger)' : 'var(--text-primary)';
+      allDetached = false;
+    }
+  });
+  if (allDetached && _timerRefs.size > 0) {
+    clearInterval(_timerInterval);
+    _timerInterval = null;
+  }
+}
+
+function _startAtendTimerLoop() {
+  if (_timerInterval) return;
+  if (_timerRefs.size === 0) return;
+  _tickAtendTimers();
+  _timerInterval = setInterval(_tickAtendTimers, 1000);
+}
+
+function _stopAtendTimerLoop() {
+  if (_timerInterval) {
+    clearInterval(_timerInterval);
+    _timerInterval = null;
+  }
+}
+
+// Pausa o timer quando a aba esconde (economia de bateria/CPU) e retoma
+// ao voltar, atualizando imediatamente pra não ficar defasado.
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    _stopAtendTimerLoop();
+  } else if (_timerRefs.size > 0) {
+    _startAtendTimerLoop();
+  }
+});
 
 /**
  * Initialize atendimento module with shared dependencies.
@@ -509,9 +567,8 @@ export function renderActiveAtendimentos() {
   });
 
   // Timer global para todos os atendimentos (painel + sidebar)
-  clearInterval(_timerInterval);
-  _timerInterval = null;
-  const _timerRefs = new Map();
+  _stopAtendTimerLoop();
+  _timerRefs = new Map();
   atendimentos.forEach((atend) => {
     _timerRefs.set(atend.id, {
       main: document.getElementById('timer-' + atend.id),
@@ -520,38 +577,7 @@ export function renderActiveAtendimentos() {
       lastText: ''
     });
   });
-  _timerInterval = setInterval(() => {
-    const now = Date.now();
-    let allDetached = true;
-    _timerRefs.forEach((ref, id) => {
-      const elapsed = (now - ref.startMs) / 1000;
-      const timeStr = formatTime(elapsed);
-      if (timeStr === ref.lastText) {
-        if (ref.main || ref.side) allDetached = false;
-        return;
-      }
-      ref.lastText = timeStr;
-      const isDanger = elapsed > ATTENDANCE_DANGER_SECONDS;
-      if (ref.main && !ref.main.isConnected) ref.main = null;
-      if (!ref.main) ref.main = document.getElementById('timer-' + id) || null;
-      if (ref.main) {
-        ref.main.textContent = timeStr;
-        ref.main.className = 'atend-timer' + (isDanger ? ' danger' : '');
-        allDetached = false;
-      }
-      if (ref.side && !ref.side.isConnected) ref.side = null;
-      if (!ref.side) ref.side = document.querySelector(`[data-sidebar-timer="${id}"]`) || null;
-      if (ref.side) {
-        ref.side.textContent = timeStr;
-        ref.side.style.color = isDanger ? 'var(--danger)' : 'var(--text-primary)';
-        allDetached = false;
-      }
-    });
-    if (allDetached && _timerRefs.size > 0) {
-      clearInterval(_timerInterval);
-      _timerInterval = null;
-    }
-  }, 1000);
+  if (!document.hidden) _startAtendTimerLoop();
 
   initAtendDrag();
 }
@@ -1182,8 +1208,8 @@ export async function checkActiveAtendimentos() {
 
 /** Clear atendimento timers (call on page unload / visibility change) */
 export function clearAtendTimers() {
-  clearInterval(_timerInterval);
-  _timerInterval = null;
+  _stopAtendTimerLoop();
+  _timerRefs.clear();
 }
 
 /** Check if atend touch drag is in progress */

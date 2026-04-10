@@ -184,6 +184,7 @@ async function confirmCloseTurno() {
     _ctx.activeAtendimentos = [];
     _ctx.pauseStartTimes.clear();
     _ctx.queueEntryTimes.clear();
+    if (_ctx.clearPositionLog) _ctx.clearPositionLog();
     _ctx.renderActiveAtendimentos();
     updateTurnoSwitch(false);
     closeTurnoSummary();
