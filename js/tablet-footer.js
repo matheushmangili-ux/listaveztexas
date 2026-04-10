@@ -3,7 +3,7 @@
 // Render, events, confirm-fila popup
 // ============================================
 
-import { STATUS_CONFIG, SAIDA_COLORS, PAUSE_LIMITS, initials, toast, escapeHtml } from '/js/utils.js';
+import { SAIDA_COLORS, PAUSE_LIMITS, initials, toast, escapeHtml } from '/js/utils.js';
 import { FOOTER_TIMER_INTERVAL, INPUT_FOCUS_DELAY, Z_MENU } from '/js/constants.js';
 
 let _ctx = null;
@@ -58,7 +58,10 @@ export function showFooterDropLabel() {
 }
 
 export function hideFooterDropLabel() {
-  if (_footerDropLabel) { _footerDropLabel.remove(); _footerDropLabel = null; }
+  if (_footerDropLabel) {
+    _footerDropLabel.remove();
+    _footerDropLabel = null;
+  }
 }
 
 // ─── Render footer (vendedores com status) ───
@@ -70,91 +73,95 @@ export function renderFooter() {
   if (_ctx.touchDragging || _ctx.draggedId) return;
 
   const allV = _ctx.vendedores || [];
-  const setorVendedores = allV.filter(v => (v.setor || 'loja') === _ctx.currentSetor);
-  const _atendMap = new Map(_ctx.activeAtendimentos.map(a => [a.vendedor_id, a]));
+  const setorVendedores = allV.filter((v) => (v.setor || 'loja') === _ctx.currentSetor);
+  const _atendMap = new Map(_ctx.activeAtendimentos.map((a) => [a.vendedor_id, a]));
   const _minGlobal = Math.floor(Date.now() / 60000);
-  const footerKey = _minGlobal + '|' + setorVendedores.map(v => {
-    let k = v.id + ':' + v.status + ':' + (v.posicao_fila || '') + ':' + (_ctx.saidaMotivos[v.id] || '');
-    if (v.status === 'pausa') {
-      const ps = _ctx.pauseStartTimes.get(v.id);
-      if (ps) k += ':' + Math.floor((Date.now() - ps.getTime()) / 60000);
-    }
-    if (v.status === 'em_atendimento') {
-      const at = _atendMap.get(v.id);
-      if (at?.inicio) k += ':' + Math.floor((Date.now() - new Date(at.inicio).getTime()) / 60000);
-    }
-    return k;
-  }).join('|');
+  const footerKey =
+    _minGlobal +
+    '|' +
+    setorVendedores
+      .map((v) => {
+        let k = v.id + ':' + v.status + ':' + (v.posicao_fila || '') + ':' + (_ctx.saidaMotivos[v.id] || '');
+        if (v.status === 'pausa') {
+          const ps = _ctx.pauseStartTimes.get(v.id);
+          if (ps) k += ':' + Math.floor((Date.now() - ps.getTime()) / 60000);
+        }
+        if (v.status === 'em_atendimento') {
+          const at = _atendMap.get(v.id);
+          if (at?.inicio) k += ':' + Math.floor((Date.now() - new Date(at.inicio).getTime()) / 60000);
+        }
+        return k;
+      })
+      .join('|');
   if (footerKey === _lastFooterKey) return;
   _lastFooterKey = footerKey;
 
-  const cards = setorVendedores.map(v => {
-    const inQueue = v.status === 'disponivel' && v.posicao_fila != null;
-    const atendendo = v.status === 'em_atendimento';
-    let statusLabel, statusColor, dotColor;
+  const cards = setorVendedores
+    .map((v) => {
+      const inQueue = v.status === 'disponivel' && v.posicao_fila != null;
+      const atendendo = v.status === 'em_atendimento';
+      let statusLabel, statusColor;
 
-    if (atendendo) {
-      const atend = _atendMap.get(v.id);
-      const mins = atend && atend.inicio ? Math.floor((Date.now() - new Date(atend.inicio).getTime()) / 60000) : 0;
-      statusLabel = mins > 0 ? 'Atendendo (' + mins + 'min)' : 'Atendendo';
-      statusColor = 'var(--info)';
-      dotColor = STATUS_CONFIG.em_atendimento.color;
-    } else if (inQueue) {
-      statusLabel = 'Na fila (#' + v.posicao_fila + ')';
-      statusColor = 'var(--success)';
-      dotColor = STATUS_CONFIG.disponivel.color;
-    } else if (v.status === 'pausa') {
-      const m = _ctx.saidaMotivos[v.id];
-      const sc = SAIDA_COLORS[m] || SAIDA_COLORS.outro;
-      const pauseStart = _ctx.pauseStartTimes.get(v.id);
-      const pauseMins = pauseStart ? Math.floor((Date.now() - pauseStart.getTime()) / 60000) : 0;
-      statusLabel = sc.label + (pauseMins > 0 ? ' (' + pauseMins + 'min)' : '');
-      statusColor = sc.color;
-      dotColor = sc.color;
-    } else if (v.status === 'disponivel') {
-      statusLabel = 'Disponível';
-      statusColor = '#64748b';
-      dotColor = '#64748b';
-    } else {
-      const m = _ctx.saidaMotivos[v.id];
-      const sc = SAIDA_COLORS[m] || SAIDA_COLORS.outro;
-      statusLabel = sc.labelFull;
-      statusColor = sc.color;
-      dotColor = sc.color;
-    }
+      if (atendendo) {
+        const atend = _atendMap.get(v.id);
+        const mins = atend && atend.inicio ? Math.floor((Date.now() - new Date(atend.inicio).getTime()) / 60000) : 0;
+        statusLabel = mins > 0 ? 'Atendendo (' + mins + 'min)' : 'Atendendo';
+        statusColor = 'var(--info)';
+      } else if (inQueue) {
+        statusLabel = 'Na fila (#' + v.posicao_fila + ')';
+        statusColor = 'var(--success)';
+      } else if (v.status === 'pausa') {
+        const m = _ctx.saidaMotivos[v.id];
+        const sc = SAIDA_COLORS[m] || SAIDA_COLORS.outro;
+        const pauseStart = _ctx.pauseStartTimes.get(v.id);
+        const pauseMins = pauseStart ? Math.floor((Date.now() - pauseStart.getTime()) / 60000) : 0;
+        statusLabel = sc.label + (pauseMins > 0 ? ' (' + pauseMins + 'min)' : '');
+        statusColor = sc.color;
+      } else if (v.status === 'disponivel') {
+        statusLabel = 'Disponível';
+        statusColor = '#64748b';
+      } else {
+        const m = _ctx.saidaMotivos[v.id];
+        const sc = SAIDA_COLORS[m] || SAIDA_COLORS.outro;
+        statusLabel = sc.labelFull;
+        statusColor = sc.color;
+      }
 
-    // Pause exceeded check
-    let pauseExceededClass = '';
-    if (v.status === 'pausa') {
-      const pm = _ctx.saidaMotivos[v.id];
-      const pStart = _ctx.pauseStartTimes.get(v.id);
-      const pMins = pStart ? Math.floor((Date.now() - pStart.getTime()) / 60000) : 0;
-      const pLimit = PAUSE_LIMITS[pm] || 60;
-      if (pMins >= pLimit) pauseExceededClass = ' pause-exceeded';
-    }
+      // Pause exceeded check
+      let pauseExceededClass = '';
+      if (v.status === 'pausa') {
+        const pm = _ctx.saidaMotivos[v.id];
+        const pStart = _ctx.pauseStartTimes.get(v.id);
+        const pMins = pStart ? Math.floor((Date.now() - pStart.getTime()) / 60000) : 0;
+        const pLimit = PAUSE_LIMITS[pm] || 60;
+        if (pMins >= pLimit) pauseExceededClass = ' pause-exceeded';
+      }
 
-    const inQueueClass = inQueue || atendendo ? ' in-queue' : '';
-    const dragAttr = !inQueue && !atendendo ? 'draggable="true"' : '';
+      const inQueueClass = inQueue || atendendo ? ' in-queue' : '';
+      const dragAttr = !inQueue && !atendendo ? 'draggable="true"' : '';
 
-    const ini = initials(v.apelido || v.nome);
-    const avatarContent = v.foto_url
-      ? `<img src="${escapeHtml(v.foto_url)}" alt="${escapeHtml(v.apelido || v.nome)}" loading="lazy" width="48" height="48">`
-      : ini;
+      const ini = initials(v.apelido || v.nome);
+      const avatarContent = v.foto_url
+        ? `<img src="${escapeHtml(v.foto_url)}" alt="${escapeHtml(v.apelido || v.nome)}" loading="lazy" width="48" height="48">`
+        : ini;
 
-    // Avatar color by status
-    let avatarBg = '#4b5563'; // cinza = fora
-    if (atendendo) avatarBg = '#3b82f6'; // azul
-    else if (inQueue) avatarBg = '#22c55e'; // verde
-    else if (v.status === 'pausa') avatarBg = statusColor;
+      // Avatar color by status
+      let avatarBg = '#4b5563'; // cinza = fora
+      if (atendendo)
+        avatarBg = '#3b82f6'; // azul
+      else if (inQueue)
+        avatarBg = '#22c55e'; // verde
+      else if (v.status === 'pausa') avatarBg = statusColor;
 
-    const firstName = (v.apelido || v.nome.split(' ')[0]);
+      const firstName = v.apelido || v.nome.split(' ')[0];
 
-    return `<div class="footer-card${inQueueClass}${pauseExceededClass}" data-id="${v.id}" ${dragAttr}>
+      return `<div class="footer-card${inQueueClass}${pauseExceededClass}" data-id="${v.id}" ${dragAttr}>
       <div class="fc-avatar" style="background:${avatarBg}">${avatarContent}</div>
       <span class="fc-name">${escapeHtml(firstName)}</span>
       <span class="fc-status" style="color:${statusColor}">${statusLabel}</span>
     </div>`;
-  }).join('');
+    })
+    .join('');
 
   const footerTitle = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:64px;padding:6px 8px;flex-shrink:0"><span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);white-space:nowrap">Vendedores</span><span style="font-size:13px;font-weight:700;color:var(--text-secondary);font-family:var(--font-mono)">${setorVendedores.length}</span></div>`;
 
@@ -167,43 +174,60 @@ function initFooterEvents() {
   const footer = _ctx.statusFooter;
   if (!footer) return;
   // Drop zone
-  footer.addEventListener('dragover', e => { e.preventDefault(); footer.classList.add('drop-highlight'); showFooterDropLabel(); });
-  footer.addEventListener('dragleave', () => { footer.classList.remove('drop-highlight'); hideFooterDropLabel(); });
-  footer.addEventListener('drop', e => {
+  footer.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    footer.classList.add('drop-highlight');
+    showFooterDropLabel();
+  });
+  footer.addEventListener('dragleave', () => {
+    footer.classList.remove('drop-highlight');
+    hideFooterDropLabel();
+  });
+  footer.addEventListener('drop', (e) => {
     e.preventDefault();
     footer.classList.remove('drop-highlight');
     hideFooterDropLabel();
     const id = _ctx.draggedId;
     _ctx.draggedId = null;
-    if (id) { _ctx.openSaida(id); }
+    if (id) {
+      _ctx.openSaida(id);
+    }
   });
   // Click delegation
-  footer.addEventListener('click', e => {
+  footer.addEventListener('click', (e) => {
     const card = e.target.closest('.footer-card[data-id]');
     if (card) handleFooterTap(card.dataset.id);
   });
   // Drag start delegation
-  footer.addEventListener('dragstart', e => {
+  footer.addEventListener('dragstart', (e) => {
     const card = e.target.closest('.footer-card[draggable="true"]');
     if (!card) return;
     _ctx.draggedId = card.dataset.id;
     e.dataTransfer.effectAllowed = 'move';
     card.style.opacity = '0.4';
-    setTimeout(() => { if (card) card.style.opacity = ''; }, 200);
+    setTimeout(() => {
+      if (card) card.style.opacity = '';
+    }, 200);
   });
-  footer.addEventListener('dragend', () => { _ctx.draggedId = null; });
+  footer.addEventListener('dragend', () => {
+    _ctx.draggedId = null;
+  });
   // Touch start delegation
-  footer.addEventListener('touchstart', e => {
-    const card = e.target.closest('.footer-card[data-id]');
-    if (card) _ctx.onTouchDragStart(e);
-  }, { passive: true });
+  footer.addEventListener(
+    'touchstart',
+    (e) => {
+      const card = e.target.closest('.footer-card[data-id]');
+      if (card) _ctx.onTouchDragStart(e);
+    },
+    { passive: true }
+  );
 }
 
 // ─── Footer card tap ───
 
 async function handleFooterTap(vendedorId) {
   if (_ctx.tvMode) return;
-  const v = _ctx.vendedores.find(x => x.id === vendedorId);
+  const v = _ctx.vendedores.find((x) => x.id === vendedorId);
   if (!v) return;
   if (v.status === 'em_atendimento') return;
   // Na fila → abrir popup de saída
@@ -212,15 +236,18 @@ async function handleFooterTap(vendedorId) {
     return;
   }
   // Fora/pausa → confirmar entrada na fila
-  if (!_ctx.currentTurno) { toast('Abra o turno primeiro', 'warning'); return; }
+  if (!_ctx.currentTurno) {
+    toast('Abra o turno primeiro', 'warning');
+    return;
+  }
   openConfirmFila(vendedorId);
 }
 
 // ─── Popup de confirmação para entrar na fila ───
 
 function openConfirmFila(vendedorId) {
-  const v = _ctx.vendedores.find(x => x.id === vendedorId);
-  const nome = v ? (v.apelido || v.nome) : 'Vendedor';
+  const v = _ctx.vendedores.find((x) => x.id === vendedorId);
+  const nome = v ? v.apelido || v.nome : 'Vendedor';
   closeConfirmFila();
 
   const menu = document.createElement('div');
@@ -241,7 +268,7 @@ function openConfirmFila(vendedorId) {
   document.body.appendChild(menu);
   _confirmFilaTimeout = setTimeout(() => {
     if (!menu.parentNode) return;
-    _confirmFilaOutsideHandler = function(e) {
+    _confirmFilaOutsideHandler = function (e) {
       if (!menu.contains(e.target)) closeConfirmFila();
     };
     document.addEventListener('click', _confirmFilaOutsideHandler);
@@ -255,7 +282,10 @@ async function confirmAddToQueue(vendedorId) {
 }
 
 function closeConfirmFila() {
-  if (_confirmFilaTimeout) { clearTimeout(_confirmFilaTimeout); _confirmFilaTimeout = null; }
+  if (_confirmFilaTimeout) {
+    clearTimeout(_confirmFilaTimeout);
+    _confirmFilaTimeout = null;
+  }
   if (_confirmFilaOutsideHandler) {
     document.removeEventListener('click', _confirmFilaOutsideHandler);
     _confirmFilaOutsideHandler = null;

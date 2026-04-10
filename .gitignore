@@ -1,1 +1,6 @@
 .vercel
+.claude
+node_modules
+coverage
+.DS_Store
+*.log

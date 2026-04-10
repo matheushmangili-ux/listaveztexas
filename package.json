@@ -1,0 +1,26 @@
+{
+  "name": "minhavez",
+  "version": "3.7.0",
+  "private": true,
+  "description": "Minha Vez — Sistema de fila e atendimento para lojas multi-tenant",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run --pool=forks --poolOptions.forks.singleFork",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint js tests --max-warnings=0",
+    "lint:fix": "eslint js tests --fix",
+    "format": "prettier --write js tests css",
+    "format:check": "prettier --check js tests css",
+    "check": "npm run lint && npm run test"
+  },
+  "devDependencies": {
+    "eslint": "^9.17.0",
+    "@eslint/js": "^9.17.0",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "eslint-config-prettier": "^9.1.0",
+    "vitest": "^2.1.8",
+    "jsdom": "^25.0.1"
+  }
+}

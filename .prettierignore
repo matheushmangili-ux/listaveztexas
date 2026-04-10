@@ -1,0 +1,8 @@
+node_modules
+coverage
+.vercel
+sw.js
+js/update-checker.js
+assets
+sql
+supabase

@@ -15,19 +15,25 @@ export function playSound(type) {
     const t0 = audioCtx.currentTime;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.frequency.value = 880; osc.type = 'sine';
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = 880;
+    osc.type = 'sine';
     gain.gain.setValueAtTime(0.15, t0);
     gain.gain.exponentialRampToValueAtTime(0.01, t0 + 0.3);
-    osc.start(t0); osc.stop(t0 + 0.3);
+    osc.start(t0);
+    osc.stop(t0 + 0.3);
     // Second note
     const osc2 = audioCtx.createOscillator();
     const gain2 = audioCtx.createGain();
-    osc2.connect(gain2); gain2.connect(audioCtx.destination);
-    osc2.frequency.value = 1174; osc2.type = 'sine';
+    osc2.connect(gain2);
+    gain2.connect(audioCtx.destination);
+    osc2.frequency.value = 1174;
+    osc2.type = 'sine';
     gain2.gain.setValueAtTime(0.15, t0 + 0.15);
     gain2.gain.exponentialRampToValueAtTime(0.01, t0 + 0.5);
-    osc2.start(t0 + 0.15); osc2.stop(t0 + 0.5);
+    osc2.start(t0 + 0.15);
+    osc2.stop(t0 + 0.5);
   } else if (type === 'venda') {
     // Cash register "KA-CHING!"
     if (!_vendaAudio) {
@@ -41,18 +47,24 @@ export function playSound(type) {
     const t0 = audioCtx.currentTime;
     const o1 = audioCtx.createOscillator();
     const g1 = audioCtx.createGain();
-    o1.connect(g1); g1.connect(audioCtx.destination);
-    o1.frequency.value = 1047; o1.type = 'sine';
+    o1.connect(g1);
+    g1.connect(audioCtx.destination);
+    o1.frequency.value = 1047;
+    o1.type = 'sine';
     g1.gain.setValueAtTime(0.12, t0);
     g1.gain.exponentialRampToValueAtTime(0.01, t0 + 0.2);
-    o1.start(t0); o1.stop(t0 + 0.2);
+    o1.start(t0);
+    o1.stop(t0 + 0.2);
     const o2 = audioCtx.createOscillator();
     const g2 = audioCtx.createGain();
-    o2.connect(g2); g2.connect(audioCtx.destination);
-    o2.frequency.value = 1319; o2.type = 'sine';
+    o2.connect(g2);
+    g2.connect(audioCtx.destination);
+    o2.frequency.value = 1319;
+    o2.type = 'sine';
     g2.gain.setValueAtTime(0.12, t0 + 0.12);
     g2.gain.exponentialRampToValueAtTime(0.01, t0 + 0.35);
-    o2.start(t0 + 0.12); o2.stop(t0 + 0.35);
+    o2.start(t0 + 0.12);
+    o2.stop(t0 + 0.35);
   } else if (type === 'fail') {
     // Sad trombone "wah wah wah wahhh"
     const t0 = audioCtx.currentTime;
@@ -62,10 +74,11 @@ export function playSound(type) {
       { freq: 349, start: 0.6, dur: 0.28 },
       { freq: 311, start: 0.9, dur: 0.6 }
     ];
-    notes.forEach(n => {
+    notes.forEach((n) => {
       const o = audioCtx.createOscillator();
       const g = audioCtx.createGain();
-      o.connect(g); g.connect(audioCtx.destination);
+      o.connect(g);
+      g.connect(audioCtx.destination);
       o.type = 'sawtooth';
       o.frequency.setValueAtTime(n.freq, t0 + n.start);
       // Vibrato on last note
@@ -77,7 +90,8 @@ export function playSound(type) {
       }
       g.gain.setValueAtTime(0.08, t0 + n.start);
       g.gain.exponentialRampToValueAtTime(0.001, t0 + n.start + n.dur);
-      o.start(t0 + n.start); o.stop(t0 + n.start + n.dur + 0.05);
+      o.start(t0 + n.start);
+      o.stop(t0 + n.start + n.dur + 0.05);
     });
   }
 }

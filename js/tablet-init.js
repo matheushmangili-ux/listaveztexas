@@ -5,22 +5,53 @@
 
 import { getSupabase } from '/js/supabase-config.js';
 import { requireRole, logout, getTenantId } from '/js/auth.js';
-import { STATUS_CONFIG, MOTIVOS, SAIDA_COLORS, PAUSE_LIMITS, formatTime, initials, toast, initTheme, toggleTheme } from '/js/utils.js';
+import { SAIDA_COLORS, toast, initTheme, toggleTheme } from '/js/utils.js';
 import { loadTenant, applyBranding, tenantPath } from '/js/tenant.js';
 import { showChangelog, setVersionLabel } from '/js/changelog.js';
 import { playSound } from '/js/sound.js';
-import { createModal, currencyInputHTML, parseCurrency } from '/js/ui.js';
-import { fireVendaCelebration, fireEpicTrocaAnimation } from '/js/tablet-celebrations.js';
-import { initTurno, updateTurnoSwitch, checkExistingTurno } from '/js/tablet-turno.js';
-import { initFooter, renderFooter, invalidateFooter, clearFooterTimer, showFooterDropLabel, hideFooterDropLabel } from '/js/tablet-footer.js';
-import { initQueue, renderQueue, scheduleRender, invalidateQueue, getDraggedId, setDraggedId, isTouchDragging, getTouchGhost, setTouchGhost, cleanupQueue, resetDragState } from '/js/tablet-queue.js';
-import { initAtendimento, renderActiveAtendimentos, checkActiveAtendimentos, doSendToAtendimento, loadCanaisOrigem, clearAtendTimers, isAtendTouchDragging, resetAtendDragState } from '/js/tablet-atendimento.js';
-import { SESSION_TIMEOUT_TABLET, SESSION_CHECK_INTERVAL, AUTO_SYNC_INTERVAL, QUICK_STATS_INTERVAL, ACTION_LOCK_SAFETY, LOCAL_ACTION_DEBOUNCE, RT_VENDEDOR_DEBOUNCE, RT_RECONNECT_DELAY, TOAST_SHORT, TOAST_MEDIUM, INPUT_FOCUS_DELAY } from '/js/constants.js';
+import { createModal } from '/js/ui.js';
+import { initTurno, checkExistingTurno } from '/js/tablet-turno.js';
+import { initFooter, renderFooter, invalidateFooter, clearFooterTimer } from '/js/tablet-footer.js';
+import {
+  initQueue,
+  renderQueue,
+  scheduleRender,
+  invalidateQueue,
+  getDraggedId,
+  setDraggedId,
+  isTouchDragging,
+  cleanupQueue,
+  resetDragState
+} from '/js/tablet-queue.js';
+import {
+  initAtendimento,
+  renderActiveAtendimentos,
+  checkActiveAtendimentos,
+  doSendToAtendimento,
+  loadCanaisOrigem,
+  clearAtendTimers,
+  resetAtendDragState
+} from '/js/tablet-atendimento.js';
+import {
+  SESSION_TIMEOUT_TABLET,
+  SESSION_CHECK_INTERVAL,
+  AUTO_SYNC_INTERVAL,
+  QUICK_STATS_INTERVAL,
+  ACTION_LOCK_SAFETY,
+  LOCAL_ACTION_DEBOUNCE,
+  RT_VENDEDOR_DEBOUNCE,
+  RT_RECONNECT_DELAY,
+  TOAST_SHORT,
+  TOAST_MEDIUM,
+  INPUT_FOCUS_DELAY
+} from '/js/constants.js';
 initTheme();
 // Sync theme-color meta with saved theme
-{ const _t = document.documentElement.getAttribute('data-theme') || 'light';
+{
+  const _t = document.documentElement.getAttribute('data-theme') || 'light';
   const _m = document.querySelector('meta[name="theme-color"]');
-  if (_m) _m.content = _t === 'dark' ? '#060606' : '#F5F5F7'; }
+  if (_m) _m.content = _t === 'dark' ? '#060606' : '#F5F5F7';
+}
 
 // Load tenant context
 const tenant = await loadTenant();
@@ -33,9 +64,12 @@ const SETOR_LABELS = { loja: 'Loja', chapelaria: 'Chapelaria', selaria: 'Selaria
 const tenantSetores = tenant?.setores || ['loja'];
 const setorTabsEl = document.getElementById('setorTabs');
 if (setorTabsEl) {
-  setorTabsEl.innerHTML = tenantSetores.map((s, i) =>
-    `<button class="setor-tab${i === 0 ? ' active' : ''}" data-setor="${s}" onclick="setSetor('${s}')"><i class="fa-solid ${SETOR_ICONS[s] || 'fa-store'}"></i><span class="tab-label">${SETOR_LABELS[s] || s}</span></button>`
-  ).join('');
+  setorTabsEl.innerHTML = tenantSetores
+    .map(
+      (s, i) =>
+        `<button class="setor-tab${i === 0 ? ' active' : ''}" data-setor="${s}" onclick="setSetor('${s}')"><i class="fa-solid ${SETOR_ICONS[s] || 'fa-store'}"></i><span class="tab-label">${SETOR_LABELS[s] || s}</span></button>`
+    )
+    .join('');
   if (tenantSetores.length <= 1) setorTabsEl.style.display = 'none';
 }
 
@@ -43,10 +77,16 @@ const sb = getSupabase();
 let user;
 try {
   user = await requireRole(['recepcionista', 'gerente', 'admin', 'owner']);
-} catch(e) { /* auth error */ }
+} catch {
+  /* auth error */
+}
 if (!user) {
-  window.handleLogout = () => { window.location.href = tenantPath('/login'); };
-  window._toggleTheme = () => { toggleTheme(); };
+  window.handleLogout = () => {
+    window.location.href = tenantPath('/login');
+  };
+  window._toggleTheme = () => {
+    toggleTheme();
+  };
 }
 
 // Guard: JWT tenant must match URL tenant — force re-login if mismatched
@@ -58,29 +98,29 @@ if (tenant && jwtTenantId && jwtTenantId !== tenant.id) {
 
 // ─── Grouped state objects ───
 const state = {
-  turno: null,                // turno aberto atual
-  atendimentos: [],           // atendimentos ativos
-  vendedores: [],             // lista de vendedores
-  setor: 'loja',              // setor ativo
-  saidaMotivos: {},           // vendedorId → motivo key
-  pendingSaidaId: null,       // vendedorId aguardando confirmação de saída
-  vendorAtendCount: {},       // vendedor_id → count de atendimentos no turno
+  turno: null, // turno aberto atual
+  atendimentos: [], // atendimentos ativos
+  vendedores: [], // lista de vendedores
+  setor: 'loja', // setor ativo
+  saidaMotivos: {}, // vendedorId → motivo key
+  pendingSaidaId: null, // vendedorId aguardando confirmação de saída
+  vendorAtendCount: {}, // vendedor_id → count de atendimentos no turno
   queueEntryTimes: new Map(), // vendedorId → { pos, time } para cold seller
   pauseStartTimes: new Map(), // vendedorId → Date inicio da pausa
-  savedPositions:  new Map(), // vendedorId → posicao_fila antes da pausa (para restaurar ao voltar)
-  positionLog: [],            // { time, icon, vendedor, action, details } — max 200
+  savedPositions: new Map(), // vendedorId → posicao_fila antes da pausa (para restaurar ao voltar)
+  positionLog: [] // { time, icon, vendedor, action, details } — max 200
 };
 
 const ui = {
   tvMode: localStorage.getItem('minhavez_tvMode') === '1' || new URLSearchParams(location.search).has('tv'),
-  actionLock: false,          // previne double-tap em ações críticas
-  localAction: false,         // ignora realtime quando ação é local
-  renderPending: false,       // debounce render
-  loadingVendedores: false,   // previne concurrent loads
+  actionLock: false, // previne double-tap em ações críticas
+  localAction: false, // ignora realtime quando ação é local
+  renderPending: false, // debounce render
+  loadingVendedores: false, // previne concurrent loads
   miniRankingOpen: false,
-  miniRankingOutside: null,   // click-outside handler ref
+  miniRankingOutside: null, // click-outside handler ref
   prevStats: { total: 0, vendas: 0, conv: 0 },
-  statsThrottle: 0,
+  statsThrottle: 0
 };
 
 const timers = {
@@ -88,7 +128,7 @@ const timers = {
   rtVend: null,
   rtAtend: null,
   reconnect: null,
-  localAction: null,
+  localAction: null
 };
 
 // Cached DOM refs (evita querySelector repetido)
@@ -96,34 +136,62 @@ const dom = {
   queuePanel: document.querySelector('.queue-panel'),
   servicePanel: document.querySelector('.service-panel'),
   queueList: document.getElementById('queueList'),
-  statusFooter: document.getElementById('statusFooter'),
-
+  statusFooter: document.getElementById('statusFooter')
 };
 
 // Lock para ações críticas (previne double-tap)
 async function withLock(fn) {
   if (ui.actionLock) return;
   ui.actionLock = true;
-  const safety = setTimeout(() => { ui.actionLock = false; }, ACTION_LOCK_SAFETY);
-  try { await fn(); } finally { clearTimeout(safety); ui.actionLock = false; }
+  const safety = setTimeout(() => {
+    ui.actionLock = false;
+  }, ACTION_LOCK_SAFETY);
+  try {
+    await fn();
+  } finally {
+    clearTimeout(safety);
+    ui.actionLock = false;
+  }
 }
 
 // Marcar que uma ação local está em andamento (evita re-render do realtime)
-function markLocal() { ui.localAction = true; clearTimeout(timers.localAction); timers.localAction = setTimeout(() => { ui.localAction = false; }, LOCAL_ACTION_DEBOUNCE); }
+function markLocal() {
+  ui.localAction = true;
+  clearTimeout(timers.localAction);
+  timers.localAction = setTimeout(() => {
+    ui.localAction = false;
+  }, LOCAL_ACTION_DEBOUNCE);
+}
 
-window.setSetor = function(setor) {
+window.setSetor = function (setor) {
   state.setor = setor;
-  document.querySelectorAll('.setor-tab').forEach(t => t.classList.toggle('active', t.dataset.setor === setor));
-  invalidateQueue(); invalidateFooter();
+  document.querySelectorAll('.setor-tab').forEach((t) => t.classList.toggle('active', t.dataset.setor === setor));
+  invalidateQueue();
+  invalidateFooter();
   renderQueue();
   renderFooter();
 };
 
 // ─── Position log (in-memory session history) ───
 function logPosition(vendedor, action, details) {
-  const nome = vendedor ? (vendedor.apelido || vendedor.nome) : '?';
-  const icons = { fila: 'fa-list-ol', atendimento: 'fa-headset', pausa: 'fa-pause', retorno: 'fa-arrow-rotate-left', saida: 'fa-door-open', cancelar: 'fa-xmark', finalizar: 'fa-check', turno: 'fa-clock' };
-  state.positionLog.unshift({ time: new Date(), icon: icons[action] || 'fa-circle', vendedor: nome, action, details: details || '' });
+  const nome = vendedor ? vendedor.apelido || vendedor.nome : '?';
+  const icons = {
+    fila: 'fa-list-ol',
+    atendimento: 'fa-headset',
+    pausa: 'fa-pause',
+    retorno: 'fa-arrow-rotate-left',
+    saida: 'fa-door-open',
+    cancelar: 'fa-xmark',
+    finalizar: 'fa-check',
+    turno: 'fa-clock'
+  };
+  state.positionLog.unshift({
+    time: new Date(),
+    icon: icons[action] || 'fa-circle',
+    vendedor: nome,
+    action,
+    details: details || ''
+  });
   if (state.positionLog.length > 200) state.positionLog.length = 200;
 }
 
@@ -134,13 +202,27 @@ function logPosition(vendedor, action, details) {
 // ─── Turno module init ───
 initTurno({
   sb,
-  get currentTurno() { return state.turno; },
-  set currentTurno(v) { state.turno = v; },
-  get activeAtendimentos() { return state.atendimentos; },
-  set activeAtendimentos(v) { state.atendimentos = v; },
-  get vendedores() { return state.vendedores; },
-  get currentSetor() { return state.setor; },
-  get tenantId() { return tenantId; },
+  get currentTurno() {
+    return state.turno;
+  },
+  set currentTurno(v) {
+    state.turno = v;
+  },
+  get activeAtendimentos() {
+    return state.atendimentos;
+  },
+  set activeAtendimentos(v) {
+    state.atendimentos = v;
+  },
+  get vendedores() {
+    return state.vendedores;
+  },
+  get currentSetor() {
+    return state.setor;
+  },
+  get tenantId() {
+    return tenantId;
+  },
   pauseStartTimes: state.pauseStartTimes,
   queueEntryTimes: state.queueEntryTimes,
   markLocal,
@@ -152,38 +234,76 @@ initTurno({
 // ─── Footer module init ───
 initFooter({
   statusFooter: dom.statusFooter,
-  get currentTurno() { return state.turno; },
-  get vendedores() { return state.vendedores; },
-  get currentSetor() { return state.setor; },
-  get activeAtendimentos() { return state.atendimentos; },
-  get tvMode() { return ui.tvMode; },
-  get draggedId() { return getDraggedId(); },
-  set draggedId(v) { setDraggedId(v); },
-  get touchDragging() { return isTouchDragging(); },
-  get saidaMotivos() { return state.saidaMotivos; },
+  get currentTurno() {
+    return state.turno;
+  },
+  get vendedores() {
+    return state.vendedores;
+  },
+  get currentSetor() {
+    return state.setor;
+  },
+  get activeAtendimentos() {
+    return state.atendimentos;
+  },
+  get tvMode() {
+    return ui.tvMode;
+  },
+  get draggedId() {
+    return getDraggedId();
+  },
+  set draggedId(v) {
+    setDraggedId(v);
+  },
+  get touchDragging() {
+    return isTouchDragging();
+  },
+  get saidaMotivos() {
+    return state.saidaMotivos;
+  },
   pauseStartTimes: state.pauseStartTimes,
   openSaida,
-  get onTouchDragStart() { return window.onTouchDragStart; },
+  get onTouchDragStart() {
+    return window.onTouchDragStart;
+  },
   addToQueue
 });
 
 // ─── Queue module init ───
 initQueue({
   sb,
-  get currentTurno() { return state.turno; },
-  get vendedores() { return state.vendedores; },
-  get currentSetor() { return state.setor; },
-  get activeAtendimentos() { return state.atendimentos; },
-  get tvMode() { return ui.tvMode; },
-  get renderPending() { return ui.renderPending; },
-  set renderPending(v) { ui.renderPending = v; },
+  get currentTurno() {
+    return state.turno;
+  },
+  get vendedores() {
+    return state.vendedores;
+  },
+  get currentSetor() {
+    return state.setor;
+  },
+  get activeAtendimentos() {
+    return state.atendimentos;
+  },
+  get tvMode() {
+    return ui.tvMode;
+  },
+  get renderPending() {
+    return ui.renderPending;
+  },
+  set renderPending(v) {
+    ui.renderPending = v;
+  },
   queueList: dom.queueList,
   queuePanel: dom.queuePanel,
   servicePanel: dom.servicePanel,
   statusFooter: dom.statusFooter,
-  get saidaMotivos() { return state.saidaMotivos; },
+  get saidaMotivos() {
+    return state.saidaMotivos;
+  },
   queueEntryTimes: state.queueEntryTimes,
-  get vendorAtendCount() { return state.vendorAtendCount; },
+  get vendorAtendCount() {
+    return state.vendorAtendCount;
+  },
   markLocal,
   loadVendedores,
   openSaida,
@@ -196,15 +316,33 @@ initQueue({
 // ─── Atendimento module init ───
 initAtendimento({
   sb,
-  get currentTurno() { return state.turno; },
-  get activeAtendimentos() { return state.atendimentos; },
-  set activeAtendimentos(v) { state.atendimentos = v; },
-  get vendedores() { return state.vendedores; },
-  get tenantId() { return tenantId; },
-  get currentSetor() { return state.setor; },
-  get tvMode() { return ui.tvMode; },
-  get actionLock() { return ui.actionLock; },
-  set actionLock(v) { ui.actionLock = v; },
+  get currentTurno() {
+    return state.turno;
+  },
+  get activeAtendimentos() {
+    return state.atendimentos;
+  },
+  set activeAtendimentos(v) {
+    state.atendimentos = v;
+  },
+  get vendedores() {
+    return state.vendedores;
+  },
+  get tenantId() {
+    return tenantId;
+  },
+  get currentSetor() {
+    return state.setor;
+  },
+  get tvMode() {
+    return ui.tvMode;
+  },
+  get actionLock() {
+    return ui.actionLock;
+  },
+  set actionLock(v) {
+    ui.actionLock = v;
+  },
   queueList: dom.queueList,
   queuePanel: dom.queuePanel,
   servicePanel: dom.servicePanel,
@@ -215,53 +353,62 @@ initAtendimento({
   withLock
 });
 
-// ─── Clock (element removed from header — kept for compat) ───
-function updateClock() {}
-timers.clock = null;
-
 // ─── Load vendedores ───
 async function loadVendedores() {
   if (ui.loadingVendedores) return;
   ui.loadingVendedores = true;
   try {
-  const vq = sb.from('vendedores').select('*').eq('ativo', true);
-  if (tenantId) vq.eq('tenant_id', tenantId);
-  const { data, error } = await vq.order('posicao_fila', { ascending: true, nullsFirst: false });
-  if (error) {
-    const backup = localStorage.getItem('minhavez_vendedores');
-    if (backup) {
-      state.vendedores = JSON.parse(backup);
-      toast('Offline — usando dados locais', 'warning');
-    } else {
-      toast('Erro ao carregar vendedores', 'error');
+    const vq = sb.from('vendedores').select('*').eq('ativo', true);
+    if (tenantId) vq.eq('tenant_id', tenantId);
+    const { data, error } = await vq.order('posicao_fila', { ascending: true, nullsFirst: false });
+    if (error) {
+      const backup = localStorage.getItem('minhavez_vendedores');
+      if (backup) {
+        state.vendedores = JSON.parse(backup);
+        toast('Offline — usando dados locais', 'warning');
+      } else {
+        toast('Erro ao carregar vendedores', 'error');
+      }
+      scheduleRender();
+      return;
+    }
+    state.vendedores = data || [];
+    try {
+      localStorage.setItem('minhavez_vendedores', JSON.stringify(state.vendedores));
+    } catch (e) {
+      console.warn('[localStorage] quota/disabled:', e?.message || e);
+    }
+    // Carregar motivos de pausa do banco apenas para vendedores sem motivo local
+    const pausadosSemMotivo = state.vendedores.filter((v) => v.status === 'pausa' && !state.saidaMotivos[v.id]);
+    if (pausadosSemMotivo.length > 0) {
+      const { data: pausas } = await sb
+        .from('pausas')
+        .select('vendedor_id, motivo, inicio')
+        .is('fim', null)
+        .in(
+          'vendedor_id',
+          pausadosSemMotivo.map((v) => v.id)
+        );
+      if (pausas) {
+        pausas.forEach((p) => {
+          state.saidaMotivos[p.vendedor_id] = p.motivo;
+          if (p.inicio) state.pauseStartTimes.set(p.vendedor_id, new Date(p.inicio));
+        });
+      }
+    }
+    // Limpar motivos e timers de vendedores que não estão mais em pausa
+    Object.keys(state.saidaMotivos).forEach((id) => {
+      const v = state.vendedores.find((x) => x.id === id);
+      if (!v || (v.status !== 'pausa' && v.status !== 'fora')) {
+        delete state.saidaMotivos[id];
+        state.pauseStartTimes.delete(id);
+      }
+    });
+    for (const [id] of state.pauseStartTimes) {
+      const v = state.vendedores.find((x) => x.id === id);
+      if (!v || v.status !== 'pausa') state.pauseStartTimes.delete(id);
     }
     scheduleRender();
-    return;
-  }
-  state.vendedores = data || [];
-  try { localStorage.setItem('minhavez_vendedores', JSON.stringify(state.vendedores)); }
-  catch (e) { console.warn('[localStorage] quota/disabled:', e?.message || e); }
-  // Carregar motivos de pausa do banco apenas para vendedores sem motivo local
-  const pausadosSemMotivo = state.vendedores.filter(v => v.status === 'pausa' && !state.saidaMotivos[v.id]);
-  if (pausadosSemMotivo.length > 0) {
-    const { data: pausas } = await sb.from('pausas').select('vendedor_id, motivo, inicio').is('fim', null).in('vendedor_id', pausadosSemMotivo.map(v => v.id));
-    if (pausas) {
-      pausas.forEach(p => {
-        state.saidaMotivos[p.vendedor_id] = p.motivo;
-        if (p.inicio) state.pauseStartTimes.set(p.vendedor_id, new Date(p.inicio));
-      });
-    }
-  }
-  // Limpar motivos e timers de vendedores que não estão mais em pausa
-  Object.keys(state.saidaMotivos).forEach(id => {
-    const v = state.vendedores.find(x => x.id === id);
-    if (!v || (v.status !== 'pausa' && v.status !== 'fora')) { delete state.saidaMotivos[id]; state.pauseStartTimes.delete(id); }
-  });
-  for (const [id] of state.pauseStartTimes) {
-    const v = state.vendedores.find(x => x.id === id);
-    if (!v || v.status !== 'pausa') state.pauseStartTimes.delete(id);
-  }
-  scheduleRender();
   } finally {
     ui.loadingVendedores = false;
   }
@@ -271,29 +418,38 @@ async function loadVendedores() {
 
 // Queue rendering, drag-and-drop imported from /js/tablet-queue.js
 
-
 // Atendimento functions imported from /js/tablet-atendimento.js
 
 async function addToQueue(vendedorId) {
-  const v = state.vendedores.find(x => x.id === vendedorId);
+  const v = state.vendedores.find((x) => x.id === vendedorId);
   const setor = v?.setor || 'loja';
-  const setorQueue = state.vendedores.filter(x => (x.setor || 'loja') === setor && x.posicao_fila != null);
-  const maxPos = Math.max(0, ...setorQueue.map(x => x.posicao_fila));
+  const setorQueue = state.vendedores.filter((x) => (x.setor || 'loja') === setor && x.posicao_fila != null);
+  const maxPos = Math.max(0, ...setorQueue.map((x) => x.posicao_fila));
   const newPos = maxPos + 1;
   markLocal();
-  if (v) { v.status = 'disponivel'; v.posicao_fila = newPos; }
+  if (v) {
+    v.status = 'disponivel';
+    v.posicao_fila = newPos;
+  }
   invalidateQueue();
   invalidateFooter();
   scheduleRender();
   logPosition(v, 'fila', 'Posição #' + newPos);
   toast((v?.apelido || v?.nome || 'Vendedor') + ' entrou na fila', 'success', TOAST_SHORT);
-  const { error } = await sb.from('vendedores').update({ status: 'disponivel', posicao_fila: newPos }).eq('id', vendedorId).eq('tenant_id', tenantId);
-  if (error) { toast('Erro ao salvar: ' + error.message, 'error'); await loadVendedores(); }
+  const { error } = await sb
+    .from('vendedores')
+    .update({ status: 'disponivel', posicao_fila: newPos })
+    .eq('id', vendedorId)
+    .eq('tenant_id', tenantId);
+  if (error) {
+    toast('Erro ao salvar: ' + error.message, 'error');
+    await loadVendedores();
+  }
 }
 
 // ─── Restaurar posição original ao voltar da pausa ───
 async function returnToSavedPosition(vendedorId) {
-  const v = state.vendedores.find(x => x.id === vendedorId);
+  const v = state.vendedores.find((x) => x.id === vendedorId);
   if (!v) return;
   const setor = v.setor || 'loja';
   const savedPos = state.savedPositions.get(vendedorId);
@@ -301,13 +457,11 @@ async function returnToSavedPosition(vendedorId) {
 
   // Vendedores atualmente na fila, ordenados por posição
   const inQueue = state.vendedores
-    .filter(x => x.id !== vendedorId && (x.setor || 'loja') === setor && x.posicao_fila != null)
+    .filter((x) => x.id !== vendedorId && (x.setor || 'loja') === setor && x.posicao_fila != null)
     .sort((a, b) => a.posicao_fila - b.posicao_fila);
 
   // Quantos ainda estão à frente da posição original?
-  const insertIdx = savedPos != null
-    ? inQueue.filter(x => x.posicao_fila < savedPos).length
-    : inQueue.length; // sem posição salva → vai para o final
+  const insertIdx = savedPos != null ? inQueue.filter((x) => x.posicao_fila < savedPos).length : inQueue.length; // sem posição salva → vai para o final
 
   // Reconstruir fila com o vendedor reinserido na posição correta
   const newOrder = [...inQueue.slice(0, insertIdx), v, ...inQueue.slice(insertIdx)];
@@ -330,28 +484,34 @@ async function returnToSavedPosition(vendedorId) {
   scheduleRender();
 
   // Salvar no banco — vendedor retornando primeiro
-  const { error } = await sb.from('vendedores')
+  const { error } = await sb
+    .from('vendedores')
     .update({ status: 'disponivel', posicao_fila: v.posicao_fila })
-    .eq('id', vendedorId).eq('tenant_id', tenantId);
-  if (error) { toast('Erro ao salvar: ' + error.message, 'error'); await loadVendedores(); return; }
+    .eq('id', vendedorId)
+    .eq('tenant_id', tenantId);
+  if (error) {
+    toast('Erro ao salvar: ' + error.message, 'error');
+    await loadVendedores();
+    return;
+  }
 
   // Atualizar posições dos vendedores deslocados
   for (const u of toUpdate) {
-    await sb.from('vendedores')
-      .update({ posicao_fila: u.posicao_fila })
-      .eq('id', u.id).eq('tenant_id', tenantId);
+    await sb.from('vendedores').update({ posicao_fila: u.posicao_fila }).eq('id', u.id).eq('tenant_id', tenantId);
   }
 }
 
 // ─── Retornar da pausa ───
-window.returnFromPause = async function(vendedorId) {
+window.returnFromPause = async function (vendedorId) {
   delete state.saidaMotivos[vendedorId];
   state.pauseStartTimes.delete(vendedorId);
-  invalidateQueue(); invalidateFooter();
-  sb.rpc('registrar_retorno', { p_vendedor_id: vendedorId })
-    .catch(err => console.warn('[registrar_retorno] falhou:', err?.message || err));
+  invalidateQueue();
+  invalidateFooter();
+  sb.rpc('registrar_retorno', { p_vendedor_id: vendedorId }).catch((err) =>
+    console.warn('[registrar_retorno] falhou:', err?.message || err)
+  );
   await returnToSavedPosition(vendedorId);
-  const v = state.vendedores.find(x => x.id === vendedorId);
+  const v = state.vendedores.find((x) => x.id === vendedorId);
   playSound('retorno');
   logPosition(v, 'retorno', 'Voltou à posição #' + (v?.posicao_fila ?? '?'));
   toast((v?.apelido || v?.nome || 'Vendedor') + ' voltou à fila', 'success', TOAST_SHORT);
@@ -361,14 +521,14 @@ window.returnFromPause = async function(vendedorId) {
 
 function openSaida(vendedorId) {
   state.pendingSaidaId = vendedorId;
-  const v = state.vendedores.find(x => x.id === vendedorId);
-  const nome = v ? (v.apelido || v.nome) : 'Vendedor';
+  const v = state.vendedores.find((x) => x.id === vendedorId);
+  const nome = v ? v.apelido || v.nome : 'Vendedor';
   document.getElementById('saidaNome').textContent = nome + ' — selecione o motivo';
   document.getElementById('saidaOverlay').classList.add('open');
   document.getElementById('saidaSheet').classList.add('open');
 }
 
-window.closeSaida = function() {
+window.closeSaida = function () {
   document.getElementById('saidaOverlay').classList.remove('open');
   document.getElementById('saidaSheet').classList.remove('open');
   state.pendingSaidaId = null;
@@ -377,30 +537,42 @@ window.closeSaida = function() {
   scheduleRender();
 };
 
-window.confirmSaida = async function(motivo) {
+window.confirmSaida = async function (motivo) {
   if (!state.pendingSaidaId) return;
   const newStatus = motivo === 'banheiro' || motivo === 'reuniao' || motivo === 'operacional' ? 'pausa' : 'fora';
   state.saidaMotivos[state.pendingSaidaId] = motivo;
   state.pauseStartTimes.set(state.pendingSaidaId, new Date());
   // Salvar posição na fila antes de zerá-la — usada para restaurar ao retornar
   if (newStatus === 'pausa') {
-    const svTemp = state.vendedores.find(x => x.id === state.pendingSaidaId);
+    const svTemp = state.vendedores.find((x) => x.id === state.pendingSaidaId);
     if (svTemp?.posicao_fila != null) state.savedPositions.set(state.pendingSaidaId, svTemp.posicao_fila);
   }
   markLocal();
   const savedId = state.pendingSaidaId;
-  const { error } = await sb.from('vendedores').update({ status: newStatus, posicao_fila: null }).eq('id', savedId).eq('tenant_id', tenantId);
-  if (error) { toast('Erro ao registrar saída', 'error'); closeSaida(); return; }
+  const { error } = await sb
+    .from('vendedores')
+    .update({ status: newStatus, posicao_fila: null })
+    .eq('id', savedId)
+    .eq('tenant_id', tenantId);
+  if (error) {
+    toast('Erro ao registrar saída', 'error');
+    window.closeSaida();
+    return;
+  }
   if (state.turno) {
     // Fechar qualquer pausa anterior aberta antes de criar a nova
     await sb.rpc('registrar_retorno', { p_vendedor_id: savedId });
-    const { error: pausaErr } = await sb.rpc('registrar_pausa', { p_vendedor_id: savedId, p_turno_id: state.turno.id, p_motivo: motivo });
+    const { error: pausaErr } = await sb.rpc('registrar_pausa', {
+      p_vendedor_id: savedId,
+      p_turno_id: state.turno.id,
+      p_motivo: motivo
+    });
     if (pausaErr) console.error('[pausas] registrar_pausa:', pausaErr.message);
   }
-  const sv = state.vendedores.find(x => x.id === savedId);
+  const sv = state.vendedores.find((x) => x.id === savedId);
   logPosition(sv, 'saida', SAIDA_COLORS[motivo]?.label || 'Saída');
   toast(SAIDA_COLORS[motivo]?.label || 'Saiu da fila', 'info', TOAST_MEDIUM);
-  closeSaida();
+  window.closeSaida();
   const savedMotivo = motivo;
   await loadVendedores();
   state.saidaMotivos[savedId] = savedMotivo;
@@ -408,17 +580,27 @@ window.confirmSaida = async function(motivo) {
 };
 
 // ─── Finalizar Todos ───
-window.finalizarTodos = async function() {
-  const ativos = state.vendedores.filter(v => v.status !== 'fora' && v.status !== 'em_atendimento');
-  if (ativos.length === 0) { toast('Nenhum vendedor na fila', 'warning'); return; }
+window.finalizarTodos = async function () {
+  const ativos = state.vendedores.filter((v) => v.status !== 'fora' && v.status !== 'em_atendimento');
+  if (ativos.length === 0) {
+    toast('Nenhum vendedor na fila', 'warning');
+    return;
+  }
   if (!confirm('Remover todos os ' + ativos.length + ' vendedores da fila?')) return;
-  const ids = ativos.map(v => v.id);
+  const ids = ativos.map((v) => v.id);
   markLocal();
-  const { error } = await sb.from('vendedores').update({ status: 'fora', posicao_fila: null }).in('id', ids).eq('tenant_id', tenantId);
-  if (error) { toast('Erro ao remover vendedores', 'error'); return; }
+  const { error } = await sb
+    .from('vendedores')
+    .update({ status: 'fora', posicao_fila: null })
+    .in('id', ids)
+    .eq('tenant_id', tenantId);
+  if (error) {
+    toast('Erro ao remover vendedores', 'error');
+    return;
+  }
   // Fechar todas as pausas abertas dos vendedores removidos
-  await Promise.all(ids.map(id => sb.rpc('registrar_retorno', { p_vendedor_id: id })));
-  ids.forEach(id => delete state.saidaMotivos[id]);
+  await Promise.all(ids.map((id) => sb.rpc('registrar_retorno', { p_vendedor_id: id })));
+  ids.forEach((id) => delete state.saidaMotivos[id]);
   toast('Todos removidos da fila', 'info');
   await loadVendedores();
 };
@@ -429,7 +611,10 @@ window.finalizarTodos = async function() {
 
 // ─── Animated counter ───
 function animateValue(el, start, end, duration = 400, suffix = '') {
-  if (!el || start === end) { if (el) el.textContent = end + suffix; return; }
+  if (!el || start === end) {
+    if (el) el.textContent = end + suffix;
+    return;
+  }
   const range = end - start;
   const startTime = performance.now();
   function tick(now) {
@@ -450,13 +635,21 @@ async function updateQuickStats() {
   ui.statsThrottle = now;
   if (!state.turno) return;
   const [totalRes, vendasRes, perVendor] = await Promise.all([
-    sb.from('atendimentos').select('id', { count: 'exact', head: true }).eq('turno_id', state.turno.id).neq('resultado', 'em_andamento'),
-    sb.from('atendimentos').select('id', { count: 'exact', head: true }).eq('turno_id', state.turno.id).eq('resultado', 'venda'),
+    sb
+      .from('atendimentos')
+      .select('id', { count: 'exact', head: true })
+      .eq('turno_id', state.turno.id)
+      .neq('resultado', 'em_andamento'),
+    sb
+      .from('atendimentos')
+      .select('id', { count: 'exact', head: true })
+      .eq('turno_id', state.turno.id)
+      .eq('resultado', 'venda'),
     sb.from('atendimentos').select('vendedor_id').eq('turno_id', state.turno.id).neq('resultado', 'em_andamento')
   ]);
   const total = totalRes.count || 0;
   const vendas = vendasRes.count || 0;
-  const conv = total > 0 ? Math.round(vendas / total * 100) : 0;
+  const conv = total > 0 ? Math.round((vendas / total) * 100) : 0;
   animateValue(document.getElementById('statAtend'), ui.prevStats.total, total);
   animateValue(document.getElementById('statVendas'), ui.prevStats.vendas, vendas);
   animateValue(document.getElementById('statConv'), ui.prevStats.conv, conv, 400, '%');
@@ -468,11 +661,17 @@ async function updateQuickStats() {
   ui.prevStats = { total, vendas, conv };
   const newCounts = {};
   if (perVendor.data) {
-    perVendor.data.forEach(r => { newCounts[r.vendedor_id] = (newCounts[r.vendedor_id] || 0) + 1; });
+    perVendor.data.forEach((r) => {
+      newCounts[r.vendedor_id] = (newCounts[r.vendedor_id] || 0) + 1;
+    });
   }
   const changed = JSON.stringify(newCounts) !== JSON.stringify(state.vendorAtendCount);
   state.vendorAtendCount = newCounts;
-  if (changed) { invalidateQueue(); invalidateFooter(); scheduleRender(); }
+  if (changed) {
+    invalidateQueue();
+    invalidateFooter();
+    scheduleRender();
+  }
 }
 
 // Turno functions imported from /js/tablet-turno.js
@@ -481,67 +680,93 @@ async function updateQuickStats() {
 // multi-client, troca, venda, motivos imported from /js/tablet-atendimento.js
 
 // ─── Position Log (histórico da sessão) ───
-window.openPosLog = function() {
+window.openPosLog = function () {
   const list = document.getElementById('posLogList');
   if (state.positionLog.length === 0) {
-    list.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px">Nenhuma movimentação registrada nesta sessão</div>';
+    list.innerHTML =
+      '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px">Nenhuma movimentação registrada nesta sessão</div>';
   } else {
-    list.innerHTML = state.positionLog.map(entry => {
-      const h = String(entry.time.getHours()).padStart(2, '0');
-      const m = String(entry.time.getMinutes()).padStart(2, '0');
-      const s = String(entry.time.getSeconds()).padStart(2, '0');
-      const actionLabels = { fila: 'Entrou na fila', atendimento: 'Atendimento', pausa: 'Pausa', retorno: 'Retornou', saida: 'Saiu', cancelar: 'Cancelado', finalizar: 'Finalizado', turno: 'Turno' };
-      return `<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid var(--border-subtle)">
+    list.innerHTML = state.positionLog
+      .map((entry) => {
+        const h = String(entry.time.getHours()).padStart(2, '0');
+        const m = String(entry.time.getMinutes()).padStart(2, '0');
+        const s = String(entry.time.getSeconds()).padStart(2, '0');
+        const actionLabels = {
+          fila: 'Entrou na fila',
+          atendimento: 'Atendimento',
+          pausa: 'Pausa',
+          retorno: 'Retornou',
+          saida: 'Saiu',
+          cancelar: 'Cancelado',
+          finalizar: 'Finalizado',
+          turno: 'Turno'
+        };
+        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid var(--border-subtle)">
         <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);flex-shrink:0;width:52px">${h}:${m}:${s}</span>
         <i class="fa-solid ${entry.icon}" style="font-size:11px;color:var(--text-muted);width:16px;text-align:center;flex-shrink:0"></i>
         <span style="font-weight:600;font-size:13px;flex-shrink:0;max-width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${entry.vendedor}</span>
         <span style="font-size:11px;color:var(--text-muted);flex-shrink:0">${actionLabels[entry.action] || entry.action}</span>
         <span style="font-size:11px;color:var(--text-secondary);margin-left:auto;flex-shrink:0;text-align:right">${entry.details}</span>
       </div>`;
-    }).join('');
+      })
+      .join('');
   }
   document.getElementById('posLogOverlay').classList.add('open');
   document.getElementById('posLogSheet').classList.add('open');
 };
-window.closePosLog = function() {
+window.closePosLog = function () {
   document.getElementById('posLogOverlay').classList.remove('open');
   document.getElementById('posLogSheet').classList.remove('open');
 };
 
 // ─── Mini Ranking (troféu) ───
-window.toggleMiniRanking = async function() {
+window.toggleMiniRanking = async function () {
   const dd = document.getElementById('miniRankingDropdown');
   if (!dd) return;
-  if (ui.miniRankingOpen) { closeMiniRanking(); return; }
-  if (!state.turno) { toast('Abra o turno para ver o ranking', 'warning'); return; }
+  if (ui.miniRankingOpen) {
+    closeMiniRanking();
+    return;
+  }
+  if (!state.turno) {
+    toast('Abra o turno para ver o ranking', 'warning');
+    return;
+  }
   ui.miniRankingOpen = true;
   dd.style.display = '';
   // Query atendimentos do turno
-  const { data } = await sb.from('atendimentos').select('vendedor_id, resultado, vendedores(nome, apelido)').eq('turno_id', state.turno.id).neq('resultado', 'em_andamento');
+  const { data } = await sb
+    .from('atendimentos')
+    .select('vendedor_id, resultado, vendedores(nome, apelido)')
+    .eq('turno_id', state.turno.id)
+    .neq('resultado', 'em_andamento');
   if (!data || data.length === 0) {
-    document.getElementById('miniRankingList').innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px">Nenhum atendimento finalizado</div>';
+    document.getElementById('miniRankingList').innerHTML =
+      '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px">Nenhum atendimento finalizado</div>';
   } else {
     // Agrupar por vendedor
     const map = new Map();
-    data.forEach(a => {
+    data.forEach((a) => {
       const vid = a.vendedor_id;
-      if (!map.has(vid)) map.set(vid, { nome: a.vendedores?.apelido || a.vendedores?.nome || '?', total: 0, vendas: 0 });
+      if (!map.has(vid))
+        map.set(vid, { nome: a.vendedores?.apelido || a.vendedores?.nome || '?', total: 0, vendas: 0 });
       const e = map.get(vid);
       e.total++;
       if (a.resultado === 'venda') e.vendas++;
     });
     const sorted = [...map.values()].sort((a, b) => b.vendas - a.vendas || b.total - a.total).slice(0, 5);
     const medals = ['🥇', '🥈', '🥉', '4º', '5º'];
-    document.getElementById('miniRankingList').innerHTML = sorted.map((s, i) => {
-      const conv = s.total > 0 ? Math.round(s.vendas / s.total * 100) : 0;
-      return `<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;${i === 0 ? 'background:rgba(251,191,36,.08);border-radius:8px' : ''}">
+    document.getElementById('miniRankingList').innerHTML = sorted
+      .map((s, i) => {
+        const conv = s.total > 0 ? Math.round((s.vendas / s.total) * 100) : 0;
+        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;${i === 0 ? 'background:rgba(251,191,36,.08);border-radius:8px' : ''}">
         <span style="font-size:14px;width:24px;text-align:center;flex-shrink:0">${medals[i]}</span>
         <span style="flex:1;font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.nome}</span>
         <span style="font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--success)">${s.vendas}v</span>
         <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${s.total}at</span>
         <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${conv}%</span>
       </div>`;
-    }).join('');
+      })
+      .join('');
   }
   // Fechar ao clicar fora
   setTimeout(() => {
@@ -555,13 +780,16 @@ function closeMiniRanking() {
   ui.miniRankingOpen = false;
   const dd = document.getElementById('miniRankingDropdown');
   if (dd) dd.style.display = 'none';
-  if (ui.miniRankingOutside) { document.removeEventListener('click', ui.miniRankingOutside); ui.miniRankingOutside = null; }
+  if (ui.miniRankingOutside) {
+    document.removeEventListener('click', ui.miniRankingOutside);
+    ui.miniRankingOutside = null;
+  }
 }
 
 // Footer card tap + confirm fila imported from /js/tablet-footer.js
 
 // ─── TV Mode ───
-window.toggleTvMode = function() {
+window.toggleTvMode = function () {
   ui.tvMode = !ui.tvMode;
   localStorage.setItem('minhavez_tvMode', ui.tvMode ? '1' : '0');
   applyTvMode();
@@ -581,15 +809,17 @@ function applyTvMode() {
 if (ui.tvMode) requestAnimationFrame(() => applyTvMode());
 
 // ─── Logout ───
-window.handleLogout = function() { logout(); };
-window._toggleTheme = function() {
+window.handleLogout = function () {
+  logout();
+};
+window._toggleTheme = function () {
   const next = toggleTheme();
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.content = next === 'dark' ? '#060606' : '#F5F5F7';
 };
 
 // ─── More menu (three dots) ───
-window.toggleMoreMenu = function() {
+window.toggleMoreMenu = function () {
   const m = document.getElementById('moreMenu');
   if (!m) return;
   const open = m.style.display === 'none';
@@ -597,10 +827,11 @@ window.toggleMoreMenu = function() {
   // Atualizar label do tema
   if (open) {
     const lbl = document.getElementById('themeLabel');
-    if (lbl) lbl.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? 'Modo Claro' : 'Modo Escuro';
+    if (lbl)
+      lbl.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? 'Modo Claro' : 'Modo Escuro';
   }
 };
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function (e) {
   const m = document.getElementById('moreMenu');
   if (!m || m.style.display === 'none') return;
   if (!e.target.closest('.more-btn') && !e.target.closest('.more-menu')) {
@@ -610,8 +841,14 @@ document.addEventListener('click', function(e) {
 
 // ─── Session timeout (30min inactivity) ───
 let _lastActivity = Date.now();
-['click','keydown','touchstart','scroll'].forEach(evt => {
-  document.addEventListener(evt, () => { _lastActivity = Date.now(); }, { passive: true });
+['click', 'keydown', 'touchstart', 'scroll'].forEach((evt) => {
+  document.addEventListener(
+    evt,
+    () => {
+      _lastActivity = Date.now();
+    },
+    { passive: true }
+  );
 });
 timers.session = setInterval(() => {
   if (Date.now() - _lastActivity > SESSION_TIMEOUT_TABLET) {
@@ -622,25 +859,39 @@ timers.session = setInterval(() => {
 
 // ─── Realtime (debounced, ignora ação local) ───
 const _rtChannelName = `tablet-sync-${tenantId || 'default'}`;
-let _rtChannel = sb.channel(_rtChannelName)
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'vendedores', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined }, () => {
-    if (ui.localAction) return;
-    clearTimeout(timers.rtVend);
-    timers.rtVend = setTimeout(loadVendedores, RT_VENDEDOR_DEBOUNCE);
-  })
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined }, () => {
-    if (ui.localAction) return;
-    clearTimeout(timers.rtAtend);
-    timers.rtAtend = setTimeout(() => { updateQuickStats(); checkActiveAtendimentos(); }, RT_VENDEDOR_DEBOUNCE);
-  })
+let _rtChannel = sb
+  .channel(_rtChannelName)
+  .on(
+    'postgres_changes',
+    { event: '*', schema: 'public', table: 'vendedores', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined },
+    () => {
+      if (ui.localAction) return;
+      clearTimeout(timers.rtVend);
+      timers.rtVend = setTimeout(loadVendedores, RT_VENDEDOR_DEBOUNCE);
+    }
+  )
+  .on(
+    'postgres_changes',
+    { event: '*', schema: 'public', table: 'atendimentos', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined },
+    () => {
+      if (ui.localAction) return;
+      clearTimeout(timers.rtAtend);
+      timers.rtAtend = setTimeout(() => {
+        updateQuickStats();
+        checkActiveAtendimentos();
+      }, RT_VENDEDOR_DEBOUNCE);
+    }
+  )
   .subscribe((status) => {
     if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
       const banner = document.getElementById('offlineBanner');
       if (banner) banner.style.display = 'flex';
       clearTimeout(timers.reconnect);
-      const delay = Math.min(RT_RECONNECT_DELAY * Math.pow(2, (ui._rtRetries || 0)), 60000);
+      const delay = Math.min(RT_RECONNECT_DELAY * Math.pow(2, ui._rtRetries || 0), 60000);
       ui._rtRetries = (ui._rtRetries || 0) + 1;
-      timers.reconnect = setTimeout(() => { if (_rtChannel) _rtChannel.subscribe(); }, delay);
+      timers.reconnect = setTimeout(() => {
+        if (_rtChannel) _rtChannel.subscribe();
+      }, delay);
     } else if (status === 'SUBSCRIBED') {
       const banner = document.getElementById('offlineBanner');
       if (banner) banner.style.display = 'none';
@@ -661,7 +912,8 @@ setInterval(() => {
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     clearAtendTimers();
-    clearInterval(timers.session); timers.session = null;
+    clearInterval(timers.session);
+    timers.session = null;
     resetDragState();
     document.body.style.overflow = '';
     dom.queuePanel?.style.setProperty('overflow', '');
@@ -675,7 +927,9 @@ document.addEventListener('visibilitychange', () => {
     ui.loadingVendedores = false;
     ui.actionLock = false;
     clearInterval(timers.session);
-    timers.session = setInterval(() => { if (state.turno) updateQuickStats(); }, QUICK_STATS_INTERVAL);
+    timers.session = setInterval(() => {
+      if (state.turno) updateQuickStats();
+    }, QUICK_STATS_INTERVAL);
     invalidateQueue();
     invalidateFooter();
     scheduleRender();
@@ -699,8 +953,15 @@ window.addEventListener('beforeunload', () => {
   clearTimeout(timers.rtAtend);
   clearTimeout(timers.reconnect);
   cleanupQueue();
-  try { if (_rtChannel) { _rtChannel.unsubscribe(); sb.removeChannel(_rtChannel); _rtChannel = null; } }
-  catch (e) { console.warn('[rtChannel] cleanup:', e?.message || e); }
+  try {
+    if (_rtChannel) {
+      _rtChannel.unsubscribe();
+      sb.removeChannel(_rtChannel);
+      _rtChannel = null;
+    }
+  } catch (e) {
+    console.warn('[rtChannel] cleanup:', e?.message || e);
+  }
 });
 
 // ─── Changelog versionado (adicione novas entradas no TOPO do array) ───
@@ -719,9 +980,18 @@ const APP_CHANGELOG = [
     version: '4.2.0',
     date: '2026-04-07',
     items: [
-      { icon: 'fa-wifi', text: 'Suporte offline real — o tablet continua funcionando sem internet e reconecta automaticamente' },
-      { icon: 'fa-mobile-screen', text: 'PWA habilitado — agora é possível instalar o sistema como app na tela inicial do tablet' },
-      { icon: 'fa-shield-halved', text: 'Proteção contra força bruta no PIN — bloqueio automático após tentativas inválidas' },
+      {
+        icon: 'fa-wifi',
+        text: 'Suporte offline real — o tablet continua funcionando sem internet e reconecta automaticamente'
+      },
+      {
+        icon: 'fa-mobile-screen',
+        text: 'PWA habilitado — agora é possível instalar o sistema como app na tela inicial do tablet'
+      },
+      {
+        icon: 'fa-shield-halved',
+        text: 'Proteção contra força bruta no PIN — bloqueio automático após tentativas inválidas'
+      },
       { icon: 'fa-bug', text: 'Correção: ícone do sistema carregava com fundo preto no logo' },
       { icon: 'fa-wrench', text: 'Correção: Service Worker instalava com erro silencioso (logo inexistente no cache)' }
     ]
@@ -730,10 +1000,16 @@ const APP_CHANGELOG = [
     version: '4.1.0',
     date: '2026-04-06',
     items: [
-      { icon: 'fa-ranking-star', text: 'Header redesenhado — botões "Iniciar" e "Ranking" substituem o toggle e o troféu' },
+      {
+        icon: 'fa-ranking-star',
+        text: 'Header redesenhado — botões "Iniciar" e "Ranking" substituem o toggle e o troféu'
+      },
       { icon: 'fa-palette', text: 'Ícones dos KPIs (Atendidos, Vendas, Conversão) unificados em rosa' },
       { icon: 'fa-text-height', text: 'Fonte dos KPIs no header aumentada para melhor leitura no tablet' },
-      { icon: 'fa-stop', text: 'Botão "Encerrar" aparece em vermelho quando o turno está ativo — distinção clara de ação destrutiva' }
+      {
+        icon: 'fa-stop',
+        text: 'Botão "Encerrar" aparece em vermelho quando o turno está ativo — distinção clara de ação destrutiva'
+      }
     ]
   },
   {
@@ -792,7 +1068,10 @@ const APP_CHANGELOG = [
     version: '2.6.0',
     date: '2026-03-28',
     items: [
-      { icon: 'fa-arrow-rotate-right', text: 'Atualizações agora mostram banner "toque para atualizar" — sem deslogar' },
+      {
+        icon: 'fa-arrow-rotate-right',
+        text: 'Atualizações agora mostram banner "toque para atualizar" — sem deslogar'
+      },
       { icon: 'fa-bell', text: 'Dashboard agora mostra popup de novidades igual ao tablet' },
       { icon: 'fa-shield', text: 'Correções: troca com diferença e envio de vendedor para atendimento' }
     ]
@@ -812,8 +1091,14 @@ const APP_CHANGELOG = [
     version: '2.4.0',
     date: '2026-03-28',
     items: [
-      { icon: 'fa-hand-pointer', text: 'Novo: arraste ou toque o card de atendimento para resolver (venda, troca, não converteu ou cancelar)' },
-      { icon: 'fa-arrow-up', text: 'Cancelar atendimento agora retorna o vendedor ao 1º da fila (antes ia pro último)' },
+      {
+        icon: 'fa-hand-pointer',
+        text: 'Novo: arraste ou toque o card de atendimento para resolver (venda, troca, não converteu ou cancelar)'
+      },
+      {
+        icon: 'fa-arrow-up',
+        text: 'Cancelar atendimento agora retorna o vendedor ao 1º da fila (antes ia pro último)'
+      },
       { icon: 'fa-clock', text: 'Timers agora mostram "5min 23s" em vez de "05:23" — mais legível' },
       { icon: 'fa-broom', text: 'Removidos os 4 mini botões de ação — interface mais limpa' }
     ]
@@ -866,7 +1151,9 @@ if (tenantId) {
     if (cr && (cr.atendimentos_stale > 0 || cr.vendedores_stuck > 0 || cr.turnos_fechados > 0)) {
       console.warn('[cleanup] Dados órfãos limpos:', cr);
     }
-  } catch (e) { console.warn('[cleanup] erro:', e.message); }
+  } catch (e) {
+    console.warn('[cleanup] erro:', e.message);
+  }
 }
 await checkExistingTurno();
 await loadVendedores();

@@ -11,8 +11,20 @@ export const MOTIVOS = {
 };
 
 export const STATUS_CONFIG = {
-  disponivel: { label: 'Disponível', short: 'LIVRE', color: '#34D399', bg: 'rgba(52,211,153,.1)', icon: 'fa-circle-check' },
-  em_atendimento: { label: 'Em atendimento', short: 'ATENDENDO', color: '#60A5FA', bg: 'rgba(96,165,250,.1)', icon: 'fa-comments' },
+  disponivel: {
+    label: 'Disponível',
+    short: 'LIVRE',
+    color: '#34D399',
+    bg: 'rgba(52,211,153,.1)',
+    icon: 'fa-circle-check'
+  },
+  em_atendimento: {
+    label: 'Em atendimento',
+    short: 'ATENDENDO',
+    color: '#60A5FA',
+    bg: 'rgba(96,165,250,.1)',
+    icon: 'fa-comments'
+  },
   pausa: { label: 'Em pausa', short: 'PAUSA', color: '#FBBF24', bg: 'rgba(251,191,36,.1)', icon: 'fa-mug-hot' },
   fora: { label: 'Fora', short: 'FORA', color: '#71717A', bg: 'rgba(113,113,122,.1)', icon: 'fa-door-open' }
 };
@@ -85,7 +97,14 @@ export function monthRange() {
 }
 
 export function initials(name) {
-  return (name || '??').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+  if (!name) return '??';
+  const letters = name
+    .split(' ')
+    .filter(Boolean)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join('');
+  return letters ? letters.toUpperCase() : '??';
 }
 
 // Theme toggle (light/dark)
@@ -107,9 +126,9 @@ export function toast(msg, type = 'info', duration = 4000) {
   if (!container) return;
   const styles = {
     success: { border: 'rgba(34,197,94,.3)', bg: '#052e16', text: '#86efac' },
-    error:   { border: 'rgba(239,68,68,.3)', bg: '#450a0a', text: '#fca5a5' },
+    error: { border: 'rgba(239,68,68,.3)', bg: '#450a0a', text: '#fca5a5' },
     warning: { border: 'rgba(245,158,11,.3)', bg: '#451a03', text: '#fcd34d' },
-    info:    { border: 'rgba(96,165,250,.3)', bg: '#172554', text: '#93c5fd' }
+    info: { border: 'rgba(96,165,250,.3)', bg: '#172554', text: '#93c5fd' }
   };
   const icons = {
     success: 'fa-circle-check',

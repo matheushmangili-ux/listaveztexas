@@ -20,7 +20,7 @@ export async function loginWithPin(pin) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${sb.supabaseKey}`
+        Authorization: `Bearer ${sb.supabaseKey}`
       },
       body: JSON.stringify({ slug, pin })
     });
@@ -52,7 +52,9 @@ export async function logout() {
 }
 
 export async function getUser() {
-  const { data: { user } } = await sb.auth.getUser();
+  const {
+    data: { user }
+  } = await sb.auth.getUser();
   return user;
 }
 

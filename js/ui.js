@@ -19,8 +19,13 @@ export function createModal(id, content, { zIndex = 1000, maxWidth = '360px', on
   overlay.id = id;
   overlay.className = 'modal-overlay';
   if (zIndex !== 1000) overlay.style.zIndex = zIndex;
-  const closeFn = () => { overlay.remove(); if (onClose) onClose(); };
-  overlay.addEventListener('click', e => { if (e.target === overlay) closeFn(); });
+  const closeFn = () => {
+    overlay.remove();
+    if (onClose) onClose();
+  };
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeFn();
+  });
   overlay.innerHTML = `<div class="modal-box" style="max-width:${maxWidth}">
     <button class="modal-close" data-modal-close title="Fechar">&times;</button>
     ${content}
@@ -52,7 +57,7 @@ export function currencyInputHTML(id, placeholder = '0,00') {
 export function formatCurrencyInput(input) {
   const cursorPos = input.selectionStart;
   const oldLen = input.value.length;
-  let v = input.value.replace(/[^\d,\.]/g, '');
+  let v = input.value.replace(/[^\d,.]/g, '');
   const parts = v.split(',');
   if (parts.length > 2) {
     v = parts.slice(0, -1).join('') + ',' + parts[parts.length - 1];

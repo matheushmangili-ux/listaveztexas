@@ -4,7 +4,13 @@
 // ============================================
 
 import { playSound } from '/js/sound.js';
-import { CELEBRATION_FLASH_SHOW, CELEBRATION_FLASH_FADE, CELEBRATION_EPIC_SHOW, CELEBRATION_EPIC_FADE, Z_DRAG_GHOST } from '/js/constants.js';
+import {
+  CELEBRATION_FLASH_SHOW,
+  CELEBRATION_FLASH_FADE,
+  CELEBRATION_EPIC_SHOW,
+  CELEBRATION_EPIC_FADE,
+  Z_DRAG_GHOST
+} from '/js/constants.js';
 import { escapeHtml } from '/js/utils.js';
 
 let _epicOverlay = null;
@@ -40,7 +46,7 @@ export function fireVendaCelebration() {
     function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       let alive = false;
-      rings.forEach(ring => {
+      rings.forEach((ring) => {
         ring.r += ring.speed;
         if (ring.r < ring.maxR) alive = true;
         const alpha = Math.max(0, 1 - ring.r / ring.maxR) * 0.4;
@@ -70,8 +76,14 @@ export function fireVendaCelebration() {
  * @param {number} valor - Trade-up value
  */
 export function fireEpicTrocaAnimation(nome, valor) {
-  if (_epicRaf) { cancelAnimationFrame(_epicRaf); _epicRaf = null; }
-  if (_epicOverlay) { _epicOverlay.remove(); _epicOverlay = null; }
+  if (_epicRaf) {
+    cancelAnimationFrame(_epicRaf);
+    _epicRaf = null;
+  }
+  if (_epicOverlay) {
+    _epicOverlay.remove();
+    _epicOverlay = null;
+  }
 
   playSound('venda');
 
@@ -84,13 +96,14 @@ export function fireEpicTrocaAnimation(nome, valor) {
   overlay.appendChild(cvs);
 
   const card = document.createElement('div');
-  card.style.cssText = 'position:relative;z-index:1;text-align:center;padding:40px 48px;border-radius:8px;border:2px solid;animation:epicCardIn .6s cubic-bezier(.2,.8,.3,1) both;background:linear-gradient(135deg,#1a0a2e 0%,#0f172a 50%,#1a0a2e 100%);border-image:linear-gradient(135deg,#a78bfa,#e879f9,#f472b6,#a78bfa) 1';
+  card.style.cssText =
+    'position:relative;z-index:1;text-align:center;padding:40px 48px;border-radius:8px;border:2px solid;animation:epicCardIn .6s cubic-bezier(.2,.8,.3,1) both;background:linear-gradient(135deg,#1a0a2e 0%,#0f172a 50%,#1a0a2e 100%);border-image:linear-gradient(135deg,#a78bfa,#e879f9,#f472b6,#a78bfa) 1';
   card.innerHTML = `
     <div style="font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#a78bfa;margin-bottom:12px;animation:epicGlow 1.5s ease infinite alternate">CONQUISTA DESBLOQUEADA</div>
     <div style="font-size:48px;margin-bottom:8px;animation:epicBounce .8s cubic-bezier(.2,.8,.3,1) .3s both">💎</div>
     <div style="font-family:var(--font-mono);font-size:20px;font-weight:800;color:#e879f9;margin-bottom:4px;text-shadow:0 0 20px rgba(232,121,249,.4)">${escapeHtml(nome)}</div>
     <div style="font-size:13px;color:#c4b5fd;font-weight:600;margin-bottom:16px">Troca com diferença épica</div>
-    <div style="font-family:var(--font-mono);font-size:32px;font-weight:800;color:#f0abfc;text-shadow:0 0 30px rgba(240,171,252,.4);animation:epicPulse 1s ease infinite alternate">R$ ${Number(valor).toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
+    <div style="font-family:var(--font-mono);font-size:32px;font-weight:800;color:#f0abfc;text-shadow:0 0 30px rgba(240,171,252,.4);animation:epicPulse 1s ease infinite alternate">R$ ${Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
     <div style="margin-top:16px;font-size:10px;color:#7c3aed;font-weight:700;letter-spacing:.1em">1º DA FILA GARANTIDO</div>
     <button onclick="this.closest('div[style*=fixed]').remove()" style="margin-top:20px;padding:10px 32px;border:1px solid rgba(167,139,250,.3);border-radius:4px;background:rgba(167,139,250,.1);color:#c4b5fd;font-family:var(--font-mono);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s" onmouseenter="this.style.background='rgba(167,139,250,.25)'" onmouseleave="this.style.background='rgba(167,139,250,.1)'">FECHAR</button>
   `;
@@ -118,10 +131,13 @@ export function fireEpicTrocaAnimation(nome, valor) {
   function animateSparkles() {
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     const t = performance.now() / 1000;
-    sparkles.forEach(s => {
+    sparkles.forEach((s) => {
       s.y -= s.speed;
       s.x += s.drift;
-      if (s.y < -10) { s.y = window.innerHeight + 10; s.x = Math.random() * window.innerWidth; }
+      if (s.y < -10) {
+        s.y = window.innerHeight + 10;
+        s.x = Math.random() * window.innerWidth;
+      }
       const alpha = 0.3 + Math.sin(t * 3 + s.phase) * 0.4;
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
@@ -135,9 +151,15 @@ export function fireEpicTrocaAnimation(nome, valor) {
   animateSparkles();
 
   setTimeout(() => {
-    if (_epicRaf) { cancelAnimationFrame(_epicRaf); _epicRaf = null; }
+    if (_epicRaf) {
+      cancelAnimationFrame(_epicRaf);
+      _epicRaf = null;
+    }
     overlay.style.transition = 'opacity .5s';
     overlay.style.opacity = '0';
-    setTimeout(() => { overlay.remove(); if (_epicOverlay === overlay) _epicOverlay = null; }, CELEBRATION_EPIC_FADE);
+    setTimeout(() => {
+      overlay.remove();
+      if (_epicOverlay === overlay) _epicOverlay = null;
+    }, CELEBRATION_EPIC_FADE);
   }, CELEBRATION_EPIC_SHOW);
 }

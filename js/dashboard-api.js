@@ -35,7 +35,8 @@ export async function fetchCanalStats(sb, range) {
 
 /** Atendimentos de um motivo de perda (drill-down) */
 export async function fetchDrillMotivo(sb, range, motivo, tenantId) {
-  let q = sb.from('atendimentos')
+  let q = sb
+    .from('atendimentos')
     .select('vendedor_id, inicio, motivo_perda, vendedores(nome, apelido)')
     .eq('motivo_perda', motivo)
     .gte('inicio', range.start)

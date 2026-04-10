@@ -18,12 +18,15 @@ export function showChangelog(changelog, storagePrefix, opts) {
   const storageKey = storagePrefix + latest.version;
   if (localStorage.getItem(storageKey)) return;
 
-  const listHtml = latest.items.map(c =>
-    `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-subtle)">
+  const listHtml = latest.items
+    .map(
+      (c) =>
+        `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-subtle)">
       <i class="fa-solid ${c.icon}" style="font-size:14px;color:var(--accent);width:20px;text-align:center;flex-shrink:0"></i>
       <span style="font-size:13px;color:var(--text-secondary);line-height:1.3">${c.text}</span>
     </div>`
-  ).join('');
+    )
+    .join('');
 
   const dateStr = latest.date
     ? new Date(latest.date + 'T00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -57,9 +60,12 @@ export function showChangelog(changelog, storagePrefix, opts) {
     // Dashboard path: create overlay directly
     const overlay = document.createElement('div');
     overlay.id = 'changelogPopup';
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:1003;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)';
+    overlay.style.cssText =
+      'position:fixed;inset:0;z-index:1003;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)';
     overlay.innerHTML = `<div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:24px;max-width:400px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.4)">${contentHtml}</div>`;
-    overlay.addEventListener('click', e => { if (e.target === overlay) closeFn(); });
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeFn();
+    });
     document.body.appendChild(overlay);
   }
 
