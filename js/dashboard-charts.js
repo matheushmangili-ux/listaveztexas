@@ -12,6 +12,7 @@ let _ctx = null;
 
 // ─── Module-level state ───
 let charts = {};
+let chartTypes = {}; // track rendered type per key to decide reuse vs destroy
 let _firstLoad = true;
 let _activeChartTab = null;
 
@@ -104,28 +105,56 @@ function chartColors() {
   };
 }
 
-// ApexCharts helper
+// Error boundary — mostra fallback quando um chart falha
+function showChartError(el, key) {
+  if (!el) return;
+  el.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;min-height:200px;color:var(--text-muted);font-size:12px;text-align:center;padding:20px">'
+    + '<div><i class="fa-solid fa-triangle-exclamation" style="font-size:24px;margin-bottom:8px;opacity:.6"></i>'
+    + '<div>Erro ao renderizar gráfico</div>'
+    + '<div style="font-size:10px;opacity:.6;margin-top:4px">' + key + '</div></div></div>';
+}
+
+function applyChartDefaults(options) {
+  if (!options.chart) options.chart = {};
+  options.chart.fontFamily = options.chart.fontFamily || "'Satoshi', system-ui, sans-serif";
+  if (!options.chart.toolbar) options.chart.toolbar = { show: false };
+  if (!options.chart.animations) options.chart.animations = { enabled: true, easing: 'easeinout', speed: 600 };
+}
+
+// ApexCharts helper — reusa o chart existente quando possível (updateOptions)
+// e cai para destroy+recreate só quando o tipo muda ou updateOptions falha.
 function renderChart(key, selector, options) {
-  if (charts[key]) { try { charts[key].destroy(); } catch(e) {} }
   const el = document.querySelector(selector);
   if (!el) return null;
-  el.innerHTML = '';
-  const defaults = {
-    chart: {
-      fontFamily: "'Satoshi', system-ui, sans-serif",
-      toolbar: { show: false },
-      animations: { enabled: true, easing: 'easeinout', speed: 600 }
-    }
-  };
-  // Deep merge defaults into options
-  if (!options.chart) options.chart = {};
-  options.chart.fontFamily = options.chart.fontFamily || defaults.chart.fontFamily;
-  if (!options.chart.toolbar) options.chart.toolbar = defaults.chart.toolbar;
-  if (!options.chart.animations) options.chart.animations = defaults.chart.animations;
+  applyChartDefaults(options);
+  const type = options.chart && options.chart.type;
 
-  charts[key] = new ApexCharts(el, options);
-  charts[key].render();
-  return charts[key];
+  // Fast path: reusa chart existente com mesmo tipo
+  if (charts[key] && chartTypes[key] === type) {
+    try {
+      charts[key].updateOptions(options, false, true, true);
+      return charts[key];
+    } catch (err) {
+      console.warn('[renderChart:' + key + '] updateOptions falhou, recriando:', err?.message || err);
+      // cai para destroy+recreate abaixo
+    }
+  }
+
+  // Destroy + recreate (primeira render ou mudança de tipo)
+  if (charts[key]) { try { charts[key].destroy(); } catch(e) {} }
+  try {
+    el.innerHTML = '';
+    charts[key] = new ApexCharts(el, options);
+    chartTypes[key] = type;
+    charts[key].render();
+    return charts[key];
+  } catch (err) {
+    console.error('[renderChart:' + key + '] falhou:', err);
+    showChartError(el, key);
+    charts[key] = null;
+    chartTypes[key] = null;
+    return null;
+  }
 }
 
 // CountUp animation (first load only)
@@ -243,20 +272,25 @@ export async function loadAll() {
       if (el) el.innerHTML = '<span class="neutral">filtrado</span>';
     });
   }
-  const results = await Promise.allSettled([
-    loadMotivos(range),
-    loadHourly(range),
-    loadRanking(range, cachedRanking),
-    loadRuptures(range),
-    loadPauseStats(range),
-    loadFloor(),
-    loadScatter(range, cachedRanking),
-    loadTempoMeta(range, cachedRanking),
-    loadTrend(range),
-    loadPreferenciais(range),
-    loadOrigem(range)
-  ]);
-  results.forEach((r, i) => { if (r.status === 'rejected') console.error('Dashboard load error [' + i + ']:', r.reason); });
+  const loaders = [
+    ['motivos', loadMotivos(range)],
+    ['hourly', loadHourly(range)],
+    ['ranking', loadRanking(range, cachedRanking)],
+    ['ruptures', loadRuptures(range)],
+    ['pauseStats', loadPauseStats(range)],
+    ['floor', loadFloor()],
+    ['scatter', loadScatter(range, cachedRanking)],
+    ['tempoMeta', loadTempoMeta(range, cachedRanking)],
+    ['trend', loadTrend(range)],
+    ['preferenciais', loadPreferenciais(range)],
+    ['origem', loadOrigem(range)]
+  ];
+  const results = await Promise.allSettled(loaders.map(([, p]) => p));
+  results.forEach((r, i) => {
+    if (r.status === 'rejected') {
+      console.error('[dashboard.loadAll:' + loaders[i][0] + '] falhou:', r.reason);
+    }
+  });
   _ctx.updateTimestamp();
 }
 
@@ -671,7 +705,7 @@ export async function loadScatter(range, cachedData) {
   const filtered = (data || []).filter(r => (r.total_atendimentos || 0) > 0);
   const emptyScatter = document.getElementById('chartScatterEmpty');
   if (filtered.length === 0) {
-    if (charts.scatter) { try { charts.scatter.destroy(); } catch(e) {} } charts.scatter = null;
+    if (charts.scatter) { try { charts.scatter.destroy(); } catch(e) {} } charts.scatter = null; chartTypes.scatter = null;
     const el = document.querySelector('#chartScatter'); if (el) el.style.display = 'none';
     if (emptyScatter) emptyScatter.style.display = 'block';
     return;
@@ -785,7 +819,7 @@ export async function loadTempoMeta(range, cachedData) {
   const emptyTempo = document.getElementById('chartTempoEmpty');
   if (filtered.length === 0) {
     if (charts.tempoMeta) { try { charts.tempoMeta.destroy(); } catch(e) {} }
-    charts.tempoMeta = null;
+    charts.tempoMeta = null; chartTypes.tempoMeta = null;
     if (el) el.style.display = 'none';
     if (emptyTempo) emptyTempo.style.display = 'block';
     return;
@@ -842,7 +876,7 @@ export async function loadTrend(range) {
   if (error) { return; }
   const emptyTrend = document.getElementById('chartTrendEmpty');
   if (!data || data.length === 0) {
-    if (charts.trend) { try { charts.trend.destroy(); } catch(e) {} } charts.trend = null;
+    if (charts.trend) { try { charts.trend.destroy(); } catch(e) {} } charts.trend = null; chartTypes.trend = null;
     const elTrend = document.querySelector('#chartTrend'); if (elTrend) elTrend.style.display = 'none';
     if (emptyTrend) emptyTrend.style.display = 'block';
     return;

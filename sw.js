@@ -1,6 +1,8 @@
-// Minha Vez — Service Worker (network-first, offline-capable)
-// Bump CACHE_VERSION on each deploy to bust stale caches
-const CACHE_VERSION = '12';
+// Minha Vez — Service Worker
+// Cache-first para estáticos (CSS, JS, imagens) — economiza banda
+// Network-first para HTML e APIs — sempre pega a versão mais fresca
+// Bump CACHE_VERSION a cada deploy
+const CACHE_VERSION = '15';
 const CACHE_NAME = 'minhavez-v' + CACHE_VERSION;
 const STATIC_ASSETS = [
   '/tablet.html',
@@ -20,16 +22,20 @@ const STATIC_ASSETS = [
   '/js/tablet-atendimento.js',
   '/js/tablet-celebrations.js',
   '/js/tablet-footer.js',
+  '/js/tablet-init.js',
   '/js/tablet-queue.js',
   '/js/tablet-turno.js',
   '/js/auth.js',
   '/js/dashboard-api.js',
   '/js/dashboard-charts.js',
   '/js/dashboard-config.js',
+  '/js/dashboard-init.js',
   '/js/changelog.js',
   '/assets/logo-minhavez-new.png',
   '/manifest.json'
 ];
+
+const STATIC_EXTENSIONS = /\.(css|js|png|jpg|jpeg|svg|woff2?|ttf|eot|ico)(\?.*)?$/i;
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -47,18 +53,37 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// Fetch: network-first for everything, cache fallback for offline
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Skip Supabase API/realtime/auth — never intercept these
+  // Nunca interceptar Supabase / CDNs externos
   if (url.hostname.includes('supabase')) return;
-
-  // Skip external CDN resources (fonts, font-awesome, supabase-js CDN)
   if (url.hostname.includes('cdn') || url.hostname.includes('cdnjs')) return;
   if (url.hostname.includes('fonts')) return;
 
-  // Network-first with cache fallback for all same-origin requests
+  // Só same-origin
+  if (url.origin !== self.location.origin) return;
+
+  const isStatic = STATIC_EXTENSIONS.test(url.pathname);
+
+  if (isStatic) {
+    // Cache-first: responde do cache imediatamente, revalida em background
+    e.respondWith(
+      caches.match(e.request).then(cached => {
+        const fetchAndUpdate = fetch(e.request).then(response => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+          }
+          return response;
+        }).catch(() => cached);
+        return cached || fetchAndUpdate;
+      })
+    );
+    return;
+  }
+
+  // HTML / outros: network-first, cache fallback
   e.respondWith(
     fetch(e.request)
       .then(response => {

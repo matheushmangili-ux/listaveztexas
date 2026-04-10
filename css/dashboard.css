@@ -644,3 +644,35 @@
   .chart-tab { flex: 1; padding: 8px 10px; font-size: 11px; text-align: center; }
   .chart-tab i { display: none; }
 }
+
+/* ─── Status Marquee (On Time) ─── */
+@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+@keyframes marqueeHeader { 0% { transform: translateX(0); } 100% { transform: translateX(-33.333%); } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 6px 2px var(--success), 0 0 12px 4px rgba(34,197,94,.4); opacity: 1; }
+  50% { box-shadow: 0 0 3px 1px var(--success), 0 0 6px 2px rgba(34,197,94,.2); opacity: .7; }
+}
+#statusMarquee:hover #marqueeTrack { animation-play-state: paused; }
+.marquee-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  transition: background .15s ease;
+}
+.marquee-pill:hover { background: rgba(255,255,255,.05); }
+.marquee-pill .mp-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.marquee-pill .mp-dot.pulse-on { animation: dotPulse 2s ease-in-out infinite; }
+@keyframes dotPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: .6; } }
+.marquee-pill .mp-name { color: var(--text-primary); }
+.marquee-pill .mp-status { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+.marquee-pill .mp-status.fora { color: rgba(255,255,255,.4); }
+

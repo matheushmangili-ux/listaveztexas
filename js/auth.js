@@ -67,12 +67,12 @@ export function getTenantId(user) {
 export async function requireRole(allowedRoles) {
   const user = await getUser();
   if (!user) {
-    window.location.href = tenantPath('/login');
+    window.location.replace(tenantPath('/login'));
     return null;
   }
   const role = getRole(user);
   if (!allowedRoles.includes(role)) {
-    window.location.href = tenantPath('/login');
+    window.location.replace(tenantPath('/login'));
     return null;
   }
   return user;
@@ -81,8 +81,8 @@ export async function requireRole(allowedRoles) {
 export function redirectByRole(user) {
   const role = getRole(user);
   if (role === 'recepcionista') {
-    window.location.href = tenantPath('/tablet');
+    window.location.replace(tenantPath('/tablet'));
   } else if (role === 'gerente' || role === 'admin' || role === 'owner') {
-    window.location.href = tenantPath('/dashboard');
+    window.location.replace(tenantPath('/dashboard'));
   }
 }
