@@ -64,9 +64,11 @@
 .t-header-kpi-value {
   color: #ffffff;
   font-size: 18px;
+  font-family: var(--font-mono);
+  font-weight: 700;
 }
 .t-header-kpi-label {
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.5);
