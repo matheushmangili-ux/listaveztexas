@@ -341,6 +341,15 @@ import { initDashboardCharts, loadAll, loadKPIs, loadMotivos, loadHourly, loadPr
 import { SESSION_TIMEOUT_DASHBOARD, SESSION_CHECK_INTERVAL, RT_DASHBOARD_DEBOUNCE, TOAST_SHORT, CHART_RESIZE_DELAY } from '/js/constants.js';
 initTheme();
 
+// ─── Logout (defined early so the button works even while page is still loading) ───
+window.handleLogout = async function() {
+  try { await logout(); }
+  catch (e) {
+    console.error('[handleLogout]', e);
+    window.location.replace('/landing.html');
+  }
+};
+
 // Load tenant context
 const tenant = await loadTenant();
 if (tenant) {
@@ -1175,14 +1184,7 @@ await Promise.all([loadAll(), loadVendedores()]);
 setFirstLoadDone();
 updateTimestamp();
 
-// ─── Theme & Logout ───
-window.handleLogout = async function() {
-  try { await logout(); }
-  catch (e) {
-    console.error('[handleLogout]', e);
-    window.location.replace('/landing.html');
-  }
-};
+// ─── Theme ───
 window.toggleTheme = function() {
   const next = toggleTheme();
   loadAll();
