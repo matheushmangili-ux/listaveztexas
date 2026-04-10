@@ -119,6 +119,7 @@ const ui = {
   loadingVendedores: false, // previne concurrent loads
   miniRankingOpen: false,
   miniRankingOutside: null, // click-outside handler ref
+  miniRankingOutsideTimer: null, // pending setTimeout id for delayed listener attach
   prevStats: { total: 0, vendas: 0, conv: 0 },
   statsThrottle: 0
 };
@@ -771,8 +772,10 @@ window.toggleMiniRanking = async function () {
       })
       .join('');
   }
-  // Fechar ao clicar fora
-  setTimeout(() => {
+  // Fechar ao clicar fora (delay evita capturar o próprio click que abriu)
+  ui.miniRankingOutsideTimer = setTimeout(() => {
+    ui.miniRankingOutsideTimer = null;
+    if (!ui.miniRankingOpen) return;
     ui.miniRankingOutside = (e) => {
       if (!dd.contains(e.target) && !e.target.closest('[onclick*="toggleMiniRanking"]')) closeMiniRanking();
     };
@@ -783,6 +786,10 @@ function closeMiniRanking() {
   ui.miniRankingOpen = false;
   const dd = document.getElementById('miniRankingDropdown');
   if (dd) dd.style.display = 'none';
+  if (ui.miniRankingOutsideTimer) {
+    clearTimeout(ui.miniRankingOutsideTimer);
+    ui.miniRankingOutsideTimer = null;
+  }
   if (ui.miniRankingOutside) {
     document.removeEventListener('click', ui.miniRankingOutside);
     ui.miniRankingOutside = null;
