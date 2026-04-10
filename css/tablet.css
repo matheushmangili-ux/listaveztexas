@@ -124,7 +124,7 @@
   transition: transform 0.15s ease;
   background: var(--bg-surface);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-medium);
   border-radius: var(--radius);
 }
 .queue-list.dragging .queue-item {
