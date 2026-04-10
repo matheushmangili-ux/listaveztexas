@@ -1146,6 +1146,71 @@
   cursor: grab;
   -webkit-tap-highlight-color: transparent;
 }
+.atend-badge {
+  display: inline-block;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-left: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+.atend-badge-pref {
+  background: var(--warning);
+  color: #060606;
+}
+.atend-badge-clients {
+  background: var(--info);
+  color: #fff;
+}
+.atend-canal {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+}
+.atend-canal > i {
+  font-size: 14px;
+  color: var(--accent);
+}
+.atend-canal > span {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  max-width: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.atend-grip {
+  color: var(--text-muted);
+  font-size: 14px;
+  opacity: 0.3;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+.atend-canal + .atend-grip {
+  margin-left: 8px;
+}
+.active-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.service-empty-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+  opacity: 0.3;
+}
 
 /* Confetti canvas */
 #confettiCanvas {

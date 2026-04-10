@@ -44,8 +44,11 @@ let _multiTotal = 0;
 let _multiCurrent = 0;
 let _continuarCallbacks = { onNo: null, onYes: null };
 let _timerInterval = null;
-let _timerRefs = new Map();
+const _timerRefs = new Map();
 const _savedQueuePositions = new Map();
+// Per-card state para diffing: id -> { key, node }
+const _atendCardState = new Map();
+let _atendEmptyNode = null;
 
 function _tickAtendTimers() {
   const now = Date.now();
@@ -501,82 +504,216 @@ async function handleProximoCliente() {
 
 // ─── Render active atendimentos ───
 
+/** Build per-card data + fingerprint for diffing. */
+function buildAtendCardData(atend) {
+  const v = atend.vendedores;
+  if (!v) return null;
+  const nome = v.apelido || v.nome;
+  const canal = atend.canais_origem;
+  const canalIcone = canal?.icone || '';
+  const canalNome = canal?.nome || '';
+  const clientCount = atend._clientCount && atend._clientCount > 1 ? atend._clientCount : 0;
+  const key = [
+    atend.id,
+    nome,
+    atend.preferencial ? 1 : 0,
+    clientCount,
+    canalIcone,
+    canalNome
+  ].join('|');
+  return {
+    id: atend.id,
+    key,
+    nome,
+    preferencial: !!atend.preferencial,
+    clientCount,
+    canalIcone,
+    canalNome,
+    startMs: new Date(atend.inicio).getTime()
+  };
+}
+
+/** Create a fresh atend-card DOM node. */
+function createAtendCardNode(cd) {
+  const card = document.createElement('div');
+  card.className = 'atend-card';
+  card.id = 'atend-' + cd.id;
+  card.dataset.atendId = cd.id;
+
+  const avatar = document.createElement('div');
+  avatar.className = 'atend-avatar';
+
+  const info = document.createElement('div');
+  info.className = 'atend-info';
+  const name = document.createElement('div');
+  name.className = 'atend-name';
+  const timer = document.createElement('div');
+  timer.className = 'atend-timer';
+  timer.id = 'timer-' + cd.id;
+  info.appendChild(name);
+  info.appendChild(timer);
+
+  const grip = document.createElement('i');
+  grip.className = 'fa-solid fa-grip-vertical atend-grip';
+
+  card.appendChild(avatar);
+  card.appendChild(info);
+  card.appendChild(grip);
+
+  applyAtendCardData(card, cd);
+  return card;
+}
+
+/** Update an existing atend-card node with new data (idempotent). */
+function applyAtendCardData(card, cd) {
+  const avatar = card.querySelector('.atend-avatar');
+  const name = card.querySelector('.atend-name');
+
+  // Avatar initials
+  const ini = initials(cd.nome);
+  if (avatar.textContent !== ini) avatar.textContent = ini;
+
+  // Nome + badges — compact enough que innerHTML é aceitável (escapado)
+  let nameHtml = escapeHtml(cd.nome);
+  if (cd.preferencial) {
+    nameHtml += '<span class="atend-badge atend-badge-pref">PREF</span>';
+  }
+  if (cd.clientCount) {
+    nameHtml += `<span class="atend-badge atend-badge-clients">${cd.clientCount} clientes</span>`;
+  }
+  if (name.innerHTML !== nameHtml) name.innerHTML = nameHtml;
+
+  // Canal badge (criado/atualizado/removido entre card.info e grip)
+  let canalEl = card.querySelector(':scope > .atend-canal');
+  if (cd.canalIcone) {
+    if (!canalEl) {
+      canalEl = document.createElement('div');
+      canalEl.className = 'atend-canal';
+      const ci = document.createElement('i');
+      const cs = document.createElement('span');
+      canalEl.appendChild(ci);
+      canalEl.appendChild(cs);
+      // Insere antes do grip (último filho)
+      card.insertBefore(canalEl, card.lastChild);
+    }
+    canalEl.title = cd.canalNome || 'Canal';
+    const ci = canalEl.firstChild;
+    const cs = canalEl.lastChild;
+    const iconCls = cd.canalIcone;
+    if (ci.className !== iconCls) ci.className = iconCls;
+    if (cs.textContent !== cd.canalNome) cs.textContent = cd.canalNome;
+  } else if (canalEl) {
+    canalEl.remove();
+  }
+}
+
 export function renderActiveAtendimentos() {
-  clearInterval(_timerInterval);
-  _timerInterval = null;
   const list = document.getElementById('activeList');
   if (!list) return;
 
   const atendimentos = _ctx.activeAtendimentos;
 
-  // Preservar activeLabel (é filho de activeList, não pode ser destruído pelo replaceChildren)
+  // Mantém activeLabel como primeiro filho
   let label = document.getElementById('activeLabel');
-  list.replaceChildren(); // limpa todos os filhos de uma vez
-  // Recriar activeLabel se foi destruído pelo replaceChildren
-  if (!label || !label.isConnected) {
+  if (!label || label.parentNode !== list) {
     label = document.createElement('p');
     label.id = 'activeLabel';
-    label.style.cssText =
-      'font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;display:none';
+    label.className = 'active-label';
+    list.insertBefore(label, list.firstChild);
   }
-  list.appendChild(label); // sempre reinserir no topo
 
   const countEl = document.getElementById('activeCount');
-  if (countEl) countEl.textContent = atendimentos.length + ' ativo' + (atendimentos.length !== 1 ? 's' : '');
+  if (countEl) {
+    const txt = atendimentos.length + ' ativo' + (atendimentos.length !== 1 ? 's' : '');
+    if (countEl.textContent !== txt) countEl.textContent = txt;
+  }
 
+  // Empty state
   if (atendimentos.length === 0) {
     label.style.display = 'none';
-    const empty = document.createElement('div');
-    empty.className = 'service-empty';
-    empty.innerHTML =
-      '<i class="fa-solid fa-arrow-left" style="font-size:24px;margin-bottom:8px;opacity:.3"></i>Arraste vendedores da fila para iniciar atendimento';
-    list.appendChild(empty);
+    // Remove todos os cards cacheados
+    for (const [, cached] of _atendCardState) {
+      if (cached.node.parentNode) cached.node.remove();
+    }
+    _atendCardState.clear();
+    _timerRefs.clear();
+    _stopAtendTimerLoop();
+    if (!_atendEmptyNode || !_atendEmptyNode.isConnected) {
+      _atendEmptyNode = document.createElement('div');
+      _atendEmptyNode.className = 'service-empty';
+      const icon = document.createElement('i');
+      icon.className = 'fa-solid fa-arrow-left service-empty-icon';
+      _atendEmptyNode.appendChild(icon);
+      _atendEmptyNode.appendChild(
+        document.createTextNode('Arraste vendedores da fila para iniciar atendimento')
+      );
+      list.appendChild(_atendEmptyNode);
+    }
+    initAtendDrag();
     return;
+  }
+
+  // Remove empty state se estava presente
+  if (_atendEmptyNode && _atendEmptyNode.parentNode) {
+    _atendEmptyNode.remove();
+    _atendEmptyNode = null;
   }
   label.style.display = 'block';
 
-  atendimentos.forEach((atend) => {
-    const v = atend.vendedores;
-    if (!v) return;
-    const nome = v.apelido || v.nome;
-    const card = document.createElement('div');
-    card.className = 'atend-card';
-    card.id = 'atend-' + atend.id;
-    const prefBadge = atend.preferencial
-      ? '<span style="display:inline-block;background:var(--warning);color:#060606;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:6px;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle">PREF</span>'
-      : '';
-    const clientBadge =
-      atend._clientCount && atend._clientCount > 1
-        ? `<span style="display:inline-block;background:var(--info);color:#fff;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:6px;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle">${atend._clientCount} clientes</span>`
-        : '';
-    const canal = atend.canais_origem;
-    const canalHtml =
-      canal && canal.icone
-        ? `<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;margin-left:auto;padding:4px 8px;border-radius:8px;background:var(--bg-surface);border:1px solid var(--border-subtle)" title="${escapeHtml(canal.nome || 'Canal')}"><i class="${escapeHtml(canal.icone)}" style="font-size:14px;color:var(--accent)"></i><span style="font-size:10px;font-weight:600;color:var(--text-muted);max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(canal.nome)}</span></div>`
-        : '';
-    card.dataset.atendId = atend.id;
-    card.innerHTML = `
-      <div class="atend-avatar">${initials(nome)}</div>
-      <div class="atend-info">
-        <div class="atend-name">${escapeHtml(nome)}${prefBadge}${clientBadge}</div>
-        <div class="atend-timer" id="timer-${atend.id}">${formatTime((Date.now() - new Date(atend.inicio).getTime()) / 1000)}</div>
-      </div>
-      ${canalHtml}
-      <i class="fa-solid fa-grip-vertical" style="color:var(--text-muted);font-size:14px;opacity:.3;flex-shrink:0;${canalHtml ? 'margin-left:8px' : 'margin-left:auto'}"></i>`;
-    list.appendChild(card);
-  });
+  // Diff cards
+  const seen = new Set();
+  let prev = label;
+  for (const atend of atendimentos) {
+    const cd = buildAtendCardData(atend);
+    if (!cd) continue;
+    seen.add(cd.id);
+    const cached = _atendCardState.get(cd.id);
+    let node;
+    if (cached && cached.node.parentNode === list) {
+      node = cached.node;
+      if (cached.key !== cd.key) {
+        applyAtendCardData(node, cd);
+        cached.key = cd.key;
+      }
+    } else {
+      node = createAtendCardNode(cd);
+      _atendCardState.set(cd.id, { key: cd.key, node });
+    }
+    if (prev.nextSibling !== node) list.insertBefore(node, prev.nextSibling);
+    prev = node;
+  }
 
-  // Timer global para todos os atendimentos (painel + sidebar)
+  // Remove cards órfãos e timerRefs correspondentes
+  for (const [id, cached] of _atendCardState) {
+    if (!seen.has(id)) {
+      if (cached.node.parentNode) cached.node.remove();
+      _atendCardState.delete(id);
+      _timerRefs.delete(id);
+    }
+  }
+
+  // Atualiza timerRefs (reutiliza refs existentes quando possível)
   _stopAtendTimerLoop();
-  _timerRefs = new Map();
-  atendimentos.forEach((atend) => {
-    _timerRefs.set(atend.id, {
-      main: document.getElementById('timer-' + atend.id),
-      side: document.querySelector(`[data-sidebar-timer="${atend.id}"]`),
-      startMs: new Date(atend.inicio).getTime(),
-      lastText: ''
-    });
-  });
+  for (const atend of atendimentos) {
+    const cached = _atendCardState.get(atend.id);
+    if (!cached) continue;
+    const mainEl = cached.node.querySelector('.atend-timer');
+    const startMs = new Date(atend.inicio).getTime();
+    const existing = _timerRefs.get(atend.id);
+    if (existing) {
+      existing.main = mainEl;
+      existing.side = document.querySelector(`[data-sidebar-timer="${atend.id}"]`);
+      existing.startMs = startMs;
+      // lastText preservado — evita rewrite do textContent se não mudou
+    } else {
+      _timerRefs.set(atend.id, {
+        main: mainEl,
+        side: document.querySelector(`[data-sidebar-timer="${atend.id}"]`),
+        startMs,
+        lastText: ''
+      });
+    }
+  }
   if (!document.hidden) _startAtendTimerLoop();
 
   initAtendDrag();
@@ -586,8 +723,10 @@ export function renderActiveAtendimentos() {
 
 function removeAtendimento(atendId) {
   _ctx.activeAtendimentos = _ctx.activeAtendimentos.filter((a) => a.id !== atendId);
-  const card = document.getElementById('atend-' + atendId);
-  if (card) card.remove();
+  const cached = _atendCardState.get(atendId);
+  if (cached && cached.node.parentNode) cached.node.remove();
+  _atendCardState.delete(atendId);
+  _timerRefs.delete(atendId);
   if (_ctx.activeAtendimentos.length === 0) {
     clearInterval(_timerInterval);
     _timerInterval = null;
