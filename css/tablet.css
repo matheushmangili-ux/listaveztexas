@@ -21,7 +21,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px;
+  padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 10px
+    max(12px, env(safe-area-inset-left));
   background: #060606;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
@@ -243,7 +244,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 14px;
+  padding: 10px max(14px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom))
+    max(14px, env(safe-area-inset-left));
   background: var(--bg-card);
   border-top: 1px solid var(--border-subtle);
   box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.06);
@@ -1443,4 +1445,172 @@
   background: var(--warning);
   color: #060606;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* ─── Tablet layout helpers (extracted from inline styles) ─── */
+.tracking-wide {
+  letter-spacing: 0.1em;
+}
+.tracking-tight {
+  letter-spacing: 0.08em;
+}
+
+.queue-setor-tabs {
+  padding: 0 2px;
+}
+.queue-head-row {
+  padding: 0 4px;
+}
+.queue-history-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: 8px;
+  transition: background 0.15s;
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.queue-history-btn:hover {
+  background: var(--bg-hover, rgba(255, 255, 255, 0.06));
+}
+
+.queue-blank-state {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.queue-blank-state i {
+  font-size: 24px;
+  margin-bottom: 8px;
+  display: block;
+  opacity: 0.3;
+}
+
+.panel-header-icon {
+  margin-right: 4px;
+}
+
+/* Motivo / Saída / Outcome icon colors via data attribute */
+.motivo-option[data-motivo='preco'] > i {
+  color: var(--motivo-preco);
+}
+.motivo-option[data-motivo='ruptura'] > i {
+  color: var(--motivo-ruptura);
+}
+.motivo-option[data-motivo='indecisao'] > i {
+  color: var(--motivo-indecisao);
+}
+.motivo-option[data-motivo='so_olhando'] > i {
+  color: var(--motivo-so-olhando);
+}
+.motivo-option[data-motivo='outro'] > i {
+  color: var(--motivo-outro);
+}
+.motivo-option[data-saida='almoco'] > i {
+  color: var(--saida-almoco);
+}
+.motivo-option[data-saida='banheiro'] > i {
+  color: var(--saida-banheiro);
+}
+.motivo-option[data-saida='operacional'] > i {
+  color: var(--saida-operacional);
+}
+.motivo-option[data-saida='finalizar'] > i {
+  color: var(--saida-finalizar);
+}
+.motivo-option[data-saida='outro'] > i {
+  color: var(--saida-outro);
+}
+.motivo-option.outcome-option > i {
+  font-size: 20px;
+  width: 28px;
+  text-align: center;
+}
+.motivo-option[data-outcome='venda'] > i {
+  color: var(--success);
+}
+.motivo-option[data-outcome='troca'] > i {
+  color: var(--info);
+}
+.motivo-option[data-outcome='nao_convertido'] > i {
+  color: var(--warning);
+}
+.motivo-option[data-outcome='cancelar'] > i {
+  color: var(--danger);
+}
+
+.btn-confirm-motivo {
+  width: 100%;
+  margin-top: 20px;
+}
+
+/* Mini Ranking dropdown */
+.mini-ranking-dropdown {
+  position: fixed;
+  top: 56px;
+  right: 120px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 16px;
+  z-index: 998;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  min-width: 260px;
+  max-width: 320px;
+}
+.mini-ranking-trophy {
+  color: #fbbf24;
+}
+
+/* Sheet sizing */
+.sheet-max-80vh {
+  max-height: 80vh;
+}
+.sheet-max-90vh {
+  max-height: 90vh;
+}
+
+/* Turno summary & close button */
+.turno-summary-content {
+  margin-bottom: 20px;
+}
+.btn-flex-tall {
+  flex: 1;
+  min-height: 48px;
+}
+.btn-turno-close {
+  flex: 1;
+  min-height: 48px;
+  background: var(--danger);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Pos log list */
+.pos-log-list {
+  max-height: 50vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.logout-icon-danger {
+  color: #ef4444;
+}
+.more-menu-wrapper {
+  position: relative;
+}
+.btn-flex-1 {
+  flex: 1;
 }

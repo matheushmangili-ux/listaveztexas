@@ -92,7 +92,7 @@ window.addEventListener('error', function(e) {
         <i class="fa-solid fa-play" id="turnoIcon"></i>
         <span id="turnoSwitchLabel">Iniciar</span>
       </div>
-      <div style="position:relative">
+      <div class="more-menu-wrapper">
         <button class="more-btn" onclick="toggleMoreMenu()" title="Mais opções" aria-label="Mais opções">
           <i class="fa-solid fa-ellipsis-vertical"></i>
         </button>
@@ -105,7 +105,7 @@ window.addEventListener('error', function(e) {
           </button>
           <div class="more-menu-divider"></div>
           <button onclick="handleLogout()">
-            <i class="fa-solid fa-right-from-bracket" style="color:#ef4444"></i> Sair
+            <i class="fa-solid fa-right-from-bracket logout-icon-danger"></i> Sair
           </button>
         </div>
       </div>
@@ -114,17 +114,17 @@ window.addEventListener('error', function(e) {
 
   <!-- QUEUE PANEL (left) -->
   <aside class="queue-panel" id="queuePanel">
-    <div id="setorTabs" class="flex-center gap-6 mb-12" style="padding:0 2px"></div>
-    <div class="flex-between mb-8" style="padding:0 4px">
-      <span class="fs-13 fw-700 text-muted uppercase" style="letter-spacing:.1em">Fila</span>
+    <div id="setorTabs" class="flex-center gap-6 mb-12 queue-setor-tabs"></div>
+    <div class="flex-between mb-8 queue-head-row">
+      <span class="fs-13 fw-700 text-muted uppercase tracking-wide">Fila</span>
       <div class="flex-center gap-8">
-        <button onclick="openPosLog()" style="background:none;border:none;color:var(--text-muted);font-size:14px;cursor:pointer;padding:8px 10px;border-radius:8px;transition:background .15s;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center" title="Histórico de movimentações" aria-label="Histórico de movimentações"><i class="fa-solid fa-clock-rotate-left"></i></button>
+        <button class="queue-history-btn" onclick="openPosLog()" title="Histórico de movimentações" aria-label="Histórico de movimentações"><i class="fa-solid fa-clock-rotate-left"></i></button>
         <span id="queueCount" class="fs-13 fw-600 text-muted">0 na fila</span>
       </div>
     </div>
     <div class="queue-list" id="queueList">
-      <div style="text-align:center;padding:40px 0;color:var(--text-muted);font-size:13px">
-        <i class="fa-solid fa-users-slash" style="font-size:24px;margin-bottom:8px;display:block;opacity:.3"></i>
+      <div class="queue-blank-state">
+        <i class="fa-solid fa-users-slash"></i>
         Abra o turno para iniciar
       </div>
     </div>
@@ -133,13 +133,13 @@ window.addEventListener('error', function(e) {
   <!-- SERVICE PANEL (right — Em Atendimento) -->
   <main class="service-panel" id="servicePanel">
     <div class="panel-header">
-      <span><i class="fa-solid fa-headset" style="margin-right:4px"></i>Em Atendimento</span>
+      <span><i class="fa-solid fa-headset panel-header-icon"></i>Em Atendimento</span>
       <span id="activeCount" class="fs-12 text-muted">0 ativos</span>
     </div>
 
     <!-- Atendimentos ativos (múltiplos simultâneos) -->
     <div id="activeList" class="flex-col gap-10 flex-1">
-      <p id="activeLabel" class="fs-10 fw-700 text-muted uppercase hidden" style="letter-spacing:.1em"></p>
+      <p id="activeLabel" class="fs-10 fw-700 text-muted uppercase hidden tracking-wide"></p>
     </div>
   </main>
 
@@ -156,37 +156,37 @@ window.addEventListener('error', function(e) {
   <h3 class="mono fs-18 fw-700 mb-8">Motivo da não conversão</h3>
   <p class="fs-14 text-secondary mb-16">Selecione o motivo principal</p>
 
-  <div style="display:flex;flex-direction:column;gap:8px" id="motivoList">
+  <div class="flex-col gap-8" id="motivoList">
     <div class="motivo-option" data-motivo="preco" onclick="selectMotivo(this)">
-      <i class="fa-solid fa-tag" style="color:var(--motivo-preco)"></i>
+      <i class="fa-solid fa-tag"></i>
       <div>
         <div class="fw-700 fs-16">Preço</div>
         <div class="fs-13 text-muted">Cliente achou caro</div>
       </div>
     </div>
     <div class="motivo-option" data-motivo="ruptura" onclick="selectMotivo(this)">
-      <i class="fa-solid fa-box-open" style="color:var(--motivo-ruptura)"></i>
+      <i class="fa-solid fa-box-open"></i>
       <div>
         <div class="fw-700 fs-16">Ruptura</div>
         <div class="fs-13 text-muted">Produto em falta / sem estoque</div>
       </div>
     </div>
     <div class="motivo-option" data-motivo="indecisao" onclick="selectMotivo(this)">
-      <i class="fa-solid fa-face-meh" style="color:var(--motivo-indecisao)"></i>
+      <i class="fa-solid fa-face-meh"></i>
       <div>
         <div class="fw-700 fs-16">Indecisão</div>
         <div class="fs-13 text-muted">Cliente vai pensar / voltar depois</div>
       </div>
     </div>
     <div class="motivo-option" data-motivo="so_olhando" onclick="selectMotivo(this)">
-      <i class="fa-solid fa-eye" style="color:var(--motivo-so-olhando)"></i>
+      <i class="fa-solid fa-eye"></i>
       <div>
         <div class="fw-700 fs-16">Só olhando</div>
         <div class="fs-13 text-muted">Sem intenção de compra</div>
       </div>
     </div>
     <div class="motivo-option" data-motivo="outro" onclick="selectMotivo(this)">
-      <i class="fa-solid fa-ellipsis" style="color:var(--motivo-outro)"></i>
+      <i class="fa-solid fa-ellipsis"></i>
       <div>
         <div class="fw-700 fs-16">Outro</div>
         <div class="fs-13 text-muted">Motivo diferente</div>
@@ -196,17 +196,17 @@ window.addEventListener('error', function(e) {
 
   <!-- Ruptura: campo produto (hidden) -->
   <div id="rupturaField" class="hidden mt-16">
-    <label class="block fs-13 fw-700 text-muted uppercase mb-4" style="letter-spacing:.08em">Qual produto?</label>
+    <label class="block fs-13 fw-700 text-muted uppercase mb-4 tracking-tight">Qual produto?</label>
     <input id="rupturaInput" class="input" type="text" placeholder="Ex: Chapéu Pralana 6X" autocomplete="off">
   </div>
 
   <!-- Outro: campo detalhe (hidden) -->
   <div id="outroField" class="hidden mt-16">
-    <label class="block fs-13 fw-700 text-muted uppercase mb-4" style="letter-spacing:.08em">Descreva o motivo</label>
+    <label class="block fs-13 fw-700 text-muted uppercase mb-4 tracking-tight">Descreva o motivo</label>
     <input id="outroInput" class="input" type="text" placeholder="Ex: Cliente errou de loja" autocomplete="off">
   </div>
 
-  <button class="btn btn-danger" style="width:100%;margin-top:20px" id="btnConfirmMotivo" onclick="confirmMotivo()" disabled>
+  <button class="btn btn-danger btn-confirm-motivo" id="btnConfirmMotivo" onclick="confirmMotivo()" disabled>
     <i class="fa-solid fa-check"></i>
     Confirmar
   </button>
@@ -220,29 +220,29 @@ window.addEventListener('error', function(e) {
   <p class="fs-14 text-secondary mb-16" id="outcomeVendorName"></p>
 
   <div class="flex-col gap-8">
-    <div class="motivo-option" onclick="selectOutcome('venda')">
-      <i class="fa-solid fa-shopping-bag" style="color:var(--success);font-size:20px;width:28px;text-align:center"></i>
+    <div class="motivo-option outcome-option" data-outcome="venda" onclick="selectOutcome('venda')">
+      <i class="fa-solid fa-shopping-bag"></i>
       <div>
         <div class="fw-700 fs-16">Venda</div>
         <div class="fs-13 text-muted">Cliente comprou</div>
       </div>
     </div>
-    <div class="motivo-option" onclick="selectOutcome('troca')">
-      <i class="fa-solid fa-arrow-right-arrow-left" style="color:var(--info);font-size:20px;width:28px;text-align:center"></i>
+    <div class="motivo-option outcome-option" data-outcome="troca" onclick="selectOutcome('troca')">
+      <i class="fa-solid fa-arrow-right-arrow-left"></i>
       <div>
         <div class="fw-700 fs-16">Troca</div>
         <div class="fs-13 text-muted">Cliente trocou produto</div>
       </div>
     </div>
-    <div class="motivo-option" onclick="selectOutcome('nao_convertido')">
-      <i class="fa-solid fa-xmark" style="color:var(--warning);font-size:20px;width:28px;text-align:center"></i>
+    <div class="motivo-option outcome-option" data-outcome="nao_convertido" onclick="selectOutcome('nao_convertido')">
+      <i class="fa-solid fa-xmark"></i>
       <div>
         <div class="fw-700 fs-16">Não Converteu</div>
         <div class="fs-13 text-muted">Cliente saiu sem comprar</div>
       </div>
     </div>
-    <div class="motivo-option" onclick="selectOutcome('cancelar')">
-      <i class="fa-solid fa-rotate-left" style="color:var(--danger);font-size:20px;width:28px;text-align:center"></i>
+    <div class="motivo-option outcome-option" data-outcome="cancelar" onclick="selectOutcome('cancelar')">
+      <i class="fa-solid fa-rotate-left"></i>
       <div>
         <div class="fw-700 fs-16">Cancelar Atendimento</div>
         <div class="fs-13 text-muted">Vendedor volta ao 1º da fila</div>
@@ -253,15 +253,15 @@ window.addEventListener('error', function(e) {
 
 <!-- Check-in Overlay (abertura de turno) -->
 <div class="bottom-sheet-overlay" id="checkinOverlay" onclick="closeCheckin()"></div>
-<div class="bottom-sheet" id="checkinSheet" style="max-height:90vh">
+<div class="bottom-sheet sheet-max-90vh" id="checkinSheet">
   <div class="bottom-sheet-handle"></div>
   <h3 class="mono fs-16 fw-700 mb-4">Check-in do Turno</h3>
   <p class="fs-13 text-secondary mb-16">Selecione os vendedores presentes</p>
   <div id="checkinList" class="flex-col gap-6 mb-16"></div>
   <div class="flex-center gap-8">
-    <button class="btn btn-ghost" style="flex:1" onclick="closeCheckin()">Cancelar</button>
-    <button class="btn btn-success" style="flex:1" id="btnCheckin" onclick="confirmCheckin()">
-      <i class="fa-solid fa-check" style="margin-right:4px"></i>Iniciar Turno
+    <button class="btn btn-ghost btn-flex-1" onclick="closeCheckin()">Cancelar</button>
+    <button class="btn btn-success btn-flex-1" id="btnCheckin" onclick="confirmCheckin()">
+      <i class="fa-solid fa-check panel-header-icon"></i>Iniciar Turno
     </button>
   </div>
 </div>
@@ -274,36 +274,36 @@ window.addEventListener('error', function(e) {
   <p class="fs-13 text-secondary mb-16" id="saidaNome">Selecione o motivo</p>
 
   <div class="flex-col gap-8">
-    <div class="motivo-option" onclick="confirmSaida('almoco')">
-      <i class="fa-solid fa-utensils" style="color:var(--saida-almoco)"></i>
+    <div class="motivo-option" data-saida="almoco" onclick="confirmSaida('almoco')">
+      <i class="fa-solid fa-utensils"></i>
       <div>
         <div class="fw-700 fs-14">Almoço</div>
         <div class="fs-11 text-muted">Saiu para almoçar</div>
       </div>
     </div>
-    <div class="motivo-option" onclick="confirmSaida('banheiro')">
-      <i class="fa-solid fa-restroom" style="color:var(--saida-banheiro)"></i>
+    <div class="motivo-option" data-saida="banheiro" onclick="confirmSaida('banheiro')">
+      <i class="fa-solid fa-restroom"></i>
       <div>
         <div class="fw-700 fs-14">Banheiro</div>
         <div class="fs-11 text-muted">Pausa rápida</div>
       </div>
     </div>
-    <div class="motivo-option" onclick="confirmSaida('operacional')">
-      <i class="fa-solid fa-wrench" style="color:var(--saida-operacional)"></i>
+    <div class="motivo-option" data-saida="operacional" onclick="confirmSaida('operacional')">
+      <i class="fa-solid fa-wrench"></i>
       <div>
         <div class="fw-700 fs-14">Operacional</div>
         <div class="fs-11 text-muted">Demanda solicitada pela gerência</div>
       </div>
     </div>
-    <div class="motivo-option" onclick="confirmSaida('finalizar')">
-      <i class="fa-solid fa-door-open" style="color:var(--saida-finalizar)"></i>
+    <div class="motivo-option" data-saida="finalizar" onclick="confirmSaida('finalizar')">
+      <i class="fa-solid fa-door-open"></i>
       <div>
         <div class="fw-700 fs-14">Finalizar o dia</div>
         <div class="fs-11 text-muted">Encerrou o expediente</div>
       </div>
     </div>
-    <div class="motivo-option" onclick="confirmSaida('outro')">
-      <i class="fa-solid fa-ellipsis" style="color:var(--saida-outro)"></i>
+    <div class="motivo-option" data-saida="outro" onclick="confirmSaida('outro')">
+      <i class="fa-solid fa-ellipsis"></i>
       <div>
         <div class="fw-700 fs-14">Outro motivo</div>
         <div class="fs-11 text-muted">Motivo diferente</div>
@@ -313,33 +313,33 @@ window.addEventListener('error', function(e) {
 </div>
 
 <!-- Mini Ranking Dropdown (fora do header para não afetar flex) -->
-<div id="miniRankingDropdown" style="display:none;position:fixed;top:56px;right:120px;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;padding:16px;z-index:998;box-shadow:0 8px 32px rgba(0,0,0,.2);min-width:260px;max-width:320px">
-  <div class="fs-11 fw-800 uppercase text-muted mb-8" style="letter-spacing:.1em"><i class="fa-solid fa-trophy mr-4" style="color:#FBBF24"></i>Ranking do Turno</div>
+<div id="miniRankingDropdown" class="mini-ranking-dropdown" style="display:none">
+  <div class="fs-11 fw-800 uppercase text-muted mb-8 tracking-wide"><i class="fa-solid fa-trophy mr-4 mini-ranking-trophy"></i>Ranking do Turno</div>
   <div id="miniRankingList" class="flex-col gap-6"></div>
 </div>
 
 <!-- Bottom Sheet: Resumo do Turno -->
 <div class="bottom-sheet-overlay" id="turnoSummaryOverlay" onclick="closeTurnoSummary()"></div>
-<div class="bottom-sheet" id="turnoSummarySheet" style="max-height:80vh">
+<div class="bottom-sheet sheet-max-80vh" id="turnoSummarySheet">
   <div class="bottom-sheet-handle"></div>
   <h3 class="mono fs-16 fw-700 mb-4"><i class="fa-solid fa-flag-checkered mr-4"></i>Encerrar Turno</h3>
   <p class="fs-13 text-secondary mb-16">Resumo do turno atual</p>
-  <div id="turnoSummaryContent" style="margin-bottom:20px"></div>
+  <div id="turnoSummaryContent" class="turno-summary-content"></div>
   <div class="flex-center gap-8">
-    <button class="btn btn-ghost" style="flex:1;min-height:48px" onclick="closeTurnoSummary()">Voltar</button>
-    <button class="btn" style="flex:1;min-height:48px;background:var(--danger);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer" id="btnConfirmCloseTurno" onclick="confirmCloseTurno()">
-      <i class="fa-solid fa-power-off" style="margin-right:4px"></i>Encerrar Turno
+    <button class="btn btn-ghost btn-flex-tall" onclick="closeTurnoSummary()">Voltar</button>
+    <button class="btn btn-turno-close" id="btnConfirmCloseTurno" onclick="confirmCloseTurno()">
+      <i class="fa-solid fa-power-off panel-header-icon"></i>Encerrar Turno
     </button>
   </div>
 </div>
 
 <!-- Bottom Sheet: Histórico de Posições -->
 <div class="bottom-sheet-overlay" id="posLogOverlay" onclick="closePosLog()"></div>
-<div class="bottom-sheet" id="posLogSheet" style="max-height:80vh">
+<div class="bottom-sheet sheet-max-80vh" id="posLogSheet">
   <div class="bottom-sheet-handle"></div>
   <h3 class="mono fs-16 fw-700 mb-4"><i class="fa-solid fa-clock-rotate-left mr-4"></i>Histórico da Sessão</h3>
   <p class="fs-13 text-secondary mb-12">Movimentações registradas nesta sessão</p>
-  <div id="posLogList" style="max-height:50vh;overflow-y:auto;display:flex;flex-direction:column;gap:4px"></div>
+  <div id="posLogList" class="pos-log-list"></div>
 </div>
 
 <canvas id="confettiCanvas"></canvas>

@@ -33,7 +33,6 @@ let touchStartX = 0,
 let touchDragging = false;
 let _ghostInitX = 0,
   _ghostInitY = 0;
-const _dragRafId = null;
 let _lastDropCheck = 0;
 
 /**
