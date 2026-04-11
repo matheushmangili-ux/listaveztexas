@@ -509,6 +509,9 @@ async function onRefresh() {
     await loadContext();
     await Promise.all([loadCanais(), loadStats()]);
     renderAll();
+    // Refresh do XP também — se houver diff, dispara toast/level up/tier up
+    // (útil pra smoke test e pra quando admin ajusta XP via banco)
+    refreshXp().catch((err) => console.warn('[xp] refresh pós-botão falhou:', err));
     window._vendorToast('Atualizado', 'success', 1200);
   } catch (err) {
     window._vendorToast('Erro: ' + (err?.message || err), 'error');
