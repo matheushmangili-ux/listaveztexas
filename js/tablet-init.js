@@ -425,6 +425,13 @@ async function loadVendedores() {
 // Atendimento functions imported from /js/tablet-atendimento.js
 
 async function addToQueue(vendedorId) {
+  // Fechar pausa aberta imediatamente — senão o fim fica NULL até o próximo
+  // evento que chama registrar_retorno (ex: fim de turno), inflando a duração
+  try {
+    await sb.rpc('registrar_retorno', { p_vendedor_id: vendedorId });
+  } catch (e) {
+    console.warn('[registrar_retorno] falhou:', e?.message || e);
+  }
   const v = state.vendedores.find((x) => x.id === vendedorId);
   const setor = v?.setor || 'loja';
   const setorQueue = state.vendedores.filter((x) => (x.setor || 'loja') === setor && x.posicao_fila != null);
