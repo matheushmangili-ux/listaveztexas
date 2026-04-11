@@ -1028,6 +1028,7 @@ html, body {
   cursor: pointer;
   color: inherit;
   font-family: inherit;
+  min-width: 0;
 }
 .xp-strip-btn:active { transform: scale(0.98); }
 .xp-level {
@@ -1039,20 +1040,28 @@ html, body {
   flex-shrink: 0;
 }
 
-/* Tier badge (Fase 2b) — ícone + short name, pintado por major */
+/* Tier badge (Fase 2b) — ícone + nome completo do tier, pintado por major */
 .tier-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 9px;
+  gap: 5px;
+  font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
   color: var(--vendor-text-dim);
 }
 .tier-badge i {
-  font-size: 11px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.tier-badge-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 .tier-badge.tier-pedra       { color: var(--tier-pedra); }
 .tier-badge.tier-madeira     { color: var(--tier-madeira); }
@@ -1066,16 +1075,18 @@ html, body {
 .tier-badge.tier-grao_mestre { color: var(--tier-grao_mestre); }
 .tier-badge.tier-rubi        { color: var(--tier-rubi); }
 .tier-badge.tier-lendario    { color: var(--tier-lendario); }
-/* Mítico usa gradient text arco-íris */
-.tier-badge.tier-mitico {
+/* Mítico usa gradient text arco-íris — aplicado no label pra não afetar o ícone */
+.tier-badge.tier-mitico .tier-badge-label {
   background: linear-gradient(135deg, #ec4899, #8b5cf6, #06b6d4, #22c55e);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
 }
+.tier-badge.tier-mitico {
+  color: #ec4899; /* fallback pro ícone */
+}
 .tier-badge.tier-mitico i {
-  -webkit-text-fill-color: initial;
   color: #ec4899;
   filter: drop-shadow(0 0 4px rgba(236, 72, 153, 0.6));
 }

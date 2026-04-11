@@ -107,7 +107,7 @@ function render(xp) {
     <button type="button" class="xp-strip-btn" aria-label="Minha jornada — ${escapeHtml(tier.label)}">
       <span class="tier-badge tier-${escapeHtml(tier.major_code)}">
         <i class="fa-solid ${escapeHtml(tier.icon)}"></i>
-        ${escapeHtml(tier.short)}
+        <span class="tier-badge-label">${escapeHtml(tier.label)}</span>
       </span>
       <span class="xp-level mono">Nv ${xp.level}</span>
       <span class="xp-bar"><span class="xp-bar-fill" style="width:${pct}%"></span></span>
