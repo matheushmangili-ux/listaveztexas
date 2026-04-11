@@ -14,7 +14,7 @@ export const AUTO_SYNC_INTERVAL = 30000; // 30s — periodic data reload
 export const QUICK_STATS_INTERVAL = 60000; // 1 min — quick stats update
 export const GHOST_CLEANUP_INTERVAL = 3000; // 3s — orphan drag ghost cleanup
 
-export const RT_VENDEDOR_DEBOUNCE = 300; // realtime vendedor reload debounce
+export const RT_VENDEDOR_DEBOUNCE = 100; // realtime vendedor reload debounce
 export const RT_DASHBOARD_DEBOUNCE = 500; // realtime dashboard reload debounce
 export const RT_RECONNECT_DELAY = 3000; // realtime channel reconnect
 

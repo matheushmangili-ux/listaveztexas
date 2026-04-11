@@ -18,6 +18,7 @@ function grabRefs() {
   el.headerName = document.getElementById('headerName');
   el.headerStatus = document.getElementById('headerStatus');
   el.headerDot = document.getElementById('headerDot');
+  el.btnRefresh = document.getElementById('btnRefresh');
 
   el.idleCard = document.getElementById('homeIdleCard');
   el.attendingCard = document.getElementById('homeAttendingCard');
@@ -28,6 +29,7 @@ function grabRefs() {
   el.bigLabel = document.getElementById('bigLabel');
   el.queuePeek = document.getElementById('queuePeek');
   el.btnStart = document.getElementById('btnStartAttendance');
+  el.btnStartPref = document.getElementById('btnStartPreferencial');
 
   el.attendingTimer = document.getElementById('attendingTimer');
   el.btnFinish = document.getElementById('btnFinishAttendance');
@@ -237,6 +239,7 @@ async function renderIdle() {
     el.bigPos.classList.remove('next-pulse');
     el.bigLabel.textContent = 'Fora da fila — peça pra recepção te adicionar';
     el.btnStart.classList.add('hidden');
+    el.btnStartPref.classList.add('hidden');
     el.queuePeek.innerHTML = '';
     return;
   }
@@ -251,6 +254,8 @@ async function renderIdle() {
     el.bigLabel.textContent = (pos - 1) === 1 ? '1 pessoa na sua frente' : (pos - 1) + ' pessoas na sua frente';
     el.btnStart.classList.add('hidden');
   }
+  // Botão preferencial: sempre visível quando está na fila (pos 1 ou mais)
+  el.btnStartPref.classList.remove('hidden');
 
   // Peek da fila (top 5 do setor do vendedor)
   const { data } = await _sb
@@ -362,12 +367,14 @@ function subscribeRealtime() {
 
 // ─── Actions wiring ───
 function wireActions() {
-  el.btnStart.addEventListener('click', onStartAttendance);
+  el.btnStart.addEventListener('click', () => onStartAttendance(false));
+  el.btnStartPref.addEventListener('click', () => onStartAttendance(true));
   el.btnFinish.addEventListener('click', () => openOutcomeSheet());
   el.btnCancel.addEventListener('click', onCancelAttendance);
   el.btnReturn.addEventListener('click', onReturnFromPausa);
   el.btnPausa.addEventListener('click', () => openPausaSheet());
   el.btnLogout.addEventListener('click', () => window._vendorLogout && window._vendorLogout());
+  el.btnRefresh.addEventListener('click', onRefresh);
 
   // Outcome buttons
   el.outcomeSheet.querySelectorAll('.vendor-outcome-btn').forEach((btn) => {
@@ -387,7 +394,7 @@ function wireActions() {
   // Helper pro botão "Não informar" canal
   window._vendorStartWithoutCanal = () => {
     closeAllSheets();
-    callStartAttendance(null);
+    callStartAttendance(null);  // _pendingPreferencial já foi setado no onStartAttendance
   };
 }
 
@@ -444,25 +451,55 @@ function closeAllSheets() {
 }
 
 // ─── Action handlers ───
-function onStartAttendance() {
-  if (_ctx.posicao_fila !== 1) {
+let _pendingPreferencial = false;
+
+function onStartAttendance(preferencial) {
+  // Regular: só quem tá no #1
+  if (!preferencial && _ctx.posicao_fila !== 1) {
     window._vendorToast('Você não é o próximo da fila', 'error');
     return;
   }
+  // Preferencial: precisa estar na fila (qualquer posição)
+  if (preferencial && (_ctx.posicao_fila == null || _ctx.status !== 'disponivel')) {
+    window._vendorToast('Você precisa estar na fila pra atender preferencial', 'error');
+    return;
+  }
+  _pendingPreferencial = !!preferencial;
   openCanalSheet();
 }
 
 async function callStartAttendance(canalId) {
   try {
-    const { data, error } = await _sb.rpc('vendor_start_attendance', { p_canal_id: canalId });
+    const { data, error } = await _sb.rpc('vendor_start_attendance', {
+      p_canal_id: canalId,
+      p_preferencial: _pendingPreferencial
+    });
     if (error) throw error;
     _atendId = data;
     _atendStartMs = Date.now();
+    const wasPref = _pendingPreferencial;
+    _pendingPreferencial = false;
     await loadContext();
     renderAll();
-    window._vendorToast('Atendimento iniciado', 'success');
+    window._vendorToast(wasPref ? 'Atendimento preferencial iniciado ⭐' : 'Atendimento iniciado', 'success');
   } catch (err) {
+    _pendingPreferencial = false;
     window._vendorToast(err?.message || 'Erro ao iniciar', 'error');
+  }
+}
+
+async function onRefresh() {
+  if (el.btnRefresh.classList.contains('refreshing')) return;
+  el.btnRefresh.classList.add('refreshing');
+  try {
+    await loadContext();
+    await Promise.all([loadCanais(), loadStats()]);
+    renderAll();
+    window._vendorToast('Atualizado', 'success', 1200);
+  } catch (err) {
+    window._vendorToast('Erro: ' + (err?.message || err), 'error');
+  } finally {
+    setTimeout(() => el.btnRefresh.classList.remove('refreshing'), 400);
   }
 }
 

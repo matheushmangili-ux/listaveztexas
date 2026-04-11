@@ -351,6 +351,37 @@ html, body {
 }
 .vendor-cta-next:active { transform: scale(0.97); }
 
+.vendor-cta-preferencial {
+  margin-top: 10px;
+  width: 100%;
+  background: transparent;
+  color: var(--vendor-warning);
+  border: 1.5px solid var(--vendor-warning);
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.15s, transform 0.1s;
+}
+.vendor-cta-preferencial:hover {
+  background: rgba(245, 158, 11, 0.1);
+}
+.vendor-cta-preferencial:active { transform: scale(0.97); }
+
+/* Animação do refresh rotacionando quando ativo */
+.vendor-icon-btn.refreshing i {
+  animation: refreshSpin 0.8s linear infinite;
+}
+@keyframes refreshSpin {
+  to { transform: rotate(360deg); }
+}
+
 /* Attending card */
 .vendor-card-attending {
   background: linear-gradient(180deg, rgba(59, 130, 246, 0.08) 0%, var(--vendor-card) 100%);

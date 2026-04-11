@@ -3,7 +3,7 @@
 // Network-first para HTML e APIs — sempre pega a versão mais fresca
 // Web Push listener pro minhavez Vendedor
 // Bump CACHE_VERSION a cada deploy
-const CACHE_VERSION = '19';
+const CACHE_VERSION = '20';
 const CACHE_NAME = 'minhavez-v' + CACHE_VERSION;
 const STATIC_ASSETS = [
   '/tablet.html',
@@ -37,6 +37,7 @@ const STATIC_ASSETS = [
   '/js/dashboard-init.js',
   '/js/changelog.js',
   '/assets/logo-minhavez-new.png',
+  '/assets/icon-notification-256.png',
   '/manifest.json'
 ];
 
@@ -117,8 +118,8 @@ self.addEventListener('push', event => {
   const title = data.title || 'minhavez Vendedor';
   const options = {
     body: data.body || 'Você é o próximo da fila',
-    icon: '/assets/logo-minhavez-new.png',
-    badge: '/assets/logo-minhavez-new.png',
+    icon: '/assets/icon-notification-256.png',
+    badge: '/assets/icon-notification-256.png',
     tag: data.tag || 'minhavez-push',
     renotify: true,
     requireInteraction: false,
