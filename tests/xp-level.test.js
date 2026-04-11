@@ -76,6 +76,113 @@ describe('vendor_xp_for_level (inverso)', () => {
   });
 });
 
+// Espelho JS da função SQL vendor_tier_from_level.
+// Mantido em sync manual com sql/17-tier-ranking.sql — se o SQL mudar,
+// atualizar aqui também.
+function tierFromLevel(level) {
+  if (level <= 1)  return { code: 'pedra',       major_code: 'pedra',       label: 'Pedra' };
+  if (level <= 3)  return { code: 'madeira',     major_code: 'madeira',     label: 'Madeira' };
+  if (level === 4) return { code: 'ferro_1',     major_code: 'ferro',       label: 'Ferro I' };
+  if (level === 5) return { code: 'ferro_2',     major_code: 'ferro',       label: 'Ferro II' };
+  if (level === 6) return { code: 'ferro_3',     major_code: 'ferro',       label: 'Ferro III' };
+  if (level === 7) return { code: 'bronze_1',    major_code: 'bronze',      label: 'Bronze I' };
+  if (level === 8) return { code: 'bronze_2',    major_code: 'bronze',      label: 'Bronze II' };
+  if (level === 9) return { code: 'bronze_3',    major_code: 'bronze',      label: 'Bronze III' };
+  if (level === 10) return { code: 'prata_1',    major_code: 'prata',       label: 'Prata I' };
+  if (level === 11) return { code: 'prata_2',    major_code: 'prata',       label: 'Prata II' };
+  if (level === 12) return { code: 'prata_3',    major_code: 'prata',       label: 'Prata III' };
+  if (level === 13) return { code: 'ouro_1',     major_code: 'ouro',        label: 'Ouro I' };
+  if (level === 14) return { code: 'ouro_2',     major_code: 'ouro',        label: 'Ouro II' };
+  if (level === 15) return { code: 'ouro_3',     major_code: 'ouro',        label: 'Ouro III' };
+  if (level === 16) return { code: 'platina_1',  major_code: 'platina',     label: 'Platina I' };
+  if (level === 17) return { code: 'platina_2',  major_code: 'platina',     label: 'Platina II' };
+  if (level === 18) return { code: 'platina_3',  major_code: 'platina',     label: 'Platina III' };
+  if (level === 19) return { code: 'diamante_1', major_code: 'diamante',    label: 'Diamante I' };
+  if (level === 20) return { code: 'diamante_2', major_code: 'diamante',    label: 'Diamante II' };
+  if (level === 21) return { code: 'diamante_3', major_code: 'diamante',    label: 'Diamante III' };
+  if (level <= 24) return { code: 'mestre',      major_code: 'mestre',      label: 'Mestre' };
+  if (level <= 29) return { code: 'grao_mestre', major_code: 'grao_mestre', label: 'Grão-Mestre' };
+  if (level <= 34) return { code: 'rubi',        major_code: 'rubi',        label: 'Rubi' };
+  if (level <= 44) return { code: 'lendario',    major_code: 'lendario',    label: 'Lendário' };
+  return              { code: 'mitico',       major_code: 'mitico',      label: 'Mítico' };
+}
+
+describe('vendor_tier_from_level (espelho SQL — Fase 2b)', () => {
+  it('N0-1 mapeia pra Pedra', () => {
+    expect(tierFromLevel(0).code).toBe('pedra');
+    expect(tierFromLevel(1).code).toBe('pedra');
+  });
+
+  it('N2-3 mapeia pra Madeira', () => {
+    expect(tierFromLevel(2).code).toBe('madeira');
+    expect(tierFromLevel(3).code).toBe('madeira');
+  });
+
+  it('sub-tiers I/II/III de Ferro (N4-6)', () => {
+    expect(tierFromLevel(4).code).toBe('ferro_1');
+    expect(tierFromLevel(5).code).toBe('ferro_2');
+    expect(tierFromLevel(6).code).toBe('ferro_3');
+  });
+
+  it('sub-tiers de Diamante (N19-21) compartilham o mesmo major_code', () => {
+    const t19 = tierFromLevel(19);
+    const t20 = tierFromLevel(20);
+    const t21 = tierFromLevel(21);
+    expect(t19.major_code).toBe('diamante');
+    expect(t20.major_code).toBe('diamante');
+    expect(t21.major_code).toBe('diamante');
+    expect(t19.code).toBe('diamante_1');
+    expect(t21.code).toBe('diamante_3');
+  });
+
+  it('top tiers (Mestre, Grão-Mestre, Rubi, Lendário, Mítico)', () => {
+    expect(tierFromLevel(22).code).toBe('mestre');
+    expect(tierFromLevel(24).code).toBe('mestre');
+    expect(tierFromLevel(25).code).toBe('grao_mestre');
+    expect(tierFromLevel(29).code).toBe('grao_mestre');
+    expect(tierFromLevel(30).code).toBe('rubi');
+    expect(tierFromLevel(34).code).toBe('rubi');
+    expect(tierFromLevel(35).code).toBe('lendario');
+    expect(tierFromLevel(44).code).toBe('lendario');
+    expect(tierFromLevel(45).code).toBe('mitico');
+    expect(tierFromLevel(99).code).toBe('mitico');
+  });
+
+  it('continuidade: todo nível de 0 a 60 tem tier válido', () => {
+    for (let n = 0; n <= 60; n++) {
+      const t = tierFromLevel(n);
+      expect(t).toBeDefined();
+      expect(t.code).toBeTruthy();
+      expect(t.major_code).toBeTruthy();
+      expect(t.label).toBeTruthy();
+    }
+  });
+
+  it('exatamente 13 tiers maiores distintos nos níveis 0-50', () => {
+    const majors = new Set();
+    for (let n = 0; n <= 50; n++) majors.add(tierFromLevel(n).major_code);
+    expect(majors.size).toBe(13);
+    expect([...majors]).toEqual(expect.arrayContaining([
+      'pedra', 'madeira', 'ferro', 'bronze', 'prata', 'ouro',
+      'platina', 'diamante', 'mestre', 'grao_mestre', 'rubi',
+      'lendario', 'mitico'
+    ]));
+  });
+
+  it('fanfarra: majors adjacentes nunca colidem (N=X e N=X+1 no mesmo major ou muda)', () => {
+    // Se existe algum N onde major(N) != major(N+1), é uma transição de fanfarra
+    let transitions = 0;
+    let prev = tierFromLevel(0).major_code;
+    for (let n = 1; n <= 60; n++) {
+      const curr = tierFromLevel(n).major_code;
+      if (curr !== prev) transitions++;
+      prev = curr;
+    }
+    // Pedra→Madeira→Ferro→Bronze→Prata→Ouro→Platina→Diamante→Mestre→GMs→Rubi→Lendario→Mitico = 12 transições
+    expect(transitions).toBe(12);
+  });
+});
+
 describe('simulação de curva de progressão', () => {
   // Cenário do roadmap: vendedor mediano = 15 atend × 20 + 5 vendas × 50 = 550 pts/dia
   const DAILY_XP = 15 * 20 + 5 * 50; // = 550

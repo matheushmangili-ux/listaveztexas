@@ -17,6 +17,21 @@
   --vendor-warning: #f59e0b;
   --vendor-danger: #ef4444;
   --vendor-info: #3b82f6;
+
+  /* Tiers RPG (Fase 2b) — cor principal por major_code */
+  --tier-pedra: #9ca3af;
+  --tier-madeira: #b45309;
+  --tier-ferro: #94a3b8;
+  --tier-bronze: #d97706;
+  --tier-prata: #e2e8f0;
+  --tier-ouro: #facc15;
+  --tier-platina: #22d3ee;
+  --tier-diamante: #60a5fa;
+  --tier-mestre: #a855f7;
+  --tier-grao_mestre: #8b5cf6;
+  --tier-rubi: #ef4444;
+  --tier-lendario: #f97316;
+  --tier-mitico: #ec4899;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -1005,7 +1020,7 @@ html, body {
 .xp-strip-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: transparent;
   border: none;
   padding: 0;
@@ -1016,12 +1031,60 @@ html, body {
 }
 .xp-strip-btn:active { transform: scale(0.98); }
 .xp-level {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
-  color: var(--vendor-warning);
+  color: var(--vendor-text-dim);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   flex-shrink: 0;
+}
+
+/* Tier badge (Fase 2b) — ícone + short name, pintado por major */
+.tier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  color: var(--vendor-text-dim);
+}
+.tier-badge i {
+  font-size: 11px;
+}
+.tier-badge.tier-pedra       { color: var(--tier-pedra); }
+.tier-badge.tier-madeira     { color: var(--tier-madeira); }
+.tier-badge.tier-ferro       { color: var(--tier-ferro); }
+.tier-badge.tier-bronze      { color: var(--tier-bronze); }
+.tier-badge.tier-prata       { color: var(--tier-prata); }
+.tier-badge.tier-ouro        { color: var(--tier-ouro); }
+.tier-badge.tier-platina     { color: var(--tier-platina); }
+.tier-badge.tier-diamante    { color: var(--tier-diamante); }
+.tier-badge.tier-mestre      { color: var(--tier-mestre); }
+.tier-badge.tier-grao_mestre { color: var(--tier-grao_mestre); }
+.tier-badge.tier-rubi        { color: var(--tier-rubi); }
+.tier-badge.tier-lendario    { color: var(--tier-lendario); }
+/* Mítico usa gradient text arco-íris */
+.tier-badge.tier-mitico {
+  background: linear-gradient(135deg, #ec4899, #8b5cf6, #06b6d4, #22c55e);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.tier-badge.tier-mitico i {
+  -webkit-text-fill-color: initial;
+  color: #ec4899;
+  filter: drop-shadow(0 0 4px rgba(236, 72, 153, 0.6));
+}
+/* Glow nos tops pra impressionar */
+.tier-badge.tier-ouro i,
+.tier-badge.tier-diamante i,
+.tier-badge.tier-rubi i,
+.tier-badge.tier-lendario i {
+  filter: drop-shadow(0 0 4px currentColor);
 }
 .xp-bar {
   flex: 1;
@@ -1117,22 +1180,150 @@ html, body {
   margin-top: 4px;
 }
 
+/* Tier up fanfarra (mudança de tier maior, ex: Diamante III → Mestre) */
+.xp-tierup {
+  --tier-color: #facc15;
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    color-mix(in srgb, var(--tier-color) 25%, rgba(0,0,0,0.8)),
+    rgba(0,0,0,0.85)
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 310;
+  opacity: 0;
+  transition: opacity 0.5s;
+  pointer-events: none;
+  padding: 24px;
+}
+.xp-tierup.show { opacity: 1; }
+.xp-tierup-card {
+  background: linear-gradient(135deg,
+    var(--tier-color),
+    color-mix(in srgb, var(--tier-color) 55%, #ffffff));
+  color: #060606;
+  padding: 40px 48px;
+  border-radius: 28px;
+  text-align: center;
+  transform: scale(0.6) rotate(-3deg);
+  transition: transform 0.55s cubic-bezier(0.34, 1.8, 0.64, 1);
+  box-shadow:
+    0 24px 72px color-mix(in srgb, var(--tier-color) 40%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--tier-color) 25%, transparent),
+    0 0 120px color-mix(in srgb, var(--tier-color) 50%, transparent);
+  position: relative;
+  overflow: hidden;
+}
+.xp-tierup.show .xp-tierup-card {
+  transform: scale(1) rotate(0);
+}
+.xp-tierup-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(255,255,255,0.35) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  animation: tierShine 2.5s ease-in-out 0.4s;
+}
+@keyframes tierShine {
+  to { transform: translateX(100%); }
+}
+.xp-tierup-card i {
+  font-size: 72px;
+  margin-bottom: 10px;
+  display: block;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+}
+.xp-tierup-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  opacity: 0.75;
+  margin-bottom: 4px;
+}
+.xp-tierup-title {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.xp-tierup-sub {
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.75;
+  margin-top: 6px;
+}
+
+/* Mítico: gradient arco-íris no card */
+.xp-tierup.tier-mitico .xp-tierup-card {
+  background: linear-gradient(135deg, #ec4899, #a855f7, #3b82f6, #06b6d4, #22c55e);
+  color: #fff;
+}
+.xp-tierup.tier-mitico .xp-tierup-title,
+.xp-tierup.tier-mitico .xp-tierup-eyebrow,
+.xp-tierup.tier-mitico .xp-tierup-sub {
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
 /* Sheet "Minha jornada" */
 .xp-sheet-hero {
-  background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(250,204,21,0.05));
-  border: 1px solid rgba(245,158,11,0.25);
+  --tier-color: var(--vendor-warning);
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--tier-color) 15%, transparent),
+    color-mix(in srgb, var(--tier-color) 3%, transparent));
+  border: 1px solid color-mix(in srgb, var(--tier-color) 30%, transparent);
   border-radius: 16px;
-  padding: 18px 16px;
+  padding: 20px 16px 18px;
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  gap: 4px;
   margin-bottom: 16px;
 }
+.xp-sheet-tier-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--tier-color) 18%, transparent);
+  color: var(--tier-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--tier-color) 30%, transparent));
+}
+.xp-sheet-hero.tier-mitico .xp-sheet-tier-icon {
+  background: linear-gradient(135deg, rgba(236,72,153,0.2), rgba(139,92,246,0.2), rgba(6,182,212,0.2));
+}
+.xp-sheet-tier-label {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--tier-color);
+  letter-spacing: -0.01em;
+  margin-bottom: 2px;
+}
+.xp-sheet-hero.tier-mitico .xp-sheet-tier-label {
+  background: linear-gradient(135deg, #ec4899, #8b5cf6, #06b6d4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 .xp-sheet-level {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
-  color: var(--vendor-warning);
+  color: var(--vendor-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -1152,7 +1343,9 @@ html, body {
 .xp-sheet-bar-fill {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, var(--vendor-warning), #facc15);
+  background: linear-gradient(90deg,
+    var(--tier-color, var(--vendor-warning)),
+    color-mix(in srgb, var(--tier-color, var(--vendor-warning)) 70%, white));
   border-radius: 999px;
   transition: width 0.4s ease;
 }
