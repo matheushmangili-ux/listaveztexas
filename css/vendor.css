@@ -77,19 +77,13 @@ html, body {
   align-items: center;
   gap: 6px;
 }
-.vendor-brand-symbol {
-  width: 96px;
-  height: 96px;
+.vendor-brand-logo {
+  height: auto;
+  width: 100%;
+  max-width: 260px;
+  max-height: 72px;
   object-fit: contain;
   display: block;
-  margin-bottom: 4px;
-}
-.vendor-brand-wordmark {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--vendor-text);
-  line-height: 1;
 }
 .vendor-brand-sub {
   font-size: 11px;
@@ -370,27 +364,25 @@ html, body {
 
 .vendor-icon-btn-pref {
   color: var(--vendor-warning);
-  position: relative;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  font-size: 15px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+  animation: prefBtnPulse 2.4s ease-in-out infinite;
 }
 .vendor-icon-btn-pref:hover {
-  background: rgba(245, 158, 11, 0.1);
+  background: rgba(245, 158, 11, 0.18);
   color: var(--vendor-warning);
 }
-.vendor-icon-btn-pref::after {
-  content: '';
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--vendor-warning);
-  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
-  animation: prefDotPulse 2s ease-in-out infinite;
+.vendor-icon-btn-pref:active {
+  transform: scale(0.95);
 }
-@keyframes prefDotPulse {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.2); }
+@keyframes prefBtnPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.35); }
+  50% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
 }
 
 /* Animação do refresh rotacionando quando ativo */
