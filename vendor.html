@@ -79,6 +79,9 @@
   </header>
 
   <main class="vendor-main">
+    <!-- Comunicados / Corridas (Fase 1 gamificação) -->
+    <section id="announcementsWrap" class="vendor-ann-wrap hidden"></section>
+
     <!-- Prompt pra ativar notificações push -->
     <section id="pushPromptCard" class="vendor-push-prompt hidden">
       <div class="vendor-push-icon"><i class="fa-solid fa-bell"></i></div>
@@ -150,6 +153,13 @@
       <span>Sair</span>
     </button>
   </nav>
+</div>
+
+<!-- Bottom sheet: Comunicado/Corrida detail -->
+<div class="vendor-sheet-overlay hidden" id="annOverlay"></div>
+<div class="vendor-sheet hidden" id="annSheet">
+  <div class="vendor-sheet-handle"></div>
+  <div id="annSheetBody"></div>
 </div>
 
 <!-- Bottom sheet: Canal de origem (ao iniciar atendimento) -->

@@ -3,7 +3,7 @@
 // Network-first para HTML e APIs — sempre pega a versão mais fresca
 // Web Push listener pro minhavez Vendedor
 // Bump CACHE_VERSION a cada deploy
-const CACHE_VERSION = '24';
+const CACHE_VERSION = '25';
 const CACHE_NAME = 'minhavez-v' + CACHE_VERSION;
 const STATIC_ASSETS = [
   '/tablet.html',
@@ -30,11 +30,13 @@ const STATIC_ASSETS = [
   '/js/tablet-turno.js',
   '/js/vendor-init.js',
   '/js/vendor-home.js',
+  '/js/vendor-announcements.js',
   '/js/auth.js',
   '/js/dashboard-api.js',
   '/js/dashboard-charts.js',
   '/js/dashboard-config.js',
   '/js/dashboard-init.js',
+  '/js/dashboard-announcements.js',
   '/js/changelog.js',
   '/assets/logo-minhavez-new.png',
   '/assets/234538172.png',

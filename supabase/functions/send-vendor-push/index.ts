@@ -1,9 +1,7 @@
 // minhavez Vendedor — Edge Function: send-vendor-push
-// Disparada por trigger Postgres (pg_net) quando vendedores.posicao_fila vira 1.
-// Envia Web Push notificação pro(s) device(s) do vendedor.
-//
-// Input payload (webhook format compatível com Supabase Database Webhooks):
-//   { type: 'UPDATE', table: 'vendedores', record: {...}, old_record: {...}, schema: 'public' }
+// Dois fluxos (discriminados por body.table):
+//  1. table='vendedores', type='UPDATE', posicao_fila virou 1 → push pro próprio vendedor
+//  2. table='tenant_announcements', type='INSERT', urgent=true → push broadcast pro tenant
 //
 // Trata: sem subscription → no-op; 410/404 → deleta subscription stale.
 // verify_jwt=false: disparador é o Postgres interno, não tem JWT.
@@ -77,11 +75,91 @@ Deno.serve(async (req: Request) => {
   try {
     const body = await req.json();
     const type = body?.type;
+    const table = body?.table;
     const record = body?.record;
     const oldRecord = body?.old_record;
 
-    // Só age em UPDATE que fez posicao_fila virar 1 (de qualquer outro valor)
-    if (type !== 'UPDATE' || !record) {
+    if (!record) {
+      return new Response(JSON.stringify({ skipped: 'no record' }), { status: 200 });
+    }
+
+    // ─── Branch: comunicado urgente (broadcast pro tenant) ───
+    if (table === 'tenant_announcements' && type === 'INSERT') {
+      if (record.urgent !== true) {
+        return new Response(JSON.stringify({ skipped: 'not urgent' }), { status: 200 });
+      }
+      const tenantId = record.tenant_id;
+      if (!tenantId) {
+        return new Response(JSON.stringify({ error: 'missing tenant_id' }), { status: 400 });
+      }
+
+      const { data: tenant } = await sb
+        .from('tenants')
+        .select('plano, vendor_mobile_enabled, status, nome_loja')
+        .eq('id', tenantId)
+        .maybeSingle();
+
+      if (!tenant || tenant.plano !== 'elite' || !tenant.vendor_mobile_enabled || tenant.status !== 'active') {
+        return new Response(JSON.stringify({ skipped: 'tenant not entitled' }), { status: 200 });
+      }
+
+      const { data: subs } = await sb
+        .from('push_subscriptions')
+        .select('id, endpoint, p256dh, auth_key')
+        .eq('tenant_id', tenantId);
+
+      if (!subs || subs.length === 0) {
+        return new Response(JSON.stringify({ skipped: 'no subscriptions' }), { status: 200 });
+      }
+
+      const titlePrefix: Record<string, string> = {
+        comunicado:  '📢 ',
+        corrida:     '🏁 ',
+        evento:      '📅 ',
+        treinamento: '🎓 '
+      };
+      const prefix = titlePrefix[record.type] || '📢 ';
+      const trimmedBody = (record.body || '').slice(0, 140);
+
+      const annPayload = new TextEncoder().encode(JSON.stringify({
+        title: prefix + (record.title || 'Novo comunicado'),
+        body: trimmedBody || 'Toque pra ler',
+        tag: 'announcement-' + record.id,
+        url: '/vendor.html',
+        announcement_id: record.id
+      }));
+
+      const appServer = await getAppServer();
+      const results = await Promise.allSettled(subs.map(async (s) => {
+        const subscriber = appServer.subscribe({
+          endpoint: s.endpoint,
+          keys: { p256dh: s.p256dh, auth: s.auth_key }
+        } as webpush.PushSubscription);
+        try {
+          await subscriber.pushMessage(annPayload.buffer, {
+            urgency: webpush.Urgency.Normal,
+            ttl: 3600
+          });
+          return { id: s.id, ok: true };
+        } catch (err: any) {
+          const msg = String(err?.message || err);
+          if (msg.includes('410') || msg.includes('404')) {
+            await sb.from('push_subscriptions').delete().eq('id', s.id);
+            return { id: s.id, ok: false, reason: 'stale-deleted' };
+          }
+          return { id: s.id, ok: false, reason: msg };
+        }
+      }));
+
+      const summary = results.map((r) => r.status === 'fulfilled' ? r.value : { error: String(r.reason) });
+      return new Response(JSON.stringify({ sent: summary.length, results: summary, kind: 'announcement' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // ─── Branch default: vendedor virou #1 na fila ───
+    if (type !== 'UPDATE') {
       return new Response(JSON.stringify({ skipped: 'not an update' }), { status: 200 });
     }
     if (record.posicao_fila !== 1) {

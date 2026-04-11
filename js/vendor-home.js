@@ -2,6 +2,8 @@
 // minhavez Vendedor — Home screen + real-time + actions
 // ============================================
 
+import { initAnnouncements, unmountAnnouncements } from './vendor-announcements.js';
+
 let _sb = null;
 let _ctx = null;        // resultado de get_my_vendedor_context()
 let _atendId = null;    // id do atendimento ativo (se houver)
@@ -86,6 +88,8 @@ export async function initHome(sb) {
     renderAll();
     subscribeRealtime();
     setupPushNotifications();
+    // Comunicados/corridas — independente, falha silenciosa
+    initAnnouncements(_sb, _ctx).catch((err) => console.warn('[announcements] init falhou:', err));
   } catch (err) {
     console.error('[initHome] erro:', err);
     window._vendorToast('Erro ao carregar: ' + (err?.message || err), 'error');
@@ -95,6 +99,7 @@ export async function initHome(sb) {
 export function unmountHome() {
   stopAttendingTimer();
   stopPausaSinceTimer();
+  unmountAnnouncements();
   if (_realtimeChannel) {
     _sb?.removeChannel(_realtimeChannel);
     _realtimeChannel = null;

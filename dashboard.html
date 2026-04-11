@@ -43,6 +43,10 @@
         <i class="fa-solid fa-tablet-screen-button"></i>
         <span>Tablet</span>
       </a>
+      <a id="linkAnnouncements" href="#" class="sidebar-link" onclick="event.preventDefault();window._dashAnnouncementsOpen&&window._dashAnnouncementsOpen()">
+        <i class="fa-solid fa-bullhorn"></i>
+        <span>Comunicados</span>
+      </a>
       <a id="linkSettings" href="#" class="sidebar-link">
         <i class="fa-solid fa-gear"></i>
         <span>Configurações</span>
@@ -305,6 +309,65 @@
 <div id="toastContainer"></div>
 
 <script type="module" src="/js/dashboard-init.js"></script>
+<script type="module" src="/js/dashboard-announcements.js"></script>
+
+<!-- Modal Comunicados -->
+<div class="modal-overlay" id="annModal" onclick="if(event.target===this)window._dashAnnouncementsClose&&window._dashAnnouncementsClose()">
+  <div class="modal-box" style="max-width:640px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h3 style="margin:0;font-size:15px"><i class="fa-solid fa-bullhorn" style="margin-right:8px;color:var(--accent)"></i>Comunicados</h3>
+      <button onclick="window._dashAnnouncementsClose&&window._dashAnnouncementsClose()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- Composer -->
+    <details class="ann-composer" id="annComposerDetails">
+      <summary style="cursor:pointer;padding:12px 14px;background:var(--surface-subtle);border-radius:10px;font-size:13px;font-weight:600;color:var(--text)">
+        <i class="fa-solid fa-plus" style="margin-right:8px;color:var(--accent)"></i>Novo comunicado
+      </summary>
+      <form id="annForm" style="display:flex;flex-direction:column;gap:10px;padding:14px 4px 8px">
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
+          Tipo
+          <select id="annType" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
+            <option value="comunicado">📢 Comunicado</option>
+            <option value="corrida">🏁 Corrida de vendas</option>
+            <option value="evento">📅 Evento</option>
+            <option value="treinamento">🎓 Treinamento</option>
+          </select>
+        </label>
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
+          Título
+          <input type="text" id="annTitle" required maxlength="120" placeholder="Ex: Corrida Black Friday" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
+        </label>
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
+          Corpo (suporta **negrito** e links)
+          <textarea id="annBody" rows="4" placeholder="Detalhes do comunicado..." style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px;resize:vertical"></textarea>
+        </label>
+        <div id="annCorridaFields" style="display:none;flex-direction:column;gap:10px;padding:10px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:8px">
+          <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
+            Premiação
+            <input type="text" id="annPrize" maxlength="120" placeholder="Ex: R$ 500 pro primeiro colocado" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
+            Termina em
+            <input type="datetime-local" id="annEndDate" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
+          </label>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);font-weight:500;cursor:pointer">
+          <input type="checkbox" id="annUrgent" style="width:16px;height:16px;accent-color:var(--accent)">
+          <span>Urgente — enviar push pra todos os vendedores</span>
+        </label>
+        <button type="submit" id="annSubmit" style="padding:12px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
+          <i class="fa-solid fa-paper-plane"></i> Publicar
+        </button>
+      </form>
+    </details>
+
+    <!-- Lista -->
+    <div id="annList" style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
+      <div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px">Carregando...</div>
+    </div>
+  </div>
+</div>
 
 <!-- Modal Drill-down -->
 <div class="modal-overlay" id="drillModal" onclick="if(event.target===this)closeDrillModal()">
