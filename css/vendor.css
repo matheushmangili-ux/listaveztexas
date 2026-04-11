@@ -77,16 +77,19 @@ html, body {
   align-items: center;
   gap: 6px;
 }
-.vendor-brand-logo {
-  height: auto;
-  width: 100%;
-  max-width: 260px;
-  max-height: 72px;
+.vendor-brand-symbol {
+  width: 96px;
+  height: 96px;
   object-fit: contain;
-  background: #09090b;
-  padding: 12px 18px;
-  border-radius: 14px;
   display: block;
+  margin-bottom: 4px;
+}
+.vendor-brand-wordmark {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--vendor-text);
+  line-height: 1;
 }
 .vendor-brand-sub {
   font-size: 11px;
