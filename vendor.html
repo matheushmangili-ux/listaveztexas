@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>minhavez Vendedor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700,800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/styles.css">
+<link rel="stylesheet" href="/css/vendor.css">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<meta name="theme-color" content="#060606">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="minhavez">
+<link rel="manifest" href="/manifest.json">
+<script>
+(function() {
+  document.documentElement.setAttribute('data-theme', 'dark');
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="vendor-body">
+
+<!-- Screen: Login -->
+<div id="screenLogin" class="vendor-screen hidden">
+  <div class="vendor-login-wrap">
+    <div class="vendor-brand">
+      <img src="/assets/logo-minhavez-new.png" alt="minhavez" class="vendor-brand-logo">
+      <span class="vendor-brand-sub">VENDEDOR</span>
+    </div>
+    <form id="loginForm" class="vendor-login-form">
+      <label class="vendor-field">
+        <span class="vendor-field-label">Email</span>
+        <input type="email" id="loginEmail" autocomplete="email" required placeholder="vendedorteste@texascenter.com.br">
+      </label>
+      <label class="vendor-field">
+        <span class="vendor-field-label">Senha</span>
+        <input type="password" id="loginPassword" autocomplete="current-password" required>
+      </label>
+      <button type="submit" class="vendor-btn-primary" id="btnLogin">
+        <i class="fa-solid fa-arrow-right-to-bracket"></i> Entrar
+      </button>
+      <p id="loginError" class="vendor-login-error hidden"></p>
+    </form>
+  </div>
+</div>
+
+<!-- Screen: Home / Na fila -->
+<div id="screenHome" class="vendor-screen hidden">
+  <header class="vendor-header">
+    <div class="vendor-header-info">
+      <div class="vendor-header-avatar" id="headerAvatar">?</div>
+      <div class="vendor-header-text">
+        <span class="vendor-header-name" id="headerName">—</span>
+        <span class="vendor-header-sub">
+          <i class="fa-solid fa-circle vendor-dot" id="headerDot"></i>
+          <span id="headerStatus">carregando…</span>
+        </span>
+      </div>
+    </div>
+    <button class="vendor-icon-btn" id="btnMenu" title="Menu" aria-label="Menu">
+      <i class="fa-solid fa-ellipsis-vertical"></i>
+    </button>
+  </header>
+
+  <main class="vendor-main">
+    <section id="homeIdleCard" class="vendor-big-card hidden">
+      <div class="vendor-big-pos" id="bigPos">—</div>
+      <div class="vendor-big-label" id="bigLabel">sua posição na fila</div>
+      <div class="vendor-queue-peek" id="queuePeek"></div>
+      <button type="button" class="vendor-cta-next hidden" id="btnStartAttendance">
+        <i class="fa-solid fa-play"></i> Estou atendendo
+      </button>
+    </section>
+
+    <section id="homeAttendingCard" class="vendor-big-card vendor-card-attending hidden">
+      <div class="vendor-attending-label">Em atendimento</div>
+      <div class="vendor-attending-timer mono" id="attendingTimer">00:00</div>
+      <button type="button" class="vendor-cta-finish" id="btnFinishAttendance">
+        <i class="fa-solid fa-check"></i> Finalizar
+      </button>
+      <button type="button" class="vendor-btn-ghost" id="btnCancelAttendance">
+        <i class="fa-solid fa-xmark"></i> Cancelar atendimento
+      </button>
+    </section>
+
+    <section id="homePausaCard" class="vendor-big-card vendor-card-pause hidden">
+      <div class="vendor-pause-icon"><i class="fa-solid" id="pausaIcon"></i></div>
+      <div class="vendor-pause-label" id="pausaLabel">Em pausa</div>
+      <div class="vendor-pause-since mono" id="pausaSince">há 0 min</div>
+      <button type="button" class="vendor-cta-next" id="btnReturnFromPausa">
+        <i class="fa-solid fa-arrow-rotate-left"></i> Voltar pra fila
+      </button>
+    </section>
+
+    <section id="homeOffCard" class="vendor-big-card vendor-card-off hidden">
+      <div class="vendor-off-icon"><i class="fa-solid fa-moon"></i></div>
+      <div class="vendor-off-label">Fora do turno</div>
+      <div class="vendor-off-sub" id="offSub">Aguardando a abertura do turno</div>
+    </section>
+
+    <section class="vendor-mini-stats" id="miniStats">
+      <div class="stat">
+        <span class="stat-value mono" id="statVendas">0</span>
+        <span class="stat-label">vendas</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value mono" id="statAtend">0</span>
+        <span class="stat-label">atendimentos</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value mono" id="statConv">0%</span>
+        <span class="stat-label">conversão</span>
+      </div>
+    </section>
+  </main>
+
+  <nav class="vendor-actions" id="actionsRow">
+    <button class="vendor-action-btn" id="btnPausa">
+      <i class="fa-solid fa-pause"></i>
+      <span>Pausa</span>
+    </button>
+    <button class="vendor-action-btn" id="btnLogout">
+      <i class="fa-solid fa-right-from-bracket"></i>
+      <span>Sair</span>
+    </button>
+  </nav>
+</div>
+
+<!-- Bottom sheet: Canal de origem (ao iniciar atendimento) -->
+<div class="vendor-sheet-overlay hidden" id="canalOverlay"></div>
+<div class="vendor-sheet hidden" id="canalSheet">
+  <div class="vendor-sheet-handle"></div>
+  <h3 class="vendor-sheet-title">Como o cliente chegou?</h3>
+  <div class="vendor-canal-grid" id="canalGrid"></div>
+  <button class="vendor-btn-ghost" onclick="window._vendorStartWithoutCanal()">Não informar</button>
+</div>
+
+<!-- Bottom sheet: Resultado do atendimento -->
+<div class="vendor-sheet-overlay hidden" id="outcomeOverlay"></div>
+<div class="vendor-sheet hidden" id="outcomeSheet">
+  <div class="vendor-sheet-handle"></div>
+  <h3 class="vendor-sheet-title">Como foi o atendimento?</h3>
+  <div class="vendor-outcome-list">
+    <button class="vendor-outcome-btn" data-outcome="venda">
+      <i class="fa-solid fa-bag-shopping" style="color:var(--success)"></i>
+      <div><strong>Venda</strong><span>Cliente comprou</span></div>
+    </button>
+    <button class="vendor-outcome-btn" data-outcome="troca">
+      <i class="fa-solid fa-arrow-right-arrow-left" style="color:var(--info)"></i>
+      <div><strong>Troca</strong><span>Cliente trocou produto</span></div>
+    </button>
+    <button class="vendor-outcome-btn" data-outcome="nao_convertido">
+      <i class="fa-solid fa-xmark" style="color:var(--warning)"></i>
+      <div><strong>Não converteu</strong><span>Cliente saiu sem comprar</span></div>
+    </button>
+  </div>
+</div>
+
+<!-- Bottom sheet: Pausa (motivos) -->
+<div class="vendor-sheet-overlay hidden" id="pausaOverlay"></div>
+<div class="vendor-sheet hidden" id="pausaSheet">
+  <div class="vendor-sheet-handle"></div>
+  <h3 class="vendor-sheet-title">Entrando em pausa</h3>
+  <div class="vendor-pausa-list">
+    <button class="vendor-pausa-btn" data-motivo="almoco">
+      <i class="fa-solid fa-utensils" style="color:#FBBF24"></i> Almoço
+    </button>
+    <button class="vendor-pausa-btn" data-motivo="banheiro">
+      <i class="fa-solid fa-restroom" style="color:#60A5FA"></i> Banheiro
+    </button>
+    <button class="vendor-pausa-btn" data-motivo="operacional">
+      <i class="fa-solid fa-wrench" style="color:#8b5cf6"></i> Operacional
+    </button>
+    <button class="vendor-pausa-btn" data-motivo="outro">
+      <i class="fa-solid fa-ellipsis" style="color:#71717A"></i> Outro
+    </button>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="vendorToast" class="vendor-toast hidden"></div>
+
+<script type="module" src="/js/vendor-init.js"></script>
+</body>
+</html>

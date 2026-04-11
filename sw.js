@@ -2,16 +2,18 @@
 // Cache-first para estáticos (CSS, JS, imagens) — economiza banda
 // Network-first para HTML e APIs — sempre pega a versão mais fresca
 // Bump CACHE_VERSION a cada deploy
-const CACHE_VERSION = '17';
+const CACHE_VERSION = '18';
 const CACHE_NAME = 'minhavez-v' + CACHE_VERSION;
 const STATIC_ASSETS = [
   '/tablet.html',
   '/index.html',
   '/dashboard.html',
   '/settings.html',
+  '/vendor.html',
   '/css/styles.css',
   '/css/dashboard.css',
   '/css/tablet.css',
+  '/css/vendor.css',
   '/js/constants.js',
   '/js/utils.js',
   '/js/supabase-config.js',
@@ -25,6 +27,8 @@ const STATIC_ASSETS = [
   '/js/tablet-init.js',
   '/js/tablet-queue.js',
   '/js/tablet-turno.js',
+  '/js/vendor-init.js',
+  '/js/vendor-home.js',
   '/js/auth.js',
   '/js/dashboard-api.js',
   '/js/dashboard-charts.js',
