@@ -97,13 +97,14 @@ RETURNS TABLE(
   is_read BOOLEAN
 )
 LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
+#variable_conflict use_column
 DECLARE
   v_vid UUID;
   v_tid UUID;
 BEGIN
-  SELECT id, tenant_id INTO v_vid, v_tid
-  FROM public.vendedores
-  WHERE auth_user_id = auth.uid()
+  SELECT v.id, v.tenant_id INTO v_vid, v_tid
+  FROM public.vendedores v
+  WHERE v.auth_user_id = auth.uid()
   LIMIT 1;
 
   IF v_vid IS NULL THEN
@@ -141,23 +142,24 @@ GRANT EXECUTE ON FUNCTION public.list_announcements(INT) TO authenticated;
 CREATE OR REPLACE FUNCTION public.mark_announcement_read(p_id UUID)
 RETURNS VOID
 LANGUAGE plpgsql SECURITY DEFINER AS $$
+#variable_conflict use_column
 DECLARE
   v_vid UUID;
   v_tid UUID;
   v_ann_tid UUID;
 BEGIN
-  SELECT id, tenant_id INTO v_vid, v_tid
-  FROM public.vendedores
-  WHERE auth_user_id = auth.uid()
+  SELECT v.id, v.tenant_id INTO v_vid, v_tid
+  FROM public.vendedores v
+  WHERE v.auth_user_id = auth.uid()
   LIMIT 1;
 
   IF v_vid IS NULL THEN
     RAISE EXCEPTION 'no vendor for caller';
   END IF;
 
-  SELECT tenant_id INTO v_ann_tid
-  FROM public.tenant_announcements
-  WHERE id = p_id;
+  SELECT a.tenant_id INTO v_ann_tid
+  FROM public.tenant_announcements a
+  WHERE a.id = p_id;
 
   IF v_ann_tid IS NULL OR v_ann_tid <> v_tid THEN
     RAISE EXCEPTION 'announcement not visible to caller';
