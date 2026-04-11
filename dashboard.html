@@ -324,7 +324,7 @@
       <summary style="cursor:pointer;padding:12px 14px;background:var(--surface-subtle);border-radius:10px;font-size:13px;font-weight:600;color:var(--text)">
         <i class="fa-solid fa-plus" style="margin-right:8px;color:var(--accent)"></i>Novo comunicado
       </summary>
-      <form id="annForm" style="display:flex;flex-direction:column;gap:10px;padding:14px 4px 8px">
+      <form id="annForm" novalidate style="display:flex;flex-direction:column;gap:10px;padding:14px 4px 8px">
         <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
           Tipo
           <select id="annType" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
@@ -336,7 +336,7 @@
         </label>
         <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
           Título
-          <input type="text" id="annTitle" required maxlength="120" placeholder="Ex: Corrida Black Friday" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
+          <input type="text" id="annTitle" maxlength="120" placeholder="Ex: Corrida Black Friday" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
         </label>
         <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
           Corpo (suporta **negrito** e links)
@@ -348,14 +348,16 @@
             <input type="text" id="annPrize" maxlength="120" placeholder="Ex: R$ 500 pro primeiro colocado" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
           </label>
           <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
-            Termina em
-            <input type="datetime-local" id="annEndDate" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
+            Último dia
+            <input type="date" id="annEndDate" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
+            <span style="font-size:10px;color:var(--text-muted);font-weight:500;font-style:italic">A corrida encerra às 23:59 deste dia.</span>
           </label>
         </div>
         <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);font-weight:500;cursor:pointer">
           <input type="checkbox" id="annUrgent" style="width:16px;height:16px;accent-color:var(--accent)">
           <span>Urgente — enviar push pra todos os vendedores</span>
         </label>
+        <div id="annError" style="display:none;padding:10px 12px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:8px;color:var(--danger);font-size:12px;font-weight:500"></div>
         <button type="submit" id="annSubmit" style="padding:12px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
           <i class="fa-solid fa-paper-plane"></i> Publicar
         </button>

@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function publish() {
   const btn = document.getElementById('annSubmit');
+  showError(null);
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Publicando...';
 
@@ -75,18 +76,24 @@ async function publish() {
     const body  = document.getElementById('annBody').value.trim();
     const urgent = document.getElementById('annUrgent').checked;
 
-    if (!title) throw new Error('Título obrigatório');
+    if (!title) throw new Error('Informe o título do comunicado');
 
     const metadata = {};
     let expires_at = null;
     if (type === 'corrida') {
       const prize = document.getElementById('annPrize').value.trim();
-      const endRaw = document.getElementById('annEndDate').value;
-      if (prize) metadata.prize = prize;
+      const endRaw = document.getElementById('annEndDate').value; // 'YYYY-MM-DD'
       if (endRaw) {
-        metadata.end_date = new Date(endRaw).toISOString();
+        // Parse como data local (não UTC) e posiciona no fim do dia local: 23:59:59.999
+        const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(endRaw);
+        if (!m) throw new Error('Data de término inválida');
+        const endLocal = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 23, 59, 59, 999);
+        if (isNaN(endLocal.getTime())) throw new Error('Data de término inválida');
+        if (endLocal.getTime() <= Date.now()) throw new Error('A data de término precisa ser no futuro');
+        metadata.end_date = endLocal.toISOString();
         expires_at = metadata.end_date;
       }
+      if (prize) metadata.prize = prize;
     }
 
     const { error } = await sb.from('tenant_announcements').insert({
@@ -109,7 +116,7 @@ async function publish() {
     toast('Comunicado publicado', 'success');
   } catch (err) {
     console.error('[announcements] publish falhou:', err);
-    toast(err?.message || 'Erro ao publicar', 'error');
+    showError(err?.message || 'Erro ao publicar');
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Publicar';
@@ -195,6 +202,18 @@ async function remove(id) {
   if (error) { toast(error.message, 'error'); return; }
   toast('Apagado', 'success');
   await loadList();
+}
+
+function showError(msg) {
+  const box = document.getElementById('annError');
+  if (!box) return;
+  if (!msg) {
+    box.style.display = 'none';
+    box.textContent = '';
+    return;
+  }
+  box.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="margin-right:6px"></i>' + escapeHtml(msg);
+  box.style.display = 'block';
 }
 
 // ─── Utils ───
