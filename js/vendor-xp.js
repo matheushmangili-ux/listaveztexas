@@ -7,6 +7,8 @@
 // fallback evita round-trip pra nome/cor de tier).
 // ============================================
 
+import { playSound } from './sound.js';
+
 const EVENT_META = {
   atendimento_concluido: { icon: 'fa-handshake',       label: 'Atendimento concluído' },
   venda_realizada:       { icon: 'fa-bag-shopping',    label: 'Venda realizada'       },
@@ -48,7 +50,25 @@ let _last = null; // último snapshot { total_xp, level, next_level_xp, progress
 export async function initXp(sb) {
   _sb = sb;
   bindSheet();
+  primeAudioUnlock();
   await refresh();
+}
+
+// iOS Safari: AudioContext só destrava dentro de user gesture.
+// Dispara um oscillator silencioso no primeiro toque pra unlock,
+// assim as fanfarras (que rodam depois de await RPC e perderiam o
+// gesture chain) já tocam som.
+function primeAudioUnlock() {
+  const unlock = () => {
+    try {
+      // Som mudo mínimo só pra criar/resumir o AudioCtx
+      playSound('__silent_unlock__');
+    } catch { /* ignore */ }
+    document.removeEventListener('touchstart', unlock);
+    document.removeEventListener('click', unlock);
+  };
+  document.addEventListener('touchstart', unlock, { once: true, passive: true });
+  document.addEventListener('click', unlock, { once: true });
 }
 
 export function unmountXp() {
@@ -147,6 +167,7 @@ function showLevelUp(newLevel) {
     setTimeout(() => box.remove(), 400);
   }, 3000);
   if (navigator.vibrate) navigator.vibrate([100, 60, 160]);
+  try { playSound('levelup'); } catch { /* ignore */ }
 }
 
 // Fanfarra maior: atravessou threshold de tier (ex: Diamante III → Mestre)
@@ -169,6 +190,7 @@ function showTierUp(tier) {
     setTimeout(() => box.remove(), 500);
   }, 4200);
   if (navigator.vibrate) navigator.vibrate([100, 80, 200, 80, 300]);
+  try { playSound('tierup'); } catch { /* ignore */ }
 }
 
 // ─── Sheet "Minha jornada" ───
