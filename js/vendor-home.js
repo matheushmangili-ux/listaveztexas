@@ -56,6 +56,11 @@ function grabRefs() {
 
   el.pausaOverlay = document.getElementById('pausaOverlay');
   el.pausaSheet = document.getElementById('pausaSheet');
+
+  el.pushPromptCard = document.getElementById('pushPromptCard');
+  el.pushPromptTitle = document.getElementById('pushPromptTitle');
+  el.pushPromptSub = document.getElementById('pushPromptSub');
+  el.btnEnablePush = document.getElementById('btnEnablePush');
 }
 
 const SAIDA_META = {
@@ -74,10 +79,11 @@ export async function initHome(sb) {
 
   try {
     await loadContext();
-    await loadCanais();
-    await loadStats();
+    // canais + stats em paralelo (independentes entre si, só dependem do ctx)
+    await Promise.all([loadCanais(), loadStats()]);
     renderAll();
     subscribeRealtime();
+    setupPushNotifications();
   } catch (err) {
     console.error('[initHome] erro:', err);
     window._vendorToast('Erro ao carregar: ' + (err?.message || err), 'error');
@@ -529,6 +535,124 @@ async function onReturnFromPausa() {
   } catch (err) {
     window._vendorToast(err?.message || 'Erro ao voltar', 'error');
   }
+}
+
+// ─── Web Push notifications ───
+async function setupPushNotifications() {
+  // Detecta suporte
+  if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+    console.log('[push] Web Push não suportado nesse browser');
+    return;
+  }
+
+  // iOS: só funciona em PWA instalada na tela inicial (Safari 16.4+)
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  if (isIOS && !isStandalone) {
+    showPushCard('ios-tip', 'Adicione à Tela de Início', 'Toque em Compartilhar → Adicionar à Tela de Início pra receber alertas');
+    return;
+  }
+
+  // Aguarda SW estar ativo
+  let registration;
+  try {
+    registration = await navigator.serviceWorker.ready;
+  } catch (err) {
+    console.warn('[push] SW não disponível:', err);
+    return;
+  }
+
+  // Já tem subscription? Reenvia pro DB (garante sync) e mostra tudo OK
+  const existing = await registration.pushManager.getSubscription();
+  if (existing) {
+    await saveSubscriptionToDB(existing);
+    hidePushCard();
+    return;
+  }
+
+  if (Notification.permission === 'denied') {
+    showPushCard('denied', 'Notificações bloqueadas', 'Habilite nas configurações do navegador pra não perder a vez');
+    return;
+  }
+
+  if (Notification.permission === 'granted') {
+    // Permissão já dada mas sem subscription — subscreve silenciosamente
+    await subscribeToPush(registration);
+    hidePushCard();
+    return;
+  }
+
+  // Permission = 'default' → mostra card de prompt
+  showPushCard('default', 'Ative as notificações', 'pra saber quando é a sua vez');
+  el.btnEnablePush.onclick = async () => {
+    el.btnEnablePush.disabled = true;
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        showPushCard('denied', 'Notificações bloqueadas', 'Habilite nas configurações do navegador pra não perder a vez');
+        return;
+      }
+      await subscribeToPush(registration);
+      hidePushCard();
+      window._vendorToast('Notificações ativadas 🔔', 'success');
+    } catch (err) {
+      console.error('[push] enable falhou:', err);
+      window._vendorToast('Erro: ' + (err?.message || err), 'error');
+    } finally {
+      el.btnEnablePush.disabled = false;
+    }
+  };
+}
+
+function showPushCard(variant, title, subtitle) {
+  el.pushPromptCard.className = 'vendor-push-prompt' + (variant && variant !== 'default' ? ' ' + variant : '');
+  el.pushPromptTitle.textContent = title;
+  el.pushPromptSub.textContent = subtitle;
+  el.pushPromptCard.classList.remove('hidden');
+}
+
+function hidePushCard() {
+  el.pushPromptCard.classList.add('hidden');
+}
+
+async function subscribeToPush(registration) {
+  const { data: vapidPublicKey, error } = await _sb.rpc('get_vapid_public_key');
+  if (error || !vapidPublicKey) throw new Error('VAPID key não disponível');
+
+  const sub = await registration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+  });
+  await saveSubscriptionToDB(sub);
+}
+
+async function saveSubscriptionToDB(sub) {
+  const p256dhKey = sub.getKey('p256dh');
+  const authKey = sub.getKey('auth');
+  if (!p256dhKey || !authKey) return;
+  const { error } = await _sb.rpc('vendor_save_push_subscription', {
+    p_endpoint: sub.endpoint,
+    p_p256dh: arrayBufferToBase64Url(p256dhKey),
+    p_auth: arrayBufferToBase64Url(authKey),
+    p_user_agent: (navigator.userAgent || '').slice(0, 200)
+  });
+  if (error) console.warn('[push] save subscription falhou:', error);
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = atob(base64);
+  const arr = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  return arr;
+}
+
+function arrayBufferToBase64Url(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let bin = '';
+  for (let i = 0; i < bytes.byteLength; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 // ─── Utils ───

@@ -1,8 +1,9 @@
 // Minha Vez — Service Worker
 // Cache-first para estáticos (CSS, JS, imagens) — economiza banda
 // Network-first para HTML e APIs — sempre pega a versão mais fresca
+// Web Push listener pro minhavez Vendedor
 // Bump CACHE_VERSION a cada deploy
-const CACHE_VERSION = '18';
+const CACHE_VERSION = '19';
 const CACHE_NAME = 'minhavez-v' + CACHE_VERSION;
 const STATIC_ASSETS = [
   '/tablet.html',
@@ -99,4 +100,56 @@ self.addEventListener('fetch', e => {
       })
       .catch(() => caches.match(e.request))
   );
+});
+
+// ─── Web Push listener (minhavez Vendedor) ───
+// Recebe push do Supabase Edge Function send-vendor-push quando
+// o vendedor vira #1 na fila. Payload esperado:
+//   { title, body, tag, url, vendedor_id }
+self.addEventListener('push', event => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (err) {
+    data = { title: 'Sua vez! 🎯', body: 'Cliente esperando por você' };
+  }
+
+  const title = data.title || 'minhavez Vendedor';
+  const options = {
+    body: data.body || 'Você é o próximo da fila',
+    icon: '/assets/logo-minhavez-new.png',
+    badge: '/assets/logo-minhavez-new.png',
+    tag: data.tag || 'minhavez-push',
+    renotify: true,
+    requireInteraction: false,
+    vibrate: [200, 100, 200, 100, 400],
+    data: {
+      url: data.url || '/vendor.html',
+      vendedor_id: data.vendedor_id || null,
+      ts: Date.now()
+    }
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// ─── Notification click → foca ou abre vendor.html ───
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const targetUrl = event.notification.data?.url || '/vendor.html';
+
+  event.waitUntil((async () => {
+    const allClients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    // Foca aba existente do vendor se tiver
+    for (const client of allClients) {
+      const u = new URL(client.url);
+      if (u.pathname === targetUrl && 'focus' in client) {
+        return client.focus();
+      }
+    }
+    // Ou abre nova
+    if (self.clients.openWindow) {
+      return self.clients.openWindow(targetUrl);
+    }
+  })());
 });

@@ -69,6 +69,16 @@
   </header>
 
   <main class="vendor-main">
+    <!-- Prompt pra ativar notificações push -->
+    <section id="pushPromptCard" class="vendor-push-prompt hidden">
+      <div class="vendor-push-icon"><i class="fa-solid fa-bell"></i></div>
+      <div class="vendor-push-text">
+        <strong id="pushPromptTitle">Ative as notificações</strong>
+        <span id="pushPromptSub">pra saber quando é a sua vez</span>
+      </div>
+      <button type="button" class="vendor-push-btn" id="btnEnablePush">Ativar</button>
+    </section>
+
     <section id="homeIdleCard" class="vendor-big-card hidden">
       <div class="vendor-big-pos" id="bigPos">—</div>
       <div class="vendor-big-label" id="bigLabel">sua posição na fila</div>
