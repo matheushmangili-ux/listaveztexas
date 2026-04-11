@@ -56,7 +56,7 @@ function initUpdateChecker(pageUrl, opts) {
     if (lastUpdate && (Date.now() - parseInt(lastUpdate, 10)) < 10000) return;
     const banner = document.createElement('div');
     banner.id = 'updateBanner';
-    banner.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--accent,#facc15);color:#060606;padding:12px 20px;border-radius:12px;font-family:Satoshi,sans-serif;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;box-shadow:0 4px 24px rgba(0,0,0,.3);cursor:pointer;animation:slideUpBanner .3s ease';
+    banner.style.cssText = 'position:fixed;bottom:calc(16px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:90;background:var(--accent,#facc15);color:#060606;padding:10px 18px;border-radius:999px;font-family:Satoshi,sans-serif;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;box-shadow:0 6px 20px rgba(0,0,0,.35);cursor:pointer;animation:slideUpBanner .3s ease;max-width:calc(100vw - 32px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
     banner.innerHTML = '<i class="fa-solid fa-arrow-rotate-right"></i> ' + bannerText;
     banner.addEventListener('click', () => {
       sessionStorage.setItem('_updateClickedAt', String(Date.now()));

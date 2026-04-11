@@ -51,16 +51,28 @@ function renderCard() {
   const wrap = document.getElementById('announcementsWrap');
   if (!wrap) return;
 
+  wrap.classList.remove('hidden');
+
   if (_announcements.length === 0) {
-    wrap.classList.add('hidden');
-    wrap.innerHTML = '';
+    wrap.classList.add('empty');
+    wrap.innerHTML = `
+      <div class="vendor-ann-header">
+        <span class="vendor-ann-title">
+          <i class="fa-solid fa-bullhorn"></i> Comunicados
+        </span>
+      </div>
+      <div class="vendor-ann-empty">
+        <i class="fa-regular fa-face-smile"></i>
+        Nada novo por aqui ainda.
+      </div>
+    `;
     return;
   }
 
+  wrap.classList.remove('empty');
   const unread = _announcements.filter((a) => !a.is_read).length;
   const top3 = _announcements.slice(0, 3);
 
-  wrap.classList.remove('hidden');
   wrap.innerHTML = `
     <div class="vendor-ann-header">
       <span class="vendor-ann-title">
