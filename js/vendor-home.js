@@ -19,6 +19,7 @@ const el = {};
 function grabRefs() {
   el.headerAvatar = document.getElementById('headerAvatar');
   el.headerName = document.getElementById('headerName');
+  el.headerSub = document.getElementById('headerSub');
   el.headerStatus = document.getElementById('headerStatus');
   el.headerDot = document.getElementById('headerDot');
   el.btnRefresh = document.getElementById('btnRefresh');
@@ -189,9 +190,17 @@ function renderHeader() {
   } else {
     el.headerAvatar.textContent = initials(nome);
   }
-  // Status dot + label
-  el.headerDot.className = 'fa-solid fa-circle vendor-dot ' + dotClassFor(_ctx.status);
-  el.headerStatus.textContent = statusLabelFor(_ctx.status);
+  // Sub-linha (dot + status): escondida quando "fora" porque o big card
+  // central já comunica esse estado. Visível nos 3 estados ativos.
+  const ACTIVE_STATES = ['disponivel', 'em_atendimento', 'pausa'];
+  const isOff = !_ctx.turno_aberto_id || !ACTIVE_STATES.includes(_ctx.status);
+  if (isOff) {
+    el.headerSub.classList.add('hidden');
+  } else {
+    el.headerSub.classList.remove('hidden');
+    el.headerDot.className = 'fa-solid fa-circle vendor-dot ' + dotClassFor(_ctx.status);
+    el.headerStatus.textContent = statusLabelFor(_ctx.status);
+  }
   // Botão preferencial: só quando está na fila como disponível
   const canPreferencial = _ctx.status === 'disponivel' && _ctx.posicao_fila != null;
   if (canPreferencial) {
