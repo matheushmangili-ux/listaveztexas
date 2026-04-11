@@ -69,9 +69,14 @@
         </span>
       </div>
     </div>
-    <button class="vendor-icon-btn" id="btnRefresh" title="Atualizar" aria-label="Atualizar">
-      <i class="fa-solid fa-arrows-rotate"></i>
-    </button>
+    <div class="vendor-header-actions">
+      <button class="vendor-icon-btn vendor-icon-btn-pref hidden" id="btnStartPreferencial" title="Atendimento preferencial" aria-label="Atendimento preferencial">
+        <i class="fa-solid fa-star"></i>
+      </button>
+      <button class="vendor-icon-btn" id="btnRefresh" title="Atualizar" aria-label="Atualizar">
+        <i class="fa-solid fa-arrows-rotate"></i>
+      </button>
+    </div>
   </header>
 
   <main class="vendor-main">
@@ -91,9 +96,6 @@
       <div class="vendor-queue-peek" id="queuePeek"></div>
       <button type="button" class="vendor-cta-next hidden" id="btnStartAttendance">
         <i class="fa-solid fa-play"></i> Estou atendendo
-      </button>
-      <button type="button" class="vendor-cta-preferencial hidden" id="btnStartPreferencial">
-        <i class="fa-solid fa-star"></i> Atender preferencial
       </button>
     </section>
 

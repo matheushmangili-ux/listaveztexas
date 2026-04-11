@@ -183,6 +183,13 @@ function renderHeader() {
   // Status dot + label
   el.headerDot.className = 'fa-solid fa-circle vendor-dot ' + dotClassFor(_ctx.status);
   el.headerStatus.textContent = statusLabelFor(_ctx.status);
+  // Botão preferencial: só quando está na fila como disponível
+  const canPreferencial = _ctx.status === 'disponivel' && _ctx.posicao_fila != null;
+  if (canPreferencial) {
+    el.btnStartPref.classList.remove('hidden');
+  } else {
+    el.btnStartPref.classList.add('hidden');
+  }
 }
 
 function dotClassFor(status) {
@@ -254,10 +261,8 @@ async function renderIdle() {
     el.bigLabel.textContent = (pos - 1) === 1 ? '1 pessoa na sua frente' : (pos - 1) + ' pessoas na sua frente';
     el.btnStart.classList.add('hidden');
   }
-  // Botão preferencial: sempre visível quando está na fila (pos 1 ou mais)
-  el.btnStartPref.classList.remove('hidden');
 
-  // Peek da fila (top 5 do setor do vendedor)
+  // Peek da fila (top 3 do setor do vendedor)
   const { data } = await _sb
     .from('vendedores')
     .select('id, nome, apelido, posicao_fila')
@@ -266,7 +271,7 @@ async function renderIdle() {
     .eq('status', 'disponivel')
     .not('posicao_fila', 'is', null)
     .order('posicao_fila')
-    .limit(5);
+    .limit(3);
 
   el.queuePeek.innerHTML = (data || [])
     .map((v) => {

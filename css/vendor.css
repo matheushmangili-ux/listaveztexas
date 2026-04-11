@@ -168,10 +168,11 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--vendor-border);
   background: var(--vendor-surface);
   flex-shrink: 0;
+  gap: 8px;
 }
 .vendor-header-info {
   display: flex;
@@ -180,9 +181,9 @@ html, body {
   min-width: 0;
 }
 .vendor-header-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   background: var(--vendor-accent);
   color: #fff;
   display: flex;
@@ -225,18 +226,25 @@ html, body {
 .vendor-dot.off { color: var(--vendor-text-muted); }
 .vendor-dot.busy { color: var(--vendor-info); }
 
+.vendor-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
 .vendor-icon-btn {
   background: transparent;
   border: none;
   color: var(--vendor-text-dim);
-  font-size: 18px;
-  width: 44px;
-  height: 44px;
+  font-size: 16px;
+  width: 38px;
+  height: 38px;
   border-radius: 10px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 .vendor-icon-btn:hover {
   background: var(--vendor-card);
@@ -247,8 +255,9 @@ html, body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 24px 20px;
+  gap: 14px;
+  padding: 16px 16px 20px;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -256,12 +265,13 @@ html, body {
 .vendor-big-card {
   background: var(--vendor-card);
   border: 1px solid var(--vendor-border);
-  border-radius: 20px;
-  padding: 32px 24px;
+  border-radius: 18px;
+  padding: 20px 18px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  flex-shrink: 0;
   animation: vendorCardIn 0.3s ease both;
 }
 @keyframes vendorCardIn {
@@ -272,7 +282,7 @@ html, body {
 /* Idle: position */
 .vendor-big-pos {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 88px;
+  font-size: clamp(64px, 18vw, 88px);
   font-weight: 700;
   line-height: 1;
   color: var(--vendor-text);
@@ -287,7 +297,7 @@ html, body {
   50% { text-shadow: 0 0 24px rgba(34,197,94,0.6); }
 }
 .vendor-big-label {
-  font-size: 13px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--vendor-text-dim);
@@ -297,20 +307,20 @@ html, body {
 .vendor-queue-peek {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   width: 100%;
   max-width: 280px;
-  margin-top: 12px;
-  padding-top: 16px;
+  margin-top: 8px;
+  padding-top: 12px;
   border-top: 1px solid var(--vendor-border);
 }
 .vendor-queue-peek .peek-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
 }
 .vendor-queue-peek .peek-item .peek-pos {
   font-family: 'JetBrains Mono', monospace;
@@ -334,14 +344,14 @@ html, body {
 }
 
 .vendor-cta-next {
-  margin-top: 16px;
+  margin-top: 10px;
   width: 100%;
   background: var(--vendor-success);
   color: #060606;
   border: none;
-  border-radius: 16px;
-  padding: 18px;
-  font-size: 17px;
+  border-radius: 14px;
+  padding: 16px;
+  font-size: 16px;
   font-weight: 800;
   font-family: inherit;
   cursor: pointer;
@@ -358,28 +368,30 @@ html, body {
 }
 .vendor-cta-next:active { transform: scale(0.97); }
 
-.vendor-cta-preferencial {
-  margin-top: 10px;
-  width: 100%;
-  background: transparent;
+.vendor-icon-btn-pref {
   color: var(--vendor-warning);
-  border: 1.5px solid var(--vendor-warning);
-  border-radius: 14px;
-  padding: 14px;
-  font-size: 14px;
-  font-weight: 700;
-  font-family: inherit;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: background 0.15s, transform 0.1s;
+  position: relative;
 }
-.vendor-cta-preferencial:hover {
+.vendor-icon-btn-pref:hover {
   background: rgba(245, 158, 11, 0.1);
+  color: var(--vendor-warning);
 }
-.vendor-cta-preferencial:active { transform: scale(0.97); }
+.vendor-icon-btn-pref::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--vendor-warning);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+  animation: prefDotPulse 2s ease-in-out infinite;
+}
+@keyframes prefDotPulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
 
 /* Animação do refresh rotacionando quando ativo */
 .vendor-icon-btn.refreshing i {
@@ -502,25 +514,26 @@ html, body {
 .vendor-mini-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 8px;
   background: var(--vendor-card);
   border: 1px solid var(--vendor-border);
-  border-radius: 16px;
-  padding: 16px;
+  border-radius: 14px;
+  padding: 10px 12px;
+  flex-shrink: 0;
 }
 .vendor-mini-stats .stat {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 .vendor-mini-stats .stat-value {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--vendor-text);
 }
 .vendor-mini-stats .stat-label {
-  font-size: 10px;
+  font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--vendor-text-dim);
@@ -530,28 +543,30 @@ html, body {
 .vendor-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+  gap: 10px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
   background: var(--vendor-surface);
   border-top: 1px solid var(--vendor-border);
+  flex-shrink: 0;
 }
 .vendor-action-btn {
   background: var(--vendor-card);
   border: 1px solid var(--vendor-border);
-  border-radius: 14px;
-  padding: 14px;
+  border-radius: 12px;
+  padding: 10px;
   color: var(--vendor-text);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 8px;
 }
 .vendor-action-btn i {
-  font-size: 18px;
+  font-size: 14px;
   color: var(--vendor-text-dim);
 }
 .vendor-action-btn:hover {
