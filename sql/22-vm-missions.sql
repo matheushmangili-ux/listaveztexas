@@ -337,7 +337,7 @@ RETURNS TABLE(
   task_id UUID, title TEXT, description TEXT, category TEXT, priority TEXT,
   due_at TIMESTAMPTZ, reward_xp INT,
   assignment_id UUID, assignment_status TEXT, feedback TEXT,
-  references JSONB, checklist JSONB
+  refs JSONB, checklist JSONB
 ) LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
 DECLARE
   v_id UUID := public._vendor_self_id();

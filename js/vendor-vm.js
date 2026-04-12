@@ -239,7 +239,7 @@ function closeTaskView() {
 
 function renderBriefing(container, task) {
   const cat = VM_CATEGORIES.find(c => c.id === task.category);
-  const refs = task.references || [];
+  const refs = task.refs || [];
   const checklist = task.checklist || [];
   const canStart = ['pending','revision'].includes(task.assignment_status);
   const isInProgress = task.assignment_status === 'in_progress';
