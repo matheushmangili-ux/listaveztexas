@@ -45,31 +45,39 @@
   --gold: #aaeec4;
   --gold-bright: #c7f5d6;
   --gold-dim: #7fd9a0;
-  --success: #22c55e;
-  --success-bg: rgba(34, 197, 94, 0.08);
-  --warning: #f59e0b;
-  --warning-bg: rgba(245, 158, 11, 0.08);
-  --danger: #ef4444;
-  --danger-bg: rgba(239, 68, 68, 0.08);
-  --info: #3b82f6;
-  --info-bg: rgba(59, 130, 246, 0.06);
-  --status-disponivel: #34d399;
-  --status-atendendo: #60a5fa;
-  --status-pausa: #fbbf24;
+  /* Status semânticos — harmonizados com mint + charcoal */
+  --success: #aaeec4;
+  --success-deep: #7fd9a0;
+  --success-bg: rgba(170, 238, 196, 0.12);
+  --warning: #d4a373;
+  --warning-deep: #b8875a;
+  --warning-bg: rgba(212, 163, 115, 0.14);
+  --danger: #e89b8a;
+  --danger-deep: #d47a68;
+  --danger-bg: rgba(232, 155, 138, 0.12);
+  --info: #8ea5c9;
+  --info-deep: #6d85ac;
+  --info-bg: rgba(142, 165, 201, 0.12);
+  --special: #b8a8d4;
+  --special-bg: rgba(184, 168, 212, 0.12);
+  /* Status disponibilidade (vendedores) */
+  --status-disponivel: #aaeec4;
+  --status-atendendo: #8ea5c9;
+  --status-pausa: #d4a373;
   --status-fora: #71717a;
-  /* Motivos de perda (semantic colors) */
-  --motivo-preco: #f59e0b;
-  --motivo-ruptura: #ef4444;
-  --motivo-indecisao: #8b5cf6;
-  --motivo-so-olhando: #6b7280;
-  --motivo-outro: #94a3b8;
+  /* Motivos de perda — desbotados, diferenciados por matiz */
+  --motivo-preco: #d4a373;
+  --motivo-ruptura: #e89b8a;
+  --motivo-indecisao: #b8a8d4;
+  --motivo-so-olhando: #9ca3af;
+  --motivo-outro: #8ea5c9;
   /* Motivos de saída/pausa */
-  --saida-almoco: #fbbf24;
-  --saida-banheiro: #60a5fa;
+  --saida-almoco: #d4a373;
+  --saida-banheiro: #8ea5c9;
   --saida-reuniao: #a1a1aa;
-  --saida-operacional: #8b5cf6;
-  --saida-finalizar: #f87171;
-  --saida-outro: #64748b;
+  --saida-operacional: #b8a8d4;
+  --saida-finalizar: #e89b8a;
+  --saida-outro: #9ca3af;
   --font-body: 'Inter Tight', system-ui, -apple-system, sans-serif;
   --font-mono: 'Inter Tight', system-ui, sans-serif;
   --font-display: 'Inter Tight', system-ui, sans-serif;
@@ -95,7 +103,7 @@
   /* Gradientes sutis */
   --grad-surface: linear-gradient(180deg, var(--bg-elevated), var(--bg-surface));
   --grad-accent: linear-gradient(135deg, #aaeec4, #7fd9a0);
-  --grad-success: linear-gradient(135deg, #22c55e, #16a34a);
+  --grad-success: linear-gradient(135deg, #aaeec4, #7fd9a0);
   --grad-gold: linear-gradient(135deg, #aaeec4, #7fd9a0);
 }
 
@@ -124,20 +132,20 @@
   --gold: #aaeec4;
   --gold-bright: #c7f5d6;
   --gold-dim: #7fd9a0;
-  --status-disponivel: #34d399;
-  --status-atendendo: #60a5fa;
-  --status-pausa: #fbbf24;
+  --status-disponivel: #aaeec4;
+  --status-atendendo: #8ea5c9;
+  --status-pausa: #d4a373;
   --status-fora: #71717a;
-  --motivo-preco: #f59e0b;
-  --motivo-ruptura: #ef4444;
-  --motivo-indecisao: #a78bfa;
+  --motivo-preco: #d4a373;
+  --motivo-ruptura: #e89b8a;
+  --motivo-indecisao: #b8a8d4;
   --motivo-so-olhando: #9ca3af;
   --motivo-outro: #94a3b8;
-  --saida-almoco: #fbbf24;
-  --saida-banheiro: #60a5fa;
+  --saida-almoco: #d4a373;
+  --saida-banheiro: #8ea5c9;
   --saida-reuniao: #a1a1aa;
-  --saida-operacional: #a78bfa;
-  --saida-finalizar: #f87171;
+  --saida-operacional: #b8a8d4;
+  --saida-finalizar: #e89b8a;
   --saida-outro: #94a3b8;
 }
 
@@ -743,11 +751,11 @@ h1, h2, h3, .kpi-value, .timer-display, .t-header-kpi-value,
   font-size: 13px;
   opacity: 0.5;
 }
-/* Variation badge pills */
+/* Variation badge pills — harmonizados mint/coral */
 .kpi-compare .up {
   display: inline-block;
-  background: rgba(52, 211, 153, 0.12);
-  color: #34d399;
+  background: var(--success-bg);
+  color: var(--success-deep);
   padding: 3px 10px;
   border-radius: 20px;
   font-size: 11px;
@@ -755,8 +763,8 @@ h1, h2, h3, .kpi-value, .timer-display, .t-header-kpi-value,
 }
 .kpi-compare .down {
   display: inline-block;
-  background: rgba(220, 38, 38, 0.1);
-  color: #dc2626;
+  background: var(--danger-bg);
+  color: var(--danger-deep);
   padding: 3px 10px;
   border-radius: 20px;
   font-size: 11px;

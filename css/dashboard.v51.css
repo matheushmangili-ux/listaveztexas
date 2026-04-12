@@ -42,8 +42,8 @@
   padding: 4px 0;
 }
 .dash-header-logo img {
-  height: 26px;
-  max-width: 140px;
+  height: 48px;
+  max-width: 180px;
   object-fit: contain;
   display: block;
   mix-blend-mode: lighten;
@@ -113,7 +113,7 @@
   color: var(--accent-ink, #0d0d0d);
 }
 .sidebar-link--danger:hover {
-  color: #f87171;
+  color: #e89b8a;
   background: rgba(248, 113, 113, 0.08);
 }
 .sidebar-spacer {
@@ -1567,12 +1567,12 @@
 }
 .vm-approve-btn {
   background: rgba(34,197,94,0.15);
-  color: #22c55e;
+  color: #aaeec4;
 }
 .vm-approve-btn:hover { background: rgba(34,197,94,0.25); }
 .vm-reject-btn {
   background: rgba(239,68,68,0.15);
-  color: #ef4444;
+  color: #e89b8a;
 }
 .vm-reject-btn:hover { background: rgba(239,68,68,0.25); }
 .vm-reject-input {
@@ -1596,7 +1596,7 @@
   border: none;
   border-radius: 6px;
   background: rgba(239,68,68,0.15);
-  color: #ef4444;
+  color: #e89b8a;
   font-size: 11px;
   font-weight: 600;
   font-family: inherit;
@@ -1726,7 +1726,7 @@
   border-radius: 6px;
   border: none;
   background: rgba(239,68,68,0.1);
-  color: #ef4444;
+  color: #e89b8a;
   font-size: 10px;
   cursor: pointer;
 }
@@ -1765,7 +1765,7 @@
   padding: 2px 5px;
   border-radius: 3px;
   background: rgba(239,68,68,0.15);
-  color: #ef4444;
+  color: #e89b8a;
 }
 .vm-compliance-bar {
   height: 6px;
@@ -1822,7 +1822,7 @@
   border: none;
   border-radius: 6px;
   background: rgba(251,191,36,0.15);
-  color: #fbbf24;
+  color: #d4a373;
   font-size: 11px;
   font-weight: 600;
   font-family: inherit;

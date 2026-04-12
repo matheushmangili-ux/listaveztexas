@@ -3,8 +3,8 @@
 // ============================================
 
 export const MOTIVOS = {
-  preco: { label: 'Preço', icon: 'fa-tag', color: '#F59E0B' },
-  ruptura: { label: 'Ruptura', icon: 'fa-box-open', color: '#EF4444' },
+  preco: { label: 'Preço', icon: 'fa-tag', color: '#d4a373' },
+  ruptura: { label: 'Ruptura', icon: 'fa-box-open', color: '#e89b8a' },
   indecisao: { label: 'Indecisão', icon: 'fa-face-meh', color: '#8B5CF6' },
   so_olhando: { label: 'Só olhando', icon: 'fa-eye', color: '#6B7280' },
   outro: { label: 'Outro', icon: 'fa-ellipsis', color: '#94A3B8' }
@@ -14,27 +14,27 @@ export const STATUS_CONFIG = {
   disponivel: {
     label: 'Disponível',
     short: 'LIVRE',
-    color: '#34D399',
+    color: '#aaeec4',
     bg: 'rgba(52,211,153,.1)',
     icon: 'fa-circle-check'
   },
   em_atendimento: {
     label: 'Em atendimento',
     short: 'ATENDENDO',
-    color: '#60A5FA',
+    color: '#8ea5c9',
     bg: 'rgba(96,165,250,.1)',
     icon: 'fa-comments'
   },
-  pausa: { label: 'Em pausa', short: 'PAUSA', color: '#FBBF24', bg: 'rgba(251,191,36,.1)', icon: 'fa-mug-hot' },
+  pausa: { label: 'Em pausa', short: 'PAUSA', color: '#d4a373', bg: 'rgba(251,191,36,.1)', icon: 'fa-mug-hot' },
   fora: { label: 'Fora', short: 'FORA', color: '#71717A', bg: 'rgba(113,113,122,.1)', icon: 'fa-door-open' }
 };
 
 export const SAIDA_COLORS = {
-  almoco: { color: '#FBBF24', label: 'Almoço', labelFull: 'Em almoço' },
-  banheiro: { color: '#60A5FA', label: 'Banheiro', labelFull: 'Banheiro' },
+  almoco: { color: '#d4a373', label: 'Almoço', labelFull: 'Em almoço' },
+  banheiro: { color: '#8ea5c9', label: 'Banheiro', labelFull: 'Banheiro' },
   reuniao: { color: '#A1A1AA', label: 'Reunião', labelFull: 'Em reunião' },
-  operacional: { color: '#8b5cf6', label: 'Operacional', labelFull: 'Operacional' },
-  finalizar: { color: '#F87171', label: 'Finalizou', labelFull: 'Encerrou' },
+  operacional: { color: '#9488b8', label: 'Operacional', labelFull: 'Operacional' },
+  finalizar: { color: '#e89b8a', label: 'Finalizou', labelFull: 'Encerrou' },
   outro: { color: '#71717A', label: 'Fora', labelFull: 'Fora' }
 };
 
@@ -125,10 +125,10 @@ export function toast(msg, type = 'info', duration = 4000) {
   const container = document.getElementById('toastContainer');
   if (!container) return;
   const tone = {
-    success: { accent: '#22c55e', iconBg: 'rgba(34,197,94,.14)' },
-    error:   { accent: '#ef4444', iconBg: 'rgba(239,68,68,.14)' },
-    warning: { accent: '#f59e0b', iconBg: 'rgba(245,158,11,.14)' },
-    info:    { accent: '#3b82f6', iconBg: 'rgba(59,130,246,.14)' }
+    success: { accent: '#7fd9a0', iconBg: 'rgba(170,238,196,.18)' },
+    error:   { accent: '#d47a68', iconBg: 'rgba(232,155,138,.18)' },
+    warning: { accent: '#b8875a', iconBg: 'rgba(212,163,115,.18)' },
+    info:    { accent: '#6d85ac', iconBg: 'rgba(142,165,201,.18)' }
   };
   const icons = {
     success: 'fa-check',

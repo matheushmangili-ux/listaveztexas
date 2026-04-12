@@ -21,18 +21,18 @@ const EVENT_META = {
 // confia no que veio da RPC.
 const TIER_META_FALLBACK = {
   pedra:       { label: 'Pedra',      short: 'PED',     icon: 'fa-mountain',      color: '#9ca3af' },
-  madeira:     { label: 'Madeira',    short: 'MAD',     icon: 'fa-tree',          color: '#92400e' },
-  ferro:       { label: 'Ferro',      short: 'FER',     icon: 'fa-shield',        color: '#64748b' },
-  bronze:      { label: 'Bronze',     short: 'BRZ',     icon: 'fa-medal',         color: '#b45309' },
-  prata:       { label: 'Prata',      short: 'PRA',     icon: 'fa-medal',         color: '#cbd5e1' },
-  ouro:        { label: 'Ouro',       short: 'OUR',     icon: 'fa-medal',         color: '#facc15' },
-  platina:     { label: 'Platina',    short: 'PLA',     icon: 'fa-shield-halved', color: '#22d3ee' },
-  diamante:    { label: 'Diamante',   short: 'DIA',     icon: 'fa-gem',           color: '#60a5fa' },
-  mestre:      { label: 'Mestre',     short: 'MES',     icon: 'fa-crown',         color: '#a855f7' },
-  grao_mestre: { label: 'Grão-Mestre',short: 'GMS',     icon: 'fa-crown',         color: '#7c3aed' },
-  rubi:        { label: 'Rubi',       short: 'RUB',     icon: 'fa-gem',           color: '#dc2626' },
-  lendario:    { label: 'Lendário',   short: 'LEN',     icon: 'fa-trophy',        color: '#f97316' },
-  mitico:      { label: 'Mítico',     short: 'MIT',     icon: 'fa-dragon',        color: '#ec4899' }
+  madeira:     { label: 'Madeira',    short: 'MAD',     icon: 'fa-tree',          color: '#a07c5a' },
+  ferro:       { label: 'Ferro',      short: 'FER',     icon: 'fa-shield',        color: '#94a3b8' },
+  bronze:      { label: 'Bronze',     short: 'BRZ',     icon: 'fa-medal',         color: '#b8875a' },
+  prata:       { label: 'Prata',      short: 'PRA',     icon: 'fa-medal',         color: '#d4d4d4' },
+  ouro:        { label: 'Ouro',       short: 'OUR',     icon: 'fa-medal',         color: '#d4a373' },
+  platina:     { label: 'Platina',    short: 'PLA',     icon: 'fa-shield-halved', color: '#a8d4d8' },
+  diamante:    { label: 'Diamante',   short: 'DIA',     icon: 'fa-gem',           color: '#8ea5c9' },
+  mestre:      { label: 'Mestre',     short: 'MES',     icon: 'fa-crown',         color: '#b8a8d4' },
+  grao_mestre: { label: 'Grão-Mestre',short: 'GMS',     icon: 'fa-crown',         color: '#9488b8' },
+  rubi:        { label: 'Rubi',       short: 'RUB',     icon: 'fa-gem',           color: '#e89b8a' },
+  lendario:    { label: 'Lendário',   short: 'LEN',     icon: 'fa-trophy',        color: '#d4a373' },
+  mitico:      { label: 'Mítico',     short: 'MIT',     icon: 'fa-dragon',        color: '#d4a8c4' }
 };
 
 function tierOf(xp) {

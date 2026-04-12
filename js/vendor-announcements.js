@@ -11,10 +11,10 @@ let _channel = null;
 let _countdownTimer = null;
 
 const TYPE_META = {
-  comunicado:  { icon: 'fa-bullhorn',     label: 'Comunicado', color: '#3b82f6' },
-  corrida:     { icon: 'fa-flag-checkered', label: 'Corrida',  color: '#f59e0b' },
-  evento:      { icon: 'fa-calendar-day', label: 'Evento',     color: '#22c55e' },
-  treinamento: { icon: 'fa-graduation-cap', label: 'Treino',   color: '#a855f7' }
+  comunicado:  { icon: 'fa-bullhorn',     label: 'Comunicado', color: '#8ea5c9' },
+  corrida:     { icon: 'fa-flag-checkered', label: 'Corrida',  color: '#d4a373' },
+  evento:      { icon: 'fa-calendar-day', label: 'Evento',     color: '#aaeec4' },
+  treinamento: { icon: 'fa-graduation-cap', label: 'Treino',   color: '#b8a8d4' }
 };
 
 export async function initAnnouncements(sb, ctx) {

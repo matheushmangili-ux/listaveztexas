@@ -10,10 +10,10 @@ let _achievements = [];
 let _prevUnlockedCodes = new Set();
 
 const TIER_COLORS = {
-  bronze:   { bg: 'rgba(180,83,9,0.12)',  border: 'rgba(180,83,9,0.3)',  text: '#d97706' },
-  prata:    { bg: 'rgba(226,232,240,0.08)', border: 'rgba(226,232,240,0.2)', text: '#e2e8f0' },
-  ouro:     { bg: 'rgba(250,204,21,0.12)', border: 'rgba(250,204,21,0.3)', text: '#facc15' },
-  lendario: { bg: 'rgba(249,115,22,0.12)', border: 'rgba(249,115,22,0.3)', text: '#f97316' }
+  bronze:   { bg: 'rgba(184,135,90,0.14)',  border: 'rgba(184,135,90,0.32)',  text: '#b8875a' },
+  prata:    { bg: 'rgba(212,212,212,0.10)', border: 'rgba(212,212,212,0.22)', text: '#d4d4d4' },
+  ouro:     { bg: 'rgba(212,163,115,0.14)', border: 'rgba(212,163,115,0.32)', text: '#d4a373' },
+  lendario: { bg: 'rgba(184,168,212,0.14)', border: 'rgba(184,168,212,0.32)', text: '#b8a8d4' }
 };
 
 export async function initAchievements(sb) {

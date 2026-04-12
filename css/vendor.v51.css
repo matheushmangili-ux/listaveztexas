@@ -13,25 +13,25 @@
   --vendor-text-dim: #a1a1aa;
   --vendor-text-muted: #71717a;
   --vendor-accent: #aaeec4;
-  --vendor-success: #22c55e;
-  --vendor-warning: #f59e0b;
-  --vendor-danger: #ef4444;
-  --vendor-info: #3b82f6;
+  --vendor-success: #aaeec4;
+  --vendor-warning: #d4a373;
+  --vendor-danger: #e89b8a;
+  --vendor-info: #8ea5c9;
 
   /* Tiers RPG (Fase 2b) — cor principal por major_code */
   --tier-pedra: #9ca3af;
-  --tier-madeira: #b45309;
+  --tier-madeira: #a07c5a;
   --tier-ferro: #94a3b8;
-  --tier-bronze: #d97706;
-  --tier-prata: #e2e8f0;
-  --tier-ouro: #facc15;
-  --tier-platina: #22d3ee;
-  --tier-diamante: #60a5fa;
-  --tier-mestre: #a855f7;
-  --tier-grao_mestre: #8b5cf6;
-  --tier-rubi: #ef4444;
-  --tier-lendario: #f97316;
-  --tier-mitico: #ec4899;
+  --tier-bronze: #b8875a;
+  --tier-prata: #d4d4d4;
+  --tier-ouro: #d4a373;
+  --tier-platina: #a8d4d8;
+  --tier-diamante: #8ea5c9;
+  --tier-mestre: #b8a8d4;
+  --tier-grao_mestre: #9488b8;
+  --tier-rubi: #e89b8a;
+  --tier-lendario: #d4a373;
+  --tier-mitico: #d4a8c4;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -95,8 +95,8 @@ html, body {
 .vendor-brand-logo {
   height: auto;
   width: 100%;
-  max-width: 200px;
-  max-height: 56px;
+  max-width: 260px;
+  max-height: 80px;
   object-fit: contain;
   display: block;
   mix-blend-mode: lighten;
@@ -297,7 +297,7 @@ html, body {
   height: 16px;
   padding: 0 4px;
   border-radius: 8px;
-  background: #ef4444;
+  background: #e89b8a;
   color: #fff;
   font-size: 9px;
   font-weight: 700;
@@ -941,13 +941,13 @@ html, body {
   left: 50%;
   transform: translate(-50%, 12px);
   background: var(--vendor-card);
-  border: 1px solid color-mix(in srgb, var(--ach-text, #facc15) 40%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ach-text, #d4a373) 40%, transparent);
   border-radius: 16px;
   padding: 14px 18px;
   display: flex;
   align-items: center;
   gap: 14px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 24px color-mix(in srgb, var(--ach-text, #facc15) 20%, transparent);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 24px color-mix(in srgb, var(--ach-text, #d4a373) 20%, transparent);
   z-index: 220;
   opacity: 0;
   transition: opacity 0.3s, transform 0.3s;
@@ -962,14 +962,14 @@ html, body {
   width: 48px;
   height: 48px;
   border-radius: 14px;
-  background: color-mix(in srgb, var(--ach-text, #facc15) 15%, transparent);
-  color: var(--ach-text, #facc15);
+  background: color-mix(in srgb, var(--ach-text, #d4a373) 15%, transparent);
+  color: var(--ach-text, #d4a373);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 22px;
   flex-shrink: 0;
-  filter: drop-shadow(0 0 8px var(--ach-text, #facc15));
+  filter: drop-shadow(0 0 8px var(--ach-text, #d4a373));
 }
 .ach-unlock-text {
   display: flex;
@@ -978,7 +978,7 @@ html, body {
 .ach-unlock-text strong {
   font-size: 14px;
   font-weight: 800;
-  color: var(--ach-text, #facc15);
+  color: var(--ach-text, #d4a373);
 }
 .ach-unlock-text span {
   font-size: 12px;
@@ -1527,17 +1527,17 @@ html, body {
 .tier-badge.tier-lendario    { color: var(--tier-lendario); }
 /* Mítico usa gradient text arco-íris — aplicado no label pra não afetar o ícone */
 .tier-badge.tier-mitico .tier-badge-label {
-  background: linear-gradient(135deg, #ec4899, #8b5cf6, #06b6d4, #22c55e);
+  background: linear-gradient(135deg, #d4a8c4, #9488b8, #06b6d4, #aaeec4);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
 }
 .tier-badge.tier-mitico {
-  color: #ec4899; /* fallback pro ícone */
+  color: #d4a8c4; /* fallback pro ícone */
 }
 .tier-badge.tier-mitico i {
-  color: #ec4899;
+  color: #d4a8c4;
   filter: drop-shadow(0 0 4px rgba(236, 72, 153, 0.6));
 }
 /* Glow nos tops pra impressionar */
@@ -1558,7 +1558,7 @@ html, body {
 .xp-bar-fill {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, var(--vendor-warning), #facc15);
+  background: linear-gradient(90deg, var(--vendor-warning), #d4a373);
   border-radius: 999px;
   transition: width 0.4s ease;
 }
@@ -1574,7 +1574,7 @@ html, body {
   top: calc(16px + env(safe-area-inset-top) + 60px); /* abaixo do toast normal */
   left: 50%;
   transform: translate(-50%, -12px);
-  background: linear-gradient(135deg, var(--vendor-warning), #facc15);
+  background: linear-gradient(135deg, var(--vendor-warning), #d4a373);
   color: #060606;
   padding: 10px 20px;
   border-radius: 999px;
@@ -1614,7 +1614,7 @@ html, body {
 }
 .xp-levelup.show { opacity: 1; }
 .xp-levelup-card {
-  background: linear-gradient(135deg, #f59e0b 0%, #facc15 100%);
+  background: linear-gradient(135deg, #d4a373 0%, #d4a373 100%);
   color: #060606;
   padding: 32px 40px;
   border-radius: 24px;
@@ -1643,7 +1643,7 @@ html, body {
 
 /* Tier up fanfarra (mudança de tier maior, ex: Diamante III → Mestre) */
 .xp-tierup {
-  --tier-color: #facc15;
+  --tier-color: #d4a373;
   position: fixed;
   inset: 0;
   background: radial-gradient(
@@ -1726,7 +1726,7 @@ html, body {
 
 /* Mítico: gradient arco-íris no card */
 .xp-tierup.tier-mitico .xp-tierup-card {
-  background: linear-gradient(135deg, #ec4899, #a855f7, #3b82f6, #06b6d4, #22c55e);
+  background: linear-gradient(135deg, #d4a8c4, #b8a8d4, #8ea5c9, #06b6d4, #aaeec4);
   color: #fff;
 }
 .xp-tierup.tier-mitico .xp-tierup-title,
@@ -1776,7 +1776,7 @@ html, body {
   margin-bottom: 2px;
 }
 .xp-sheet-hero.tier-mitico .xp-sheet-tier-label {
-  background: linear-gradient(135deg, #ec4899, #8b5cf6, #06b6d4);
+  background: linear-gradient(135deg, #d4a8c4, #9488b8, #06b6d4);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -2153,13 +2153,13 @@ html, body {
 
 /* Tier accent on items */
 .avatar-item.tier-bronze { border-color: rgba(180,83,9,0.3); }
-.avatar-item.tier-bronze.selected { border-color: #d97706; box-shadow: 0 0 0 1px #d97706; }
+.avatar-item.tier-bronze.selected { border-color: #b8875a; box-shadow: 0 0 0 1px #b8875a; }
 .avatar-item.tier-prata { border-color: rgba(226,232,240,0.2); }
 .avatar-item.tier-prata.selected { border-color: #e2e8f0; box-shadow: 0 0 0 1px #e2e8f0; }
 .avatar-item.tier-ouro { border-color: rgba(250,204,21,0.3); }
-.avatar-item.tier-ouro.selected { border-color: #facc15; box-shadow: 0 0 0 1px #facc15; }
+.avatar-item.tier-ouro.selected { border-color: #d4a373; box-shadow: 0 0 0 1px #d4a373; }
 .avatar-item.tier-lendario { border-color: rgba(249,115,22,0.3); }
-.avatar-item.tier-lendario.selected { border-color: #f97316; box-shadow: 0 0 0 1px #f97316; }
+.avatar-item.tier-lendario.selected { border-color: #d4a373; box-shadow: 0 0 0 1px #d4a373; }
 
 /* ═══════════════════════════════════════════
    VM Photos (Fase 6)
@@ -2286,9 +2286,9 @@ html, body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-.vm-status-pending { background: rgba(251,191,36,0.15); color: #fbbf24; }
-.vm-status-approved { background: rgba(34,197,94,0.15); color: #22c55e; }
-.vm-status-rejected { background: rgba(239,68,68,0.15); color: #ef4444; }
+.vm-status-pending { background: rgba(251,191,36,0.15); color: #d4a373; }
+.vm-status-approved { background: rgba(34,197,94,0.15); color: #aaeec4; }
+.vm-status-rejected { background: rgba(239,68,68,0.15); color: #e89b8a; }
 .vm-cat-tag {
   font-size: 9px;
   color: var(--vendor-text-muted);
@@ -2423,7 +2423,7 @@ html, body {
   padding: 2px 6px;
   border-radius: 4px;
   background: rgba(239,68,68,0.15);
-  color: #ef4444;
+  color: #e89b8a;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -2461,8 +2461,8 @@ html, body {
   color: var(--vendor-text);
   line-height: 1.4;
 }
-.vm-task-feedback i { color: #ef4444; margin-right: 4px; }
-.vm-status-revision { background: rgba(239,68,68,0.15); color: #ef4444; }
+.vm-task-feedback i { color: #e89b8a; margin-right: 4px; }
+.vm-status-revision { background: rgba(239,68,68,0.15); color: #e89b8a; }
 
 /* Task fullscreen view */
 .vm-task-view {
@@ -2659,7 +2659,7 @@ html, body {
   border: 1px solid rgba(250,204,21,0.35);
   border-radius: 14px;
   background: linear-gradient(135deg, rgba(250,204,21,0.12), rgba(245,158,11,0.08));
-  color: #facc15;
+  color: #d4a373;
   font-family: inherit;
   font-size: 14px;
   font-weight: 700;
@@ -2828,8 +2828,8 @@ html, body {
   color: var(--vendor-text-dim);
 }
 .drawer-item-danger i { color: var(--vendor-text-dim); transition: color 0.15s ease; }
-.drawer-item-danger:hover { background: rgba(239, 68, 68, 0.08); color: #ef4444; }
-.drawer-item-danger:hover i { color: #ef4444; }
+.drawer-item-danger:hover { background: rgba(239, 68, 68, 0.08); color: #e89b8a; }
+.drawer-item-danger:hover i { color: #e89b8a; }
 
 .drawer-badge {
   min-width: 20px;

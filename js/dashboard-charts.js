@@ -16,11 +16,36 @@ const chartTypes = {}; // track rendered type per key to decide reuse vs destroy
 let _firstLoad = true;
 let _activeChartTab = null;
 
-// ─── Semantic tempo colors based on meta threshold ───
+// ─── Paleta harmonizada (mint + charcoal) ───
+const BRAND_PALETTE = {
+  mint:      '#aaeec4',
+  mintDeep:  '#7fd9a0',
+  mintSoft:  '#c7f5d6',
+  coral:     '#e89b8a',
+  coralDeep: '#d47a68',
+  sand:      '#d4a373',
+  sandDeep:  '#b8875a',
+  dusty:     '#8ea5c9',
+  dustyDeep: '#6d85ac',
+  lavender:  '#b8a8d4',
+  neutral:   '#a3a3a3',
+  charcoal:  '#2a2a2a'
+};
+
+// Donut categórico (motivos, setores, canais)
+const CATEGORICAL = [
+  '#aaeec4', '#8ea5c9', '#d4a373', '#b8a8d4', '#e89b8a', '#7fd9a0', '#6d85ac', '#a3a3a3'
+];
+// Dual-series (hoje vs ontem): mint + sand
+const DUAL = ['#aaeec4', '#d4a373'];
+// Triple: mint (positivo) + dusty (info) + coral (negativo)
+const TRIPLE = ['#aaeec4', '#8ea5c9', '#e89b8a'];
+
+// ─── Semantic tempo colors harmonizados ───
 function tempoColor(minutes, meta) {
-  if (minutes <= meta) return '#22C55E';
-  if (minutes <= meta * 1.3) return '#F59E0B';
-  return '#EF4444';
+  if (minutes <= meta) return BRAND_PALETTE.mint;
+  if (minutes <= meta * 1.3) return BRAND_PALETTE.sand;
+  return BRAND_PALETTE.coral;
 }
 
 // ─── Unified custom tooltip builder ───
@@ -593,14 +618,14 @@ export async function loadHourly(range) {
       if (!annotations.xaxis) annotations.xaxis = [];
       annotations.xaxis.push({
         x: currentHourLabel,
-        borderColor: '#EF4444',
+        borderColor: BRAND_PALETTE.coralDeep,
         strokeDashArray: 3,
         label: {
           text: 'agora',
           style: {
             fontSize: '9px',
             fontWeight: 700,
-            background: '#EF4444',
+            background: BRAND_PALETTE.coralDeep,
             color: '#fff',
             padding: { left: 5, right: 5, top: 2, bottom: 2 }
           },
@@ -616,7 +641,7 @@ export async function loadHourly(range) {
       xaxis: { categories: hours, labels: { style: { fontSize: '11px', fontWeight: 500 } } },
       yaxis: { labels: { style: { fontSize: '11px', fontWeight: 500 } }, forceNiceScale: true },
       plotOptions: { bar: { borderRadius: 6, columnWidth: '60%' } },
-      colors: ['#aaeec4', '#D4D4D8', '#7fd9a0'],
+      colors: TRIPLE,
       fill: {
         type: ['gradient', 'solid', 'solid'],
         gradient: {
@@ -786,11 +811,11 @@ export async function loadPauseStats(range) {
     outro: 'fa-ellipsis'
   };
   const motivoColors = {
-    almoco: '#f59e0b',
-    banheiro: '#60a5fa',
-    reuniao: '#A1A1AA',
-    operacional: '#8b5cf6',
-    outro: '#64748b'
+    almoco: BRAND_PALETTE.sand,
+    banheiro: BRAND_PALETTE.dusty,
+    reuniao: BRAND_PALETTE.neutral,
+    operacional: BRAND_PALETTE.lavender,
+    outro: BRAND_PALETTE.neutral
   };
 
   el.innerHTML = data
@@ -969,12 +994,12 @@ export async function loadScatter(range, cachedData) {
       { name: 'Perto da meta', data: series2 },
       { name: 'Abaixo da meta', data: series3 }
     ],
-    colors: ['#aaeec4', '#c7f5d6', '#D4D4D8'],
+    colors: [BRAND_PALETTE.mint, BRAND_PALETTE.sand, BRAND_PALETTE.coral],
     markers: {
       size: 10,
       opacity: 0.85,
       strokeWidth: 2,
-      strokeColors: ['#7fd9a0', '#d4607a', '#A1A1AA'],
+      strokeColors: [BRAND_PALETTE.mintDeep, BRAND_PALETTE.sandDeep, BRAND_PALETTE.coralDeep],
       hover: { sizeOffset: 4 }
     },
     xaxis: {
@@ -1286,7 +1311,7 @@ export async function loadTrend(range) {
         stops: [0, 95]
       }
     },
-    colors: ['#aaeec4', '#D4D4D8', '#f59e0b'],
+    colors: [BRAND_PALETTE.mint, BRAND_PALETTE.dusty, BRAND_PALETTE.sand],
     markers: { size: [0, 0, 4], strokeWidth: 2, strokeColors: '#fff', hover: { sizeOffset: 2 } },
     grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { left: 10, right: 10, bottom: 5 } },
     legend: {

@@ -77,7 +77,7 @@ function spawnGoldBurst(cx, cy) {
   const layer = document.createElement('div');
   layer.style.cssText = `position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:${Z_DRAG_GHOST + 1}`;
   document.body.appendChild(layer);
-  const colors = ['#fbbf24', '#f59e0b', '#fde68a', '#34d399', '#ffffff'];
+  const colors = ['#d4a373', '#b8875a', '#e8d0a0', '#aaeec4', '#ffffff'];
   const particles = [];
   for (let i = 0; i < 18; i++) {
     const p = document.createElement('div');
@@ -118,7 +118,7 @@ export function animateValueToHeader(valor, originEl) {
 
   const badge = document.createElement('div');
   badge.textContent = '+R$ ' + Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  badge.style.cssText = `position:fixed;left:${ox}px;top:${oy}px;transform:translate(-50%,-50%);z-index:${Z_DRAG_GHOST + 2};padding:8px 14px;border-radius:999px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-family:var(--font-mono);font-weight:800;font-size:16px;box-shadow:0 8px 32px rgba(34,197,94,.45);pointer-events:none;white-space:nowrap;letter-spacing:-.01em`;
+  badge.style.cssText = `position:fixed;left:${ox}px;top:${oy}px;transform:translate(-50%,-50%);z-index:${Z_DRAG_GHOST + 2};padding:8px 14px;border-radius:999px;background:linear-gradient(135deg,#aaeec4,#7fd9a0);color:#fff;font-family:var(--font-mono);font-weight:800;font-size:16px;box-shadow:0 8px 32px rgba(34,197,94,.45);pointer-events:none;white-space:nowrap;letter-spacing:-.01em`;
   document.body.appendChild(badge);
 
   const midX = (ox + tx) / 2;
@@ -157,10 +157,10 @@ export function fireEpicTrocaAnimation(nome, valor) {
   card.innerHTML = `
     <div class="epic-label" style="font-size:11px;font-weight:800;letter-spacing:.25em;text-transform:uppercase;color:#c4b5fd;margin-bottom:14px">CONQUISTA DESBLOQUEADA</div>
     <div class="epic-gem" style="font-size:56px;margin-bottom:10px;filter:drop-shadow(0 0 24px rgba(232,121,249,.6))">💎</div>
-    <div class="epic-name" style="font-family:var(--font-mono);font-size:22px;font-weight:800;color:#e879f9;margin-bottom:4px;text-shadow:0 0 20px rgba(232,121,249,.4);letter-spacing:-.01em">${escapeHtml(nome)}</div>
+    <div class="epic-name" style="font-family:var(--font-mono);font-size:22px;font-weight:800;color:#d4a8c4;margin-bottom:4px;text-shadow:0 0 20px rgba(232,121,249,.4);letter-spacing:-.01em">${escapeHtml(nome)}</div>
     <div class="epic-sub" style="font-size:13px;color:#c4b5fd;font-weight:600;margin-bottom:18px">Troca com diferença épica</div>
     <div class="epic-valor" style="font-family:var(--font-mono);font-size:36px;font-weight:800;color:#f0abfc;text-shadow:0 0 32px rgba(240,171,252,.5);letter-spacing:-.02em;font-variant-numeric:tabular-nums">R$ ${Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-    <div class="epic-foot" style="margin-top:18px;font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:.15em">1º DA FILA GARANTIDO</div>
+    <div class="epic-foot" style="margin-top:18px;font-size:10px;color:#b8a8d4;font-weight:700;letter-spacing:.15em">1º DA FILA GARANTIDO</div>
     <button class="epic-close" style="margin-top:22px;padding:10px 32px;border:1px solid rgba(167,139,250,.4);border-radius:10px;background:rgba(167,139,250,.15);color:#e9d5ff;font-family:var(--font-mono);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s">FECHAR</button>
   `;
   overlay.appendChild(card);
@@ -198,7 +198,7 @@ export function fireEpicTrocaAnimation(nome, valor) {
   const confettiLayer = document.createElement('div');
   confettiLayer.style.cssText = `position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0`;
   overlay.insertBefore(confettiLayer, card);
-  const palette = ['#a78bfa', '#e879f9', '#f472b6', '#c4b5fd', '#fbbf24', '#f0abfc'];
+  const palette = ['#b8a8d4', '#d4a8c4', '#c7f5d6', '#aaeec4', '#d4a373', '#e8d0a0'];
   const bits = [];
   for (let i = 0; i < 40; i++) {
     const b = document.createElement('div');

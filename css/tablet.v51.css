@@ -31,9 +31,9 @@
   color: #ffffff;
 }
 .t-header-logo {
-  height: 32px;
+  height: 44px;
   width: auto;
-  max-width: 150px;
+  max-width: 180px;
   background: transparent;
   padding: 0;
   mix-blend-mode: lighten;
@@ -315,7 +315,7 @@
 /* Turno card — Encerrar (ON): danger outlined */
 .turno-card.on {
   background: rgba(239, 68, 68, 0.1);
-  color: #f87171;
+  color: #e89b8a;
   border-color: rgba(239, 68, 68, 0.28);
   filter: none;
 }
@@ -1786,7 +1786,7 @@
   max-width: 320px;
 }
 .mini-ranking-trophy {
-  color: #fbbf24;
+  color: #d4a373;
 }
 
 /* Sheet sizing */
@@ -1826,7 +1826,7 @@
 }
 
 .logout-icon-danger {
-  color: #ef4444;
+  color: #e89b8a;
 }
 .more-menu-wrapper {
   position: relative;

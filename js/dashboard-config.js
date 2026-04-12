@@ -8,7 +8,7 @@ export const METAS_KEY = 'minhavez_metas';
 export const DEFAULT_METAS = { conversao: 70, tempo_medio: 30, ticket_medio: 3000 };
 
 // Donut chart palette: diverse colors for distinct category identification
-export const ORIGEM_PALETTE = ['#3B82F6', '#22C55E', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#F97316', '#64748B'];
+export const ORIGEM_PALETTE = ['#8ea5c9', '#aaeec4', '#d4a373', '#b8a8d4', '#d4a8c4', '#a8d4d8', '#b8875a', '#9ca3af'];
 
 // Period identifiers
 export const PERIODS = {

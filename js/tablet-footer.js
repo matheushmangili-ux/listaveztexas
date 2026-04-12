@@ -120,9 +120,9 @@ function buildFooterCardData(v, atendMap) {
   const firstName = v.apelido || v.nome.split(' ')[0];
 
   // Avatar color by status
-  let avatarBg = '#4b5563';
-  if (atendendo) avatarBg = '#3b82f6';
-  else if (inQueue) avatarBg = '#22c55e';
+  let avatarBg = '#525252';
+  if (atendendo) avatarBg = '#8ea5c9';
+  else if (inQueue) avatarBg = '#aaeec4';
   else if (v.status === 'pausa') avatarBg = statusColor;
 
   // Fingerprint — tudo que altera a saída renderizada
