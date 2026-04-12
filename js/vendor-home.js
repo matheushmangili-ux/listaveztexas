@@ -6,6 +6,7 @@ import { initAnnouncements, unmountAnnouncements } from './vendor-announcements.
 import { initXp, unmountXp, refreshAfterAtendimento as refreshXp } from './vendor-xp.js';
 import { initMissions, unmountMissions, refreshMissionsAfterAtendimento as refreshMissions } from './vendor-missions.js';
 import { initAchievements, unmountAchievements, refreshAchievementsAfterAtendimento as refreshAchievements } from './vendor-achievements.js';
+import { initAvatar, unmountAvatar, buildAvatarUrl } from './vendor-avatar.js';
 
 let _sb = null;
 let _ctx = null;        // resultado de get_my_vendedor_context()
@@ -100,6 +101,8 @@ export async function initHome(sb) {
     initMissions(_sb).catch((err) => console.warn('[missions] init falhou:', err));
     // Conquistas — independente, falha silenciosa
     initAchievements(_sb).catch((err) => console.warn('[achievements] init falhou:', err));
+    // Avatar RPG — independente, falha silenciosa
+    initAvatar(_sb, _ctx).catch((err) => console.warn('[avatar] init falhou:', err));
   } catch (err) {
     console.error('[initHome] erro:', err);
     window._vendorToast('Erro ao carregar: ' + (err?.message || err), 'error');
@@ -113,6 +116,7 @@ export function unmountHome() {
   unmountXp();
   unmountMissions();
   unmountAchievements();
+  unmountAvatar();
   if (_realtimeChannel) {
     _sb?.removeChannel(_realtimeChannel);
     _realtimeChannel = null;
@@ -192,11 +196,17 @@ function renderAll() {
 function renderHeader() {
   const nome = _ctx.apelido || _ctx.nome;
   el.headerName.textContent = nome;
-  // Avatar
-  if (_ctx.foto_url) {
+  // Avatar: pixel-art DiceBear → foto_url → iniciais
+  const avatarUrl = buildAvatarUrl(_ctx.avatar_config);
+  if (avatarUrl) {
+    el.headerAvatar.innerHTML = `<img src="${escape(avatarUrl)}" alt="${escape(nome)}">`;
+    el.headerAvatar.classList.add('has-avatar');
+  } else if (_ctx.foto_url) {
     el.headerAvatar.innerHTML = `<img src="${escape(_ctx.foto_url)}" alt="${escape(nome)}">`;
+    el.headerAvatar.classList.remove('has-avatar');
   } else {
     el.headerAvatar.textContent = initials(nome);
+    el.headerAvatar.classList.remove('has-avatar');
   }
   // Sub-linha (dot + status): escondida quando "fora" porque o big card
   // central já comunica esse estado. Visível nos 3 estados ativos.
