@@ -23,12 +23,11 @@
   justify-content: space-between;
   padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 10px
     max(12px, env(safe-area-inset-left));
-  background: #060606;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-subtle);
   gap: 8px;
   flex-wrap: nowrap;
-  color: #ffffff;
+  color: var(--text-primary);
 }
 .t-header-logo {
   height: 44px;
@@ -177,14 +176,15 @@
   opacity: 0.7;
   transition: opacity 0.15s ease;
 }
-.setor-tab:hover {
-  background: var(--accent);
-  color: var(--accent-ink, #0d0d0d);
-  filter: brightness(1.15);
+.setor-tab:hover:not(.active) {
+  background: var(--bg-hover);
+  color: var(--accent);
+  box-shadow: var(--shadow-sm);
+  filter: none;
 }
-.setor-tab:hover i {
+.setor-tab:hover:not(.active) i {
   opacity: 1;
-  color: #fff;
+  color: var(--accent);
 }
 .setor-tab.active {
   background: var(--accent);
@@ -193,20 +193,20 @@
 }
 .setor-tab.active i {
   opacity: 1;
-  color: #fff;
+  color: var(--accent-ink, #0d0d0d);
 }
 .setor-tab:active {
   transform: scale(0.97);
 }
 
-/* Service panel (right — Em Atendimento) */
+/* Service panel (right — Em Atendimento) — um tom acima do charcoal */
 .service-panel {
   display: flex;
   flex-direction: column;
   padding: 14px 16px;
   position: relative;
   overflow-y: auto;
-  background: var(--bg-deep);
+  background: #1a1a1a;
   contain: layout style;
 }
 .service-panel.drop-active {
@@ -1083,7 +1083,7 @@
 }
 
 .setor-tab:hover:not(.active) {
-  transform: scale(1.04);
+  transform: translateY(-1px);
 }
 .setor-tab:active {
   transform: scale(0.95);
@@ -1842,7 +1842,7 @@
 
 /* Header — KPIs com mais vida */
 .t-header {
-  background: linear-gradient(180deg, #0a0a0c 0%, #060606 100%);
+  background: var(--bg-card);
   border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 .t-header-kpi-value {
