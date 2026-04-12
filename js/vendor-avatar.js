@@ -46,7 +46,7 @@ const DEFAULT_CONFIG = {
 // requiredAchievement: null = free, string = achievement code needed
 const CATEGORIES = [
   { id: 'skinColor', label: 'Pele', icon: 'fa-palette', type: 'color' },
-  { id: 'hair', label: 'Cabelo', icon: 'fa-head-side', type: 'variant' },
+  { id: 'hair', label: 'Cabelo', icon: 'fa-scissors', type: 'variant' },
   { id: 'hairColor', label: 'Cor Cabelo', icon: 'fa-droplet', type: 'color' },
   { id: 'eyes', label: 'Olhos', icon: 'fa-eye', type: 'variant' },
   { id: 'mouth', label: 'Boca', icon: 'fa-face-smile', type: 'variant' },

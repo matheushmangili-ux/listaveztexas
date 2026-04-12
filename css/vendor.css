@@ -2038,7 +2038,7 @@ html, body {
   color: var(--vendor-text);
   position: relative;
   transition: all 0.15s;
-  overflow: hidden;
+  overflow: visible;
 }
 .avatar-item:active:not(.locked) {
   transform: scale(0.95);
@@ -2057,6 +2057,7 @@ html, body {
   height: 48px;
   border-radius: 8px;
   image-rendering: pixelated;
+  object-fit: contain;
 }
 .avatar-item-label {
   font-size: 9px;
@@ -2082,6 +2083,9 @@ html, body {
 .avatar-item-color.selected .avatar-color-swatch {
   border-color: var(--vendor-accent);
   box-shadow: 0 0 0 2px var(--vendor-accent);
+}
+.avatar-item-color .avatar-lock-hint {
+  display: none;
 }
 
 /* "None" option for optional categories */
