@@ -70,15 +70,9 @@
       </div>
     </div>
     <div class="vendor-header-actions">
-      <button class="vendor-icon-btn vendor-icon-btn-pref hidden" id="btnStartPreferencial" title="Atendimento preferencial" aria-label="Atendimento preferencial">
-        <i class="fa-solid fa-star"></i>
-      </button>
-      <button class="vendor-icon-btn vendor-icon-btn-ai" id="btnAiTips" title="Dicas da IA" aria-label="Dicas da IA">
-        <i class="fa-solid fa-wand-magic-sparkles"></i>
-      </button>
-      <button class="vendor-icon-btn" id="btnAchievements" title="Conquistas" aria-label="Conquistas">
-        <i class="fa-solid fa-trophy"></i>
-        <span class="achievements-badge">0</span>
+      <button class="vendor-icon-btn" id="btnMenu" title="Menu" aria-label="Menu">
+        <i class="fa-solid fa-bars"></i>
+        <span class="menu-badge hidden" id="menuBadge">0</span>
       </button>
       <button class="vendor-icon-btn" id="btnRefresh" title="Atualizar" aria-label="Atualizar">
         <i class="fa-solid fa-arrows-rotate"></i>
@@ -87,13 +81,9 @@
   </header>
 
   <main class="vendor-main">
-    <!-- Missões do dia (Fase 3 gamificação) -->
+    <!-- Cards ocultos: conteúdo movido para o drawer, só renderizam lá -->
     <section id="missionsCard" class="missions-card hidden"></section>
-
-    <!-- VM Photos (Fase 6) -->
     <section id="vmCard" class="vm-card hidden"></section>
-
-    <!-- Comunicados / Corridas (Fase 1 gamificação) -->
     <section id="announcementsWrap" class="vendor-ann-wrap hidden"></section>
 
     <!-- Prompt pra ativar notificações push -->
@@ -141,6 +131,13 @@
       <div class="vendor-off-sub" id="offSub">Aguardando a abertura do turno</div>
     </section>
 
+    <section class="vendor-primary-actions" id="primaryActions">
+      <button class="vendor-btn-pref-main hidden" id="btnStartPreferencial" type="button">
+        <i class="fa-solid fa-star"></i>
+        <span>Atendimento preferencial</span>
+      </button>
+    </section>
+
     <section class="vendor-mini-stats" id="miniStats">
       <div class="stat">
         <span class="stat-value mono" id="statVendas">0</span>
@@ -163,12 +160,63 @@
       <i class="fa-solid fa-pause"></i>
       <span>Pausa</span>
     </button>
-    <button class="vendor-action-btn" id="btnLogout">
+  </nav>
+</div>
+
+<!-- Drawer lateral (Hub de atividades) -->
+<div class="vendor-drawer-overlay hidden" id="drawerOverlay"></div>
+<aside class="vendor-drawer hidden" id="vendorDrawer">
+  <div class="drawer-header">
+    <div class="drawer-user">
+      <div class="drawer-avatar" id="drawerAvatar"></div>
+      <div class="drawer-user-text">
+        <strong id="drawerName">—</strong>
+        <span id="drawerTier">—</span>
+      </div>
+    </div>
+    <button class="drawer-close" id="drawerClose" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="drawer-xp" id="drawerXp"></div>
+  <nav class="drawer-nav">
+    <div class="drawer-section-label">Tarefas do dia</div>
+    <button class="drawer-item" data-action="announcements">
+      <i class="fa-solid fa-bullhorn"></i>
+      <span>Comunicados</span>
+      <span class="drawer-badge hidden" id="drawerBadgeAnn"></span>
+    </button>
+    <button class="drawer-item" data-action="missions">
+      <i class="fa-solid fa-bullseye"></i>
+      <span>Missões</span>
+      <span class="drawer-badge hidden" id="drawerBadgeMis"></span>
+    </button>
+    <button class="drawer-item" data-action="vm">
+      <i class="fa-solid fa-camera-retro"></i>
+      <span>VM Missions</span>
+      <span class="drawer-badge hidden" id="drawerBadgeVm"></span>
+    </button>
+
+    <div class="drawer-section-label">Progresso</div>
+    <button class="drawer-item" data-action="achievements">
+      <i class="fa-solid fa-trophy"></i>
+      <span>Conquistas</span>
+      <span class="drawer-count" id="drawerCountAch"></span>
+    </button>
+    <button class="drawer-item" data-action="xp">
+      <i class="fa-solid fa-bolt"></i>
+      <span>Minha Jornada</span>
+    </button>
+    <button class="drawer-item" data-action="ai">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      <span>Dicas da IA</span>
+    </button>
+
+    <div class="drawer-section-label">Conta</div>
+    <button class="drawer-item drawer-item-danger" data-action="logout">
       <i class="fa-solid fa-right-from-bracket"></i>
       <span>Sair</span>
     </button>
   </nav>
-</div>
+</aside>
 
 <!-- Bottom sheet: Conquistas -->
 <div class="vendor-sheet-overlay hidden" id="achievementsOverlay"></div>

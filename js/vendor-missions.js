@@ -47,6 +47,10 @@ async function refresh() {
     _missions = [];
     render();
   }
+  if (window._vendorCounts) {
+    window._vendorCounts.missions = _missions.filter(m => !m.completed).length;
+    window._vendorUpdateBadges?.();
+  }
 }
 
 function render() {
@@ -101,6 +105,7 @@ function bindSheet() {
   document.getElementById('missionsOverlay')?.addEventListener('click', closeSheet);
 }
 
+window._vendorMissionsOpen = openSheet;
 function openSheet() {
   const overlay = document.getElementById('missionsOverlay');
   const sheet   = document.getElementById('missionsSheet');

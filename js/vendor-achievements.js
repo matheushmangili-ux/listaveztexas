@@ -49,6 +49,11 @@ async function refresh() {
     console.warn('[achievements] refresh falhou:', err);
     _achievements = [];
   }
+  if (window._vendorCounts) {
+    const unlocked = _achievements.filter(a => a.unlocked).length;
+    window._vendorCounts.achievements = { unlocked, total: _achievements.length };
+    window._vendorUpdateBadges?.();
+  }
 }
 
 function updateBadgeCount() {

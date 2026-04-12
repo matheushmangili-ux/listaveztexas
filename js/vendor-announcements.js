@@ -45,6 +45,10 @@ async function loadAndRender() {
     _announcements = data || [];
   }
   renderCard();
+  if (window._vendorCounts) {
+    window._vendorCounts.announcements = _announcements.filter(a => !a.read_at).length;
+    window._vendorUpdateBadges?.();
+  }
 }
 
 function renderCard() {
@@ -213,6 +217,9 @@ function startCountdown(ann) {
   tick();
   _countdownTimer = setInterval(tick, 60000);
 }
+
+// Expose for drawer
+window._vendorAnnOpen = openList;
 
 function openList() {
   // Versão simples: reusa o sheet com uma lista completa. Futuro: screen dedicada.

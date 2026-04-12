@@ -68,10 +68,24 @@ function grabRefs() {
   el.pausaOverlay = document.getElementById('pausaOverlay');
   el.pausaSheet = document.getElementById('pausaSheet');
 
-  el.btnAiTips = document.getElementById('btnAiTips');
   el.aiTipsOverlay = document.getElementById('aiTipsOverlay');
   el.aiTipsSheet = document.getElementById('aiTipsSheet');
   el.aiTipsBody = document.getElementById('aiTipsSheetBody');
+
+  el.btnMenu = document.getElementById('btnMenu');
+  el.menuBadge = document.getElementById('menuBadge');
+  el.drawer = document.getElementById('vendorDrawer');
+  el.drawerOverlay = document.getElementById('drawerOverlay');
+  el.drawerClose = document.getElementById('drawerClose');
+  el.drawerName = document.getElementById('drawerName');
+  el.drawerTier = document.getElementById('drawerTier');
+  el.drawerAvatar = document.getElementById('drawerAvatar');
+  el.drawerXp = document.getElementById('drawerXp');
+  el.drawerBadgeAnn = document.getElementById('drawerBadgeAnn');
+  el.drawerBadgeMis = document.getElementById('drawerBadgeMis');
+  el.drawerBadgeVm = document.getElementById('drawerBadgeVm');
+  el.drawerCountAch = document.getElementById('drawerCountAch');
+  el.primaryActions = document.getElementById('primaryActions');
 
   el.pushPromptCard = document.getElementById('pushPromptCard');
   el.pushPromptTitle = document.getElementById('pushPromptTitle');
@@ -426,10 +440,16 @@ function wireActions() {
   el.btnCancel.addEventListener('click', onCancelAttendance);
   el.btnReturn.addEventListener('click', onReturnFromPausa);
   el.btnPausa.addEventListener('click', () => openPausaSheet());
-  el.btnLogout.addEventListener('click', () => window._vendorLogout && window._vendorLogout());
   el.btnRefresh.addEventListener('click', onRefresh);
-  el.btnAiTips?.addEventListener('click', onAiTips);
   el.aiTipsOverlay?.addEventListener('click', closeAiTips);
+
+  // Drawer
+  el.btnMenu?.addEventListener('click', openDrawer);
+  el.drawerClose?.addEventListener('click', closeDrawer);
+  el.drawerOverlay?.addEventListener('click', closeDrawer);
+  el.drawer?.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', () => onDrawerAction(btn.dataset.action));
+  });
 
   // Outcome buttons
   el.outcomeSheet.querySelectorAll('.vendor-outcome-btn').forEach((btn) => {
@@ -757,6 +777,120 @@ function arrayBufferToBase64Url(buffer) {
   for (let i = 0; i < bytes.byteLength; i++) bin += String.fromCharCode(bytes[i]);
   return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
+
+// ─── Drawer ───
+function openDrawer() {
+  if (!el.drawer) return;
+  updateDrawerHeader();
+  updateDrawerBadges();
+  el.drawerOverlay?.classList.remove('hidden');
+  el.drawer.classList.remove('hidden');
+  // force reflow for transition
+  requestAnimationFrame(() => {
+    el.drawerOverlay?.classList.add('open');
+    el.drawer?.classList.add('open');
+  });
+}
+
+function closeDrawer() {
+  if (!el.drawer) return;
+  el.drawerOverlay?.classList.remove('open');
+  el.drawer.classList.remove('open');
+  setTimeout(() => {
+    el.drawerOverlay?.classList.add('hidden');
+    el.drawer?.classList.add('hidden');
+  }, 250);
+}
+
+function updateDrawerHeader() {
+  if (!_ctx) return;
+  const nome = _ctx.apelido || _ctx.nome || '—';
+  if (el.drawerName) el.drawerName.textContent = nome;
+  if (el.drawerAvatar) {
+    try {
+      const url = buildAvatarUrl(_ctx.avatar_config);
+      el.drawerAvatar.innerHTML = url
+        ? `<img src="${escape(url)}" alt="${escape(nome)}">`
+        : initials(nome);
+    } catch { el.drawerAvatar.textContent = initials(nome); }
+  }
+}
+
+function updateDrawerBadges() {
+  const ann = window._vendorCounts?.announcements || 0;
+  const mis = window._vendorCounts?.missions || 0;
+  const vm = window._vendorCounts?.vm || 0;
+  const ach = window._vendorCounts?.achievements || null;
+
+  setBadge(el.drawerBadgeAnn, ann);
+  setBadge(el.drawerBadgeMis, mis);
+  setBadge(el.drawerBadgeVm, vm);
+
+  if (el.drawerCountAch) {
+    el.drawerCountAch.textContent = ach ? `${ach.unlocked}/${ach.total}` : '';
+  }
+
+  // Menu button composite badge
+  const total = ann + mis + vm;
+  if (el.menuBadge) {
+    if (total > 0) {
+      el.menuBadge.textContent = String(total);
+      el.menuBadge.classList.remove('hidden');
+    } else {
+      el.menuBadge.classList.add('hidden');
+    }
+  }
+}
+
+function setBadge(elem, count) {
+  if (!elem) return;
+  if (count > 0) {
+    elem.textContent = String(count);
+    elem.classList.remove('hidden');
+  } else {
+    elem.classList.add('hidden');
+  }
+}
+
+function onDrawerAction(action) {
+  closeDrawer();
+  // dispatch after close animation (so sheets abrem sobre fundo limpo)
+  setTimeout(() => {
+    switch (action) {
+      case 'announcements':
+        window._vendorAnnOpen?.();
+        break;
+      case 'missions':
+        window._vendorMissionsOpen?.() || _openSheetById('missionsSheet', 'missionsOverlay');
+        break;
+      case 'vm':
+        window._vendorVmOpen?.() || _openSheetById('vmSheet', 'vmOverlay');
+        break;
+      case 'achievements':
+        _openSheetById('achievementsSheet', 'achievementsOverlay');
+        break;
+      case 'xp':
+        _openSheetById('xpSheet', 'xpOverlay');
+        break;
+      case 'ai':
+        onAiTips();
+        break;
+      case 'logout':
+        window._vendorLogout && window._vendorLogout();
+        break;
+    }
+  }, 280);
+}
+
+// Fallback helper for sheets without own open button
+function _openSheetById(sheetId, overlayId) {
+  document.getElementById(overlayId)?.classList.remove('hidden');
+  document.getElementById(sheetId)?.classList.remove('hidden');
+}
+
+// Expose for modules to update badges
+window._vendorCounts = window._vendorCounts || { announcements: 0, missions: 0, vm: 0, achievements: null };
+window._vendorUpdateBadges = updateDrawerBadges;
 
 // ─── AI Tips ───
 async function onAiTips() {

@@ -55,6 +55,10 @@ async function refreshVmTasks() {
     console.warn('[vm] tasks refresh falhou:', err);
     _vmTasks = [];
   }
+  if (window._vendorCounts) {
+    window._vendorCounts.vm = _vmTasks.filter(t => ['pending','in_progress','revision'].includes(t.assignment_status)).length;
+    window._vendorUpdateBadges?.();
+  }
 }
 
 async function refreshMyVms() {
@@ -116,6 +120,7 @@ function bindSheet() {
   document.getElementById('vmOverlay')?.addEventListener('click', closeSheet);
 }
 
+window._vendorVmOpen = openSheet;
 function openSheet() {
   const overlay = document.getElementById('vmOverlay');
   const sheet = document.getElementById('vmSheet');
