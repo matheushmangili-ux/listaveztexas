@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/styles.v51.css">
 <link rel="stylesheet" href="/css/tablet.v51.css">
-<meta name="theme-color" content="#060606">
+<meta name="theme-color" content="#0d0d0d">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="/manifest.json">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
@@ -17,7 +17,7 @@
 <script>
 // Apply saved theme before CSS paints (avoid flash)
 (function() {
-  var t = localStorage.getItem('lv-theme') || 'light';
+  var t = localStorage.getItem('lv-theme') || 'dark';
   document.documentElement.setAttribute('data-theme', t);
   var m = document.querySelector('meta[name="theme-color"]');
   if (m) m.content = t === 'dark' ? '#060606' : '#F5F5F7';

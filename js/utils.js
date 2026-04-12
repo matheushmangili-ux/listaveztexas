@@ -109,7 +109,7 @@ export function initials(name) {
 
 // Theme toggle (light/dark)
 export function initTheme() {
-  const saved = localStorage.getItem('lv-theme') || 'light';
+  const saved = localStorage.getItem('lv-theme') || 'dark';
   document.documentElement.setAttribute('data-theme', saved);
 }
 export function toggleTheme() {
