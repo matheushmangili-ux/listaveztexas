@@ -10,12 +10,12 @@
   window._dashAiOpen = async function () {
     sb = window._supabase;
     if (!sb) return;
-    document.getElementById('aiModal')?.classList.add('visible');
+    document.getElementById('aiModal')?.classList.add('open');
     renderModal();
   };
 
   window._dashAiClose = function () {
-    document.getElementById('aiModal')?.classList.remove('visible');
+    document.getElementById('aiModal')?.classList.remove('open');
   };
 
   function renderModal() {

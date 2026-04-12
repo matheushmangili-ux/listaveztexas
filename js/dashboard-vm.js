@@ -23,13 +23,13 @@
     sb = window._supabase;
     if (!sb) return;
     const modal = document.getElementById('vmModal');
-    if (modal) modal.classList.add('visible');
+    if (modal) modal.classList.add('open');
     _activeTab = 'track';
     await renderModal();
   };
 
   window._dashVmClose = function () {
-    document.getElementById('vmModal')?.classList.remove('visible');
+    document.getElementById('vmModal')?.classList.remove('open');
     _viewingTaskId = null;
   };
 
