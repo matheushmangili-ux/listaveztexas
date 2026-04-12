@@ -1,7 +1,7 @@
 // minhavez — Edge Function: ai-assist
-// Proxy para Gemini AI (free tier). 5 features:
+// Proxy para Groq AI (free tier, Llama 3.3 70B). 5 features:
 //   turno-summary, mission-suggestions, vendor-tips, vm-compliance, flow-prediction
-// JWT verificado, cache em ai_cache, rate limit em memória.
+// Cache em ai_cache, rate limit em memória.
 
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'jsr:@supabase/supabase-js@2'
@@ -9,66 +9,70 @@ import { getCorsHeaders } from '../_shared/cors.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const GEMINI_MODEL = 'gemini-2.0-flash'
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
+const GROQ_MODEL = 'llama-3.3-70b-versatile'
+const GROQ_VISION_MODEL = 'llama-3.2-90b-vision-preview'
 
 const sb = createClient(SUPABASE_URL, SERVICE_ROLE, {
   auth: { persistSession: false, autoRefreshToken: false }
 })
 
-let _geminiKey: string | null = null
+let _groqKey: string | null = null
 const _rateCounter = new Map<string, number>()
 const _memCache = new Map<string, { data: unknown; exp: number }>()
 
-async function getGeminiKey(): Promise<string> {
-  if (_geminiKey) return _geminiKey
-  const { data } = await sb.from('app_secrets').select('value').eq('key', 'gemini_api_key').single()
-  if (!data?.value) throw new Error('gemini_api_key not found in app_secrets')
-  _geminiKey = data.value
-  return _geminiKey!
+async function getGroqKey(): Promise<string> {
+  if (_groqKey) return _groqKey
+  const { data } = await sb.from('app_secrets').select('value').eq('key', 'groq_api_key').single()
+  if (!data?.value) throw new Error('groq_api_key not found in app_secrets')
+  _groqKey = data.value
+  return _groqKey!
 }
 
 function checkRateLimit(): boolean {
   const minute = Math.floor(Date.now() / 60000).toString()
   const count = _rateCounter.get(minute) || 0
-  if (count >= 14) return false
+  if (count >= 28) return false // Groq free: 30 RPM
   _rateCounter.set(minute, count + 1)
-  // Cleanup old entries
   for (const [k] of _rateCounter) { if (k !== minute) _rateCounter.delete(k) }
   return true
 }
 
-async function callGemini(prompt: string, images?: { mime: string; b64: string }[]): Promise<unknown> {
-  const key = await getGeminiKey()
-  const parts: unknown[] = [{ text: prompt }]
+async function callGroq(prompt: string, images?: { mime: string; b64: string }[]): Promise<unknown> {
+  const key = await getGroqKey()
+  const model = images ? GROQ_VISION_MODEL : GROQ_MODEL
+
+  const content: unknown[] = [{ type: 'text', text: prompt }]
   if (images) {
     for (const img of images) {
-      parts.push({ inlineData: { mimeType: img.mime, data: img.b64 } })
+      content.push({ type: 'image_url', image_url: { url: `data:${img.mime};base64,${img.b64}` } })
     }
   }
 
-  const resp = await fetch(`${GEMINI_URL}?key=${key}`, {
+  const resp = await fetch(GROQ_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${key}`
+    },
     body: JSON.stringify({
-      contents: [{ parts }],
-      generationConfig: {
-        temperature: images ? 0.3 : 0.7,
-        maxOutputTokens: images ? 800 : 500,
-        responseMimeType: 'application/json'
-      }
+      model,
+      messages: [{ role: 'user', content: images ? content : prompt }],
+      temperature: images ? 0.3 : 0.7,
+      max_tokens: images ? 800 : 500,
+      response_format: { type: 'json_object' }
     }),
     signal: AbortSignal.timeout(15000)
   })
 
   if (!resp.ok) {
     const txt = await resp.text().catch(() => '')
-    throw new Error(`Gemini ${resp.status}: ${txt.slice(0, 200)}`)
+    throw new Error(`Groq ${resp.status}: ${txt.slice(0, 200)}`)
   }
 
   const json = await resp.json()
-  const text = json?.candidates?.[0]?.content?.parts?.[0]?.text
-  if (!text) throw new Error('Empty Gemini response')
+  const text = json?.choices?.[0]?.message?.content
+  if (!text) throw new Error('Empty Groq response')
   return JSON.parse(text)
 }
 
@@ -116,9 +120,9 @@ Dados do vendedor:
 - Posicao no ranking: #${payload.rank} de ${payload.total_vendors}
 - Media da loja: ${payload.store_conversao}% conversao
 
-Responda em JSON: { "tips": [{ "emoji": "string", "tip": "string" }], "motivational": "string" }`
+Responda APENAS em JSON valido: { "tips": [{ "emoji": "string", "tip": "string" }], "motivational": "string" }`
 
-  const result = await callGemini(prompt)
+  const result = await callGroq(prompt)
   await setCache(tenantId, cacheKey, result, 3600000)
   return result
 }
@@ -137,9 +141,9 @@ Dados do turno:
 - Top vendedores: ${JSON.stringify(payload.ranking)}
 - Motivos de perda: ${JSON.stringify(payload.motivos)}
 
-Responda em JSON: { "resumo": "string", "destaque": "string", "oportunidade": "string" }`
+Responda APENAS em JSON valido: { "resumo": "string", "destaque": "string", "oportunidade": "string" }`
 
-  const result = await callGemini(prompt)
+  const result = await callGroq(prompt)
   await setCache(tenantId, cacheKey, result, 3600000)
   return result
 }
@@ -160,9 +164,9 @@ Dados da semana:
 Tipos validos: atendimentos_count, vendas_count, valor_vendido_total.
 Metas alcancaveis (80-120% da media). Nomes criativos em portugues.
 
-Responda em JSON: { "missions": [{ "title": "string", "goal_type": "string", "goal_value": number, "xp": number, "description": "string" }] }`
+Responda APENAS em JSON valido: { "missions": [{ "title": "string", "goal_type": "string", "goal_value": number, "xp": number, "description": "string" }] }`
 
-  const result = await callGemini(prompt)
+  const result = await callGroq(prompt)
   await setCache(tenantId, cacheKey, result, 3600000)
   return result
 }
@@ -179,15 +183,14 @@ ${JSON.stringify(payload.hourly_data)}
 
 Dia alvo: ${payload.target_day}
 
-Responda em JSON: { "predictions": [{ "hour": number, "expected": number }], "peaks": [{ "hour": number, "expected": number, "suggestion": "string" }], "insight": "string" }`
+Responda APENAS em JSON valido: { "predictions": [{ "hour": number, "expected": number }], "peaks": [{ "hour": number, "expected": number, "suggestion": "string" }], "insight": "string" }`
 
-  const result = await callGemini(prompt)
+  const result = await callGroq(prompt)
   await setCache(tenantId, cacheKey, result, 3600000)
   return result
 }
 
 async function handleVmCompliance(_tenantId: string, payload: Record<string, unknown>) {
-  // Fetch both images and convert to base64
   const [refResp, subResp] = await Promise.all([
     fetch(payload.ref_photo_url as string),
     fetch(payload.submission_photo_url as string)
@@ -207,14 +210,12 @@ async function handleVmCompliance(_tenantId: string, payload: Record<string, unk
 Contexto: ${payload.task_description || ''}
 Checklist: ${JSON.stringify(payload.checklist || [])}
 
-Responda em JSON: { "score": number, "positivos": ["string"], "melhorias": ["string"], "resumo": "string" }`
+Responda APENAS em JSON valido: { "score": number, "positivos": ["string"], "melhorias": ["string"], "resumo": "string" }`
 
-  const result = await callGemini(prompt, [
+  return await callGroq(prompt, [
     { mime: 'image/jpeg', b64: refB64 },
     { mime: 'image/jpeg', b64: subB64 }
   ])
-  // No cache for VM compliance (each submission is unique)
-  return result
 }
 
 // ─── Main handler ───
@@ -224,7 +225,6 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
 
   try {
-    // Verify JWT
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) throw new Error('Missing Authorization header')
     const { data: { user }, error: authErr } = await sb.auth.getUser(authHeader.replace('Bearer ', ''))
@@ -236,19 +236,18 @@ Deno.serve(async (req) => {
     const { type, payload } = await req.json()
     if (!type || !payload) throw new Error('Missing type or payload')
 
-    // Rate limit
     if (!checkRateLimit()) {
-      return new Response(JSON.stringify({ ok: false, fallback: true, message: 'Rate limit — tente novamente em 1 minuto' }),
+      return new Response(JSON.stringify({ ok: false, fallback: true, message: 'Rate limit — tente em 1 minuto' }),
         { headers: { ...cors, 'Content-Type': 'application/json' }, status: 429 })
     }
 
     let result: unknown
     switch (type) {
-      case 'vendor-tips':       result = await handleVendorTips(tenantId, payload); break
-      case 'turno-summary':     result = await handleTurnoSummary(tenantId, payload); break
+      case 'vendor-tips':         result = await handleVendorTips(tenantId, payload); break
+      case 'turno-summary':       result = await handleTurnoSummary(tenantId, payload); break
       case 'mission-suggestions': result = await handleMissionSuggestions(tenantId, payload); break
-      case 'flow-prediction':   result = await handleFlowPrediction(tenantId, payload); break
-      case 'vm-compliance':     result = await handleVmCompliance(tenantId, payload); break
+      case 'flow-prediction':     result = await handleFlowPrediction(tenantId, payload); break
+      case 'vm-compliance':       result = await handleVmCompliance(tenantId, payload); break
       default: throw new Error(`Unknown type: ${type}`)
     }
 
