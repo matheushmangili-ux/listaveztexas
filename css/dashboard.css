@@ -38,9 +38,12 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
+  background: #222222;
+  border-radius: 10px;
+  padding: 6px 12px;
 }
 .dash-header-logo img {
-  height: 34px;
+  height: 28px;
   object-fit: contain;
   display: block;
 }
@@ -1950,17 +1953,17 @@
    MODERNIZATION LAYER v2 — rebrand mint + charcoal, shadows premium
    ================================================================= */
 
-/* KPI Cards — depth + hover lift */
+/* KPI Cards — depth sutil + hover lift */
 .kpi-card {
-  box-shadow: var(--shadow-xs);
+  box-shadow: none;
   transition:
-    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.2s ease,
-    border-color 0.2s ease;
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
 }
 .kpi-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
   border-color: var(--border-medium);
 }
 .kpi-value {
@@ -2011,14 +2014,13 @@
   border-radius: 20px;
 }
 
-/* Chart cards — gradient + shadow */
+/* Chart cards — sem shadow default (só hover) */
 .chart-card {
-  background: var(--grad-surface);
-  box-shadow: var(--shadow-xs);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  box-shadow: none;
+  transition: box-shadow 0.2s ease;
 }
 .chart-card:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Calendar popover */
