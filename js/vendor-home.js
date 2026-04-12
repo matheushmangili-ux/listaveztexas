@@ -7,6 +7,7 @@ import { initXp, unmountXp, refreshAfterAtendimento as refreshXp } from './vendo
 import { initMissions, unmountMissions, refreshMissionsAfterAtendimento as refreshMissions } from './vendor-missions.js';
 import { initAchievements, unmountAchievements, refreshAchievementsAfterAtendimento as refreshAchievements } from './vendor-achievements.js';
 import { initAvatar, unmountAvatar, buildAvatarUrl } from './vendor-avatar.js';
+import { initVm, unmountVm } from './vendor-vm.js';
 
 let _sb = null;
 let _ctx = null;        // resultado de get_my_vendedor_context()
@@ -103,6 +104,8 @@ export async function initHome(sb) {
     initAchievements(_sb).catch((err) => console.warn('[achievements] init falhou:', err));
     // Avatar RPG — independente, falha silenciosa
     initAvatar(_sb, _ctx).catch((err) => console.warn('[avatar] init falhou:', err));
+    // VM Photos — independente, falha silenciosa
+    initVm(_sb, _ctx).catch((err) => console.warn('[vm] init falhou:', err));
   } catch (err) {
     console.error('[initHome] erro:', err);
     window._vendorToast('Erro ao carregar: ' + (err?.message || err), 'error');
@@ -117,6 +120,7 @@ export function unmountHome() {
   unmountMissions();
   unmountAchievements();
   unmountAvatar();
+  unmountVm();
   if (_realtimeChannel) {
     _sb?.removeChannel(_realtimeChannel);
     _realtimeChannel = null;

@@ -55,6 +55,10 @@
         <i class="fa-solid fa-bullseye"></i>
         <span>Missões</span>
       </a>
+      <a id="linkVm" href="#" class="sidebar-link" onclick="event.preventDefault();window._dashVmOpen&&window._dashVmOpen()">
+        <i class="fa-solid fa-camera-retro"></i>
+        <span>VM Photos</span>
+      </a>
       <a id="linkSettings" href="#" class="sidebar-link">
         <i class="fa-solid fa-gear"></i>
         <span>Configurações</span>
@@ -320,6 +324,18 @@
 <script type="module" src="/js/dashboard-announcements.js"></script>
 <script type="module" src="/js/dashboard-xp-config.js"></script>
 <script type="module" src="/js/dashboard-missions.js"></script>
+<script type="module" src="/js/dashboard-vm.js"></script>
+
+<!-- Modal VM Photos -->
+<div class="modal-overlay" id="vmModal" onclick="if(event.target===this)window._dashVmClose&&window._dashVmClose()">
+  <div class="modal-box" style="max-width:720px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h3 style="margin:0;font-size:15px"><i class="fa-solid fa-camera-retro" style="margin-right:8px;color:var(--info)"></i>VM Photos</h3>
+      <button onclick="window._dashVmClose&&window._dashVmClose()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="vmModalBody"></div>
+  </div>
+</div>
 
 <!-- Modal Missões CMS -->
 <div class="modal-overlay" id="missionsModal" onclick="if(event.target===this)window._dashMissionsClose&&window._dashMissionsClose()">

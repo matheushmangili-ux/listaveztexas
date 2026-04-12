@@ -87,6 +87,9 @@
     <!-- Missões do dia (Fase 3 gamificação) -->
     <section id="missionsCard" class="missions-card hidden"></section>
 
+    <!-- VM Photos (Fase 6) -->
+    <section id="vmCard" class="vm-card hidden"></section>
+
     <!-- Comunicados / Corridas (Fase 1 gamificação) -->
     <section id="announcementsWrap" class="vendor-ann-wrap hidden"></section>
 
@@ -244,6 +247,17 @@
     </button>
   </div>
 </div>
+
+<!-- Bottom sheet: VM Photos -->
+<div class="vendor-sheet-overlay hidden" id="vmOverlay"></div>
+<div class="vendor-sheet hidden" id="vmSheet">
+  <div class="vendor-sheet-handle"></div>
+  <h3 class="vendor-sheet-title"><i class="fa-solid fa-camera-retro" style="margin-right:8px;color:var(--vendor-info)"></i>VM Photos</h3>
+  <div id="vmSheetBody"></div>
+</div>
+
+<!-- Hidden file input for VM camera capture -->
+<input type="file" accept="image/*" capture="environment" id="vmPhotoInput" class="hidden">
 
 <!-- Avatar Editor (fullscreen overlay) -->
 <div id="avatarEditor" class="avatar-editor hidden">
