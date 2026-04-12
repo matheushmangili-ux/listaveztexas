@@ -12,7 +12,7 @@
   --vendor-text: #fafafa;
   --vendor-text-dim: #a1a1aa;
   --vendor-text-muted: #71717a;
-  --vendor-accent: #e2506f;
+  --vendor-accent: #aaeec4;
   --vendor-success: #22c55e;
   --vendor-warning: #f59e0b;
   --vendor-danger: #ef4444;
@@ -41,7 +41,7 @@ html, body {
   padding: 0;
   background: var(--vendor-bg);
   color: var(--vendor-text);
-  font-family: 'Satoshi', system-ui, sans-serif;
+  font-family: 'Inter Tight', system-ui, sans-serif;
   font-size: 14px;
   line-height: 1.4;
   overscroll-behavior-y: none;
@@ -58,7 +58,7 @@ html, body {
 }
 
 .hidden { display: none !important; }
-.mono { font-family: 'JetBrains Mono', monospace; }
+.mono { font-family: 'Inter Tight', monospace; }
 
 /* ─── Screen wrappers ─── */
 .vendor-screen {
@@ -146,7 +146,7 @@ html, body {
 
 .vendor-btn-primary {
   background: var(--vendor-accent);
-  color: #fff;
+  color: var(--accent-ink, #0d0d0d);
   border: none;
   border-radius: 14px;
   padding: 16px;
@@ -194,7 +194,7 @@ html, body {
   height: 40px;
   border-radius: 10px;
   background: var(--vendor-accent);
-  color: #fff;
+  color: var(--accent-ink, #0d0d0d);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -224,7 +224,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--accent-ink, #0d0d0d);
   pointer-events: none;
 }
 .vendor-header-avatar img {
@@ -336,7 +336,7 @@ html, body {
 
 /* Idle: position */
 .vendor-big-pos {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Inter Tight', monospace;
   font-size: clamp(64px, 18vw, 88px);
   font-weight: 700;
   line-height: 1;
@@ -378,7 +378,7 @@ html, body {
   font-size: 12px;
 }
 .vendor-queue-peek .peek-item .peek-pos {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Inter Tight', monospace;
   font-weight: 700;
   color: var(--vendor-text-dim);
   min-width: 20px;
@@ -390,8 +390,8 @@ html, body {
   text-overflow: ellipsis;
 }
 .vendor-queue-peek .peek-item.self {
-  background: rgba(226, 80, 111, 0.1);
-  border: 1px solid rgba(226, 80, 111, 0.3);
+  background: rgba(170, 238, 196, 0.1);
+  border: 1px solid rgba(170, 238, 196, 0.3);
 }
 .vendor-queue-peek .peek-item.self .peek-pos,
 .vendor-queue-peek .peek-item.self .peek-name {
@@ -1274,19 +1274,19 @@ html, body {
 }
 .vendor-ann-badge {
   background: var(--vendor-accent);
-  color: #fff;
+  color: var(--accent-ink, #0d0d0d);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   padding: 3px 8px;
   border-radius: 999px;
-  box-shadow: 0 0 0 0 rgba(226, 80, 111, 0.4);
+  box-shadow: 0 0 0 0 rgba(170, 238, 196, 0.4);
   animation: annBadgePulse 2.4s ease-in-out infinite;
 }
 @keyframes annBadgePulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(226, 80, 111, 0.45); }
-  50% { box-shadow: 0 0 0 6px rgba(226, 80, 111, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(170, 238, 196, 0.45); }
+  50% { box-shadow: 0 0 0 6px rgba(170, 238, 196, 0); }
 }
 
 .vendor-ann-list {
@@ -1319,8 +1319,8 @@ html, body {
   border-color: var(--vendor-border);
 }
 .vendor-ann-item.unread {
-  background: rgba(226, 80, 111, 0.06);
-  border-color: rgba(226, 80, 111, 0.2);
+  background: rgba(170, 238, 196, 0.06);
+  border-color: rgba(170, 238, 196, 0.2);
 }
 .vendor-ann-item.corrida {
   background: rgba(245, 158, 11, 0.08);
@@ -1369,7 +1369,7 @@ html, body {
   border-radius: 50%;
   background: var(--vendor-accent);
   flex-shrink: 0;
-  box-shadow: 0 0 8px rgba(226, 80, 111, 0.6);
+  box-shadow: 0 0 8px rgba(170, 238, 196, 0.6);
 }
 
 .vendor-ann-more {
@@ -1453,7 +1453,7 @@ html, body {
   font-weight: 700;
 }
 .vendor-corrida-countdown {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Inter Tight', monospace;
   font-size: 22px;
   font-weight: 700;
   color: var(--vendor-warning);
@@ -2027,7 +2027,7 @@ html, body {
 .avatar-tab i { font-size: 16px; }
 .avatar-tab.active {
   background: var(--vendor-accent);
-  color: #fff;
+  color: var(--accent-ink, #0d0d0d);
 }
 .avatar-tab.all-locked {
   opacity: 0.4;
@@ -2231,7 +2231,7 @@ html, body {
 .vm-tab.active {
   background: var(--vendor-accent);
   border-color: var(--vendor-accent);
-  color: #fff;
+  color: var(--accent-ink, #0d0d0d);
 }
 
 /* New photo button */
@@ -2344,7 +2344,7 @@ html, body {
 .vm-cat-pill.active {
   background: var(--vendor-accent);
   border-color: var(--vendor-accent);
-  color: #fff;
+  color: var(--accent-ink, #0d0d0d);
 }
 .vm-cat-pill i { margin-right: 4px; }
 .vm-desc-input {
@@ -2727,7 +2727,7 @@ html, body {
   height: 44px;
   border-radius: 12px;
   background: var(--vendor-accent);
-  color: #fff;
+  color: var(--accent-ink, #0d0d0d);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2850,3 +2850,97 @@ html, body {
   font-weight: 600;
   flex-shrink: 0;
 }
+
+/* =================================================================
+   MODERNIZATION LAYER v2 — rebrand mint, drawer blur, sheets premium
+   ================================================================= */
+
+/* Tipografia — tudo Inter Tight, sem mono */
+.mono,
+[class*='-mono'],
+[class*='-tabular'],
+.vendor-big-value,
+.vendor-timer,
+.vendor-xp-value,
+.vendor-stat-value,
+.vendor-pos-number {
+  font-family: 'Inter Tight', system-ui, sans-serif !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Drawer — backdrop blur 12px + sombra premium */
+.vendor-drawer-overlay {
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  background: rgba(0, 0, 0, 0.42) !important;
+}
+.vendor-drawer {
+  box-shadow: var(--shadow-lg);
+}
+.drawer-item {
+  transition:
+    background 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.15s ease;
+}
+.drawer-item:hover {
+  background: var(--accent-bright);
+  color: var(--accent-ink, #0d0d0d);
+}
+
+/* Bottom sheets — handle pill + blur backdrop */
+.vendor-sheet-overlay,
+.sheet-overlay {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(0, 0, 0, 0.42);
+}
+.vendor-sheet,
+.bottom-sheet {
+  border-radius: 20px 20px 0 0;
+  box-shadow: var(--shadow-lg);
+}
+.sheet-handle,
+.bottom-sheet-handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 3px;
+  background: var(--border-strong);
+  opacity: 0.5;
+}
+
+/* Big status card — profundidade */
+.vendor-big-card,
+.vendor-status-card {
+  background: var(--grad-surface);
+  box-shadow: var(--shadow-sm);
+  border-radius: 20px;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+}
+.vendor-big-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Botão preferencial (main) — mint com texto escuro */
+.vendor-btn-pref-main {
+  background: var(--grad-accent);
+  color: var(--accent-ink, #0d0d0d);
+  box-shadow: var(--shadow-accent);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.vendor-btn-pref-main:active {
+  transform: scale(0.98);
+}
+
+/* Avatar ring por status (header do vendor) */
+.vendor-header-avatar {
+  box-shadow: 0 0 0 2px var(--vendor-bg), 0 0 0 3px var(--accent);
+}
+
+/* Achievement pulse — usar accent em vez de hardcode */
+@keyframes vendorAchievementPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(170, 238, 196, 0.6); }
+  50% { box-shadow: 0 0 0 12px rgba(170, 238, 196, 0); }
+}
+
+/* ============ FIM modernization layer v2 ============ */

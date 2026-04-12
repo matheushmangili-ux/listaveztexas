@@ -26,7 +26,7 @@ function tempoColor(minutes, meta) {
 // ─── Unified custom tooltip builder ───
 function buildTooltip(title, rows, color) {
   const cc = chartColors();
-  let html = `<div style="padding:10px 14px;font-family:Satoshi,sans-serif;font-size:12px;line-height:1.6;min-width:140px;background:${cc.tooltipBg};border:1px solid ${cc.tooltipBorder};border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15)">`;
+  let html = `<div style="padding:10px 14px;font-family:Inter Tight,sans-serif;font-size:12px;line-height:1.6;min-width:140px;background:${cc.tooltipBg};border:1px solid ${cc.tooltipBorder};border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15)">`;
   if (title) {
     html += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">`;
     if (color)
@@ -80,13 +80,13 @@ function donutConfig({ labels, values, colors, total, centerLabel, tooltipFn, ev
       enabled: true,
       formatter: (v) => Math.round(v) + '%',
       dropShadow: { enabled: false },
-      style: { fontSize: '11px', fontWeight: 700, fontFamily: "'Satoshi'" }
+      style: { fontSize: '11px', fontWeight: 700, fontFamily: "'Inter Tight'" }
     },
     legend: {
       position: 'bottom',
       fontSize: '11px',
       fontWeight: 600,
-      fontFamily: "'Satoshi'",
+      fontFamily: "'Inter Tight'",
       labels: { colors: cc.textStrong }
     },
     stroke: { width: 2, colors: [isDarkTheme() ? '#18181B' : '#FFFFFF'] },
@@ -148,7 +148,7 @@ function showChartError(el, key) {
 
 function applyChartDefaults(options) {
   if (!options.chart) options.chart = {};
-  options.chart.fontFamily = options.chart.fontFamily || "'Satoshi', system-ui, sans-serif";
+  options.chart.fontFamily = options.chart.fontFamily || "'Inter Tight', system-ui, sans-serif";
   if (!options.chart.toolbar) options.chart.toolbar = { show: false };
   if (!options.chart.animations) options.chart.animations = { enabled: true, easing: 'easeinout', speed: 600 };
 }
@@ -477,7 +477,7 @@ export async function loadMotivos(range) {
           ) +
           '<div style="padding:0 14px 8px;font-size:10px;color:' +
           chartColors().textMuted +
-          ';font-family:Satoshi,sans-serif">Clique para detalhes</div>'
+          ';font-family:Inter Tight,sans-serif">Clique para detalhes</div>'
         );
       }
     })
@@ -571,7 +571,7 @@ export async function loadHourly(range) {
             style: {
               fontSize: '10px',
               fontWeight: 600,
-              fontFamily: "'Satoshi'",
+              fontFamily: "'Inter Tight'",
               color: _cc.textMuted,
               background: _annBg,
               borderColor: 'transparent',
@@ -616,7 +616,7 @@ export async function loadHourly(range) {
       xaxis: { categories: hours, labels: { style: { fontSize: '11px', fontWeight: 500 } } },
       yaxis: { labels: { style: { fontSize: '11px', fontWeight: 500 } }, forceNiceScale: true },
       plotOptions: { bar: { borderRadius: 6, columnWidth: '60%' } },
-      colors: ['#e2506f', '#D4D4D8', '#c43d5a'],
+      colors: ['#aaeec4', '#D4D4D8', '#7fd9a0'],
       fill: {
         type: ['gradient', 'solid', 'solid'],
         gradient: {
@@ -969,12 +969,12 @@ export async function loadScatter(range, cachedData) {
       { name: 'Perto da meta', data: series2 },
       { name: 'Abaixo da meta', data: series3 }
     ],
-    colors: ['#e2506f', '#f0758e', '#D4D4D8'],
+    colors: ['#aaeec4', '#c7f5d6', '#D4D4D8'],
     markers: {
       size: 10,
       opacity: 0.85,
       strokeWidth: 2,
-      strokeColors: ['#c43d5a', '#d4607a', '#A1A1AA'],
+      strokeColors: ['#7fd9a0', '#d4607a', '#A1A1AA'],
       hover: { sizeOffset: 4 }
     },
     xaxis: {
@@ -1011,7 +1011,7 @@ export async function loadScatter(range, cachedData) {
       yaxis: [
         {
           y: metaConv,
-          borderColor: '#e2506f',
+          borderColor: '#aaeec4',
           strokeDashArray: 5,
           opacity: 0.6,
           label: {
@@ -1019,9 +1019,9 @@ export async function loadScatter(range, cachedData) {
             style: {
               fontSize: '10px',
               fontWeight: 700,
-              fontFamily: "'Satoshi'",
-              background: 'rgba(226,80,111,.12)',
-              color: '#e2506f',
+              fontFamily: "'Inter Tight'",
+              background: 'rgba(170, 238, 196,.12)',
+              color: '#aaeec4',
               padding: { left: 6, right: 6, top: 2, bottom: 2 }
             },
             position: 'right',
@@ -1219,7 +1219,7 @@ export async function loadTrend(range) {
       {
         y: metaConv,
         yAxisIndex: 1,
-        borderColor: 'rgba(226,80,111,.25)',
+        borderColor: 'rgba(170, 238, 196,.25)',
         strokeDashArray: 4,
         opacity: 0.5,
         label: {
@@ -1227,8 +1227,8 @@ export async function loadTrend(range) {
           style: {
             fontSize: '9px',
             fontWeight: 600,
-            background: 'rgba(226,80,111,.08)',
-            color: '#e2506f',
+            background: 'rgba(170, 238, 196,.08)',
+            color: '#aaeec4',
             padding: { left: 4, right: 4, top: 2, bottom: 2 }
           },
           position: 'right',
@@ -1286,7 +1286,7 @@ export async function loadTrend(range) {
         stops: [0, 95]
       }
     },
-    colors: ['#e2506f', '#D4D4D8', '#f59e0b'],
+    colors: ['#aaeec4', '#D4D4D8', '#f59e0b'],
     markers: { size: [0, 0, 4], strokeWidth: 2, strokeColors: '#fff', hover: { sizeOffset: 2 } },
     grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { left: 10, right: 10, bottom: 5 } },
     legend: {
@@ -1336,7 +1336,7 @@ export async function loadTrend(range) {
       cssClass: 'spark-tooltip'
     }
   });
-  if (conv.length > 1) renderChart('sparkConv', '#sparkConv', sparkOpts(conv, '#e2506f', sparkDates, '%'));
+  if (conv.length > 1) renderChart('sparkConv', '#sparkConv', sparkOpts(conv, '#aaeec4', sparkDates, '%'));
   if (atend.length > 1) renderChart('sparkTempo', '#sparkTempo', sparkOpts(atend, '#6366f1', sparkDates, ''));
 }
 

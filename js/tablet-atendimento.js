@@ -7,7 +7,8 @@
 import { toast, formatTime, initials, escapeHtml } from '/js/utils.js';
 import { playSound } from '/js/sound.js';
 import { createModal, currencyInputHTML, parseCurrency } from '/js/ui.js';
-import { fireVendaCelebration, fireEpicTrocaAnimation } from '/js/tablet-celebrations.js';
+import { fireVendaCelebration, fireEpicTrocaAnimation, animateValueToHeader } from '/js/tablet-celebrations.js';
+import { animateFichaToAtendimento } from '/js/tablet-queue.js';
 import { invalidateQueue, scheduleRender, isTouchDragging, getTouchGhost, setTouchGhost } from '/js/tablet-queue.js';
 import { invalidateFooter } from '/js/tablet-footer.js';
 import {
@@ -278,6 +279,8 @@ export async function doSendToAtendimento(vendedorId) {
 // ─── Executar atendimento (lógica real após escolha de canal) ───
 
 async function _executeAtendimento(vendedorId, canalOrigemId) {
+  // GSAP: shared-element flight da ficha pra o painel de atendimento
+  animateFichaToAtendimento(vendedorId);
   if (!_ctx.currentTurno) {
     toast('Abra o turno primeiro', 'warning');
     return;
@@ -989,7 +992,10 @@ async function finalizeMultiOutcome() {
 
     if (vendaCount > 0) {
       playSound('venda');
-      fireVendaCelebration();
+      const totalValor = _multiResults.reduce((s, r) => s + (r.resultado === 'venda' ? Number(r.valor) || 0 : 0), 0);
+      const cardEl = document.querySelector(`[data-atend-id="${atendId}"]`);
+      fireVendaCelebration({ valor: totalValor || null, originEl: cardEl });
+      if (totalValor > 0) setTimeout(() => animateValueToHeader(totalValor, cardEl), 700);
     } else if (naoCount > 0) {
       playSound('fail');
     }
@@ -1241,7 +1247,9 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor, con
     toast(msg, type);
     if (resultado === 'venda') {
       playSound('venda');
-      fireVendaCelebration();
+      const cardEl = document.querySelector(`[data-atend-id="${id}"]`);
+      fireVendaCelebration({ valor: valor || null, originEl: cardEl });
+      if (valor) setTimeout(() => animateValueToHeader(valor, cardEl), 700);
     } else if (resultado === 'nao_convertido') {
       playSound('fail');
     }

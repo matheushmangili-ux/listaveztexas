@@ -177,7 +177,7 @@
 }
 .setor-tab:hover {
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-ink, #0d0d0d);
   filter: brightness(1.15);
 }
 .setor-tab:hover i {
@@ -186,7 +186,7 @@
 }
 .setor-tab.active {
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-ink, #0d0d0d);
   font-weight: 700;
 }
 .setor-tab.active i {
@@ -291,19 +291,19 @@
 
 /* Ranking — outlined rose */
 .ranking-card {
-  background: rgba(226, 80, 111, 0.1);
+  background: rgba(170, 238, 196, 0.1);
   color: var(--accent-bright);
-  border-color: rgba(226, 80, 111, 0.2);
+  border-color: rgba(170, 238, 196, 0.2);
 }
 .ranking-card:hover {
-  background: rgba(226, 80, 111, 0.18);
-  border-color: rgba(226, 80, 111, 0.36);
+  background: rgba(170, 238, 196, 0.18);
+  border-color: rgba(170, 238, 196, 0.36);
 }
 
 /* Turno card — Iniciar (OFF): filled rose, matching sidebar-link active */
 .turno-card {
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-ink, #0d0d0d);
   border-color: transparent;
 }
 .turno-card:hover {
@@ -381,10 +381,10 @@
   height: 0;
 }
 .t-footer.drop-highlight {
-  background: rgba(225, 29, 72, 0.12);
+  background: rgba(170, 238, 196, 0.12);
   box-shadow:
     inset 0 2px 0 0 var(--accent),
-    0 -8px 24px rgba(225, 29, 72, 0.15);
+    0 -8px 24px rgba(170, 238, 196, 0.15);
   position: relative;
   transition:
     background 0.15s ease,
@@ -1832,3 +1832,237 @@
 .btn-flex-1 {
   flex: 1;
 }
+
+/* =================================================================
+   MODERNIZATION LAYER v2 — polimento pré-rodada de venda
+   Estilo: Linear/Arc. Sombras premium, gradientes sutis, tipografia densa.
+   ================================================================= */
+
+/* Header — KPIs com mais vida */
+.t-header {
+  background: linear-gradient(180deg, #0a0a0c 0%, #060606 100%);
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+.t-header-kpi-value {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.78) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.t-header-kpi-label {
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+}
+
+/* Queue items — micro-lift + sombra premium */
+.queue-item {
+  box-shadow: var(--shadow-xs);
+  transition:
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.18s ease;
+}
+.queue-item:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--border-strong);
+}
+
+/* Next-in-line — glow accent em vez de verde mecânico */
+.queue-item.next-in-line {
+  box-shadow: var(--glow-accent);
+  border-color: rgba(170, 238, 196, 0.5);
+}
+.queue-item.next-in-line::after {
+  background: linear-gradient(90deg, rgba(170, 238, 196, 0.08), rgba(170, 238, 196, 0));
+}
+.queue-item.next-in-line .next-badge {
+  background: var(--grad-accent);
+  color: var(--accent-ink, #0d0d0d);
+  box-shadow: 0 4px 14px rgba(170, 238, 196, 0.45);
+}
+
+/* Footer cards — avatar com ring colorido por status */
+.footer-card {
+  box-shadow: var(--shadow-xs);
+  transition:
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.18s ease,
+    background 0.15s ease;
+}
+.footer-card:hover {
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+.footer-card .fc-avatar {
+  box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 3px var(--border-subtle);
+}
+.footer-card.status-disponivel .fc-avatar {
+  box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 3px rgba(52, 211, 153, 0.6);
+}
+.footer-card.status-atendendo .fc-avatar {
+  box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 3px rgba(96, 165, 250, 0.6);
+}
+.footer-card.status-pausa .fc-avatar {
+  box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 3px rgba(251, 191, 36, 0.6);
+}
+.footer-card.status-fora .fc-avatar {
+  box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 3px rgba(113, 113, 122, 0.45);
+}
+
+/* Pause exceeded — mais calmo (mantém urgência sem ansiedade) */
+.footer-card.pause-exceeded {
+  border-width: 1px !important;
+}
+.footer-card.pause-exceeded::after {
+  animation-duration: 2.4s;
+  inset: -2px;
+  opacity: 0.3;
+}
+
+/* Atendimento card — ponto focal com sombra premium e gradiente */
+.atend-card {
+  background: var(--grad-surface);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  box-shadow: var(--shadow-sm);
+  border-color: var(--border-subtle);
+  transition:
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+.atend-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-medium);
+  transform: translateY(-1px);
+}
+.atend-card .atend-timer {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  font-size: 15px;
+}
+.atend-card .atend-name {
+  letter-spacing: -0.01em;
+}
+.atend-card .atend-avatar {
+  box-shadow: 0 2px 8px rgba(170, 238, 196, 0.25);
+  background: var(--grad-accent);
+}
+
+/* Outcome buttons — sombra premium no venda */
+.outcome-btn {
+  transition:
+    transform 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.18s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+.outcome-btn:hover {
+  transform: translateY(-1px);
+}
+.outcome-btn.sale:hover {
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.18);
+}
+
+/* Bottom sheets — Arc/Linear style */
+.bottom-sheet-overlay {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.bottom-sheet {
+  border-radius: 20px 20px 0 0;
+  border-top: none;
+  box-shadow: var(--shadow-lg);
+}
+.bottom-sheet-handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 3px;
+  background: var(--border-strong);
+  opacity: 0.6;
+  margin-bottom: 16px;
+}
+
+/* Modal overlays — blur também */
+.modal-overlay {
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.modal-box {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Tipografia — ritmo mais denso e moderno */
+.panel-header span,
+.footer-title-label,
+.active-label {
+  letter-spacing: 0.1em;
+}
+.timer-display,
+.atend-timer,
+.t-header-kpi-value,
+.footer-title-count,
+.currency-wrap input {
+  font-variant-numeric: tabular-nums;
+}
+.timer-display {
+  letter-spacing: -0.03em;
+}
+
+/* Números KPI do dashboard (stat*) com tabular */
+#statAtend,
+#statVendas,
+#statConv {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Ranking card — subtle shadow + grad */
+.ranking-card,
+.turno-card {
+  box-shadow: var(--shadow-xs);
+  transition:
+    transform 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    filter 0.18s ease,
+    border-color 0.18s ease;
+}
+.ranking-card:hover,
+.turno-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+.turno-card:not(.on) {
+  background: var(--grad-accent);
+  box-shadow: 0 4px 14px rgba(170, 238, 196, 0.28);
+}
+.turno-card:not(.on):hover {
+  box-shadow: 0 8px 22px rgba(170, 238, 196, 0.38);
+}
+
+/* Currency input — mais premium */
+.currency-wrap input {
+  letter-spacing: -0.01em;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.currency-wrap input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(170, 238, 196, 0.12);
+  outline: none;
+}
+
+/* Motivo option — sombra sutil + transform suave */
+.motivo-option {
+  box-shadow: var(--shadow-xs);
+}
+.motivo-option.selected {
+  box-shadow: var(--shadow-sm);
+}
+
+/* ============ FIM modernization layer v2 ============ */

@@ -26,23 +26,25 @@
 /* Font: Satoshi (Fontshare) loaded via <link> in HTML */
 
 :root {
-  --bg-deep: #f5f5f7;
-  --bg-surface: #fafafa;
+  --bg-deep: #f8f8f8;
+  --bg-surface: #ffffff;
   --bg-card: #ffffff;
-  --bg-elevated: #f0f0f2;
-  --bg-hover: #e8e8ec;
+  --bg-elevated: #f0f0f0;
+  --bg-hover: #eaeaea;
   --border-subtle: rgba(0, 0, 0, 0.06);
   --border-medium: rgba(0, 0, 0, 0.1);
   --border-strong: rgba(0, 0, 0, 0.16);
-  --text-primary: #1a1a1a;
-  --text-secondary: #52525b;
-  --text-muted: #a1a1aa;
-  --accent: #e2506f;
-  --accent-bright: #f0758e;
-  --accent-dim: #c43d5a;
-  --gold: #e2506f;
-  --gold-bright: #f0758e;
-  --gold-dim: #a8304d;
+  --text-primary: #0d0d0d;
+  --text-secondary: #525252;
+  --text-muted: #a3a3a3;
+  /* Brand — mint (inspirado awwwards) */
+  --accent: #aaeec4;
+  --accent-bright: #c7f5d6;
+  --accent-dim: #7fd9a0;
+  --accent-ink: #0d0d0d; /* texto sobre bg mint */
+  --gold: #aaeec4;
+  --gold-bright: #c7f5d6;
+  --gold-dim: #7fd9a0;
   --success: #22c55e;
   --success-bg: rgba(34, 197, 94, 0.08);
   --warning: #f59e0b;
@@ -68,8 +70,9 @@
   --saida-operacional: #8b5cf6;
   --saida-finalizar: #f87171;
   --saida-outro: #64748b;
-  --font-body: 'Satoshi', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+  --font-body: 'Inter Tight', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Inter Tight', system-ui, sans-serif;
+  --font-display: 'Inter Tight', system-ui, sans-serif;
   --radius: 14px;
   --radius-sm: 8px;
   --radius-lg: 20px;
@@ -82,27 +85,45 @@
   --space-lg: 24px;
   --space-xl: 32px;
   --space-2xl: 48px;
+  /* Sombras premium (estilo Linear/Arc) */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-accent: 0 8px 24px rgba(170, 238, 196, 0.35);
+  --glow-accent: 0 0 0 1px rgba(170, 238, 196, 0.4), 0 8px 32px rgba(170, 238, 196, 0.28);
+  /* Gradientes sutis */
+  --grad-surface: linear-gradient(180deg, var(--bg-elevated), var(--bg-surface));
+  --grad-accent: linear-gradient(135deg, #aaeec4, #7fd9a0);
+  --grad-success: linear-gradient(135deg, #22c55e, #16a34a);
+  --grad-gold: linear-gradient(135deg, #aaeec4, #7fd9a0);
 }
 
 /* ─── Dark Mode ─── */
 [data-theme='dark'] {
-  --bg-deep: #060606;
-  --bg-surface: #111114;
-  --bg-card: #161619;
-  --bg-elevated: #1c1c20;
-  --bg-hover: #242428;
+  --bg-deep: #0d0d0d;
+  --bg-surface: #1a1a1a;
+  --bg-card: #222222;
+  --bg-elevated: #2a2a2a;
+  --bg-hover: #323232;
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --glow-accent: 0 0 0 1px rgba(170, 238, 196, 0.35), 0 8px 32px rgba(170, 238, 196, 0.28);
   --border-subtle: rgba(255, 255, 255, 0.06);
   --border-medium: rgba(255, 255, 255, 0.1);
   --border-strong: rgba(255, 255, 255, 0.16);
   --text-primary: #fafafa;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
-  --accent: #e2506f;
-  --accent-bright: #f0758e;
-  --accent-dim: #c43d5a;
-  --gold: #e2506f;
-  --gold-bright: #f0758e;
-  --gold-dim: #a8304d;
+  --text-secondary: #a3a3a3;
+  --text-muted: #6b6b6b;
+  --accent: #aaeec4;
+  --accent-bright: #c7f5d6;
+  --accent-dim: #7fd9a0;
+  --accent-ink: #0d0d0d;
+  --gold: #aaeec4;
+  --gold-bright: #c7f5d6;
+  --gold-dim: #7fd9a0;
   --status-disponivel: #34d399;
   --status-atendendo: #60a5fa;
   --status-pausa: #fbbf24;
@@ -649,7 +670,7 @@ body {
 }
 .motivo-option.selected {
   border-color: var(--accent);
-  background: rgba(226, 80, 111, 0.06);
+  background: rgba(170, 238, 196, 0.06);
 }
 .motivo-option i {
   font-size: 18px;

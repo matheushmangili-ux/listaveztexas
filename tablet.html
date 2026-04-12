@@ -6,8 +6,7 @@
 <title>Minha Vez — Fila</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700,800&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/styles.css">
 <link rel="stylesheet" href="/css/tablet.css">
 <meta name="theme-color" content="#060606">
@@ -25,6 +24,7 @@
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="/js/update-checker.js"></script>
 <script>
 initUpdateChecker('/tablet.html', { bannerText: 'Atualização disponível — toque para atualizar' });
@@ -52,7 +52,7 @@ window.addEventListener('error', function(e) {
   <!-- HEADER -->
   <header class="t-header">
     <div class="flex-center gap-8 shrink-0">
-      <img src="/assets/logo-minhavez-new.png" alt="minhavez" class="t-header-logo">
+      <img src="/assets/logo-minhavez-mint.png" alt="minhavez" class="t-header-logo">
       <span id="appVersion" class="mono fs-9 t-header-version"></span>
     </div>
     <div id="headerKpis" class="flex-center gap-16 mono fw-700 t-header-kpis">

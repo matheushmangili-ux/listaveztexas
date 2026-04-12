@@ -4,11 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Minha Vez — Texas Center</title>
-<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,600,700,800,900&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/styles.css?v=5">
 <meta name="theme-color" content="#060606">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -37,7 +35,7 @@
     top: 50%; left: 50%;
     width: 720px; height: 720px;
     transform: translate(-50%, -50%);
-    background: radial-gradient(circle, rgba(226,80,111,.22) 0%, rgba(226,80,111,.08) 35%, transparent 65%);
+    background: radial-gradient(circle, rgba(170, 238, 196,.22) 0%, rgba(170, 238, 196,.08) 35%, transparent 65%);
     pointer-events: none;
     z-index: 0;
     filter: blur(12px);
@@ -74,7 +72,7 @@
     background: rgba(240,117,142,.7);
     border-radius: 50%;
     opacity: 0;
-    box-shadow: 0 0 6px rgba(226,80,111,.6), 0 0 12px rgba(226,80,111,.3);
+    box-shadow: 0 0 6px rgba(170, 238, 196,.6), 0 0 12px rgba(170, 238, 196,.3);
     animation: particleUp linear infinite;
   }
   @keyframes particleUp {
@@ -91,7 +89,7 @@
     background: var(--bg-card);
     box-shadow:
       0 24px 70px rgba(0,0,0,.6),
-      0 0 0 1px rgba(226,80,111,.08);
+      0 0 0 1px rgba(170, 238, 196,.08);
     border-radius: 20px;
     border: 1px solid rgba(255,255,255,.06);
     padding: 32px;
@@ -101,7 +99,7 @@
     opacity: 1 !important;
   }
   .gold-line {
-    background: linear-gradient(90deg, transparent, rgba(226,80,111,.35), transparent);
+    background: linear-gradient(90deg, transparent, rgba(170, 238, 196,.35), transparent);
     height: 1px;
   }
   .tab-switch {
@@ -212,7 +210,7 @@
   }
   #loginError.show { display: flex; align-items: center; gap: 8px; }
   /* CTA links */
-  a, .cta-link { color: #e2506f; }
+  a, .cta-link { color: #aaeec4; }
 </style>
 </head>
 <body>
@@ -229,7 +227,7 @@
   <div class="login-box" style="opacity:0;transition:opacity .3s ease" id="loginBox">
     <!-- Brand -->
     <div class="brand-mark" style="text-align:center;margin-bottom:28px">
-      <img src="/assets/logo-minhavez-new.png" alt="MinhaVez" style="width:180px;height:auto;display:inline-block">
+      <img src="/assets/logo-minhavez-mint.png" alt="MinhaVez" style="width:180px;height:auto;display:inline-block">
     </div>
 
     <div class="gold-line" style="margin-bottom:28px"></div>
@@ -278,7 +276,7 @@
         Entrar
       </button>
       <div style="text-align:center;margin-top:14px">
-        <a id="forgotLink" href="/forgot-password" style="font-size:12px;color:#e2506f;text-decoration:none;font-weight:500">Esqueci minha senha</a>
+        <a id="forgotLink" href="/forgot-password" style="font-size:12px;color:#aaeec4;text-decoration:none;font-weight:500">Esqueci minha senha</a>
       </div>
     </div>
 
@@ -422,11 +420,11 @@ document.getElementById('passInput')?.addEventListener('keydown', (e) => {
     const r = Math.random();
     if (r > 0.75) {
       p.style.background = 'rgba(255,180,196,.9)';
-      p.style.boxShadow = '0 0 8px rgba(240,117,142,.8), 0 0 16px rgba(226,80,111,.5)';
+      p.style.boxShadow = '0 0 8px rgba(240,117,142,.8), 0 0 16px rgba(170, 238, 196,.5)';
     } else if (r > 0.4) {
       p.style.background = 'rgba(240,117,142,.8)';
     } else {
-      p.style.background = 'rgba(226,80,111,.6)';
+      p.style.background = 'rgba(170, 238, 196,.6)';
     }
     c.appendChild(p);
   }

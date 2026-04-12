@@ -1,165 +1,223 @@
 // ============================================
-// MinhaVez — Celebration Animations
-// Venda flash + Epic Troca achievement overlay
+// MinhaVez — Celebration Animations (GSAP-powered)
+// Venda flash + Epic Troca overlay + value-to-header flight
 // ============================================
 
 import { playSound } from '/js/sound.js';
-import {
-  CELEBRATION_FLASH_SHOW,
-  CELEBRATION_FLASH_FADE,
-  CELEBRATION_EPIC_SHOW,
-  CELEBRATION_EPIC_FADE,
-  Z_DRAG_GHOST
-} from '/js/constants.js';
+import { CELEBRATION_EPIC_FADE, Z_DRAG_GHOST } from '/js/constants.js';
 import { escapeHtml } from '/js/utils.js';
 
+const g = () => window.gsap;
+
 let _epicOverlay = null;
-let _epicRaf = null;
 
 /**
- * Flash overlay + expanding rings for a sale.
- * Expects a <canvas id="confettiCanvas"> in the DOM.
+ * Venda flash: popup + golden particle burst + optional value counter.
+ * @param {Object} opts
+ * @param {number} [opts.valor] — se passado, conta de 0 até o valor
+ * @param {HTMLElement} [opts.originEl] — origem do burst (default: centro da tela)
  */
-export function fireVendaCelebration() {
+export function fireVendaCelebration(opts = {}) {
+  const { valor = null, originEl = null } = opts;
+  const gsap = g();
+
+  // Overlay container
   const flash = document.createElement('div');
-  flash.style.cssText = `position:fixed;inset:0;z-index:${Z_DRAG_GHOST};pointer-events:none;display:flex;align-items:center;justify-content:center;background:rgba(52,211,153,.08)`;
+  flash.style.cssText = `position:fixed;inset:0;z-index:${Z_DRAG_GHOST};pointer-events:none;display:flex;align-items:center;justify-content:center;background:rgba(52,211,153,.06)`;
+
+  const valorHtml = valor != null
+    ? `<span class="venda-celebrate-valor" style="font-family:var(--font-mono);font-size:28px;font-weight:800;color:var(--success);letter-spacing:-.02em;margin-top:4px;text-shadow:0 0 24px rgba(52,211,153,.45);font-variant-numeric:tabular-nums">R$ 0,00</span>`
+    : '';
+
   flash.innerHTML = `
-    <div style="display:flex;flex-direction:column;align-items:center;animation:popIn .4s cubic-bezier(.2,.8,.3,1) both">
-      <i class="fa-solid fa-circle-check" style="font-size:56px;color:var(--success);margin-bottom:8px;filter:drop-shadow(0 0 20px rgba(52,211,153,.5))"></i>
-      <span style="font-family:var(--font-mono);font-size:20px;font-weight:800;color:var(--success);letter-spacing:.06em;text-shadow:0 0 20px rgba(52,211,153,.3)">VENDA!</span>
+    <div class="venda-celebrate-box" style="display:flex;flex-direction:column;align-items:center;gap:2px">
+      <i class="fa-solid fa-circle-check" style="font-size:64px;color:var(--success);filter:drop-shadow(0 0 24px rgba(52,211,153,.55))"></i>
+      <span style="font-family:var(--font-mono);font-size:22px;font-weight:800;color:var(--success);letter-spacing:.08em;text-shadow:0 0 20px rgba(52,211,153,.35)">VENDA!</span>
+      ${valorHtml}
     </div>`;
   document.body.appendChild(flash);
 
-  const canvas = document.getElementById('confettiCanvas');
-  if (canvas) {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const ctx = canvas.getContext('2d');
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-    let frame = 0;
-    const rings = [
-      { r: 0, maxR: Math.max(canvas.width, canvas.height) * 0.6, speed: 8, color: 'rgba(52,211,153,' },
-      { r: 0, maxR: Math.max(canvas.width, canvas.height) * 0.5, speed: 6, color: 'rgba(74,222,128,' }
-    ];
-
-    function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      let alive = false;
-      rings.forEach((ring) => {
-        ring.r += ring.speed;
-        if (ring.r < ring.maxR) alive = true;
-        const alpha = Math.max(0, 1 - ring.r / ring.maxR) * 0.4;
-        ctx.beginPath();
-        ctx.arc(cx, cy, ring.r, 0, Math.PI * 2);
-        ctx.strokeStyle = ring.color + alpha + ')';
-        ctx.lineWidth = 3;
-        ctx.stroke();
-      });
-      frame++;
-      if (alive && frame < 60) requestAnimationFrame(animate);
-      else ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-    requestAnimationFrame(animate);
+  if (!gsap) {
+    // Fallback sem GSAP
+    setTimeout(() => { flash.style.transition = 'opacity .4s'; flash.style.opacity = '0'; setTimeout(() => flash.remove(), 400); }, 1200);
+    return;
   }
 
-  setTimeout(() => {
-    flash.style.transition = 'opacity .4s';
-    flash.style.opacity = '0';
-    setTimeout(() => flash.remove(), CELEBRATION_FLASH_FADE);
-  }, CELEBRATION_FLASH_SHOW);
+  const box = flash.querySelector('.venda-celebrate-box');
+  const tl = gsap.timeline({ onComplete: () => flash.remove() });
+  tl.from(box, { scale: 0.5, opacity: 0, duration: 0.45, ease: 'back.out(2)' })
+    .to(box, { scale: 1.05, duration: 0.15, ease: 'power2.inOut', yoyo: true, repeat: 1 }, '>-0.05');
+
+  // Counter até valor
+  if (valor != null) {
+    const valorEl = flash.querySelector('.venda-celebrate-valor');
+    const state = { n: 0 };
+    tl.to(state, {
+      n: valor,
+      duration: 1.1,
+      ease: 'power2.out',
+      onUpdate: () => {
+        valorEl.textContent = 'R$ ' + state.n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+    }, 0.15);
+  }
+
+  // Partículas douradas do clique (ou centro)
+  const rect = originEl?.getBoundingClientRect();
+  const ox = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
+  const oy = rect ? rect.top + rect.height / 2 : window.innerHeight / 2;
+  spawnGoldBurst(ox, oy);
+
+  tl.to(flash, { opacity: 0, duration: 0.4, ease: 'power2.in' }, 1.6);
+}
+
+function spawnGoldBurst(cx, cy) {
+  const gsap = g();
+  if (!gsap) return;
+  const layer = document.createElement('div');
+  layer.style.cssText = `position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:${Z_DRAG_GHOST + 1}`;
+  document.body.appendChild(layer);
+  const colors = ['#fbbf24', '#f59e0b', '#fde68a', '#34d399', '#ffffff'];
+  const particles = [];
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    const sz = 6 + Math.random() * 6;
+    p.style.cssText = `position:absolute;left:${cx}px;top:${cy}px;width:${sz}px;height:${sz}px;border-radius:50%;background:${colors[i % colors.length]};box-shadow:0 0 12px ${colors[i % colors.length]};will-change:transform,opacity`;
+    layer.appendChild(p);
+    particles.push(p);
+  }
+  gsap.to(particles, {
+    x: () => (Math.random() - 0.5) * 520,
+    y: () => (Math.random() - 0.8) * 420,
+    scale: 0,
+    opacity: 0,
+    rotation: () => (Math.random() - 0.5) * 360,
+    duration: 1.2,
+    ease: 'power3.out',
+    stagger: { each: 0.015, from: 'random' },
+    onComplete: () => layer.remove()
+  });
+}
+
+/**
+ * Animação "valor voa até o KPI #statVendas" no header.
+ * Shared-element motion — dinheiro subindo pro contador.
+ */
+export function animateValueToHeader(valor, originEl) {
+  const gsap = g();
+  if (!gsap || !valor) return;
+  const target = document.getElementById('statVendas');
+  if (!target) return;
+
+  const rect = originEl?.getBoundingClientRect();
+  const ox = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
+  const oy = rect ? rect.top + rect.height / 2 : window.innerHeight / 2;
+  const tRect = target.getBoundingClientRect();
+  const tx = tRect.left + tRect.width / 2;
+  const ty = tRect.top + tRect.height / 2;
+
+  const badge = document.createElement('div');
+  badge.textContent = '+R$ ' + Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  badge.style.cssText = `position:fixed;left:${ox}px;top:${oy}px;transform:translate(-50%,-50%);z-index:${Z_DRAG_GHOST + 2};padding:8px 14px;border-radius:999px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-family:var(--font-mono);font-weight:800;font-size:16px;box-shadow:0 8px 32px rgba(34,197,94,.45);pointer-events:none;white-space:nowrap;letter-spacing:-.01em`;
+  document.body.appendChild(badge);
+
+  const midX = (ox + tx) / 2;
+  const arcY = Math.min(oy, ty) - 120;
+
+  gsap.timeline({ onComplete: () => badge.remove() })
+    .to(badge, { scale: 1.15, duration: 0.2, ease: 'back.out(2)' })
+    .to(badge, {
+      motionPath: undefined, // fallback: 2-step bezier via keyTimes
+      keyframes: [
+        { left: midX, top: arcY, duration: 0.55, ease: 'power2.out' },
+        { left: tx, top: ty, scale: 0.6, opacity: 0.9, duration: 0.45, ease: 'power2.in' }
+      ]
+    })
+    .to(target, { scale: 1.18, duration: 0.18, ease: 'back.out(2)' }, '-=0.2')
+    .to(target, { scale: 1, duration: 0.25, ease: 'power2.out' });
 }
 
 /**
  * Epic achievement overlay for high-value troca (>= R$1.000).
- * @param {string} nome - Vendor name
- * @param {number} valor - Trade-up value
+ * Timeline GSAP: fade overlay → card flip → gem bounce → sparkles → valor pulse → exit.
  */
 export function fireEpicTrocaAnimation(nome, valor) {
-  if (_epicRaf) {
-    cancelAnimationFrame(_epicRaf);
-    _epicRaf = null;
-  }
-  if (_epicOverlay) {
-    _epicOverlay.remove();
-    _epicOverlay = null;
-  }
+  const gsap = g();
+  if (_epicOverlay) { _epicOverlay.remove(); _epicOverlay = null; }
 
   playSound('venda');
 
   const overlay = document.createElement('div');
   _epicOverlay = overlay;
-  overlay.style.cssText = `position:fixed;inset:0;z-index:${Z_DRAG_GHOST};display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.75)`;
-
-  const cvs = document.createElement('canvas');
-  cvs.style.cssText = 'position:absolute;inset:0;width:100%;height:100%';
-  overlay.appendChild(cvs);
+  overlay.style.cssText = `position:fixed;inset:0;z-index:${Z_DRAG_GHOST};display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.78);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0`;
 
   const card = document.createElement('div');
-  card.style.cssText =
-    'position:relative;z-index:1;text-align:center;padding:40px 48px;border-radius:8px;border:2px solid;animation:epicCardIn .6s cubic-bezier(.2,.8,.3,1) both;background:linear-gradient(135deg,#1a0a2e 0%,#0f172a 50%,#1a0a2e 100%);border-image:linear-gradient(135deg,#a78bfa,#e879f9,#f472b6,#a78bfa) 1';
+  card.className = 'epic-card';
+  card.style.cssText = 'position:relative;z-index:1;text-align:center;padding:40px 52px;border-radius:20px;border:2px solid rgba(167,139,250,.5);background:linear-gradient(135deg,#1a0a2e 0%,#0f172a 50%,#1a0a2e 100%);box-shadow:0 30px 80px rgba(167,139,250,.35),inset 0 1px 0 rgba(255,255,255,.08);transform-style:preserve-3d';
   card.innerHTML = `
-    <div style="font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#a78bfa;margin-bottom:12px;animation:epicGlow 1.5s ease infinite alternate">CONQUISTA DESBLOQUEADA</div>
-    <div style="font-size:48px;margin-bottom:8px;animation:epicBounce .8s cubic-bezier(.2,.8,.3,1) .3s both">💎</div>
-    <div style="font-family:var(--font-mono);font-size:20px;font-weight:800;color:#e879f9;margin-bottom:4px;text-shadow:0 0 20px rgba(232,121,249,.4)">${escapeHtml(nome)}</div>
-    <div style="font-size:13px;color:#c4b5fd;font-weight:600;margin-bottom:16px">Troca com diferença épica</div>
-    <div style="font-family:var(--font-mono);font-size:32px;font-weight:800;color:#f0abfc;text-shadow:0 0 30px rgba(240,171,252,.4);animation:epicPulse 1s ease infinite alternate">R$ ${Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-    <div style="margin-top:16px;font-size:10px;color:#7c3aed;font-weight:700;letter-spacing:.1em">1º DA FILA GARANTIDO</div>
-    <button onclick="this.closest('div[style*=fixed]').remove()" style="margin-top:20px;padding:10px 32px;border:1px solid rgba(167,139,250,.3);border-radius:4px;background:rgba(167,139,250,.1);color:#c4b5fd;font-family:var(--font-mono);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s" onmouseenter="this.style.background='rgba(167,139,250,.25)'" onmouseleave="this.style.background='rgba(167,139,250,.1)'">FECHAR</button>
+    <div class="epic-label" style="font-size:11px;font-weight:800;letter-spacing:.25em;text-transform:uppercase;color:#c4b5fd;margin-bottom:14px">CONQUISTA DESBLOQUEADA</div>
+    <div class="epic-gem" style="font-size:56px;margin-bottom:10px;filter:drop-shadow(0 0 24px rgba(232,121,249,.6))">💎</div>
+    <div class="epic-name" style="font-family:var(--font-mono);font-size:22px;font-weight:800;color:#e879f9;margin-bottom:4px;text-shadow:0 0 20px rgba(232,121,249,.4);letter-spacing:-.01em">${escapeHtml(nome)}</div>
+    <div class="epic-sub" style="font-size:13px;color:#c4b5fd;font-weight:600;margin-bottom:18px">Troca com diferença épica</div>
+    <div class="epic-valor" style="font-family:var(--font-mono);font-size:36px;font-weight:800;color:#f0abfc;text-shadow:0 0 32px rgba(240,171,252,.5);letter-spacing:-.02em;font-variant-numeric:tabular-nums">R$ ${Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+    <div class="epic-foot" style="margin-top:18px;font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:.15em">1º DA FILA GARANTIDO</div>
+    <button class="epic-close" style="margin-top:22px;padding:10px 32px;border:1px solid rgba(167,139,250,.4);border-radius:10px;background:rgba(167,139,250,.15);color:#e9d5ff;font-family:var(--font-mono);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s">FECHAR</button>
   `;
   overlay.appendChild(card);
   document.body.appendChild(overlay);
 
-  const dpr = window.devicePixelRatio || 1;
-  cvs.width = window.innerWidth * dpr;
-  cvs.height = window.innerHeight * dpr;
-  const ctx = cvs.getContext('2d');
-  ctx.scale(dpr, dpr);
-  const sparkles = [];
-  const sparkColors = ['#a78bfa', '#e879f9', '#f472b6', '#c4b5fd', '#fbbf24', '#f0abfc'];
-  for (let i = 0; i < 30; i++) {
-    sparkles.push({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      size: 1 + Math.random() * 3,
-      color: sparkColors[Math.floor(Math.random() * sparkColors.length)],
-      speed: 0.3 + Math.random() * 1.5,
-      phase: Math.random() * Math.PI * 2,
-      drift: (Math.random() - 0.5) * 0.5
-    });
-  }
-  function animateSparkles() {
-    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    const t = performance.now() / 1000;
-    sparkles.forEach((s) => {
-      s.y -= s.speed;
-      s.x += s.drift;
-      if (s.y < -10) {
-        s.y = window.innerHeight + 10;
-        s.x = Math.random() * window.innerWidth;
-      }
-      const alpha = 0.3 + Math.sin(t * 3 + s.phase) * 0.4;
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-      ctx.fillStyle = s.color;
-      ctx.globalAlpha = Math.max(0, alpha);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    });
-    _epicRaf = requestAnimationFrame(animateSparkles);
-  }
-  animateSparkles();
+  const closeBtn = card.querySelector('.epic-close');
+  const closeNow = () => {
+    if (!gsap) { overlay.remove(); _epicOverlay = null; return; }
+    gsap.to(overlay, { opacity: 0, duration: 0.4, ease: 'power2.in', onComplete: () => { overlay.remove(); if (_epicOverlay === overlay) _epicOverlay = null; } });
+    gsap.to(card, { scale: 0.9, filter: 'blur(8px)', duration: 0.4, ease: 'power2.in' });
+  };
+  closeBtn.addEventListener('click', closeNow);
 
-  setTimeout(() => {
-    if (_epicRaf) {
-      cancelAnimationFrame(_epicRaf);
-      _epicRaf = null;
-    }
-    overlay.style.transition = 'opacity .5s';
-    overlay.style.opacity = '0';
-    setTimeout(() => {
-      overlay.remove();
-      if (_epicOverlay === overlay) _epicOverlay = null;
-    }, CELEBRATION_EPIC_FADE);
-  }, CELEBRATION_EPIC_SHOW);
+  if (!gsap) {
+    overlay.style.opacity = '1';
+    setTimeout(closeNow, 3500);
+    return;
+  }
+
+  // Entrada em timeline
+  const tl = gsap.timeline();
+  tl.to(overlay, { opacity: 1, duration: 0.3, ease: 'power2.out' })
+    .from(card, { scale: 0.5, rotationY: 30, opacity: 0, duration: 0.7, ease: 'back.out(1.6)' }, '<')
+    .from(card.querySelector('.epic-label'), { y: -12, opacity: 0, duration: 0.35, ease: 'power2.out' }, '-=0.2')
+    .from(card.querySelector('.epic-gem'), { scale: 0, rotation: -180, opacity: 0, duration: 0.55, ease: 'back.out(2.4)' }, '-=0.2')
+    .from([card.querySelector('.epic-name'), card.querySelector('.epic-sub')], { y: 10, opacity: 0, duration: 0.3, stagger: 0.08, ease: 'power2.out' }, '-=0.3')
+    .from(card.querySelector('.epic-valor'), { scale: 0.6, opacity: 0, duration: 0.5, ease: 'back.out(2)' }, '-=0.15')
+    .from(card.querySelector('.epic-foot'), { y: 8, opacity: 0, duration: 0.3, ease: 'power2.out' }, '-=0.25')
+    .from(card.querySelector('.epic-close'), { y: 8, opacity: 0, duration: 0.3, ease: 'power2.out' }, '-=0.2');
+
+  // Pulso do valor (loop curto)
+  gsap.to(card.querySelector('.epic-valor'), { scale: 1.05, duration: 0.9, ease: 'sine.inOut', yoyo: true, repeat: 3, delay: 1.2 });
+
+  // Confete simples (divs) em stagger
+  const confettiLayer = document.createElement('div');
+  confettiLayer.style.cssText = `position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0`;
+  overlay.insertBefore(confettiLayer, card);
+  const palette = ['#a78bfa', '#e879f9', '#f472b6', '#c4b5fd', '#fbbf24', '#f0abfc'];
+  const bits = [];
+  for (let i = 0; i < 40; i++) {
+    const b = document.createElement('div');
+    const sz = 6 + Math.random() * 8;
+    b.style.cssText = `position:absolute;left:${Math.random() * 100}%;top:-20px;width:${sz}px;height:${sz}px;background:${palette[i % palette.length]};border-radius:${Math.random() > 0.5 ? '50%' : '2px'};will-change:transform,opacity`;
+    confettiLayer.appendChild(b);
+    bits.push(b);
+  }
+  gsap.to(bits, {
+    y: () => window.innerHeight + 40,
+    x: () => (Math.random() - 0.5) * 160,
+    rotation: () => (Math.random() - 0.5) * 720,
+    opacity: 0,
+    duration: () => 2 + Math.random() * 1.4,
+    ease: 'power1.in',
+    stagger: { each: 0.04, from: 'random' },
+    delay: 0.3
+  });
+
+  // Auto-close
+  setTimeout(closeNow, 3800);
 }

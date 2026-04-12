@@ -87,7 +87,7 @@
 }
 .sidebar-link:hover {
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-ink, #0d0d0d);
   filter: brightness(1.15);
 }
 .sidebar-link:hover i {
@@ -98,7 +98,7 @@
 }
 .sidebar-link--active {
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-ink, #0d0d0d);
   font-weight: 700;
 }
 .sidebar-link--active i {
@@ -621,7 +621,7 @@
   font-weight: 700;
 }
 .cal-day.in-range {
-  background: rgba(226, 80, 111, 0.12);
+  background: rgba(170, 238, 196, 0.12);
   border-radius: 4px;
 }
 .cal-day.range-start {
@@ -714,7 +714,7 @@
   border: 1px solid var(--accent);
   border-radius: var(--radius-sm);
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-ink, #0d0d0d);
   font-family: var(--font-body);
   font-size: 11px;
   font-weight: 700;
@@ -784,10 +784,10 @@
   background: var(--bg-hover);
 }
 .rank-row--top {
-  background: rgba(226, 80, 111, 0.02);
+  background: rgba(170, 238, 196, 0.02);
 }
 .rank-row--top:hover {
-  background: rgba(226, 80, 111, 0.05);
+  background: rgba(170, 238, 196, 0.05);
 }
 .rl-pos {
   font-size: 13px;
@@ -826,7 +826,7 @@
   border: 1.5px solid var(--border-subtle);
 }
 .rank-row--top .rl-avatar {
-  border-color: rgba(226, 80, 111, 0.2);
+  border-color: rgba(170, 238, 196, 0.2);
 }
 .rl-bar {
   display: flex;
@@ -1486,7 +1486,7 @@
 .vm-admin-tab.active {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--accent-ink, #0d0d0d);
 }
 .vm-admin-list {
   display: flex;
@@ -1646,7 +1646,7 @@
 .vm-cat-pill-sm.active {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--accent-ink, #0d0d0d);
 }
 
 /* Reference upload */
@@ -1945,3 +1945,107 @@
   transition: width 0.3s;
 }
 .ai-flow-val { font-size: 10px; color: var(--text-muted); min-width: 24px; }
+
+/* =================================================================
+   MODERNIZATION LAYER v2 — rebrand mint + charcoal, shadows premium
+   ================================================================= */
+
+/* KPI Cards — depth + hover lift */
+.kpi-card {
+  box-shadow: var(--shadow-xs);
+  transition:
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-medium);
+}
+.kpi-value {
+  font-family: 'Inter Tight', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+.kpi-label {
+  font-family: 'Inter Tight', system-ui, sans-serif;
+  letter-spacing: 0.08em;
+}
+
+/* Sidebar — active state com mint + texto escuro */
+.sidebar-link.active {
+  color: var(--accent-ink, #0d0d0d) !important;
+  box-shadow: var(--shadow-xs);
+}
+.sidebar-link {
+  transition:
+    background 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.18s ease;
+}
+.sidebar-link:hover:not(.active) {
+  background: var(--accent-bright);
+  color: var(--accent-ink, #0d0d0d);
+}
+
+/* Topbar period tabs */
+.period-tab {
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.period-tab.active {
+  color: var(--accent-ink, #0d0d0d) !important;
+  box-shadow: var(--shadow-xs);
+}
+
+/* Modal overlay — blur */
+.modal-overlay,
+.dashboard-modal-overlay {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(0, 0, 0, 0.4);
+}
+.modal-box,
+.dashboard-modal {
+  box-shadow: var(--shadow-lg);
+  border-radius: 20px;
+}
+
+/* Chart cards — gradient + shadow */
+.chart-card {
+  background: var(--grad-surface);
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.chart-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Calendar popover */
+.calendar-popover,
+.datepicker-popover {
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-lg);
+  border-radius: 16px;
+}
+
+/* Tipografia: números em Inter Tight tabular (sem mono) */
+.mono,
+.font-display,
+[class*='kpi-'],
+.ranking-value,
+.ranking-table td {
+  font-family: 'Inter Tight', system-ui, sans-serif !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Modal title — body font, não mono */
+.modal-box h3,
+.dashboard-modal h3 {
+  font-family: 'Inter Tight', system-ui, sans-serif;
+  letter-spacing: -0.01em;
+  font-weight: 700;
+}
+
+/* ============ FIM modernization layer v2 ============ */

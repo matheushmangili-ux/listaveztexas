@@ -239,8 +239,10 @@ export function renderQueue() {
     if (cached && cached.key === key && cached.node.parentNode === list) {
       node = cached.node;
     } else {
+      const isBrandNew = !cached;
       node = htmlToElement(renderQueueItem(v, pos, false, true));
       _queueItemState.set(v.id, { key, node });
+      if (isBrandNew) node._justCreated = true;
     }
     desired.push(node);
   });
@@ -296,6 +298,56 @@ export function renderQueue() {
   }
 
   initDragAndDrop();
+
+  // GSAP: anima entrada de novos itens com stagger (2.4)
+  animateNewQueueItems(desired);
+}
+
+function animateNewQueueItems(nodes) {
+  const gsap = window.gsap;
+  if (!gsap) return;
+  const fresh = nodes.filter((n) => n._justCreated);
+  if (!fresh.length) return;
+  fresh.forEach((n) => { n._justCreated = false; });
+  gsap.from(fresh, {
+    opacity: 0,
+    scale: 0.85,
+    y: -8,
+    duration: 0.42,
+    ease: 'back.out(1.6)',
+    stagger: { each: 0.05, from: 'start' },
+    clearProps: 'all'
+  });
+}
+
+/**
+ * Shared-element flight: clona ficha da fila e faz arc até o painel de atendimento.
+ * Chamado antes da mutação de dados, pra dar sensação de continuidade.
+ */
+export function animateFichaToAtendimento(vendedorId) {
+  const gsap = window.gsap;
+  if (!gsap) return;
+  const src = document.querySelector(`.queue-item[data-id="${vendedorId}"]`) || document.querySelector(`[data-vendedor-id="${vendedorId}"]`);
+  const target = document.querySelector('.service-panel') || document.getElementById('activeServices');
+  if (!src || !target) return;
+  const sRect = src.getBoundingClientRect();
+  const tRect = target.getBoundingClientRect();
+  const clone = src.cloneNode(true);
+  clone.style.cssText = `position:fixed;left:${sRect.left}px;top:${sRect.top}px;width:${sRect.width}px;margin:0;z-index:${Z_DRAG_GHOST};pointer-events:none;box-shadow:0 20px 48px rgba(170, 238, 196,.3);border:1px solid rgba(170, 238, 196,.4)`;
+  document.body.appendChild(clone);
+  const tx = tRect.left + 20;
+  const ty = tRect.top + 20;
+  gsap.timeline({ onComplete: () => clone.remove() })
+    .to(clone, { scale: 1.04, duration: 0.15, ease: 'power2.out' })
+    .to(clone, {
+      left: tx,
+      top: ty,
+      scale: 0.95,
+      opacity: 0.5,
+      duration: 0.55,
+      ease: 'power2.inOut'
+    })
+    .to(clone, { opacity: 0, scale: 0.8, duration: 0.15, ease: 'power2.in' });
 }
 
 function renderQueueItem(v, pos, isActive, draggable) {
