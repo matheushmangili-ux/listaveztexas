@@ -153,9 +153,30 @@ body {
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'ss01', 'cv11';
   overflow-x: hidden;
   font-size: 14px;
   line-height: 1.5;
+  letter-spacing: -0.005em;
+}
+
+/* Depth sutil em títulos e números grandes pra fugir do "vibecoded" */
+h1, h2, h3, .kpi-value, .timer-display, .t-header-kpi-value,
+.vendor-big-value, .vendor-timer, .vendor-pos-number {
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+  letter-spacing: -0.02em;
+}
+[data-theme='dark'] h1,
+[data-theme='dark'] h2,
+[data-theme='dark'] h3,
+[data-theme='dark'] .kpi-value,
+[data-theme='dark'] .timer-display,
+[data-theme='dark'] .t-header-kpi-value,
+[data-theme='dark'] .vendor-big-value,
+[data-theme='dark'] .vendor-timer,
+[data-theme='dark'] .vendor-pos-number {
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4), 0 0 1px rgba(255, 255, 255, 0.02);
 }
 
 /* Scrollbar */

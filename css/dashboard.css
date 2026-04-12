@@ -38,14 +38,12 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  background: #222222;
-  border-radius: 10px;
-  padding: 6px 12px;
 }
 .dash-header-logo img {
-  height: 28px;
+  height: 32px;
   object-fit: contain;
   display: block;
+  mix-blend-mode: screen;
 }
 .sidebar-section-label {
   font-size: 9px;

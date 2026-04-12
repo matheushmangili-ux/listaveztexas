@@ -31,11 +31,11 @@
   color: #ffffff;
 }
 .t-header-logo {
-  height: 38px;
+  height: 42px;
   width: auto;
-  background: #222222;
-  border-radius: 10px;
-  padding: 4px 12px;
+  background: transparent;
+  padding: 0;
+  mix-blend-mode: screen;
   object-fit: contain;
 }
 .t-header-version {
