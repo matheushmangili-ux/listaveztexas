@@ -8,6 +8,7 @@ import { initMissions, unmountMissions, refreshMissionsAfterAtendimento as refre
 import { initAchievements, unmountAchievements, refreshAchievementsAfterAtendimento as refreshAchievements } from './vendor-achievements.js';
 import { initAvatar, unmountAvatar, buildAvatarUrl } from './vendor-avatar.js';
 import { initVm, unmountVm } from './vendor-vm.js';
+import { callAI } from './ai-assist.js';
 
 let _sb = null;
 let _ctx = null;        // resultado de get_my_vendedor_context()
@@ -66,6 +67,11 @@ function grabRefs() {
 
   el.pausaOverlay = document.getElementById('pausaOverlay');
   el.pausaSheet = document.getElementById('pausaSheet');
+
+  el.btnAiTips = document.getElementById('btnAiTips');
+  el.aiTipsOverlay = document.getElementById('aiTipsOverlay');
+  el.aiTipsSheet = document.getElementById('aiTipsSheet');
+  el.aiTipsBody = document.getElementById('aiTipsSheetBody');
 
   el.pushPromptCard = document.getElementById('pushPromptCard');
   el.pushPromptTitle = document.getElementById('pushPromptTitle');
@@ -259,8 +265,10 @@ function renderMainCard() {
   if (!_ctx.turno_aberto_id) {
     el.offCard.classList.remove('hidden');
     el.offSub.textContent = 'Aguardando a abertura do turno pela recepção';
+    if (el.btnAiTips) el.btnAiTips.classList.add('hidden');
     return;
   }
+  if (el.btnAiTips) el.btnAiTips.classList.remove('hidden');
 
   switch (_ctx.status) {
     case 'disponivel':
@@ -422,6 +430,8 @@ function wireActions() {
   el.btnPausa.addEventListener('click', () => openPausaSheet());
   el.btnLogout.addEventListener('click', () => window._vendorLogout && window._vendorLogout());
   el.btnRefresh.addEventListener('click', onRefresh);
+  el.btnAiTips?.addEventListener('click', onAiTips);
+  el.aiTipsOverlay?.addEventListener('click', closeAiTips);
 
   // Outcome buttons
   el.outcomeSheet.querySelectorAll('.vendor-outcome-btn').forEach((btn) => {
@@ -748,6 +758,52 @@ function arrayBufferToBase64Url(buffer) {
   let bin = '';
   for (let i = 0; i < bytes.byteLength; i++) bin += String.fromCharCode(bytes[i]);
   return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+// ─── AI Tips ───
+async function onAiTips() {
+  if (!_ctx || !_sb) return;
+  if (el.btnAiTips) el.btnAiTips.classList.add('hidden');
+  el.aiTipsOverlay?.classList.remove('hidden');
+  el.aiTipsSheet?.classList.remove('hidden');
+  if (el.aiTipsBody) el.aiTipsBody.innerHTML = '<div style="padding:24px;text-align:center;color:var(--vendor-text-muted);font-size:12px"><i class="fa-solid fa-spinner fa-spin" style="margin-right:6px"></i>Consultando a IA…</div>';
+
+  const vendas = parseInt(el.statVendas?.textContent || '0');
+  const atend = parseInt(el.statAtend?.textContent || '0');
+  const conv = parseInt(el.statConv?.textContent || '0');
+
+  const result = await callAI(_sb, 'vendor-tips', {
+    vendor_id: _ctx.vendedor_id,
+    atendimentos: atend,
+    vendas: vendas,
+    conversao: conv,
+    tempo_medio: 0,
+    rank: _ctx.posicao_fila || 0,
+    total_vendors: 0,
+    store_conversao: 0
+  }, { fallback: null });
+
+  if (!el.aiTipsBody) return;
+  if (!result || !result.tips) {
+    el.aiTipsBody.innerHTML = '<div style="padding:24px;text-align:center;color:var(--vendor-text-muted);font-size:12px">IA indisponível no momento. Tente novamente mais tarde.</div>';
+    return;
+  }
+
+  el.aiTipsBody.innerHTML = `
+    <div class="ai-tips-list">
+      ${result.tips.map(t => `<div class="ai-tip-item">
+        <span class="ai-tip-emoji">${escape(t.emoji || '💡')}</span>
+        <span class="ai-tip-text">${escape(t.tip)}</span>
+      </div>`).join('')}
+    </div>
+    ${result.motivational ? `<div class="ai-motivational">${escape(result.motivational)}</div>` : ''}
+  `;
+}
+
+function closeAiTips() {
+  el.aiTipsOverlay?.classList.add('hidden');
+  el.aiTipsSheet?.classList.add('hidden');
+  if (el.btnAiTips && _ctx?.turno_aberto_id) el.btnAiTips.classList.remove('hidden');
 }
 
 // ─── Utils ───

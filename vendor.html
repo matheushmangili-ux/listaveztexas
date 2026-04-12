@@ -152,6 +152,10 @@
         <span class="stat-label">conversão</span>
       </div>
     </section>
+
+    <button class="vendor-ai-tips-btn hidden" id="btnAiTips">
+      <i class="fa-solid fa-wand-magic-sparkles"></i> Dicas da IA
+    </button>
   </main>
 
   <nav class="vendor-actions" id="actionsRow">
@@ -246,6 +250,14 @@
       <i class="fa-solid fa-ellipsis" style="color:#71717A"></i> Outro
     </button>
   </div>
+</div>
+
+<!-- Bottom sheet: AI Tips -->
+<div class="vendor-sheet-overlay hidden" id="aiTipsOverlay"></div>
+<div class="vendor-sheet hidden" id="aiTipsSheet">
+  <div class="vendor-sheet-handle"></div>
+  <h3 class="vendor-sheet-title"><i class="fa-solid fa-wand-magic-sparkles" style="margin-right:8px;color:var(--vendor-warning)"></i>Dicas da IA</h3>
+  <div id="aiTipsSheetBody"></div>
 </div>
 
 <!-- Bottom sheet: VM Photos -->
