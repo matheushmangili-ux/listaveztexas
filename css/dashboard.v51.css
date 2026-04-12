@@ -176,6 +176,10 @@
 .dash-main {
   padding: var(--space-xl) var(--space-xl);
   overflow-y: auto;
+  background: #1a1a1a;
+}
+[data-theme='light'] .dash-main {
+  background: var(--bg-deep);
 }
 
 /* ─── Topbar (period + filters + greeting) ─── */
