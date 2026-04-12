@@ -120,29 +120,48 @@ export function toggleTheme() {
   return next;
 }
 
-// Toast notification
+// Toast notification — estilo Linear/Arc minimalista
 export function toast(msg, type = 'info', duration = 4000) {
   const container = document.getElementById('toastContainer');
   if (!container) return;
-  const styles = {
-    success: { border: 'rgba(34,197,94,.3)', bg: '#052e16', text: '#86efac' },
-    error: { border: 'rgba(239,68,68,.3)', bg: '#450a0a', text: '#fca5a5' },
-    warning: { border: 'rgba(245,158,11,.3)', bg: '#451a03', text: '#fcd34d' },
-    info: { border: 'rgba(96,165,250,.3)', bg: '#172554', text: '#93c5fd' }
+  const tone = {
+    success: { accent: '#22c55e', iconBg: 'rgba(34,197,94,.14)' },
+    error:   { accent: '#ef4444', iconBg: 'rgba(239,68,68,.14)' },
+    warning: { accent: '#f59e0b', iconBg: 'rgba(245,158,11,.14)' },
+    info:    { accent: '#3b82f6', iconBg: 'rgba(59,130,246,.14)' }
   };
   const icons = {
-    success: 'fa-circle-check',
-    error: 'fa-circle-xmark',
-    warning: 'fa-triangle-exclamation',
-    info: 'fa-circle-info'
+    success: 'fa-check',
+    error: 'fa-xmark',
+    warning: 'fa-exclamation',
+    info: 'fa-info'
   };
-  const s = styles[type] || styles.info;
+  const t = tone[type] || tone.info;
   const el = document.createElement('div');
-  el.style.cssText = `display:flex;align-items:center;gap:14px;padding:16px 20px;border-radius:12px;border:1px solid ${s.border};background:${s.bg};color:${s.text};font-size:15px;font-weight:600;font-family:var(--font-body);box-shadow:0 4px 16px rgba(0,0,0,.35);animation:toastIn .25s ease forwards;min-width:300px;max-width:460px`;
-  el.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}" style="font-size:18px;flex-shrink:0"></i><span>${escapeHtml(msg)}</span>`;
+  el.style.cssText = `
+    display:flex;align-items:center;gap:12px;
+    padding:12px 16px 12px 12px;
+    border-radius:12px;
+    background:var(--bg-card);
+    border:1px solid var(--border-subtle);
+    color:var(--text-primary);
+    font-size:13px;font-weight:500;
+    font-family:'Inter Tight',system-ui,sans-serif;
+    letter-spacing:-0.005em;
+    box-shadow:0 8px 24px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.06);
+    animation:toastIn .22s cubic-bezier(.16,1,.3,1) forwards;
+    min-width:260px;max-width:420px;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  `;
+  el.innerHTML = `
+    <span style="width:28px;height:28px;border-radius:8px;background:${t.iconBg};display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">
+      <i class="fa-solid ${icons[type] || icons.info}" style="font-size:13px;color:${t.accent}"></i>
+    </span>
+    <span style="line-height:1.4">${escapeHtml(msg)}</span>
+  `;
   container.appendChild(el);
   setTimeout(() => {
-    el.style.animation = 'toastOut .3s ease forwards';
-    setTimeout(() => el.remove(), 300);
+    el.style.animation = 'toastOut .28s cubic-bezier(.4,0,1,1) forwards';
+    setTimeout(() => el.remove(), 280);
   }, duration);
 }

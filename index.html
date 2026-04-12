@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/styles.css?v=5">
+<link rel="stylesheet" href="/css/styles.css?v=50">
 <meta name="theme-color" content="#060606">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -125,12 +125,12 @@
   }
   .tab-switch button:hover {
     background: var(--accent);
-    color: #fff;
-    filter: brightness(1.15);
+    color: var(--accent-ink, #0d0d0d);
+    filter: brightness(1.05);
   }
   .tab-switch button.active {
     background: var(--accent);
-    color: #fff;
+    color: var(--accent-ink, #0d0d0d);
     font-weight: 700;
   }
   .tab-switch button:active {
@@ -138,7 +138,7 @@
   }
   /* Login primary button — same hover feel as sidebar-link */
   .login-box .btn-primary {
-    color: #fff;
+    color: var(--accent-ink, #0d0d0d);
   }
   .login-box .btn-primary:hover {
     opacity: 1;
