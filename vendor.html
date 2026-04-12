@@ -80,6 +80,9 @@
   </header>
 
   <main class="vendor-main">
+    <!-- Missões do dia (Fase 3 gamificação) -->
+    <section id="missionsCard" class="missions-card hidden"></section>
+
     <!-- Comunicados / Corridas (Fase 1 gamificação) -->
     <section id="announcementsWrap" class="vendor-ann-wrap hidden"></section>
 
@@ -154,6 +157,14 @@
       <span>Sair</span>
     </button>
   </nav>
+</div>
+
+<!-- Bottom sheet: Missões do dia -->
+<div class="vendor-sheet-overlay hidden" id="missionsOverlay"></div>
+<div class="vendor-sheet hidden" id="missionsSheet">
+  <div class="vendor-sheet-handle"></div>
+  <h3 class="vendor-sheet-title"><i class="fa-solid fa-bullseye" style="margin-right:8px;color:var(--vendor-success)"></i>Missões do dia</h3>
+  <div id="missionsSheetBody"></div>
 </div>
 
 <!-- Bottom sheet: XP / Minha jornada -->

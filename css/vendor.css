@@ -775,6 +775,246 @@ html, body {
   display: none;
 }
 
+/* ─── Missões do dia (Fase 3) ─── */
+.missions-card {
+  animation: vendorCardIn 0.3s ease both;
+}
+.missions-card-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  background: var(--vendor-card);
+  border: 1px solid var(--vendor-border);
+  border-radius: 14px;
+  padding: 12px 14px 10px;
+  cursor: pointer;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+.missions-card-btn:active { transform: scale(0.99); }
+.missions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.missions-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--vendor-text-dim);
+}
+.missions-title i { font-size: 11px; color: var(--vendor-success); }
+.missions-count {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--vendor-success);
+  letter-spacing: 0.04em;
+}
+.missions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mission-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 4px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.mission-row i {
+  font-size: 13px;
+  color: var(--vendor-text-dim);
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.mission-row.completed i { color: var(--vendor-success); }
+.mission-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.mission-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vendor-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mission-row.completed .mission-title {
+  text-decoration: line-through;
+  color: var(--vendor-text-dim);
+}
+.mission-bar {
+  height: 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.mission-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--vendor-success);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+.mission-row.completed .mission-bar-fill { background: var(--vendor-success); opacity: 0.5; }
+.mission-nums {
+  font-size: 9px;
+  color: var(--vendor-text-muted);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Sheet missões */
+.mission-sheet-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 10px;
+  border-bottom: 1px solid var(--vendor-border);
+  position: relative;
+}
+.mission-sheet-row:last-child { border-bottom: none; }
+.mission-sheet-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(34,197,94,0.1);
+  color: var(--vendor-success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.mission-sheet-row.completed .mission-sheet-icon {
+  background: rgba(34,197,94,0.2);
+}
+.mission-sheet-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.mission-sheet-body strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--vendor-text);
+}
+.mission-sheet-row.completed .mission-sheet-body strong {
+  text-decoration: line-through;
+  color: var(--vendor-text-dim);
+}
+.mission-sheet-desc {
+  font-size: 11px;
+  color: var(--vendor-text-muted);
+  line-height: 1.4;
+}
+.mission-sheet-bar {
+  height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.mission-sheet-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--vendor-success);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+.mission-sheet-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  color: var(--vendor-text-muted);
+  margin-top: 2px;
+}
+.mission-reward {
+  color: var(--vendor-warning);
+  font-weight: 700;
+}
+.mission-reward i { margin-right: 3px; }
+.mission-done-check {
+  color: var(--vendor-success);
+  font-size: 20px;
+  position: absolute;
+  top: 14px;
+  right: 10px;
+}
+.missions-empty {
+  padding: 24px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--vendor-text-muted);
+  font-style: italic;
+}
+
+/* Toast missão completada */
+.mission-complete-toast {
+  position: fixed;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translate(-50%, 12px);
+  background: var(--vendor-card);
+  border: 1px solid rgba(34,197,94,0.4);
+  border-radius: 14px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(34,197,94,0.15);
+  z-index: 220;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  max-width: calc(100vw - 32px);
+}
+.mission-complete-toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.mission-complete-toast > i {
+  font-size: 24px;
+  color: var(--vendor-success);
+  flex-shrink: 0;
+}
+.mission-complete-text {
+  display: flex;
+  flex-direction: column;
+}
+.mission-complete-text strong {
+  font-size: 13px;
+  color: var(--vendor-success);
+  font-weight: 700;
+}
+.mission-complete-text span {
+  font-size: 11px;
+  color: var(--vendor-text-dim);
+}
+.mission-complete-reward {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--vendor-warning);
+  flex-shrink: 0;
+}
+
 /* ─── Comunicados / Corridas (Fase 1) ─── */
 .vendor-ann-wrap {
   background: var(--vendor-card);

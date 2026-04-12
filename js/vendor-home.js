@@ -4,6 +4,7 @@
 
 import { initAnnouncements, unmountAnnouncements } from './vendor-announcements.js';
 import { initXp, unmountXp, refreshAfterAtendimento as refreshXp } from './vendor-xp.js';
+import { initMissions, unmountMissions, refreshMissionsAfterAtendimento as refreshMissions } from './vendor-missions.js';
 
 let _sb = null;
 let _ctx = null;        // resultado de get_my_vendedor_context()
@@ -94,6 +95,8 @@ export async function initHome(sb) {
     initAnnouncements(_sb, _ctx).catch((err) => console.warn('[announcements] init falhou:', err));
     // XP + níveis — independente, falha silenciosa
     initXp(_sb).catch((err) => console.warn('[xp] init falhou:', err));
+    // Missões diárias — independente, falha silenciosa
+    initMissions(_sb).catch((err) => console.warn('[missions] init falhou:', err));
   } catch (err) {
     console.error('[initHome] erro:', err);
     window._vendorToast('Erro ao carregar: ' + (err?.message || err), 'error');
@@ -105,6 +108,7 @@ export function unmountHome() {
   stopPausaSinceTimer();
   unmountAnnouncements();
   unmountXp();
+  unmountMissions();
   if (_realtimeChannel) {
     _sb?.removeChannel(_realtimeChannel);
     _realtimeChannel = null;
@@ -521,6 +525,7 @@ async function onRefresh() {
     // Refresh do XP também — se houver diff, dispara toast/level up/tier up
     // (útil pra smoke test e pra quando admin ajusta XP via banco)
     refreshXp().catch((err) => console.warn('[xp] refresh pós-botão falhou:', err));
+    refreshMissions().catch((err) => console.warn('[missions] refresh pós-botão falhou:', err));
     window._vendorToast('Atualizado', 'success', 1200);
   } catch (err) {
     window._vendorToast('Erro: ' + (err?.message || err), 'error');
@@ -551,6 +556,8 @@ async function onFinishAttendance(resultado) {
     window._vendorToast('Atendimento finalizado', 'success');
     // Atualiza XP + dispara toast/level up se ganhou pontos (non-blocking)
     refreshXp().catch((err) => console.warn('[xp] refresh pós-finish falhou:', err));
+    // Atualiza missões + dispara toast de missão completada (non-blocking)
+    refreshMissions().catch((err) => console.warn('[missions] refresh pós-finish falhou:', err));
   } catch (err) {
     window._vendorToast(err?.message || 'Erro ao finalizar', 'error');
   }
