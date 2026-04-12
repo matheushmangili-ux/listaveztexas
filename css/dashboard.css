@@ -106,7 +106,7 @@
 }
 .sidebar-link--active i {
   opacity: 1;
-  color: #fff;
+  color: var(--accent-ink, #0d0d0d);
 }
 .sidebar-link--danger:hover {
   color: #f87171;
@@ -1977,26 +1977,24 @@
   letter-spacing: 0.08em;
 }
 
-/* Sidebar — active state com mint + texto escuro */
-.sidebar-link.active {
+/* Sidebar — active state mint + texto escuro (BEM: sidebar-link--active) */
+.sidebar-link.active,
+.sidebar-link--active {
+  background: var(--accent) !important;
   color: var(--accent-ink, #0d0d0d) !important;
   box-shadow: var(--shadow-xs);
 }
-.sidebar-link {
-  transition:
-    background 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-    color 0.18s ease;
-}
-.sidebar-link:hover:not(.active) {
-  background: var(--accent-bright);
-  color: var(--accent-ink, #0d0d0d);
+.sidebar-link.active i,
+.sidebar-link--active i {
+  color: var(--accent-ink, #0d0d0d) !important;
 }
 
-/* Topbar period tabs */
-.period-tab {
+/* Topbar period tabs (dashboard usa .period-tabs button.active) */
+.period-tabs button {
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.period-tab.active {
+.period-tabs button.active {
+  background: var(--accent) !important;
   color: var(--accent-ink, #0d0d0d) !important;
   box-shadow: var(--shadow-xs);
 }

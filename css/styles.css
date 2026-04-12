@@ -734,8 +734,8 @@ body {
 }
 .kpi-compare .down {
   display: inline-block;
-  background: rgba(248, 113, 113, 0.12);
-  color: #f87171;
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
   padding: 3px 10px;
   border-radius: 20px;
   font-size: 11px;
