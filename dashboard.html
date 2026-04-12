@@ -59,6 +59,10 @@
         <i class="fa-solid fa-camera-retro"></i>
         <span>VM Photos</span>
       </a>
+      <a id="linkAi" href="#" class="sidebar-link" onclick="event.preventDefault();window._dashAiOpen&&window._dashAiOpen()">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <span>IA Assist</span>
+      </a>
       <a id="linkSettings" href="#" class="sidebar-link">
         <i class="fa-solid fa-gear"></i>
         <span>Configurações</span>
@@ -325,6 +329,18 @@
 <script type="module" src="/js/dashboard-xp-config.js"></script>
 <script type="module" src="/js/dashboard-missions.js"></script>
 <script type="module" src="/js/dashboard-vm.js"></script>
+<script type="module" src="/js/dashboard-ai.js"></script>
+
+<!-- Modal IA Assist -->
+<div class="modal-overlay" id="aiModal" onclick="if(event.target===this)window._dashAiClose&&window._dashAiClose()">
+  <div class="modal-box" style="max-width:640px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h3 style="margin:0;font-size:15px"><i class="fa-solid fa-wand-magic-sparkles" style="margin-right:8px;color:var(--warning)"></i>IA Assist</h3>
+      <button onclick="window._dashAiClose&&window._dashAiClose()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="aiModalBody"></div>
+  </div>
+</div>
 
 <!-- Modal VM Photos -->
 <div class="modal-overlay" id="vmModal" onclick="if(event.target===this)window._dashVmClose&&window._dashVmClose()">

@@ -265,10 +265,8 @@ function renderMainCard() {
   if (!_ctx.turno_aberto_id) {
     el.offCard.classList.remove('hidden');
     el.offSub.textContent = 'Aguardando a abertura do turno pela recepção';
-    if (el.btnAiTips) el.btnAiTips.classList.add('hidden');
     return;
   }
-  if (el.btnAiTips) el.btnAiTips.classList.remove('hidden');
 
   switch (_ctx.status) {
     case 'disponivel':
@@ -762,8 +760,7 @@ function arrayBufferToBase64Url(buffer) {
 
 // ─── AI Tips ───
 async function onAiTips() {
-  if (!_ctx || !_sb) return;
-  if (el.btnAiTips) el.btnAiTips.classList.add('hidden');
+  if (!_sb) return;
   el.aiTipsOverlay?.classList.remove('hidden');
   el.aiTipsSheet?.classList.remove('hidden');
   if (el.aiTipsBody) el.aiTipsBody.innerHTML = '<div style="padding:24px;text-align:center;color:var(--vendor-text-muted);font-size:12px"><i class="fa-solid fa-spinner fa-spin" style="margin-right:6px"></i>Consultando a IA…</div>';
@@ -803,7 +800,6 @@ async function onAiTips() {
 function closeAiTips() {
   el.aiTipsOverlay?.classList.add('hidden');
   el.aiTipsSheet?.classList.add('hidden');
-  if (el.btnAiTips && _ctx?.turno_aberto_id) el.btnAiTips.classList.remove('hidden');
 }
 
 // ─── Utils ───
