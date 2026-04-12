@@ -5,6 +5,7 @@
 import { initAnnouncements, unmountAnnouncements } from './vendor-announcements.js';
 import { initXp, unmountXp, refreshAfterAtendimento as refreshXp } from './vendor-xp.js';
 import { initMissions, unmountMissions, refreshMissionsAfterAtendimento as refreshMissions } from './vendor-missions.js';
+import { initAchievements, unmountAchievements, refreshAchievementsAfterAtendimento as refreshAchievements } from './vendor-achievements.js';
 
 let _sb = null;
 let _ctx = null;        // resultado de get_my_vendedor_context()
@@ -97,6 +98,8 @@ export async function initHome(sb) {
     initXp(_sb).catch((err) => console.warn('[xp] init falhou:', err));
     // Missões diárias — independente, falha silenciosa
     initMissions(_sb).catch((err) => console.warn('[missions] init falhou:', err));
+    // Conquistas — independente, falha silenciosa
+    initAchievements(_sb).catch((err) => console.warn('[achievements] init falhou:', err));
   } catch (err) {
     console.error('[initHome] erro:', err);
     window._vendorToast('Erro ao carregar: ' + (err?.message || err), 'error');
@@ -109,6 +112,7 @@ export function unmountHome() {
   unmountAnnouncements();
   unmountXp();
   unmountMissions();
+  unmountAchievements();
   if (_realtimeChannel) {
     _sb?.removeChannel(_realtimeChannel);
     _realtimeChannel = null;
@@ -526,6 +530,7 @@ async function onRefresh() {
     // (útil pra smoke test e pra quando admin ajusta XP via banco)
     refreshXp().catch((err) => console.warn('[xp] refresh pós-botão falhou:', err));
     refreshMissions().catch((err) => console.warn('[missions] refresh pós-botão falhou:', err));
+    refreshAchievements().catch((err) => console.warn('[achievements] refresh pós-botão falhou:', err));
     window._vendorToast('Atualizado', 'success', 1200);
   } catch (err) {
     window._vendorToast('Erro: ' + (err?.message || err), 'error');
@@ -558,6 +563,8 @@ async function onFinishAttendance(resultado) {
     refreshXp().catch((err) => console.warn('[xp] refresh pós-finish falhou:', err));
     // Atualiza missões + dispara toast de missão completada (non-blocking)
     refreshMissions().catch((err) => console.warn('[missions] refresh pós-finish falhou:', err));
+    // Checa conquistas desbloqueáveis (non-blocking)
+    refreshAchievements().catch((err) => console.warn('[achievements] refresh pós-finish falhou:', err));
   } catch (err) {
     window._vendorToast(err?.message || 'Erro ao finalizar', 'error');
   }

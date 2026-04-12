@@ -73,6 +73,10 @@
       <button class="vendor-icon-btn vendor-icon-btn-pref hidden" id="btnStartPreferencial" title="Atendimento preferencial" aria-label="Atendimento preferencial">
         <i class="fa-solid fa-star"></i>
       </button>
+      <button class="vendor-icon-btn" id="btnAchievements" title="Conquistas" aria-label="Conquistas">
+        <i class="fa-solid fa-trophy"></i>
+        <span class="achievements-badge">0</span>
+      </button>
       <button class="vendor-icon-btn" id="btnRefresh" title="Atualizar" aria-label="Atualizar">
         <i class="fa-solid fa-arrows-rotate"></i>
       </button>
@@ -157,6 +161,14 @@
       <span>Sair</span>
     </button>
   </nav>
+</div>
+
+<!-- Bottom sheet: Conquistas -->
+<div class="vendor-sheet-overlay hidden" id="achievementsOverlay"></div>
+<div class="vendor-sheet hidden" id="achievementsSheet">
+  <div class="vendor-sheet-handle"></div>
+  <h3 class="vendor-sheet-title"><i class="fa-solid fa-trophy" style="margin-right:8px;color:var(--vendor-warning)"></i>Conquistas</h3>
+  <div id="achievementsSheetBody"></div>
 </div>
 
 <!-- Bottom sheet: Missões do dia -->
