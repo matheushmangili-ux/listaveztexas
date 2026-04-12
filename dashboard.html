@@ -51,6 +51,10 @@
         <i class="fa-solid fa-bolt"></i>
         <span>Gamificação</span>
       </a>
+      <a id="linkMissions" href="#" class="sidebar-link" onclick="event.preventDefault();window._dashMissionsOpen&&window._dashMissionsOpen()">
+        <i class="fa-solid fa-bullseye"></i>
+        <span>Missões</span>
+      </a>
       <a id="linkSettings" href="#" class="sidebar-link">
         <i class="fa-solid fa-gear"></i>
         <span>Configurações</span>
@@ -315,6 +319,71 @@
 <script type="module" src="/js/dashboard-init.js"></script>
 <script type="module" src="/js/dashboard-announcements.js"></script>
 <script type="module" src="/js/dashboard-xp-config.js"></script>
+<script type="module" src="/js/dashboard-missions.js"></script>
+
+<!-- Modal Missões CMS -->
+<div class="modal-overlay" id="missionsModal" onclick="if(event.target===this)window._dashMissionsClose&&window._dashMissionsClose()">
+  <div class="modal-box" style="max-width:640px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h3 style="margin:0;font-size:15px"><i class="fa-solid fa-bullseye" style="margin-right:8px;color:var(--success)"></i>Missões diárias</h3>
+      <button onclick="window._dashMissionsClose&&window._dashMissionsClose()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- Sugestões rápidas -->
+    <details id="missionSuggestions">
+      <summary style="cursor:pointer;padding:10px 14px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:10px;font-size:12px;font-weight:600;color:var(--text);margin-bottom:12px">
+        <i class="fa-solid fa-wand-magic-sparkles" style="margin-right:8px;color:var(--success)"></i>Sugestões prontas (clonar com 1 click)
+      </summary>
+      <div id="missionSuggestionsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 0 12px"></div>
+    </details>
+
+    <!-- Form nova/editar missão -->
+    <details id="missionFormDetails">
+      <summary style="cursor:pointer;padding:10px 14px;background:var(--surface-subtle);border-radius:10px;font-size:12px;font-weight:600;color:var(--text)">
+        <i class="fa-solid fa-plus" style="margin-right:8px;color:var(--accent)"></i>Nova missão
+      </summary>
+      <form id="missionForm" novalidate style="display:flex;flex-direction:column;gap:10px;padding:12px 4px 8px">
+        <input type="hidden" id="missionEditId" value="">
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
+          Título
+          <input type="text" id="missionTitle" maxlength="80" placeholder="Ex: 3 vendas hoje" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
+        </label>
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
+          Descrição (opcional)
+          <input type="text" id="missionDesc" maxlength="200" placeholder="Ex: Realize 3 vendas durante o dia" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
+        </label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
+            Tipo de meta
+            <select id="missionGoalType" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
+              <option value="atendimentos_count">Atendimentos</option>
+              <option value="vendas_count">Vendas</option>
+              <option value="vendas_canal_count">Vendas por canal</option>
+              <option value="valor_vendido_total">Valor vendido (R$)</option>
+            </select>
+          </label>
+          <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
+            Meta
+            <input type="number" id="missionGoalValue" min="1" step="1" placeholder="5" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:var(--font-mono);font-size:13px">
+          </label>
+        </div>
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
+          Recompensa XP
+          <input type="number" id="missionRewardXp" min="0" step="5" value="50" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:var(--font-mono);font-size:13px">
+        </label>
+        <div id="missionError" style="display:none;padding:10px 12px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:8px;color:var(--danger);font-size:12px;font-weight:500"></div>
+        <button type="submit" id="missionSubmit" style="padding:12px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
+          <i class="fa-solid fa-check"></i> Salvar missão
+        </button>
+      </form>
+    </details>
+
+    <!-- Lista -->
+    <div id="missionList" style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
+      <div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px">Carregando...</div>
+    </div>
+  </div>
+</div>
 
 <!-- Modal Gamificação / XP Config -->
 <div class="modal-overlay" id="xpConfigModal" onclick="if(event.target===this)window._dashXpConfigClose&&window._dashXpConfigClose()">
