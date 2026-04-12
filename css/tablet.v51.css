@@ -140,29 +140,32 @@
   box-shadow: 0 2px 0 0 var(--success);
 }
 
-/* Setor tabs — matching dashboard sidebar-link visual */
+/* Setor tabs — charcoal com sombra + active neon mint */
 .setor-tab {
   flex: 1;
   padding: 10px 12px;
   min-height: 52px;
-  border: none;
+  border: 1px solid var(--border-subtle);
   border-radius: 10px;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.5);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-xs);
+  color: var(--text-secondary);
   font-size: 18px;
   font-weight: 500;
   cursor: pointer;
   text-align: center;
-  transition: all 0.15s ease;
+  transition:
+    background 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.18s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.2s ease;
   line-height: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
-}
-[data-theme='light'] .setor-tab {
-  color: var(--text-secondary);
 }
 .setor-tab .tab-label {
   font-size: 12px;
@@ -171,30 +174,45 @@
   margin-top: 2px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  transition: text-shadow 0.22s ease;
 }
 .setor-tab i {
   opacity: 0.7;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.18s ease, color 0.18s ease, filter 0.22s ease;
 }
+
 .setor-tab:hover:not(.active) {
   background: var(--bg-hover);
   color: var(--accent);
   box-shadow: var(--shadow-sm);
-  filter: none;
+  transform: translateY(-1px);
 }
 .setor-tab:hover:not(.active) i {
   opacity: 1;
   color: var(--accent);
 }
+
+/* Active — neon mint LED (sem fill chapado) */
 .setor-tab.active {
-  background: var(--accent);
-  color: var(--accent-ink, #0d0d0d);
-  font-weight: 700;
+  background: var(--bg-card);
+  border-color: rgba(170, 238, 196, 0.55);
+  color: var(--accent);
+  box-shadow:
+    0 0 0 1px rgba(170, 238, 196, 0.25),
+    0 8px 24px rgba(170, 238, 196, 0.18),
+    inset 0 0 20px rgba(170, 238, 196, 0.06);
 }
 .setor-tab.active i {
   opacity: 1;
-  color: var(--accent-ink, #0d0d0d);
+  color: var(--accent);
+  filter:
+    drop-shadow(0 0 6px rgba(170, 238, 196, 0.7))
+    drop-shadow(0 0 14px rgba(170, 238, 196, 0.35));
 }
+.setor-tab.active .tab-label {
+  text-shadow: 0 0 8px rgba(170, 238, 196, 0.55), 0 0 2px rgba(170, 238, 196, 0.9);
+}
+
 .setor-tab:active {
   transform: scale(0.97);
 }
