@@ -91,9 +91,11 @@ export function clearTenantCache() {
  */
 export function applyBranding(tenant) {
   if (!tenant) return;
-  if (tenant.cor_primaria) {
-    document.documentElement.style.setProperty('--accent', tenant.cor_primaria);
-  }
+  // NÃO sobrescrever --accent: paleta minhavez (mint) é padrão global.
+  // Rebranding white-label per-tenant pode voltar depois como feature Elite.
+  // if (tenant.cor_primaria) {
+  //   document.documentElement.style.setProperty('--accent', tenant.cor_primaria);
+  // }
   if (tenant.nome_loja) {
     document.title = `Minha Vez — ${tenant.nome_loja}`;
   }
