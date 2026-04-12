@@ -278,10 +278,22 @@ html, body {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+  position: relative;
 }
 .vendor-icon-btn:hover {
-  background: var(--vendor-card);
+  background: rgba(255,255,255,0.06);
   color: var(--vendor-text);
+}
+.vendor-icon-btn:active {
+  transform: scale(0.9);
+}
+.vendor-icon-btn-ai {
+  color: var(--vendor-warning);
+}
+.vendor-icon-btn-ai:hover {
+  background: rgba(250,204,21,0.1);
+  color: #facc15;
 }
 
 .vendor-main {
@@ -2578,24 +2590,6 @@ html, body {
 .vm-exec-check-item input { width: 18px; height: 18px; accent-color: var(--vendor-success); }
 
 /* ═══ AI Tips (Fase 7) ═══ */
-.vendor-ai-tips-btn {
-  width: calc(100% - 32px);
-  margin: 0 16px 8px;
-  padding: 10px;
-  border: 1px solid rgba(250,204,21,0.25);
-  border-radius: 12px;
-  background: rgba(250,204,21,0.06);
-  color: var(--vendor-warning);
-  font-size: 12px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.vendor-ai-tips-btn:active { transform: scale(0.98); }
-.vendor-ai-tips-btn i { margin-right: 6px; }
-.vendor-ai-tips-btn.hidden { display: none; }
-
 .ai-tips-list {
   display: flex;
   flex-direction: column;
