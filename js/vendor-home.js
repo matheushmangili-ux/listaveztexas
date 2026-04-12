@@ -194,6 +194,7 @@ function renderAll() {
 }
 
 function renderHeader() {
+  if (!_ctx) return;
   const nome = _ctx.apelido || _ctx.nome;
   el.headerName.textContent = nome;
   // Avatar: pixel-art DiceBear → foto_url → iniciais
@@ -274,6 +275,7 @@ function renderMainCard() {
 }
 
 async function renderIdle() {
+  if (!_ctx) return;
   el.idleCard.classList.remove('hidden');
 
   const pos = _ctx.posicao_fila;

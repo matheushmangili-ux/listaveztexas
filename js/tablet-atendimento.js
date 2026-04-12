@@ -49,6 +49,7 @@ const _savedQueuePositions = new Map();
 // Per-card state para diffing: id -> { key, node }
 const _atendCardState = new Map();
 let _atendEmptyNode = null;
+let _ghostCleanupInterval = null;
 
 function _tickAtendTimers() {
   const now = Date.now();
@@ -136,7 +137,8 @@ export function initAtendimento(ctx) {
   window.confirmMotivo = confirmMotivo;
 
   // Ghost cleanup interval (cleans orphaned drag ghosts)
-  setInterval(() => {
+  if (_ghostCleanupInterval) clearInterval(_ghostCleanupInterval);
+  _ghostCleanupInterval = setInterval(() => {
     if (!isTouchDragging() && !_atendTouchDragging) {
       const _tg = getTouchGhost();
       if (_tg) {

@@ -3,7 +3,7 @@
 // Network-first para HTML e APIs — sempre pega a versão mais fresca
 // Web Push listener pro minhavez Vendedor
 // Bump CACHE_VERSION a cada deploy
-const CACHE_VERSION = '37';
+const CACHE_VERSION = '38';
 const CACHE_NAME = 'minhavez-v' + CACHE_VERSION;
 const STATIC_ASSETS = [
   '/tablet.html',
@@ -120,7 +120,15 @@ self.addEventListener('fetch', e => {
 self.addEventListener('push', event => {
   let data = {};
   try {
-    data = event.data ? event.data.json() : {};
+    const parsed = event.data ? event.data.json() : {};
+    if (typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('bad payload');
+    data = {
+      title: typeof parsed.title === 'string' ? parsed.title.slice(0, 120) : null,
+      body: typeof parsed.body === 'string' ? parsed.body.slice(0, 250) : null,
+      tag: typeof parsed.tag === 'string' ? parsed.tag.slice(0, 50) : null,
+      url: (typeof parsed.url === 'string' && parsed.url.startsWith('/')) ? parsed.url : null,
+      vendedor_id: parsed.vendedor_id || null
+    };
   } catch (err) {
     data = { title: 'Sua vez! 🎯', body: 'Cliente esperando por você' };
   }

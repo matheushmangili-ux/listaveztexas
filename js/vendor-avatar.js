@@ -212,6 +212,18 @@ export async function initAvatar(sb, ctx) {
 }
 
 export function unmountAvatar() {
+  if (_boundOpenEditor) {
+    document.getElementById('headerAvatar')?.removeEventListener('click', _boundOpenEditor);
+    _boundOpenEditor = null;
+  }
+  if (_boundClose) {
+    document.getElementById('avatarEditorClose')?.removeEventListener('click', _boundClose);
+    _boundClose = null;
+  }
+  if (_boundSave) {
+    document.getElementById('avatarEditorSave')?.removeEventListener('click', _boundSave);
+    _boundSave = null;
+  }
   _sb = null;
   _ctx = null;
   _achievements = [];
@@ -250,9 +262,15 @@ function renderHeaderAvatar() {
 }
 
 // ─── Editor binding ───
+let _boundOpenEditor = null;
+let _boundClose = null;
+let _boundSave = null;
+
 function bindEditor() {
   const el = document.getElementById('headerAvatar');
-  if (el) el.addEventListener('click', openEditor);
+  if (!el) return;
+  _boundOpenEditor = openEditor;
+  el.addEventListener('click', _boundOpenEditor);
 }
 
 function openEditor() {
@@ -270,8 +288,14 @@ function openEditor() {
   renderTabs();
   renderGrid();
 
-  document.getElementById('avatarEditorClose')?.addEventListener('click', closeEditor, { once: true });
-  document.getElementById('avatarEditorSave')?.addEventListener('click', saveAvatar, { once: true });
+  const closeBtn = document.getElementById('avatarEditorClose');
+  const saveBtn = document.getElementById('avatarEditorSave');
+  if (_boundClose) closeBtn?.removeEventListener('click', _boundClose);
+  if (_boundSave) saveBtn?.removeEventListener('click', _boundSave);
+  _boundClose = closeEditor;
+  _boundSave = saveAvatar;
+  closeBtn?.addEventListener('click', _boundClose);
+  saveBtn?.addEventListener('click', _boundSave);
 }
 
 function closeEditor() {
