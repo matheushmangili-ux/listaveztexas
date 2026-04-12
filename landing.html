@@ -102,10 +102,27 @@ button { font-family: inherit; cursor: pointer; }
   background: rgba(13, 13, 13, 0.9);
   border-bottom-color: var(--border);
 }
-.nav-logo img {
-  height: 32px; width: auto;
-  mix-blend-mode: lighten;
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  height: 36px;
+  text-decoration: none;
 }
+.nav-logo::before {
+  content: '';
+  width: 28px; height: 28px;
+  background-image: url('/assets/logo-minhavez-mint.png');
+  background-size: 360% auto;
+  background-position: 15% center;
+  background-repeat: no-repeat;
+  mix-blend-mode: lighten;
+  flex-shrink: 0;
+}
+.nav-logo span {
+  font-size: 17px; font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--accent);
+}
+.nav-logo img { display: none; }
 .nav-links {
   display: flex; align-items: center; gap: 24px;
 }
@@ -171,43 +188,58 @@ button { font-family: inherit; cursor: pointer; }
 }
 .hero-inner {
   position: relative; z-index: 2;
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
-  text-align: center;
+  text-align: left;
+  padding: 0 24px;
 }
-.hero-badge { margin-bottom: 28px; }
+.hero-badge { margin-bottom: 24px; }
 .hero h1 {
-  font-size: clamp(48px, 9vw, 128px);
+  font-size: clamp(36px, 6.2vw, 84px);
   font-weight: 800;
-  line-height: 0.98;
-  letter-spacing: -0.04em;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
   text-wrap: balance;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
+  max-width: 17ch;
+}
+.hero h1 .word-wrap {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  line-height: 1.02;
+}
+.hero h1 .word {
+  display: inline-block;
+  transform: translateY(110%);
+  transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
   background: linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.78) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  padding-right: 0.25em;
 }
-.hero h1 .accent {
+.hero h1 .word.in { transform: translateY(0); }
+.hero h1 .word-wrap.accent .word {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 .hero-sub {
-  font-size: clamp(16px, 2vw, 20px);
+  font-size: clamp(15px, 1.6vw, 18px);
   color: var(--text-dim);
-  max-width: 680px;
-  margin: 0 auto 40px;
+  max-width: 560px;
+  margin: 0 0 36px;
   line-height: 1.55;
   text-wrap: pretty;
 }
 .hero-sub strong { color: var(--text); font-weight: 600; }
 .hero-ctas {
   display: flex; gap: 12px;
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 .btn {
   display: inline-flex; align-items: center; gap: 8px;
@@ -242,7 +274,7 @@ button { font-family: inherit; cursor: pointer; }
   font-size: 13px;
   color: var(--text-muted);
   display: flex; gap: 18px;
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
 }
 .hero-footnote span { display: inline-flex; align-items: center; gap: 6px; }
@@ -602,6 +634,36 @@ button { font-family: inherit; cursor: pointer; }
 }
 .plan-footnote { font-size: 11px; color: var(--text-muted); margin-top: 12px; text-align: center; }
 
+/* Elite-specific */
+.plan-price-elite {
+  display: flex; align-items: baseline; gap: 14px;
+  margin-bottom: 12px;
+}
+.plan-price-elite .v-wrap { display: flex; align-items: baseline; gap: 4px; }
+.plan-price-elite .v { font-size: 48px; font-weight: 800; letter-spacing: -0.03em; color: var(--text); font-variant-numeric: tabular-nums; line-height: 1; }
+.plan-price-elite .currency { font-size: 16px; color: var(--text-dim); font-weight: 600; }
+.plan-price-elite .unit { font-size: 11px; color: var(--text-muted); line-height: 1.3; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; }
+.plan-price-elite .unit .seat { color: var(--accent); font-weight: 600; text-transform: none; letter-spacing: 0; font-size: 12px; }
+.plan-section-label {
+  font-size: 10px; font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 8px 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.plan-features-rich li {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 4px 0;
+}
+.plan-features-rich li i { color: var(--accent); font-size: 14px; margin-top: 3px; }
+.plan-features-rich li strong { display: block; font-weight: 600; font-size: 14px; color: var(--text); line-height: 1.3; }
+.plan-features-rich li span { display: block; font-size: 12px; color: var(--text-dim); margin-top: 3px; line-height: 1.4; }
+
 /* ==================================================================
    FAQ
    ================================================================== */
@@ -658,7 +720,26 @@ button { font-family: inherit; cursor: pointer; }
   margin-bottom: 40px;
 }
 @media (max-width: 768px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 28px; } }
-.footer-brand img { height: 32px; width: auto; mix-blend-mode: lighten; margin-bottom: 16px; }
+.footer-brand .logo-inline {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px;
+}
+.footer-brand .logo-inline::before {
+  content: '';
+  width: 28px; height: 28px;
+  background-image: url('/assets/logo-minhavez-mint.png');
+  background-size: 360% auto;
+  background-position: 15% center;
+  background-repeat: no-repeat;
+  mix-blend-mode: lighten;
+  flex-shrink: 0;
+}
+.footer-brand .logo-inline span {
+  font-size: 17px; font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--accent);
+}
+.footer-brand img { display: none; }
 .footer-brand p { color: var(--text-muted); font-size: 13px; line-height: 1.5; max-width: 280px; }
 .footer-col h4 {
   font-size: 11px; font-weight: 700;
@@ -771,7 +852,7 @@ button { font-family: inherit; cursor: pointer; }
      ================================================================== -->
 <nav class="nav" id="nav">
   <a href="#" class="nav-logo" aria-label="minhavez">
-    <img src="/assets/logo-minhavez-mint.png" alt="minhavez">
+    <span>minhavez</span>
   </a>
   <div class="nav-links">
     <a href="#produto">Produto</a>
@@ -792,7 +873,19 @@ button { font-family: inherit; cursor: pointer; }
     <div class="hero-badge reveal">
       <span class="badge-mono"><span class="dot"></span>Em produção real na Texas Center desde Jan/2026</span>
     </div>
-    <h1 class="reveal">Cada vendedor no lugar certo.<br><span class="accent">Cada venda no momento certo.</span></h1>
+    <h1 id="heroH1">
+      <span class="word-wrap"><span class="word">Cada</span></span>
+      <span class="word-wrap"><span class="word">vendedor</span></span>
+      <span class="word-wrap"><span class="word">no</span></span>
+      <span class="word-wrap"><span class="word">lugar</span></span>
+      <span class="word-wrap"><span class="word">certo.</span></span>
+      <br>
+      <span class="word-wrap accent"><span class="word">Cada</span></span>
+      <span class="word-wrap accent"><span class="word">venda</span></span>
+      <span class="word-wrap accent"><span class="word">no</span></span>
+      <span class="word-wrap accent"><span class="word">momento</span></span>
+      <span class="word-wrap accent"><span class="word">certo.</span></span>
+    </h1>
     <p class="hero-sub reveal">
       Sistema de gestão de fila + engajamento gamificado que transforma <strong>loja física em operação de dados</strong>.
       Vendedores veem seu progresso em tempo real. Gestor decide com base em número, não em achismo.
@@ -1003,21 +1096,36 @@ button { font-family: inherit; cursor: pointer; }
       </div>
 
       <!-- ELITE -->
-      <div class="plan reveal">
+      <div class="plan plan-elite reveal">
         <h3>Elite</h3>
-        <div class="plan-price"><span class="currency">R$</span><span class="v">149</span><span class="per">/mês base</span></div>
-        <div class="plan-extra">+ R$ 19/vendedor/mês</div>
-        <p class="plan-desc">Quando você quer vendedor engajado sozinho. Gamificação RPG + IA avançada + VM.</p>
-        <ul class="plan-features">
-          <li><i class="fa-solid fa-check"></i>Vendedores ilimitados</li>
-          <li><i class="fa-solid fa-check"></i>Tudo do Pro</li>
-          <li><i class="fa-solid fa-check"></i><strong>App vendedor gamificado</strong> (XP, 13 tiers RPG, avatar)</li>
-          <li><i class="fa-solid fa-check"></i><strong>VM Missions</strong> (vitrine, display, fachada)</li>
-          <li><i class="fa-solid fa-check"></i><strong>IA avançada</strong> — previsão de fluxo + coaching</li>
-          <li><i class="fa-solid fa-check"></i>Onboarding dedicado + suporte prioritário</li>
+        <div class="plan-price-elite">
+          <div class="v-wrap"><span class="currency">R$</span><span class="v">149</span></div>
+          <div class="unit">/mês base<br><span class="seat">+ R$ 19 por vendedor</span></div>
+        </div>
+        <p class="plan-desc">Quando engajamento é parte da estratégia. Vendedor vira protagonista da operação — XP, tiers, missões e avatar próprio. IA coacha o time.</p>
+        <div class="plan-section-label">Tudo do Pro +</div>
+        <ul class="plan-features plan-features-rich">
+          <li>
+            <i class="fa-solid fa-gamepad"></i>
+            <div><strong>App vendedor gamificado</strong><span>XP, 13 tiers RPG, avatar pixel-art</span></div>
+          </li>
+          <li>
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <div><strong>IA avançada</strong><span>Previsão de fluxo + coaching 1:1</span></div>
+          </li>
+          <li>
+            <i class="fa-solid fa-camera-retro"></i>
+            <div><strong>VM Missions</strong><span>Vitrine, display, fachada (multi-loja)</span></div>
+          </li>
+          <li>
+            <i class="fa-solid fa-headset"></i>
+            <div><strong>Onboarding dedicado</strong><span>Call de 1h + suporte prioritário</span></div>
+          </li>
         </ul>
-        <button class="plan-btn" onclick="openDemo()">Agendar demo</button>
-        <div class="plan-footnote">Pra lojas com 10+ vendedores ou operação multi-loja</div>
+        <button class="plan-btn" onclick="openDemo()">
+          <i class="fa-solid fa-calendar-check"></i> Agendar demo
+        </button>
+        <div class="plan-footnote">Ideal pra lojas com 10+ vendedores ou operação multi-loja</div>
       </div>
     </div>
   </div>
@@ -1062,7 +1170,7 @@ button { font-family: inherit; cursor: pointer; }
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <img src="/assets/logo-minhavez-mint.png" alt="minhavez">
+        <div class="logo-inline"><span>minhavez</span></div>
         <p>Gestão inteligente de fila + engajamento gamificado pra lojas físicas. Feito no Brasil, em produção real.</p>
       </div>
       <div class="footer-col">
@@ -1163,6 +1271,12 @@ window.addEventListener('scroll', () => {
   nav.classList.toggle('scrolled', y > 12);
   lastScroll = y;
 }, { passive: true });
+
+// ─── Hero word reveal (stagger) ───
+window.addEventListener('load', () => {
+  const words = document.querySelectorAll('#heroH1 .word');
+  words.forEach((w, i) => setTimeout(() => w.classList.add('in'), 120 + i * 80));
+});
 
 // ─── Reveal on scroll ───
 const observer = new IntersectionObserver((entries) => {
