@@ -40,6 +40,7 @@
   align-items: center;
   justify-content: center;
   padding: 4px 0;
+  width: 100%;
 }
 .dash-header-logo img {
   height: 48px;
@@ -50,6 +51,18 @@
 }
 [data-theme='light'] .dash-header-logo img {
   mix-blend-mode: multiply;
+}
+
+/* Cube-only logo — tech minimalist centralizado */
+.dash-header-logo--cube {
+  width: 80px;
+  height: 80px;
+  margin: 12px auto 8px;
+  background-image: url('/assets/logo-minhavez-mint.png');
+  background-repeat: no-repeat;
+  background-position: 0% center;
+  background-size: auto 100%;
+  mix-blend-mode: lighten;
 }
 .sidebar-section-label {
   font-size: 9px;

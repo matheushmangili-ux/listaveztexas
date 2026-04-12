@@ -192,25 +192,22 @@
   color: var(--accent);
 }
 
-/* Active — neon mint LED (sem fill chapado) */
+/* Active — neon mint sutil (LED discreto) */
 .setor-tab.active {
   background: var(--bg-card);
-  border-color: rgba(170, 238, 196, 0.55);
+  border-color: rgba(170, 238, 196, 0.38);
   color: var(--accent);
   box-shadow:
-    0 0 0 1px rgba(170, 238, 196, 0.25),
-    0 8px 24px rgba(170, 238, 196, 0.18),
-    inset 0 0 20px rgba(170, 238, 196, 0.06);
+    0 0 0 1px rgba(170, 238, 196, 0.15),
+    0 4px 14px rgba(170, 238, 196, 0.08);
 }
 .setor-tab.active i {
   opacity: 1;
   color: var(--accent);
-  filter:
-    drop-shadow(0 0 6px rgba(170, 238, 196, 0.7))
-    drop-shadow(0 0 14px rgba(170, 238, 196, 0.35));
+  filter: drop-shadow(0 0 3px rgba(170, 238, 196, 0.45));
 }
 .setor-tab.active .tab-label {
-  text-shadow: 0 0 8px rgba(170, 238, 196, 0.55), 0 0 2px rgba(170, 238, 196, 0.9);
+  text-shadow: 0 0 4px rgba(170, 238, 196, 0.3);
 }
 
 .setor-tab:active {

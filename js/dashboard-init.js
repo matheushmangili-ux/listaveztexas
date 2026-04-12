@@ -86,6 +86,7 @@ if (tenant) {
 }
 
 const sb = getSupabase();
+window._supabase = sb; // expose for dashboard-vm, dashboard-ai modules
 let user;
 try {
   user = await requireRole(['gerente', 'admin', 'owner']);
