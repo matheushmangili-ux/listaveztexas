@@ -95,10 +95,11 @@ html, body {
 .vendor-brand-logo {
   height: auto;
   width: 100%;
-  max-width: 260px;
-  max-height: 72px;
+  max-width: 200px;
+  max-height: 56px;
   object-fit: contain;
   display: block;
+  mix-blend-mode: lighten;
 }
 .vendor-brand-sub {
   font-size: 11px;
