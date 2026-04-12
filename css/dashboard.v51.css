@@ -55,14 +55,15 @@
 
 /* Cube-only logo — tech minimalist centralizado */
 .dash-header-logo--cube {
-  width: 80px;
-  height: 80px;
-  margin: 12px auto 8px;
+  width: 88px;
+  height: 88px;
+  margin: 14px auto 10px;
   background-image: url('/assets/logo-minhavez-mint.png');
   background-repeat: no-repeat;
-  background-position: 0% center;
-  background-size: auto 100%;
+  background-position: 15% center;
+  background-size: 360% auto;
   mix-blend-mode: lighten;
+  image-rendering: -webkit-optimize-contrast;
 }
 .sidebar-section-label {
   font-size: 9px;
@@ -1500,7 +1501,7 @@
 .vm-admin-tab {
   flex: 1;
   padding: 8px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   background: transparent;
   color: var(--text-muted);
@@ -1523,9 +1524,9 @@
   display: flex;
   gap: 12px;
   padding: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
-  background: var(--surface-subtle);
+  background: var(--bg-elevated);
 }
 .vm-admin-thumb {
   width: 120px;
@@ -1547,7 +1548,7 @@
 }
 .vm-admin-meta strong {
   font-size: 13px;
-  color: var(--text);
+  color: var(--text-primary);
 }
 .vm-admin-cat {
   font-size: 10px;
@@ -1603,10 +1604,10 @@
 .vm-reject-feedback {
   flex: 1;
   padding: 6px 10px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-subtle);
   border-radius: 6px;
-  background: var(--surface-subtle);
-  color: var(--text);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
   font-size: 11px;
   font-family: inherit;
 }
@@ -1640,10 +1641,10 @@
 .vm-form-label textarea,
 .vm-form-label select {
   padding: 8px 10px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
-  background: var(--surface-subtle);
-  color: var(--text);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
   font-size: 12px;
   font-family: inherit;
 }
@@ -1661,7 +1662,7 @@
 }
 .vm-cat-pill-sm {
   padding: 4px 10px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-subtle);
   border-radius: 6px;
   background: transparent;
   color: var(--text-muted);
@@ -1713,7 +1714,7 @@
   width: 64px;
   height: 64px;
   border-radius: 6px;
-  border: 2px dashed var(--border);
+  border: 2px dashed var(--border-subtle);
   background: transparent;
   color: var(--text-muted);
   font-size: 16px;
@@ -1732,10 +1733,10 @@
 .vm-checklist-input {
   flex: 1;
   padding: 6px 10px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-subtle);
   border-radius: 6px;
-  background: var(--surface-subtle);
-  color: var(--text);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
   font-size: 11px;
   font-family: inherit;
 }
@@ -1751,7 +1752,7 @@
 }
 .vm-checklist-add {
   padding: 6px 12px;
-  border: 1px dashed var(--border);
+  border: 1px dashed var(--border-subtle);
   border-radius: 6px;
   background: transparent;
   color: var(--text-muted);
@@ -1764,7 +1765,7 @@
 /* Track view */
 .vm-track-card {
   padding: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-subtle);
   border-radius: 10px;
   margin-bottom: 8px;
   cursor: pointer;
@@ -1777,7 +1778,7 @@
   gap: 6px;
   margin-bottom: 6px;
 }
-.vm-track-top strong { font-size: 13px; color: var(--text); }
+.vm-track-top strong { font-size: 13px; color: var(--text-primary); }
 .vm-priority-badge-sm {
   font-size: 8px;
   font-weight: 800;
@@ -1789,7 +1790,7 @@
 .vm-compliance-bar {
   height: 6px;
   border-radius: 3px;
-  background: var(--border);
+  background: var(--border-subtle);
   overflow: hidden;
   margin-bottom: 6px;
 }
@@ -1808,7 +1809,7 @@
 .vm-track-pending { color: var(--warning); font-weight: 600; }
 .vm-back-btn {
   padding: 6px 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-subtle);
   border-radius: 6px;
   background: transparent;
   color: var(--text-muted);
@@ -1872,7 +1873,7 @@
 }
 .ai-result-section h4 {
   font-size: 13px;
-  color: var(--text);
+  color: var(--text-primary);
   margin: 0 0 6px;
 }
 .ai-result-section h4 i { margin-right: 6px; color: var(--accent); }
@@ -1890,7 +1891,7 @@
 .ai-result-highlight {
   padding: 12px;
   border-radius: 10px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-subtle);
 }
 .ai-result-highlight strong {
   display: block;
@@ -1904,7 +1905,7 @@
 .ai-missions-list { display: flex; flex-direction: column; gap: 8px; }
 .ai-mission-card {
   padding: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-subtle);
   border-radius: 10px;
 }
 .ai-mission-top {
@@ -1913,7 +1914,7 @@
   align-items: center;
   margin-bottom: 4px;
 }
-.ai-mission-top strong { font-size: 13px; color: var(--text); }
+.ai-mission-top strong { font-size: 13px; color: var(--text-primary); }
 .ai-mission-xp { font-size: 11px; color: var(--warning); font-weight: 600; }
 .ai-mission-xp i { margin-right: 3px; }
 .ai-mission-card p { font-size: 11px; color: var(--text-muted); margin: 0 0 8px; line-height: 1.4; }
@@ -1937,17 +1938,17 @@
 }
 .ai-mission-use i { margin-right: 3px; }
 .ai-peaks { margin-top: 4px; }
-.ai-peaks strong { font-size: 11px; color: var(--text); display: block; margin-bottom: 6px; }
+.ai-peaks strong { font-size: 11px; color: var(--text-primary); display: block; margin-bottom: 6px; }
 .ai-peak-item {
   display: flex;
   gap: 8px;
   align-items: center;
   padding: 6px 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-subtle);
   font-size: 11px;
 }
 .ai-peak-hour { font-weight: 700; color: var(--danger); min-width: 32px; }
-.ai-peak-expected { color: var(--text); min-width: 60px; }
+.ai-peak-expected { color: var(--text-primary); min-width: 60px; }
 .ai-peak-tip { color: var(--text-muted); flex: 1; }
 .ai-flow-chart { margin-top: 8px; }
 .ai-flow-bar-row {
@@ -1961,7 +1962,7 @@
   flex: 1;
   height: 8px;
   border-radius: 4px;
-  background: var(--border);
+  background: var(--border-subtle);
   overflow: hidden;
 }
 .ai-flow-fill {
