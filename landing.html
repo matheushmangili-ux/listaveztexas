@@ -124,21 +124,12 @@ button { font-family: inherit; cursor: pointer; }
   height: 36px;
   text-decoration: none;
 }
-.nav-logo::before {
-  content: '';
-  width: 28px; height: 28px;
-  background-image: url('/assets/logo-minhavez-transparent.png');
-  background-size: 360% auto;
-  background-position: 15% center;
-  background-repeat: no-repeat;
+.nav-logo img {
+  height: 28px;
+  width: auto;
+  display: block;
   flex-shrink: 0;
 }
-.nav-logo span {
-  font-size: 17px; font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--accent);
-}
-.nav-logo img { display: none; }
 .nav-links {
   display: flex; align-items: center; gap: 6px;
 }
@@ -1014,21 +1005,12 @@ button { font-family: inherit; cursor: pointer; }
   display: flex; align-items: center; gap: 10px;
   margin-bottom: 16px;
 }
-.footer-brand .logo-inline::before {
-  content: '';
-  width: 28px; height: 28px;
-  background-image: url('/assets/logo-minhavez-transparent.png');
-  background-size: 360% auto;
-  background-position: 15% center;
-  background-repeat: no-repeat;
+.footer-brand .logo-inline img {
+  height: 28px;
+  width: auto;
+  display: block;
   flex-shrink: 0;
 }
-.footer-brand .logo-inline span {
-  font-size: 17px; font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--accent);
-}
-.footer-brand img { display: none; }
 .footer-brand p { color: var(--text-muted); font-size: 13px; line-height: 1.5; max-width: 280px; }
 .footer-col h4 {
   font-size: 11px; font-weight: 700;
@@ -1141,7 +1123,7 @@ button { font-family: inherit; cursor: pointer; }
      ================================================================== -->
 <nav class="nav" id="nav">
   <a href="#" class="nav-logo" aria-label="minhavez">
-    <span>minhavez</span>
+    <img src="/assets/logo-minhavez-transparent.png" alt="minhavez">
   </a>
   <div class="nav-links">
     <a href="#produto">Produto</a>
@@ -1581,7 +1563,7 @@ button { font-family: inherit; cursor: pointer; }
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <div class="logo-inline"><span>minhavez</span></div>
+        <div class="logo-inline"><img src="/assets/logo-minhavez-transparent.png" alt="minhavez"></div>
         <p>Gestão inteligente de fila + engajamento gamificado pra lojas físicas. Feito no Brasil, em produção real.</p>
       </div>
       <div class="footer-col">
