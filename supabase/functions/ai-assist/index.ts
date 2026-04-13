@@ -326,10 +326,26 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) throw new Error('Missing Authorization header')
     const { data: { user }, error: authErr } = await sb.auth.getUser(authHeader.replace('Bearer ', ''))
-    if (authErr || !user) throw new Error('Invalid token')
+    if (authErr || !user) throw new Error('Invalid token: ' + (authErr?.message || 'no user'))
 
-    const tenantId = user.user_metadata?.tenant_id as string
-    if (!tenantId) throw new Error('No tenant_id in user metadata')
+    // Try multiple paths to resolve tenant_id (user_metadata, app_metadata, vendedores table)
+    let tenantId = (user.user_metadata?.tenant_id || user.app_metadata?.tenant_id) as string | undefined
+
+    if (!tenantId) {
+      // Fallback 1: vendedores.tenant_id by user.id
+      const { data: vend } = await sb.from('vendedores')
+        .select('tenant_id').eq('auth_user_id', user.id).limit(1).maybeSingle()
+      if (vend?.tenant_id) tenantId = vend.tenant_id
+    }
+
+    if (!tenantId) {
+      // Fallback 2: tenant_users (gerentes/admins)
+      const { data: tu } = await sb.from('tenant_users')
+        .select('tenant_id').eq('user_id', user.id).limit(1).maybeSingle()
+      if (tu?.tenant_id) tenantId = tu.tenant_id
+    }
+
+    if (!tenantId) throw new Error(`No tenant_id resolved for user ${user.id} (email=${user.email})`)
 
     const { type, payload } = await req.json()
     if (!type || !payload) throw new Error('Missing type or payload')
@@ -353,8 +369,10 @@ Deno.serve(async (req) => {
       { headers: { ...cors, 'Content-Type': 'application/json' } })
 
   } catch (err) {
-    console.error('[ai-assist]', err)
-    return new Response(JSON.stringify({ ok: false, fallback: true, message: (err as Error).message }),
-      { headers: { ...cors, 'Content-Type': 'application/json' }, status: 500 })
+    const msg = (err as Error).message || String(err)
+    const stack = (err as Error).stack || ''
+    console.error('[ai-assist]', msg, '\n', stack)
+    return new Response(JSON.stringify({ ok: false, fallback: true, message: msg, stack: stack.slice(0, 300) }),
+      { headers: { ...cors, 'Content-Type': 'application/json' }, status: 200 })
   }
 })
