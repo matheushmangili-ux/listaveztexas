@@ -6,13 +6,19 @@
   "type": "module",
   "scripts": {
     "test": "vitest run --pool=forks --poolOptions.forks.singleFork",
+    "test:smoke": "SMOKE=1 vitest run --pool=forks --poolOptions.forks.singleFork tests/smoke.test.js",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint js tests --max-warnings=0",
     "lint:fix": "eslint js tests --fix",
     "format": "prettier --write js tests css",
     "format:check": "prettier --check js tests css",
-    "check": "npm run lint && npm run test"
+    "check": "npm run lint && npm run test",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,mjs}": ["eslint --fix", "prettier --write"],
+    "*.{css,html,json,md}": ["prettier --write"]
   },
   "devDependencies": {
     "eslint": "^9.17.0",
@@ -21,6 +27,8 @@
     "prettier": "^3.4.2",
     "eslint-config-prettier": "^9.1.0",
     "vitest": "^2.1.8",
-    "jsdom": "^25.0.1"
+    "jsdom": "^25.0.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10"
   }
 }

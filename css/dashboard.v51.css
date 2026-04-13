@@ -78,17 +78,6 @@
   transform-origin: center;
 }
 
-/* Cube-only logo — tech minimalist centralizado */
-.dash-header-logo--cube {
-  width: 88px;
-  height: 88px;
-  margin: 14px auto 10px;
-  background-image: url('/assets/logo-minhavez-transparent.png');
-  background-repeat: no-repeat;
-  background-position: 15% center;
-  background-size: 360% auto;
-  image-rendering: -webkit-optimize-contrast;
-}
 .sidebar-section-label {
   font-size: 9px;
   font-weight: 700;
