@@ -249,7 +249,7 @@ button { font-family: inherit; cursor: pointer; }
 .hero h1 {
   font-size: clamp(36px, 6.2vw, 84px);
   font-weight: 800;
-  line-height: 1.02;
+  line-height: 0.92;
   letter-spacing: -0.035em;
   text-wrap: balance;
   margin-bottom: 24px;
@@ -259,9 +259,13 @@ button { font-family: inherit; cursor: pointer; }
   display: inline-block;
   overflow: hidden;
   vertical-align: bottom;
-  line-height: 1.02;
-  padding: 0.05em 0 0.16em;
-  margin-bottom: -0.16em;
+  line-height: 0.92;
+  padding: 0.05em 0 0.13em;
+  margin-bottom: -0.13em;
+}
+.hero h1 br + .word-wrap,
+.hero h1 .word-wrap.line-break {
+  margin-top: 0.06em;
 }
 .hero h1 .word {
   display: inline-block;

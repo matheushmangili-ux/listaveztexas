@@ -128,46 +128,109 @@ Responda APENAS em JSON valido: { "tips": [{ "emoji": "string", "tip": "string" 
 }
 
 async function handleTurnoSummary(tenantId: string, payload: Record<string, unknown>) {
-  const cacheKey = `turno-summary:${payload.turno_id}`
+  const cacheKey = `turno-summary:${payload.turno_id}:${payload.snapshot_hash || ''}`
   const cached = await getCached(tenantId, cacheKey)
   if (cached) return cached
 
-  const prompt = `Voce e um analista de varejo especializado. Analise os dados deste turno de uma loja e escreva um resumo executivo de 3-4 frases em portugues brasileiro, tom profissional mas acessivel. Destaque o ponto forte e uma oportunidade de melhoria.
+  const prompt = `Você é um consultor sênior de operações de varejo brasileiro com 15+ anos de experiência. Sua função é entregar análise EXECUTIVA acionável a um gestor que tem 30 segundos pra ler.
 
-Dados do turno:
-- Duracao: ${payload.duracao}h
-- Atendimentos: ${payload.total_atend}, Vendas: ${payload.vendas}, Conversao: ${payload.conversao}%
-- Tempo medio: ${payload.tempo_medio}min
-- Top vendedores: ${JSON.stringify(payload.ranking)}
-- Motivos de perda: ${JSON.stringify(payload.motivos)}
+BENCHMARKS DE VARELO BRASILEIRO (use pra comparar):
+- Conversão saudável loja física moda/calçado: 28-38%. Acima de 40% é excelente. Abaixo de 25% precisa intervenção.
+- Tempo médio de atendimento ideal: 8-15min. Abaixo de 5 = atropelo. Acima de 20 = ineficiência.
+- Distribuição saudável: top vendedor não deve passar de 35% das vendas (concentração de risco).
 
-Responda APENAS em JSON valido: { "resumo": "string", "destaque": "string", "oportunidade": "string" }`
+REGRAS DE ESCRITA:
+- Use NÚMEROS específicos (não "muitos" ou "alguns")
+- Use VERBOS DE AÇÃO (treinar X, realocar Y, abordar Z)
+- ZERO frases tipo "considere", "talvez", "pode ser interessante"
+- Tom: direto, executivo, sem floreio
+- Português brasileiro coloquial profissional
+
+DADOS DO TURNO ATUAL:
+- Duração: ${payload.duracao}h
+- Atendimentos: ${payload.total_atend} | Vendas: ${payload.vendas} | Conversão: ${payload.conversao}%
+- Tempo médio: ${payload.tempo_medio}min
+- Top 3 vendedores: ${JSON.stringify(payload.ranking?.slice(0, 3) || [])}
+- Top 3 motivos de perda: ${JSON.stringify(payload.motivos?.slice(0, 3) || [])}
+- Vs ontem: conversão ${payload.delta_conv > 0 ? '+' : ''}${payload.delta_conv || 0}%, vendas ${payload.delta_vendas > 0 ? '+' : ''}${payload.delta_vendas || 0}
+
+EXEMPLO DE BOA RESPOSTA (estrutura — você adapta com os dados reais):
+{
+  "headline": "Conversão 32% (acima da média do setor de 28%), mas 1 vendedor segura 41% das vendas",
+  "destaque": { "titulo": "Karol entregou", "detalhe": "12 vendas em 28 atendimentos (43% conversão) — destaque acima do esperado." },
+  "alerta": { "titulo": "Concentração de risco", "detalhe": "Karol = 41% das vendas. Se faltar amanhã, projeção cai pra 22 vendas (vs 35 hoje). Distribua leads mais." },
+  "acao_imediata": "Próxima hora: realocar Marcos pra atender clientes preço-sensível (3 perdas por preço hoje, ele tem desconto liberado)",
+  "score": 78
+}
+
+Responda APENAS em JSON válido: {
+  "headline": "string (1 frase, max 110 chars, com numero principal)",
+  "destaque": { "titulo": "string (max 30 chars)", "detalhe": "string com nome+numero" },
+  "alerta": { "titulo": "string (max 30 chars)", "detalhe": "string com numero+ação" },
+  "acao_imediata": "string (1 ação concreta pra executar HOJE, com nome se aplicável)",
+  "score": number (0-100, score geral do turno comparado ao benchmark)
+}`
 
   const result = await callGroq(prompt)
-  await setCache(tenantId, cacheKey, result, 3600000)
+  await setCache(tenantId, cacheKey, result, 1800000) // 30min cache
   return result
 }
 
 async function handleMissionSuggestions(tenantId: string, payload: Record<string, unknown>) {
-  const cacheKey = `mission-suggestions:${tenantId}`
+  const cacheKey = `mission-suggestions:${tenantId}:${payload.snapshot_hash || ''}`
   const cached = await getCached(tenantId, cacheKey)
   if (cached) return cached
 
-  const prompt = `Voce e um game designer de um sistema de gamificacao para vendedores de varejo. Sugira 3 missoes calibradas para o proximo dia. Cada missao deve ter: titulo criativo em portugues, tipo de meta, valor da meta e XP (10-100).
+  const prompt = `Você é um game designer de gamificação aplicada a varejo brasileiro. Cria missões diárias pra vendedores que sejam: ESPECÍFICAS (meta clara), DESAFIADORAS mas atingíveis (75-115% da média), VARIADAS (mix volume + qualidade + comportamento), e com nomes que motivem (referencias pop, gírias do time).
 
-Dados da semana:
-- Media de atendimentos/dia: ${payload.avg_atend}
-- Media de vendas/dia: ${payload.avg_vendas}
-- Conversao media: ${payload.avg_conv}%
-- Missoes ativas: ${JSON.stringify(payload.current_missions)}
+REGRAS DE CALIBRAÇÃO:
+- Missão FÁCIL (80% da média): XP 30-50 — pra animar o time todo
+- Missão MÉDIA (100% da média): XP 60-80 — desafio padrão
+- Missão DIFÍCIL (115% da média): XP 100-150 — pros top performers
+- Sempre balancear: 1 fácil + 1 média + 1 difícil
 
-Tipos validos: atendimentos_count, vendas_count, valor_vendido_total.
-Metas alcancaveis (80-120% da media). Nomes criativos em portugues.
+TIPOS VÁLIDOS (use exatamente esses):
+- atendimentos_count (quantidade de atendimentos)
+- vendas_count (quantidade de vendas)
+- vendas_canal_count (vendas por canal específico)
+- valor_vendido_total (faturamento individual em R$)
 
-Responda APENAS em JSON valido: { "missions": [{ "title": "string", "goal_type": "string", "goal_value": number, "xp": number, "description": "string" }] }`
+NOMES CRIATIVOS (exemplos do tom):
+- "Sequência Brasileiríssima" (5 vendas seguidas)
+- "Operação Tríplice" (3 atendimentos em 1h)
+- "Ticket de Ouro" (venda > R$ 500)
+- "Maratonista do Balcão" (10 atendimentos no dia)
+- "Closer da Hora" (2 vendas na primeira hora)
+
+DADOS REAIS DO TIME (últimos 7 dias):
+- Média de atendimentos/vendedor/dia: ${payload.avg_atend}
+- Média de vendas/vendedor/dia: ${payload.avg_vendas}
+- Conversão média: ${payload.avg_conv}%
+- Ticket médio: R$ ${payload.avg_ticket || 0}
+- Vendedores ativos: ${payload.total_vendors || 'N/A'}
+- Missões já ativas (não sugira parecidas): ${JSON.stringify(payload.current_missions || [])}
+
+EXEMPLO DE BOA RESPOSTA:
+{
+  "missions": [
+    {
+      "title": "Largada Acelerada",
+      "description": "5 atendimentos completados antes do meio-dia. Quem chega cedo, fatura cedo.",
+      "goal_type": "atendimentos_count",
+      "goal_value": 5,
+      "xp": 40,
+      "difficulty": "easy",
+      "rationale": "80% da média (6 atend/dia), focado na manhã pra puxar o ritmo"
+    },
+    { "title": "Closer Brasileirão", "description": "3 vendas no dia. Ritmo de top performer.", "goal_type": "vendas_count", "goal_value": 3, "xp": 70, "difficulty": "medium", "rationale": "Igual à média de 3.2 vendas/dia" },
+    { "title": "Ticket de Ouro", "description": "1 venda acima de R$ 600 — mostra que sabe vender o premium.", "goal_type": "valor_vendido_total", "goal_value": 600, "xp": 120, "difficulty": "hard", "rationale": "115% do ticket médio R$ 520 — empurra pra produtos top" }
+  ]
+}
+
+Responda APENAS em JSON válido seguindo exatamente o schema acima. Sempre 3 missões: easy + medium + hard.`
 
   const result = await callGroq(prompt)
-  await setCache(tenantId, cacheKey, result, 3600000)
+  await setCache(tenantId, cacheKey, result, 21600000) // 6h cache (sugestões diárias)
   return result
 }
 
