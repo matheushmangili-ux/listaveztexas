@@ -257,30 +257,39 @@ button { font-family: inherit; cursor: pointer; }
   margin-bottom: 24px;
   max-width: 17ch;
 }
-.hero h1 .word-wrap {
-  display: inline-block;
-  overflow: hidden;
-  vertical-align: bottom;
-  line-height: 1.0;
-  padding: 0.08em 0 0.6em;
-  margin-bottom: -0.5em;
-}
-.hero h1 .word {
-  display: inline-block;
-  transform: translateY(120%);
-  transition: transform 0.75s cubic-bezier(0.2, 0.8, 0.2, 1);
+.hero h1 .hero-line {
+  display: block;
   background: linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.78) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  padding-right: 0.08em;
 }
-.hero h1 .word.in { transform: translateY(0); }
-.hero h1 .word-wrap.accent .word {
+.hero h1 .hero-line.accent {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+.hero h1 .hero-char {
+  opacity: 0;
+  transition: opacity 0.05s linear;
+}
+.hero h1 .hero-char.on { opacity: 1; }
+.hero-cursor {
+  display: inline-block;
+  width: 0.06em;
+  height: 0.95em;
+  background: var(--accent);
+  margin-left: 0.04em;
+  vertical-align: -0.1em;
+  border-radius: 1px;
+  box-shadow: 0 0 8px rgba(170, 238, 196, 0.55);
+  animation: heroCursorBlink 0.85s steps(2) infinite;
+  -webkit-text-fill-color: var(--accent);
+}
+@keyframes heroCursorBlink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
 }
 .hero-sub {
   font-size: clamp(15px, 1.6vw, 18px);
@@ -1166,18 +1175,9 @@ button { font-family: inherit; cursor: pointer; }
     <div class="hero-badge reveal">
       <span class="badge-mono"><span class="dot"></span>Em produção real na Texas Center desde Jan/2026</span>
     </div>
-    <h1 id="heroH1">
-      <span class="word-wrap"><span class="word">Cada</span></span>
-      <span class="word-wrap"><span class="word">vendedor</span></span>
-      <span class="word-wrap"><span class="word">no</span></span>
-      <span class="word-wrap"><span class="word">lugar</span></span>
-      <span class="word-wrap"><span class="word">certo.</span></span>
-      <br>
-      <span class="word-wrap accent"><span class="word">Cada</span></span>
-      <span class="word-wrap accent"><span class="word">venda</span></span>
-      <span class="word-wrap accent"><span class="word">no</span></span>
-      <span class="word-wrap accent"><span class="word">momento</span></span>
-      <span class="word-wrap accent"><span class="word">certo.</span></span>
+    <h1 id="heroH1" aria-label="Cada vendedor no lugar certo. Cada venda no momento certo.">
+      <span class="hero-line" data-text="Cada vendedor no lugar certo."></span>
+      <span class="hero-line accent" data-text="Cada venda no momento certo."></span>
     </h1>
     <p class="hero-sub reveal">
       Sistema de gestão de fila + engajamento gamificado que transforma <strong>loja física em operação de dados</strong>.
@@ -1699,10 +1699,30 @@ const sectionSpy = new IntersectionObserver((entries) => {
 }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
 sections.forEach((s) => sectionSpy.observe(s));
 
-// ─── Hero word reveal (stagger) ───
+// ─── Hero typewriter ───
 window.addEventListener('load', () => {
-  const words = document.querySelectorAll('#heroH1 .word');
-  words.forEach((w, i) => setTimeout(() => w.classList.add('in'), 120 + i * 80));
+  const lines = document.querySelectorAll('#heroH1 .hero-line');
+  if (!lines.length) return;
+  // Build char spans + reserve layout (chars hidden, cursor at end)
+  const cursor = document.createElement('span');
+  cursor.className = 'hero-cursor';
+  const chars = [];
+  lines.forEach((line) => {
+    const text = line.dataset.text || '';
+    for (const ch of text) {
+      const span = document.createElement('span');
+      span.className = 'hero-char';
+      span.textContent = ch === ' ' ? '\u00A0' : ch;
+      line.appendChild(span);
+      chars.push(span);
+    }
+  });
+  // Cursor lives in the last line so it sits at the end after typing
+  lines[lines.length - 1].appendChild(cursor);
+  // Type sequentially
+  const TYPE_MS = 55;
+  const START_DELAY = 280;
+  chars.forEach((c, i) => setTimeout(() => c.classList.add('on'), START_DELAY + i * TYPE_MS));
 });
 
 // ─── Reveal on scroll ───
