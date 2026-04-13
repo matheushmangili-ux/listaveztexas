@@ -1712,7 +1712,8 @@ window.addEventListener('load', () => {
     for (const ch of text) {
       const span = document.createElement('span');
       span.className = 'hero-char';
-      span.textContent = ch === ' ' ? '\u00A0' : ch;
+      span.textContent = ch;
+      if (ch === ' ') span.classList.add('on');
       line.appendChild(span);
       chars.push(span);
     }
