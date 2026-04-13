@@ -1082,3 +1082,113 @@ h1, h2, h3, .kpi-value, .timer-display, .t-header-kpi-value,
     padding-top: calc(14px + env(safe-area-inset-top));
   }
 }
+
+/* ============================================
+   Intro.js skin — mint + charcoal coerente com o resto
+   ============================================ */
+.introjs-overlay {
+  background: rgba(13, 13, 13, 0.78) !important;
+  backdrop-filter: blur(2px);
+}
+.introjs-helperLayer {
+  border-radius: 12px !important;
+  box-shadow:
+    0 0 0 9999px rgba(13, 13, 13, 0.78),
+    0 0 0 2px rgba(170, 238, 196, 0.55),
+    0 0 24px rgba(170, 238, 196, 0.25) !important;
+}
+.introjs-tooltip,
+.mv-introjs-tooltip {
+  background: var(--bg-card, #1a1a1a) !important;
+  color: var(--text-primary, #fafafa) !important;
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08)) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(170, 238, 196, 0.18) !important;
+  font-family: var(--font-body, 'Inter Tight', sans-serif) !important;
+  min-width: 320px;
+  max-width: 400px;
+  padding: 4px !important;
+}
+.introjs-tooltiptext {
+  color: var(--text-primary, #fafafa) !important;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+  padding: 18px 18px 12px !important;
+}
+.introjs-tooltiptext strong { color: var(--accent, #aaeec4); font-weight: 700; }
+.introjs-arrow.top    { border-bottom-color: var(--bg-card, #1a1a1a) !important; }
+.introjs-arrow.bottom { border-top-color:    var(--bg-card, #1a1a1a) !important; }
+.introjs-arrow.left   { border-right-color:  var(--bg-card, #1a1a1a) !important; }
+.introjs-arrow.right  { border-left-color:   var(--bg-card, #1a1a1a) !important; }
+.introjs-tooltipbuttons {
+  border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08)) !important;
+  padding: 12px 18px !important;
+  background: transparent !important;
+}
+.introjs-button {
+  background: transparent !important;
+  color: var(--text-secondary, #a1a1aa) !important;
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1)) !important;
+  border-radius: 8px !important;
+  padding: 8px 14px !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  text-shadow: none !important;
+  font-family: var(--font-body, 'Inter Tight', sans-serif) !important;
+  transition: all 0.18s ease !important;
+}
+.introjs-button:hover,
+.introjs-button:focus {
+  background: var(--bg-hover, rgba(255, 255, 255, 0.06)) !important;
+  color: var(--text-primary, #fafafa) !important;
+  border-color: var(--border-medium, rgba(255, 255, 255, 0.18)) !important;
+  outline: none !important;
+}
+.introjs-nextbutton {
+  background: var(--accent, #aaeec4) !important;
+  color: var(--accent-ink, #0d0d0d) !important;
+  border-color: var(--accent, #aaeec4) !important;
+  font-weight: 700 !important;
+}
+.introjs-nextbutton:hover {
+  background: var(--accent-bright, #c7f5d6) !important;
+  color: var(--accent-ink, #0d0d0d) !important;
+}
+.introjs-disabled,
+.introjs-disabled:hover {
+  opacity: 0.35 !important;
+  cursor: not-allowed !important;
+}
+.introjs-skipbutton {
+  position: absolute !important;
+  top: 10px !important;
+  right: 12px !important;
+  background: transparent !important;
+  border: none !important;
+  color: var(--text-muted, #71717a) !important;
+  font-size: 20px !important;
+  font-weight: 300 !important;
+  padding: 4px 8px !important;
+  line-height: 1 !important;
+}
+.introjs-skipbutton:hover { color: var(--text-primary, #fafafa) !important; background: transparent !important; }
+.introjs-bullets ul li a {
+  background: var(--border-subtle, rgba(255, 255, 255, 0.12)) !important;
+  width: 7px !important;
+  height: 7px !important;
+}
+.introjs-bullets ul li a.active {
+  background: var(--accent, #aaeec4) !important;
+  width: 22px !important;
+  border-radius: 4px !important;
+}
+.introjs-progress {
+  background: var(--border-subtle, rgba(255, 255, 255, 0.08)) !important;
+  height: 3px !important;
+  border-radius: 2px !important;
+  margin: 0 18px 12px !important;
+}
+.introjs-progressbar {
+  background: var(--accent, #aaeec4) !important;
+  box-shadow: 0 0 8px rgba(170, 238, 196, 0.5);
+}
