@@ -92,13 +92,23 @@ html, body {
   align-items: center;
   gap: 6px;
 }
+.vendor-brand-logo-wrap {
+  width: 240px;
+  height: 72px;
+  margin: 0 auto;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .vendor-brand-logo {
-  height: auto;
-  width: 100%;
-  max-width: 260px;
-  max-height: 80px;
+  width: auto;
+  height: 100%;
+  max-width: none;
   object-fit: contain;
   display: block;
+  transform: scale(1.85);
+  transform-origin: center;
 }
 .vendor-brand-sub {
   font-size: 11px;
