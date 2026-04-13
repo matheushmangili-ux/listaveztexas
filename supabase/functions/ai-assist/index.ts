@@ -235,21 +235,56 @@ Responda APENAS em JSON válido seguindo exatamente o schema acima. Sempre 3 mis
 }
 
 async function handleFlowPrediction(tenantId: string, payload: Record<string, unknown>) {
-  const cacheKey = `flow-prediction:${payload.target_day}`
+  const cacheKey = `flow-prediction:${payload.target_day}:${payload.snapshot_hash || ''}`
   const cached = await getCached(tenantId, cacheKey)
   if (cached) return cached
 
-  const prompt = `Voce e um analista de dados de varejo. Com base no historico de fluxo, preveja o fluxo de atendimentos para cada hora (8h-22h). Identifique 2-3 horarios de pico.
+  const prompt = `Você é um analista de operações de varejo brasileiro. Sua tarefa: prever fluxo de atendimentos hora-a-hora pro próximo dia operacional e dar recomendações ACIONÁVEIS de escala/preparação.
 
-Historico (ultimas 4 semanas, por hora):
-${JSON.stringify(payload.hourly_data)}
+REGRAS:
+- Use APENAS dados reais fornecidos; se vazio, sinalize "sem histórico suficiente" no insight
+- Picos = horas com fluxo >= 130% da média do dia
+- Para cada pico, sugerir AÇÃO concreta: "alocar 2 vendedores extra", "antecipar pausas pra antes das Xh", "reforçar caixa às Yh"
+- Compare com o mesmo dia da semana anterior se houver dado
+- Identifique vales (horas <70% da média) pra sugerir treinamento/break/abastecimento
+
+DADOS REAIS (últimas 4 semanas, fluxo por hora 8h-22h):
+${JSON.stringify(payload.hourly_data || {})}
+
+Mesmo dia da semana — última ocorrência:
+${JSON.stringify(payload.last_same_day || {})}
 
 Dia alvo: ${payload.target_day}
+Vendedores ativos hoje: ${payload.total_vendors || 'N/A'}
 
-Responda APENAS em JSON valido: { "predictions": [{ "hour": number, "expected": number }], "peaks": [{ "hour": number, "expected": number, "suggestion": "string" }], "insight": "string" }`
+EXEMPLO DE BOA RESPOSTA:
+{
+  "headline": "Pico forte previsto entre 18-20h. Reforço necessário.",
+  "predictions": [
+    { "hour": 9, "expected": 3, "type": "vale" },
+    { "hour": 10, "expected": 5, "type": "normal" },
+    { "hour": 11, "expected": 7, "type": "normal" },
+    { "hour": 14, "expected": 9, "type": "normal" },
+    { "hour": 18, "expected": 14, "type": "pico" },
+    { "hour": 19, "expected": 16, "type": "pico" }
+  ],
+  "peaks": [
+    { "hour": 18, "expected": 14, "action": "Alocar 1 vendedor extra a partir das 17h45 (escala completa)", "priority": "high" },
+    { "hour": 19, "expected": 16, "action": "Programar todas as pausas pra antes das 18h. Caixa reforçada.", "priority": "critical" }
+  ],
+  "vales": [
+    { "hour": 9, "expected": 3, "action": "Aproveitar pra treinamento rápido ou abastecer prateleira" }
+  ],
+  "comparativo": "Mesma sexta-feira passada teve 78 atendimentos; projeção hoje: 92 (+18%)",
+  "insight": "Sexta-feira é o dia de maior fluxo da semana. Pico vespertino concentra 35% dos atendimentos."
+}
+
+Se dados insuficientes, retorne com headline honesta e arrays vazios + insight explicando.
+
+Responda APENAS em JSON válido seguindo o schema acima.`
 
   const result = await callGroq(prompt)
-  await setCache(tenantId, cacheKey, result, 3600000)
+  await setCache(tenantId, cacheKey, result, 7200000) // 2h cache
   return result
 }
 

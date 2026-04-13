@@ -106,18 +106,20 @@ button { font-family: inherit; cursor: pointer; }
    ================================================================== */
 .nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  padding: 16px 32px;
+  padding: 22px 40px;
   display: flex; align-items: center; justify-content: space-between;
   background: rgba(13, 13, 13, 0.72);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid transparent;
   transition: all 0.25s var(--ease);
+  min-height: 80px;
 }
 .nav.scrolled {
-  padding: 12px 32px;
+  padding: 16px 40px;
   background: rgba(13, 13, 13, 0.9);
   border-bottom-color: var(--border);
+  min-height: 68px;
 }
 .nav-logo {
   display: flex; align-items: center; justify-content: center;
@@ -249,7 +251,7 @@ button { font-family: inherit; cursor: pointer; }
 .hero h1 {
   font-size: clamp(36px, 6.2vw, 84px);
   font-weight: 800;
-  line-height: 0.92;
+  line-height: 1.0;
   letter-spacing: -0.035em;
   text-wrap: balance;
   margin-bottom: 24px;
@@ -259,13 +261,9 @@ button { font-family: inherit; cursor: pointer; }
   display: inline-block;
   overflow: hidden;
   vertical-align: bottom;
-  line-height: 0.92;
-  padding: 0.05em 0 0.13em;
-  margin-bottom: -0.13em;
-}
-.hero h1 br + .word-wrap,
-.hero h1 .word-wrap.line-break {
-  margin-top: 0.06em;
+  line-height: 1.0;
+  padding: 0.06em 0 0.22em;
+  margin-bottom: -0.18em;
 }
 .hero h1 .word {
   display: inline-block;
