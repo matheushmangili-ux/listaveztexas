@@ -328,6 +328,10 @@
 
 <script type="module" src="/js/dashboard-init.js"></script>
 <script type="module" src="/js/dashboard-announcements.js"></script>
+<script type="module">
+  import { startTourIfFirstTime } from '/js/tour.js';
+  window.addEventListener('load', () => setTimeout(() => startTourIfFirstTime('dashboard'), 1500));
+</script>
 <script type="module" src="/js/dashboard-xp-config.js"></script>
 <script type="module" src="/js/dashboard-missions.js"></script>
 <script type="module" src="/js/dashboard-vm.js"></script>

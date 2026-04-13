@@ -700,7 +700,84 @@ window.goStep = function(step) {
     const n = parseInt(l.dataset.line);
     l.classList.toggle('done', n < step);
   });
+  // Save & resume + analytics
+  saveSetupState(step);
+  window.minhavezAnalytics?.capture('setup_step_view', { step });
 };
+
+// ─── Save & Resume ───
+const SETUP_STATE_KEY = 'mv-setup-state-v1';
+
+function saveSetupState(step) {
+  try {
+    const state = {
+      step,
+      storeName: document.getElementById('storeName')?.value || '',
+      storeSlug: document.getElementById('storeSlug')?.value || '',
+      ownerEmail: document.getElementById('ownerEmail')?.value || '',
+      sectors: typeof sectors !== 'undefined' ? sectors : [],
+      vendors: typeof vendors !== 'undefined' ? vendors : [],
+      ts: Date.now(),
+    };
+    localStorage.setItem(SETUP_STATE_KEY, JSON.stringify(state));
+  } catch {}
+}
+
+function loadSetupState() {
+  try {
+    const raw = localStorage.getItem(SETUP_STATE_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    // Expira em 7 dias
+    if (Date.now() - s.ts > 7 * 24 * 60 * 60 * 1000) {
+      localStorage.removeItem(SETUP_STATE_KEY);
+      return null;
+    }
+    return s;
+  } catch { return null; }
+}
+
+window.clearSetupState = function() {
+  localStorage.removeItem(SETUP_STATE_KEY);
+};
+
+// Restaurar ao carregar página
+window.addEventListener('load', () => {
+  const saved = loadSetupState();
+  if (!saved || saved.step <= 1) return;
+  // Banner de retomar
+  const banner = document.createElement('div');
+  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:1000;background:var(--accent);color:var(--accent-ink);padding:12px 20px;display:flex;align-items:center;justify-content:center;gap:16px;font-weight:600;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,0.2)';
+  banner.innerHTML = `
+    <span><i class="fa-solid fa-clock-rotate-left"></i> Você tem um setup em andamento (step ${saved.step}/5)</span>
+    <button id="resumeBtn" style="padding:6px 14px;background:var(--accent-ink);color:var(--accent);border:none;border-radius:6px;font-weight:700;cursor:pointer">Retomar</button>
+    <button id="discardBtn" style="padding:6px 12px;background:transparent;color:var(--accent-ink);border:1px solid var(--accent-ink);border-radius:6px;font-weight:500;cursor:pointer">Recomeçar</button>
+  `;
+  document.body.appendChild(banner);
+  document.getElementById('resumeBtn').onclick = () => {
+    if (saved.storeName) document.getElementById('storeName').value = saved.storeName;
+    if (saved.storeSlug) document.getElementById('storeSlug').value = saved.storeSlug;
+    if (saved.ownerEmail) document.getElementById('ownerEmail').value = saved.ownerEmail;
+    if (saved.sectors && typeof sectors !== 'undefined') {
+      sectors.length = 0;
+      saved.sectors.forEach((s) => sectors.push(s));
+      if (typeof renderSectors === 'function') renderSectors();
+    }
+    if (saved.vendors && typeof vendors !== 'undefined') {
+      vendors.length = 0;
+      saved.vendors.forEach((v) => vendors.push(v));
+      if (typeof renderVendors === 'function') renderVendors();
+    }
+    goStep(saved.step);
+    banner.remove();
+    window.minhavezAnalytics?.capture('setup_resumed', { step: saved.step });
+  };
+  document.getElementById('discardBtn').onclick = () => {
+    clearSetupState();
+    banner.remove();
+    window.minhavezAnalytics?.capture('setup_discarded', { step: saved.step });
+  };
+});
 
 // Sectors
 function renderSectors() {
@@ -890,6 +967,8 @@ window.createTenant = async function() {
     }).catch(() => { /* silently ignore — email é best-effort */ });
 
     toast('Loja criada com sucesso!', 'success');
+    if (typeof clearSetupState === 'function') clearSetupState();
+    window.minhavezAnalytics?.capture('setup_completed', { slug, plano: result.plano || 'pro' });
     goStep(6);
   } catch (e) {
     showError(e.message);

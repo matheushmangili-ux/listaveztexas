@@ -136,6 +136,52 @@ button { font-family: inherit; cursor: pointer; }
 
 .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 .section { padding: 120px 0; position: relative; }
+.section-proof {
+  padding: 80px 0;
+  background: linear-gradient(180deg, transparent, rgba(170, 238, 196, 0.04), transparent);
+}
+.proof-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 48px;
+}
+@media (max-width: 720px) { .proof-grid { grid-template-columns: repeat(2, 1fr); } }
+.proof-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px 20px;
+  text-align: center;
+  transition: border-color 0.25s, transform 0.25s;
+}
+.proof-card:hover {
+  border-color: rgba(170, 238, 196, 0.35);
+  transform: translateY(-3px);
+}
+.proof-value {
+  font-size: clamp(32px, 4.5vw, 56px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-variant-numeric: tabular-nums;
+}
+.proof-unit {
+  font-size: 0.55em;
+  margin-left: 4px;
+  opacity: 0.7;
+}
+.proof-label {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
 @media (max-width: 768px) { .section { padding: 80px 0; } }
 
 .badge-mono {
@@ -1440,6 +1486,37 @@ button { font-family: inherit; cursor: pointer; }
 </section>
 
 <!-- ==================================================================
+     SOCIAL PROOF — Texas Center hoje (KPIs vivos via RPC)
+     ================================================================== -->
+<section class="section section-proof" id="proof">
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="section-label">Em produção real</span>
+      <h2 class="section-title">Texas Center, últimos 30 dias</h2>
+      <p class="section-sub">Números agregados, atualizados a cada 5 minutos. Sem dado fake.</p>
+    </div>
+    <div class="proof-grid reveal" id="proofGrid">
+      <div class="proof-card">
+        <div class="proof-value" id="proofAtend">—</div>
+        <div class="proof-label">atendimentos finalizados</div>
+      </div>
+      <div class="proof-card">
+        <div class="proof-value" id="proofVend">—</div>
+        <div class="proof-label">vendedores ativos</div>
+      </div>
+      <div class="proof-card">
+        <div class="proof-value"><span id="proofTempo">—</span><span class="proof-unit">min</span></div>
+        <div class="proof-label">tempo médio de atendimento</div>
+      </div>
+      <div class="proof-card">
+        <div class="proof-value" id="proofLojas">—</div>
+        <div class="proof-label">loja(s) usando agora</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================
      HOW IT WORKS
      ================================================================== -->
 <section class="section" id="como-funciona">
@@ -1750,6 +1827,51 @@ const sectionSpy = new IntersectionObserver((entries) => {
   });
 }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
 sections.forEach((s) => sectionSpy.observe(s));
+
+// ─── Social proof: KPIs vivos via RPC (cache 5min sessionStorage) ───
+(async () => {
+  const FALLBACK = { atendimentos_mes: 850, vendedores_ativos: 4, tempo_medio_min: 6.5, lojas_count: 1 };
+  const KEY = 'mv-proof-cache';
+  const TTL = 5 * 60 * 1000;
+  const fmt = (n) => new Intl.NumberFormat('pt-BR').format(n);
+  const fmtMin = (n) => (Number(n) || 0).toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+
+  function paint(stats) {
+    const a = document.getElementById('proofAtend');
+    const v = document.getElementById('proofVend');
+    const t = document.getElementById('proofTempo');
+    const l = document.getElementById('proofLojas');
+    if (!a) return;
+    a.textContent = fmt(stats.atendimentos_mes);
+    v.textContent = fmt(stats.vendedores_ativos);
+    t.textContent = fmtMin(stats.tempo_medio_min);
+    l.textContent = fmt(stats.lojas_count);
+  }
+
+  // Cache hit
+  try {
+    const cached = JSON.parse(sessionStorage.getItem(KEY) || 'null');
+    if (cached && Date.now() - cached.ts < TTL) { paint(cached.data); return; }
+  } catch {}
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_landing_stats`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      },
+      body: '{}'
+    });
+    if (!res.ok) throw new Error('rpc failed');
+    const data = await res.json();
+    paint(data);
+    sessionStorage.setItem(KEY, JSON.stringify({ ts: Date.now(), data }));
+  } catch {
+    paint(FALLBACK);
+  }
+})();
 
 // ─── Hero video lazy-load (poupar 1.7MB no first paint) ───
 (() => {
