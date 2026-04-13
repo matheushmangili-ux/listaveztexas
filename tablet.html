@@ -60,49 +60,21 @@ window.addEventListener('error', function(e) {
       <span id="appVersion" class="mono fs-9 t-header-version"></span>
     </div>
     <div id="headerKpis" class="flex-center gap-16 mono fw-700 t-header-kpis">
-      <div class="t-header-kpi" data-kpi="atend">
+      <div class="t-header-kpi" title="Atendimentos finalizados">
         <i class="fa-solid fa-users"></i>
         <div class="t-header-kpi-body">
           <span id="statAtend" class="t-header-kpi-value">0</span>
           <span class="t-header-kpi-label">Atendidos</span>
         </div>
-        <div class="kpi-popover" id="popAtend">
-          <div class="kpi-pop-head">
-            <span class="kpi-pop-title">Atendimentos do turno</span>
-            <i class="fa-solid fa-users kpi-pop-icon"></i>
-          </div>
-          <div class="kpi-pop-metric">
-            <span class="kpi-pop-big" id="popAtendBig">0</span>
-            <span class="kpi-pop-sub" id="popAtendSub">total finalizados</span>
-          </div>
-          <div class="kpi-pop-section-label">Top vendedores</div>
-          <ul class="kpi-pop-list" id="popAtendTop">
-            <li class="kpi-pop-empty">Sem dados ainda</li>
-          </ul>
-        </div>
       </div>
-      <div class="t-header-kpi" data-kpi="vendas">
+      <div class="t-header-kpi" title="Vendas concretizadas">
         <i class="fa-solid fa-bag-shopping"></i>
         <div class="t-header-kpi-body">
           <span id="statVendas" class="t-header-kpi-value">0</span>
           <span class="t-header-kpi-label">Vendas</span>
         </div>
-        <div class="kpi-popover" id="popVendas">
-          <div class="kpi-pop-head">
-            <span class="kpi-pop-title">Vendas do turno</span>
-            <i class="fa-solid fa-bag-shopping kpi-pop-icon"></i>
-          </div>
-          <div class="kpi-pop-metric">
-            <span class="kpi-pop-big" id="popVendasBig">0</span>
-            <span class="kpi-pop-sub" id="popVendasSub">concretizadas</span>
-          </div>
-          <div class="kpi-pop-section-label">Ranking de vendedores</div>
-          <ul class="kpi-pop-list" id="popVendasTop">
-            <li class="kpi-pop-empty">Sem vendas ainda</li>
-          </ul>
-        </div>
       </div>
-      <div class="t-header-kpi" data-kpi="conv">
+      <div class="t-header-kpi" title="Taxa de conversão">
         <i class="fa-solid fa-chart-line"></i>
         <div class="t-header-kpi-body">
           <span id="statConv" class="t-header-kpi-value">0%</span>
@@ -110,26 +82,6 @@ window.addEventListener('error', function(e) {
         </div>
         <div class="conv-bar-track">
           <div id="convBar" class="conv-bar-fill"></div>
-        </div>
-        <div class="kpi-popover" id="popConv">
-          <div class="kpi-pop-head">
-            <span class="kpi-pop-title">Taxa de conversão</span>
-            <i class="fa-solid fa-chart-line kpi-pop-icon"></i>
-          </div>
-          <div class="kpi-pop-metric">
-            <span class="kpi-pop-big" id="popConvBig">0%</span>
-            <span class="kpi-pop-sub" id="popConvSub">vendas / atendimentos</span>
-          </div>
-          <div class="kpi-pop-track-wrap">
-            <div class="kpi-pop-track"><div class="kpi-pop-track-fill" id="popConvBar"></div></div>
-            <div class="kpi-pop-scale">
-              <span>0%</span><span>50%</span><span>100%</span>
-            </div>
-          </div>
-          <div class="kpi-pop-hint" id="popConvHint">
-            <i class="fa-solid fa-lightbulb"></i>
-            <span>Aim for acima de 50%</span>
-          </div>
         </div>
       </div>
     </div>
