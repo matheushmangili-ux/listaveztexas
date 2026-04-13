@@ -34,6 +34,11 @@
 .sidebar-brand {
   margin-bottom: 16px;
   padding: 0;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 .dash-header-logo {
   flex-shrink: 0;
@@ -42,13 +47,16 @@
   justify-content: center;
   padding: 0;
   width: 100%;
+  height: 100%;
 }
 .dash-header-logo img {
   width: auto;
-  height: 72px;
-  max-width: 100%;
+  height: 100%;
+  max-width: none;
   object-fit: contain;
   display: block;
+  transform: scale(1.85);
+  transform-origin: center;
 }
 /* Cube-only logo — tech minimalist centralizado */
 .dash-header-logo--cube {
