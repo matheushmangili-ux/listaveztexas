@@ -30,12 +30,16 @@
   color: var(--text-primary);
 }
 .t-header-logo {
-  height: 44px;
-  width: auto;
-  max-width: 180px;
+  height: 38px;
+  width: 130px;
+  max-width: none;
   background: transparent;
   padding: 0;
   object-fit: contain;
+  transform: scale(1.7);
+  transform-origin: left center;
+  margin-right: 24px;
+  flex-shrink: 0;
 }
 .t-header-version {
   color: rgba(255, 255, 255, 0.5);
