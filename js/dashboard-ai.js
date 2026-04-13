@@ -91,6 +91,10 @@
       const t = convToday.data?.[0] || {};
       const y = convYest.data?.[0] || {};
 
+      if (convToday.error) console.error('[ai] conv today:', convToday.error);
+      if (ranking.error) console.error('[ai] ranking:', ranking.error);
+      if (motivos.error) console.error('[ai] motivos:', motivos.error);
+
       const total_atend = Number(t.total_atendimentos) || 0;
       if (total_atend === 0) {
         area.innerHTML = `<div class="ai-empty-rich">
@@ -106,21 +110,21 @@
       const yConv = Number(y.total_atendimentos) > 0 ? Math.round((Number(y.total_vendas) / Number(y.total_atendimentos)) * 100) : 0;
 
       const rankingTop = (ranking.data || []).slice(0, 5).map(v => ({
-        nome: v.apelido || v.nome,
-        atendimentos: v.total_atendimentos,
-        vendas: v.total_vendas,
-        conversao: v.taxa_conversao,
-        valor: v.valor_total
+        nome: v.nome,
+        atendimentos: Number(v.total_atendimentos) || 0,
+        vendas: Number(v.total_vendas) || 0,
+        conversao: Number(v.taxa_conversao) || 0,
+        tempo_medio: Number(v.tempo_medio_min) || 0
       }));
 
       const motivosTop = (motivos.data || []).slice(0, 5).map(m => ({
         motivo: m.motivo,
-        qtd: m.total
+        qtd: Number(m.total) || 0
       }));
 
       const snapshotHash = `${total_atend}-${vendas}-${rankingTop.length}-${motivosTop.length}`;
 
-      const { data, error } = await sb.functions.invoke('ai-assist', {
+      const invokeRes = await sb.functions.invoke('ai-assist', {
         body: {
           type: 'turno-summary',
           payload: {
@@ -130,7 +134,8 @@
             total_atend,
             vendas,
             conversao,
-            tempo_medio: Math.round(Number(t.tempo_medio) || 0),
+            tempo_medio: Math.round(Number(t.tempo_medio_min) || 0),
+            ticket_medio: Math.round(Number(t.ticket_medio) || 0),
             ranking: rankingTop,
             motivos: motivosTop,
             delta_conv: conversao - yConv,
@@ -139,7 +144,10 @@
         }
       });
 
-      if (error || !data?.ok) throw new Error(data?.message || 'IA indisponível');
+      const { data, error } = invokeRes;
+      if (error) console.error('[ai-assist invoke error]', error);
+      if (data && !data.ok) console.error('[ai-assist payload error]', data);
+      if (error || !data?.ok) throw new Error(data?.message || error?.message || 'IA indisponível');
       const r = data.result;
 
       const scoreColor = r.score >= 80 ? 'good' : r.score >= 60 ? 'mid' : 'bad';
@@ -199,21 +207,24 @@
         sb.rpc('get_seller_ranking',   { p_inicio: wRange.start, p_fim: wRange.end })
       ]);
 
+      if (conv.error) console.error('[ai] conv 4w:', conv.error);
+      if (ranking.error) console.error('[ai] ranking 4w:', ranking.error);
+
       const c = conv.data?.[0] || {};
       const totalAtend = Number(c.total_atendimentos) || 0;
       const totalVendas = Number(c.total_vendas) || 0;
-      const totalValor = Number(c.valor_total) || 0;
+      const ticketMedio = Number(c.ticket_medio) || 0;
       const numVendors = (ranking.data || []).length || 1;
       const days = 28;
 
       const avg_atend = Math.round(totalAtend / numVendors / days * 10) / 10;
       const avg_vendas = Math.round(totalVendas / numVendors / days * 10) / 10;
       const avg_conv = totalAtend > 0 ? Math.round((totalVendas / totalAtend) * 100) : 0;
-      const avg_ticket = totalVendas > 0 ? Math.round(totalValor / totalVendas) : 0;
+      const avg_ticket = Math.round(ticketMedio);
 
       const snapshotHash = `${totalAtend}-${totalVendas}-${numVendors}`;
 
-      const { data, error } = await sb.functions.invoke('ai-assist', {
+      const invokeRes2 = await sb.functions.invoke('ai-assist', {
         body: {
           type: 'mission-suggestions',
           payload: {
@@ -225,7 +236,10 @@
         }
       });
 
-      if (error || !data?.ok) throw new Error(data?.message || 'IA indisponível');
+      const { data, error } = invokeRes2;
+      if (error) console.error('[ai-assist missions error]', error);
+      if (data && !data.ok) console.error('[ai-assist missions payload err]', data);
+      if (error || !data?.ok) throw new Error(data?.message || error?.message || 'IA indisponível');
       const missions = data.result?.missions || [];
 
       area.innerHTML = `
@@ -292,11 +306,14 @@
         sb.rpc('get_hourly_flow', { p_inicio: sameDayRange.start, p_fim: sameDayRange.end })
       ]);
 
+      if (hourly4w.error) console.error('[ai] hourly 4w:', hourly4w.error);
+      if (hourlySameDay.error) console.error('[ai] hourly same:', hourlySameDay.error);
+
       const buckets = {};
       (hourly4w.data || []).forEach(row => {
         const h = Number(row.hora);
         if (!buckets[h]) buckets[h] = { count: 0, samples: 0 };
-        buckets[h].count += Number(row.total_atendimentos || 0);
+        buckets[h].count += Number(row.atendimentos || 0);
         buckets[h].samples++;
       });
 
@@ -307,12 +324,12 @@
 
       const last_same_day = {};
       (hourlySameDay.data || []).forEach(row => {
-        last_same_day[Number(row.hora)] = Number(row.total_atendimentos || 0);
+        last_same_day[Number(row.hora)] = Number(row.atendimentos || 0);
       });
 
       const snapshotHash = `${Object.keys(hourly_data).length}-${today}`;
 
-      const { data, error } = await sb.functions.invoke('ai-assist', {
+      const invokeRes3 = await sb.functions.invoke('ai-assist', {
         body: {
           type: 'flow-prediction',
           payload: {
@@ -325,7 +342,10 @@
         }
       });
 
-      if (error || !data?.ok) throw new Error(data?.message || 'IA indisponível');
+      const { data, error } = invokeRes3;
+      if (error) console.error('[ai-assist flow error]', error);
+      if (data && !data.ok) console.error('[ai-assist flow payload err]', data);
+      if (error || !data?.ok) throw new Error(data?.message || error?.message || 'IA indisponível');
       const r = data.result;
       const peaks = r.peaks || [];
       const vales = r.vales || [];

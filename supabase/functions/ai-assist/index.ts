@@ -59,10 +59,10 @@ async function callGroq(prompt: string, images?: { mime: string; b64: string }[]
       model,
       messages: [{ role: 'user', content: images ? content : prompt }],
       temperature: images ? 0.3 : 0.7,
-      max_tokens: images ? 800 : 500,
+      max_tokens: images ? 800 : 1500,
       response_format: { type: 'json_object' }
     }),
-    signal: AbortSignal.timeout(15000)
+    signal: AbortSignal.timeout(20000)
   })
 
   if (!resp.ok) {
