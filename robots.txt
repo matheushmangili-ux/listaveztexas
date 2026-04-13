@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /landing
+Allow: /termos
+Allow: /privacidade
+Disallow: /index.html
+Disallow: /dashboard
+Disallow: /tablet
+Disallow: /vendor
+Disallow: /settings
+Disallow: /setup
+Disallow: /forgot-password
+Disallow: /reset-password
+
+Sitemap: https://listaveztexas.vercel.app/sitemap.xml

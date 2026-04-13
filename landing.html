@@ -3,18 +3,68 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>minhavez — gestão de fila + engajamento gamificado pra lojas físicas</title>
-<meta name="description" content="Sistema que organiza a vez dos vendedores, mostra vendas em tempo real e transforma a operação em jogo. Usado na Texas Center em produção real.">
-<meta property="og:title" content="minhavez — gestão inteligente de fila + engajamento">
-<meta property="og:description" content="Organize a vez, veja vendas em tempo real, gamifique sua equipe. Elite com IA + avatar RPG.">
-<meta property="og:image" content="/assets/logo-minhavez-transparent.png">
+<title>minhavez — gestão de fila + IA pra varejo físico | Vendedores no lugar certo</title>
+<meta name="description" content="Sistema que organiza a vez dos vendedores, mostra vendas em tempo real e gamifica a operação. IA Assist resume turno, prevê pico e sugere escala. Em produção na Texas Center.">
+<meta name="keywords" content="gestão de fila vendedor, fila de atendimento varejo, gamificação vendas, sistema vez vendedor, software loja física, dashboard vendas tempo real">
+<meta name="author" content="minhavez">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://listaveztexas.vercel.app/landing">
+
+<!-- Open Graph -->
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://listaveztexas.vercel.app/landing">
+<meta property="og:site_name" content="minhavez">
+<meta property="og:title" content="minhavez — gestão de fila + IA pra varejo físico">
+<meta property="og:description" content="Cada vendedor no lugar certo. Cada venda no momento certo. Sistema usado na Texas Center que organiza fila, gamifica equipe e prevê pico com IA.">
+<meta property="og:image" content="https://listaveztexas.vercel.app/assets/og-image-landing.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="minhavez — gestão de fila + IA pra varejo físico">
+<meta property="og:locale" content="pt_BR">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="minhavez — gestão de fila + IA pra varejo físico">
+<meta name="twitter:description" content="Cada vendedor no lugar certo. Cada venda no momento certo. Em produção na Texas Center.">
+<meta name="twitter:image" content="https://listaveztexas.vercel.app/assets/og-image-landing.png">
+
 <meta name="theme-color" content="#0d0d0d">
+
+<!-- JSON-LD Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "minhavez",
+  "description": "Sistema SaaS de gestão de fila de atendimento + engajamento gamificado para lojas físicas, com IA Assist para previsão de pico e sugestão de escala.",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web, Android, iOS (PWA)",
+  "url": "https://listaveztexas.vercel.app/landing",
+  "publisher": {
+    "@type": "Organization",
+    "name": "minhavez",
+    "url": "https://listaveztexas.vercel.app/landing"
+  },
+  "offers": [
+    { "@type": "Offer", "name": "Starter", "price": "49", "priceCurrency": "BRL", "category": "subscription" },
+    { "@type": "Offer", "name": "Pro", "price": "99", "priceCurrency": "BRL", "category": "subscription" },
+    { "@type": "Offer", "name": "Elite", "price": "149", "priceCurrency": "BRL", "category": "subscription", "description": "R$ 149 base + R$ 19 por vendedor" }
+  ],
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "5.0",
+    "reviewCount": "1",
+    "bestRating": "5"
+  }
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 <link rel="icon" href="/assets/logo-minhavez-transparent.png">
 <style>
 /* ==================================================================
@@ -1142,6 +1192,8 @@ button { font-family: inherit; cursor: pointer; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>
+<script>window.PUBLIC_POSTHOG_KEY="";window.PUBLIC_POSTHOG_HOST="https://us.i.posthog.com";</script>
+<script type="module" src="/js/analytics.js"></script>
 </head>
 <body>
 
@@ -1165,9 +1217,8 @@ button { font-family: inherit; cursor: pointer; }
      HERO
      ================================================================== -->
 <section class="hero">
-  <video class="hero-video" autoplay muted loop playsinline poster="">
-    <source src="/assets/hero-ambient.webm" type="video/webm">
-    <source src="/assets/hero-ambient.mp4" type="video/mp4">
+  <video class="hero-video" id="heroVideo" muted loop playsinline preload="none" poster="" aria-hidden="true">
+    <!-- sources injetados via JS quando hero entra no viewport (lazy 1.7MB) -->
   </video>
   <div class="hero-video-overlay"></div>
   <div class="hero-grid-dots"></div>
@@ -1700,6 +1751,34 @@ const sectionSpy = new IntersectionObserver((entries) => {
 }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
 sections.forEach((s) => sectionSpy.observe(s));
 
+// ─── Hero video lazy-load (poupar 1.7MB no first paint) ───
+(() => {
+  const v = document.getElementById('heroVideo');
+  if (!v) return;
+  const load = () => {
+    if (v.dataset.loaded) return;
+    v.dataset.loaded = '1';
+    v.innerHTML =
+      '<source src="/assets/hero-ambient.webm" type="video/webm">' +
+      '<source src="/assets/hero-ambient.mp4" type="video/mp4">';
+    v.load();
+    v.play().catch(() => {});
+  };
+  // Carrega assim que o hero estiver no viewport (que é praticamente imediato no load)
+  // mas deixa o crítico (texto, fonte, css) renderizar primeiro
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        load();
+        io.disconnect();
+      }
+    }, { rootMargin: '200px' });
+    io.observe(v);
+  } else {
+    setTimeout(load, 1500);
+  }
+})();
+
 // ─── Hero typewriter ───
 window.addEventListener('load', () => {
   const lines = document.querySelectorAll('#heroH1 .hero-line');
@@ -1824,6 +1903,8 @@ function openCheckout(plan) {
   document.getElementById('checkoutSub').textContent = 'Informe seu email pra criar a loja e ir pro pagamento seguro.';
   document.getElementById('checkoutModal').classList.add('open');
   setTimeout(() => document.getElementById('checkoutEmail').focus(), 100);
+  window.minhavezAnalytics?.capture('cta_click', { plan, location: 'pricing_card' });
+  window.minhavezAnalytics?.capture('checkout_modal_open', { plan });
 }
 function closeCheckout() { document.getElementById('checkoutModal').classList.remove('open'); }
 
@@ -1839,6 +1920,7 @@ async function startCheckout() {
   const btn = document.getElementById('btnCheckout');
   btn.disabled = true;
   btn.innerHTML = '<span class="spin"></span> Redirecionando...';
+  window.minhavezAnalytics?.capture('checkout_start', { plan: selectedPlan, email });
 
   try {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout`, {
@@ -1848,8 +1930,14 @@ async function startCheckout() {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Erro ao criar checkout');
-    if (data.url) { window.location.href = data.url; } else { throw new Error('URL de checkout não retornada'); }
+    if (data.url) {
+      window.minhavezAnalytics?.capture('checkout_redirect', { plan: selectedPlan });
+      window.location.href = data.url;
+    } else {
+      throw new Error('URL de checkout não retornada');
+    }
   } catch (err) {
+    window.minhavezAnalytics?.capture('checkout_error', { plan: selectedPlan, error: err.message });
     btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-lock" style="font-size:12px"></i> Ir pro pagamento seguro';
     const existing = btn.parentElement.querySelector('.modal-error');
@@ -1866,18 +1954,79 @@ async function startCheckout() {
 function openDemo() {
   document.getElementById('demoModal').classList.add('open');
   setTimeout(() => document.getElementById('demoNome').focus(), 100);
+  window.minhavezAnalytics?.capture('demo_modal_open', { plan: 'elite' });
 }
 function closeDemo() { document.getElementById('demoModal').classList.remove('open'); }
 
-function sendDemo() {
+function getStoredUtm() {
+  try { return JSON.parse(sessionStorage.getItem('mv-utm') || '{}'); } catch { return {}; }
+}
+
+async function saveDemoLead(payload) {
+  // Insert direto no Supabase via REST (RLS permite anon)
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/demo_leads`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {
+    console.warn('[demo_leads] insert falhou:', err);
+    // Não bloqueia o WhatsApp — UX > captura
+  }
+}
+
+async function sendDemo() {
   const nome = document.getElementById('demoNome').value.trim();
   const phone = document.getElementById('demoPhone').value.trim();
   const size = document.getElementById('demoSize').value;
-  if (!nome || !phone) {
-    if (!nome) document.getElementById('demoNome').style.borderColor = 'var(--coral)';
-    if (!phone) document.getElementById('demoPhone').style.borderColor = 'var(--coral)';
+  const nomeEl = document.getElementById('demoNome');
+  const phoneEl = document.getElementById('demoPhone');
+
+  // Validação
+  const phoneClean = phone.replace(/\D/g, '');
+  let valid = true;
+  if (nome.length < 2) { nomeEl.style.borderColor = 'var(--coral)'; valid = false; }
+  if (phoneClean.length < 10 || phoneClean.length > 13) {
+    phoneEl.style.borderColor = 'var(--coral)';
+    valid = false;
+  }
+  if (!valid) {
+    window.minhavezAnalytics?.capture('demo_validation_error', {
+      missing_name: nome.length < 2,
+      invalid_phone: phoneClean.length < 10 || phoneClean.length > 13,
+    });
     return;
   }
+  nomeEl.style.borderColor = '';
+  phoneEl.style.borderColor = '';
+
+  const utm = getStoredUtm();
+  const lead = {
+    name: nome,
+    whatsapp: phoneClean,
+    store_size: size || null,
+    utm_source:   utm.utm_source   || null,
+    utm_medium:   utm.utm_medium   || null,
+    utm_campaign: utm.utm_campaign || null,
+    utm_term:     utm.utm_term     || null,
+    utm_content:  utm.utm_content  || null,
+    user_agent:   navigator.userAgent.slice(0, 280),
+    referrer:     document.referrer.slice(0, 280) || null,
+  };
+
+  // Salva PRIMEIRO (mesmo que WhatsApp não abra, lead fica capturado)
+  await saveDemoLead(lead);
+  window.minhavezAnalytics?.capture('demo_submit', {
+    store_size: size || 'unknown',
+    has_utm: !!utm.utm_source,
+  });
+
   const msg = `Olá! Quero agendar uma demo do plano Elite do minhavez.\n\nNome: ${nome}\nWhatsApp: ${phone}\nVendedores: ${size || 'não informado'}`;
   const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
