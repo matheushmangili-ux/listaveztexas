@@ -683,6 +683,78 @@ async function updateQuickStats() {
     invalidateFooter();
     scheduleRender();
   }
+
+  // Populate KPI popovers (rich summary on hover)
+  try {
+    await updateKpiPopovers(total, vendas, conv, newCounts);
+  } catch (e) {
+    console.warn('[kpi-popover]', e);
+  }
+}
+
+// ─── KPI popover content ───
+async function updateKpiPopovers(total, vendas, conv, atendCounts) {
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const byId = (n) => state.vendedores?.find((v) => v.id === n);
+
+  // ── Atendidos popover ──
+  const popAtendBig = document.getElementById('popAtendBig');
+  if (popAtendBig) popAtendBig.textContent = total;
+  const topAtend = Object.entries(atendCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3);
+  const popAtendTop = document.getElementById('popAtendTop');
+  if (popAtendTop) {
+    popAtendTop.innerHTML = topAtend.length
+      ? topAtend
+          .map(([id, c], i) => {
+            const v = byId(id);
+            return `<li><span class="kpi-pop-rank">${i + 1}</span><span class="kpi-pop-name">${esc(v?.nome || 'Vendedor')}</span><span class="kpi-pop-count">${c}</span></li>`;
+          })
+          .join('')
+      : '<li class="kpi-pop-empty">Sem atendimentos ainda</li>';
+  }
+
+  // ── Vendas popover ── (query separada, leve)
+  const popVendasBig = document.getElementById('popVendasBig');
+  if (popVendasBig) popVendasBig.textContent = vendas;
+  if (state.turno) {
+    const { data: vendaRows } = await sb
+      .from('atendimentos')
+      .select('vendedor_id')
+      .eq('turno_id', state.turno.id)
+      .eq('resultado', 'venda');
+    const vCounts = {};
+    (vendaRows || []).forEach((r) => { vCounts[r.vendedor_id] = (vCounts[r.vendedor_id] || 0) + 1; });
+    const topV = Object.entries(vCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+    const popVendasTop = document.getElementById('popVendasTop');
+    if (popVendasTop) {
+      popVendasTop.innerHTML = topV.length
+        ? topV.map(([id, c], i) => {
+            const v = byId(id);
+            return `<li><span class="kpi-pop-rank">${i + 1}</span><span class="kpi-pop-name">${esc(v?.nome || 'Vendedor')}</span><span class="kpi-pop-count">${c}</span></li>`;
+          }).join('')
+        : '<li class="kpi-pop-empty">Sem vendas ainda</li>';
+    }
+  }
+
+  // ── Conversão popover ──
+  const popConvBig = document.getElementById('popConvBig');
+  if (popConvBig) popConvBig.textContent = conv + '%';
+  const popConvBar = document.getElementById('popConvBar');
+  if (popConvBar) popConvBar.style.width = conv + '%';
+  const popConvSub = document.getElementById('popConvSub');
+  if (popConvSub) popConvSub.textContent = `${vendas} de ${total}`;
+  const hint = document.getElementById('popConvHint');
+  if (hint) {
+    hint.classList.remove('warn', 'low');
+    let msg = 'Meta: acima de 50%';
+    if (conv >= 50) msg = 'Excelente — acima da meta (50%)';
+    else if (conv >= 30) { msg = 'Média — mire em ≥50%'; hint.classList.add('warn'); }
+    else if (total >= 5) { msg = 'Baixa — revise abordagem'; hint.classList.add('low'); }
+    const sp = hint.querySelector('span');
+    if (sp) sp.textContent = msg;
+  }
 }
 
 // Turno functions imported from /js/tablet-turno.js

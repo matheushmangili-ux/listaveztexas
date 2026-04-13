@@ -24,22 +24,25 @@
   border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
-  padding: 24px 16px;
+  padding: 18px 10px;
   position: sticky;
   top: 0;
   height: 100vh;
-  overflow-y: auto;
+  width: 68px;
+  flex-shrink: 0;
+  overflow: visible;  /* tooltips escapam do container */
   z-index: 100;
 }
 .sidebar-brand {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   padding: 0;
-  height: 64px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
 }
+.sidebar-brand .dash-header-logo img { transform: scale(2.6); }
 .dash-header-logo {
   flex-shrink: 0;
   display: flex;
@@ -78,64 +81,61 @@
   transform-origin: center;
 }
 
-.sidebar-section-label {
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.2);
-  padding: 0 12px;
-  margin-bottom: 8px;
-  display: block;
-}
+.sidebar-section-label { display: none; }
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  margin-bottom: 20px;
+  gap: 4px;
+  margin-bottom: 14px;
+  align-items: center;
 }
 .sidebar-link {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
+  justify-content: center;
+  padding: 0;
+  width: 44px;
+  height: 44px;
   border-radius: 10px;
-  font-size: 13px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.55);
   text-decoration: none;
   border: none;
   background: none;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.12s ease;
   font-family: var(--font-body);
-  width: 100%;
-  text-align: left;
+}
+.sidebar-link span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 .sidebar-link i {
-  font-size: 13px;
-  width: 18px;
+  font-size: 18px;
+  width: auto;
   text-align: center;
-  flex-shrink: 0;
-  opacity: 0.7;
+  opacity: 0.85;
+  transition: opacity 0.18s ease, color 0.18s ease;
 }
 .sidebar-link:hover:not(.sidebar-link--active) {
   background: var(--bg-hover);
   color: var(--accent);
-  box-shadow: var(--shadow-sm);
-  filter: none;
 }
 .sidebar-link:hover:not(.sidebar-link--active) i {
   opacity: 1;
   color: var(--accent);
 }
 .sidebar-link:active {
-  transform: scale(0.97);
+  transform: scale(0.94);
 }
 .sidebar-link--active {
   background: var(--accent);
   color: var(--accent-ink, #0d0d0d);
-  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(170, 238, 196, 0.28);
 }
 .sidebar-link--active i {
   opacity: 1;
@@ -143,8 +143,57 @@
 }
 .sidebar-link--danger:hover {
   color: #e89b8a;
-  background: rgba(232, 155, 138, 0.08);
+  background: rgba(232, 155, 138, 0.1);
 }
+.sidebar-link--danger:hover i { color: #e89b8a; }
+
+/* ─── Tooltip mint+charcoal (aparece à direita, 260ms delay) ─── */
+.sidebar-link::before,
+.sidebar-link::after {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition-delay: 0s;
+  z-index: 200;
+}
+.sidebar-link::before {
+  content: attr(aria-label);
+  padding: 7px 12px;
+  background: var(--bg-card, #1a1a1a);
+  color: var(--text-primary, #fafafa);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(170, 238, 196, 0.08);
+}
+.sidebar-link::after {
+  content: '';
+  left: calc(100% + 4px);
+  width: 7px;
+  height: 7px;
+  background: var(--bg-card, #1a1a1a);
+  border-left: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  transform: translateY(-50%) translateX(-4px) rotate(45deg);
+}
+.sidebar-link:hover::before,
+.sidebar-link:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+  transition-delay: 0.18s;
+}
+.sidebar-link:hover::after {
+  transform: translateY(-50%) translateX(0) rotate(45deg);
+}
+.sidebar-link--active:hover::before,
+.sidebar-link--active:hover::after { opacity: 0; transition-delay: 0s; }
 .sidebar-spacer {
   flex: 1;
 }
