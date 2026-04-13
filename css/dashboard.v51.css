@@ -32,19 +32,21 @@
   z-index: 100;
 }
 .sidebar-brand {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  padding: 8px 0;
 }
 .dash-header-logo {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 0;
+  padding: 0;
   width: 100%;
 }
 .dash-header-logo img {
-  height: 56px;
-  max-width: 200px;
+  width: 100%;
+  height: auto;
+  max-height: 110px;
   object-fit: contain;
   display: block;
 }
