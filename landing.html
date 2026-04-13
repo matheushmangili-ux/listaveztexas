@@ -1721,10 +1721,46 @@ window.addEventListener('load', () => {
   });
   // Cursor lives in the last line so it sits at the end after typing
   lines[lines.length - 1].appendChild(cursor);
-  // Type sequentially
-  const TYPE_MS = 55;
-  const START_DELAY = 280;
-  chars.forEach((c, i) => setTimeout(() => c.classList.add('on'), START_DELAY + i * TYPE_MS));
+  // Loop typewriter: type → hold → erase → hold → repeat
+  const TYPE_MS  = 55;   // delay entre chars no type
+  const ERASE_MS = 28;   // delay entre chars no erase (mais rápido)
+  const HOLD_MS  = 2400; // segura no final
+  const PAUSE_MS = 450;  // pausa antes de re-digitar
+  const isTypeable = (c) => !c.classList.contains('on') || c.textContent !== ' ';
+
+  let cancelled = false;
+  async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+  async function typeAll() {
+    for (const c of chars) {
+      if (cancelled) return;
+      if (c.textContent === ' ') { c.classList.add('on'); continue; }
+      c.classList.add('on');
+      await sleep(TYPE_MS);
+    }
+  }
+  async function eraseAll() {
+    for (let i = chars.length - 1; i >= 0; i--) {
+      if (cancelled) return;
+      const c = chars[i];
+      if (c.textContent === ' ') { c.classList.remove('on'); continue; }
+      c.classList.remove('on');
+      await sleep(ERASE_MS);
+    }
+  }
+  async function loop() {
+    while (!cancelled) {
+      await typeAll();
+      await sleep(HOLD_MS);
+      await eraseAll();
+      await sleep(PAUSE_MS);
+    }
+  }
+  // Pausa quando aba está oculta pra não desperdiçar CPU
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) cancelled = true;
+    else if (cancelled) { cancelled = false; loop(); }
+  });
+  setTimeout(loop, 280);
 });
 
 // ─── Reveal on scroll ───
