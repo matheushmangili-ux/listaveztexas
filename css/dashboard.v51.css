@@ -37,12 +37,26 @@
   margin-bottom: 14px;
   padding: 0;
   height: 44px;
+  width: 44px;
+  margin-left: auto;
+  margin-right: auto;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  border-radius: 10px;
 }
-.sidebar-brand .dash-header-logo img { transform: scale(2.6); }
+/* Mostra SÓ o cubo da logo (não cabe o wordmark horizontal em 48px) */
+.sidebar-brand .dash-header-logo {
+  width: 100%;
+  height: 100%;
+  background-image: url('/assets/logo-minhavez-transparent.png');
+  background-repeat: no-repeat;
+  background-position: 15% center;
+  background-size: 360% auto;
+  image-rendering: -webkit-optimize-contrast;
+}
+.sidebar-brand .dash-header-logo img { display: none; }
 .dash-header-logo {
   flex-shrink: 0;
   display: flex;
