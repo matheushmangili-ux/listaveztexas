@@ -264,7 +264,7 @@
 
 /* ─── Main content area ─── */
 .dash-main {
-  padding: var(--space-xl) var(--space-xl);
+  padding: 40px var(--space-xl) 64px;
   overflow-y: auto;
   background: #1a1a1a;
 }
