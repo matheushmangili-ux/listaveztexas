@@ -157,29 +157,33 @@ button { font-family: inherit; cursor: pointer; }
 .nav-links a:hover:not(.nav-cta):not(.nav-link-active) {
   background: var(--bg-hover);
   color: var(--accent);
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-1px);
 }
 .nav-links a.nav-link-active {
   color: var(--accent);
-  background: transparent;
-  text-shadow: 0 0 4px rgba(170, 238, 196, 0.3);
-  box-shadow: inset 0 -1px 0 rgba(170, 238, 196, 0.5);
+  background: var(--bg-hover);
+}
+@keyframes navCtaPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(170, 238, 196, 0.45), inset 0 0 0 1px rgba(170, 238, 196, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(170, 238, 196, 0), inset 0 0 0 1px rgba(170, 238, 196, 0.9);
+  }
 }
 .nav-cta {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 10px 18px;
-  background: var(--accent);
-  color: var(--accent-ink);
-  border-radius: 10px;
-  font-size: 13px; font-weight: 600;
-  transition: all 0.2s var(--ease);
+  padding: 8px 14px;
+  background: transparent;
+  color: var(--accent);
+  border-radius: 8px;
+  font-size: 14px; font-weight: 500;
+  transition: background 0.18s var(--ease), color 0.18s ease;
   border: none;
+  animation: navCtaPulse 2.2s ease-in-out infinite;
 }
 .nav-cta:hover {
-  background: var(--accent-deep);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-accent);
+  background: var(--bg-hover);
+  color: var(--accent);
 }
 @media (max-width: 820px) {
   .nav { padding: 12px 16px; }
@@ -378,6 +382,16 @@ button { font-family: inherit; cursor: pointer; }
   margin: 0 -24px;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 48px, #000 calc(100% - 96px), transparent 100%);
+          mask-image: linear-gradient(to right, transparent 0, #000 48px, #000 calc(100% - 96px), transparent 100%);
+}
+.showcase-slider.at-start {
+  -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 96px), transparent 100%);
+          mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 96px), transparent 100%);
+}
+.showcase-slider.at-end {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 48px, #000 100%);
+          mask-image: linear-gradient(to right, transparent 0, #000 48px, #000 100%);
 }
 .showcase-slider::-webkit-scrollbar { display: none; }
 .showcase-card {
@@ -453,6 +467,231 @@ button { font-family: inherit; cursor: pointer; }
   padding: 24px;
 }
 .showcase-visual-fallback i { font-size: 48px; color: var(--accent); margin-bottom: 12px; display: block; opacity: 0.6; }
+
+/* ─── Mockups dentro do showcase-visual ─── */
+.mock {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  font-size: 11px;
+  color: var(--text);
+}
+.mock-topbar {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.25);
+  font-size: 10px; color: var(--text-muted);
+}
+.mock-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+.mock-dot.mint { background: var(--accent); box-shadow: 0 0 8px rgba(170,238,196,0.6); }
+
+/* Dashboard mock */
+.mock-dash { flex: 1; display: grid; grid-template-columns: 48px 1fr; }
+.mock-sidebar {
+  background: rgba(0,0,0,0.35);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: center;
+  padding: 10px 0; gap: 10px;
+}
+.mock-sidebar .icn {
+  width: 26px; height: 26px; border-radius: 7px;
+  background: rgba(255,255,255,0.04);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: var(--text-muted);
+}
+.mock-sidebar .icn.active {
+  background: rgba(170,238,196,0.14);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px rgba(170,238,196,0.35);
+}
+.mock-main { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+.mock-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.mock-kpi {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+.mock-kpi-label { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.mock-kpi-val { font-size: 13px; font-weight: 700; letter-spacing: -0.02em; margin-top: 2px; }
+.mock-kpi-delta { font-size: 8px; color: var(--accent); }
+.mock-kpi-delta.down { color: #e89b8a; }
+.mock-charts { display: grid; grid-template-columns: 1.6fr 1fr; gap: 6px; flex: 1; min-height: 0; }
+.mock-chart {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.mock-chart-title { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.mock-chart svg { width: 100%; flex: 1; }
+.mock-ia {
+  position: absolute; right: 10px; bottom: 10px;
+  max-width: 62%;
+  background: rgba(170,238,196,0.08);
+  border: 1px solid rgba(170,238,196,0.28);
+  border-radius: 7px;
+  padding: 6px 8px;
+  font-size: 9px;
+  color: var(--text);
+  display: flex; gap: 6px; align-items: flex-start;
+  backdrop-filter: blur(8px);
+}
+.mock-ia .spark { color: var(--accent); font-size: 10px; }
+
+/* Vendor mock */
+.mock-phone {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at center, rgba(170,238,196,0.06), transparent 60%);
+  padding: 10px;
+}
+.mock-phone-frame {
+  width: 140px; height: 100%; max-height: 220px;
+  background: #0d0d0d;
+  border: 2px solid #1f1f1f;
+  border-radius: 14px;
+  padding: 8px 8px 10px;
+  display: flex; flex-direction: column; gap: 6px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.03);
+  position: relative;
+}
+.mock-phone-frame::before {
+  content: ''; position: absolute; top: 4px; left: 50%; transform: translateX(-50%);
+  width: 30px; height: 3px; background: #1f1f1f; border-radius: 2px;
+}
+.mock-avatar {
+  width: 42px; height: 42px; margin: 8px auto 4px;
+  background:
+    radial-gradient(circle at 35% 35%, #aaeec4 0 4px, transparent 4px) 8px 8px,
+    radial-gradient(circle at 65% 35%, #aaeec4 0 4px, transparent 4px) 8px 8px,
+    linear-gradient(180deg, #7fd9a0 50%, #5fb887 50%);
+  background-size: 100% 100%;
+  border-radius: 6px;
+  image-rendering: pixelated;
+  box-shadow: 0 0 12px rgba(170,238,196,0.35), inset 0 -6px 0 rgba(0,0,0,0.2);
+  position: relative;
+}
+.mock-avatar::after {
+  content: ''; position: absolute; inset: 62% 28% 20% 28%;
+  background: #0d0d0d; border-radius: 1px;
+}
+.mock-tier {
+  text-align: center;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+.mock-tier .lvl { color: var(--text-muted); font-weight: 500; }
+.mock-xp {
+  height: 6px; background: rgba(255,255,255,0.06);
+  border-radius: 3px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.mock-xp span {
+  display: block; height: 100%;
+  width: 68%;
+  background: linear-gradient(90deg, var(--accent), #7fd9a0);
+  box-shadow: 0 0 6px rgba(170,238,196,0.5);
+}
+.mock-xp-meta {
+  display: flex; justify-content: space-between;
+  font-size: 8px; color: var(--text-muted);
+}
+.mock-missions {
+  list-style: none; display: flex; flex-direction: column; gap: 3px;
+  margin-top: 2px;
+}
+.mock-missions li {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 8.5px;
+  color: var(--text);
+  padding: 3px 5px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 4px;
+}
+.mock-missions .chk {
+  width: 9px; height: 9px; border-radius: 2px;
+  border: 1px solid rgba(170,238,196,0.4);
+  flex-shrink: 0;
+}
+.mock-missions .chk.done {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.mock-push {
+  position: absolute;
+  top: 18px; right: -18px;
+  background: var(--bg-card);
+  border: 1px solid rgba(170,238,196,0.35);
+  border-radius: 7px;
+  padding: 5px 7px;
+  font-size: 8px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.4), 0 0 10px rgba(170,238,196,0.15);
+  display: flex; gap: 5px; align-items: center;
+  white-space: nowrap;
+}
+.mock-push .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+
+/* Tablet mock */
+.mock-tablet { flex: 1; display: flex; flex-direction: column; }
+.mock-tablet-tabs {
+  display: flex; gap: 4px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.25);
+}
+.mock-tablet-tabs .tab {
+  flex: 1;
+  padding: 5px 6px;
+  font-size: 9px; font-weight: 600;
+  text-align: center;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+.mock-tablet-tabs .tab.active {
+  color: var(--accent);
+  border-color: rgba(170,238,196,0.5);
+  text-shadow: 0 0 4px rgba(170,238,196,0.6);
+  box-shadow: 0 0 10px rgba(170,238,196,0.2), inset 0 0 0 1px rgba(170,238,196,0.3);
+}
+.mock-queue {
+  flex: 1; display: flex; flex-direction: column; gap: 4px;
+  padding: 8px 10px;
+  overflow: hidden;
+}
+.mock-queue-row {
+  display: grid; grid-template-columns: 20px 1fr auto auto;
+  align-items: center; gap: 8px;
+  padding: 5px 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 9px;
+}
+.mock-queue-row.active {
+  border-color: rgba(170,238,196,0.5);
+  background: rgba(170,238,196,0.06);
+  box-shadow: 0 0 12px rgba(170,238,196,0.12);
+}
+.mock-queue-row .pos {
+  font-weight: 700; color: var(--accent); font-size: 10px;
+}
+.mock-queue-row .name { color: var(--text); font-weight: 500; }
+.mock-queue-row .timer {
+  font-variant-numeric: tabular-nums;
+  font-size: 8.5px;
+  color: var(--text-muted);
+}
+.mock-queue-row.active .timer { color: var(--accent); }
+.mock-queue-row .avatar {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: linear-gradient(135deg, #8ea5c9, #6d85ac);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 7px; font-weight: 700; color: #0d0d0d;
+}
 .showcase-hint {
   text-align: center;
   color: var(--text-muted);
@@ -910,7 +1149,7 @@ button { font-family: inherit; cursor: pointer; }
     <a href="#produto">Produto</a>
     <a href="#como-funciona">Como funciona</a>
     <a href="#precos">Preços</a>
-    <a href="/login" style="margin-right:8px">Entrar</a>
+    <a href="/" style="margin-right:8px">Entrar</a>
     <a href="#precos" class="nav-cta">Começar agora</a>
   </div>
 </nav>
@@ -987,9 +1226,70 @@ button { font-family: inherit; cursor: pointer; }
           <li><i class="fa-solid fa-check"></i>Previsão de fluxo com sugestão de escala</li>
         </ul>
         <div class="showcase-visual">
-          <div class="showcase-visual-fallback">
-            <i class="fa-solid fa-chart-line"></i>
-            <div>Screenshot do dashboard com IA Assist</div>
+          <div class="mock">
+            <div class="mock-topbar">
+              <span class="mock-dot mint"></span>
+              <span class="mock-dot"></span>
+              <span class="mock-dot"></span>
+              <span style="margin-left:8px">minhavez.app/dashboard</span>
+              <span style="margin-left:auto; color:var(--accent)">● ao vivo</span>
+            </div>
+            <div class="mock-dash">
+              <div class="mock-sidebar">
+                <div class="icn active"><i class="fa-solid fa-chart-line"></i></div>
+                <div class="icn"><i class="fa-solid fa-users"></i></div>
+                <div class="icn"><i class="fa-solid fa-bag-shopping"></i></div>
+                <div class="icn"><i class="fa-solid fa-gear"></i></div>
+              </div>
+              <div class="mock-main">
+                <div class="mock-kpis">
+                  <div class="mock-kpi">
+                    <div class="mock-kpi-label">Vendas hoje</div>
+                    <div class="mock-kpi-val">R$ 18.420</div>
+                    <div class="mock-kpi-delta">▲ 12,4% vs ontem</div>
+                  </div>
+                  <div class="mock-kpi">
+                    <div class="mock-kpi-label">Ticket médio</div>
+                    <div class="mock-kpi-val">R$ 287</div>
+                    <div class="mock-kpi-delta">▲ 4,8%</div>
+                  </div>
+                  <div class="mock-kpi">
+                    <div class="mock-kpi-label">Conversão</div>
+                    <div class="mock-kpi-val">42%</div>
+                    <div class="mock-kpi-delta down">▼ 2,1%</div>
+                  </div>
+                </div>
+                <div class="mock-charts">
+                  <div class="mock-chart">
+                    <div class="mock-chart-title">Vendas · últimas 12h</div>
+                    <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="gsp" x1="0" x2="0" y1="0" y2="1">
+                          <stop offset="0" stop-color="#aaeec4" stop-opacity="0.4"/>
+                          <stop offset="1" stop-color="#aaeec4" stop-opacity="0"/>
+                        </linearGradient>
+                      </defs>
+                      <path d="M0,48 L15,44 L30,46 L45,38 L60,40 L75,30 L90,34 L105,22 L120,26 L135,18 L150,22 L165,14 L180,10 L200,8 L200,60 L0,60 Z" fill="url(#gsp)"/>
+                      <path d="M0,48 L15,44 L30,46 L45,38 L60,40 L75,30 L90,34 L105,22 L120,26 L135,18 L150,22 L165,14 L180,10 L200,8" fill="none" stroke="#aaeec4" stroke-width="1.5"/>
+                    </svg>
+                  </div>
+                  <div class="mock-chart">
+                    <div class="mock-chart-title">Por setor</div>
+                    <svg viewBox="0 0 60 60">
+                      <circle cx="30" cy="30" r="22" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>
+                      <circle cx="30" cy="30" r="22" fill="none" stroke="#aaeec4" stroke-width="8" stroke-dasharray="70 138" stroke-dashoffset="0" transform="rotate(-90 30 30)"/>
+                      <circle cx="30" cy="30" r="22" fill="none" stroke="#8ea5c9" stroke-width="8" stroke-dasharray="40 138" stroke-dashoffset="-70" transform="rotate(-90 30 30)"/>
+                      <circle cx="30" cy="30" r="22" fill="none" stroke="#d4a373" stroke-width="8" stroke-dasharray="28 138" stroke-dashoffset="-110" transform="rotate(-90 30 30)"/>
+                      <text x="30" y="33" text-anchor="middle" fill="#e6e6e6" font-size="10" font-weight="700">R$18k</text>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="mock-ia">
+              <span class="spark"><i class="fa-solid fa-sparkles"></i></span>
+              <span><strong style="color:var(--accent)">IA:</strong> pico esperado às 19h. Sugiro reforçar Masculino com +1 vendedor.</span>
+            </div>
           </div>
         </div>
       </article>
@@ -1005,9 +1305,27 @@ button { font-family: inherit; cursor: pointer; }
           <li><i class="fa-solid fa-check"></i>Push quando é a vez — notifica no celular</li>
         </ul>
         <div class="showcase-visual">
-          <div class="showcase-visual-fallback">
-            <i class="fa-solid fa-gamepad"></i>
-            <div>Screenshot do app vendedor com XP + tiers</div>
+          <div class="mock">
+            <div class="mock-phone">
+              <div class="mock-phone-frame">
+                <div class="mock-avatar"></div>
+                <div class="mock-tier">Ouro <span class="lvl">· nível 7</span></div>
+                <div class="mock-xp"><span></span></div>
+                <div class="mock-xp-meta">
+                  <span>2.480 XP</span>
+                  <span>3.650</span>
+                </div>
+                <ul class="mock-missions">
+                  <li><span class="chk done"></span>5 atendimentos · 100 XP</li>
+                  <li><span class="chk done"></span>Ticket &gt; R$ 300 · 80 XP</li>
+                  <li><span class="chk"></span>3 trocas resolvidas · 60 XP</li>
+                </ul>
+                <div class="mock-push">
+                  <span class="dot"></span>
+                  <span><strong style="color:var(--accent)">É a sua vez!</strong></span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </article>
@@ -1023,9 +1341,47 @@ button { font-family: inherit; cursor: pointer; }
           <li><i class="fa-solid fa-check"></i>Gestão de trocas (simples e com diferença)</li>
         </ul>
         <div class="showcase-visual">
-          <div class="showcase-visual-fallback">
-            <i class="fa-solid fa-tablet-screen-button"></i>
-            <div>Screenshot do tablet em operação</div>
+          <div class="mock">
+            <div class="mock-topbar">
+              <span class="mock-dot mint"></span>
+              <span style="margin-left:8px">Texas Center · Balcão 2</span>
+              <span style="margin-left:auto"><i class="fa-solid fa-wifi" style="color:var(--accent)"></i> online</span>
+            </div>
+            <div class="mock-tablet">
+              <div class="mock-tablet-tabs">
+                <div class="tab">Todos</div>
+                <div class="tab active">Masculino</div>
+                <div class="tab">Feminino</div>
+                <div class="tab">Calçados</div>
+                <div class="tab">Caixa</div>
+              </div>
+              <div class="mock-queue">
+                <div class="mock-queue-row active">
+                  <div class="pos">1</div>
+                  <div class="avatar">JP</div>
+                  <div class="name">João P. <span style="color:var(--text-muted); font-weight:400">· atendendo</span></div>
+                  <div class="timer">04:12</div>
+                </div>
+                <div class="mock-queue-row">
+                  <div class="pos">2</div>
+                  <div class="avatar" style="background:linear-gradient(135deg,#d4a373,#b8875a)">MR</div>
+                  <div class="name">Marina R.</div>
+                  <div class="timer">próximo</div>
+                </div>
+                <div class="mock-queue-row">
+                  <div class="pos">3</div>
+                  <div class="avatar" style="background:linear-gradient(135deg,#b8a8d4,#9d8bc4)">LS</div>
+                  <div class="name">Lucas S.</div>
+                  <div class="timer">aguarda</div>
+                </div>
+                <div class="mock-queue-row">
+                  <div class="pos">4</div>
+                  <div class="avatar" style="background:linear-gradient(135deg,#e89b8a,#d47a68)">AC</div>
+                  <div class="name">Ana C.</div>
+                  <div class="timer">aguarda</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </article>
@@ -1240,7 +1596,7 @@ button { font-family: inherit; cursor: pointer; }
         <h4>Empresa</h4>
         <a href="#produto">Sobre</a>
         <a href="javascript:openDemo()">Contato</a>
-        <a href="/login">Entrar</a>
+        <a href="/">Entrar</a>
       </div>
       <div class="footer-col">
         <h4>Legal</h4>
@@ -1394,6 +1750,14 @@ if (slider) {
     const x = e.pageX - slider.offsetLeft;
     slider.scrollLeft = scrollLeft - (x - startX) * 1.8;
   });
+  const updateFade = () => {
+    const max = slider.scrollWidth - slider.clientWidth;
+    slider.classList.toggle('at-start', slider.scrollLeft <= 4);
+    slider.classList.toggle('at-end', slider.scrollLeft >= max - 4);
+  };
+  slider.addEventListener('scroll', updateFade, { passive: true });
+  window.addEventListener('resize', updateFade);
+  updateFade();
 }
 
 // ─── Checkout modal (Stripe) ───
