@@ -58,6 +58,26 @@
   transform: scale(1.85);
   transform-origin: center;
 }
+/* Footer logo — mesma técnica do header (scale + overflow:hidden) */
+.dash-footer-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  width: 160px;
+  overflow: hidden;
+  background: transparent;
+}
+.dash-footer-logo img {
+  width: auto;
+  height: 100%;
+  max-width: none;
+  object-fit: contain;
+  display: block;
+  transform: scale(2.0);
+  transform-origin: center;
+}
+
 /* Cube-only logo — tech minimalist centralizado */
 .dash-header-logo--cube {
   width: 88px;
