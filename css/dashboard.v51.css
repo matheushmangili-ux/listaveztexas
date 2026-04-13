@@ -13,7 +13,7 @@
 /* ─── Layout: Sidebar + Main ─── */
 .dash-layout {
   display: grid;
-  grid-template-columns: 232px 1fr;
+  grid-template-columns: 68px 1fr;
   min-height: 100vh;
   --gap: 16px;
 }
