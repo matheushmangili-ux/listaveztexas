@@ -5,7 +5,7 @@
 export const MOTIVOS = {
   preco: { label: 'Preço', icon: 'fa-tag', color: '#d4a373' },
   ruptura: { label: 'Ruptura', icon: 'fa-box-open', color: '#e89b8a' },
-  indecisao: { label: 'Indecisão', icon: 'fa-face-meh', color: '#8B5CF6' },
+  indecisao: { label: 'Indecisão', icon: 'fa-face-meh', color: '#b8a8d4' },
   so_olhando: { label: 'Só olhando', icon: 'fa-eye', color: '#6B7280' },
   outro: { label: 'Outro', icon: 'fa-ellipsis', color: '#94A3B8' }
 };
@@ -15,17 +15,17 @@ export const STATUS_CONFIG = {
     label: 'Disponível',
     short: 'LIVRE',
     color: '#aaeec4',
-    bg: 'rgba(52,211,153,.1)',
+    bg: 'rgba(170,238,196,.1)',
     icon: 'fa-circle-check'
   },
   em_atendimento: {
     label: 'Em atendimento',
     short: 'ATENDENDO',
     color: '#8ea5c9',
-    bg: 'rgba(96,165,250,.1)',
+    bg: 'rgba(142,165,201,.1)',
     icon: 'fa-comments'
   },
-  pausa: { label: 'Em pausa', short: 'PAUSA', color: '#d4a373', bg: 'rgba(251,191,36,.1)', icon: 'fa-mug-hot' },
+  pausa: { label: 'Em pausa', short: 'PAUSA', color: '#d4a373', bg: 'rgba(212,163,115,.1)', icon: 'fa-mug-hot' },
   fora: { label: 'Fora', short: 'FORA', color: '#71717A', bg: 'rgba(113,113,122,.1)', icon: 'fa-door-open' }
 };
 

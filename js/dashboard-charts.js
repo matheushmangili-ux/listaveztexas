@@ -1362,7 +1362,7 @@ export async function loadTrend(range) {
     }
   });
   if (conv.length > 1) renderChart('sparkConv', '#sparkConv', sparkOpts(conv, '#aaeec4', sparkDates, '%'));
-  if (atend.length > 1) renderChart('sparkTempo', '#sparkTempo', sparkOpts(atend, '#6366f1', sparkDates, ''));
+  if (atend.length > 1) renderChart('sparkTempo', '#sparkTempo', sparkOpts(atend, '#8ea5c9', sparkDates, ''));
 }
 
 // ─── Origem dos Clientes (ApexCharts donut) ───

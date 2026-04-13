@@ -33,7 +33,7 @@ window.addEventListener('error', function(e) {
   const el = document.getElementById('toastContainer');
   if (el) {
     const d = document.createElement('div');
-    d.style.cssText = 'background:#dc2626;color:#fff;padding:8px 16px;border-radius:4px;margin:4px;font-size:12px;max-width:300px';
+    d.style.cssText = 'background:#d47a68;color:#0d0d0d;padding:8px 16px;border-radius:4px;margin:4px;font-size:12px;max-width:300px';
     d.textContent = 'Erro: ' + (e.message || 'desconhecido');
     el.appendChild(d);
     setTimeout(() => d.remove(), 5000);
