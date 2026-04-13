@@ -129,7 +129,7 @@ async function openTurnoSummary() {
       </div>
       ${
         topVendedor
-          ? `<div style="background:rgba(251,191,36,.08);border-radius:10px;padding:12px;text-align:center;margin-bottom:12px">
+          ? `<div style="background:rgba(212, 163, 115,.08);border-radius:10px;padding:12px;text-align:center;margin-bottom:12px">
         <span style="font-size:18px;margin-right:6px">🏆</span>
         <span style="font-weight:700;font-size:14px">${escapeHtml(topVendedor.nome)}</span>
         <span style="font-family:var(--font-mono);font-size:13px;color:var(--success);margin-left:6px">${topVendedor.vendas} venda${topVendedor.vendas > 1 ? 's' : ''}</span>

@@ -460,7 +460,7 @@ function initDragAndDrop() {
   dropzone.addEventListener('dragover', (e) => {
     e.preventDefault();
     dropzone.classList.add('dragging');
-    dropzone.style.background = 'rgba(34,197,94,.05)';
+    dropzone.style.background = 'rgba(170, 238, 196,.05)';
     const after = getDragAfterElement(dropzone, e.clientY);
     if (after !== _prevDragAfter) {
       clearDragIndicators();
@@ -704,7 +704,7 @@ function onTouchDragStart(e) {
       const elUnder = document.elementFromPoint(t.clientX, t.clientY);
 
       if (elUnder && (elUnder.id === 'queueList' || elUnder.closest('#queueList'))) {
-        queueList.style.background = 'rgba(34,197,94,.05)';
+        queueList.style.background = 'rgba(170, 238, 196,.05)';
         footer?.classList.remove('drop-highlight');
         hideFooterDropLabel();
         const after = getDragAfterElement(queueList, t.clientY);

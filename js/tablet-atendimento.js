@@ -402,7 +402,7 @@ function initAtendDrag() {
               elUnder.id === 'queuePanel' ||
               elUnder.closest('#queuePanel'));
           if (overQueue) {
-            queueList.style.background = 'rgba(96,165,250,.06)';
+            queueList.style.background = 'rgba(142, 165, 201,.06)';
           } else {
             queueList.style.background = '';
           }

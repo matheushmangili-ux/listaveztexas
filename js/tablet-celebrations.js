@@ -23,16 +23,16 @@ export function fireVendaCelebration(opts = {}) {
 
   // Overlay container
   const flash = document.createElement('div');
-  flash.style.cssText = `position:fixed;inset:0;z-index:${Z_DRAG_GHOST};pointer-events:none;display:flex;align-items:center;justify-content:center;background:rgba(52,211,153,.06)`;
+  flash.style.cssText = `position:fixed;inset:0;z-index:${Z_DRAG_GHOST};pointer-events:none;display:flex;align-items:center;justify-content:center;background:rgba(170, 238, 196,.06)`;
 
   const valorHtml = valor != null
-    ? `<span class="venda-celebrate-valor" style="font-family:var(--font-mono);font-size:28px;font-weight:800;color:var(--success);letter-spacing:-.02em;margin-top:4px;text-shadow:0 0 24px rgba(52,211,153,.45);font-variant-numeric:tabular-nums">R$ 0,00</span>`
+    ? `<span class="venda-celebrate-valor" style="font-family:var(--font-mono);font-size:28px;font-weight:800;color:var(--success);letter-spacing:-.02em;margin-top:4px;text-shadow:0 0 24px rgba(170, 238, 196,.45);font-variant-numeric:tabular-nums">R$ 0,00</span>`
     : '';
 
   flash.innerHTML = `
     <div class="venda-celebrate-box" style="display:flex;flex-direction:column;align-items:center;gap:2px">
-      <i class="fa-solid fa-circle-check" style="font-size:64px;color:var(--success);filter:drop-shadow(0 0 24px rgba(52,211,153,.55))"></i>
-      <span style="font-family:var(--font-mono);font-size:22px;font-weight:800;color:var(--success);letter-spacing:.08em;text-shadow:0 0 20px rgba(52,211,153,.35)">VENDA!</span>
+      <i class="fa-solid fa-circle-check" style="font-size:64px;color:var(--success);filter:drop-shadow(0 0 24px rgba(170, 238, 196,.55))"></i>
+      <span style="font-family:var(--font-mono);font-size:22px;font-weight:800;color:var(--success);letter-spacing:.08em;text-shadow:0 0 20px rgba(170, 238, 196,.35)">VENDA!</span>
       ${valorHtml}
     </div>`;
   document.body.appendChild(flash);
@@ -118,7 +118,7 @@ export function animateValueToHeader(valor, originEl) {
 
   const badge = document.createElement('div');
   badge.textContent = '+R$ ' + Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  badge.style.cssText = `position:fixed;left:${ox}px;top:${oy}px;transform:translate(-50%,-50%);z-index:${Z_DRAG_GHOST + 2};padding:8px 14px;border-radius:999px;background:linear-gradient(135deg,#aaeec4,#7fd9a0);color:#fff;font-family:var(--font-mono);font-weight:800;font-size:16px;box-shadow:0 8px 32px rgba(34,197,94,.45);pointer-events:none;white-space:nowrap;letter-spacing:-.01em`;
+  badge.style.cssText = `position:fixed;left:${ox}px;top:${oy}px;transform:translate(-50%,-50%);z-index:${Z_DRAG_GHOST + 2};padding:8px 14px;border-radius:999px;background:linear-gradient(135deg,#aaeec4,#7fd9a0);color:#fff;font-family:var(--font-mono);font-weight:800;font-size:16px;box-shadow:0 8px 32px rgba(170, 238, 196,.45);pointer-events:none;white-space:nowrap;letter-spacing:-.01em`;
   document.body.appendChild(badge);
 
   const midX = (ox + tx) / 2;
@@ -153,7 +153,7 @@ export function fireEpicTrocaAnimation(nome, valor) {
 
   const card = document.createElement('div');
   card.className = 'epic-card';
-  card.style.cssText = 'position:relative;z-index:1;text-align:center;padding:40px 52px;border-radius:20px;border:2px solid rgba(167,139,250,.5);background:linear-gradient(135deg,#1a0a2e 0%,#0f172a 50%,#1a0a2e 100%);box-shadow:0 30px 80px rgba(167,139,250,.35),inset 0 1px 0 rgba(255,255,255,.08);transform-style:preserve-3d';
+  card.style.cssText = 'position:relative;z-index:1;text-align:center;padding:40px 52px;border-radius:20px;border:2px solid rgba(184, 168, 212,.5);background:linear-gradient(135deg,#1a0a2e 0%,#0f172a 50%,#1a0a2e 100%);box-shadow:0 30px 80px rgba(184, 168, 212,.35),inset 0 1px 0 rgba(255,255,255,.08);transform-style:preserve-3d';
   card.innerHTML = `
     <div class="epic-label" style="font-size:11px;font-weight:800;letter-spacing:.25em;text-transform:uppercase;color:#c4b5fd;margin-bottom:14px">CONQUISTA DESBLOQUEADA</div>
     <div class="epic-gem" style="font-size:56px;margin-bottom:10px;filter:drop-shadow(0 0 24px rgba(232,121,249,.6))">💎</div>
@@ -161,7 +161,7 @@ export function fireEpicTrocaAnimation(nome, valor) {
     <div class="epic-sub" style="font-size:13px;color:#c4b5fd;font-weight:600;margin-bottom:18px">Troca com diferença épica</div>
     <div class="epic-valor" style="font-family:var(--font-mono);font-size:36px;font-weight:800;color:#f0abfc;text-shadow:0 0 32px rgba(240,171,252,.5);letter-spacing:-.02em;font-variant-numeric:tabular-nums">R$ ${Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
     <div class="epic-foot" style="margin-top:18px;font-size:10px;color:#b8a8d4;font-weight:700;letter-spacing:.15em">1º DA FILA GARANTIDO</div>
-    <button class="epic-close" style="margin-top:22px;padding:10px 32px;border:1px solid rgba(167,139,250,.4);border-radius:10px;background:rgba(167,139,250,.15);color:#e9d5ff;font-family:var(--font-mono);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s">FECHAR</button>
+    <button class="epic-close" style="margin-top:22px;padding:10px 32px;border:1px solid rgba(184, 168, 212,.4);border-radius:10px;background:rgba(184, 168, 212,.15);color:#e9d5ff;font-family:var(--font-mono);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s">FECHAR</button>
   `;
   overlay.appendChild(card);
   document.body.appendChild(overlay);

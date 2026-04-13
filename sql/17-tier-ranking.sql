@@ -47,13 +47,13 @@ RETURNS JSONB LANGUAGE sql IMMUTABLE AS $$
         'major_code','ferro','icon','fa-shield','color','#64748b','sub_roman','III')
     WHEN p_level = 7 THEN
       jsonb_build_object('code','bronze_1','label','Bronze I','short','BRZ I',
-        'major_code','bronze','icon','fa-medal','color','#b45309','sub_roman','I')
+        'major_code','bronze','icon','fa-medal','color','#b8875a','sub_roman','I')
     WHEN p_level = 8 THEN
       jsonb_build_object('code','bronze_2','label','Bronze II','short','BRZ II',
-        'major_code','bronze','icon','fa-medal','color','#b45309','sub_roman','II')
+        'major_code','bronze','icon','fa-medal','color','#b8875a','sub_roman','II')
     WHEN p_level = 9 THEN
       jsonb_build_object('code','bronze_3','label','Bronze III','short','BRZ III',
-        'major_code','bronze','icon','fa-medal','color','#b45309','sub_roman','III')
+        'major_code','bronze','icon','fa-medal','color','#b8875a','sub_roman','III')
     WHEN p_level = 10 THEN
       jsonb_build_object('code','prata_1','label','Prata I','short','PRA I',
         'major_code','prata','icon','fa-medal','color','#cbd5e1','sub_roman','I')
@@ -65,46 +65,46 @@ RETURNS JSONB LANGUAGE sql IMMUTABLE AS $$
         'major_code','prata','icon','fa-medal','color','#cbd5e1','sub_roman','III')
     WHEN p_level = 13 THEN
       jsonb_build_object('code','ouro_1','label','Ouro I','short','OUR I',
-        'major_code','ouro','icon','fa-medal','color','#facc15','sub_roman','I')
+        'major_code','ouro','icon','fa-medal','color','#d4a373','sub_roman','I')
     WHEN p_level = 14 THEN
       jsonb_build_object('code','ouro_2','label','Ouro II','short','OUR II',
-        'major_code','ouro','icon','fa-medal','color','#facc15','sub_roman','II')
+        'major_code','ouro','icon','fa-medal','color','#d4a373','sub_roman','II')
     WHEN p_level = 15 THEN
       jsonb_build_object('code','ouro_3','label','Ouro III','short','OUR III',
-        'major_code','ouro','icon','fa-medal','color','#facc15','sub_roman','III')
+        'major_code','ouro','icon','fa-medal','color','#d4a373','sub_roman','III')
     WHEN p_level = 16 THEN
       jsonb_build_object('code','platina_1','label','Platina I','short','PLA I',
-        'major_code','platina','icon','fa-shield-halved','color','#22d3ee','sub_roman','I')
+        'major_code','platina','icon','fa-shield-halved','color','#a8c4d4','sub_roman','I')
     WHEN p_level = 17 THEN
       jsonb_build_object('code','platina_2','label','Platina II','short','PLA II',
-        'major_code','platina','icon','fa-shield-halved','color','#22d3ee','sub_roman','II')
+        'major_code','platina','icon','fa-shield-halved','color','#a8c4d4','sub_roman','II')
     WHEN p_level = 18 THEN
       jsonb_build_object('code','platina_3','label','Platina III','short','PLA III',
-        'major_code','platina','icon','fa-shield-halved','color','#22d3ee','sub_roman','III')
+        'major_code','platina','icon','fa-shield-halved','color','#a8c4d4','sub_roman','III')
     WHEN p_level = 19 THEN
       jsonb_build_object('code','diamante_1','label','Diamante I','short','DIA I',
-        'major_code','diamante','icon','fa-gem','color','#60a5fa','sub_roman','I')
+        'major_code','diamante','icon','fa-gem','color','#8ea5c9','sub_roman','I')
     WHEN p_level = 20 THEN
       jsonb_build_object('code','diamante_2','label','Diamante II','short','DIA II',
-        'major_code','diamante','icon','fa-gem','color','#60a5fa','sub_roman','II')
+        'major_code','diamante','icon','fa-gem','color','#8ea5c9','sub_roman','II')
     WHEN p_level = 21 THEN
       jsonb_build_object('code','diamante_3','label','Diamante III','short','DIA III',
-        'major_code','diamante','icon','fa-gem','color','#60a5fa','sub_roman','III')
+        'major_code','diamante','icon','fa-gem','color','#8ea5c9','sub_roman','III')
     WHEN p_level <= 24 THEN
       jsonb_build_object('code','mestre','label','Mestre','short','MES',
-        'major_code','mestre','icon','fa-crown','color','#a855f7','sub_roman','')
+        'major_code','mestre','icon','fa-crown','color','#b8a8d4','sub_roman','')
     WHEN p_level <= 29 THEN
       jsonb_build_object('code','grao_mestre','label','Grão-Mestre','short','GMS',
-        'major_code','grao_mestre','icon','fa-crown','color','#7c3aed','sub_roman','')
+        'major_code','grao_mestre','icon','fa-crown','color','#9488b8','sub_roman','')
     WHEN p_level <= 34 THEN
       jsonb_build_object('code','rubi','label','Rubi','short','RUB',
-        'major_code','rubi','icon','fa-gem','color','#dc2626','sub_roman','')
+        'major_code','rubi','icon','fa-gem','color','#d47a68','sub_roman','')
     WHEN p_level <= 44 THEN
       jsonb_build_object('code','lendario','label','Lendário','short','LEN',
-        'major_code','lendario','icon','fa-trophy','color','#f97316','sub_roman','')
+        'major_code','lendario','icon','fa-trophy','color','#e89b8a','sub_roman','')
     ELSE
       jsonb_build_object('code','mitico','label','Mítico','short','MIT',
-        'major_code','mitico','icon','fa-dragon','color','#ec4899','sub_roman','')
+        'major_code','mitico','icon','fa-dragon','color','#7fd9a0','sub_roman','')
   END;
 $$;
 

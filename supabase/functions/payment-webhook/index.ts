@@ -135,7 +135,7 @@ function setupCompleteEmailHTML(slug: string) {
 <table width="560" cellpadding="0" cellspacing="0" style="background:#18181B;border-radius:8px;border:1px solid rgba(255,255,255,.06)">
   <tr><td style="padding:40px 32px 24px;text-align:center">
     <h1 style="margin:0;font-size:24px;font-weight:800;color:#FAFAFA">Minha Vez</h1>
-    <p style="margin:4px 0 0;font-size:11px;color:#34D399;text-transform:uppercase;letter-spacing:2px">Loja Configurada</p>
+    <p style="margin:4px 0 0;font-size:11px;color:#aaeec4;text-transform:uppercase;letter-spacing:2px">Loja Configurada</p>
   </td></tr>
   <tr><td style="padding:0 32px"><div style="height:1px;background:rgba(255,255,255,.06)"></div></td></tr>
   <tr><td style="padding:24px 32px">
@@ -269,7 +269,7 @@ Deno.serve(async (req) => {
 <table width="560" cellpadding="0" cellspacing="0" style="background:#18181B;border-radius:8px;border:1px solid rgba(255,255,255,.06)">
   <tr><td style="padding:40px 32px 24px;text-align:center">
     <h1 style="margin:0;font-size:24px;font-weight:800;color:#FAFAFA">Minha Vez</h1>
-    <p style="margin:4px 0 0;font-size:11px;color:#F87171;text-transform:uppercase;letter-spacing:2px">Atenção</p>
+    <p style="margin:4px 0 0;font-size:11px;color:#e89b8a;text-transform:uppercase;letter-spacing:2px">Atenção</p>
   </td></tr>
   <tr><td style="padding:0 32px"><div style="height:1px;background:rgba(255,255,255,.06)"></div></td></tr>
   <tr><td style="padding:24px 32px">
@@ -278,7 +278,7 @@ Deno.serve(async (req) => {
     </p>
     <table width="100%" cellpadding="0" cellspacing="0">
       <tr><td align="center">
-        <a href="${BASE_URL}" style="display:inline-block;padding:14px 32px;background:#F87171;color:#09090B;font-size:15px;font-weight:700;text-decoration:none;border-radius:6px">
+        <a href="${BASE_URL}" style="display:inline-block;padding:14px 32px;background:#e89b8a;color:#09090B;font-size:15px;font-weight:700;text-decoration:none;border-radius:6px">
           Atualizar pagamento
         </a>
       </td></tr>

@@ -769,7 +769,7 @@ window.toggleMiniRanking = async function () {
     document.getElementById('miniRankingList').innerHTML = sorted
       .map((s, i) => {
         const conv = s.total > 0 ? Math.round((s.vendas / s.total) * 100) : 0;
-        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;${i === 0 ? 'background:rgba(251,191,36,.08);border-radius:8px' : ''}">
+        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;${i === 0 ? 'background:rgba(212, 163, 115,.08);border-radius:8px' : ''}">
         <span style="font-size:14px;width:24px;text-align:center;flex-shrink:0">${medals[i]}</span>
         <span style="flex:1;font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.nome}</span>
         <span style="font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--success)">${s.vendas}v</span>
