@@ -32,8 +32,8 @@
   z-index: 100;
 }
 .sidebar-brand {
-  margin-bottom: 24px;
-  padding: 8px 0;
+  margin-bottom: 16px;
+  padding: 0;
 }
 .dash-header-logo {
   flex-shrink: 0;
@@ -44,9 +44,9 @@
   width: 100%;
 }
 .dash-header-logo img {
-  width: 100%;
-  height: auto;
-  max-height: 110px;
+  width: auto;
+  height: 72px;
+  max-width: 100%;
   object-fit: contain;
   display: block;
 }
