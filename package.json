@@ -5,6 +5,7 @@
   "description": "Minha Vez — Sistema de fila e atendimento para lojas multi-tenant",
   "type": "module",
   "scripts": {
+    "dev": "browser-sync start --server --files \"**/*.{html,css,js}\" --no-notify --port 3000 --startPath \"/landing.html\" --ignore \"node_modules/**\" --ignore \".git/**\"",
     "test": "vitest run --pool=forks --poolOptions.forks.singleFork",
     "test:smoke": "SMOKE=1 vitest run --pool=forks --poolOptions.forks.singleFork tests/smoke.test.js",
     "test:watch": "vitest",
@@ -29,6 +30,7 @@
     "vitest": "^2.1.8",
     "jsdom": "^25.0.1",
     "husky": "^9.1.7",
-    "lint-staged": "^15.2.10"
+    "lint-staged": "^15.2.10",
+    "browser-sync": "^3.0.3"
   }
 }
