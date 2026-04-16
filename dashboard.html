@@ -1,551 +1,1360 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR" data-theme="dark">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Minha Vez — Dashboard</title>
-<script>
-(function(){
-  var t = localStorage.getItem('lv-theme') || 'dark';
-  document.documentElement.setAttribute('data-theme', t);
-})();
-</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/styles.v51.css">
-<link rel="stylesheet" href="/css/dashboard.v51.css">
-<meta name="theme-color" content="#0d0d0d">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="manifest" href="/manifest.json">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/js/update-checker.js"></script>
-<script>initUpdateChecker('/dashboard.html');</script>
-<script src="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.min.js"></script>
-<!-- ECharts removed — only ApexCharts is used -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minha Vez — Dashboard</title>
+    <script>
+      (function () {
+        var t = localStorage.getItem('lv-theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/styles.v51.css" />
+    <link rel="stylesheet" href="/css/dashboard.v51.css" />
+    <meta name="theme-color" content="#0d0d0d" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/update-checker.js"></script>
+    <script>
+      initUpdateChecker('/dashboard.html');
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.min.js"></script>
+    <!-- ECharts removed — only ApexCharts is used -->
 
-<script>window.PUBLIC_POSTHOG_KEY="";window.PUBLIC_POSTHOG_HOST="https://us.i.posthog.com";</script>
-<script>window.PUBLIC_SENTRY_DSN="";window.PUBLIC_SENTRY_ENV="production";</script>
-<script type="module" src="/js/sentry.js"></script>
-<script type="module" src="/js/analytics.js"></script>
-</head>
-<body>
+    <script>
+      window.PUBLIC_POSTHOG_KEY = '';
+      window.PUBLIC_POSTHOG_HOST = 'https://us.i.posthog.com';
+    </script>
+    <script>
+      window.PUBLIC_SENTRY_DSN = '';
+      window.PUBLIC_SENTRY_ENV = 'production';
+    </script>
+    <script type="module" src="/js/sentry.js"></script>
+    <script type="module" src="/js/analytics.js"></script>
+  </head>
+  <body>
+    <div class="dash-layout">
+      <!-- Sidebar -->
+      <aside class="dash-sidebar" id="dashSidebar">
+        <!-- Brand -->
+        <div class="sidebar-brand">
+          <div class="dash-header-logo" id="headerLogo">
+            <img src="/assets/logo-minhavez-transparent.png" alt="minhavez" />
+          </div>
+        </div>
 
-<div class="dash-layout">
-  <!-- Sidebar -->
-  <aside class="dash-sidebar" id="dashSidebar">
-    <!-- Brand -->
-    <div class="sidebar-brand">
-      <div class="dash-header-logo" id="headerLogo"><img src="/assets/logo-minhavez-transparent.png" alt="minhavez"></div>
-    </div>
+        <!-- Nav -->
+        <nav class="sidebar-nav">
+          <span class="sidebar-section-label">Menu</span>
+          <a class="sidebar-link sidebar-link--active" href="#" onclick="event.preventDefault()">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Dashboard</span>
+          </a>
+          <a id="linkTablet" href="#" class="sidebar-link">
+            <i class="fa-solid fa-tablet-screen-button"></i>
+            <span>Tablet</span>
+          </a>
+          <a
+            id="linkAnnouncements"
+            href="#"
+            class="sidebar-link"
+            onclick="
+              event.preventDefault();
+              window._dashAnnouncementsOpen && window._dashAnnouncementsOpen();
+            "
+          >
+            <i class="fa-solid fa-bullhorn"></i>
+            <span>Comunicados</span>
+          </a>
+          <a
+            id="linkXpConfig"
+            href="#"
+            class="sidebar-link"
+            onclick="
+              event.preventDefault();
+              window._dashXpConfigOpen && window._dashXpConfigOpen();
+            "
+          >
+            <i class="fa-solid fa-bolt"></i>
+            <span>Gamificação</span>
+          </a>
+          <a
+            id="linkMissions"
+            href="#"
+            class="sidebar-link"
+            onclick="
+              event.preventDefault();
+              window._dashMissionsOpen && window._dashMissionsOpen();
+            "
+          >
+            <i class="fa-solid fa-bullseye"></i>
+            <span>Missões</span>
+          </a>
+          <a
+            id="linkVm"
+            href="#"
+            class="sidebar-link"
+            onclick="
+              event.preventDefault();
+              window._dashVmOpen && window._dashVmOpen();
+            "
+          >
+            <i class="fa-solid fa-camera-retro"></i>
+            <span>VM Photos</span>
+          </a>
+          <a
+            id="linkAi"
+            href="#"
+            class="sidebar-link"
+            onclick="
+              event.preventDefault();
+              window._dashAiOpen && window._dashAiOpen();
+            "
+          >
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>IA Assist</span>
+          </a>
+          <a id="linkSettings" href="#" class="sidebar-link">
+            <i class="fa-solid fa-gear"></i>
+            <span>Configurações</span>
+          </a>
+        </nav>
 
-    <!-- Nav -->
-    <nav class="sidebar-nav">
-      <span class="sidebar-section-label">Menu</span>
-      <a class="sidebar-link sidebar-link--active" href="#" onclick="event.preventDefault()">
-        <i class="fa-solid fa-chart-pie"></i>
-        <span>Dashboard</span>
-      </a>
-      <a id="linkTablet" href="#" class="sidebar-link">
-        <i class="fa-solid fa-tablet-screen-button"></i>
-        <span>Tablet</span>
-      </a>
-      <a id="linkAnnouncements" href="#" class="sidebar-link" onclick="event.preventDefault();window._dashAnnouncementsOpen&&window._dashAnnouncementsOpen()">
-        <i class="fa-solid fa-bullhorn"></i>
-        <span>Comunicados</span>
-      </a>
-      <a id="linkXpConfig" href="#" class="sidebar-link" onclick="event.preventDefault();window._dashXpConfigOpen&&window._dashXpConfigOpen()">
-        <i class="fa-solid fa-bolt"></i>
-        <span>Gamificação</span>
-      </a>
-      <a id="linkMissions" href="#" class="sidebar-link" onclick="event.preventDefault();window._dashMissionsOpen&&window._dashMissionsOpen()">
-        <i class="fa-solid fa-bullseye"></i>
-        <span>Missões</span>
-      </a>
-      <a id="linkVm" href="#" class="sidebar-link" onclick="event.preventDefault();window._dashVmOpen&&window._dashVmOpen()">
-        <i class="fa-solid fa-camera-retro"></i>
-        <span>VM Photos</span>
-      </a>
-      <a id="linkAi" href="#" class="sidebar-link" onclick="event.preventDefault();window._dashAiOpen&&window._dashAiOpen()">
-        <i class="fa-solid fa-wand-magic-sparkles"></i>
-        <span>IA Assist</span>
-      </a>
-      <a id="linkSettings" href="#" class="sidebar-link">
-        <i class="fa-solid fa-gear"></i>
-        <span>Configurações</span>
-      </a>
-    </nav>
+        <div class="sidebar-spacer"></div>
 
-    <div class="sidebar-spacer"></div>
+        <!-- Footer -->
+        <div class="sidebar-footer">
+          <button class="sidebar-link" onclick="window.minhavezTour?.start('dashboard')" aria-label="Rever tour">
+            <i class="fa-solid fa-circle-question"></i>
+            <span>Rever tour</span>
+          </button>
+          <button class="sidebar-link sidebar-link--danger" onclick="handleLogout()" aria-label="Sair">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Sair</span>
+          </button>
+        </div>
+      </aside>
 
-
-    <!-- Footer -->
-    <div class="sidebar-footer">
-      <button class="sidebar-link" onclick="window.minhavezTour?.start('dashboard')" aria-label="Rever tour">
-        <i class="fa-solid fa-circle-question"></i>
-        <span>Rever tour</span>
+      <!-- Mobile header (hidden on desktop) -->
+      <button
+        class="dash-mobile-toggle"
+        id="sidebarToggle"
+        onclick="document.getElementById('dashSidebar').classList.toggle('open')"
+        aria-label="Abrir menu"
+      >
+        <i class="fa-solid fa-bars"></i>
       </button>
-      <button class="sidebar-link sidebar-link--danger" onclick="handleLogout()" aria-label="Sair">
-        <i class="fa-solid fa-right-from-bracket"></i>
-        <span>Sair</span>
-      </button>
-    </div>
-  </aside>
 
-  <!-- Mobile header (hidden on desktop) -->
-  <button class="dash-mobile-toggle" id="sidebarToggle" onclick="document.getElementById('dashSidebar').classList.toggle('open')" aria-label="Abrir menu">
-    <i class="fa-solid fa-bars"></i>
-  </button>
+      <!-- Main content -->
+      <div class="dash-main">
+        <!-- Topbar: Period + Filters + Greeting -->
+        <div class="dash-topbar">
+          <!-- Row 1: Period tabs + Greeting -->
+          <div class="topbar-row">
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0">
+              <div class="period-tabs" id="periodTabs">
+                <button data-period="hoje" class="active" onclick="setPeriod('hoje')">Hoje</button>
+                <button data-period="ontem" onclick="setPeriod('ontem')">Ontem</button>
+                <button data-period="semana" onclick="setPeriod('semana')">Semana</button>
+                <button data-period="mes" onclick="setPeriod('mes')">Mês</button>
+                <button
+                  data-period="custom"
+                  onclick="toggleCalendar(event)"
+                  title="Período personalizado"
+                  style="position: relative"
+                >
+                  <i class="fa-solid fa-calendar-days" style="font-size: 10px"></i>
+                </button>
+              </div>
+              <span
+                id="customRangeLabel"
+                style="
+                  display: none;
+                  font-size: 11px;
+                  color: var(--text-muted);
+                  font-weight: 600;
+                  font-family: var(--font-body);
+                "
+              ></span>
+            </div>
+            <!-- Calendar Popover -->
+            <div id="calendarPopover" class="cal-popover" style="display: none">
+              <div class="cal-header">
+                <button class="cal-nav" onclick="calNav(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                <span id="calMonthLabel" class="cal-month-label"></span>
+                <button class="cal-nav" onclick="calNav(1)"><i class="fa-solid fa-chevron-right"></i></button>
+              </div>
+              <div class="cal-weekdays">
+                <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+              </div>
+              <div class="cal-grid" id="calGrid"></div>
+              <div class="cal-footer">
+                <span id="calSelectionHint" class="cal-hint">Clique no dia inicial</span>
+                <button class="cal-clear" onclick="calClear()">Limpar</button>
+              </div>
+            </div>
+            <div class="topbar-greeting" id="topbarGreeting">
+              <span class="greeting-text" id="greetingText"></span>
+              <span class="greeting-meta">
+                <span id="greetingCity"><i class="fa-solid fa-location-dot"></i> —</span>
+                <span class="greeting-sep">·</span>
+                <span id="greetingClock">--:--</span>
+                <span class="greeting-sep">·</span>
+                <span id="greetingTemp"><i class="fa-solid fa-temperature-half"></i> —</span>
+              </span>
+            </div>
+          </div>
+          <!-- Row 2: Filters + Export -->
+          <div class="topbar-filter-card">
+            <div class="filter-bar">
+              <label>Setor:</label>
+              <select id="filterSetor" onchange="onSetorChange()">
+                <option value="">Todos os setores</option>
+              </select>
+              <label>Vendedor:</label>
+              <select id="filterVendedor">
+                <option value="">Todos os vendedores</option>
+              </select>
+              <button class="filter-apply-btn" onclick="applyFilters()" title="Aplicar filtros">
+                <i class="fa-solid fa-filter"></i> Aplicar
+              </button>
+              <button
+                class="filter-clear-btn"
+                id="filterClearBtn"
+                onclick="clearFilters()"
+                title="Limpar filtros"
+                style="display: none"
+              >
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div style="position: relative; display: inline-block" id="exportDropdown">
+              <button
+                class="filter-apply-btn"
+                onclick="document.getElementById('exportMenu').classList.toggle('open')"
+                title="Exportar dados"
+              >
+                <i class="fa-solid fa-file-export"></i> Exportar
+              </button>
+              <div id="exportMenu" class="export-menu">
+                <button
+                  onclick="
+                    exportCSV();
+                    document.getElementById('exportMenu').classList.remove('open');
+                  "
+                >
+                  <i class="fa-solid fa-file-csv" style="color: var(--success)"></i> CSV
+                </button>
+                <button
+                  onclick="
+                    exportPDF();
+                    document.getElementById('exportMenu').classList.remove('open');
+                  "
+                >
+                  <i class="fa-solid fa-file-pdf" style="color: var(--danger)"></i> PDF
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
 
-  <!-- Main content -->
-  <div class="dash-main">
-    <!-- Topbar: Period + Filters + Greeting -->
-    <div class="dash-topbar">
-      <!-- Row 1: Period tabs + Greeting -->
-      <div class="topbar-row">
-        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
-          <div class="period-tabs" id="periodTabs">
-            <button data-period="hoje" class="active" onclick="setPeriod('hoje')">Hoje</button>
-            <button data-period="ontem" onclick="setPeriod('ontem')">Ontem</button>
-            <button data-period="semana" onclick="setPeriod('semana')">Semana</button>
-            <button data-period="mes" onclick="setPeriod('mes')">Mês</button>
-            <button data-period="custom" onclick="toggleCalendar(event)" title="Período personalizado" style="position:relative"><i class="fa-solid fa-calendar-days" style="font-size:10px"></i></button>
+        <!-- Status Marquee -->
+        <div
+          id="statusMarquee"
+          style="
+            overflow: hidden;
+            white-space: nowrap;
+            margin-bottom: var(--space-lg);
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            padding: 10px 0;
+            position: relative;
+          "
+        >
+          <div
+            style="
+              position: absolute;
+              left: 0;
+              top: 0;
+              bottom: 0;
+              display: flex;
+              align-items: center;
+              padding: 0 14px;
+              background: linear-gradient(90deg, var(--bg-surface) 80%, transparent);
+              z-index: 2;
+              font-size: 9px;
+              font-weight: 800;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+            "
+          >
+            <span
+              style="
+                display: inline-block;
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: var(--success);
+                margin-right: 8px;
+                box-shadow:
+                  0 0 6px 2px var(--success),
+                  0 0 12px 4px rgba(170, 238, 196, 0.4);
+                animation: pulseGlow 2s ease-in-out infinite;
+              "
+            ></span
+            >On Time
           </div>
-          <span id="customRangeLabel" style="display:none;font-size:11px;color:var(--text-muted);font-weight:600;font-family:var(--font-body)"></span>
+          <div
+            id="marqueeTrack"
+            style="display: inline-flex; gap: 16px; animation: marqueeHeader 25s linear infinite; padding-left: 120px"
+          ></div>
         </div>
-        <!-- Calendar Popover -->
-        <div id="calendarPopover" class="cal-popover" style="display:none">
-          <div class="cal-header">
-            <button class="cal-nav" onclick="calNav(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-            <span id="calMonthLabel" class="cal-month-label"></span>
-            <button class="cal-nav" onclick="calNav(1)"><i class="fa-solid fa-chevron-right"></i></button>
+
+        <!-- KPI Cards — Hero Row -->
+        <div class="kpi-grid-hero" id="kpiGrid">
+          <div class="kpi-card kpi-card--hero">
+            <div class="kpi-label"><i class="fa-solid fa-users"></i> Total Atendimentos</div>
+            <div class="kpi-value" id="kpiTotal"><div class="skeleton skeleton-kpi-value"></div></div>
+            <div class="kpi-compare" id="kpiTotalCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
           </div>
-          <div class="cal-weekdays">
-            <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+          <div class="kpi-card">
+            <div class="kpi-label"><i class="fa-solid fa-bag-shopping"></i> Total Vendas</div>
+            <div class="kpi-value" id="kpiVendas"><div class="skeleton skeleton-kpi-value"></div></div>
+            <div class="kpi-compare" id="kpiVendasCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
           </div>
-          <div class="cal-grid" id="calGrid"></div>
-          <div class="cal-footer">
-            <span id="calSelectionHint" class="cal-hint">Clique no dia inicial</span>
-            <button class="cal-clear" onclick="calClear()">Limpar</button>
+          <div class="kpi-card kpi-card--hero">
+            <div class="kpi-label"><i class="fa-solid fa-chart-line"></i> Taxa de Conversão</div>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+              <div style="flex: 1; min-width: 0">
+                <div class="kpi-value" id="kpiConv"><div class="skeleton skeleton-kpi-value"></div></div>
+                <div class="kpi-compare" id="kpiConvCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+              </div>
+              <div id="sparkConv" class="kpi-spark"></div>
+            </div>
           </div>
         </div>
-        <div class="topbar-greeting" id="topbarGreeting">
-          <span class="greeting-text" id="greetingText"></span>
-          <span class="greeting-meta">
-            <span id="greetingCity"><i class="fa-solid fa-location-dot"></i> —</span>
-            <span class="greeting-sep">·</span>
-            <span id="greetingClock">--:--</span>
-            <span class="greeting-sep">·</span>
-            <span id="greetingTemp"><i class="fa-solid fa-temperature-half"></i> —</span>
-          </span>
+        <!-- KPI Cards — Secondary Row -->
+        <div class="kpi-grid-secondary">
+          <div class="kpi-card">
+            <div class="kpi-label"><i class="fa-solid fa-xmark"></i> Não Convertidos</div>
+            <div class="kpi-value" id="kpiLoss"><div class="skeleton skeleton-kpi-value"></div></div>
+            <div class="kpi-compare" id="kpiLossCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label"><i class="fa-solid fa-star" style="color: var(--warning)"></i> Fidelizados</div>
+            <div class="kpi-value" id="kpiPref"><div class="skeleton skeleton-kpi-value"></div></div>
+            <div class="kpi-compare" id="kpiPrefCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label"><i class="fa-solid fa-clock"></i> Tempo Médio</div>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+              <div style="flex: 1; min-width: 0">
+                <div class="kpi-value" id="kpiTime"><div class="skeleton skeleton-kpi-value"></div></div>
+                <div class="kpi-compare" id="kpiTimeCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+              </div>
+              <div id="sparkTempo" class="kpi-spark"></div>
+            </div>
+          </div>
         </div>
-      </div>
-      <!-- Row 2: Filters + Export -->
-      <div class="topbar-filter-card">
-        <div class="filter-bar">
-          <label>Setor:</label>
-          <select id="filterSetor" onchange="onSetorChange()">
-            <option value="">Todos os setores</option>
-          </select>
-          <label>Vendedor:</label>
-          <select id="filterVendedor">
-            <option value="">Todos os vendedores</option>
-          </select>
-          <button class="filter-apply-btn" onclick="applyFilters()" title="Aplicar filtros">
-            <i class="fa-solid fa-filter"></i> Aplicar
+
+        <!-- Chart Section Tabs -->
+        <div class="chart-tabs" id="chartTabs">
+          <button class="chart-tab active" data-section="geral" onclick="setChartTab('geral')">
+            <i class="fa-solid fa-chart-pie" style="margin-right: 6px"></i>Visão Geral
           </button>
-          <button class="filter-clear-btn" id="filterClearBtn" onclick="clearFilters()" title="Limpar filtros" style="display:none">
-            <i class="fa-solid fa-xmark"></i>
+          <button class="chart-tab" data-section="vendedor" onclick="setChartTab('vendedor')">
+            <i class="fa-solid fa-users" style="margin-right: 6px"></i>Por Vendedor
+          </button>
+          <button class="chart-tab" data-section="operacional" onclick="setChartTab('operacional')">
+            <i class="fa-solid fa-gears" style="margin-right: 6px"></i>Operacional
           </button>
         </div>
-        <div style="position:relative;display:inline-block" id="exportDropdown">
-          <button class="filter-apply-btn" onclick="document.getElementById('exportMenu').classList.toggle('open')" title="Exportar dados">
-            <i class="fa-solid fa-file-export"></i> Exportar
-          </button>
-          <div id="exportMenu" class="export-menu">
-            <button onclick="exportCSV();document.getElementById('exportMenu').classList.remove('open')"><i class="fa-solid fa-file-csv" style="color:var(--success)"></i> CSV</button>
-            <button onclick="exportPDF();document.getElementById('exportMenu').classList.remove('open')"><i class="fa-solid fa-file-pdf" style="color:var(--danger)"></i> PDF</button>
+
+        <!-- Section: Visão Geral -->
+        <div class="chart-section" id="section-geral">
+          <div class="charts-grid">
+            <div class="chart-card">
+              <h3>
+                <i class="fa-solid fa-chart-pie" style="margin-right: 6px; color: var(--accent-dim)"></i>Motivos de
+                Perda
+              </h3>
+              <div class="chart-box" style="height: 300px"><div id="chartMotivos"></div></div>
+              <p id="chartMotivosEmpty" class="chart-empty-state" style="display: none">
+                <i class="fa-solid fa-face-smile-beam"></i>Nenhuma perda registrada neste período
+              </p>
+            </div>
+            <div class="chart-card">
+              <h3>
+                <i class="fa-solid fa-signs-post" style="margin-right: 6px; color: var(--accent-dim)"></i>Origem dos
+                Clientes
+              </h3>
+              <div class="chart-box" style="height: 300px"><div id="chartOrigem"></div></div>
+              <p id="chartOrigemEmpty" class="chart-empty-state" style="display: none">
+                <i class="fa-solid fa-signs-post"></i>Nenhum dado de origem registrado neste período
+              </p>
+            </div>
+          </div>
+          <div class="chart-card" style="margin-bottom: var(--gap)">
+            <h3>
+              <i class="fa-solid fa-chart-bar" style="margin-right: 6px; color: var(--accent-dim)"></i>Fluxo por Hora
+            </h3>
+            <div class="chart-box"><div id="chartHourly"></div></div>
+            <p id="chartHourlyEmpty" class="chart-empty-state" style="display: none">
+              <i class="fa-solid fa-clock"></i>Sem fluxo de atendimentos neste período
+            </p>
+          </div>
+          <div class="chart-card" style="margin-bottom: var(--gap)">
+            <h3>
+              <i class="fa-solid fa-chart-line" style="margin-right: 6px; color: var(--accent-dim)"></i>Evolução Diária
+            </h3>
+            <div
+              style="
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+                scrollbar-color: var(--accent-dim) transparent;
+              "
+            >
+              <div class="chart-box" style="height: 320px; min-width: 700px"><div id="chartTrend"></div></div>
+            </div>
+            <p id="chartTrendEmpty" class="chart-empty-state" style="display: none">
+              <i class="fa-solid fa-chart-line"></i>Sem evolução registrada neste período
+            </p>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Status Marquee -->
-  <div id="statusMarquee" style="overflow:hidden;white-space:nowrap;margin-bottom:var(--space-lg);background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:10px 0;position:relative">
-    <div style="position:absolute;left:0;top:0;bottom:0;display:flex;align-items:center;padding:0 14px;background:linear-gradient(90deg,var(--bg-surface) 80%,transparent);z-index:2;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--success);margin-right:8px;box-shadow:0 0 6px 2px var(--success),0 0 12px 4px rgba(170, 238, 196,.4);animation:pulseGlow 2s ease-in-out infinite"></span>On Time</div>
-    <div id="marqueeTrack" style="display:inline-flex;gap:16px;animation:marqueeHeader 25s linear infinite;padding-left:120px">
-    </div>
-  </div>
-
-  <!-- KPI Cards — Hero Row -->
-  <div class="kpi-grid-hero" id="kpiGrid">
-    <div class="kpi-card kpi-card--hero">
-      <div class="kpi-label"><i class="fa-solid fa-users"></i> Total Atendimentos</div>
-      <div class="kpi-value" id="kpiTotal"><div class="skeleton skeleton-kpi-value"></div></div>
-      <div class="kpi-compare" id="kpiTotalCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label"><i class="fa-solid fa-bag-shopping"></i> Total Vendas</div>
-      <div class="kpi-value" id="kpiVendas"><div class="skeleton skeleton-kpi-value"></div></div>
-      <div class="kpi-compare" id="kpiVendasCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
-    </div>
-    <div class="kpi-card kpi-card--hero">
-      <div class="kpi-label"><i class="fa-solid fa-chart-line"></i> Taxa de Conversão</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-        <div style="flex:1;min-width:0">
-          <div class="kpi-value" id="kpiConv"><div class="skeleton skeleton-kpi-value"></div></div>
-          <div class="kpi-compare" id="kpiConvCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+        <!-- Section: Por Vendedor -->
+        <div class="chart-section" id="section-vendedor" style="display: none">
+          <div class="chart-card" style="margin-bottom: var(--gap)">
+            <div class="chart-card-header" onclick="toggleSection('ranking')">
+              <h3>
+                <i class="fa-solid fa-ranking-star" style="margin-right: 6px; color: var(--accent-dim)"></i>Ranking
+                Vendedores
+              </h3>
+              <button
+                class="collapse-btn"
+                id="collapseBtn-ranking"
+                onclick="
+                  event.stopPropagation();
+                  toggleSection('ranking');
+                "
+              >
+                <i class="fa-solid fa-chevron-down"></i>
+              </button>
+            </div>
+            <div class="chart-card-body" id="collapseBody-ranking" style="margin-top: 16px">
+              <div class="ranking-grid" id="rankingBody">
+                <div style="grid-column: 1/-1; text-align: center; padding: 32px; color: var(--text-muted)">
+                  Carregando...
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="charts-grid">
+            <div class="chart-card">
+              <h3>
+                <i class="fa-solid fa-chart-scatter" style="margin-right: 6px; color: var(--accent-dim)"></i>Volume ×
+                Conversão por Vendedor
+              </h3>
+              <div class="chart-box"><div id="chartScatter"></div></div>
+              <p id="chartScatterEmpty" class="chart-empty-state" style="display: none">
+                <i class="fa-solid fa-chart-scatter"></i>Sem dados de conversão neste período
+              </p>
+            </div>
+            <div class="chart-card">
+              <h3>
+                <i class="fa-solid fa-stopwatch" style="margin-right: 6px; color: var(--accent-dim)"></i>Tempo Médio por
+                Vendedor
+              </h3>
+              <div class="chart-box"><div id="chartTempoMeta"></div></div>
+              <p id="chartTempoEmpty" class="chart-empty-state" style="display: none">
+                <i class="fa-solid fa-stopwatch"></i>Sem dados de tempo neste período
+              </p>
+            </div>
+          </div>
         </div>
-        <div id="sparkConv" class="kpi-spark"></div>
-      </div>
-    </div>
-  </div>
-  <!-- KPI Cards — Secondary Row -->
-  <div class="kpi-grid-secondary">
-    <div class="kpi-card">
-      <div class="kpi-label"><i class="fa-solid fa-xmark"></i> Não Convertidos</div>
-      <div class="kpi-value" id="kpiLoss"><div class="skeleton skeleton-kpi-value"></div></div>
-      <div class="kpi-compare" id="kpiLossCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label"><i class="fa-solid fa-star" style="color:var(--warning)"></i> Fidelizados</div>
-      <div class="kpi-value" id="kpiPref"><div class="skeleton skeleton-kpi-value"></div></div>
-      <div class="kpi-compare" id="kpiPrefCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label"><i class="fa-solid fa-clock"></i> Tempo Médio</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-        <div style="flex:1;min-width:0">
-          <div class="kpi-value" id="kpiTime"><div class="skeleton skeleton-kpi-value"></div></div>
-          <div class="kpi-compare" id="kpiTimeCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+
+        <!-- Section: Operacional -->
+        <div class="chart-section" id="section-operacional" style="display: none">
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-card-header" onclick="toggleSection('rupturas')">
+                <h3>
+                  <i class="fa-solid fa-box-open" style="margin-right: 6px; color: var(--danger)"></i>Rupturas —
+                  Produtos em Falta
+                </h3>
+                <button
+                  class="collapse-btn"
+                  id="collapseBtn-rupturas"
+                  onclick="
+                    event.stopPropagation();
+                    toggleSection('rupturas');
+                  "
+                >
+                  <i class="fa-solid fa-chevron-down"></i>
+                </button>
+              </div>
+              <div class="chart-card-body" id="collapseBody-rupturas" style="margin-top: 16px">
+                <div id="ruptureList">
+                  <div style="text-align: center; padding: 32px; color: var(--text-muted); font-size: 13px">
+                    <i
+                      class="fa-solid fa-check-circle"
+                      style="font-size: 20px; margin-bottom: 8px; display: block; color: var(--success); opacity: 0.4"
+                    ></i>
+                    Nenhuma ruptura registrada
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-card-header" onclick="toggleSection('pausas')">
+                <h3>
+                  <i class="fa-solid fa-clipboard-list" style="margin-right: 6px; color: var(--warning)"></i>Log de
+                  Pausas
+                </h3>
+                <button
+                  class="collapse-btn"
+                  id="collapseBtn-pausas"
+                  onclick="
+                    event.stopPropagation();
+                    toggleSection('pausas');
+                  "
+                >
+                  <i class="fa-solid fa-chevron-down"></i>
+                </button>
+              </div>
+              <div class="chart-card-body" id="collapseBody-pausas" style="margin-top: 16px">
+                <div id="pauseStatsList" class="pause-log" style="max-height: 420px; overflow-y: auto">
+                  <div style="text-align: center; padding: 32px; color: var(--text-muted); font-size: 13px">
+                    Carregando...
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Gestão de Vendedores movida para Settings > Equipe -->
         </div>
-        <div id="sparkTempo" class="kpi-spark"></div>
-      </div>
-    </div>
-  </div>
+        <!-- /section-operacional -->
 
-  <!-- Chart Section Tabs -->
-  <div class="chart-tabs" id="chartTabs">
-    <button class="chart-tab active" data-section="geral" onclick="setChartTab('geral')"><i class="fa-solid fa-chart-pie" style="margin-right:6px"></i>Visão Geral</button>
-    <button class="chart-tab" data-section="vendedor" onclick="setChartTab('vendedor')"><i class="fa-solid fa-users" style="margin-right:6px"></i>Por Vendedor</button>
-    <button class="chart-tab" data-section="operacional" onclick="setChartTab('operacional')"><i class="fa-solid fa-gears" style="margin-right:6px"></i>Operacional</button>
-  </div>
+        <!-- Footer -->
+        <footer
+          style="text-align: center; margin-top: 40px; padding: 32px 0; border-top: 1px solid var(--border-subtle)"
+        >
+          <div class="dash-footer-logo">
+            <img src="/assets/logo-minhavez-transparent.png" alt="minhavez" />
+          </div>
+          <div
+            id="tenantSlugFooter"
+            style="display: none; margin-top: 8px; font-size: 11px; color: #a1a1aa; font-weight: 500; cursor: pointer"
+            title="Clique para copiar"
+          >
+            minhavez V3.7 · ID: <span id="tenantSlugValue"></span>
+          </div>
+        </footer>
+      </div>
 
-  <!-- Section: Visão Geral -->
-  <div class="chart-section" id="section-geral">
-    <div class="charts-grid">
-      <div class="chart-card">
-        <h3><i class="fa-solid fa-chart-pie" style="margin-right:6px;color:var(--accent-dim)"></i>Motivos de Perda</h3>
-        <div class="chart-box" style="height:300px"><div id="chartMotivos"></div></div>
-        <p id="chartMotivosEmpty" class="chart-empty-state" style="display:none"><i class="fa-solid fa-face-smile-beam"></i>Nenhuma perda registrada neste período</p>
-      </div>
-      <div class="chart-card">
-        <h3><i class="fa-solid fa-signs-post" style="margin-right:6px;color:var(--accent-dim)"></i>Origem dos Clientes</h3>
-        <div class="chart-box" style="height:300px"><div id="chartOrigem"></div></div>
-        <p id="chartOrigemEmpty" class="chart-empty-state" style="display:none"><i class="fa-solid fa-signs-post"></i>Nenhum dado de origem registrado neste período</p>
-      </div>
-    </div>
-    <div class="chart-card" style="margin-bottom:var(--gap)">
-      <h3><i class="fa-solid fa-chart-bar" style="margin-right:6px;color:var(--accent-dim)"></i>Fluxo por Hora</h3>
-      <div class="chart-box"><div id="chartHourly"></div></div>
-      <p id="chartHourlyEmpty" class="chart-empty-state" style="display:none"><i class="fa-solid fa-clock"></i>Sem fluxo de atendimentos neste período</p>
-    </div>
-    <div class="chart-card" style="margin-bottom:var(--gap)">
-      <h3><i class="fa-solid fa-chart-line" style="margin-right:6px;color:var(--accent-dim)"></i>Evolução Diária</h3>
-      <div style="overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--accent-dim) transparent">
-        <div class="chart-box" style="height:320px;min-width:700px"><div id="chartTrend"></div></div>
-      </div>
-      <p id="chartTrendEmpty" class="chart-empty-state" style="display:none"><i class="fa-solid fa-chart-line"></i>Sem evolução registrada neste período</p>
-    </div>
-  </div>
+      <div id="toastContainer"></div>
 
-  <!-- Section: Por Vendedor -->
-  <div class="chart-section" id="section-vendedor" style="display:none">
-    <div class="chart-card" style="margin-bottom:var(--gap)">
-      <div class="chart-card-header" onclick="toggleSection('ranking')">
-        <h3><i class="fa-solid fa-ranking-star" style="margin-right:6px;color:var(--accent-dim)"></i>Ranking Vendedores</h3>
-        <button class="collapse-btn" id="collapseBtn-ranking" onclick="event.stopPropagation();toggleSection('ranking')"><i class="fa-solid fa-chevron-down"></i></button>
-      </div>
-      <div class="chart-card-body" id="collapseBody-ranking" style="margin-top:16px">
-        <div class="ranking-grid" id="rankingBody">
-          <div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text-muted)">Carregando...</div>
+      <script type="module" src="/js/dashboard-init.js"></script>
+      <script type="module" src="/js/dashboard-announcements.js"></script>
+      <script type="module">
+        import { startTourIfFirstTime } from '/js/tour.js';
+        window.addEventListener('load', () => setTimeout(() => startTourIfFirstTime('dashboard'), 1500));
+      </script>
+      <script type="module" src="/js/dashboard-xp-config.js"></script>
+      <script type="module" src="/js/dashboard-missions.js"></script>
+      <script type="module" src="/js/dashboard-vm.js"></script>
+      <script type="module" src="/js/dashboard-ai.js"></script>
+
+      <!-- Modal IA Assist -->
+      <div
+        class="modal-overlay"
+        id="aiModal"
+        onclick="if (event.target === this) window._dashAiClose && window._dashAiClose();"
+      >
+        <div class="modal-box" style="max-width: 640px; max-height: 90vh; overflow-y: auto">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px">
+            <h3 style="margin: 0; font-size: 15px">
+              <i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 8px; color: var(--warning)"></i>IA Assist
+            </h3>
+            <button
+              onclick="window._dashAiClose && window._dashAiClose()"
+              style="
+                background: none;
+                border: none;
+                cursor: pointer;
+                color: var(--text-muted);
+                font-size: 16px;
+                padding: 4px;
+              "
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div id="aiModalBody"></div>
         </div>
       </div>
-    </div>
-    <div class="charts-grid">
-      <div class="chart-card">
-        <h3><i class="fa-solid fa-chart-scatter" style="margin-right:6px;color:var(--accent-dim)"></i>Volume × Conversão por Vendedor</h3>
-        <div class="chart-box"><div id="chartScatter"></div></div>
-        <p id="chartScatterEmpty" class="chart-empty-state" style="display:none"><i class="fa-solid fa-chart-scatter"></i>Sem dados de conversão neste período</p>
-      </div>
-      <div class="chart-card">
-        <h3><i class="fa-solid fa-stopwatch" style="margin-right:6px;color:var(--accent-dim)"></i>Tempo Médio por Vendedor</h3>
-        <div class="chart-box"><div id="chartTempoMeta"></div></div>
-        <p id="chartTempoEmpty" class="chart-empty-state" style="display:none"><i class="fa-solid fa-stopwatch"></i>Sem dados de tempo neste período</p>
-      </div>
-    </div>
-  </div>
 
-  <!-- Section: Operacional -->
-  <div class="chart-section" id="section-operacional" style="display:none">
-    <div class="charts-grid">
-      <div class="chart-card">
-        <div class="chart-card-header" onclick="toggleSection('rupturas')">
-          <h3><i class="fa-solid fa-box-open" style="margin-right:6px;color:var(--danger)"></i>Rupturas — Produtos em Falta</h3>
-          <button class="collapse-btn" id="collapseBtn-rupturas" onclick="event.stopPropagation();toggleSection('rupturas')"><i class="fa-solid fa-chevron-down"></i></button>
+      <!-- Modal VM Photos -->
+      <div
+        class="modal-overlay"
+        id="vmModal"
+        onclick="if (event.target === this) window._dashVmClose && window._dashVmClose();"
+      >
+        <div class="modal-box" style="max-width: 720px; max-height: 90vh; overflow-y: auto">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px">
+            <h3 style="margin: 0; font-size: 15px">
+              <i class="fa-solid fa-camera-retro" style="margin-right: 8px; color: var(--info)"></i>VM Photos
+            </h3>
+            <button
+              onclick="window._dashVmClose && window._dashVmClose()"
+              style="
+                background: none;
+                border: none;
+                cursor: pointer;
+                color: var(--text-muted);
+                font-size: 16px;
+                padding: 4px;
+              "
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div id="vmModalBody"></div>
         </div>
-        <div class="chart-card-body" id="collapseBody-rupturas" style="margin-top:16px">
-          <div id="ruptureList">
-            <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">
-              <i class="fa-solid fa-check-circle" style="font-size:20px;margin-bottom:8px;display:block;color:var(--success);opacity:.4"></i>
-              Nenhuma ruptura registrada
+      </div>
+
+      <!-- Modal Missões CMS -->
+      <div
+        class="modal-overlay"
+        id="missionsModal"
+        onclick="if (event.target === this) window._dashMissionsClose && window._dashMissionsClose();"
+      >
+        <div class="modal-box" style="max-width: 640px; max-height: 90vh; overflow-y: auto">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px">
+            <h3 style="margin: 0; font-size: 15px">
+              <i class="fa-solid fa-bullseye" style="margin-right: 8px; color: var(--success)"></i>Missões diárias
+            </h3>
+            <button
+              onclick="window._dashMissionsClose && window._dashMissionsClose()"
+              style="
+                background: none;
+                border: none;
+                cursor: pointer;
+                color: var(--text-muted);
+                font-size: 16px;
+                padding: 4px;
+              "
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <!-- Sugestões rápidas -->
+          <details id="missionSuggestions">
+            <summary
+              style="
+                cursor: pointer;
+                padding: 10px 14px;
+                background: rgba(170, 238, 196, 0.08);
+                border: 1px solid rgba(170, 238, 196, 0.25);
+                border-radius: 10px;
+                font-size: 12px;
+                font-weight: 600;
+                color: var(--text);
+                margin-bottom: 12px;
+              "
+            >
+              <i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 8px; color: var(--success)"></i>Sugestões
+              prontas (clonar com 1 click)
+            </summary>
+            <div
+              id="missionSuggestionsGrid"
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 0 12px"
+            ></div>
+          </details>
+
+          <!-- Form nova/editar missão -->
+          <details id="missionFormDetails">
+            <summary
+              style="
+                cursor: pointer;
+                padding: 10px 14px;
+                background: var(--surface-subtle);
+                border-radius: 10px;
+                font-size: 12px;
+                font-weight: 600;
+                color: var(--text);
+              "
+            >
+              <i class="fa-solid fa-plus" style="margin-right: 8px; color: var(--accent)"></i>Nova missão
+            </summary>
+            <form
+              id="missionForm"
+              novalidate
+              style="display: flex; flex-direction: column; gap: 10px; padding: 12px 4px 8px"
+            >
+              <input type="hidden" id="missionEditId" value="" />
+              <label
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  gap: 4px;
+                  font-size: 11px;
+                  color: var(--text-muted);
+                  font-weight: 600;
+                "
+              >
+                Título
+                <input
+                  type="text"
+                  id="missionTitle"
+                  maxlength="80"
+                  placeholder="Ex: 3 vendas hoje"
+                  style="
+                    padding: 10px;
+                    border: 1px solid var(--border-subtle);
+                    border-radius: 8px;
+                    background: var(--surface);
+                    color: var(--text);
+                    font-family: inherit;
+                    font-size: 13px;
+                  "
+                />
+              </label>
+              <label
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  gap: 4px;
+                  font-size: 11px;
+                  color: var(--text-muted);
+                  font-weight: 600;
+                "
+              >
+                Descrição (opcional)
+                <input
+                  type="text"
+                  id="missionDesc"
+                  maxlength="200"
+                  placeholder="Ex: Realize 3 vendas durante o dia"
+                  style="
+                    padding: 10px;
+                    border: 1px solid var(--border-subtle);
+                    border-radius: 8px;
+                    background: var(--surface);
+                    color: var(--text);
+                    font-family: inherit;
+                    font-size: 13px;
+                  "
+                />
+              </label>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
+                <label
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                    font-size: 11px;
+                    color: var(--text-muted);
+                    font-weight: 600;
+                  "
+                >
+                  Tipo de meta
+                  <select
+                    id="missionGoalType"
+                    style="
+                      padding: 10px;
+                      border: 1px solid var(--border-subtle);
+                      border-radius: 8px;
+                      background: var(--surface);
+                      color: var(--text);
+                      font-family: inherit;
+                      font-size: 13px;
+                    "
+                  >
+                    <option value="atendimentos_count">Atendimentos</option>
+                    <option value="vendas_count">Vendas</option>
+                    <option value="vendas_canal_count">Vendas por canal</option>
+                    <option value="valor_vendido_total">Valor vendido (R$)</option>
+                  </select>
+                </label>
+                <label
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                    font-size: 11px;
+                    color: var(--text-muted);
+                    font-weight: 600;
+                  "
+                >
+                  Meta
+                  <input
+                    type="number"
+                    id="missionGoalValue"
+                    min="1"
+                    step="1"
+                    placeholder="5"
+                    style="
+                      padding: 10px;
+                      border: 1px solid var(--border-subtle);
+                      border-radius: 8px;
+                      background: var(--surface);
+                      color: var(--text);
+                      font-family: var(--font-mono);
+                      font-size: 13px;
+                    "
+                  />
+                </label>
+              </div>
+              <label
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  gap: 4px;
+                  font-size: 11px;
+                  color: var(--text-muted);
+                  font-weight: 600;
+                "
+              >
+                Recompensa XP
+                <input
+                  type="number"
+                  id="missionRewardXp"
+                  min="0"
+                  step="5"
+                  value="50"
+                  style="
+                    padding: 10px;
+                    border: 1px solid var(--border-subtle);
+                    border-radius: 8px;
+                    background: var(--surface);
+                    color: var(--text);
+                    font-family: var(--font-mono);
+                    font-size: 13px;
+                  "
+                />
+              </label>
+              <div
+                id="missionError"
+                style="
+                  display: none;
+                  padding: 10px 12px;
+                  background: rgba(232, 155, 138, 0.08);
+                  border: 1px solid rgba(232, 155, 138, 0.3);
+                  border-radius: 8px;
+                  color: var(--danger);
+                  font-size: 12px;
+                  font-weight: 500;
+                "
+              ></div>
+              <button
+                type="submit"
+                id="missionSubmit"
+                style="
+                  padding: 12px;
+                  background: var(--accent);
+                  color: #fff;
+                  border: none;
+                  border-radius: 10px;
+                  font-size: 13px;
+                  font-weight: 700;
+                  cursor: pointer;
+                  font-family: inherit;
+                "
+              >
+                <i class="fa-solid fa-check"></i> Salvar missão
+              </button>
+            </form>
+          </details>
+
+          <!-- Lista -->
+          <div id="missionList" style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px">
+            <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px">
+              Carregando...
             </div>
           </div>
         </div>
       </div>
-      <div class="chart-card">
-        <div class="chart-card-header" onclick="toggleSection('pausas')">
-          <h3><i class="fa-solid fa-clipboard-list" style="margin-right:6px;color:var(--warning)"></i>Log de Pausas</h3>
-          <button class="collapse-btn" id="collapseBtn-pausas" onclick="event.stopPropagation();toggleSection('pausas')"><i class="fa-solid fa-chevron-down"></i></button>
+
+      <!-- Modal Gamificação / XP Config -->
+      <div
+        class="modal-overlay"
+        id="xpConfigModal"
+        onclick="if (event.target === this) window._dashXpConfigClose && window._dashXpConfigClose();"
+      >
+        <div class="modal-box" style="max-width: 540px">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px">
+            <h3 style="margin: 0; font-size: 15px">
+              <i class="fa-solid fa-bolt" style="margin-right: 8px; color: var(--warning)"></i>Gamificação · Pontos por
+              evento
+            </h3>
+            <button
+              onclick="window._dashXpConfigClose && window._dashXpConfigClose()"
+              style="
+                background: none;
+                border: none;
+                cursor: pointer;
+                color: var(--text-muted);
+                font-size: 16px;
+                padding: 4px;
+              "
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 16px; line-height: 1.5">
+            Defina quantos pontos de XP cada evento gera para os vendedores. Valores são aplicados nos próximos
+            atendimentos — histórico não é recalculado.
+          </p>
+
+          <form id="xpConfigForm" novalidate style="display: flex; flex-direction: column; gap: 12px">
+            <label
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                font-size: 11px;
+                color: var(--text-muted);
+                font-weight: 600;
+              "
+            >
+              Atendimento concluído (base)
+              <input
+                type="number"
+                id="xpCfgAtend"
+                min="0"
+                max="999"
+                step="1"
+                style="
+                  padding: 10px;
+                  border: 1px solid var(--border-subtle);
+                  border-radius: 8px;
+                  background: var(--surface);
+                  color: var(--text);
+                  font-family: var(--font-mono);
+                  font-size: 14px;
+                "
+              />
+            </label>
+            <label
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                font-size: 11px;
+                color: var(--text-muted);
+                font-weight: 600;
+              "
+            >
+              Venda realizada (bônus)
+              <input
+                type="number"
+                id="xpCfgVenda"
+                min="0"
+                max="999"
+                step="1"
+                style="
+                  padding: 10px;
+                  border: 1px solid var(--border-subtle);
+                  border-radius: 8px;
+                  background: var(--surface);
+                  color: var(--text);
+                  font-family: var(--font-mono);
+                  font-size: 14px;
+                "
+              />
+            </label>
+            <label
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                font-size: 11px;
+                color: var(--text-muted);
+                font-weight: 600;
+              "
+            >
+              Troca realizada (bônus)
+              <input
+                type="number"
+                id="xpCfgTroca"
+                min="0"
+                max="999"
+                step="1"
+                style="
+                  padding: 10px;
+                  border: 1px solid var(--border-subtle);
+                  border-radius: 8px;
+                  background: var(--surface);
+                  color: var(--text);
+                  font-family: var(--font-mono);
+                  font-size: 14px;
+                "
+              />
+            </label>
+
+            <div
+              id="xpCfgPreview"
+              style="
+                padding: 12px 14px;
+                background: rgba(245, 158, 11, 0.08);
+                border: 1px solid rgba(245, 158, 11, 0.25);
+                border-radius: 10px;
+                font-size: 12px;
+                color: var(--text);
+                line-height: 1.5;
+              "
+            >
+              <strong style="color: var(--warning)"><i class="fa-solid fa-chart-line"></i> Simulação:</strong>
+              <span id="xpCfgPreviewText">—</span>
+            </div>
+
+            <div
+              id="xpCfgError"
+              style="
+                display: none;
+                padding: 10px 12px;
+                background: rgba(232, 155, 138, 0.08);
+                border: 1px solid rgba(232, 155, 138, 0.3);
+                border-radius: 8px;
+                color: var(--danger);
+                font-size: 12px;
+                font-weight: 500;
+              "
+            ></div>
+
+            <div style="display: flex; gap: 8px; margin-top: 4px">
+              <button
+                type="button"
+                id="xpCfgReset"
+                style="
+                  padding: 12px;
+                  background: transparent;
+                  color: var(--text-muted);
+                  border: 1px solid var(--border-subtle);
+                  border-radius: 10px;
+                  font-size: 12px;
+                  font-weight: 600;
+                  cursor: pointer;
+                  font-family: inherit;
+                "
+              >
+                Restaurar padrões
+              </button>
+              <button
+                type="submit"
+                id="xpCfgSubmit"
+                style="
+                  flex: 1;
+                  padding: 12px;
+                  background: var(--accent);
+                  color: #fff;
+                  border: none;
+                  border-radius: 10px;
+                  font-size: 13px;
+                  font-weight: 700;
+                  cursor: pointer;
+                  font-family: inherit;
+                "
+              >
+                <i class="fa-solid fa-check"></i> Salvar
+              </button>
+            </div>
+          </form>
         </div>
-        <div class="chart-card-body" id="collapseBody-pausas" style="margin-top:16px">
-          <div id="pauseStatsList" class="pause-log" style="max-height:420px;overflow-y:auto">
-            <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>
+      </div>
+
+      <!-- Modal Comunicados -->
+      <div
+        class="modal-overlay"
+        id="annModal"
+        onclick="if (event.target === this) window._dashAnnouncementsClose && window._dashAnnouncementsClose();"
+      >
+        <div class="modal-box" style="max-width: 640px; max-height: 90vh; overflow-y: auto">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px">
+            <h3 style="margin: 0; font-size: 15px">
+              <i class="fa-solid fa-bullhorn" style="margin-right: 8px; color: var(--accent)"></i>Comunicados
+            </h3>
+            <button
+              onclick="window._dashAnnouncementsClose && window._dashAnnouncementsClose()"
+              style="
+                background: none;
+                border: none;
+                cursor: pointer;
+                color: var(--text-muted);
+                font-size: 16px;
+                padding: 4px;
+              "
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <!-- Composer -->
+          <details class="ann-composer" id="annComposerDetails">
+            <summary
+              style="
+                cursor: pointer;
+                padding: 12px 14px;
+                background: var(--surface-subtle);
+                border-radius: 10px;
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--text);
+              "
+            >
+              <i class="fa-solid fa-plus" style="margin-right: 8px; color: var(--accent)"></i>Novo comunicado
+            </summary>
+            <form
+              id="annForm"
+              novalidate
+              style="display: flex; flex-direction: column; gap: 10px; padding: 14px 4px 8px"
+            >
+              <label
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  gap: 4px;
+                  font-size: 11px;
+                  color: var(--text-muted);
+                  font-weight: 600;
+                "
+              >
+                Tipo
+                <select
+                  id="annType"
+                  style="
+                    padding: 10px;
+                    border: 1px solid var(--border-subtle);
+                    border-radius: 8px;
+                    background: var(--surface);
+                    color: var(--text);
+                    font-family: inherit;
+                    font-size: 13px;
+                  "
+                >
+                  <option value="comunicado">📢 Comunicado</option>
+                  <option value="corrida">🏁 Corrida de vendas</option>
+                  <option value="evento">📅 Evento</option>
+                  <option value="treinamento">🎓 Treinamento</option>
+                </select>
+              </label>
+              <label
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  gap: 4px;
+                  font-size: 11px;
+                  color: var(--text-muted);
+                  font-weight: 600;
+                "
+              >
+                Título
+                <input
+                  type="text"
+                  id="annTitle"
+                  maxlength="120"
+                  placeholder="Ex: Corrida Black Friday"
+                  style="
+                    padding: 10px;
+                    border: 1px solid var(--border-subtle);
+                    border-radius: 8px;
+                    background: var(--surface);
+                    color: var(--text);
+                    font-family: inherit;
+                    font-size: 13px;
+                  "
+                />
+              </label>
+              <label
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  gap: 4px;
+                  font-size: 11px;
+                  color: var(--text-muted);
+                  font-weight: 600;
+                "
+              >
+                Corpo (suporta **negrito** e links)
+                <textarea
+                  id="annBody"
+                  rows="4"
+                  placeholder="Detalhes do comunicado..."
+                  style="
+                    padding: 10px;
+                    border: 1px solid var(--border-subtle);
+                    border-radius: 8px;
+                    background: var(--surface);
+                    color: var(--text);
+                    font-family: inherit;
+                    font-size: 13px;
+                    resize: vertical;
+                  "
+                ></textarea>
+              </label>
+              <div
+                id="annCorridaFields"
+                style="
+                  display: none;
+                  flex-direction: column;
+                  gap: 10px;
+                  padding: 10px;
+                  background: rgba(245, 158, 11, 0.08);
+                  border: 1px solid rgba(245, 158, 11, 0.25);
+                  border-radius: 8px;
+                "
+              >
+                <label
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                    font-size: 11px;
+                    color: var(--text-muted);
+                    font-weight: 600;
+                  "
+                >
+                  Premiação
+                  <input
+                    type="text"
+                    id="annPrize"
+                    maxlength="120"
+                    placeholder="Ex: R$ 500 pro primeiro colocado"
+                    style="
+                      padding: 10px;
+                      border: 1px solid var(--border-subtle);
+                      border-radius: 8px;
+                      background: var(--surface);
+                      color: var(--text);
+                      font-family: inherit;
+                      font-size: 13px;
+                    "
+                  />
+                </label>
+                <label
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                    font-size: 11px;
+                    color: var(--text-muted);
+                    font-weight: 600;
+                  "
+                >
+                  Último dia
+                  <input
+                    type="date"
+                    id="annEndDate"
+                    style="
+                      padding: 10px;
+                      border: 1px solid var(--border-subtle);
+                      border-radius: 8px;
+                      background: var(--surface);
+                      color: var(--text);
+                      font-family: inherit;
+                      font-size: 13px;
+                    "
+                  />
+                  <span style="font-size: 10px; color: var(--text-muted); font-weight: 500; font-style: italic"
+                    >A corrida encerra às 23:59 deste dia.</span
+                  >
+                </label>
+              </div>
+              <label
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                  font-size: 12px;
+                  color: var(--text);
+                  font-weight: 500;
+                  cursor: pointer;
+                "
+              >
+                <input type="checkbox" id="annUrgent" style="width: 16px; height: 16px; accent-color: var(--accent)" />
+                <span>Urgente — enviar push pra todos os vendedores</span>
+              </label>
+              <div
+                id="annError"
+                style="
+                  display: none;
+                  padding: 10px 12px;
+                  background: rgba(232, 155, 138, 0.08);
+                  border: 1px solid rgba(232, 155, 138, 0.3);
+                  border-radius: 8px;
+                  color: var(--danger);
+                  font-size: 12px;
+                  font-weight: 500;
+                "
+              ></div>
+              <button
+                type="submit"
+                id="annSubmit"
+                style="
+                  padding: 12px;
+                  background: var(--accent);
+                  color: #fff;
+                  border: none;
+                  border-radius: 10px;
+                  font-size: 13px;
+                  font-weight: 700;
+                  cursor: pointer;
+                  font-family: inherit;
+                "
+              >
+                <i class="fa-solid fa-paper-plane"></i> Publicar
+              </button>
+            </form>
+          </details>
+
+          <!-- Lista -->
+          <div id="annList" style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px">
+            <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px">
+              Carregando...
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <!-- Gestão de Vendedores movida para Settings > Equipe -->
-  </div><!-- /section-operacional -->
 
-  <!-- Footer -->
-  <footer style="text-align:center;margin-top:40px;padding:32px 0;border-top:1px solid var(--border-subtle)">
-    <div class="dash-footer-logo">
-      <img src="/assets/logo-minhavez-transparent.png" alt="minhavez">
-    </div>
-    <div id="tenantSlugFooter" style="display:none;margin-top:8px;font-size:11px;color:#A1A1AA;font-weight:500;cursor:pointer" title="Clique para copiar">
-      minhavez V3.7 · ID: <span id="tenantSlugValue"></span>
-    </div>
-  </footer>
-</div>
-
-<div id="toastContainer"></div>
-
-<script type="module" src="/js/dashboard-init.js"></script>
-<script type="module" src="/js/dashboard-announcements.js"></script>
-<script type="module">
-  import { startTourIfFirstTime } from '/js/tour.js';
-  window.addEventListener('load', () => setTimeout(() => startTourIfFirstTime('dashboard'), 1500));
-</script>
-<script type="module" src="/js/dashboard-xp-config.js"></script>
-<script type="module" src="/js/dashboard-missions.js"></script>
-<script type="module" src="/js/dashboard-vm.js"></script>
-<script type="module" src="/js/dashboard-ai.js"></script>
-
-<!-- Modal IA Assist -->
-<div class="modal-overlay" id="aiModal" onclick="if(event.target===this)window._dashAiClose&&window._dashAiClose()">
-  <div class="modal-box" style="max-width:640px;max-height:90vh;overflow-y:auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <h3 style="margin:0;font-size:15px"><i class="fa-solid fa-wand-magic-sparkles" style="margin-right:8px;color:var(--warning)"></i>IA Assist</h3>
-      <button onclick="window._dashAiClose&&window._dashAiClose()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div id="aiModalBody"></div>
-  </div>
-</div>
-
-<!-- Modal VM Photos -->
-<div class="modal-overlay" id="vmModal" onclick="if(event.target===this)window._dashVmClose&&window._dashVmClose()">
-  <div class="modal-box" style="max-width:720px;max-height:90vh;overflow-y:auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <h3 style="margin:0;font-size:15px"><i class="fa-solid fa-camera-retro" style="margin-right:8px;color:var(--info)"></i>VM Photos</h3>
-      <button onclick="window._dashVmClose&&window._dashVmClose()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div id="vmModalBody"></div>
-  </div>
-</div>
-
-<!-- Modal Missões CMS -->
-<div class="modal-overlay" id="missionsModal" onclick="if(event.target===this)window._dashMissionsClose&&window._dashMissionsClose()">
-  <div class="modal-box" style="max-width:640px;max-height:90vh;overflow-y:auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <h3 style="margin:0;font-size:15px"><i class="fa-solid fa-bullseye" style="margin-right:8px;color:var(--success)"></i>Missões diárias</h3>
-      <button onclick="window._dashMissionsClose&&window._dashMissionsClose()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-
-    <!-- Sugestões rápidas -->
-    <details id="missionSuggestions">
-      <summary style="cursor:pointer;padding:10px 14px;background:rgba(170, 238, 196,0.08);border:1px solid rgba(170, 238, 196,0.25);border-radius:10px;font-size:12px;font-weight:600;color:var(--text);margin-bottom:12px">
-        <i class="fa-solid fa-wand-magic-sparkles" style="margin-right:8px;color:var(--success)"></i>Sugestões prontas (clonar com 1 click)
-      </summary>
-      <div id="missionSuggestionsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 0 12px"></div>
-    </details>
-
-    <!-- Form nova/editar missão -->
-    <details id="missionFormDetails">
-      <summary style="cursor:pointer;padding:10px 14px;background:var(--surface-subtle);border-radius:10px;font-size:12px;font-weight:600;color:var(--text)">
-        <i class="fa-solid fa-plus" style="margin-right:8px;color:var(--accent)"></i>Nova missão
-      </summary>
-      <form id="missionForm" novalidate style="display:flex;flex-direction:column;gap:10px;padding:12px 4px 8px">
-        <input type="hidden" id="missionEditId" value="">
-        <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
-          Título
-          <input type="text" id="missionTitle" maxlength="80" placeholder="Ex: 3 vendas hoje" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
-        </label>
-        <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
-          Descrição (opcional)
-          <input type="text" id="missionDesc" maxlength="200" placeholder="Ex: Realize 3 vendas durante o dia" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
-        </label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
-            Tipo de meta
-            <select id="missionGoalType" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
-              <option value="atendimentos_count">Atendimentos</option>
-              <option value="vendas_count">Vendas</option>
-              <option value="vendas_canal_count">Vendas por canal</option>
-              <option value="valor_vendido_total">Valor vendido (R$)</option>
-            </select>
-          </label>
-          <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
-            Meta
-            <input type="number" id="missionGoalValue" min="1" step="1" placeholder="5" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:var(--font-mono);font-size:13px">
-          </label>
+      <!-- Modal Drill-down -->
+      <div class="modal-overlay" id="drillModal" onclick="if (event.target === this) closeDrillModal();">
+        <div class="modal-box" style="max-width: 480px">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px">
+            <h3 id="drillTitle" style="margin: 0; font-size: 15px"></h3>
+            <button
+              onclick="closeDrillModal()"
+              style="
+                background: none;
+                border: none;
+                cursor: pointer;
+                color: var(--text-muted);
+                font-size: 16px;
+                padding: 4px;
+              "
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div id="drillBody" style="max-height: 400px; overflow-y: auto"></div>
         </div>
-        <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
-          Recompensa XP
-          <input type="number" id="missionRewardXp" min="0" step="5" value="50" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:var(--font-mono);font-size:13px">
-        </label>
-        <div id="missionError" style="display:none;padding:10px 12px;background:rgba(232, 155, 138,0.08);border:1px solid rgba(232, 155, 138,0.3);border-radius:8px;color:var(--danger);font-size:12px;font-weight:500"></div>
-        <button type="submit" id="missionSubmit" style="padding:12px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
-          <i class="fa-solid fa-check"></i> Salvar missão
-        </button>
-      </form>
-    </details>
-
-    <!-- Lista -->
-    <div id="missionList" style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
-      <div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px">Carregando...</div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Gamificação / XP Config -->
-<div class="modal-overlay" id="xpConfigModal" onclick="if(event.target===this)window._dashXpConfigClose&&window._dashXpConfigClose()">
-  <div class="modal-box" style="max-width:540px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <h3 style="margin:0;font-size:15px"><i class="fa-solid fa-bolt" style="margin-right:8px;color:var(--warning)"></i>Gamificação · Pontos por evento</h3>
-      <button onclick="window._dashXpConfigClose&&window._dashXpConfigClose()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-
-    <p style="font-size:12px;color:var(--text-muted);margin:0 0 16px;line-height:1.5">
-      Defina quantos pontos de XP cada evento gera para os vendedores. Valores são aplicados nos próximos atendimentos — histórico não é recalculado.
-    </p>
-
-    <form id="xpConfigForm" novalidate style="display:flex;flex-direction:column;gap:12px">
-      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
-        Atendimento concluído (base)
-        <input type="number" id="xpCfgAtend" min="0" max="999" step="1" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:var(--font-mono);font-size:14px">
-      </label>
-      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
-        Venda realizada (bônus)
-        <input type="number" id="xpCfgVenda" min="0" max="999" step="1" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:var(--font-mono);font-size:14px">
-      </label>
-      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
-        Troca realizada (bônus)
-        <input type="number" id="xpCfgTroca" min="0" max="999" step="1" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:var(--font-mono);font-size:14px">
-      </label>
-
-      <div id="xpCfgPreview" style="padding:12px 14px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;font-size:12px;color:var(--text);line-height:1.5">
-        <strong style="color:var(--warning)"><i class="fa-solid fa-chart-line"></i> Simulação:</strong>
-        <span id="xpCfgPreviewText">—</span>
       </div>
-
-      <div id="xpCfgError" style="display:none;padding:10px 12px;background:rgba(232, 155, 138,0.08);border:1px solid rgba(232, 155, 138,0.3);border-radius:8px;color:var(--danger);font-size:12px;font-weight:500"></div>
-
-      <div style="display:flex;gap:8px;margin-top:4px">
-        <button type="button" id="xpCfgReset" style="padding:12px;background:transparent;color:var(--text-muted);border:1px solid var(--border-subtle);border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">
-          Restaurar padrões
-        </button>
-        <button type="submit" id="xpCfgSubmit" style="flex:1;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
-          <i class="fa-solid fa-check"></i> Salvar
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Modal Comunicados -->
-<div class="modal-overlay" id="annModal" onclick="if(event.target===this)window._dashAnnouncementsClose&&window._dashAnnouncementsClose()">
-  <div class="modal-box" style="max-width:640px;max-height:90vh;overflow-y:auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <h3 style="margin:0;font-size:15px"><i class="fa-solid fa-bullhorn" style="margin-right:8px;color:var(--accent)"></i>Comunicados</h3>
-      <button onclick="window._dashAnnouncementsClose&&window._dashAnnouncementsClose()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px"><i class="fa-solid fa-xmark"></i></button>
     </div>
-
-    <!-- Composer -->
-    <details class="ann-composer" id="annComposerDetails">
-      <summary style="cursor:pointer;padding:12px 14px;background:var(--surface-subtle);border-radius:10px;font-size:13px;font-weight:600;color:var(--text)">
-        <i class="fa-solid fa-plus" style="margin-right:8px;color:var(--accent)"></i>Novo comunicado
-      </summary>
-      <form id="annForm" novalidate style="display:flex;flex-direction:column;gap:10px;padding:14px 4px 8px">
-        <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
-          Tipo
-          <select id="annType" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
-            <option value="comunicado">📢 Comunicado</option>
-            <option value="corrida">🏁 Corrida de vendas</option>
-            <option value="evento">📅 Evento</option>
-            <option value="treinamento">🎓 Treinamento</option>
-          </select>
-        </label>
-        <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
-          Título
-          <input type="text" id="annTitle" maxlength="120" placeholder="Ex: Corrida Black Friday" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
-        </label>
-        <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
-          Corpo (suporta **negrito** e links)
-          <textarea id="annBody" rows="4" placeholder="Detalhes do comunicado..." style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px;resize:vertical"></textarea>
-        </label>
-        <div id="annCorridaFields" style="display:none;flex-direction:column;gap:10px;padding:10px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:8px">
-          <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
-            Premiação
-            <input type="text" id="annPrize" maxlength="120" placeholder="Ex: R$ 500 pro primeiro colocado" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
-          </label>
-          <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-muted);font-weight:600">
-            Último dia
-            <input type="date" id="annEndDate" style="padding:10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
-            <span style="font-size:10px;color:var(--text-muted);font-weight:500;font-style:italic">A corrida encerra às 23:59 deste dia.</span>
-          </label>
-        </div>
-        <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);font-weight:500;cursor:pointer">
-          <input type="checkbox" id="annUrgent" style="width:16px;height:16px;accent-color:var(--accent)">
-          <span>Urgente — enviar push pra todos os vendedores</span>
-        </label>
-        <div id="annError" style="display:none;padding:10px 12px;background:rgba(232, 155, 138,0.08);border:1px solid rgba(232, 155, 138,0.3);border-radius:8px;color:var(--danger);font-size:12px;font-weight:500"></div>
-        <button type="submit" id="annSubmit" style="padding:12px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
-          <i class="fa-solid fa-paper-plane"></i> Publicar
-        </button>
-      </form>
-    </details>
-
-    <!-- Lista -->
-    <div id="annList" style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
-      <div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px">Carregando...</div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Drill-down -->
-<div class="modal-overlay" id="drillModal" onclick="if(event.target===this)closeDrillModal()">
-  <div class="modal-box" style="max-width:480px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <h3 id="drillTitle" style="margin:0;font-size:15px"></h3>
-      <button onclick="closeDrillModal()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div id="drillBody" style="max-height:400px;overflow-y:auto"></div>
-  </div>
-</div>
-
-  </div><!-- /dash-main -->
-</div><!-- /dash-layout -->
-</body>
+    <!-- /dash-layout -->
+  </body>
 </html>

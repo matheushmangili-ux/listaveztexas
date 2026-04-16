@@ -1,366 +1,410 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR" data-theme="dark">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Minha Vez — Fila</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/styles.v51.css">
-<link rel="stylesheet" href="/css/tablet.v51.css">
-<meta name="theme-color" content="#0d0d0d">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="manifest" href="/manifest.json">
-<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script>
-// Apply saved theme before CSS paints (avoid flash)
-(function() {
-  var t = localStorage.getItem('lv-theme') || 'dark';
-  document.documentElement.setAttribute('data-theme', t);
-  var m = document.querySelector('meta[name="theme-color"]');
-  if (m) m.content = t === 'dark' ? '#060606' : '#F5F5F7';
-})();
-</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-<script src="/js/update-checker.js"></script>
-<script>
-initUpdateChecker('/tablet.html', { bannerText: 'Atualização disponível — toque para atualizar' });
-// Error logging (sem auto-reload para evitar loops)
-window.addEventListener('error', function(e) {
-  const el = document.getElementById('toastContainer');
-  if (el) {
-    const d = document.createElement('div');
-    d.style.cssText = 'background:#d47a68;color:#0d0d0d;padding:8px 16px;border-radius:4px;margin:4px;font-size:12px;max-width:300px';
-    d.textContent = 'Erro: ' + (e.message || 'desconhecido');
-    el.appendChild(d);
-    setTimeout(() => d.remove(), 5000);
-  }
-});
-</script>
-<script>window.PUBLIC_POSTHOG_KEY="";window.PUBLIC_POSTHOG_HOST="https://us.i.posthog.com";</script>
-<script>window.PUBLIC_SENTRY_DSN="";window.PUBLIC_SENTRY_ENV="production";</script>
-<script type="module" src="/js/sentry.js"></script>
-<script type="module" src="/js/analytics.js"></script>
-</head>
-<body>
-
-<div id="offlineBanner" class="offline-banner" style="display:none" role="alert" aria-live="assertive">
-  <i class="fa-solid fa-triangle-exclamation"></i>
-  <span>Conexão em tempo real perdida. Dados podem estar desatualizados. Reconectando...</span>
-</div>
-
-<div class="tablet-layout">
-  <!-- HEADER -->
-  <header class="t-header">
-    <div class="flex-center gap-8 shrink-0">
-      <img src="/assets/logo-minhavez-transparent.png" alt="minhavez" class="t-header-logo">
-      <span id="appVersion" class="mono fs-9 t-header-version"></span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minha Vez — Fila</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/styles.v51.css" />
+    <link rel="stylesheet" href="/css/tablet.v51.css" />
+    <meta name="theme-color" content="#0d0d0d" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script>
+      // Apply saved theme before CSS paints (avoid flash)
+      (function () {
+        var t = localStorage.getItem('lv-theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.content = t === 'dark' ? '#060606' : '#F5F5F7';
+      })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="/js/update-checker.js"></script>
+    <script>
+      initUpdateChecker('/tablet.html', { bannerText: 'Atualização disponível — toque para atualizar' });
+      // Error logging (sem auto-reload para evitar loops)
+      window.addEventListener('error', function (e) {
+        const el = document.getElementById('toastContainer');
+        if (el) {
+          const d = document.createElement('div');
+          d.style.cssText =
+            'background:#d47a68;color:#0d0d0d;padding:8px 16px;border-radius:4px;margin:4px;font-size:12px;max-width:300px';
+          d.textContent = 'Erro: ' + (e.message || 'desconhecido');
+          el.appendChild(d);
+          setTimeout(() => d.remove(), 5000);
+        }
+      });
+    </script>
+    <script>
+      window.PUBLIC_POSTHOG_KEY = '';
+      window.PUBLIC_POSTHOG_HOST = 'https://us.i.posthog.com';
+    </script>
+    <script>
+      window.PUBLIC_SENTRY_DSN = '';
+      window.PUBLIC_SENTRY_ENV = 'production';
+    </script>
+    <script type="module" src="/js/sentry.js"></script>
+    <script type="module" src="/js/analytics.js"></script>
+  </head>
+  <body>
+    <div id="offlineBanner" class="offline-banner" style="display: none" role="alert" aria-live="assertive">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span>Conexão em tempo real perdida. Dados podem estar desatualizados. Reconectando...</span>
     </div>
-    <div id="headerKpis" class="flex-center gap-16 mono fw-700 t-header-kpis">
-      <div class="t-header-kpi" title="Atendimentos finalizados">
-        <i class="fa-solid fa-users"></i>
-        <div class="t-header-kpi-body">
-          <span id="statAtend" class="t-header-kpi-value">0</span>
-          <span class="t-header-kpi-label">Atendidos</span>
+
+    <div class="tablet-layout">
+      <!-- HEADER -->
+      <header class="t-header">
+        <div class="flex-center gap-8 shrink-0">
+          <img src="/assets/logo-minhavez-transparent.png" alt="minhavez" class="t-header-logo" />
+          <span id="appVersion" class="mono fs-9 t-header-version"></span>
         </div>
-      </div>
-      <div class="t-header-kpi" title="Vendas concretizadas">
-        <i class="fa-solid fa-bag-shopping"></i>
-        <div class="t-header-kpi-body">
-          <span id="statVendas" class="t-header-kpi-value">0</span>
-          <span class="t-header-kpi-label">Vendas</span>
+        <div id="headerKpis" class="flex-center gap-16 mono fw-700 t-header-kpis">
+          <div class="t-header-kpi" title="Atendimentos finalizados">
+            <i class="fa-solid fa-users"></i>
+            <div class="t-header-kpi-body">
+              <span id="statAtend" class="t-header-kpi-value">0</span>
+              <span class="t-header-kpi-label">Atendidos</span>
+            </div>
+          </div>
+          <div class="t-header-kpi" title="Vendas concretizadas">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <div class="t-header-kpi-body">
+              <span id="statVendas" class="t-header-kpi-value">0</span>
+              <span class="t-header-kpi-label">Vendas</span>
+            </div>
+          </div>
+          <div class="t-header-kpi" title="Taxa de conversão">
+            <i class="fa-solid fa-chart-line"></i>
+            <div class="t-header-kpi-body">
+              <span id="statConv" class="t-header-kpi-value">0%</span>
+              <span class="t-header-kpi-label">Conversão</span>
+            </div>
+            <div class="conv-bar-track">
+              <div id="convBar" class="conv-bar-fill"></div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="t-header-kpi" title="Taxa de conversão">
-        <i class="fa-solid fa-chart-line"></i>
-        <div class="t-header-kpi-body">
-          <span id="statConv" class="t-header-kpi-value">0%</span>
-          <span class="t-header-kpi-label">Conversão</span>
+        <div class="flex-center gap-8 shrink-0">
+          <!-- Ranking card -->
+          <button
+            class="action-card ranking-card"
+            onclick="toggleMiniRanking()"
+            title="Ranking do turno"
+            aria-label="Ver ranking do turno"
+          >
+            <i class="fa-solid fa-ranking-star"></i>
+            <span>Ranking</span>
+          </button>
+          <!-- Iniciar / Encerrar turno card -->
+          <div
+            class="action-card turno-card"
+            id="turnoSwitch"
+            onclick="toggleTurno()"
+            role="button"
+            aria-label="Iniciar ou encerrar turno"
+          >
+            <i class="fa-solid fa-play" id="turnoIcon"></i>
+            <span id="turnoSwitchLabel">Iniciar</span>
+          </div>
+          <div class="more-menu-wrapper">
+            <button class="more-btn" onclick="toggleMoreMenu()" title="Mais opções" aria-label="Mais opções">
+              <i class="fa-solid fa-ellipsis-vertical"></i>
+            </button>
+            <div id="moreMenu" class="more-menu" style="display: none">
+              <button
+                id="tvMenuBtn"
+                onclick="
+                  toggleTvMode();
+                  toggleMoreMenu();
+                "
+              >
+                <i class="fa-solid fa-tv"></i> Modo TV
+              </button>
+              <button
+                onclick="
+                  window.minhavezTour?.start('tablet');
+                  toggleMoreMenu();
+                "
+              >
+                <i class="fa-solid fa-circle-question"></i> Rever tour
+              </button>
+              <div class="more-menu-divider"></div>
+              <button onclick="handleLogout()">
+                <i class="fa-solid fa-right-from-bracket logout-icon-danger"></i> Sair
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="conv-bar-track">
-          <div id="convBar" class="conv-bar-fill"></div>
+      </header>
+
+      <!-- QUEUE PANEL (left) -->
+      <aside class="queue-panel" id="queuePanel">
+        <div id="setorTabs" class="flex-center gap-6 mb-12 queue-setor-tabs"></div>
+        <div class="flex-between mb-8 queue-head-row">
+          <span class="fs-13 fw-700 text-muted uppercase tracking-wide">Fila</span>
+          <div class="flex-center gap-8">
+            <button
+              class="queue-history-btn"
+              onclick="openPosLog()"
+              title="Histórico de movimentações"
+              aria-label="Histórico de movimentações"
+            >
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </button>
+            <span id="queueCount" class="fs-13 fw-600 text-muted">0 na fila</span>
+          </div>
         </div>
-      </div>
+        <div class="queue-list" id="queueList">
+          <div class="queue-blank-state">
+            <i class="fa-solid fa-users-slash"></i>
+            Abra o turno para iniciar
+          </div>
+        </div>
+      </aside>
+
+      <!-- SERVICE PANEL (right — Em Atendimento) -->
+      <main class="service-panel" id="servicePanel">
+        <div class="panel-header">
+          <span><i class="fa-solid fa-headset panel-header-icon"></i>Em Atendimento</span>
+          <span id="activeCount" class="fs-12 text-muted">0 ativos</span>
+        </div>
+
+        <!-- Atendimentos ativos (múltiplos simultâneos) -->
+        <div id="activeList" class="flex-col gap-10 flex-1">
+          <p id="activeLabel" class="fs-10 fw-700 text-muted uppercase hidden tracking-wide"></p>
+        </div>
+      </main>
+
+      <!-- FOOTER: vendedores -->
+      <footer class="t-footer" id="statusFooter">
+        <!-- Populated dynamically -->
+      </footer>
     </div>
-    <div class="flex-center gap-8 shrink-0">
-      <!-- Ranking card -->
-      <button class="action-card ranking-card" onclick="toggleMiniRanking()" title="Ranking do turno" aria-label="Ver ranking do turno">
-        <i class="fa-solid fa-ranking-star"></i>
-        <span>Ranking</span>
+
+    <!-- Bottom Sheet: Motivos de Não Conversão -->
+    <div class="bottom-sheet-overlay" id="motivoOverlay" onclick="closeMotivos()"></div>
+    <div class="bottom-sheet" id="motivoSheet">
+      <div class="bottom-sheet-handle"></div>
+      <h3 class="mono fs-18 fw-700 mb-8">Motivo da não conversão</h3>
+      <p class="fs-14 text-secondary mb-16">Selecione o motivo principal</p>
+
+      <div class="flex-col gap-8" id="motivoList">
+        <div class="motivo-option" data-motivo="preco" onclick="selectMotivo(this)">
+          <i class="fa-solid fa-tag"></i>
+          <div>
+            <div class="fw-700 fs-16">Preço</div>
+            <div class="fs-13 text-muted">Cliente achou caro</div>
+          </div>
+        </div>
+        <div class="motivo-option" data-motivo="ruptura" onclick="selectMotivo(this)">
+          <i class="fa-solid fa-box-open"></i>
+          <div>
+            <div class="fw-700 fs-16">Ruptura</div>
+            <div class="fs-13 text-muted">Produto em falta / sem estoque</div>
+          </div>
+        </div>
+        <div class="motivo-option" data-motivo="indecisao" onclick="selectMotivo(this)">
+          <i class="fa-solid fa-face-meh"></i>
+          <div>
+            <div class="fw-700 fs-16">Indecisão</div>
+            <div class="fs-13 text-muted">Cliente vai pensar / voltar depois</div>
+          </div>
+        </div>
+        <div class="motivo-option" data-motivo="so_olhando" onclick="selectMotivo(this)">
+          <i class="fa-solid fa-eye"></i>
+          <div>
+            <div class="fw-700 fs-16">Só olhando</div>
+            <div class="fs-13 text-muted">Sem intenção de compra</div>
+          </div>
+        </div>
+        <div class="motivo-option" data-motivo="outro" onclick="selectMotivo(this)">
+          <i class="fa-solid fa-ellipsis"></i>
+          <div>
+            <div class="fw-700 fs-16">Outro</div>
+            <div class="fs-13 text-muted">Motivo diferente</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ruptura: campo produto (hidden) -->
+      <div id="rupturaField" class="hidden mt-16">
+        <label class="block fs-13 fw-700 text-muted uppercase mb-4 tracking-tight">Qual produto?</label>
+        <input id="rupturaInput" class="input" type="text" placeholder="Ex: Chapéu Pralana 6X" autocomplete="off" />
+      </div>
+
+      <!-- Outro: campo detalhe (hidden) -->
+      <div id="outroField" class="hidden mt-16">
+        <label class="block fs-13 fw-700 text-muted uppercase mb-4 tracking-tight">Descreva o motivo</label>
+        <input id="outroInput" class="input" type="text" placeholder="Ex: Cliente errou de loja" autocomplete="off" />
+      </div>
+
+      <button class="btn btn-danger btn-confirm-motivo" id="btnConfirmMotivo" onclick="confirmMotivo()" disabled>
+        <i class="fa-solid fa-check"></i>
+        Confirmar
       </button>
-      <!-- Iniciar / Encerrar turno card -->
-      <div class="action-card turno-card" id="turnoSwitch" onclick="toggleTurno()" role="button" aria-label="Iniciar ou encerrar turno">
-        <i class="fa-solid fa-play" id="turnoIcon"></i>
-        <span id="turnoSwitchLabel">Iniciar</span>
-      </div>
-      <div class="more-menu-wrapper">
-        <button class="more-btn" onclick="toggleMoreMenu()" title="Mais opções" aria-label="Mais opções">
-          <i class="fa-solid fa-ellipsis-vertical"></i>
-        </button>
-        <div id="moreMenu" class="more-menu" style="display:none">
-          <button id="tvMenuBtn" onclick="toggleTvMode();toggleMoreMenu()">
-            <i class="fa-solid fa-tv"></i> Modo TV
-          </button>
-          <button onclick="window.minhavezTour?.start('tablet');toggleMoreMenu()">
-            <i class="fa-solid fa-circle-question"></i> Rever tour
-          </button>
-          <div class="more-menu-divider"></div>
-          <button onclick="handleLogout()">
-            <i class="fa-solid fa-right-from-bracket logout-icon-danger"></i> Sair
-          </button>
+    </div>
+
+    <!-- Outcome Sheet (resultado do atendimento) -->
+    <div class="bottom-sheet-overlay" id="outcomeOverlay" onclick="closeOutcomeSheet()"></div>
+    <div class="bottom-sheet" id="outcomeSheet">
+      <div class="bottom-sheet-handle"></div>
+      <h3 class="mono fs-18 fw-700 mb-8">Resultado do atendimento</h3>
+      <p class="fs-14 text-secondary mb-16" id="outcomeVendorName"></p>
+
+      <div class="flex-col gap-8">
+        <div class="motivo-option outcome-option" data-outcome="venda" onclick="selectOutcome('venda')">
+          <i class="fa-solid fa-shopping-bag"></i>
+          <div>
+            <div class="fw-700 fs-16">Venda</div>
+            <div class="fs-13 text-muted">Cliente comprou</div>
+          </div>
+        </div>
+        <div class="motivo-option outcome-option" data-outcome="troca" onclick="selectOutcome('troca')">
+          <i class="fa-solid fa-arrow-right-arrow-left"></i>
+          <div>
+            <div class="fw-700 fs-16">Troca</div>
+            <div class="fs-13 text-muted">Cliente trocou produto</div>
+          </div>
+        </div>
+        <div
+          class="motivo-option outcome-option"
+          data-outcome="nao_convertido"
+          onclick="selectOutcome('nao_convertido')"
+        >
+          <i class="fa-solid fa-xmark"></i>
+          <div>
+            <div class="fw-700 fs-16">Não Converteu</div>
+            <div class="fs-13 text-muted">Cliente saiu sem comprar</div>
+          </div>
+        </div>
+        <div class="motivo-option outcome-option" data-outcome="cancelar" onclick="selectOutcome('cancelar')">
+          <i class="fa-solid fa-rotate-left"></i>
+          <div>
+            <div class="fw-700 fs-16">Cancelar Atendimento</div>
+            <div class="fs-13 text-muted">Vendedor volta ao 1º da fila</div>
+          </div>
         </div>
       </div>
     </div>
-  </header>
 
-  <!-- QUEUE PANEL (left) -->
-  <aside class="queue-panel" id="queuePanel">
-    <div id="setorTabs" class="flex-center gap-6 mb-12 queue-setor-tabs"></div>
-    <div class="flex-between mb-8 queue-head-row">
-      <span class="fs-13 fw-700 text-muted uppercase tracking-wide">Fila</span>
+    <!-- Check-in Overlay (abertura de turno) -->
+    <div class="bottom-sheet-overlay" id="checkinOverlay" onclick="closeCheckin()"></div>
+    <div class="bottom-sheet sheet-max-90vh" id="checkinSheet">
+      <div class="bottom-sheet-handle"></div>
+      <h3 class="mono fs-16 fw-700 mb-4">Check-in do Turno</h3>
+      <p class="fs-13 text-secondary mb-16">Selecione os vendedores presentes</p>
+      <div id="checkinList" class="flex-col gap-6 mb-16"></div>
       <div class="flex-center gap-8">
-        <button class="queue-history-btn" onclick="openPosLog()" title="Histórico de movimentações" aria-label="Histórico de movimentações"><i class="fa-solid fa-clock-rotate-left"></i></button>
-        <span id="queueCount" class="fs-13 fw-600 text-muted">0 na fila</span>
+        <button class="btn btn-ghost btn-flex-1" onclick="closeCheckin()">Cancelar</button>
+        <button class="btn btn-success btn-flex-1" id="btnCheckin" onclick="confirmCheckin()">
+          <i class="fa-solid fa-check panel-header-icon"></i>Iniciar Turno
+        </button>
       </div>
     </div>
-    <div class="queue-list" id="queueList">
-      <div class="queue-blank-state">
-        <i class="fa-solid fa-users-slash"></i>
-        Abra o turno para iniciar
+
+    <!-- Bottom Sheet: Motivo de Saída da Fila -->
+    <div class="bottom-sheet-overlay" id="saidaOverlay" onclick="closeSaida()"></div>
+    <div class="bottom-sheet" id="saidaSheet">
+      <div class="bottom-sheet-handle"></div>
+      <h3 class="mono fs-16 fw-700 mb-4">Saindo da fila</h3>
+      <p class="fs-13 text-secondary mb-16" id="saidaNome">Selecione o motivo</p>
+
+      <div class="flex-col gap-8">
+        <div class="motivo-option" data-saida="almoco" onclick="confirmSaida('almoco')">
+          <i class="fa-solid fa-utensils"></i>
+          <div>
+            <div class="fw-700 fs-14">Almoço</div>
+            <div class="fs-11 text-muted">Saiu para almoçar</div>
+          </div>
+        </div>
+        <div class="motivo-option" data-saida="banheiro" onclick="confirmSaida('banheiro')">
+          <i class="fa-solid fa-restroom"></i>
+          <div>
+            <div class="fw-700 fs-14">Banheiro</div>
+            <div class="fs-11 text-muted">Pausa rápida</div>
+          </div>
+        </div>
+        <div class="motivo-option" data-saida="operacional" onclick="confirmSaida('operacional')">
+          <i class="fa-solid fa-wrench"></i>
+          <div>
+            <div class="fw-700 fs-14">Operacional</div>
+            <div class="fs-11 text-muted">Demanda solicitada pela gerência</div>
+          </div>
+        </div>
+        <div class="motivo-option" data-saida="finalizar" onclick="confirmSaida('finalizar')">
+          <i class="fa-solid fa-door-open"></i>
+          <div>
+            <div class="fw-700 fs-14">Finalizar o dia</div>
+            <div class="fs-11 text-muted">Encerrou o expediente</div>
+          </div>
+        </div>
+        <div class="motivo-option" data-saida="outro" onclick="confirmSaida('outro')">
+          <i class="fa-solid fa-ellipsis"></i>
+          <div>
+            <div class="fw-700 fs-14">Outro motivo</div>
+            <div class="fs-11 text-muted">Motivo diferente</div>
+          </div>
+        </div>
       </div>
     </div>
-  </aside>
 
-  <!-- SERVICE PANEL (right — Em Atendimento) -->
-  <main class="service-panel" id="servicePanel">
-    <div class="panel-header">
-      <span><i class="fa-solid fa-headset panel-header-icon"></i>Em Atendimento</span>
-      <span id="activeCount" class="fs-12 text-muted">0 ativos</span>
+    <!-- Mini Ranking Dropdown (fora do header para não afetar flex) -->
+    <div id="miniRankingDropdown" class="mini-ranking-dropdown" style="display: none">
+      <div class="fs-11 fw-800 uppercase text-muted mb-8 tracking-wide">
+        <i class="fa-solid fa-trophy mr-4 mini-ranking-trophy"></i>Ranking do Turno
+      </div>
+      <div id="miniRankingList" class="flex-col gap-6"></div>
     </div>
 
-    <!-- Atendimentos ativos (múltiplos simultâneos) -->
-    <div id="activeList" class="flex-col gap-10 flex-1">
-      <p id="activeLabel" class="fs-10 fw-700 text-muted uppercase hidden tracking-wide"></p>
-    </div>
-  </main>
-
-  <!-- FOOTER: vendedores -->
-  <footer class="t-footer" id="statusFooter">
-    <!-- Populated dynamically -->
-  </footer>
-</div>
-
-<!-- Bottom Sheet: Motivos de Não Conversão -->
-<div class="bottom-sheet-overlay" id="motivoOverlay" onclick="closeMotivos()"></div>
-<div class="bottom-sheet" id="motivoSheet">
-  <div class="bottom-sheet-handle"></div>
-  <h3 class="mono fs-18 fw-700 mb-8">Motivo da não conversão</h3>
-  <p class="fs-14 text-secondary mb-16">Selecione o motivo principal</p>
-
-  <div class="flex-col gap-8" id="motivoList">
-    <div class="motivo-option" data-motivo="preco" onclick="selectMotivo(this)">
-      <i class="fa-solid fa-tag"></i>
-      <div>
-        <div class="fw-700 fs-16">Preço</div>
-        <div class="fs-13 text-muted">Cliente achou caro</div>
+    <!-- Bottom Sheet: Resumo do Turno -->
+    <div class="bottom-sheet-overlay" id="turnoSummaryOverlay" onclick="closeTurnoSummary()"></div>
+    <div class="bottom-sheet sheet-max-80vh" id="turnoSummarySheet">
+      <div class="bottom-sheet-handle"></div>
+      <h3 class="mono fs-16 fw-700 mb-4"><i class="fa-solid fa-flag-checkered mr-4"></i>Encerrar Turno</h3>
+      <p class="fs-13 text-secondary mb-16">Resumo do turno atual</p>
+      <div id="turnoSummaryContent" class="turno-summary-content"></div>
+      <div class="flex-center gap-8">
+        <button class="btn btn-ghost btn-flex-tall" onclick="closeTurnoSummary()">Voltar</button>
+        <button class="btn btn-turno-close" id="btnConfirmCloseTurno" onclick="confirmCloseTurno()">
+          <i class="fa-solid fa-power-off panel-header-icon"></i>Encerrar Turno
+        </button>
       </div>
     </div>
-    <div class="motivo-option" data-motivo="ruptura" onclick="selectMotivo(this)">
-      <i class="fa-solid fa-box-open"></i>
-      <div>
-        <div class="fw-700 fs-16">Ruptura</div>
-        <div class="fs-13 text-muted">Produto em falta / sem estoque</div>
+
+    <!-- Bottom Sheet: Histórico de Posições -->
+    <div class="bottom-sheet-overlay" id="posLogOverlay" onclick="closePosLog()"></div>
+    <div class="bottom-sheet sheet-max-80vh" id="posLogSheet">
+      <div class="bottom-sheet-handle"></div>
+      <h3 class="mono fs-16 fw-700 mb-4"><i class="fa-solid fa-clock-rotate-left mr-4"></i>Histórico da Sessão</h3>
+      <p class="fs-13 text-secondary mb-12">Movimentações registradas nesta sessão</p>
+      <div id="posLogList" class="pos-log-list"></div>
+    </div>
+
+    <canvas id="confettiCanvas"></canvas>
+    <div id="toastContainer"></div>
+
+    <script type="module" src="/js/tablet-init.js"></script>
+    <script type="module">
+      import { startTourIfFirstTime } from '/js/tour.js';
+      window.addEventListener('load', () => setTimeout(() => startTourIfFirstTime('tablet'), 1500));
+    </script>
+    <!-- Origin Channel Modal -->
+    <div class="origin-overlay" id="originOverlay">
+      <div class="origin-box">
+        <div class="origin-title">Como o cliente chegou?</div>
+        <div class="origin-grid" id="originGrid"></div>
+        <button class="origin-skip" onclick="confirmOrigin(null)">Não informado</button>
       </div>
     </div>
-    <div class="motivo-option" data-motivo="indecisao" onclick="selectMotivo(this)">
-      <i class="fa-solid fa-face-meh"></i>
-      <div>
-        <div class="fw-700 fs-16">Indecisão</div>
-        <div class="fs-13 text-muted">Cliente vai pensar / voltar depois</div>
-      </div>
-    </div>
-    <div class="motivo-option" data-motivo="so_olhando" onclick="selectMotivo(this)">
-      <i class="fa-solid fa-eye"></i>
-      <div>
-        <div class="fw-700 fs-16">Só olhando</div>
-        <div class="fs-13 text-muted">Sem intenção de compra</div>
-      </div>
-    </div>
-    <div class="motivo-option" data-motivo="outro" onclick="selectMotivo(this)">
-      <i class="fa-solid fa-ellipsis"></i>
-      <div>
-        <div class="fw-700 fs-16">Outro</div>
-        <div class="fs-13 text-muted">Motivo diferente</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Ruptura: campo produto (hidden) -->
-  <div id="rupturaField" class="hidden mt-16">
-    <label class="block fs-13 fw-700 text-muted uppercase mb-4 tracking-tight">Qual produto?</label>
-    <input id="rupturaInput" class="input" type="text" placeholder="Ex: Chapéu Pralana 6X" autocomplete="off">
-  </div>
-
-  <!-- Outro: campo detalhe (hidden) -->
-  <div id="outroField" class="hidden mt-16">
-    <label class="block fs-13 fw-700 text-muted uppercase mb-4 tracking-tight">Descreva o motivo</label>
-    <input id="outroInput" class="input" type="text" placeholder="Ex: Cliente errou de loja" autocomplete="off">
-  </div>
-
-  <button class="btn btn-danger btn-confirm-motivo" id="btnConfirmMotivo" onclick="confirmMotivo()" disabled>
-    <i class="fa-solid fa-check"></i>
-    Confirmar
-  </button>
-</div>
-
-<!-- Outcome Sheet (resultado do atendimento) -->
-<div class="bottom-sheet-overlay" id="outcomeOverlay" onclick="closeOutcomeSheet()"></div>
-<div class="bottom-sheet" id="outcomeSheet">
-  <div class="bottom-sheet-handle"></div>
-  <h3 class="mono fs-18 fw-700 mb-8">Resultado do atendimento</h3>
-  <p class="fs-14 text-secondary mb-16" id="outcomeVendorName"></p>
-
-  <div class="flex-col gap-8">
-    <div class="motivo-option outcome-option" data-outcome="venda" onclick="selectOutcome('venda')">
-      <i class="fa-solid fa-shopping-bag"></i>
-      <div>
-        <div class="fw-700 fs-16">Venda</div>
-        <div class="fs-13 text-muted">Cliente comprou</div>
-      </div>
-    </div>
-    <div class="motivo-option outcome-option" data-outcome="troca" onclick="selectOutcome('troca')">
-      <i class="fa-solid fa-arrow-right-arrow-left"></i>
-      <div>
-        <div class="fw-700 fs-16">Troca</div>
-        <div class="fs-13 text-muted">Cliente trocou produto</div>
-      </div>
-    </div>
-    <div class="motivo-option outcome-option" data-outcome="nao_convertido" onclick="selectOutcome('nao_convertido')">
-      <i class="fa-solid fa-xmark"></i>
-      <div>
-        <div class="fw-700 fs-16">Não Converteu</div>
-        <div class="fs-13 text-muted">Cliente saiu sem comprar</div>
-      </div>
-    </div>
-    <div class="motivo-option outcome-option" data-outcome="cancelar" onclick="selectOutcome('cancelar')">
-      <i class="fa-solid fa-rotate-left"></i>
-      <div>
-        <div class="fw-700 fs-16">Cancelar Atendimento</div>
-        <div class="fs-13 text-muted">Vendedor volta ao 1º da fila</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Check-in Overlay (abertura de turno) -->
-<div class="bottom-sheet-overlay" id="checkinOverlay" onclick="closeCheckin()"></div>
-<div class="bottom-sheet sheet-max-90vh" id="checkinSheet">
-  <div class="bottom-sheet-handle"></div>
-  <h3 class="mono fs-16 fw-700 mb-4">Check-in do Turno</h3>
-  <p class="fs-13 text-secondary mb-16">Selecione os vendedores presentes</p>
-  <div id="checkinList" class="flex-col gap-6 mb-16"></div>
-  <div class="flex-center gap-8">
-    <button class="btn btn-ghost btn-flex-1" onclick="closeCheckin()">Cancelar</button>
-    <button class="btn btn-success btn-flex-1" id="btnCheckin" onclick="confirmCheckin()">
-      <i class="fa-solid fa-check panel-header-icon"></i>Iniciar Turno
-    </button>
-  </div>
-</div>
-
-<!-- Bottom Sheet: Motivo de Saída da Fila -->
-<div class="bottom-sheet-overlay" id="saidaOverlay" onclick="closeSaida()"></div>
-<div class="bottom-sheet" id="saidaSheet">
-  <div class="bottom-sheet-handle"></div>
-  <h3 class="mono fs-16 fw-700 mb-4">Saindo da fila</h3>
-  <p class="fs-13 text-secondary mb-16" id="saidaNome">Selecione o motivo</p>
-
-  <div class="flex-col gap-8">
-    <div class="motivo-option" data-saida="almoco" onclick="confirmSaida('almoco')">
-      <i class="fa-solid fa-utensils"></i>
-      <div>
-        <div class="fw-700 fs-14">Almoço</div>
-        <div class="fs-11 text-muted">Saiu para almoçar</div>
-      </div>
-    </div>
-    <div class="motivo-option" data-saida="banheiro" onclick="confirmSaida('banheiro')">
-      <i class="fa-solid fa-restroom"></i>
-      <div>
-        <div class="fw-700 fs-14">Banheiro</div>
-        <div class="fs-11 text-muted">Pausa rápida</div>
-      </div>
-    </div>
-    <div class="motivo-option" data-saida="operacional" onclick="confirmSaida('operacional')">
-      <i class="fa-solid fa-wrench"></i>
-      <div>
-        <div class="fw-700 fs-14">Operacional</div>
-        <div class="fs-11 text-muted">Demanda solicitada pela gerência</div>
-      </div>
-    </div>
-    <div class="motivo-option" data-saida="finalizar" onclick="confirmSaida('finalizar')">
-      <i class="fa-solid fa-door-open"></i>
-      <div>
-        <div class="fw-700 fs-14">Finalizar o dia</div>
-        <div class="fs-11 text-muted">Encerrou o expediente</div>
-      </div>
-    </div>
-    <div class="motivo-option" data-saida="outro" onclick="confirmSaida('outro')">
-      <i class="fa-solid fa-ellipsis"></i>
-      <div>
-        <div class="fw-700 fs-14">Outro motivo</div>
-        <div class="fs-11 text-muted">Motivo diferente</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Mini Ranking Dropdown (fora do header para não afetar flex) -->
-<div id="miniRankingDropdown" class="mini-ranking-dropdown" style="display:none">
-  <div class="fs-11 fw-800 uppercase text-muted mb-8 tracking-wide"><i class="fa-solid fa-trophy mr-4 mini-ranking-trophy"></i>Ranking do Turno</div>
-  <div id="miniRankingList" class="flex-col gap-6"></div>
-</div>
-
-<!-- Bottom Sheet: Resumo do Turno -->
-<div class="bottom-sheet-overlay" id="turnoSummaryOverlay" onclick="closeTurnoSummary()"></div>
-<div class="bottom-sheet sheet-max-80vh" id="turnoSummarySheet">
-  <div class="bottom-sheet-handle"></div>
-  <h3 class="mono fs-16 fw-700 mb-4"><i class="fa-solid fa-flag-checkered mr-4"></i>Encerrar Turno</h3>
-  <p class="fs-13 text-secondary mb-16">Resumo do turno atual</p>
-  <div id="turnoSummaryContent" class="turno-summary-content"></div>
-  <div class="flex-center gap-8">
-    <button class="btn btn-ghost btn-flex-tall" onclick="closeTurnoSummary()">Voltar</button>
-    <button class="btn btn-turno-close" id="btnConfirmCloseTurno" onclick="confirmCloseTurno()">
-      <i class="fa-solid fa-power-off panel-header-icon"></i>Encerrar Turno
-    </button>
-  </div>
-</div>
-
-<!-- Bottom Sheet: Histórico de Posições -->
-<div class="bottom-sheet-overlay" id="posLogOverlay" onclick="closePosLog()"></div>
-<div class="bottom-sheet sheet-max-80vh" id="posLogSheet">
-  <div class="bottom-sheet-handle"></div>
-  <h3 class="mono fs-16 fw-700 mb-4"><i class="fa-solid fa-clock-rotate-left mr-4"></i>Histórico da Sessão</h3>
-  <p class="fs-13 text-secondary mb-12">Movimentações registradas nesta sessão</p>
-  <div id="posLogList" class="pos-log-list"></div>
-</div>
-
-<canvas id="confettiCanvas"></canvas>
-<div id="toastContainer"></div>
-
-<script type="module" src="/js/tablet-init.js"></script>
-<script type="module">
-  import { startTourIfFirstTime } from '/js/tour.js';
-  window.addEventListener('load', () => setTimeout(() => startTourIfFirstTime('tablet'), 1500));
-</script>
-<!-- Origin Channel Modal -->
-<div class="origin-overlay" id="originOverlay">
-  <div class="origin-box">
-    <div class="origin-title">Como o cliente chegou?</div>
-    <div class="origin-grid" id="originGrid"></div>
-    <button class="origin-skip" onclick="confirmOrigin(null)">Não informado</button>
-  </div>
-</div>
-</body>
+  </body>
 </html>
