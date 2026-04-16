@@ -38,7 +38,7 @@
   object-fit: contain;
   transform: scale(1.85);
   transform-origin: left center;
-  margin-right: 24px;
+  margin-right: 104px;
   flex-shrink: 0;
 }
 .t-header-version {
