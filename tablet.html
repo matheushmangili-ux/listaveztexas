@@ -236,10 +236,16 @@
         </div>
       </div>
 
-      <!-- Ruptura: campo produto (hidden) -->
+      <!-- Ruptura: picker cascata (hidden) -->
       <div id="rupturaField" class="hidden mt-16">
-        <label class="block fs-13 fw-700 text-muted uppercase mb-4 tracking-tight">Qual produto?</label>
-        <input id="rupturaInput" class="input" type="text" placeholder="Ex: Chapéu Pralana 6X" autocomplete="off" />
+        <!-- Picker estruturado (se tenant tem catálogo) -->
+        <div id="rupturaPicker" class="ruptura-picker" style="display: none"></div>
+        <!-- Fallback: input de texto livre (se catálogo vazio). Default: visível
+             até a integração do picker estruturado (ruptura v2) ser concluída. -->
+        <div id="rupturaInputWrap" style="display: block">
+          <label class="block fs-13 fw-700 text-muted uppercase mb-4 tracking-tight">Qual produto?</label>
+          <input id="rupturaInput" class="input" type="text" placeholder="Ex: Chapéu Pralana 6X" autocomplete="off" />
+        </div>
       </div>
 
       <!-- Outro: campo detalhe (hidden) -->
