@@ -18,24 +18,22 @@ let _activeChartTab = null;
 
 // ─── Paleta harmonizada (mint + charcoal) ───
 const BRAND_PALETTE = {
-  mint:      '#aaeec4',
-  mintDeep:  '#7fd9a0',
-  mintSoft:  '#c7f5d6',
-  coral:     '#e89b8a',
+  mint: '#aaeec4',
+  mintDeep: '#7fd9a0',
+  mintSoft: '#c7f5d6',
+  coral: '#e89b8a',
   coralDeep: '#d47a68',
-  sand:      '#d4a373',
-  sandDeep:  '#b8875a',
-  dusty:     '#8ea5c9',
+  sand: '#d4a373',
+  sandDeep: '#b8875a',
+  dusty: '#8ea5c9',
   dustyDeep: '#6d85ac',
-  lavender:  '#b8a8d4',
-  neutral:   '#a3a3a3',
-  charcoal:  '#2a2a2a'
+  lavender: '#b8a8d4',
+  neutral: '#a3a3a3',
+  charcoal: '#2a2a2a'
 };
 
 // Donut categórico (motivos, setores, canais)
-const CATEGORICAL = [
-  '#aaeec4', '#8ea5c9', '#d4a373', '#b8a8d4', '#e89b8a', '#7fd9a0', '#6d85ac', '#a3a3a3'
-];
+const CATEGORICAL = ['#aaeec4', '#8ea5c9', '#d4a373', '#b8a8d4', '#e89b8a', '#7fd9a0', '#6d85ac', '#a3a3a3'];
 // Dual-series (hoje vs ontem): mint + sand
 const DUAL = ['#aaeec4', '#d4a373'];
 // Triple: mint (positivo) + dusty (info) + coral (negativo)
@@ -115,7 +113,12 @@ function donutConfig({ labels, values, colors, total, centerLabel, tooltipFn, ev
       labels: { colors: cc.textStrong }
     },
     stroke: { width: 2, colors: [isDarkTheme() ? '#18181B' : '#FFFFFF'] },
-    tooltip: { custom: tooltipFn },
+    tooltip: {
+      custom: tooltipFn,
+      // Âncora o tooltip no canto top-right do chart em vez de seguir o cursor.
+      // Evita clipping na borda superior do .chart-card (que tem overflow:hidden).
+      fixed: { enabled: true, position: 'topRight', offsetX: -8, offsetY: 8 }
+    },
     states: { hover: { filter: { type: 'darken', value: 0.82 } }, active: { filter: { type: 'none' } } }
   };
 }
@@ -667,7 +670,25 @@ export async function loadHourly(range) {
       },
       annotations,
       dataLabels: { enabled: false },
-      tooltip: { shared: true, intersect: false, y: { formatter: (val) => (val != null ? Math.round(val) : '') } }
+      tooltip: {
+        shared: true,
+        intersect: false,
+        y: {
+          formatter: (val, opts) => {
+            if (val == null) return '';
+            // Em single-day: mostra só o valor inteiro.
+            // Em multi-day (Semana/Mês): mostra "média (total: N)" pras 2 primeiras séries (Média Atendimentos/Vendas).
+            //   A 3ª série ("Hoje") é single-value — sem total.
+            const base = Math.round(val * 10) / 10;
+            if (!isMultiDay) return Math.round(val);
+            const idx = opts?.dataPointIndex;
+            const seriesIdx = opts?.seriesIndex;
+            if (idx == null || seriesIdx == null || seriesIdx > 1) return base;
+            const raw = seriesIdx === 0 ? atendRaw[idx] : vendasRaw[idx];
+            return `${base} (total: ${raw})`;
+          }
+        }
+      }
     });
   } catch (err) {
     console.error('loadHourly error:', err);
