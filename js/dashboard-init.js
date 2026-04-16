@@ -1091,6 +1091,7 @@ window.toggleSection = function (id) {
   if (!btn || !body) return;
   const isCollapsed = body.classList.toggle('collapsed');
   btn.classList.toggle('collapsed', isCollapsed);
+  btn.setAttribute('aria-expanded', String(!isCollapsed));
   const stored = JSON.parse(localStorage.getItem('lv-collapsed') || '{}');
   stored[id] = isCollapsed;
   localStorage.setItem('lv-collapsed', JSON.stringify(stored));
@@ -1105,6 +1106,7 @@ window.toggleSection = function (id) {
     if (btn && body) {
       btn.classList.add('collapsed');
       body.classList.add('collapsed');
+      btn.setAttribute('aria-expanded', 'false');
     }
   });
 })();

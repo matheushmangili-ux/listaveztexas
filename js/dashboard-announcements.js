@@ -5,15 +5,16 @@
 // ============================================
 
 import { getSupabase } from '/js/supabase-config.js';
+import { renderState } from '/js/ui.js';
 
 const sb = getSupabase();
 let _items = [];
 let _tenantId = null;
 
 const TYPE_META = {
-  comunicado:  { icon: '📢', label: 'Comunicado' },
-  corrida:     { icon: '🏁', label: 'Corrida' },
-  evento:      { icon: '📅', label: 'Evento' },
+  comunicado: { icon: '📢', label: 'Comunicado' },
+  corrida: { icon: '🏁', label: 'Corrida' },
+  evento: { icon: '📅', label: 'Evento' },
   treinamento: { icon: '🎓', label: 'Treinamento' }
 };
 
@@ -37,7 +38,9 @@ function closeModal() {
 
 async function ensureTenant() {
   if (_tenantId) return;
-  const { data: { user } } = await sb.auth.getUser();
+  const {
+    data: { user }
+  } = await sb.auth.getUser();
   _tenantId = user?.user_metadata?.tenant_id || null;
 }
 
@@ -71,9 +74,9 @@ async function publish() {
     await ensureTenant();
     if (!_tenantId) throw new Error('tenant_id não disponível');
 
-    const type  = document.getElementById('annType').value;
+    const type = document.getElementById('annType').value;
     const title = document.getElementById('annTitle').value.trim();
-    const body  = document.getElementById('annBody').value.trim();
+    const body = document.getElementById('annBody').value.trim();
     const urgent = document.getElementById('annUrgent').checked;
 
     if (!title) throw new Error('Informe o título do comunicado');
@@ -127,6 +130,8 @@ async function loadList() {
   const list = document.getElementById('annList');
   if (!list) return;
 
+  renderState(list, 'loading');
+
   const { data, error } = await sb
     .from('tenant_announcements')
     .select('*')
@@ -134,13 +139,21 @@ async function loadList() {
     .limit(50);
 
   if (error) {
-    list.innerHTML = `<div style="color:var(--danger);padding:16px;font-size:12px">Erro: ${escapeHtml(error.message)}</div>`;
+    renderState(list, 'error', {
+      title: 'Não consegui carregar os comunicados',
+      hint: error.message,
+      onRetry: loadList
+    });
     return;
   }
 
   _items = data || [];
   if (_items.length === 0) {
-    list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum comunicado ainda.<br>Crie o primeiro acima.</div>';
+    renderState(list, 'empty', {
+      icon: 'fa-bullhorn',
+      title: 'Nenhum comunicado ainda',
+      hint: 'Crie o primeiro no formulário acima.'
+    });
     return;
   }
 
@@ -157,13 +170,12 @@ function renderItem(a) {
   const meta = TYPE_META[a.type] || TYPE_META.comunicado;
   const isArchived = a.archived_at != null;
   const isExpired = a.expires_at && new Date(a.expires_at) < new Date();
-  const badge = isArchived ? 'ARQUIVADO'
-              : isExpired ? 'EXPIRADO'
-              : a.urgent ? 'URGENTE' : '';
+  const badge = isArchived ? 'ARQUIVADO' : isExpired ? 'EXPIRADO' : a.urgent ? 'URGENTE' : '';
   const badgeColor = isArchived || isExpired ? 'var(--text-muted)' : 'var(--accent)';
-  const corridaInfo = a.type === 'corrida' && a.metadata?.prize
-    ? `<div style="font-size:11px;color:var(--warning);margin-top:4px">🏆 ${escapeHtml(a.metadata.prize)}</div>`
-    : '';
+  const corridaInfo =
+    a.type === 'corrida' && a.metadata?.prize
+      ? `<div style="font-size:11px;color:var(--warning);margin-top:4px">🏆 ${escapeHtml(a.metadata.prize)}</div>`
+      : '';
 
   return `
     <div style="padding:12px 14px;background:var(--surface-subtle);border:1px solid var(--border-subtle);border-radius:10px;${isArchived || isExpired ? 'opacity:0.6' : ''}">
@@ -188,10 +200,14 @@ function renderItem(a) {
 }
 
 async function archive(id) {
-  const { error } = await sb.from('tenant_announcements')
+  const { error } = await sb
+    .from('tenant_announcements')
     .update({ archived_at: new Date().toISOString() })
     .eq('id', id);
-  if (error) { toast(error.message, 'error'); return; }
+  if (error) {
+    toast(error.message, 'error');
+    return;
+  }
   toast('Arquivado', 'success');
   await loadList();
 }
@@ -199,7 +215,10 @@ async function archive(id) {
 async function remove(id) {
   if (!confirm('Apagar este comunicado? Esta ação não pode ser desfeita.')) return;
   const { error } = await sb.from('tenant_announcements').delete().eq('id', id);
-  if (error) { toast(error.message, 'error'); return; }
+  if (error) {
+    toast(error.message, 'error');
+    return;
+  }
   toast('Apagado', 'success');
   await loadList();
 }
@@ -219,14 +238,22 @@ function showError(msg) {
 // ─── Utils ───
 function escapeHtml(s) {
   return String(s || '')
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function formatDate(iso) {
   try {
     const d = new Date(iso);
-    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   } catch {
     return '';
   }
@@ -238,7 +265,10 @@ function toast(msg, kind) {
     window.showToast(msg, kind);
   } else {
     const c = document.getElementById('toastContainer');
-    if (!c) { alert(msg); return; }
+    if (!c) {
+      alert(msg);
+      return;
+    }
     const el = document.createElement('div');
     el.textContent = msg;
     el.style.cssText = `background:${kind === 'error' ? 'var(--danger)' : 'var(--success)'};color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;margin-top:8px;box-shadow:0 4px 12px rgba(0,0,0,0.2)`;

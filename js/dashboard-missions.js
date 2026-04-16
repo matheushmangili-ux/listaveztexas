@@ -4,13 +4,14 @@
 // ============================================
 
 import { getSupabase } from '/js/supabase-config.js';
+import { renderState } from '/js/ui.js';
 
 const sb = getSupabase();
 
 const GOAL_LABELS = {
-  atendimentos_count:  'Atendimentos',
-  vendas_count:        'Vendas',
-  vendas_canal_count:  'Vendas por canal',
+  atendimentos_count: 'Atendimentos',
+  vendas_count: 'Vendas',
+  vendas_canal_count: 'Vendas por canal',
   valor_vendido_total: 'Valor vendido (R$)'
 };
 
@@ -18,7 +19,13 @@ const SUGGESTIONS = [
   { title: '5 atendimentos hoje', goal_type: 'atendimentos_count', goal_value: 5, reward_xp: 30, icon: 'fa-handshake' },
   { title: '3 vendas hoje', goal_type: 'vendas_count', goal_value: 3, reward_xp: 80, icon: 'fa-bag-shopping' },
   { title: '10 atendimentos hoje', goal_type: 'atendimentos_count', goal_value: 10, reward_xp: 60, icon: 'fa-users' },
-  { title: 'R$ 500 em vendas', goal_type: 'valor_vendido_total', goal_value: 500, reward_xp: 100, icon: 'fa-dollar-sign' },
+  {
+    title: 'R$ 500 em vendas',
+    goal_type: 'valor_vendido_total',
+    goal_value: 500,
+    reward_xp: 100,
+    icon: 'fa-dollar-sign'
+  },
   { title: '1 venda hoje', goal_type: 'vendas_count', goal_value: 1, reward_xp: 25, icon: 'fa-star' },
   { title: '7 atendimentos hoje', goal_type: 'atendimentos_count', goal_value: 7, reward_xp: 45, icon: 'fa-fire' }
 ];
@@ -39,12 +46,14 @@ function closeModal() {
 function renderSuggestions() {
   const grid = document.getElementById('missionSuggestionsGrid');
   if (!grid) return;
-  grid.innerHTML = SUGGESTIONS.map((s, i) => `
+  grid.innerHTML = SUGGESTIONS.map(
+    (s, i) => `
     <button type="button" data-suggest="${i}" style="padding:10px;background:var(--surface);border:1px solid var(--border-subtle);border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;text-align:left">
       <i class="fa-solid ${s.icon}" style="color:var(--success)"></i>
       <span>${esc(s.title)}<br><span style="font-size:10px;color:var(--text-muted);font-weight:400">${s.reward_xp} XP</span></span>
     </button>
-  `).join('');
+  `
+  ).join('');
   grid.querySelectorAll('[data-suggest]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const s = SUGGESTIONS[parseInt(btn.dataset.suggest)];
@@ -125,14 +134,24 @@ async function loadList() {
   const list = document.getElementById('missionList');
   if (!list) return;
 
+  renderState(list, 'loading');
+
   const { data, error } = await sb.rpc('admin_list_mission_templates');
   if (error) {
-    list.innerHTML = `<div style="color:var(--danger);padding:16px;font-size:12px">Erro: ${esc(error.message)}</div>`;
+    renderState(list, 'error', {
+      title: 'Não consegui carregar as missões',
+      hint: error.message,
+      onRetry: loadList
+    });
     return;
   }
 
   if (!data || data.length === 0) {
-    list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhuma missão criada ainda.<br>Use as sugestões acima ou crie uma nova.</div>';
+    renderState(list, 'empty', {
+      icon: 'fa-flag-checkered',
+      title: 'Nenhuma missão criada ainda',
+      hint: 'Use as sugestões acima ou crie uma nova.'
+    });
     return;
   }
 
@@ -140,7 +159,10 @@ async function loadList() {
   list.querySelectorAll('[data-edit]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const item = data.find((d) => d.id === btn.dataset.edit);
-      if (item) { fillForm(item); document.getElementById('missionFormDetails').open = true; }
+      if (item) {
+        fillForm(item);
+        document.getElementById('missionFormDetails').open = true;
+      }
     });
   });
   list.querySelectorAll('[data-toggle]').forEach((btn) => {
@@ -188,19 +210,32 @@ function renderItem(m) {
 function showError(msg) {
   const box = document.getElementById('missionError');
   if (!box) return;
-  if (!msg) { box.style.display = 'none'; return; }
+  if (!msg) {
+    box.style.display = 'none';
+    return;
+  }
   box.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="margin-right:6px"></i>' + esc(msg);
   box.style.display = 'block';
 }
 
 function esc(s) {
-  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function toast(msg, kind) {
-  if (typeof window.showToast === 'function') { window.showToast(msg, kind); return; }
+  if (typeof window.showToast === 'function') {
+    window.showToast(msg, kind);
+    return;
+  }
   const c = document.getElementById('toastContainer');
-  if (!c) { alert(msg); return; }
+  if (!c) {
+    alert(msg);
+    return;
+  }
   const el = document.createElement('div');
   el.textContent = msg;
   el.style.cssText = `background:${kind === 'error' ? 'var(--danger)' : 'var(--success)'};color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;margin-top:8px;box-shadow:0 4px 12px rgba(0,0,0,0.2)`;

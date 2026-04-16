@@ -43,6 +43,7 @@ async function showHome() {
 // ─── Login handler ───
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
+  loginError.textContent = '';
   loginError.classList.add('hidden');
   btnLogin.disabled = true;
 
@@ -62,7 +63,20 @@ loginForm.addEventListener('submit', async (e) => {
 
     await showHome();
   } catch (err) {
-    loginError.textContent = err?.message || 'Falha no login';
+    const raw = err?.message || '';
+    let msg;
+    if (!navigator.onLine) {
+      msg = 'Sem conexão. Confira sua internet e tente de novo.';
+    } else if (/invalid login credentials/i.test(raw)) {
+      msg = 'Email ou senha incorretos.';
+    } else if (/rate limit|too many/i.test(raw)) {
+      msg = 'Muitas tentativas. Aguarde um instante e tente novamente.';
+    } else if (/email not confirmed/i.test(raw)) {
+      msg = 'Email ainda não confirmado. Confira sua caixa de entrada.';
+    } else {
+      msg = raw || 'Falha no login. Tente novamente.';
+    }
+    loginError.textContent = msg;
     loginError.classList.remove('hidden');
   } finally {
     btnLogin.disabled = false;
@@ -90,7 +104,9 @@ window._vendorLogout = async function () {
     }
   }
 
-  const { data: { session } } = await sb.auth.getSession();
+  const {
+    data: { session }
+  } = await sb.auth.getSession();
   if (session?.user?.user_metadata?.user_role === 'vendedor') {
     await showHome();
   } else {

@@ -1,886 +1,1021 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR" data-theme="dark">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Configuração — Minha Vez</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/styles.v51.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-  .setup-container {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px 24px 80px;
-  }
-  .setup-header {
-    text-align: center;
-    margin-bottom: 40px;
-  }
-  .setup-header h1 {
-    font-family: var(--font-mono);
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: -.025em;
-    margin-bottom: 4px;
-  }
-  .setup-header p {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-weight: 500;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-  }
-  /* Progress */
-  .progress-bar {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    margin-bottom: 40px;
-    width: 100%;
-    max-width: 520px;
-  }
-  .progress-step {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 2px solid var(--border-subtle);
-    background: var(--bg-surface);
-    font-family: var(--font-mono);
-    font-weight: 700;
-    font-size: 13px;
-    color: var(--text-muted);
-    flex-shrink: 0;
-    transition: all .3s ease;
-    position: relative;
-  }
-  .progress-step.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(170, 238, 196,.08);
-  }
-  .progress-step.done {
-    border-color: var(--success);
-    color: var(--success);
-    background: rgba(170, 238, 196,.08);
-  }
-  .progress-line {
-    flex: 1;
-    height: 2px;
-    background: var(--border-subtle);
-    transition: background .3s ease;
-  }
-  .progress-line.done {
-    background: var(--success);
-  }
-  /* Step panels */
-  .setup-box {
-    width: 100%;
-    max-width: 520px;
-  }
-  .step-panel {
-    display: none;
-    animation: fadeIn .3s ease;
-  }
-  .step-panel.active { display: block; }
-  .step-title {
-    font-family: var(--font-mono);
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-  .step-desc {
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin-bottom: 28px;
-  }
-  .form-group {
-    margin-bottom: 20px;
-  }
-  .form-label {
-    display: block;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    margin-bottom: 6px;
-  }
-  .form-hint {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 4px;
-  }
-  .slug-preview {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--accent);
-    margin-top: 6px;
-    padding: 8px 12px;
-    background: var(--bg-elevated);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-subtle);
-  }
-  /* Sector chips */
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--transition);
-    border: 1px solid var(--border-subtle);
-    background: var(--bg-surface);
-    color: var(--text-secondary);
-  }
-  .chip.selected {
-    border-color: var(--accent);
-    background: rgba(170, 238, 196,.08);
-    color: var(--accent);
-  }
-  .chip .remove-chip {
-    width: 16px;
-    height: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    font-size: 10px;
-    background: rgba(0,0,0,.08);
-    cursor: pointer;
-  }
-  .chip .remove-chip:hover {
-    background: var(--danger);
-    color: #fff;
-  }
-  .add-chip-row {
-    display: flex;
-    gap: 8px;
-    margin-top: 8px;
-  }
-  .add-chip-row .input { max-width: 200px; min-height: 36px; font-size: 13px; }
-  .add-chip-row .btn { min-height: 36px; padding: 0 14px; font-size: 12px; }
-  /* Vendor table */
-  .vendor-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  .vendor-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 100px 40px;
-    gap: 8px;
-    align-items: center;
-    padding: 10px 12px;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius);
-    animation: fadeIn .2s ease;
-  }
-  .vendor-row .input { min-height: 36px; font-size: 13px; }
-  .vendor-row select {
-    width: 100%;
-    min-height: 36px;
-    padding: 0 8px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
-    color: var(--text-primary);
-    font-family: var(--font-body);
-    font-size: 13px;
-    outline: none;
-  }
-  .vendor-row select:focus { border-color: var(--accent); }
-  .vendor-row .pin-small {
-    width: 100%;
-    min-height: 36px;
-    text-align: center;
-    font-family: var(--font-mono);
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
-    color: var(--accent);
-    outline: none;
-  }
-  .vendor-row .pin-small:focus { border-color: var(--accent); }
-  .vendor-remove {
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    background: transparent;
-    color: var(--text-muted);
-    cursor: pointer;
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-    transition: all var(--transition);
-  }
-  .vendor-remove:hover { background: var(--danger-bg); color: var(--danger); }
-  /* Step nav */
-  .step-nav {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    margin-top: 32px;
-  }
-  .step-nav .btn { flex: 1; }
-  /* Review summary */
-  .review-card {
-    padding: 20px;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius);
-    margin-bottom: 16px;
-  }
-  .review-card h3 {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    margin-bottom: 10px;
-  }
-  .review-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 0;
-    font-size: 14px;
-  }
-  .review-item .label { color: var(--text-secondary); }
-  .review-item .value { font-weight: 600; font-family: var(--font-mono); font-size: 13px; }
-  /* Success */
-  .success-panel {
-    text-align: center;
-    padding: 40px 0;
-  }
-  .success-icon {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: rgba(170, 238, 196,.1);
-    border: 2px solid var(--success);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 24px;
-    font-size: 32px;
-    color: var(--success);
-  }
-  .url-card {
-    padding: 14px 16px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .url-card .url-text {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--accent);
-    word-break: break-all;
-  }
-  .url-card .copy-btn {
-    padding: 6px 10px;
-    border: 1px solid var(--border-subtle);
-    background: var(--bg-surface);
-    border-radius: var(--radius-sm);
-    color: var(--text-secondary);
-    cursor: pointer;
-    font-size: 12px;
-    white-space: nowrap;
-  }
-  .url-card .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .error-msg {
-    padding: 12px 16px;
-    background: var(--danger-bg);
-    border: 1px solid rgba(232, 155, 138,.15);
-    border-radius: var(--radius-sm);
-    color: var(--danger);
-    font-size: 13px;
-    font-weight: 500;
-    margin-bottom: 16px;
-    display: none;
-    align-items: center;
-    gap: 8px;
-  }
-  .error-msg.show { display: flex; }
-  @media (max-width: 540px) {
-    .vendor-row {
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-    }
-    .vendor-row .pin-small { grid-column: 1; }
-    .vendor-remove { grid-column: 2; justify-self: end; }
-  }
-</style>
-<script>window.PUBLIC_POSTHOG_KEY="";window.PUBLIC_POSTHOG_HOST="https://us.i.posthog.com";</script>
-<script>window.PUBLIC_SENTRY_DSN="";window.PUBLIC_SENTRY_ENV="production";</script>
-<script type="module" src="/js/sentry.js"></script>
-<script type="module" src="/js/analytics.js"></script>
-</head>
-<body>
-
-<div class="setup-container">
-  <div class="setup-header">
-    <h1>Minha Vez</h1>
-    <p>Configuração Inicial</p>
-  </div>
-
-  <!-- Progress bar -->
-  <div class="progress-bar" id="progressBar">
-    <div class="progress-step active" data-step="1">1</div>
-    <div class="progress-line" data-line="1"></div>
-    <div class="progress-step" data-step="2">2</div>
-    <div class="progress-line" data-line="2"></div>
-    <div class="progress-step" data-step="3">3</div>
-    <div class="progress-line" data-line="3"></div>
-    <div class="progress-step" data-step="4">4</div>
-    <div class="progress-line" data-line="4"></div>
-    <div class="progress-step" data-step="5">5</div>
-  </div>
-
-  <div class="setup-box">
-    <div id="setupError" class="error-msg">
-      <i class="fa-solid fa-circle-xmark"></i>
-      <span id="setupErrorMsg"></span>
-    </div>
-    <div id="setupLoading" style="display:none;text-align:center;padding:48px 24px">
-      <div style="width:40px;height:40px;border:3px solid rgba(0,0,0,.1);border-top-color:#aaeec4;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 20px"></div>
-      <p style="font-size:15px;font-weight:600;color:#FAFAFA;margin:0 0 8px">Confirmando pagamento...</p>
-      <p style="font-size:12px;color:#71717A;margin:0">Isso pode levar alguns segundos</p>
-    </div>
-
-    <!-- Step 1: Store Info -->
-    <div class="step-panel active" data-panel="1">
-      <h2 class="step-title">Sua Loja</h2>
-      <p class="step-desc">Informações básicas do seu estabelecimento</p>
-
-      <div class="form-group">
-        <label class="form-label">Nome da loja</label>
-        <input id="storeName" class="input" type="text" placeholder="Ex: Texas Center" maxlength="60" autocomplete="off">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Link personalizado (slug)</label>
-        <input id="storeSlug" class="input" type="text" placeholder="Ex: texascenter" maxlength="30" autocomplete="off" style="font-family:var(--font-mono);letter-spacing:.02em">
-        <div class="form-hint">Apenas letras minúsculas, números e hífens</div>
-        <div id="slugPreview" class="slug-preview" style="display:none">
-          <i class="fa-solid fa-link" style="margin-right:6px;opacity:.5"></i>
-          minhavez.com.br/<span id="slugValue"></span>/tablet
-        </div>
-      </div>
-
-      <div class="step-nav">
-        <div></div>
-        <button class="btn btn-primary" onclick="goStep(2)">
-          Próximo <i class="fa-solid fa-arrow-right"></i>
-        </button>
-      </div>
-    </div>
-
-    <!-- Step 2: Sectors -->
-    <div class="step-panel" data-panel="2">
-      <h2 class="step-title">Setores</h2>
-      <p class="step-desc">Quais setores/departamentos sua loja tem?</p>
-
-      <div id="sectorChips" class="chips"></div>
-
-      <div class="add-chip-row">
-        <input id="newSector" class="input" type="text" placeholder="Novo setor..." maxlength="30">
-        <button class="btn btn-ghost" onclick="addSector()">
-          <i class="fa-solid fa-plus"></i> Adicionar
-        </button>
-      </div>
-
-      <div class="step-nav">
-        <button class="btn btn-ghost" onclick="goStep(1)">
-          <i class="fa-solid fa-arrow-left"></i> Voltar
-        </button>
-        <button class="btn btn-primary" onclick="goStep(3)">
-          Próximo <i class="fa-solid fa-arrow-right"></i>
-        </button>
-      </div>
-    </div>
-
-    <!-- Step 3: Vendors -->
-    <div class="step-panel" data-panel="3">
-      <h2 class="step-title">Vendedores</h2>
-      <p class="step-desc">Cadastre sua equipe. Cada um terá um PIN de 4 dígitos.</p>
-
-      <div id="vendorList" class="vendor-list"></div>
-
-      <button class="btn btn-ghost" onclick="addVendor()" style="width:100%;margin-bottom:8px">
-        <i class="fa-solid fa-plus"></i> Adicionar vendedor
-      </button>
-
-      <div class="step-nav">
-        <button class="btn btn-ghost" onclick="goStep(2)">
-          <i class="fa-solid fa-arrow-left"></i> Voltar
-        </button>
-        <button class="btn btn-primary" onclick="goStep(4)">
-          Próximo <i class="fa-solid fa-arrow-right"></i>
-        </button>
-      </div>
-    </div>
-
-    <!-- Step 4: Account -->
-    <div class="step-panel" data-panel="4">
-      <h2 class="step-title">Sua Conta</h2>
-      <p class="step-desc">Crie seu acesso de administrador para gerenciar a loja</p>
-
-      <div class="form-group">
-        <label class="form-label">Seu email</label>
-        <input id="ownerEmail" class="input" type="email" placeholder="seu@email.com" autocomplete="email">
-        <div class="form-hint">Você usará este email para fazer login no dashboard</div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Senha</label>
-        <input id="ownerPassword" class="input" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" minlength="6">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Confirmar senha</label>
-        <input id="ownerPasswordConfirm" class="input" type="password" placeholder="Repita a senha" autocomplete="new-password">
-      </div>
-
-      <div class="step-nav">
-        <button class="btn btn-ghost" onclick="goStep(3)">
-          <i class="fa-solid fa-arrow-left"></i> Voltar
-        </button>
-        <button class="btn btn-primary" onclick="goStep(5)">
-          Próximo <i class="fa-solid fa-arrow-right"></i>
-        </button>
-      </div>
-    </div>
-
-    <!-- Step 5: Review -->
-    <div class="step-panel" data-panel="5">
-      <h2 class="step-title">Revisão</h2>
-      <p class="step-desc">Confirme os dados antes de criar sua loja</p>
-
-      <div id="reviewContent"></div>
-
-      <div class="step-nav">
-        <button class="btn btn-ghost" onclick="goStep(4)">
-          <i class="fa-solid fa-arrow-left"></i> Voltar
-        </button>
-        <button id="btnCreate" class="btn btn-primary" onclick="createTenant()">
-          <i class="fa-solid fa-rocket"></i> Criar minha loja
-        </button>
-      </div>
-    </div>
-
-    <!-- Step 6: Success -->
-    <div class="step-panel" data-panel="6">
-      <div class="success-panel">
-        <div class="success-icon">
-          <i class="fa-solid fa-check"></i>
-        </div>
-        <h2 class="step-title" style="margin-bottom:8px">Tudo pronto!</h2>
-        <p class="step-desc">Sua loja foi criada com sucesso. Salve os links abaixo.</p>
-
-        <div style="text-align:left;margin-top:24px">
-          <label class="form-label">Link do Tablet (recepção)</label>
-          <div class="url-card">
-            <span class="url-text" id="urlTablet"></span>
-            <button class="copy-btn" onclick="copyUrl('urlTablet')"><i class="fa-solid fa-copy"></i> Copiar</button>
-          </div>
-
-          <label class="form-label" style="margin-top:16px">Link do Dashboard (gerência)</label>
-          <div class="url-card">
-            <span class="url-text" id="urlDashboard"></span>
-            <button class="copy-btn" onclick="copyUrl('urlDashboard')"><i class="fa-solid fa-copy"></i> Copiar</button>
-          </div>
-
-          <label class="form-label" style="margin-top:16px">Link de Login</label>
-          <div class="url-card">
-            <span class="url-text" id="urlLogin"></span>
-            <button class="copy-btn" onclick="copyUrl('urlLogin')"><i class="fa-solid fa-copy"></i> Copiar</button>
-          </div>
-
-          <div class="gold-line" style="margin:20px 0"></div>
-
-          <label class="form-label">Seu acesso (administrador)</label>
-          <div class="url-card">
-            <span class="url-text" id="credEmail" style="color:var(--text-primary)"></span>
-            <button class="copy-btn" onclick="copyUrl('credEmail')"><i class="fa-solid fa-copy"></i> Copiar</button>
-          </div>
-          <div class="form-hint" style="margin-top:8px;color:var(--text-muted)">
-            <i class="fa-solid fa-lock" style="margin-right:4px"></i>
-            Use a senha que você definiu para fazer login na aba "Email"
-          </div>
-        </div>
-
-        <div class="gold-line" style="margin:28px 0"></div>
-
-        <button class="btn btn-primary" onclick="goToDashboard()" style="width:100%">
-          <i class="fa-solid fa-chart-line"></i> Ir para o Dashboard
-        </button>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<div id="toastContainer"></div>
-
-<script type="module">
-import { getSupabase, SUPABASE_URL, SUPABASE_ANON_KEY } from '/js/supabase-config.js';
-import { toast, initTheme } from '/js/utils.js';
-initTheme();
-
-const sb = getSupabase();
-let currentStep = 1;
-let sectors = ['loja'];
-let vendors = [];
-let createdSlug = '';
-
-// Check for onboarding token or Stripe session_id
-const params = new URLSearchParams(window.location.search);
-let token = params.get('token');
-const sessionId = params.get('session_id');
-
-// Validate token on load
-(async function init() {
-  // Direct token from email link
-  if (token) {
-    const { data, error } = await sb.from('onboarding_tokens')
-      .select('*')
-      .eq('token', token)
-      .eq('used', false)
-      .gt('expires_at', new Date().toISOString())
-      .single();
-    if (error || !data) {
-      showError('Token inválido ou expirado. Por favor, faça uma nova compra.');
-      return;
-    }
-  }
-  // Stripe redirect — poll for webhook to create token
-  else if (sessionId) {
-    document.getElementById('setupLoading').style.display = '';
-    const maxAttempts = 15;
-    let attempt = 0;
-    let found = false;
-    while (attempt < maxAttempts && !found) {
-      const { data } = await sb.from('onboarding_tokens')
-        .select('*')
-        .eq('stripe_session_id', sessionId)
-        .eq('used', false)
-        .single();
-      if (data) {
-        token = data.token;
-        found = true;
-        // Update URL to use token instead of session_id
-        const url = new URL(window.location);
-        url.searchParams.delete('session_id');
-        url.searchParams.set('token', token);
-        history.replaceState(null, '', url);
-        break;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Configuração — Minha Vez</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/styles.v51.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      .setup-container {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 24px 80px;
       }
-      attempt++;
-      if (attempt < maxAttempts) {
-        await new Promise(r => setTimeout(r, 2000));
+      .setup-header {
+        text-align: center;
+        margin-bottom: 40px;
       }
-    }
-    document.getElementById('setupLoading').style.display = 'none';
-    if (!found) {
-      showError('Pagamento em processamento. Verifique seu e-mail em alguns minutos — enviaremos o link de configuração.');
-      return;
-    }
-  }
-  renderSectors();
-  addVendor();
-  addVendor();
-})();
+      .setup-header h1 {
+        font-family: var(--font-mono);
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        margin-bottom: 4px;
+      }
+      .setup-header p {
+        font-size: 11px;
+        color: var(--text-muted);
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      /* Progress */
+      .progress-bar {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        margin-bottom: 40px;
+        width: 100%;
+        max-width: 520px;
+      }
+      .progress-step {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 2px solid var(--border-subtle);
+        background: var(--bg-surface);
+        font-family: var(--font-mono);
+        font-weight: 700;
+        font-size: 13px;
+        color: var(--text-muted);
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+      .progress-step.active {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: rgba(170, 238, 196, 0.08);
+      }
+      .progress-step.done {
+        border-color: var(--success);
+        color: var(--success);
+        background: rgba(170, 238, 196, 0.08);
+      }
+      .progress-line {
+        flex: 1;
+        height: 2px;
+        background: var(--border-subtle);
+        transition: background 0.3s ease;
+      }
+      .progress-line.done {
+        background: var(--success);
+      }
+      /* Step panels */
+      .setup-box {
+        width: 100%;
+        max-width: 520px;
+      }
+      .step-panel {
+        display: none;
+        animation: fadeIn 0.3s ease;
+      }
+      .step-panel.active {
+        display: block;
+      }
+      .step-title {
+        font-family: var(--font-mono);
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .step-desc {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin-bottom: 28px;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      .form-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 6px;
+      }
+      .form-hint {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 4px;
+      }
+      .slug-preview {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--accent);
+        margin-top: 6px;
+        padding: 8px 12px;
+        background: var(--bg-elevated);
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-subtle);
+      }
+      /* Sector chips */
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition);
+        border: 1px solid var(--border-subtle);
+        background: var(--bg-surface);
+        color: var(--text-secondary);
+      }
+      .chip.selected {
+        border-color: var(--accent);
+        background: rgba(170, 238, 196, 0.08);
+        color: var(--accent);
+      }
+      .chip .remove-chip {
+        width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-size: 10px;
+        background: rgba(0, 0, 0, 0.08);
+        cursor: pointer;
+      }
+      .chip .remove-chip:hover {
+        background: var(--danger);
+        color: #fff;
+      }
+      .add-chip-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .add-chip-row .input {
+        max-width: 200px;
+        min-height: 36px;
+        font-size: 13px;
+      }
+      .add-chip-row .btn {
+        min-height: 36px;
+        padding: 0 14px;
+        font-size: 12px;
+      }
+      /* Vendor table */
+      .vendor-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .vendor-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 100px 40px;
+        gap: 8px;
+        align-items: center;
+        padding: 10px 12px;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius);
+        animation: fadeIn 0.2s ease;
+      }
+      .vendor-row .input {
+        min-height: 36px;
+        font-size: 13px;
+      }
+      .vendor-row select {
+        width: 100%;
+        min-height: 36px;
+        padding: 0 8px;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        font-family: var(--font-body);
+        font-size: 13px;
+        outline: none;
+      }
+      .vendor-row select:focus {
+        border-color: var(--accent);
+      }
+      .vendor-row .pin-small {
+        width: 100%;
+        min-height: 36px;
+        text-align: center;
+        font-family: var(--font-mono);
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-sm);
+        color: var(--accent);
+        outline: none;
+      }
+      .vendor-row .pin-small:focus {
+        border-color: var(--accent);
+      }
+      .vendor-remove {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+        cursor: pointer;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        transition: all var(--transition);
+      }
+      .vendor-remove:hover {
+        background: var(--danger-bg);
+        color: var(--danger);
+      }
+      /* Step nav */
+      .step-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 32px;
+      }
+      .step-nav .btn {
+        flex: 1;
+      }
+      /* Review summary */
+      .review-card {
+        padding: 20px;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius);
+        margin-bottom: 16px;
+      }
+      .review-card h3 {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 10px;
+      }
+      .review-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        font-size: 14px;
+      }
+      .review-item .label {
+        color: var(--text-secondary);
+      }
+      .review-item .value {
+        font-weight: 600;
+        font-family: var(--font-mono);
+        font-size: 13px;
+      }
+      /* Success */
+      .success-panel {
+        text-align: center;
+        padding: 40px 0;
+      }
+      .success-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(170, 238, 196, 0.1);
+        border: 2px solid var(--success);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px;
+        font-size: 32px;
+        color: var(--success);
+      }
+      .url-card {
+        padding: 14px 16px;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .url-card .url-text {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--accent);
+        word-break: break-all;
+      }
+      .url-card .copy-btn {
+        padding: 6px 10px;
+        border: 1px solid var(--border-subtle);
+        background: var(--bg-surface);
+        border-radius: var(--radius-sm);
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+      .url-card .copy-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .error-msg {
+        padding: 12px 16px;
+        background: var(--danger-bg);
+        border: 1px solid rgba(232, 155, 138, 0.15);
+        border-radius: var(--radius-sm);
+        color: var(--danger);
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 16px;
+        display: none;
+        align-items: center;
+        gap: 8px;
+      }
+      .error-msg.show {
+        display: flex;
+      }
+      @media (max-width: 540px) {
+        .vendor-row {
+          grid-template-columns: 1fr 1fr;
+          gap: 6px;
+        }
+        .vendor-row .pin-small {
+          grid-column: 1;
+        }
+        .vendor-remove {
+          grid-column: 2;
+          justify-self: end;
+        }
+      }
+    </style>
+    <script>
+      window.PUBLIC_POSTHOG_KEY = '';
+      window.PUBLIC_POSTHOG_HOST = 'https://us.i.posthog.com';
+    </script>
+    <script>
+      window.PUBLIC_SENTRY_DSN = '';
+      window.PUBLIC_SENTRY_ENV = 'production';
+    </script>
+    <script type="module" src="/js/sentry.js"></script>
+    <script type="module" src="/js/analytics.js"></script>
+  </head>
+  <body>
+    <div class="setup-container">
+      <div class="setup-header">
+        <h1>Minha Vez</h1>
+        <p>Configuração Inicial</p>
+      </div>
 
-// Slug auto-generate from store name
-document.getElementById('storeName').addEventListener('input', (e) => {
-  const name = e.target.value;
-  const slug = name.toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 30);
-  document.getElementById('storeSlug').value = slug;
-  updateSlugPreview(slug);
-});
+      <!-- Progress bar -->
+      <div class="progress-bar" id="progressBar">
+        <div class="progress-step active" data-step="1">1</div>
+        <div class="progress-line" data-line="1"></div>
+        <div class="progress-step" data-step="2">2</div>
+        <div class="progress-line" data-line="2"></div>
+        <div class="progress-step" data-step="3">3</div>
+        <div class="progress-line" data-line="3"></div>
+        <div class="progress-step" data-step="4">4</div>
+        <div class="progress-line" data-line="4"></div>
+        <div class="progress-step" data-step="5">5</div>
+      </div>
 
-document.getElementById('storeSlug').addEventListener('input', (e) => {
-  let slug = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 30);
-  e.target.value = slug;
-  updateSlugPreview(slug);
-});
+      <div class="setup-box">
+        <div id="setupError" class="error-msg">
+          <i class="fa-solid fa-circle-xmark"></i>
+          <span id="setupErrorMsg"></span>
+        </div>
+        <div id="setupLoading" style="display: none; text-align: center; padding: 48px 24px">
+          <div
+            style="
+              width: 40px;
+              height: 40px;
+              border: 3px solid rgba(0, 0, 0, 0.1);
+              border-top-color: #aaeec4;
+              border-radius: 50%;
+              animation: spin 0.7s linear infinite;
+              margin: 0 auto 20px;
+            "
+          ></div>
+          <p style="font-size: 15px; font-weight: 600; color: #fafafa; margin: 0 0 8px">Confirmando pagamento...</p>
+          <p style="font-size: 12px; color: #71717a; margin: 0">Isso pode levar alguns segundos</p>
+        </div>
 
-document.getElementById('newSector').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') addSector();
-});
+        <!-- Step 1: Store Info -->
+        <div class="step-panel active" data-panel="1">
+          <h2 class="step-title">Sua Loja</h2>
+          <p class="step-desc">Informações básicas do seu estabelecimento</p>
 
-function updateSlugPreview(slug) {
-  const preview = document.getElementById('slugPreview');
-  const val = document.getElementById('slugValue');
-  if (slug) {
-    preview.style.display = 'block';
-    val.textContent = slug;
-  } else {
-    preview.style.display = 'none';
-  }
-}
+          <div class="form-group">
+            <label class="form-label">Nome da loja</label>
+            <input
+              id="storeName"
+              class="input"
+              type="text"
+              placeholder="Ex: Texas Center"
+              maxlength="60"
+              autocomplete="off"
+            />
+          </div>
 
-// Step navigation
-window.goStep = function(step) {
-  hideError();
-  // Validate current step
-  if (step > currentStep) {
-    if (currentStep === 1) {
-      const name = document.getElementById('storeName').value.trim();
-      const slug = document.getElementById('storeSlug').value.trim();
-      if (!name) { showError('Digite o nome da loja'); return; }
-      if (!slug || slug.length < 3) { showError('O slug deve ter pelo menos 3 caracteres'); return; }
-      if (!/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(slug) && slug.length >= 3) { showError('Slug inválido. Use apenas letras, números e hífens.'); return; }
-    }
-    if (currentStep === 2) {
-      if (sectors.length === 0) { showError('Adicione pelo menos um setor'); return; }
-    }
-    if (currentStep === 3) {
-      const valid = validateVendors();
-      if (!valid) return;
-    }
-    if (currentStep === 4) {
-      const email = document.getElementById('ownerEmail').value.trim();
-      const pass = document.getElementById('ownerPassword').value;
-      const pass2 = document.getElementById('ownerPasswordConfirm').value;
-      if (!email) { showError('Digite seu email'); return; }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('Email inválido'); return; }
-      if (!pass || pass.length < 6) { showError('A senha deve ter pelo menos 6 caracteres'); return; }
-      if (pass !== pass2) { showError('As senhas não conferem'); return; }
-    }
-  }
-  if (step === 5) buildReview();
-  currentStep = step;
-  // Update panels
-  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
-  const panel = document.querySelector(`[data-panel="${step}"]`);
-  if (panel) panel.classList.add('active');
-  // Update progress
-  document.querySelectorAll('.progress-step').forEach(s => {
-    const n = parseInt(s.dataset.step);
-    s.classList.remove('active', 'done');
-    if (n === step) s.classList.add('active');
-    else if (n < step) { s.classList.add('done'); s.innerHTML = '<i class="fa-solid fa-check" style="font-size:12px"></i>'; }
-    else s.textContent = n;
-  });
-  document.querySelectorAll('.progress-line').forEach(l => {
-    const n = parseInt(l.dataset.line);
-    l.classList.toggle('done', n < step);
-  });
-  // Save & resume + analytics
-  saveSetupState(step);
-  window.minhavezAnalytics?.capture('setup_step_view', { step });
-};
+          <div class="form-group">
+            <label class="form-label">Link personalizado (slug)</label>
+            <input
+              id="storeSlug"
+              class="input"
+              type="text"
+              placeholder="Ex: texascenter"
+              maxlength="30"
+              autocomplete="off"
+              style="font-family: var(--font-mono); letter-spacing: 0.02em"
+            />
+            <div class="form-hint">Apenas letras minúsculas, números e hífens</div>
+            <div id="slugPreview" class="slug-preview" style="display: none">
+              <i class="fa-solid fa-link" style="margin-right: 6px; opacity: 0.5"></i>
+              minhavez.com.br/<span id="slugValue"></span>/tablet
+            </div>
+          </div>
 
-// ─── Save & Resume ───
-const SETUP_STATE_KEY = 'mv-setup-state-v1';
+          <div class="step-nav">
+            <div></div>
+            <button class="btn btn-primary" onclick="goStep(2)">Próximo <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+        </div>
 
-function saveSetupState(step) {
-  try {
-    const state = {
-      step,
-      storeName: document.getElementById('storeName')?.value || '',
-      storeSlug: document.getElementById('storeSlug')?.value || '',
-      ownerEmail: document.getElementById('ownerEmail')?.value || '',
-      sectors: typeof sectors !== 'undefined' ? sectors : [],
-      vendors: typeof vendors !== 'undefined' ? vendors : [],
-      ts: Date.now(),
-    };
-    localStorage.setItem(SETUP_STATE_KEY, JSON.stringify(state));
-  } catch {}
-}
+        <!-- Step 2: Sectors -->
+        <div class="step-panel" data-panel="2">
+          <h2 class="step-title">Setores</h2>
+          <p class="step-desc">Quais setores/departamentos sua loja tem?</p>
 
-function loadSetupState() {
-  try {
-    const raw = localStorage.getItem(SETUP_STATE_KEY);
-    if (!raw) return null;
-    const s = JSON.parse(raw);
-    // Expira em 7 dias
-    if (Date.now() - s.ts > 7 * 24 * 60 * 60 * 1000) {
-      localStorage.removeItem(SETUP_STATE_KEY);
-      return null;
-    }
-    return s;
-  } catch { return null; }
-}
+          <div id="sectorChips" class="chips"></div>
 
-window.clearSetupState = function() {
-  localStorage.removeItem(SETUP_STATE_KEY);
-};
+          <div class="add-chip-row">
+            <input
+              id="newSector"
+              class="input"
+              type="text"
+              placeholder="Novo setor..."
+              maxlength="30"
+              aria-label="Nome do novo setor"
+            />
+            <button class="btn btn-ghost" onclick="addSector()"><i class="fa-solid fa-plus"></i> Adicionar</button>
+          </div>
 
-// Restaurar ao carregar página
-window.addEventListener('load', () => {
-  const saved = loadSetupState();
-  if (!saved || saved.step <= 1) return;
-  // Banner de retomar
-  const banner = document.createElement('div');
-  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:1000;background:var(--accent);color:var(--accent-ink);padding:12px 20px;display:flex;align-items:center;justify-content:center;gap:16px;font-weight:600;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,0.2)';
-  banner.innerHTML = `
+          <div class="step-nav">
+            <button class="btn btn-ghost" onclick="goStep(1)"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+            <button class="btn btn-primary" onclick="goStep(3)">Próximo <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+        </div>
+
+        <!-- Step 3: Vendors -->
+        <div class="step-panel" data-panel="3">
+          <h2 class="step-title">Vendedores</h2>
+          <p class="step-desc">Cadastre sua equipe. Cada um terá um PIN de 4 dígitos.</p>
+
+          <div id="vendorList" class="vendor-list"></div>
+
+          <button class="btn btn-ghost" onclick="addVendor()" style="width: 100%; margin-bottom: 8px">
+            <i class="fa-solid fa-plus"></i> Adicionar vendedor
+          </button>
+
+          <div class="step-nav">
+            <button class="btn btn-ghost" onclick="goStep(2)"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+            <button class="btn btn-primary" onclick="goStep(4)">Próximo <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+        </div>
+
+        <!-- Step 4: Account -->
+        <div class="step-panel" data-panel="4">
+          <h2 class="step-title">Sua Conta</h2>
+          <p class="step-desc">Crie seu acesso de administrador para gerenciar a loja</p>
+
+          <div class="form-group">
+            <label class="form-label">Seu email</label>
+            <input id="ownerEmail" class="input" type="email" placeholder="seu@email.com" autocomplete="email" />
+            <div class="form-hint">Você usará este email para fazer login no dashboard</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Senha</label>
+            <input
+              id="ownerPassword"
+              class="input"
+              type="password"
+              placeholder="Mínimo 6 caracteres"
+              autocomplete="new-password"
+              minlength="6"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Confirmar senha</label>
+            <input
+              id="ownerPasswordConfirm"
+              class="input"
+              type="password"
+              placeholder="Repita a senha"
+              autocomplete="new-password"
+            />
+          </div>
+
+          <div class="step-nav">
+            <button class="btn btn-ghost" onclick="goStep(3)"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+            <button class="btn btn-primary" onclick="goStep(5)">Próximo <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+        </div>
+
+        <!-- Step 5: Review -->
+        <div class="step-panel" data-panel="5">
+          <h2 class="step-title">Revisão</h2>
+          <p class="step-desc">Confirme os dados antes de criar sua loja</p>
+
+          <div id="reviewContent"></div>
+
+          <div class="step-nav">
+            <button class="btn btn-ghost" onclick="goStep(4)"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+            <button id="btnCreate" class="btn btn-primary" onclick="createTenant()">
+              <i class="fa-solid fa-rocket"></i> Criar minha loja
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 6: Success -->
+        <div class="step-panel" data-panel="6">
+          <div class="success-panel">
+            <div class="success-icon">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <h2 class="step-title" style="margin-bottom: 8px">Tudo pronto!</h2>
+            <p class="step-desc">Sua loja foi criada com sucesso. Salve os links abaixo.</p>
+
+            <div style="text-align: left; margin-top: 24px">
+              <label class="form-label">Link do Tablet (recepção)</label>
+              <div class="url-card">
+                <span class="url-text" id="urlTablet"></span>
+                <button class="copy-btn" onclick="copyUrl('urlTablet')"><i class="fa-solid fa-copy"></i> Copiar</button>
+              </div>
+
+              <label class="form-label" style="margin-top: 16px">Link do Dashboard (gerência)</label>
+              <div class="url-card">
+                <span class="url-text" id="urlDashboard"></span>
+                <button class="copy-btn" onclick="copyUrl('urlDashboard')">
+                  <i class="fa-solid fa-copy"></i> Copiar
+                </button>
+              </div>
+
+              <label class="form-label" style="margin-top: 16px">Link de Login</label>
+              <div class="url-card">
+                <span class="url-text" id="urlLogin"></span>
+                <button class="copy-btn" onclick="copyUrl('urlLogin')"><i class="fa-solid fa-copy"></i> Copiar</button>
+              </div>
+
+              <div class="gold-line" style="margin: 20px 0"></div>
+
+              <label class="form-label">Seu acesso (administrador)</label>
+              <div class="url-card">
+                <span class="url-text" id="credEmail" style="color: var(--text-primary)"></span>
+                <button class="copy-btn" onclick="copyUrl('credEmail')"><i class="fa-solid fa-copy"></i> Copiar</button>
+              </div>
+              <div class="form-hint" style="margin-top: 8px; color: var(--text-muted)">
+                <i class="fa-solid fa-lock" style="margin-right: 4px"></i>
+                Use a senha que você definiu para fazer login na aba "Email"
+              </div>
+            </div>
+
+            <div class="gold-line" style="margin: 28px 0"></div>
+
+            <button class="btn btn-primary" onclick="goToDashboard()" style="width: 100%">
+              <i class="fa-solid fa-chart-line"></i> Ir para o Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="toastContainer" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <script type="module">
+      import { getSupabase, SUPABASE_URL, SUPABASE_ANON_KEY } from '/js/supabase-config.js';
+      import { toast, initTheme } from '/js/utils.js';
+      initTheme();
+
+      const sb = getSupabase();
+      let currentStep = 1;
+      let sectors = ['loja'];
+      let vendors = [];
+      let createdSlug = '';
+
+      // Check for onboarding token or Stripe session_id
+      const params = new URLSearchParams(window.location.search);
+      let token = params.get('token');
+      const sessionId = params.get('session_id');
+
+      // Validate token on load
+      (async function init() {
+        // Direct token from email link
+        if (token) {
+          const { data, error } = await sb
+            .from('onboarding_tokens')
+            .select('*')
+            .eq('token', token)
+            .eq('used', false)
+            .gt('expires_at', new Date().toISOString())
+            .single();
+          if (error || !data) {
+            showError('Token inválido ou expirado. Por favor, faça uma nova compra.');
+            return;
+          }
+        }
+        // Stripe redirect — poll for webhook to create token
+        else if (sessionId) {
+          document.getElementById('setupLoading').style.display = '';
+          const maxAttempts = 15;
+          let attempt = 0;
+          let found = false;
+          while (attempt < maxAttempts && !found) {
+            const { data } = await sb
+              .from('onboarding_tokens')
+              .select('*')
+              .eq('stripe_session_id', sessionId)
+              .eq('used', false)
+              .single();
+            if (data) {
+              token = data.token;
+              found = true;
+              // Update URL to use token instead of session_id
+              const url = new URL(window.location);
+              url.searchParams.delete('session_id');
+              url.searchParams.set('token', token);
+              history.replaceState(null, '', url);
+              break;
+            }
+            attempt++;
+            if (attempt < maxAttempts) {
+              await new Promise((r) => setTimeout(r, 2000));
+            }
+          }
+          document.getElementById('setupLoading').style.display = 'none';
+          if (!found) {
+            showError(
+              'Pagamento em processamento. Verifique seu e-mail em alguns minutos — enviaremos o link de configuração.'
+            );
+            return;
+          }
+        }
+        renderSectors();
+        addVendor();
+        addVendor();
+      })();
+
+      // Slug auto-generate from store name
+      document.getElementById('storeName').addEventListener('input', (e) => {
+        const name = e.target.value;
+        const slug = name
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '')
+          .slice(0, 30);
+        document.getElementById('storeSlug').value = slug;
+        updateSlugPreview(slug);
+      });
+
+      document.getElementById('storeSlug').addEventListener('input', (e) => {
+        let slug = e.target.value
+          .toLowerCase()
+          .replace(/[^a-z0-9-]/g, '')
+          .slice(0, 30);
+        e.target.value = slug;
+        updateSlugPreview(slug);
+      });
+
+      document.getElementById('newSector').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') addSector();
+      });
+
+      function updateSlugPreview(slug) {
+        const preview = document.getElementById('slugPreview');
+        const val = document.getElementById('slugValue');
+        if (slug) {
+          preview.style.display = 'block';
+          val.textContent = slug;
+        } else {
+          preview.style.display = 'none';
+        }
+      }
+
+      // Step navigation
+      window.goStep = function (step) {
+        hideError();
+        // Validate current step
+        if (step > currentStep) {
+          if (currentStep === 1) {
+            const name = document.getElementById('storeName').value.trim();
+            const slug = document.getElementById('storeSlug').value.trim();
+            if (!name) {
+              showError('Digite o nome da loja');
+              return;
+            }
+            if (!slug || slug.length < 3) {
+              showError('O slug deve ter pelo menos 3 caracteres');
+              return;
+            }
+            if (!/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(slug) && slug.length >= 3) {
+              showError('Slug inválido. Use apenas letras, números e hífens.');
+              return;
+            }
+          }
+          if (currentStep === 2) {
+            if (sectors.length === 0) {
+              showError('Adicione pelo menos um setor');
+              return;
+            }
+          }
+          if (currentStep === 3) {
+            const valid = validateVendors();
+            if (!valid) return;
+          }
+          if (currentStep === 4) {
+            const email = document.getElementById('ownerEmail').value.trim();
+            const pass = document.getElementById('ownerPassword').value;
+            const pass2 = document.getElementById('ownerPasswordConfirm').value;
+            if (!email) {
+              showError('Digite seu email');
+              return;
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+              showError('Email inválido');
+              return;
+            }
+            if (!pass || pass.length < 6) {
+              showError('A senha deve ter pelo menos 6 caracteres');
+              return;
+            }
+            if (pass !== pass2) {
+              showError('As senhas não conferem');
+              return;
+            }
+          }
+        }
+        if (step === 5) buildReview();
+        currentStep = step;
+        // Update panels
+        document.querySelectorAll('.step-panel').forEach((p) => p.classList.remove('active'));
+        const panel = document.querySelector(`[data-panel="${step}"]`);
+        if (panel) panel.classList.add('active');
+        // Update progress
+        document.querySelectorAll('.progress-step').forEach((s) => {
+          const n = parseInt(s.dataset.step);
+          s.classList.remove('active', 'done');
+          if (n === step) s.classList.add('active');
+          else if (n < step) {
+            s.classList.add('done');
+            s.innerHTML = '<i class="fa-solid fa-check" style="font-size:12px"></i>';
+          } else s.textContent = n;
+        });
+        document.querySelectorAll('.progress-line').forEach((l) => {
+          const n = parseInt(l.dataset.line);
+          l.classList.toggle('done', n < step);
+        });
+        // Save & resume + analytics
+        saveSetupState(step);
+        window.minhavezAnalytics?.capture('setup_step_view', { step });
+      };
+
+      // ─── Save & Resume ───
+      const SETUP_STATE_KEY = 'mv-setup-state-v1';
+
+      function saveSetupState(step) {
+        try {
+          const state = {
+            step,
+            storeName: document.getElementById('storeName')?.value || '',
+            storeSlug: document.getElementById('storeSlug')?.value || '',
+            ownerEmail: document.getElementById('ownerEmail')?.value || '',
+            sectors: typeof sectors !== 'undefined' ? sectors : [],
+            vendors: typeof vendors !== 'undefined' ? vendors : [],
+            ts: Date.now()
+          };
+          localStorage.setItem(SETUP_STATE_KEY, JSON.stringify(state));
+        } catch {}
+      }
+
+      function loadSetupState() {
+        try {
+          const raw = localStorage.getItem(SETUP_STATE_KEY);
+          if (!raw) return null;
+          const s = JSON.parse(raw);
+          // Expira em 7 dias
+          if (Date.now() - s.ts > 7 * 24 * 60 * 60 * 1000) {
+            localStorage.removeItem(SETUP_STATE_KEY);
+            return null;
+          }
+          return s;
+        } catch {
+          return null;
+        }
+      }
+
+      window.clearSetupState = function () {
+        localStorage.removeItem(SETUP_STATE_KEY);
+      };
+
+      // Restaurar ao carregar página
+      window.addEventListener('load', () => {
+        const saved = loadSetupState();
+        if (!saved || saved.step <= 1) return;
+        // Banner de retomar
+        const banner = document.createElement('div');
+        banner.style.cssText =
+          'position:fixed;top:0;left:0;right:0;z-index:1000;background:var(--accent);color:var(--accent-ink);padding:12px 20px;display:flex;align-items:center;justify-content:center;gap:16px;font-weight:600;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,0.2)';
+        banner.innerHTML = `
     <span><i class="fa-solid fa-clock-rotate-left"></i> Você tem um setup em andamento (step ${saved.step}/5)</span>
     <button id="resumeBtn" style="padding:6px 14px;background:var(--accent-ink);color:var(--accent);border:none;border-radius:6px;font-weight:700;cursor:pointer">Retomar</button>
     <button id="discardBtn" style="padding:6px 12px;background:transparent;color:var(--accent-ink);border:1px solid var(--accent-ink);border-radius:6px;font-weight:500;cursor:pointer">Recomeçar</button>
   `;
-  document.body.appendChild(banner);
-  document.getElementById('resumeBtn').onclick = () => {
-    if (saved.storeName) document.getElementById('storeName').value = saved.storeName;
-    if (saved.storeSlug) document.getElementById('storeSlug').value = saved.storeSlug;
-    if (saved.ownerEmail) document.getElementById('ownerEmail').value = saved.ownerEmail;
-    if (saved.sectors && typeof sectors !== 'undefined') {
-      sectors.length = 0;
-      saved.sectors.forEach((s) => sectors.push(s));
-      if (typeof renderSectors === 'function') renderSectors();
-    }
-    if (saved.vendors && typeof vendors !== 'undefined') {
-      vendors.length = 0;
-      saved.vendors.forEach((v) => vendors.push(v));
-      if (typeof renderVendors === 'function') renderVendors();
-    }
-    goStep(saved.step);
-    banner.remove();
-    window.minhavezAnalytics?.capture('setup_resumed', { step: saved.step });
-  };
-  document.getElementById('discardBtn').onclick = () => {
-    clearSetupState();
-    banner.remove();
-    window.minhavezAnalytics?.capture('setup_discarded', { step: saved.step });
-  };
-});
+        document.body.appendChild(banner);
+        document.getElementById('resumeBtn').onclick = () => {
+          if (saved.storeName) document.getElementById('storeName').value = saved.storeName;
+          if (saved.storeSlug) document.getElementById('storeSlug').value = saved.storeSlug;
+          if (saved.ownerEmail) document.getElementById('ownerEmail').value = saved.ownerEmail;
+          if (saved.sectors && typeof sectors !== 'undefined') {
+            sectors.length = 0;
+            saved.sectors.forEach((s) => sectors.push(s));
+            if (typeof renderSectors === 'function') renderSectors();
+          }
+          if (saved.vendors && typeof vendors !== 'undefined') {
+            vendors.length = 0;
+            saved.vendors.forEach((v) => vendors.push(v));
+            if (typeof renderVendors === 'function') renderVendors();
+          }
+          goStep(saved.step);
+          banner.remove();
+          window.minhavezAnalytics?.capture('setup_resumed', { step: saved.step });
+        };
+        document.getElementById('discardBtn').onclick = () => {
+          clearSetupState();
+          banner.remove();
+          window.minhavezAnalytics?.capture('setup_discarded', { step: saved.step });
+        };
+      });
 
-// Sectors
-function renderSectors() {
-  const container = document.getElementById('sectorChips');
-  container.innerHTML = sectors.map((s, i) => `
+      // Sectors
+      function renderSectors() {
+        const container = document.getElementById('sectorChips');
+        container.innerHTML = sectors
+          .map(
+            (s, i) => `
     <div class="chip selected">
       ${s}
       <span class="remove-chip" onclick="removeSector(${i})"><i class="fa-solid fa-xmark"></i></span>
     </div>
-  `).join('');
-}
+  `
+          )
+          .join('');
+      }
 
-window.addSector = function() {
-  const input = document.getElementById('newSector');
-  const name = input.value.trim();
-  if (!name) return;
-  if (sectors.includes(name.toLowerCase())) { showError('Setor já existe'); return; }
-  sectors.push(name.toLowerCase());
-  input.value = '';
-  renderSectors();
-  hideError();
-};
+      window.addSector = function () {
+        const input = document.getElementById('newSector');
+        const name = input.value.trim();
+        if (!name) return;
+        if (sectors.includes(name.toLowerCase())) {
+          showError('Setor já existe');
+          return;
+        }
+        sectors.push(name.toLowerCase());
+        input.value = '';
+        renderSectors();
+        hideError();
+      };
 
-window.removeSector = function(idx) {
-  sectors.splice(idx, 1);
-  renderSectors();
-  // Update vendor sector selects
-  renderVendors();
-};
+      window.removeSector = function (idx) {
+        sectors.splice(idx, 1);
+        renderSectors();
+        // Update vendor sector selects
+        renderVendors();
+      };
 
-// Vendors
-let vendorId = 0;
-window.addVendor = function() {
-  vendorId++;
-  vendors.push({ id: vendorId, nome: '', setor: sectors[0] || '', pin: '' });
-  renderVendors();
-};
+      // Vendors
+      let vendorId = 0;
+      window.addVendor = function () {
+        vendorId++;
+        vendors.push({ id: vendorId, nome: '', setor: sectors[0] || '', pin: '' });
+        renderVendors();
+      };
 
-function renderVendors() {
-  const list = document.getElementById('vendorList');
-  list.innerHTML = vendors.map((v, i) => `
+      function renderVendors() {
+        const list = document.getElementById('vendorList');
+        list.innerHTML = vendors
+          .map(
+            (v, i) => `
     <div class="vendor-row" data-vid="${v.id}">
       <input class="input" type="text" placeholder="Nome" value="${v.nome}" onchange="updateVendor(${v.id},'nome',this.value)">
       <select onchange="updateVendor(${v.id},'setor',this.value)">
-        ${sectors.map(s => `<option value="${s}" ${v.setor === s ? 'selected' : ''}>${s}</option>`).join('')}
+        ${sectors.map((s) => `<option value="${s}" ${v.setor === s ? 'selected' : ''}>${s}</option>`).join('')}
       </select>
       <input class="pin-small" type="text" maxlength="4" inputmode="numeric" placeholder="PIN" value="${v.pin}" onchange="updateVendor(${v.id},'pin',this.value)" oninput="this.value=this.value.replace(/\\D/g,'')">
       <button class="vendor-remove" onclick="removeVendor(${v.id})" title="Remover">
         <i class="fa-solid fa-trash-can"></i>
       </button>
     </div>
-  `).join('');
-}
+  `
+          )
+          .join('');
+      }
 
-window.updateVendor = function(id, field, value) {
-  const v = vendors.find(x => x.id === id);
-  if (v) v[field] = value;
-};
+      window.updateVendor = function (id, field, value) {
+        const v = vendors.find((x) => x.id === id);
+        if (v) v[field] = value;
+      };
 
-window.removeVendor = function(id) {
-  vendors = vendors.filter(x => x.id !== id);
-  renderVendors();
-};
+      window.removeVendor = function (id) {
+        vendors = vendors.filter((x) => x.id !== id);
+        renderVendors();
+      };
 
-function validateVendors() {
-  // Sync DOM values
-  vendors.forEach(v => {
-    const row = document.querySelector(`[data-vid="${v.id}"]`);
-    if (row) {
-      v.nome = row.querySelector('input[type="text"]').value.trim();
-      v.pin = row.querySelector('.pin-small').value.trim();
-      v.setor = row.querySelector('select').value;
-    }
-  });
-  if (vendors.length === 0) { showError('Adicione pelo menos um vendedor'); return false; }
-  for (const v of vendors) {
-    if (!v.nome) { showError('Preencha o nome de todos os vendedores'); return false; }
-    if (!v.pin || v.pin.length !== 4) { showError(`PIN de "${v.nome}" deve ter 4 dígitos`); return false; }
-  }
-  const pins = vendors.map(v => v.pin);
-  if (new Set(pins).size !== pins.length) { showError('PINs devem ser únicos'); return false; }
-  return true;
-}
+      function validateVendors() {
+        // Sync DOM values
+        vendors.forEach((v) => {
+          const row = document.querySelector(`[data-vid="${v.id}"]`);
+          if (row) {
+            v.nome = row.querySelector('input[type="text"]').value.trim();
+            v.pin = row.querySelector('.pin-small').value.trim();
+            v.setor = row.querySelector('select').value;
+          }
+        });
+        if (vendors.length === 0) {
+          showError('Adicione pelo menos um vendedor');
+          return false;
+        }
+        for (const v of vendors) {
+          if (!v.nome) {
+            showError('Preencha o nome de todos os vendedores');
+            return false;
+          }
+          if (!v.pin || v.pin.length !== 4) {
+            showError(`PIN de "${v.nome}" deve ter 4 dígitos`);
+            return false;
+          }
+        }
+        const pins = vendors.map((v) => v.pin);
+        if (new Set(pins).size !== pins.length) {
+          showError('PINs devem ser únicos');
+          return false;
+        }
+        return true;
+      }
 
-// Review
-function buildReview() {
-  // Sync vendors from DOM
-  vendors.forEach(v => {
-    const row = document.querySelector(`[data-vid="${v.id}"]`);
-    if (row) {
-      v.nome = row.querySelector('input[type="text"]').value.trim();
-      v.pin = row.querySelector('.pin-small').value.trim();
-      v.setor = row.querySelector('select').value;
-    }
-  });
-  const name = document.getElementById('storeName').value.trim();
-  const slug = document.getElementById('storeSlug').value.trim();
+      // Review
+      function buildReview() {
+        // Sync vendors from DOM
+        vendors.forEach((v) => {
+          const row = document.querySelector(`[data-vid="${v.id}"]`);
+          if (row) {
+            v.nome = row.querySelector('input[type="text"]').value.trim();
+            v.pin = row.querySelector('.pin-small').value.trim();
+            v.setor = row.querySelector('select').value;
+          }
+        });
+        const name = document.getElementById('storeName').value.trim();
+        const slug = document.getElementById('storeSlug').value.trim();
 
-  const ownerEmail = document.getElementById('ownerEmail').value.trim();
+        const ownerEmail = document.getElementById('ownerEmail').value.trim();
 
-  document.getElementById('reviewContent').innerHTML = `
+        document.getElementById('reviewContent').innerHTML = `
     <div class="review-card">
       <h3><i class="fa-solid fa-store" style="margin-right:6px"></i>Loja</h3>
       <div class="review-item"><span class="label">Nome</span><span class="value">${name}</span></div>
@@ -889,17 +1024,21 @@ function buildReview() {
     <div class="review-card">
       <h3><i class="fa-solid fa-layer-group" style="margin-right:6px"></i>Setores (${sectors.length})</h3>
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
-        ${sectors.map(s => `<span style="padding:4px 10px;background:var(--bg-elevated);border-radius:12px;font-size:12px;font-weight:600;color:var(--text-secondary)">${s}</span>`).join('')}
+        ${sectors.map((s) => `<span style="padding:4px 10px;background:var(--bg-elevated);border-radius:12px;font-size:12px;font-weight:600;color:var(--text-secondary)">${s}</span>`).join('')}
       </div>
     </div>
     <div class="review-card">
       <h3><i class="fa-solid fa-users" style="margin-right:6px"></i>Vendedores (${vendors.length})</h3>
-      ${vendors.map(v => `
+      ${vendors
+        .map(
+          (v) => `
         <div class="review-item">
           <span class="label">${v.nome} <span style="color:var(--text-muted);font-size:11px">(${v.setor})</span></span>
           <span class="value" style="color:var(--accent)">PIN: ${v.pin}</span>
         </div>
-      `).join('')}
+      `
+        )
+        .join('')}
     </div>
     <div class="review-card">
       <h3><i class="fa-solid fa-user-shield" style="margin-right:6px"></i>Conta do administrador</h3>
@@ -907,96 +1046,100 @@ function buildReview() {
       <div class="review-item"><span class="label">Senha</span><span class="value">••••••</span></div>
     </div>
   `;
-}
-
-// Create tenant
-window.createTenant = async function() {
-  const btn = document.getElementById('btnCreate');
-  btn.disabled = true;
-  btn.innerHTML = '<div class="spinner"></div> Criando...';
-  hideError();
-
-  const name = document.getElementById('storeName').value.trim();
-  const slug = document.getElementById('storeSlug').value.trim();
-  const ownerEmail = document.getElementById('ownerEmail').value.trim();
-  const ownerPassword = document.getElementById('ownerPassword').value;
-
-  try {
-    // Call provision-tenant Edge Function
-    const res = await fetch(`${sb.supabaseUrl}/functions/v1/provision-tenant`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${sb.supabaseKey}`
-      },
-      body: JSON.stringify({
-        token: token || null,
-        nome_loja: name,
-        slug,
-        setores: sectors,
-        vendedores: vendors.map(v => ({ nome: v.nome, setor: v.setor, pin: v.pin })),
-        owner_email: ownerEmail,
-        owner_password: ownerPassword
-      })
-    });
-
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error || 'Erro ao criar loja');
-
-    createdSlug = slug;
-    const baseUrl = window.location.origin;
-    document.getElementById('urlTablet').textContent = `${baseUrl}/${slug}/tablet`;
-    document.getElementById('urlDashboard').textContent = `${baseUrl}/${slug}/dashboard`;
-    document.getElementById('urlLogin').textContent = `${baseUrl}/${slug}/login`;
-    document.getElementById('credEmail').textContent = ownerEmail;
-
-    // Auto-login with the credentials the user just set
-    try {
-      const { data } = await sb.auth.signInWithPassword({ email: ownerEmail, password: ownerPassword });
-      if (data?.session) {
-        toast('Loja criada e login realizado!', 'success');
       }
-    } catch(_) { /* login will happen manually */ }
 
-    // Send setup-complete email (fire-and-forget — não bloqueia o fluxo)
-    fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-      },
-      body: JSON.stringify({ type: 'setup-complete', to: ownerEmail, slug, plano: result.plano || 'pro' })
-    }).catch(() => { /* silently ignore — email é best-effort */ });
+      // Create tenant
+      window.createTenant = async function () {
+        const btn = document.getElementById('btnCreate');
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner"></div> Criando...';
+        hideError();
 
-    toast('Loja criada com sucesso!', 'success');
-    if (typeof clearSetupState === 'function') clearSetupState();
-    window.minhavezAnalytics?.capture('setup_completed', { slug, plano: result.plano || 'pro' });
-    goStep(6);
-  } catch (e) {
-    showError(e.message);
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Criar minha loja';
-  }
-};
+        const name = document.getElementById('storeName').value.trim();
+        const slug = document.getElementById('storeSlug').value.trim();
+        const ownerEmail = document.getElementById('ownerEmail').value.trim();
+        const ownerPassword = document.getElementById('ownerPassword').value;
 
-window.goToDashboard = function() {
-  window.location.href = `/${createdSlug}/dashboard`;
-};
+        try {
+          // Call provision-tenant Edge Function
+          const res = await fetch(`${sb.supabaseUrl}/functions/v1/provision-tenant`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${sb.supabaseKey}`
+            },
+            body: JSON.stringify({
+              token: token || null,
+              nome_loja: name,
+              slug,
+              setores: sectors,
+              vendedores: vendors.map((v) => ({ nome: v.nome, setor: v.setor, pin: v.pin })),
+              owner_email: ownerEmail,
+              owner_password: ownerPassword
+            })
+          });
 
-window.copyUrl = function(id) {
-  const text = document.getElementById(id).textContent;
-  navigator.clipboard.writeText(text).then(() => toast('Link copiado!', 'success'));
-};
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.error || 'Erro ao criar loja');
 
-function showError(msg) {
-  const el = document.getElementById('setupError');
-  document.getElementById('setupErrorMsg').textContent = msg;
-  el.classList.add('show');
-}
+          createdSlug = slug;
+          const baseUrl = window.location.origin;
+          document.getElementById('urlTablet').textContent = `${baseUrl}/${slug}/tablet`;
+          document.getElementById('urlDashboard').textContent = `${baseUrl}/${slug}/dashboard`;
+          document.getElementById('urlLogin').textContent = `${baseUrl}/${slug}/login`;
+          document.getElementById('credEmail').textContent = ownerEmail;
 
-function hideError() {
-  document.getElementById('setupError').classList.remove('show');
-}
-</script>
-</body>
+          // Auto-login with the credentials the user just set
+          try {
+            const { data } = await sb.auth.signInWithPassword({ email: ownerEmail, password: ownerPassword });
+            if (data?.session) {
+              toast('Loja criada e login realizado!', 'success');
+            }
+          } catch (_) {
+            /* login will happen manually */
+          }
+
+          // Send setup-complete email (fire-and-forget — não bloqueia o fluxo)
+          fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify({ type: 'setup-complete', to: ownerEmail, slug, plano: result.plano || 'pro' })
+          }).catch(() => {
+            /* silently ignore — email é best-effort */
+          });
+
+          toast('Loja criada com sucesso!', 'success');
+          if (typeof clearSetupState === 'function') clearSetupState();
+          window.minhavezAnalytics?.capture('setup_completed', { slug, plano: result.plano || 'pro' });
+          goStep(6);
+        } catch (e) {
+          showError(e.message);
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Criar minha loja';
+        }
+      };
+
+      window.goToDashboard = function () {
+        window.location.href = `/${createdSlug}/dashboard`;
+      };
+
+      window.copyUrl = function (id) {
+        const text = document.getElementById(id).textContent;
+        navigator.clipboard.writeText(text).then(() => toast('Link copiado!', 'success'));
+      };
+
+      function showError(msg) {
+        const el = document.getElementById('setupError');
+        document.getElementById('setupErrorMsg').textContent = msg;
+        el.classList.add('show');
+      }
+
+      function hideError() {
+        document.getElementById('setupError').classList.remove('show');
+      }
+    </script>
+  </body>
 </html>

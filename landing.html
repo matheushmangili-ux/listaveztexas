@@ -1,2165 +1,2963 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR" data-theme="dark">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>minhavez — gestão de fila + IA pra varejo físico | Vendedores no lugar certo</title>
-<meta name="description" content="Sistema que organiza a vez dos vendedores, mostra vendas em tempo real e gamifica a operação. IA Assist resume turno, prevê pico e sugere escala. Em produção na Texas Center.">
-<meta name="keywords" content="gestão de fila vendedor, fila de atendimento varejo, gamificação vendas, sistema vez vendedor, software loja física, dashboard vendas tempo real">
-<meta name="author" content="minhavez">
-<meta name="robots" content="index, follow, max-image-preview:large">
-<link rel="canonical" href="https://listaveztexas.vercel.app/landing">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>minhavez — gestão de fila + IA pra varejo físico | Vendedores no lugar certo</title>
+    <meta
+      name="description"
+      content="Sistema que organiza a vez dos vendedores, mostra vendas em tempo real e gamifica a operação. IA Assist resume turno, prevê pico e sugere escala. Em produção na Texas Center."
+    />
+    <meta
+      name="keywords"
+      content="gestão de fila vendedor, fila de atendimento varejo, gamificação vendas, sistema vez vendedor, software loja física, dashboard vendas tempo real"
+    />
+    <meta name="author" content="minhavez" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://listaveztexas.vercel.app/landing" />
 
-<!-- Open Graph -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://listaveztexas.vercel.app/landing">
-<meta property="og:site_name" content="minhavez">
-<meta property="og:title" content="minhavez — gestão de fila + IA pra varejo físico">
-<meta property="og:description" content="Cada vendedor no lugar certo. Cada venda no momento certo. Sistema usado na Texas Center que organiza fila, gamifica equipe e prevê pico com IA.">
-<meta property="og:image" content="https://listaveztexas.vercel.app/assets/og-image-landing.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="minhavez — gestão de fila + IA pra varejo físico">
-<meta property="og:locale" content="pt_BR">
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://listaveztexas.vercel.app/landing" />
+    <meta property="og:site_name" content="minhavez" />
+    <meta property="og:title" content="minhavez — gestão de fila + IA pra varejo físico" />
+    <meta
+      property="og:description"
+      content="Cada vendedor no lugar certo. Cada venda no momento certo. Sistema usado na Texas Center que organiza fila, gamifica equipe e prevê pico com IA."
+    />
+    <meta property="og:image" content="https://listaveztexas.vercel.app/assets/og-image-landing.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="minhavez — gestão de fila + IA pra varejo físico" />
+    <meta property="og:locale" content="pt_BR" />
 
-<!-- Twitter Card -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="minhavez — gestão de fila + IA pra varejo físico">
-<meta name="twitter:description" content="Cada vendedor no lugar certo. Cada venda no momento certo. Em produção na Texas Center.">
-<meta name="twitter:image" content="https://listaveztexas.vercel.app/assets/og-image-landing.png">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="minhavez — gestão de fila + IA pra varejo físico" />
+    <meta
+      name="twitter:description"
+      content="Cada vendedor no lugar certo. Cada venda no momento certo. Em produção na Texas Center."
+    />
+    <meta name="twitter:image" content="https://listaveztexas.vercel.app/assets/og-image-landing.png" />
 
-<meta name="theme-color" content="#0d0d0d">
+    <meta name="theme-color" content="#0d0d0d" />
 
-<!-- JSON-LD Schema -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "minhavez",
-  "description": "Sistema SaaS de gestão de fila de atendimento + engajamento gamificado para lojas físicas, com IA Assist para previsão de pico e sugestão de escala.",
-  "applicationCategory": "BusinessApplication",
-  "operatingSystem": "Web, Android, iOS (PWA)",
-  "url": "https://listaveztexas.vercel.app/landing",
-  "publisher": {
-    "@type": "Organization",
-    "name": "minhavez",
-    "url": "https://listaveztexas.vercel.app/landing"
-  },
-  "offers": [
-    { "@type": "Offer", "name": "Starter", "price": "49", "priceCurrency": "BRL", "category": "subscription" },
-    { "@type": "Offer", "name": "Pro", "price": "99", "priceCurrency": "BRL", "category": "subscription" },
-    { "@type": "Offer", "name": "Elite", "price": "149", "priceCurrency": "BRL", "category": "subscription", "description": "R$ 149 base + R$ 19 por vendedor" }
-  ],
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "5.0",
-    "reviewCount": "1",
-    "bestRating": "5"
-  }
-}
-</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap">
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
-<link rel="icon" href="/assets/logo-minhavez-transparent.png">
-<style>
-/* ==================================================================
+    <!-- JSON-LD Schema -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "minhavez",
+        "description": "Sistema SaaS de gestão de fila de atendimento + engajamento gamificado para lojas físicas, com IA Assist para previsão de pico e sugestão de escala.",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web, Android, iOS (PWA)",
+        "url": "https://listaveztexas.vercel.app/landing",
+        "publisher": {
+          "@type": "Organization",
+          "name": "minhavez",
+          "url": "https://listaveztexas.vercel.app/landing"
+        },
+        "offers": [
+          { "@type": "Offer", "name": "Starter", "price": "49", "priceCurrency": "BRL", "category": "subscription" },
+          { "@type": "Offer", "name": "Pro", "price": "99", "priceCurrency": "BRL", "category": "subscription" },
+          {
+            "@type": "Offer",
+            "name": "Elite",
+            "price": "149",
+            "priceCurrency": "BRL",
+            "category": "subscription",
+            "description": "R$ 149 base + R$ 19 por vendedor"
+          }
+        ],
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "5.0",
+          "reviewCount": "1",
+          "bestRating": "5"
+        }
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link
+      rel="preload"
+      as="style"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      onload="
+        this.onload = null;
+        this.rel = 'stylesheet';
+      "
+    />
+    <noscript
+      ><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    /></noscript>
+    <link rel="icon" href="/assets/logo-minhavez-transparent.png" />
+    <style>
+      /* ==================================================================
    TOKENS — paleta mint+charcoal (alinhada com o rebrand do app)
    ================================================================== */
-:root {
-  --bg:         #0d0d0d;
-  --bg-surface: #1a1a1a;
-  --bg-card:    #222222;
-  --bg-elev:    #2a2a2a;
-  --text:       #fafafa;
-  --text-dim:   #a3a3a3;
-  --text-muted: #6b6b6b;
-  --border:     rgba(255,255,255,0.08);
-  --border-strong: rgba(255,255,255,0.16);
-  --accent:     #aaeec4;
-  --accent-deep:#7fd9a0;
-  --accent-ink: #0d0d0d;
-  --coral:      #e89b8a;
-  --sand:       #d4a373;
-  --dusty:      #8ea5c9;
-  --shadow-sm:  0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04);
-  --shadow-md:  0 8px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
-  --shadow-lg:  0 20px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
-  --shadow-accent: 0 8px 32px rgba(170,238,196,0.28);
-  --radius:     14px;
-  --radius-lg:  20px;
-  --ease:       cubic-bezier(0.16, 1, 0.3, 1);
-}
+      :root {
+        --bg: #0d0d0d;
+        --bg-surface: #1a1a1a;
+        --bg-card: #222222;
+        --bg-elev: #2a2a2a;
+        --text: #fafafa;
+        --text-dim: #a3a3a3;
+        --text-muted: #6b6b6b;
+        --border: rgba(255, 255, 255, 0.08);
+        --border-strong: rgba(255, 255, 255, 0.16);
+        --accent: #aaeec4;
+        --accent-deep: #7fd9a0;
+        --accent-ink: #0d0d0d;
+        --coral: #e89b8a;
+        --sand: #d4a373;
+        --dusty: #8ea5c9;
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        --shadow-accent: 0 8px 32px rgba(170, 238, 196, 0.28);
+        --radius: 14px;
+        --radius-lg: 20px;
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+      }
 
-/* ==================================================================
+      /* ==================================================================
    RESET + BASE
    ================================================================== */
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: 'Inter Tight', system-ui, -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 15px;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  letter-spacing: -0.005em;
-  overflow-x: hidden;
-}
-a { color: inherit; text-decoration: none; }
-img { max-width: 100%; display: block; }
-button { font-family: inherit; cursor: pointer; }
-::selection { background: var(--accent); color: var(--accent-ink); }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family:
+          'Inter Tight',
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        font-size: 15px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        letter-spacing: -0.005em;
+        overflow-x: hidden;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      img {
+        max-width: 100%;
+        display: block;
+      }
+      button {
+        font-family: inherit;
+        cursor: pointer;
+      }
+      ::selection {
+        background: var(--accent);
+        color: var(--accent-ink);
+      }
 
-/* Scrollbar blush mint */
-* { scrollbar-width: thin; scrollbar-color: rgba(170,238,196,0.3) transparent; }
-*::-webkit-scrollbar { width: 10px; height: 10px; }
-*::-webkit-scrollbar-track { background: transparent; }
-*::-webkit-scrollbar-thumb {
-  background: rgba(170, 238, 196, 0.22);
-  border-radius: 5px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
-  transition: background 0.2s;
-}
-*::-webkit-scrollbar-thumb:hover {
-  background: rgba(170, 238, 196, 0.5);
-  background-clip: padding-box;
-  border: 2px solid transparent;
-}
+      /* Scrollbar blush mint */
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(170, 238, 196, 0.3) transparent;
+      }
+      *::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+      *::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      *::-webkit-scrollbar-thumb {
+        background: rgba(170, 238, 196, 0.22);
+        border-radius: 5px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+        transition: background 0.2s;
+      }
+      *::-webkit-scrollbar-thumb:hover {
+        background: rgba(170, 238, 196, 0.5);
+        background-clip: padding-box;
+        border: 2px solid transparent;
+      }
 
-.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-.section { padding: 120px 0; position: relative; }
-.section-proof {
-  padding: 80px 0;
-  background: linear-gradient(180deg, transparent, rgba(170, 238, 196, 0.04), transparent);
-}
-.proof-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-top: 48px;
-}
-@media (max-width: 720px) { .proof-grid { grid-template-columns: repeat(2, 1fr); } }
-.proof-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 28px 20px;
-  text-align: center;
-  transition: border-color 0.25s, transform 0.25s;
-}
-.proof-card:hover {
-  border-color: rgba(170, 238, 196, 0.35);
-  transform: translateY(-3px);
-}
-.proof-value {
-  font-size: clamp(32px, 4.5vw, 56px);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1;
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-variant-numeric: tabular-nums;
-}
-.proof-unit {
-  font-size: 0.55em;
-  margin-left: 4px;
-  opacity: 0.7;
-}
-.proof-label {
-  margin-top: 12px;
-  font-size: 13px;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-@media (max-width: 768px) { .section { padding: 80px 0; } }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+      .section {
+        padding: 120px 0;
+        position: relative;
+      }
+      .section-proof {
+        padding: 80px 0;
+        background: linear-gradient(180deg, transparent, rgba(170, 238, 196, 0.04), transparent);
+      }
+      .proof-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-top: 48px;
+      }
+      @media (max-width: 720px) {
+        .proof-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      .proof-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 28px 20px;
+        text-align: center;
+        transition:
+          border-color 0.25s,
+          transform 0.25s;
+      }
+      .proof-card:hover {
+        border-color: rgba(170, 238, 196, 0.35);
+        transform: translateY(-3px);
+      }
+      .proof-value {
+        font-size: clamp(32px, 4.5vw, 56px);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-variant-numeric: tabular-nums;
+      }
+      .proof-unit {
+        font-size: 0.55em;
+        margin-left: 4px;
+        opacity: 0.7;
+      }
+      .proof-label {
+        margin-top: 12px;
+        font-size: 13px;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      @media (max-width: 768px) {
+        .section {
+          padding: 80px 0;
+        }
+      }
 
-.badge-mono {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 4px 10px; border-radius: 999px;
-  background: rgba(170,238,196,0.08);
-  border: 1px solid rgba(170,238,196,0.2);
-  color: var(--accent);
-  font-size: 11px; font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-.badge-mono .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+      .badge-mono {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(170, 238, 196, 0.08);
+        border: 1px solid rgba(170, 238, 196, 0.2);
+        color: var(--accent);
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .badge-mono .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
 
-/* ==================================================================
+      /* ==================================================================
    NAV (glassmorphism Linear-style)
    ================================================================== */
-.nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  padding: 22px 40px;
-  display: flex; align-items: center; justify-content: space-between;
-  background: rgba(13, 13, 13, 0.72);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid transparent;
-  transition: all 0.25s var(--ease);
-  min-height: 80px;
-}
-.nav.scrolled {
-  padding: 16px 40px;
-  background: rgba(13, 13, 13, 0.9);
-  border-bottom-color: var(--border);
-  min-height: 68px;
-}
-.nav-logo {
-  display: flex; align-items: center; justify-content: center;
-  height: 64px;
-  width: 200px;
-  overflow: hidden;
-  text-decoration: none;
-  flex-shrink: 0;
-}
-.nav-logo img {
-  width: auto;
-  height: 100%;
-  max-width: none;
-  object-fit: contain;
-  display: block;
-  transform: scale(2.1);
-  transform-origin: center;
-}
-.nav-links {
-  display: flex; align-items: center; gap: 6px;
-}
-.nav-links a {
-  color: var(--text-dim);
-  font-size: 14px; font-weight: 500;
-  padding: 8px 14px;
-  border-radius: 8px;
-  transition:
-    background 0.18s var(--ease),
-    color 0.18s ease,
-    box-shadow 0.18s ease,
-    transform 0.15s var(--ease);
-}
-.nav-links a:hover:not(.nav-cta):not(.nav-link-active) {
-  background: var(--bg-hover);
-  color: var(--accent);
-}
-.nav-links a.nav-link-active {
-  color: var(--accent);
-  background: var(--bg-hover);
-}
-@keyframes navCtaPulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(170, 238, 196, 0.45), inset 0 0 0 1px rgba(170, 238, 196, 0.55);
-  }
-  50% {
-    box-shadow: 0 0 0 6px rgba(170, 238, 196, 0), inset 0 0 0 1px rgba(170, 238, 196, 0.9);
-  }
-}
-.nav-cta {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 14px;
-  background: transparent;
-  color: var(--accent);
-  border-radius: 8px;
-  font-size: 14px; font-weight: 500;
-  transition: background 0.18s var(--ease), color 0.18s ease;
-  border: none;
-  animation: navCtaPulse 2.2s ease-in-out infinite;
-}
-.nav-cta:hover {
-  background: var(--bg-hover);
-  color: var(--accent);
-}
-@media (max-width: 820px) {
-  .nav { padding: 12px 16px; }
-  .nav-links a:not(.nav-cta) { display: none; }
-  .nav.scrolled { padding: 10px 16px; }
-}
+      .nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        padding: 22px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(13, 13, 13, 0.72);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-bottom: 1px solid transparent;
+        transition: all 0.25s var(--ease);
+        min-height: 80px;
+      }
+      .nav.scrolled {
+        padding: 16px 40px;
+        background: rgba(13, 13, 13, 0.9);
+        border-bottom-color: var(--border);
+        min-height: 68px;
+      }
+      .nav-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 64px;
+        width: 200px;
+        overflow: hidden;
+        text-decoration: none;
+        flex-shrink: 0;
+      }
+      .nav-logo img {
+        width: auto;
+        height: 100%;
+        max-width: none;
+        object-fit: contain;
+        display: block;
+        transform: scale(2.1);
+        transform-origin: center;
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .nav-links a {
+        color: var(--text-dim);
+        font-size: 14px;
+        font-weight: 500;
+        padding: 8px 14px;
+        border-radius: 8px;
+        transition:
+          background 0.18s var(--ease),
+          color 0.18s ease,
+          box-shadow 0.18s ease,
+          transform 0.15s var(--ease);
+      }
+      .nav-links a:hover:not(.nav-cta):not(.nav-link-active) {
+        background: var(--bg-hover);
+        color: var(--accent);
+      }
+      .nav-links a.nav-link-active {
+        color: var(--accent);
+        background: var(--bg-hover);
+      }
+      @keyframes navCtaPulse {
+        0%,
+        100% {
+          box-shadow:
+            0 0 0 0 rgba(170, 238, 196, 0.45),
+            inset 0 0 0 1px rgba(170, 238, 196, 0.55);
+        }
+        50% {
+          box-shadow:
+            0 0 0 6px rgba(170, 238, 196, 0),
+            inset 0 0 0 1px rgba(170, 238, 196, 0.9);
+        }
+      }
+      .nav-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        background: transparent;
+        color: var(--accent);
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        transition:
+          background 0.18s var(--ease),
+          color 0.18s ease;
+        border: none;
+        animation: navCtaPulse 2.2s ease-in-out infinite;
+      }
+      .nav-cta:hover {
+        background: var(--bg-hover);
+        color: var(--accent);
+      }
+      @media (max-width: 820px) {
+        .nav {
+          padding: 12px 16px;
+        }
+        .nav-links a:not(.nav-cta) {
+          display: none;
+        }
+        .nav.scrolled {
+          padding: 10px 16px;
+        }
+      }
 
-/* ==================================================================
+      /* ==================================================================
    HERO (in-cognita-inspired, brutalist type + grid dot bg)
    ================================================================== */
-.hero {
-  min-height: 100vh;
-  display: flex; align-items: center;
-  padding: 140px 0 80px;
-  position: relative;
-  overflow: hidden;
-}
-.hero-grid-dots {
-  position: absolute; inset: 0;
-  pointer-events: none;
-  background-image: radial-gradient(circle, rgba(170,238,196,0.08) 1px, transparent 1px);
-  background-size: 48px 48px;
-  background-position: center center;
-  mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
-  z-index: 1;
-}
-.hero-video {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  opacity: 0.22;
-  filter: hue-rotate(35deg) saturate(0.7) contrast(1.05) brightness(0.85);
-  pointer-events: none;
-  z-index: 0;
-}
-.hero-video-overlay {
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse at center, rgba(13,13,13,0.35) 0%, rgba(13,13,13,0.7) 55%, var(--bg) 95%),
-    linear-gradient(180deg, rgba(13,13,13,0.6) 0%, rgba(13,13,13,0.3) 30%, rgba(13,13,13,0.3) 70%, rgba(13,13,13,0.9) 100%);
-  pointer-events: none;
-  z-index: 1;
-}
-.hero-glow {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 900px; height: 600px;
-  background: radial-gradient(ellipse, rgba(170,238,196,0.14) 0%, rgba(170,238,196,0.04) 35%, transparent 70%);
-  filter: blur(40px);
-  pointer-events: none;
-  animation: heroGlow 8s ease-in-out infinite;
-}
-@keyframes heroGlow {
-  0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
-  50%      { opacity: 1;   transform: translate(-50%, -50%) scale(1.1); }
-}
-.hero-inner {
-  position: relative; z-index: 2;
-  max-width: 1100px;
-  margin: 0 auto;
-  text-align: left;
-  padding: 0 24px;
-}
-.hero-badge { margin-bottom: 24px; }
-.hero h1 {
-  font-size: clamp(36px, 6.2vw, 84px);
-  font-weight: 800;
-  line-height: 1.18;
-  letter-spacing: -0.035em;
-  text-wrap: balance;
-  margin-bottom: 24px;
-  max-width: 17ch;
-}
-.hero h1 .hero-line {
-  display: block;
-  padding-bottom: 0.05em;
-  background: linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.78) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.hero h1 .hero-line.accent {
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.hero h1 .hero-char {
-  opacity: 0;
-  transition: opacity 0.05s linear;
-}
-.hero h1 .hero-char.on { opacity: 1; }
-.hero-cursor {
-  display: inline-block;
-  width: 0.06em;
-  height: 0.95em;
-  background: var(--accent);
-  margin-left: 0.04em;
-  vertical-align: -0.1em;
-  border-radius: 1px;
-  box-shadow: 0 0 8px rgba(170, 238, 196, 0.55);
-  animation: heroCursorBlink 0.85s steps(2) infinite;
-  -webkit-text-fill-color: var(--accent);
-}
-@keyframes heroCursorBlink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
-}
-.hero-sub {
-  font-size: clamp(15px, 1.6vw, 18px);
-  color: var(--text-dim);
-  max-width: 560px;
-  margin: 0 0 36px;
-  line-height: 1.55;
-  text-wrap: pretty;
-}
-.hero-sub strong { color: var(--text); font-weight: 600; }
-.hero-ctas {
-  display: flex; gap: 12px;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-  margin-bottom: 24px;
-}
-.btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 14px 26px;
-  border-radius: 12px;
-  font-size: 15px; font-weight: 600;
-  border: 1px solid transparent;
-  transition: all 0.2s var(--ease);
-  text-decoration: none;
-  letter-spacing: -0.01em;
-}
-.btn-primary {
-  background: var(--accent);
-  color: var(--accent-ink);
-  box-shadow: var(--shadow-accent);
-}
-.btn-primary:hover {
-  background: var(--accent-deep);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 36px rgba(170,238,196,0.38);
-}
-.btn-ghost {
-  background: transparent;
-  color: var(--text);
-  border-color: var(--border-strong);
-}
-.btn-ghost:hover {
-  background: var(--bg-card);
-  border-color: var(--accent);
-}
-.hero-footnote {
-  font-size: 13px;
-  color: var(--text-muted);
-  display: flex; gap: 18px;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-}
-.hero-footnote span { display: inline-flex; align-items: center; gap: 6px; }
-.hero-footnote i { color: var(--accent); font-size: 11px; }
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        padding: 140px 0 80px;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-grid-dots {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image: radial-gradient(circle, rgba(170, 238, 196, 0.08) 1px, transparent 1px);
+        background-size: 48px 48px;
+        background-position: center center;
+        mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+        -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+        z-index: 1;
+      }
+      .hero-video {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.22;
+        filter: hue-rotate(35deg) saturate(0.7) contrast(1.05) brightness(0.85);
+        pointer-events: none;
+        z-index: 0;
+      }
+      .hero-video-overlay {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(ellipse at center, rgba(13, 13, 13, 0.35) 0%, rgba(13, 13, 13, 0.7) 55%, var(--bg) 95%),
+          linear-gradient(
+            180deg,
+            rgba(13, 13, 13, 0.6) 0%,
+            rgba(13, 13, 13, 0.3) 30%,
+            rgba(13, 13, 13, 0.3) 70%,
+            rgba(13, 13, 13, 0.9) 100%
+          );
+        pointer-events: none;
+        z-index: 1;
+      }
+      .hero-glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 900px;
+        height: 600px;
+        background: radial-gradient(
+          ellipse,
+          rgba(170, 238, 196, 0.14) 0%,
+          rgba(170, 238, 196, 0.04) 35%,
+          transparent 70%
+        );
+        filter: blur(40px);
+        pointer-events: none;
+        animation: heroGlow 8s ease-in-out infinite;
+      }
+      @keyframes heroGlow {
+        0%,
+        100% {
+          opacity: 0.7;
+          transform: translate(-50%, -50%) scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1.1);
+        }
+      }
+      .hero-inner {
+        position: relative;
+        z-index: 2;
+        max-width: 1100px;
+        margin: 0 auto;
+        text-align: left;
+        padding: 0 24px;
+      }
+      .hero-badge {
+        margin-bottom: 24px;
+      }
+      .hero h1 {
+        font-size: clamp(36px, 6.2vw, 84px);
+        font-weight: 800;
+        line-height: 1.18;
+        letter-spacing: -0.035em;
+        text-wrap: balance;
+        margin-bottom: 24px;
+        max-width: 17ch;
+      }
+      .hero h1 .hero-line {
+        display: block;
+        padding-bottom: 0.05em;
+        background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.78) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .hero h1 .hero-line.accent {
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .hero h1 .hero-char {
+        opacity: 0;
+        transition: opacity 0.05s linear;
+      }
+      .hero h1 .hero-char.on {
+        opacity: 1;
+      }
+      .hero-cursor {
+        display: inline-block;
+        width: 0.06em;
+        height: 0.95em;
+        background: var(--accent);
+        margin-left: 0.04em;
+        vertical-align: -0.1em;
+        border-radius: 1px;
+        box-shadow: 0 0 8px rgba(170, 238, 196, 0.55);
+        animation: heroCursorBlink 0.85s steps(2) infinite;
+        -webkit-text-fill-color: var(--accent);
+      }
+      @keyframes heroCursorBlink {
+        0%,
+        50% {
+          opacity: 1;
+        }
+        51%,
+        100% {
+          opacity: 0;
+        }
+      }
+      .hero-sub {
+        font-size: clamp(15px, 1.6vw, 18px);
+        color: var(--text-dim);
+        max-width: 560px;
+        margin: 0 0 36px;
+        line-height: 1.55;
+        text-wrap: pretty;
+      }
+      .hero-sub strong {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .hero-ctas {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 26px;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        border: 1px solid transparent;
+        transition: all 0.2s var(--ease);
+        text-decoration: none;
+        letter-spacing: -0.01em;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: var(--accent-ink);
+        box-shadow: var(--shadow-accent);
+      }
+      .btn-primary:hover {
+        background: var(--accent-deep);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 36px rgba(170, 238, 196, 0.38);
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--text);
+        border-color: var(--border-strong);
+      }
+      .btn-ghost:hover {
+        background: var(--bg-card);
+        border-color: var(--accent);
+      }
+      .hero-footnote {
+        font-size: 13px;
+        color: var(--text-muted);
+        display: flex;
+        gap: 18px;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+      .hero-footnote span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .hero-footnote i {
+        color: var(--accent);
+        font-size: 11px;
+      }
 
-/* ==================================================================
+      /* ==================================================================
    SECTION TITLES
    ================================================================== */
-.section-label {
-  display: inline-block;
-  font-size: 12px; font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 16px;
-}
-.section-title {
-  font-size: clamp(32px, 5vw, 56px);
-  font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  margin-bottom: 20px;
-  text-wrap: balance;
-}
-.section-sub {
-  font-size: clamp(16px, 1.6vw, 19px);
-  color: var(--text-dim);
-  max-width: 620px;
-  line-height: 1.55;
-  text-wrap: pretty;
-}
-.section-head { margin-bottom: 64px; }
-.section-head.center { text-align: center; }
-.section-head.center .section-sub { margin: 0 auto; }
+      .section-label {
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 16px;
+      }
+      .section-title {
+        font-size: clamp(32px, 5vw, 56px);
+        font-weight: 700;
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+        margin-bottom: 20px;
+        text-wrap: balance;
+      }
+      .section-sub {
+        font-size: clamp(16px, 1.6vw, 19px);
+        color: var(--text-dim);
+        max-width: 620px;
+        line-height: 1.55;
+        text-wrap: pretty;
+      }
+      .section-head {
+        margin-bottom: 64px;
+      }
+      .section-head.center {
+        text-align: center;
+      }
+      .section-head.center .section-sub {
+        margin: 0 auto;
+      }
 
-/* ==================================================================
+      /* ==================================================================
    SHOWCASE (horizontal slider in-cognita-style)
    ================================================================== */
-.showcase {
-  background: var(--bg-surface);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-.showcase-slider {
-  display: flex; gap: 24px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding: 0 24px 32px;
-  margin: 0 -24px;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 48px, #000 calc(100% - 96px), transparent 100%);
-          mask-image: linear-gradient(to right, transparent 0, #000 48px, #000 calc(100% - 96px), transparent 100%);
-}
-.showcase-slider.at-start {
-  -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 96px), transparent 100%);
-          mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 96px), transparent 100%);
-}
-.showcase-slider.at-end {
-  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 48px, #000 100%);
-          mask-image: linear-gradient(to right, transparent 0, #000 48px, #000 100%);
-}
-.showcase-slider::-webkit-scrollbar { display: none; }
-.showcase-card {
-  flex: 0 0 clamp(320px, 85vw, 720px);
-  scroll-snap-align: center;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 36px;
-  box-shadow: var(--shadow-sm);
-  display: flex; flex-direction: column;
-  transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s;
-}
-.showcase-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(170,238,196,0.22);
-  box-shadow: var(--shadow-md);
-}
-.showcase-tag {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 4px 10px;
-  background: rgba(170,238,196,0.1);
-  color: var(--accent);
-  border-radius: 999px;
-  font-size: 11px; font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  margin-bottom: 18px;
-  width: fit-content;
-}
-.showcase-card h3 {
-  font-size: clamp(24px, 3vw, 32px);
-  font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  margin-bottom: 14px;
-}
-.showcase-card p {
-  color: var(--text-dim);
-  margin-bottom: 28px;
-  font-size: 15px;
-  line-height: 1.6;
-}
-.showcase-bullets {
-  list-style: none;
-  display: flex; flex-direction: column;
-  gap: 10px;
-  margin-bottom: 32px;
-}
-.showcase-bullets li {
-  display: flex; align-items: flex-start; gap: 10px;
-  font-size: 14px;
-  color: var(--text);
-}
-.showcase-bullets i {
-  color: var(--accent);
-  margin-top: 4px;
-  font-size: 13px;
-}
-.showcase-visual {
-  aspect-ratio: 16 / 10;
-  background: linear-gradient(180deg, var(--bg-elev), var(--bg-surface));
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  position: relative;
-  overflow: hidden;
-  display: flex; align-items: center; justify-content: center;
-}
-.showcase-visual-fallback {
-  color: var(--text-muted);
-  font-size: 14px;
-  text-align: center;
-  padding: 24px;
-}
-.showcase-visual-fallback i { font-size: 48px; color: var(--accent); margin-bottom: 12px; display: block; opacity: 0.6; }
+      .showcase {
+        background: var(--bg-surface);
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+      }
+      .showcase-slider {
+        display: flex;
+        gap: 24px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding: 0 24px 32px;
+        margin: 0 -24px;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        -webkit-mask-image: linear-gradient(
+          to right,
+          transparent 0,
+          #000 48px,
+          #000 calc(100% - 96px),
+          transparent 100%
+        );
+        mask-image: linear-gradient(to right, transparent 0, #000 48px, #000 calc(100% - 96px), transparent 100%);
+      }
+      .showcase-slider.at-start {
+        -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 96px), transparent 100%);
+        mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 96px), transparent 100%);
+      }
+      .showcase-slider.at-end {
+        -webkit-mask-image: linear-gradient(to right, transparent 0, #000 48px, #000 100%);
+        mask-image: linear-gradient(to right, transparent 0, #000 48px, #000 100%);
+      }
+      .showcase-slider::-webkit-scrollbar {
+        display: none;
+      }
+      .showcase-card {
+        flex: 0 0 clamp(320px, 85vw, 720px);
+        scroll-snap-align: center;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 36px;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-direction: column;
+        transition:
+          transform 0.3s var(--ease),
+          border-color 0.3s,
+          box-shadow 0.3s;
+      }
+      .showcase-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(170, 238, 196, 0.22);
+        box-shadow: var(--shadow-md);
+      }
+      .showcase-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        background: rgba(170, 238, 196, 0.1);
+        color: var(--accent);
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin-bottom: 18px;
+        width: fit-content;
+      }
+      .showcase-card h3 {
+        font-size: clamp(24px, 3vw, 32px);
+        font-weight: 700;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+        margin-bottom: 14px;
+      }
+      .showcase-card p {
+        color: var(--text-dim);
+        margin-bottom: 28px;
+        font-size: 15px;
+        line-height: 1.6;
+      }
+      .showcase-bullets {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 32px;
+      }
+      .showcase-bullets li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 14px;
+        color: var(--text);
+      }
+      .showcase-bullets i {
+        color: var(--accent);
+        margin-top: 4px;
+        font-size: 13px;
+      }
+      .showcase-visual {
+        aspect-ratio: 16 / 10;
+        background: linear-gradient(180deg, var(--bg-elev), var(--bg-surface));
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .showcase-visual-fallback {
+        color: var(--text-muted);
+        font-size: 14px;
+        text-align: center;
+        padding: 24px;
+      }
+      .showcase-visual-fallback i {
+        font-size: 48px;
+        color: var(--accent);
+        margin-bottom: 12px;
+        display: block;
+        opacity: 0.6;
+      }
 
-/* ─── Mockups dentro do showcase-visual ─── */
-.mock {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  font-size: 11px;
-  color: var(--text);
-}
-.mock-topbar {
-  display: flex; align-items: center; gap: 6px;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--border);
-  background: rgba(0,0,0,0.25);
-  font-size: 10px; color: var(--text-muted);
-}
-.mock-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.15); }
-.mock-dot.mint { background: var(--accent); box-shadow: 0 0 8px rgba(170,238,196,0.6); }
+      /* ─── Mockups dentro do showcase-visual ─── */
+      .mock {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        font-size: 11px;
+        color: var(--text);
+      }
+      .mock-topbar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.25);
+        font-size: 10px;
+        color: var(--text-muted);
+      }
+      .mock-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.15);
+      }
+      .mock-dot.mint {
+        background: var(--accent);
+        box-shadow: 0 0 8px rgba(170, 238, 196, 0.6);
+      }
 
-/* Dashboard mock */
-.mock-dash { flex: 1; display: grid; grid-template-columns: 48px 1fr; }
-.mock-sidebar {
-  background: rgba(0,0,0,0.35);
-  border-right: 1px solid var(--border);
-  display: flex; flex-direction: column; align-items: center;
-  padding: 10px 0; gap: 10px;
-}
-.mock-sidebar .icn {
-  width: 26px; height: 26px; border-radius: 7px;
-  background: rgba(255,255,255,0.04);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 10px; color: var(--text-muted);
-}
-.mock-sidebar .icn.active {
-  background: rgba(170,238,196,0.14);
-  color: var(--accent);
-  box-shadow: inset 0 0 0 1px rgba(170,238,196,0.35);
-}
-.mock-main { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
-.mock-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.mock-kpi {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 6px 8px;
-}
-.mock-kpi-label { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
-.mock-kpi-val { font-size: 13px; font-weight: 700; letter-spacing: -0.02em; margin-top: 2px; }
-.mock-kpi-delta { font-size: 8px; color: var(--accent); }
-.mock-kpi-delta.down { color: #e89b8a; }
-.mock-charts { display: grid; grid-template-columns: 1.6fr 1fr; gap: 6px; flex: 1; min-height: 0; }
-.mock-chart {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 6px 8px;
-  display: flex; flex-direction: column; gap: 4px;
-}
-.mock-chart-title { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
-.mock-chart svg { width: 100%; flex: 1; }
-.mock-ia {
-  position: absolute; right: 10px; bottom: 10px;
-  max-width: 62%;
-  background: rgba(170,238,196,0.08);
-  border: 1px solid rgba(170,238,196,0.28);
-  border-radius: 7px;
-  padding: 6px 8px;
-  font-size: 9px;
-  color: var(--text);
-  display: flex; gap: 6px; align-items: flex-start;
-  backdrop-filter: blur(8px);
-}
-.mock-ia .spark { color: var(--accent); font-size: 10px; }
+      /* Dashboard mock */
+      .mock-dash {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 48px 1fr;
+      }
+      .mock-sidebar {
+        background: rgba(0, 0, 0, 0.35);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px 0;
+        gap: 10px;
+      }
+      .mock-sidebar .icn {
+        width: 26px;
+        height: 26px;
+        border-radius: 7px;
+        background: rgba(255, 255, 255, 0.04);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        color: var(--text-muted);
+      }
+      .mock-sidebar .icn.active {
+        background: rgba(170, 238, 196, 0.14);
+        color: var(--accent);
+        box-shadow: inset 0 0 0 1px rgba(170, 238, 196, 0.35);
+      }
+      .mock-main {
+        padding: 10px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        overflow: hidden;
+      }
+      .mock-kpis {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+      }
+      .mock-kpi {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 6px 8px;
+      }
+      .mock-kpi-label {
+        font-size: 8px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .mock-kpi-val {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-top: 2px;
+      }
+      .mock-kpi-delta {
+        font-size: 8px;
+        color: var(--accent);
+      }
+      .mock-kpi-delta.down {
+        color: #e89b8a;
+      }
+      .mock-charts {
+        display: grid;
+        grid-template-columns: 1.6fr 1fr;
+        gap: 6px;
+        flex: 1;
+        min-height: 0;
+      }
+      .mock-chart {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 6px 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .mock-chart-title {
+        font-size: 8px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .mock-chart svg {
+        width: 100%;
+        flex: 1;
+      }
+      .mock-ia {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+        max-width: 62%;
+        background: rgba(170, 238, 196, 0.08);
+        border: 1px solid rgba(170, 238, 196, 0.28);
+        border-radius: 7px;
+        padding: 6px 8px;
+        font-size: 9px;
+        color: var(--text);
+        display: flex;
+        gap: 6px;
+        align-items: flex-start;
+        backdrop-filter: blur(8px);
+      }
+      .mock-ia .spark {
+        color: var(--accent);
+        font-size: 10px;
+      }
 
-/* Vendor mock */
-.mock-phone {
-  flex: 1; display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(ellipse at center, rgba(170,238,196,0.06), transparent 60%);
-  padding: 10px;
-}
-.mock-phone-frame {
-  width: 140px; height: 100%; max-height: 220px;
-  background: #0d0d0d;
-  border: 2px solid #1f1f1f;
-  border-radius: 14px;
-  padding: 8px 8px 10px;
-  display: flex; flex-direction: column; gap: 6px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.03);
-  position: relative;
-}
-.mock-phone-frame::before {
-  content: ''; position: absolute; top: 4px; left: 50%; transform: translateX(-50%);
-  width: 30px; height: 3px; background: #1f1f1f; border-radius: 2px;
-}
-.mock-avatar {
-  width: 42px; height: 42px; margin: 8px auto 4px;
-  background:
-    radial-gradient(circle at 35% 35%, #aaeec4 0 4px, transparent 4px) 8px 8px,
-    radial-gradient(circle at 65% 35%, #aaeec4 0 4px, transparent 4px) 8px 8px,
-    linear-gradient(180deg, #7fd9a0 50%, #5fb887 50%);
-  background-size: 100% 100%;
-  border-radius: 6px;
-  image-rendering: pixelated;
-  box-shadow: 0 0 12px rgba(170,238,196,0.35), inset 0 -6px 0 rgba(0,0,0,0.2);
-  position: relative;
-}
-.mock-avatar::after {
-  content: ''; position: absolute; inset: 62% 28% 20% 28%;
-  background: #0d0d0d; border-radius: 1px;
-}
-.mock-tier {
-  text-align: center;
-  font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
-  color: var(--accent);
-  text-transform: uppercase;
-}
-.mock-tier .lvl { color: var(--text-muted); font-weight: 500; }
-.mock-xp {
-  height: 6px; background: rgba(255,255,255,0.06);
-  border-radius: 3px; overflow: hidden;
-  border: 1px solid var(--border);
-}
-.mock-xp span {
-  display: block; height: 100%;
-  width: 68%;
-  background: linear-gradient(90deg, var(--accent), #7fd9a0);
-  box-shadow: 0 0 6px rgba(170,238,196,0.5);
-}
-.mock-xp-meta {
-  display: flex; justify-content: space-between;
-  font-size: 8px; color: var(--text-muted);
-}
-.mock-missions {
-  list-style: none; display: flex; flex-direction: column; gap: 3px;
-  margin-top: 2px;
-}
-.mock-missions li {
-  display: flex; align-items: center; gap: 5px;
-  font-size: 8.5px;
-  color: var(--text);
-  padding: 3px 5px;
-  background: rgba(255,255,255,0.03);
-  border-radius: 4px;
-}
-.mock-missions .chk {
-  width: 9px; height: 9px; border-radius: 2px;
-  border: 1px solid rgba(170,238,196,0.4);
-  flex-shrink: 0;
-}
-.mock-missions .chk.done {
-  background: var(--accent);
-  border-color: var(--accent);
-}
-.mock-push {
-  position: absolute;
-  top: 18px; right: -18px;
-  background: var(--bg-card);
-  border: 1px solid rgba(170,238,196,0.35);
-  border-radius: 7px;
-  padding: 5px 7px;
-  font-size: 8px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.4), 0 0 10px rgba(170,238,196,0.15);
-  display: flex; gap: 5px; align-items: center;
-  white-space: nowrap;
-}
-.mock-push .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+      /* Vendor mock */
+      .mock-phone {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(ellipse at center, rgba(170, 238, 196, 0.06), transparent 60%);
+        padding: 10px;
+      }
+      .mock-phone-frame {
+        width: 140px;
+        height: 100%;
+        max-height: 220px;
+        background: #0d0d0d;
+        border: 2px solid #1f1f1f;
+        border-radius: 14px;
+        padding: 8px 8px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        box-shadow:
+          0 8px 24px rgba(0, 0, 0, 0.4),
+          inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+        position: relative;
+      }
+      .mock-phone-frame::before {
+        content: '';
+        position: absolute;
+        top: 4px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 30px;
+        height: 3px;
+        background: #1f1f1f;
+        border-radius: 2px;
+      }
+      .mock-avatar {
+        width: 42px;
+        height: 42px;
+        margin: 8px auto 4px;
+        background:
+          radial-gradient(circle at 35% 35%, #aaeec4 0 4px, transparent 4px) 8px 8px,
+          radial-gradient(circle at 65% 35%, #aaeec4 0 4px, transparent 4px) 8px 8px,
+          linear-gradient(180deg, #7fd9a0 50%, #5fb887 50%);
+        background-size: 100% 100%;
+        border-radius: 6px;
+        image-rendering: pixelated;
+        box-shadow:
+          0 0 12px rgba(170, 238, 196, 0.35),
+          inset 0 -6px 0 rgba(0, 0, 0, 0.2);
+        position: relative;
+      }
+      .mock-avatar::after {
+        content: '';
+        position: absolute;
+        inset: 62% 28% 20% 28%;
+        background: #0d0d0d;
+        border-radius: 1px;
+      }
+      .mock-tier {
+        text-align: center;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+        text-transform: uppercase;
+      }
+      .mock-tier .lvl {
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+      .mock-xp {
+        height: 6px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 3px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+      }
+      .mock-xp span {
+        display: block;
+        height: 100%;
+        width: 68%;
+        background: linear-gradient(90deg, var(--accent), #7fd9a0);
+        box-shadow: 0 0 6px rgba(170, 238, 196, 0.5);
+      }
+      .mock-xp-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 8px;
+        color: var(--text-muted);
+      }
+      .mock-missions {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        margin-top: 2px;
+      }
+      .mock-missions li {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 8.5px;
+        color: var(--text);
+        padding: 3px 5px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 4px;
+      }
+      .mock-missions .chk {
+        width: 9px;
+        height: 9px;
+        border-radius: 2px;
+        border: 1px solid rgba(170, 238, 196, 0.4);
+        flex-shrink: 0;
+      }
+      .mock-missions .chk.done {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+      .mock-push {
+        position: absolute;
+        top: 18px;
+        right: -18px;
+        background: var(--bg-card);
+        border: 1px solid rgba(170, 238, 196, 0.35);
+        border-radius: 7px;
+        padding: 5px 7px;
+        font-size: 8px;
+        box-shadow:
+          0 4px 14px rgba(0, 0, 0, 0.4),
+          0 0 10px rgba(170, 238, 196, 0.15);
+        display: flex;
+        gap: 5px;
+        align-items: center;
+        white-space: nowrap;
+      }
+      .mock-push .dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 6px var(--accent);
+      }
 
-/* Tablet mock */
-.mock-tablet { flex: 1; display: flex; flex-direction: column; }
-.mock-tablet-tabs {
-  display: flex; gap: 4px;
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--border);
-  background: rgba(0,0,0,0.25);
-}
-.mock-tablet-tabs .tab {
-  flex: 1;
-  padding: 5px 6px;
-  font-size: 9px; font-weight: 600;
-  text-align: center;
-  color: var(--text-muted);
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border);
-  border-radius: 5px;
-}
-.mock-tablet-tabs .tab.active {
-  color: var(--accent);
-  border-color: rgba(170,238,196,0.5);
-  text-shadow: 0 0 4px rgba(170,238,196,0.6);
-  box-shadow: 0 0 10px rgba(170,238,196,0.2), inset 0 0 0 1px rgba(170,238,196,0.3);
-}
-.mock-queue {
-  flex: 1; display: flex; flex-direction: column; gap: 4px;
-  padding: 8px 10px;
-  overflow: hidden;
-}
-.mock-queue-row {
-  display: grid; grid-template-columns: 20px 1fr auto auto;
-  align-items: center; gap: 8px;
-  padding: 5px 8px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  font-size: 9px;
-}
-.mock-queue-row.active {
-  border-color: rgba(170,238,196,0.5);
-  background: rgba(170,238,196,0.06);
-  box-shadow: 0 0 12px rgba(170,238,196,0.12);
-}
-.mock-queue-row .pos {
-  font-weight: 700; color: var(--accent); font-size: 10px;
-}
-.mock-queue-row .name { color: var(--text); font-weight: 500; }
-.mock-queue-row .timer {
-  font-variant-numeric: tabular-nums;
-  font-size: 8.5px;
-  color: var(--text-muted);
-}
-.mock-queue-row.active .timer { color: var(--accent); }
-.mock-queue-row .avatar {
-  width: 16px; height: 16px; border-radius: 50%;
-  background: linear-gradient(135deg, #8ea5c9, #6d85ac);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 7px; font-weight: 700; color: #0d0d0d;
-}
-.showcase-hint {
-  text-align: center;
-  color: var(--text-muted);
-  font-size: 13px;
-  margin-top: 24px;
-}
-.showcase-hint i { margin: 0 6px; color: var(--accent); }
+      /* Tablet mock */
+      .mock-tablet {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .mock-tablet-tabs {
+        display: flex;
+        gap: 4px;
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.25);
+      }
+      .mock-tablet-tabs .tab {
+        flex: 1;
+        padding: 5px 6px;
+        font-size: 9px;
+        font-weight: 600;
+        text-align: center;
+        color: var(--text-muted);
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border);
+        border-radius: 5px;
+      }
+      .mock-tablet-tabs .tab.active {
+        color: var(--accent);
+        border-color: rgba(170, 238, 196, 0.5);
+        text-shadow: 0 0 4px rgba(170, 238, 196, 0.6);
+        box-shadow:
+          0 0 10px rgba(170, 238, 196, 0.2),
+          inset 0 0 0 1px rgba(170, 238, 196, 0.3);
+      }
+      .mock-queue {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 8px 10px;
+        overflow: hidden;
+      }
+      .mock-queue-row {
+        display: grid;
+        grid-template-columns: 20px 1fr auto auto;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 8px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        font-size: 9px;
+      }
+      .mock-queue-row.active {
+        border-color: rgba(170, 238, 196, 0.5);
+        background: rgba(170, 238, 196, 0.06);
+        box-shadow: 0 0 12px rgba(170, 238, 196, 0.12);
+      }
+      .mock-queue-row .pos {
+        font-weight: 700;
+        color: var(--accent);
+        font-size: 10px;
+      }
+      .mock-queue-row .name {
+        color: var(--text);
+        font-weight: 500;
+      }
+      .mock-queue-row .timer {
+        font-variant-numeric: tabular-nums;
+        font-size: 8.5px;
+        color: var(--text-muted);
+      }
+      .mock-queue-row.active .timer {
+        color: var(--accent);
+      }
+      .mock-queue-row .avatar {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #8ea5c9, #6d85ac);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 7px;
+        font-weight: 700;
+        color: #0d0d0d;
+      }
+      .showcase-hint {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 13px;
+        margin-top: 24px;
+      }
+      .showcase-hint i {
+        margin: 0 6px;
+        color: var(--accent);
+      }
 
-/* ==================================================================
+      /* ==================================================================
    HOW IT WORKS (3 steps)
    ================================================================== */
-.steps-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 32px;
-}
-.step {
-  padding: 32px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  position: relative;
-  overflow: hidden;
-  transition: all 0.25s var(--ease);
-}
-.step:hover { border-color: rgba(170,238,196,0.22); transform: translateY(-2px); }
-.step-num {
-  font-size: 14px; font-weight: 700;
-  color: var(--accent);
-  margin-bottom: 20px;
-  letter-spacing: 0.06em;
-  font-variant-numeric: tabular-nums;
-}
-.step-icon {
-  width: 48px; height: 48px;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(170,238,196,0.1);
-  border-radius: 12px;
-  color: var(--accent);
-  font-size: 20px;
-  margin-bottom: 20px;
-}
-.step h3 {
-  font-size: 20px; font-weight: 700;
-  letter-spacing: -0.01em;
-  margin-bottom: 10px;
-}
-.step p { color: var(--text-dim); font-size: 14px; line-height: 1.55; }
+      .steps-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 32px;
+      }
+      .step {
+        padding: 32px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.25s var(--ease);
+      }
+      .step:hover {
+        border-color: rgba(170, 238, 196, 0.22);
+        transform: translateY(-2px);
+      }
+      .step-num {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--accent);
+        margin-bottom: 20px;
+        letter-spacing: 0.06em;
+        font-variant-numeric: tabular-nums;
+      }
+      .step-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(170, 238, 196, 0.1);
+        border-radius: 12px;
+        color: var(--accent);
+        font-size: 20px;
+        margin-bottom: 20px;
+      }
+      .step h3 {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        margin-bottom: 10px;
+      }
+      .step p {
+        color: var(--text-dim);
+        font-size: 14px;
+        line-height: 1.55;
+      }
 
-/* ==================================================================
+      /* ==================================================================
    SOCIAL PROOF
    ================================================================== */
-.proof {
-  background: var(--bg-surface);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-.proof-inner {
-  display: grid;
-  grid-template-columns: 1.6fr 1fr;
-  gap: 64px;
-  align-items: center;
-}
-@media (max-width: 900px) {
-  .proof-inner { grid-template-columns: 1fr; gap: 40px; }
-}
-.proof-quote {
-  font-size: clamp(22px, 2.8vw, 34px);
-  font-weight: 500;
-  line-height: 1.3;
-  letter-spacing: -0.02em;
-  color: var(--text);
-  margin-bottom: 24px;
-  text-wrap: balance;
-}
-.proof-quote::before { content: '“'; color: var(--accent); margin-right: 4px; }
-.proof-quote::after  { content: '”'; color: var(--accent); margin-left: 4px; }
-.proof-author { display: flex; align-items: center; gap: 12px; }
-.proof-author-avatar {
-  width: 44px; height: 44px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
-  display: flex; align-items: center; justify-content: center;
-  color: var(--accent-ink); font-weight: 700; font-size: 15px;
-}
-.proof-author-info strong { display: block; font-weight: 600; font-size: 15px; }
-.proof-author-info span  { color: var(--text-dim); font-size: 13px; }
-.proof-stats {
-  display: grid; grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-}
-.proof-stat {
-  padding: 24px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-.proof-stat-num {
-  font-size: clamp(28px, 4vw, 44px);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: var(--accent);
-  font-variant-numeric: tabular-nums;
-  margin-bottom: 4px;
-  line-height: 1;
-}
-.proof-stat-label {
-  font-size: 12px; font-weight: 500;
-  color: var(--text-dim);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
+      .proof {
+        background: var(--bg-surface);
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+      }
+      .proof-inner {
+        display: grid;
+        grid-template-columns: 1.6fr 1fr;
+        gap: 64px;
+        align-items: center;
+      }
+      @media (max-width: 900px) {
+        .proof-inner {
+          grid-template-columns: 1fr;
+          gap: 40px;
+        }
+      }
+      .proof-quote {
+        font-size: clamp(22px, 2.8vw, 34px);
+        font-weight: 500;
+        line-height: 1.3;
+        letter-spacing: -0.02em;
+        color: var(--text);
+        margin-bottom: 24px;
+        text-wrap: balance;
+      }
+      .proof-quote::before {
+        content: '“';
+        color: var(--accent);
+        margin-right: 4px;
+      }
+      .proof-quote::after {
+        content: '”';
+        color: var(--accent);
+        margin-left: 4px;
+      }
+      .proof-author {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .proof-author-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent-ink);
+        font-weight: 700;
+        font-size: 15px;
+      }
+      .proof-author-info strong {
+        display: block;
+        font-weight: 600;
+        font-size: 15px;
+      }
+      .proof-author-info span {
+        color: var(--text-dim);
+        font-size: 13px;
+      }
+      .proof-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
+      .proof-stat {
+        padding: 24px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+      }
+      .proof-stat-num {
+        font-size: clamp(28px, 4vw, 44px);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: var(--accent);
+        font-variant-numeric: tabular-nums;
+        margin-bottom: 4px;
+        line-height: 1;
+      }
+      .proof-stat-label {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text-dim);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
 
-/* ==================================================================
+      /* ==================================================================
    PRICING
    ================================================================== */
-.pricing-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  margin-top: 40px;
-}
-@media (max-width: 900px) {
-  .pricing-grid { grid-template-columns: 1fr; max-width: 440px; margin: 40px auto 0; }
-}
-.plan {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 36px 28px;
-  display: flex; flex-direction: column;
-  transition: all 0.25s var(--ease);
-  position: relative;
-}
-.plan:hover { transform: translateY(-2px); border-color: var(--border-strong); }
-.plan.featured {
-  border-color: rgba(170,238,196,0.5);
-  background: linear-gradient(180deg, rgba(170,238,196,0.04) 0%, var(--bg-card) 100%);
-  box-shadow: 0 0 0 1px rgba(170,238,196,0.2), var(--shadow-md);
-  transform: scale(1.03);
-}
-.plan.featured:hover { transform: translateY(-4px) scale(1.03); }
-@media (max-width: 900px) { .plan.featured { transform: none; } .plan.featured:hover { transform: translateY(-4px); } }
-.plan-tag {
-  position: absolute; top: -12px; left: 50%;
-  transform: translateX(-50%);
-  padding: 4px 14px;
-  background: var(--accent);
-  color: var(--accent-ink);
-  border-radius: 999px;
-  font-size: 11px; font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-.plan h3 {
-  font-size: 15px; font-weight: 600;
-  color: var(--text-dim);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  margin-bottom: 12px;
-}
-.plan-price {
-  display: flex; align-items: baseline; gap: 6px;
-  margin-bottom: 8px;
-}
-.plan-price .v {
-  font-size: 48px; font-weight: 800;
-  letter-spacing: -0.03em;
-  color: var(--text);
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-}
-.plan-price .currency { font-size: 16px; font-weight: 600; color: var(--text-dim); }
-.plan-price .per { font-size: 14px; color: var(--text-muted); font-weight: 500; }
-.plan-extra {
-  font-size: 13px;
-  color: var(--accent);
-  margin-bottom: 16px;
-  font-weight: 500;
-}
-.plan-desc {
-  color: var(--text-dim);
-  font-size: 14px;
-  margin-bottom: 24px;
-  line-height: 1.5;
-}
-.plan-features {
-  list-style: none;
-  display: flex; flex-direction: column;
-  gap: 10px;
-  margin-bottom: 32px;
-  flex: 1;
-}
-.plan-features li {
-  display: flex; align-items: flex-start; gap: 10px;
-  font-size: 14px;
-  color: var(--text);
-  line-height: 1.45;
-}
-.plan-features i {
-  color: var(--accent);
-  font-size: 13px;
-  margin-top: 4px;
-  flex-shrink: 0;
-}
-.plan-features li.muted { color: var(--text-muted); }
-.plan-features li.muted i { color: var(--text-muted); }
-.plan-btn {
-  width: 100%;
-  padding: 13px;
-  border-radius: 10px;
-  font-size: 14px; font-weight: 600;
-  border: 1px solid var(--border-strong);
-  background: transparent;
-  color: var(--text);
-  transition: all 0.2s var(--ease);
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-}
-.plan-btn:hover {
-  background: var(--bg-elev);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-.plan.featured .plan-btn {
-  background: var(--accent);
-  color: var(--accent-ink);
-  border-color: var(--accent);
-}
-.plan.featured .plan-btn:hover {
-  background: var(--accent-deep);
-  box-shadow: var(--shadow-accent);
-}
-.plan-footnote { font-size: 11px; color: var(--text-muted); margin-top: 12px; text-align: center; }
+      .pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        margin-top: 40px;
+      }
+      @media (max-width: 900px) {
+        .pricing-grid {
+          grid-template-columns: 1fr;
+          max-width: 440px;
+          margin: 40px auto 0;
+        }
+      }
+      .plan {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 36px 28px;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.25s var(--ease);
+        position: relative;
+      }
+      .plan:hover {
+        transform: translateY(-2px);
+        border-color: var(--border-strong);
+      }
+      .plan.featured {
+        border-color: rgba(170, 238, 196, 0.5);
+        background: linear-gradient(180deg, rgba(170, 238, 196, 0.04) 0%, var(--bg-card) 100%);
+        box-shadow:
+          0 0 0 1px rgba(170, 238, 196, 0.2),
+          var(--shadow-md);
+        transform: scale(1.03);
+      }
+      .plan.featured:hover {
+        transform: translateY(-4px) scale(1.03);
+      }
+      @media (max-width: 900px) {
+        .plan.featured {
+          transform: none;
+        }
+        .plan.featured:hover {
+          transform: translateY(-4px);
+        }
+      }
+      .plan-tag {
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 4px 14px;
+        background: var(--accent);
+        color: var(--accent-ink);
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .plan h3 {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text-dim);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+      }
+      .plan-price {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        margin-bottom: 8px;
+      }
+      .plan-price .v {
+        font-size: 48px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: var(--text);
+        font-variant-numeric: tabular-nums;
+        line-height: 1;
+      }
+      .plan-price .currency {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-dim);
+      }
+      .plan-price .per {
+        font-size: 14px;
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+      .plan-extra {
+        font-size: 13px;
+        color: var(--accent);
+        margin-bottom: 16px;
+        font-weight: 500;
+      }
+      .plan-desc {
+        color: var(--text-dim);
+        font-size: 14px;
+        margin-bottom: 24px;
+        line-height: 1.5;
+      }
+      .plan-features {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 32px;
+        flex: 1;
+      }
+      .plan-features li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 14px;
+        color: var(--text);
+        line-height: 1.45;
+      }
+      .plan-features i {
+        color: var(--accent);
+        font-size: 13px;
+        margin-top: 4px;
+        flex-shrink: 0;
+      }
+      .plan-features li.muted {
+        color: var(--text-muted);
+      }
+      .plan-features li.muted i {
+        color: var(--text-muted);
+      }
+      .plan-btn {
+        width: 100%;
+        padding: 13px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        border: 1px solid var(--border-strong);
+        background: transparent;
+        color: var(--text);
+        transition: all 0.2s var(--ease);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+      .plan-btn:hover {
+        background: var(--bg-elev);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .plan.featured .plan-btn {
+        background: var(--accent);
+        color: var(--accent-ink);
+        border-color: var(--accent);
+      }
+      .plan.featured .plan-btn:hover {
+        background: var(--accent-deep);
+        box-shadow: var(--shadow-accent);
+      }
+      .plan-footnote {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 12px;
+        text-align: center;
+      }
 
-/* Elite-specific */
-.plan-price-elite {
-  display: flex; align-items: baseline; gap: 14px;
-  margin-bottom: 12px;
-}
-.plan-price-elite .v-wrap { display: flex; align-items: baseline; gap: 4px; }
-.plan-price-elite .v { font-size: 48px; font-weight: 800; letter-spacing: -0.03em; color: var(--text); font-variant-numeric: tabular-nums; line-height: 1; }
-.plan-price-elite .currency { font-size: 16px; color: var(--text-dim); font-weight: 600; }
-.plan-price-elite .unit { font-size: 11px; color: var(--text-muted); line-height: 1.3; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; }
-.plan-price-elite .unit .seat { color: var(--accent); font-weight: 600; text-transform: none; letter-spacing: 0; font-size: 12px; }
-.plan-section-label {
-  font-size: 10px; font-weight: 700;
-  color: var(--accent);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin: 8px 0 14px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-}
-.plan-features-rich li {
-  display: grid;
-  grid-template-columns: 20px 1fr;
-  gap: 12px;
-  align-items: start;
-  padding: 4px 0;
-}
-.plan-features-rich li i { color: var(--accent); font-size: 14px; margin-top: 3px; }
-.plan-features-rich li strong { display: block; font-weight: 600; font-size: 14px; color: var(--text); line-height: 1.3; }
-.plan-features-rich li span { display: block; font-size: 12px; color: var(--text-dim); margin-top: 3px; line-height: 1.4; }
+      /* Elite-specific */
+      .plan-price-elite {
+        display: flex;
+        align-items: baseline;
+        gap: 14px;
+        margin-bottom: 12px;
+      }
+      .plan-price-elite .v-wrap {
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+      }
+      .plan-price-elite .v {
+        font-size: 48px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: var(--text);
+        font-variant-numeric: tabular-nums;
+        line-height: 1;
+      }
+      .plan-price-elite .currency {
+        font-size: 16px;
+        color: var(--text-dim);
+        font-weight: 600;
+      }
+      .plan-price-elite .unit {
+        font-size: 11px;
+        color: var(--text-muted);
+        line-height: 1.3;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+      .plan-price-elite .unit .seat {
+        color: var(--accent);
+        font-weight: 600;
+        text-transform: none;
+        letter-spacing: 0;
+        font-size: 12px;
+      }
+      .plan-section-label {
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--accent);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin: 8px 0 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border);
+      }
+      .plan-features-rich li {
+        display: grid;
+        grid-template-columns: 20px 1fr;
+        gap: 12px;
+        align-items: start;
+        padding: 4px 0;
+      }
+      .plan-features-rich li i {
+        color: var(--accent);
+        font-size: 14px;
+        margin-top: 3px;
+      }
+      .plan-features-rich li strong {
+        display: block;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--text);
+        line-height: 1.3;
+      }
+      .plan-features-rich li span {
+        display: block;
+        font-size: 12px;
+        color: var(--text-dim);
+        margin-top: 3px;
+        line-height: 1.4;
+      }
 
-/* ==================================================================
+      /* ==================================================================
    FAQ
    ================================================================== */
-.faq-list {
-  max-width: 720px; margin: 0 auto;
-  display: flex; flex-direction: column; gap: 8px;
-}
-.faq-item {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
-  transition: border-color 0.2s;
-}
-.faq-item[open] { border-color: rgba(170,238,196,0.22); }
-.faq-item summary {
-  padding: 20px 24px;
-  font-size: 15px; font-weight: 500;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 16px;
-  list-style: none;
-  transition: color 0.15s;
-}
-.faq-item summary::-webkit-details-marker { display: none; }
-.faq-item summary::after {
-  content: '+';
-  font-size: 22px;
-  color: var(--accent);
-  font-weight: 300;
-  transition: transform 0.2s;
-}
-.faq-item[open] summary::after { content: '−'; }
-.faq-item summary:hover { color: var(--accent); }
-.faq-item p {
-  padding: 0 24px 22px;
-  color: var(--text-dim);
-  font-size: 14px;
-  line-height: 1.6;
-}
+      .faq-list {
+        max-width: 720px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .faq-item {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: border-color 0.2s;
+      }
+      .faq-item[open] {
+        border-color: rgba(170, 238, 196, 0.22);
+      }
+      .faq-item summary {
+        padding: 20px 24px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        list-style: none;
+        transition: color 0.15s;
+      }
+      .faq-item summary::-webkit-details-marker {
+        display: none;
+      }
+      .faq-item summary::after {
+        content: '+';
+        font-size: 22px;
+        color: var(--accent);
+        font-weight: 300;
+        transition: transform 0.2s;
+      }
+      .faq-item[open] summary::after {
+        content: '−';
+      }
+      .faq-item summary:hover {
+        color: var(--accent);
+      }
+      .faq-item p {
+        padding: 0 24px 22px;
+        color: var(--text-dim);
+        font-size: 14px;
+        line-height: 1.6;
+      }
 
-/* ==================================================================
+      /* ==================================================================
    FOOTER
    ================================================================== */
-.footer {
-  padding: 48px 0 32px;
-  background: var(--bg-surface);
-  border-top: 1px solid var(--border);
-}
-.footer-grid {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr 1fr;
-  gap: 40px;
-  margin-bottom: 40px;
-}
-@media (max-width: 768px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 28px; } }
-.footer-brand .logo-inline {
-  display: flex; align-items: center; justify-content: flex-start;
-  width: 180px;
-  height: 52px;
-  overflow: hidden;
-  margin-bottom: 8px;
-  margin-left: -16px;
-}
-.footer-brand .logo-inline img {
-  width: auto;
-  height: 100%;
-  max-width: none;
-  object-fit: contain;
-  display: block;
-  transform: scale(1.85);
-  transform-origin: center;
-}
-.footer-brand p { color: var(--text-muted); font-size: 13px; line-height: 1.5; max-width: 280px; }
-.footer-col h4 {
-  font-size: 11px; font-weight: 700;
-  color: var(--text-muted);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin-bottom: 14px;
-}
-.footer-col a {
-  display: block;
-  color: var(--text-dim);
-  font-size: 14px;
-  padding: 4px 0;
-  transition: color 0.15s;
-}
-.footer-col a:hover { color: var(--accent); }
-.footer-bottom {
-  padding-top: 24px;
-  border-top: 1px solid var(--border);
-  display: flex; justify-content: space-between; align-items: center;
-  flex-wrap: wrap; gap: 12px;
-  font-size: 12px;
-  color: var(--text-muted);
-}
-.footer-bottom a { color: var(--text-muted); }
-.footer-bottom a:hover { color: var(--text-dim); }
+      .footer {
+        padding: 48px 0 32px;
+        background: var(--bg-surface);
+        border-top: 1px solid var(--border);
+      }
+      .footer-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr 1fr 1fr;
+        gap: 40px;
+        margin-bottom: 40px;
+      }
+      @media (max-width: 768px) {
+        .footer-grid {
+          grid-template-columns: 1fr 1fr;
+          gap: 28px;
+        }
+      }
+      .footer-brand .logo-inline {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        width: 180px;
+        height: 52px;
+        overflow: hidden;
+        margin-bottom: 8px;
+        margin-left: -16px;
+      }
+      .footer-brand .logo-inline img {
+        width: auto;
+        height: 100%;
+        max-width: none;
+        object-fit: contain;
+        display: block;
+        transform: scale(1.85);
+        transform-origin: center;
+      }
+      .footer-brand p {
+        color: var(--text-muted);
+        font-size: 13px;
+        line-height: 1.5;
+        max-width: 280px;
+      }
+      .footer-col h4 {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text-muted);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 14px;
+      }
+      .footer-col a {
+        display: block;
+        color: var(--text-dim);
+        font-size: 14px;
+        padding: 4px 0;
+        transition: color 0.15s;
+      }
+      .footer-col a:hover {
+        color: var(--accent);
+      }
+      .footer-bottom {
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+      .footer-bottom a {
+        color: var(--text-muted);
+      }
+      .footer-bottom a:hover {
+        color: var(--text-dim);
+      }
 
-/* ==================================================================
+      /* ==================================================================
    MODALS (checkout + demo)
    ================================================================== */
-.modal-overlay {
-  position: fixed; inset: 0; z-index: 500;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  display: none;
-  align-items: center; justify-content: center;
-  padding: 24px;
-}
-.modal-overlay.open { display: flex; animation: fadeIn 0.2s var(--ease); }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.modal {
-  background: var(--bg-card);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-lg);
-  padding: 32px;
-  max-width: 440px;
-  width: 100%;
-  box-shadow: var(--shadow-lg);
-  animation: modalSlide 0.3s var(--ease);
-}
-@keyframes modalSlide { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-.modal h3 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
-.modal-sub { color: var(--text-dim); font-size: 14px; margin-bottom: 24px; }
-.modal-field {
-  display: flex; flex-direction: column; gap: 6px;
-  margin-bottom: 14px;
-}
-.modal-field label { font-size: 12px; font-weight: 600; color: var(--text-dim); letter-spacing: 0.04em; text-transform: uppercase; }
-.modal-field input, .modal-field select, .modal-field textarea {
-  width: 100%; padding: 12px 14px;
-  background: var(--bg);
-  border: 1px solid var(--border-strong);
-  border-radius: 10px;
-  color: var(--text);
-  font-family: inherit;
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.15s;
-}
-.modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { border-color: var(--accent); }
-.modal-footer { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
-.modal-footer .btn { width: 100%; justify-content: center; }
-.modal-close {
-  position: absolute; top: 12px; right: 12px;
-  width: 32px; height: 32px;
-  background: transparent; border: none;
-  color: var(--text-dim);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.15s;
-}
-.modal-close:hover { background: var(--bg-elev); color: var(--text); }
-.modal { position: relative; }
-.modal-note { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 10px; }
-.modal-error { color: var(--coral); font-size: 13px; margin-top: 8px; text-align: center; font-weight: 500; }
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 500;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .modal-overlay.open {
+        display: flex;
+        animation: fadeIn 0.2s var(--ease);
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      .modal {
+        background: var(--bg-card);
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius-lg);
+        padding: 32px;
+        max-width: 440px;
+        width: 100%;
+        box-shadow: var(--shadow-lg);
+        animation: modalSlide 0.3s var(--ease);
+      }
+      @keyframes modalSlide {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .modal h3 {
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 8px;
+      }
+      .modal-sub {
+        color: var(--text-dim);
+        font-size: 14px;
+        margin-bottom: 24px;
+      }
+      .modal-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 14px;
+      }
+      .modal-field label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-dim);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .modal-field input,
+      .modal-field select,
+      .modal-field textarea {
+        width: 100%;
+        padding: 12px 14px;
+        background: var(--bg);
+        border: 1px solid var(--border-strong);
+        border-radius: 10px;
+        color: var(--text);
+        font-family: inherit;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      .modal-field input:focus,
+      .modal-field select:focus,
+      .modal-field textarea:focus {
+        border-color: var(--accent);
+      }
+      .modal-footer {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 8px;
+      }
+      .modal-footer .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      .modal-close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 32px;
+        height: 32px;
+        background: transparent;
+        border: none;
+        color: var(--text-dim);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s;
+      }
+      .modal-close:hover {
+        background: var(--bg-elev);
+        color: var(--text);
+      }
+      .modal {
+        position: relative;
+      }
+      .modal-note {
+        font-size: 11px;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 10px;
+      }
+      .modal-error {
+        color: var(--coral);
+        font-size: 13px;
+        margin-top: 8px;
+        text-align: center;
+        font-weight: 500;
+      }
 
-/* ==================================================================
+      /* ==================================================================
    REVEAL ANIM
    ================================================================== */
-.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s var(--ease), transform 0.6s var(--ease); }
-.reveal.in { opacity: 1; transform: translateY(0); }
+      .reveal {
+        opacity: 0;
+        transform: translateY(24px);
+        transition:
+          opacity 0.6s var(--ease),
+          transform 0.6s var(--ease);
+      }
+      .reveal.in {
+        opacity: 1;
+        transform: translateY(0);
+      }
 
-/* spinner */
-.spin {
-  display: inline-block;
-  width: 14px; height: 14px;
-  border: 2px solid rgba(13,13,13,0.3);
-  border-top-color: var(--accent-ink);
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-</style>
-<script>window.PUBLIC_POSTHOG_KEY="";window.PUBLIC_POSTHOG_HOST="https://us.i.posthog.com";</script>
-<script type="module" src="/js/analytics.js"></script>
-</head>
-<body>
-
-<!-- ==================================================================
+      /* spinner */
+      .spin {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(13, 13, 13, 0.3);
+        border-top-color: var(--accent-ink);
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+    <script>
+      window.PUBLIC_POSTHOG_KEY = '';
+      window.PUBLIC_POSTHOG_HOST = 'https://us.i.posthog.com';
+    </script>
+    <script type="module" src="/js/analytics.js"></script>
+  </head>
+  <body>
+    <!-- ==================================================================
      NAV
      ================================================================== -->
-<nav class="nav" id="nav">
-  <a href="#" class="nav-logo" aria-label="minhavez">
-    <img src="/assets/logo-minhavez-transparent.png" alt="minhavez">
-  </a>
-  <div class="nav-links">
-    <a href="#produto">Produto</a>
-    <a href="#como-funciona">Como funciona</a>
-    <a href="#precos">Preços</a>
-    <a href="/" style="margin-right:8px">Entrar</a>
-    <a href="#precos" class="nav-cta">Começar agora</a>
-  </div>
-</nav>
+    <nav class="nav" id="nav">
+      <a href="#" class="nav-logo" aria-label="minhavez">
+        <img src="/assets/logo-minhavez-transparent.png" alt="minhavez" />
+      </a>
+      <div class="nav-links">
+        <a href="#produto">Produto</a>
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#precos">Preços</a>
+        <a href="/" style="margin-right: 8px">Entrar</a>
+        <a href="#precos" class="nav-cta">Começar agora</a>
+      </div>
+    </nav>
 
-<!-- ==================================================================
+    <!-- ==================================================================
      HERO
      ================================================================== -->
-<section class="hero">
-  <video class="hero-video" id="heroVideo" muted loop playsinline preload="none" poster="" aria-hidden="true">
-    <!-- sources injetados via JS quando hero entra no viewport (lazy 1.7MB) -->
-  </video>
-  <div class="hero-video-overlay"></div>
-  <div class="hero-grid-dots"></div>
-  <div class="hero-glow"></div>
-  <div class="container hero-inner">
-    <div class="hero-badge reveal">
-      <span class="badge-mono"><span class="dot"></span>Em produção real na Texas Center desde Jan/2026</span>
-    </div>
-    <h1 id="heroH1" aria-label="Cada vendedor no lugar certo. Cada venda no momento certo.">
-      <span class="hero-line" data-text="Cada vendedor no lugar certo."></span>
-      <span class="hero-line accent" data-text="Cada venda no momento certo."></span>
-    </h1>
-    <p class="hero-sub reveal">
-      Sistema de gestão de fila + engajamento gamificado que transforma <strong>loja física em operação de dados</strong>.
-      Vendedores veem seu progresso em tempo real. Gestor decide com base em número, não em achismo.
-    </p>
-    <div class="hero-ctas reveal">
-      <a href="#precos" class="btn btn-primary">
-        Começar agora <i class="fa-solid fa-arrow-right" style="font-size:13px"></i>
-      </a>
-      <a href="#produto" class="btn btn-ghost">
-        <i class="fa-solid fa-play" style="font-size:12px"></i> Ver em 2 minutos
-      </a>
-    </div>
-    <div class="hero-footnote reveal">
-      <span><i class="fa-solid fa-check"></i>Sem contrato de fidelidade</span>
-      <span><i class="fa-solid fa-check"></i>Cancele quando quiser</span>
-      <span><i class="fa-solid fa-check"></i>Funciona no tablet que você já tem</span>
-    </div>
-  </div>
-</section>
+    <section class="hero">
+      <video class="hero-video" id="heroVideo" muted loop playsinline preload="none" poster="" aria-hidden="true">
+        <!-- sources injetados via JS quando hero entra no viewport (lazy 1.7MB) -->
+      </video>
+      <div class="hero-video-overlay"></div>
+      <div class="hero-grid-dots"></div>
+      <div class="hero-glow"></div>
+      <div class="container hero-inner">
+        <div class="hero-badge reveal">
+          <span class="badge-mono"><span class="dot"></span>Em produção real na Texas Center desde Jan/2026</span>
+        </div>
+        <h1 id="heroH1" aria-label="Cada vendedor no lugar certo. Cada venda no momento certo.">
+          <span class="hero-line" data-text="Cada vendedor no lugar certo."></span>
+          <span class="hero-line accent" data-text="Cada venda no momento certo."></span>
+        </h1>
+        <p class="hero-sub reveal">
+          Sistema de gestão de fila + engajamento gamificado que transforma
+          <strong>loja física em operação de dados</strong>. Vendedores veem seu progresso em tempo real. Gestor decide
+          com base em número, não em achismo.
+        </p>
+        <div class="hero-ctas reveal">
+          <a href="#precos" class="btn btn-primary">
+            Começar agora <i class="fa-solid fa-arrow-right" style="font-size: 13px"></i>
+          </a>
+          <a href="#produto" class="btn btn-ghost">
+            <i class="fa-solid fa-play" style="font-size: 12px"></i> Ver em 2 minutos
+          </a>
+        </div>
+        <div class="hero-footnote reveal">
+          <span><i class="fa-solid fa-check"></i>Sem contrato de fidelidade</span>
+          <span><i class="fa-solid fa-check"></i>Cancele quando quiser</span>
+          <span><i class="fa-solid fa-check"></i>Funciona no tablet que você já tem</span>
+        </div>
+      </div>
+    </section>
 
-<!-- ==================================================================
+    <!-- ==================================================================
      PRODUCT SHOWCASE (horizontal slider)
      ================================================================== -->
-<section class="section showcase" id="produto">
-  <div class="container">
-    <div class="section-head center reveal">
-      <span class="section-label">Produto</span>
-      <h2 class="section-title">Três peças que conversam.<br>Um time que performa.</h2>
-      <p class="section-sub">Arraste pra explorar. Cada módulo resolve uma dor específica do varejo físico — e todos se conectam em tempo real.</p>
-    </div>
-  </div>
-  <div class="container" style="max-width:1280px">
-    <div class="showcase-slider reveal" id="showcaseSlider">
-      <!-- Card 1: Dashboard + IA -->
-      <article class="showcase-card">
-        <span class="showcase-tag"><i class="fa-solid fa-bolt" style="font-size:10px"></i>Tempo real</span>
-        <h3>Dashboard com IA Assist</h3>
-        <p>Veja atendimentos, vendas e conversão rolando em tempo real. A IA resume o turno em 1 parágrafo, sugere missões e prevê horários de pico.</p>
-        <ul class="showcase-bullets">
-          <li><i class="fa-solid fa-check"></i>Comparativo vs ontem / semana / mês (detecta queda antes que doa)</li>
-          <li><i class="fa-solid fa-check"></i>Resumo automático do turno gerado por IA</li>
-          <li><i class="fa-solid fa-check"></i>Previsão de fluxo com sugestão de escala</li>
-        </ul>
-        <div class="showcase-visual">
-          <div class="mock">
-            <div class="mock-topbar">
-              <span class="mock-dot mint"></span>
-              <span class="mock-dot"></span>
-              <span class="mock-dot"></span>
-              <span style="margin-left:8px">minhavez.app/dashboard</span>
-              <span style="margin-left:auto; color:var(--accent)">● ao vivo</span>
-            </div>
-            <div class="mock-dash">
-              <div class="mock-sidebar">
-                <div class="icn active"><i class="fa-solid fa-chart-line"></i></div>
-                <div class="icn"><i class="fa-solid fa-users"></i></div>
-                <div class="icn"><i class="fa-solid fa-bag-shopping"></i></div>
-                <div class="icn"><i class="fa-solid fa-gear"></i></div>
-              </div>
-              <div class="mock-main">
-                <div class="mock-kpis">
-                  <div class="mock-kpi">
-                    <div class="mock-kpi-label">Vendas hoje</div>
-                    <div class="mock-kpi-val">R$ 18.420</div>
-                    <div class="mock-kpi-delta">▲ 12,4% vs ontem</div>
-                  </div>
-                  <div class="mock-kpi">
-                    <div class="mock-kpi-label">Ticket médio</div>
-                    <div class="mock-kpi-val">R$ 287</div>
-                    <div class="mock-kpi-delta">▲ 4,8%</div>
-                  </div>
-                  <div class="mock-kpi">
-                    <div class="mock-kpi-label">Conversão</div>
-                    <div class="mock-kpi-val">42%</div>
-                    <div class="mock-kpi-delta down">▼ 2,1%</div>
-                  </div>
-                </div>
-                <div class="mock-charts">
-                  <div class="mock-chart">
-                    <div class="mock-chart-title">Vendas · últimas 12h</div>
-                    <svg viewBox="0 0 200 60" preserveAspectRatio="none">
-                      <defs>
-                        <linearGradient id="gsp" x1="0" x2="0" y1="0" y2="1">
-                          <stop offset="0" stop-color="#aaeec4" stop-opacity="0.4"/>
-                          <stop offset="1" stop-color="#aaeec4" stop-opacity="0"/>
-                        </linearGradient>
-                      </defs>
-                      <path d="M0,48 L15,44 L30,46 L45,38 L60,40 L75,30 L90,34 L105,22 L120,26 L135,18 L150,22 L165,14 L180,10 L200,8 L200,60 L0,60 Z" fill="url(#gsp)"/>
-                      <path d="M0,48 L15,44 L30,46 L45,38 L60,40 L75,30 L90,34 L105,22 L120,26 L135,18 L150,22 L165,14 L180,10 L200,8" fill="none" stroke="#aaeec4" stroke-width="1.5"/>
-                    </svg>
-                  </div>
-                  <div class="mock-chart">
-                    <div class="mock-chart-title">Por setor</div>
-                    <svg viewBox="0 0 60 60">
-                      <circle cx="30" cy="30" r="22" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>
-                      <circle cx="30" cy="30" r="22" fill="none" stroke="#aaeec4" stroke-width="8" stroke-dasharray="70 138" stroke-dashoffset="0" transform="rotate(-90 30 30)"/>
-                      <circle cx="30" cy="30" r="22" fill="none" stroke="#8ea5c9" stroke-width="8" stroke-dasharray="40 138" stroke-dashoffset="-70" transform="rotate(-90 30 30)"/>
-                      <circle cx="30" cy="30" r="22" fill="none" stroke="#d4a373" stroke-width="8" stroke-dasharray="28 138" stroke-dashoffset="-110" transform="rotate(-90 30 30)"/>
-                      <text x="30" y="33" text-anchor="middle" fill="#e6e6e6" font-size="10" font-weight="700">R$18k</text>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="mock-ia">
-              <span class="spark"><i class="fa-solid fa-sparkles"></i></span>
-              <span><strong style="color:var(--accent)">IA:</strong> pico esperado às 19h. Sugiro reforçar Masculino com +1 vendedor.</span>
-            </div>
-          </div>
+    <section class="section showcase" id="produto">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="section-label">Produto</span>
+          <h2 class="section-title">Três peças que conversam.<br />Um time que performa.</h2>
+          <p class="section-sub">
+            Arraste pra explorar. Cada módulo resolve uma dor específica do varejo físico — e todos se conectam em tempo
+            real.
+          </p>
         </div>
-      </article>
-
-      <!-- Card 2: Vendor gamificado -->
-      <article class="showcase-card">
-        <span class="showcase-tag"><i class="fa-solid fa-trophy" style="font-size:10px"></i>Exclusivo Elite</span>
-        <h3>App do vendedor gamificado</h3>
-        <p>Cada venda vira XP. XP vira tier (Pedra, Bronze, Ouro, Diamante, Mítico). Tier desbloqueia cosméticos do avatar pixel-art. Engajamento sem manager.</p>
-        <ul class="showcase-bullets">
-          <li><i class="fa-solid fa-check"></i>13 tiers RPG com progressão visível (XP + missões diárias)</li>
-          <li><i class="fa-solid fa-check"></i>Avatar pixel-art customizável (120+ cosméticos)</li>
-          <li><i class="fa-solid fa-check"></i>Push quando é a vez — notifica no celular</li>
-        </ul>
-        <div class="showcase-visual">
-          <div class="mock">
-            <div class="mock-phone">
-              <div class="mock-phone-frame">
-                <div class="mock-avatar"></div>
-                <div class="mock-tier">Ouro <span class="lvl">· nível 7</span></div>
-                <div class="mock-xp"><span></span></div>
-                <div class="mock-xp-meta">
-                  <span>2.480 XP</span>
-                  <span>3.650</span>
+      </div>
+      <div class="container" style="max-width: 1280px">
+        <div class="showcase-slider reveal" id="showcaseSlider">
+          <!-- Card 1: Dashboard + IA -->
+          <article class="showcase-card">
+            <span class="showcase-tag"><i class="fa-solid fa-bolt" style="font-size: 10px"></i>Tempo real</span>
+            <h3>Dashboard com IA Assist</h3>
+            <p>
+              Veja atendimentos, vendas e conversão rolando em tempo real. A IA resume o turno em 1 parágrafo, sugere
+              missões e prevê horários de pico.
+            </p>
+            <ul class="showcase-bullets">
+              <li>
+                <i class="fa-solid fa-check"></i>Comparativo vs ontem / semana / mês (detecta queda antes que doa)
+              </li>
+              <li><i class="fa-solid fa-check"></i>Resumo automático do turno gerado por IA</li>
+              <li><i class="fa-solid fa-check"></i>Previsão de fluxo com sugestão de escala</li>
+            </ul>
+            <div class="showcase-visual">
+              <div class="mock">
+                <div class="mock-topbar">
+                  <span class="mock-dot mint"></span>
+                  <span class="mock-dot"></span>
+                  <span class="mock-dot"></span>
+                  <span style="margin-left: 8px">minhavez.app/dashboard</span>
+                  <span style="margin-left: auto; color: var(--accent)">● ao vivo</span>
                 </div>
-                <ul class="mock-missions">
-                  <li><span class="chk done"></span>5 atendimentos · 100 XP</li>
-                  <li><span class="chk done"></span>Ticket &gt; R$ 300 · 80 XP</li>
-                  <li><span class="chk"></span>3 trocas resolvidas · 60 XP</li>
-                </ul>
-                <div class="mock-push">
-                  <span class="dot"></span>
-                  <span><strong style="color:var(--accent)">É a sua vez!</strong></span>
+                <div class="mock-dash">
+                  <div class="mock-sidebar">
+                    <div class="icn active"><i class="fa-solid fa-chart-line"></i></div>
+                    <div class="icn"><i class="fa-solid fa-users"></i></div>
+                    <div class="icn"><i class="fa-solid fa-bag-shopping"></i></div>
+                    <div class="icn"><i class="fa-solid fa-gear"></i></div>
+                  </div>
+                  <div class="mock-main">
+                    <div class="mock-kpis">
+                      <div class="mock-kpi">
+                        <div class="mock-kpi-label">Vendas hoje</div>
+                        <div class="mock-kpi-val">R$ 18.420</div>
+                        <div class="mock-kpi-delta">▲ 12,4% vs ontem</div>
+                      </div>
+                      <div class="mock-kpi">
+                        <div class="mock-kpi-label">Ticket médio</div>
+                        <div class="mock-kpi-val">R$ 287</div>
+                        <div class="mock-kpi-delta">▲ 4,8%</div>
+                      </div>
+                      <div class="mock-kpi">
+                        <div class="mock-kpi-label">Conversão</div>
+                        <div class="mock-kpi-val">42%</div>
+                        <div class="mock-kpi-delta down">▼ 2,1%</div>
+                      </div>
+                    </div>
+                    <div class="mock-charts">
+                      <div class="mock-chart">
+                        <div class="mock-chart-title">Vendas · últimas 12h</div>
+                        <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+                          <defs>
+                            <linearGradient id="gsp" x1="0" x2="0" y1="0" y2="1">
+                              <stop offset="0" stop-color="#aaeec4" stop-opacity="0.4" />
+                              <stop offset="1" stop-color="#aaeec4" stop-opacity="0" />
+                            </linearGradient>
+                          </defs>
+                          <path
+                            d="M0,48 L15,44 L30,46 L45,38 L60,40 L75,30 L90,34 L105,22 L120,26 L135,18 L150,22 L165,14 L180,10 L200,8 L200,60 L0,60 Z"
+                            fill="url(#gsp)"
+                          />
+                          <path
+                            d="M0,48 L15,44 L30,46 L45,38 L60,40 L75,30 L90,34 L105,22 L120,26 L135,18 L150,22 L165,14 L180,10 L200,8"
+                            fill="none"
+                            stroke="#aaeec4"
+                            stroke-width="1.5"
+                          />
+                        </svg>
+                      </div>
+                      <div class="mock-chart">
+                        <div class="mock-chart-title">Por setor</div>
+                        <svg viewBox="0 0 60 60">
+                          <circle cx="30" cy="30" r="22" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8" />
+                          <circle
+                            cx="30"
+                            cy="30"
+                            r="22"
+                            fill="none"
+                            stroke="#aaeec4"
+                            stroke-width="8"
+                            stroke-dasharray="70 138"
+                            stroke-dashoffset="0"
+                            transform="rotate(-90 30 30)"
+                          />
+                          <circle
+                            cx="30"
+                            cy="30"
+                            r="22"
+                            fill="none"
+                            stroke="#8ea5c9"
+                            stroke-width="8"
+                            stroke-dasharray="40 138"
+                            stroke-dashoffset="-70"
+                            transform="rotate(-90 30 30)"
+                          />
+                          <circle
+                            cx="30"
+                            cy="30"
+                            r="22"
+                            fill="none"
+                            stroke="#d4a373"
+                            stroke-width="8"
+                            stroke-dasharray="28 138"
+                            stroke-dashoffset="-110"
+                            transform="rotate(-90 30 30)"
+                          />
+                          <text x="30" y="33" text-anchor="middle" fill="#e6e6e6" font-size="10" font-weight="700">
+                            R$18k
+                          </text>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mock-ia">
+                  <span class="spark"><i class="fa-solid fa-sparkles"></i></span>
+                  <span
+                    ><strong style="color: var(--accent)">IA:</strong> pico esperado às 19h. Sugiro reforçar Masculino
+                    com +1 vendedor.</span
+                  >
                 </div>
               </div>
             </div>
-          </div>
+          </article>
+
+          <!-- Card 2: Vendor gamificado -->
+          <article class="showcase-card">
+            <span class="showcase-tag"><i class="fa-solid fa-trophy" style="font-size: 10px"></i>Exclusivo Elite</span>
+            <h3>App do vendedor gamificado</h3>
+            <p>
+              Cada venda vira XP. XP vira tier (Pedra, Bronze, Ouro, Diamante, Mítico). Tier desbloqueia cosméticos do
+              avatar pixel-art. Engajamento sem manager.
+            </p>
+            <ul class="showcase-bullets">
+              <li><i class="fa-solid fa-check"></i>13 tiers RPG com progressão visível (XP + missões diárias)</li>
+              <li><i class="fa-solid fa-check"></i>Avatar pixel-art customizável (120+ cosméticos)</li>
+              <li><i class="fa-solid fa-check"></i>Push quando é a vez — notifica no celular</li>
+            </ul>
+            <div class="showcase-visual">
+              <div class="mock">
+                <div class="mock-phone">
+                  <div class="mock-phone-frame">
+                    <div class="mock-avatar"></div>
+                    <div class="mock-tier">Ouro <span class="lvl">· nível 7</span></div>
+                    <div class="mock-xp"><span></span></div>
+                    <div class="mock-xp-meta">
+                      <span>2.480 XP</span>
+                      <span>3.650</span>
+                    </div>
+                    <ul class="mock-missions">
+                      <li><span class="chk done"></span>5 atendimentos · 100 XP</li>
+                      <li><span class="chk done"></span>Ticket &gt; R$ 300 · 80 XP</li>
+                      <li><span class="chk"></span>3 trocas resolvidas · 60 XP</li>
+                    </ul>
+                    <div class="mock-push">
+                      <span class="dot"></span>
+                      <span><strong style="color: var(--accent)">É a sua vez!</strong></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Card 3: Tablet fila -->
+          <article class="showcase-card">
+            <span class="showcase-tag"
+              ><i class="fa-solid fa-tablet-screen-button" style="font-size: 10px"></i>Operação</span
+            >
+            <h3>Tablet no balcão</h3>
+            <p>
+              Touch, drag &amp; swipe. Quem encosta no tablet entende em 30s. Funciona no Android que você já tem. Modo
+              offline se a internet cair.
+            </p>
+            <ul class="showcase-bullets">
+              <li><i class="fa-solid fa-check"></i>Fila com rodízio automático e setores</li>
+              <li><i class="fa-solid fa-check"></i>Timer de atendimento + controle de saídas</li>
+              <li><i class="fa-solid fa-check"></i>Gestão de trocas (simples e com diferença)</li>
+            </ul>
+            <div class="showcase-visual">
+              <div class="mock">
+                <div class="mock-topbar">
+                  <span class="mock-dot mint"></span>
+                  <span style="margin-left: 8px">Texas Center · Balcão 2</span>
+                  <span style="margin-left: auto"
+                    ><i class="fa-solid fa-wifi" style="color: var(--accent)"></i> online</span
+                  >
+                </div>
+                <div class="mock-tablet">
+                  <div class="mock-tablet-tabs">
+                    <div class="tab">Todos</div>
+                    <div class="tab active">Masculino</div>
+                    <div class="tab">Feminino</div>
+                    <div class="tab">Calçados</div>
+                    <div class="tab">Caixa</div>
+                  </div>
+                  <div class="mock-queue">
+                    <div class="mock-queue-row active">
+                      <div class="pos">1</div>
+                      <div class="avatar">JP</div>
+                      <div class="name">
+                        João P. <span style="color: var(--text-muted); font-weight: 400">· atendendo</span>
+                      </div>
+                      <div class="timer">04:12</div>
+                    </div>
+                    <div class="mock-queue-row">
+                      <div class="pos">2</div>
+                      <div class="avatar" style="background: linear-gradient(135deg, #d4a373, #b8875a)">MR</div>
+                      <div class="name">Marina R.</div>
+                      <div class="timer">próximo</div>
+                    </div>
+                    <div class="mock-queue-row">
+                      <div class="pos">3</div>
+                      <div class="avatar" style="background: linear-gradient(135deg, #b8a8d4, #9d8bc4)">LS</div>
+                      <div class="name">Lucas S.</div>
+                      <div class="timer">aguarda</div>
+                    </div>
+                    <div class="mock-queue-row">
+                      <div class="pos">4</div>
+                      <div class="avatar" style="background: linear-gradient(135deg, #e89b8a, #d47a68)">AC</div>
+                      <div class="name">Ana C.</div>
+                      <div class="timer">aguarda</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
         </div>
-      </article>
+        <p class="showcase-hint reveal">
+          Arraste lateralmente <i class="fa-solid fa-arrows-left-right"></i> pra explorar os módulos
+        </p>
+      </div>
+    </section>
 
-      <!-- Card 3: Tablet fila -->
-      <article class="showcase-card">
-        <span class="showcase-tag"><i class="fa-solid fa-tablet-screen-button" style="font-size:10px"></i>Operação</span>
-        <h3>Tablet no balcão</h3>
-        <p>Touch, drag &amp; swipe. Quem encosta no tablet entende em 30s. Funciona no Android que você já tem. Modo offline se a internet cair.</p>
-        <ul class="showcase-bullets">
-          <li><i class="fa-solid fa-check"></i>Fila com rodízio automático e setores</li>
-          <li><i class="fa-solid fa-check"></i>Timer de atendimento + controle de saídas</li>
-          <li><i class="fa-solid fa-check"></i>Gestão de trocas (simples e com diferença)</li>
-        </ul>
-        <div class="showcase-visual">
-          <div class="mock">
-            <div class="mock-topbar">
-              <span class="mock-dot mint"></span>
-              <span style="margin-left:8px">Texas Center · Balcão 2</span>
-              <span style="margin-left:auto"><i class="fa-solid fa-wifi" style="color:var(--accent)"></i> online</span>
-            </div>
-            <div class="mock-tablet">
-              <div class="mock-tablet-tabs">
-                <div class="tab">Todos</div>
-                <div class="tab active">Masculino</div>
-                <div class="tab">Feminino</div>
-                <div class="tab">Calçados</div>
-                <div class="tab">Caixa</div>
-              </div>
-              <div class="mock-queue">
-                <div class="mock-queue-row active">
-                  <div class="pos">1</div>
-                  <div class="avatar">JP</div>
-                  <div class="name">João P. <span style="color:var(--text-muted); font-weight:400">· atendendo</span></div>
-                  <div class="timer">04:12</div>
-                </div>
-                <div class="mock-queue-row">
-                  <div class="pos">2</div>
-                  <div class="avatar" style="background:linear-gradient(135deg,#d4a373,#b8875a)">MR</div>
-                  <div class="name">Marina R.</div>
-                  <div class="timer">próximo</div>
-                </div>
-                <div class="mock-queue-row">
-                  <div class="pos">3</div>
-                  <div class="avatar" style="background:linear-gradient(135deg,#b8a8d4,#9d8bc4)">LS</div>
-                  <div class="name">Lucas S.</div>
-                  <div class="timer">aguarda</div>
-                </div>
-                <div class="mock-queue-row">
-                  <div class="pos">4</div>
-                  <div class="avatar" style="background:linear-gradient(135deg,#e89b8a,#d47a68)">AC</div>
-                  <div class="name">Ana C.</div>
-                  <div class="timer">aguarda</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </article>
-    </div>
-    <p class="showcase-hint reveal">Arraste lateralmente <i class="fa-solid fa-arrows-left-right"></i> pra explorar os módulos</p>
-  </div>
-</section>
-
-<!-- ==================================================================
+    <!-- ==================================================================
      SOCIAL PROOF — Texas Center hoje (KPIs vivos via RPC)
      ================================================================== -->
-<section class="section section-proof" id="proof">
-  <div class="container">
-    <div class="section-head center reveal">
-      <span class="section-label">Em produção real</span>
-      <h2 class="section-title">Texas Center, últimos 30 dias</h2>
-      <p class="section-sub">Números agregados, atualizados a cada 5 minutos. Sem dado fake.</p>
-    </div>
-    <div class="proof-grid reveal" id="proofGrid">
-      <div class="proof-card">
-        <div class="proof-value" id="proofAtend">—</div>
-        <div class="proof-label">atendimentos finalizados</div>
-      </div>
-      <div class="proof-card">
-        <div class="proof-value" id="proofVend">—</div>
-        <div class="proof-label">vendedores ativos</div>
-      </div>
-      <div class="proof-card">
-        <div class="proof-value"><span id="proofTempo">—</span><span class="proof-unit">min</span></div>
-        <div class="proof-label">tempo médio de atendimento</div>
-      </div>
-      <div class="proof-card">
-        <div class="proof-value" id="proofLojas">—</div>
-        <div class="proof-label">loja(s) usando agora</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ==================================================================
-     HOW IT WORKS
-     ================================================================== -->
-<section class="section" id="como-funciona">
-  <div class="container">
-    <div class="section-head center reveal">
-      <span class="section-label">Como funciona</span>
-      <h2 class="section-title">5 minutos pra subir.<br>O resto acontece sozinho.</h2>
-    </div>
-    <div class="steps-grid">
-      <div class="step reveal">
-        <div class="step-num">01</div>
-        <div class="step-icon"><i class="fa-solid fa-user-plus"></i></div>
-        <h3>Conecte os vendedores</h3>
-        <p>Cada vendedor entra com PIN de 4 dígitos ou QR. Avatar e perfil começam vazios — vão preenchendo com o uso.</p>
-      </div>
-      <div class="step reveal">
-        <div class="step-num">02</div>
-        <div class="step-icon"><i class="fa-solid fa-hand-pointer"></i></div>
-        <h3>Opere o turno no tablet</h3>
-        <p>Ao chegar cliente, gestor arrasta o próximo vendedor pro atendimento. Timer, sells e pausas rolam automáticas.</p>
-      </div>
-      <div class="step reveal">
-        <div class="step-num">03</div>
-        <div class="step-icon"><i class="fa-solid fa-chart-line"></i></div>
-        <h3>Todo mundo vê resultado</h3>
-        <p>Gestor vê números no dashboard. Vendedor vê XP subir no celular. IA resume o dia em 1 parágrafo.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ==================================================================
-     SOCIAL PROOF
-     ================================================================== -->
-<section class="section proof">
-  <div class="container">
-    <div class="section-head reveal" style="margin-bottom:40px">
-      <span class="section-label">Em produção</span>
-      <h2 class="section-title">Texas Center.<br>3 meses de operação real.</h2>
-    </div>
-    <div class="proof-inner">
-      <div class="reveal">
-        <p class="proof-quote">A gente tinha achismo. Agora tem número. Vendedor que produz menos, aparece. Vendedor que produz muito, também. Tudo mudou quando cada um passou a ver o próprio resultado.</p>
-        <div class="proof-author">
-          <div class="proof-author-avatar">MC</div>
-          <div class="proof-author-info">
-            <strong>Matheus C.</strong>
-            <span>Gestor comercial · Texas Center · Goiânia</span>
+    <section class="section section-proof" id="proof">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="section-label">Em produção real</span>
+          <h2 class="section-title">Texas Center, últimos 30 dias</h2>
+          <p class="section-sub">Números agregados, atualizados a cada 5 minutos. Sem dado fake.</p>
+        </div>
+        <div class="proof-grid reveal" id="proofGrid">
+          <div class="proof-card">
+            <div class="proof-value" id="proofAtend">—</div>
+            <div class="proof-label">atendimentos finalizados</div>
+          </div>
+          <div class="proof-card">
+            <div class="proof-value" id="proofVend">—</div>
+            <div class="proof-label">vendedores ativos</div>
+          </div>
+          <div class="proof-card">
+            <div class="proof-value"><span id="proofTempo">—</span><span class="proof-unit">min</span></div>
+            <div class="proof-label">tempo médio de atendimento</div>
+          </div>
+          <div class="proof-card">
+            <div class="proof-value" id="proofLojas">—</div>
+            <div class="proof-label">loja(s) usando agora</div>
           </div>
         </div>
       </div>
-      <div class="proof-stats reveal">
-        <div class="proof-stat">
-          <div class="proof-stat-num">12k+</div>
-          <div class="proof-stat-label">Atendimentos registrados</div>
+    </section>
+
+    <!-- ==================================================================
+     HOW IT WORKS
+     ================================================================== -->
+    <section class="section" id="como-funciona">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="section-label">Como funciona</span>
+          <h2 class="section-title">5 minutos pra subir.<br />O resto acontece sozinho.</h2>
         </div>
-        <div class="proof-stat">
-          <div class="proof-stat-num">3</div>
-          <div class="proof-stat-label">Setores operando juntos</div>
-        </div>
-        <div class="proof-stat">
-          <div class="proof-stat-num">8</div>
-          <div class="proof-stat-label">Vendedores ativos</div>
-        </div>
-        <div class="proof-stat">
-          <div class="proof-stat-num">100%</div>
-          <div class="proof-stat-label">Disponibilidade (uptime)</div>
+        <div class="steps-grid">
+          <div class="step reveal">
+            <div class="step-num">01</div>
+            <div class="step-icon"><i class="fa-solid fa-user-plus"></i></div>
+            <h3>Conecte os vendedores</h3>
+            <p>
+              Cada vendedor entra com PIN de 4 dígitos ou QR. Avatar e perfil começam vazios — vão preenchendo com o
+              uso.
+            </p>
+          </div>
+          <div class="step reveal">
+            <div class="step-num">02</div>
+            <div class="step-icon"><i class="fa-solid fa-hand-pointer"></i></div>
+            <h3>Opere o turno no tablet</h3>
+            <p>
+              Ao chegar cliente, gestor arrasta o próximo vendedor pro atendimento. Timer, sells e pausas rolam
+              automáticas.
+            </p>
+          </div>
+          <div class="step reveal">
+            <div class="step-num">03</div>
+            <div class="step-icon"><i class="fa-solid fa-chart-line"></i></div>
+            <h3>Todo mundo vê resultado</h3>
+            <p>Gestor vê números no dashboard. Vendedor vê XP subir no celular. IA resume o dia em 1 parágrafo.</p>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- ==================================================================
+    <!-- ==================================================================
+     SOCIAL PROOF
+     ================================================================== -->
+    <section class="section proof">
+      <div class="container">
+        <div class="section-head reveal" style="margin-bottom: 40px">
+          <span class="section-label">Em produção</span>
+          <h2 class="section-title">Texas Center.<br />3 meses de operação real.</h2>
+        </div>
+        <div class="proof-inner">
+          <div class="reveal">
+            <p class="proof-quote">
+              A gente tinha achismo. Agora tem número. Vendedor que produz menos, aparece. Vendedor que produz muito,
+              também. Tudo mudou quando cada um passou a ver o próprio resultado.
+            </p>
+            <div class="proof-author">
+              <div class="proof-author-avatar">MC</div>
+              <div class="proof-author-info">
+                <strong>Matheus C.</strong>
+                <span>Gestor comercial · Texas Center · Goiânia</span>
+              </div>
+            </div>
+          </div>
+          <div class="proof-stats reveal">
+            <div class="proof-stat">
+              <div class="proof-stat-num">12k+</div>
+              <div class="proof-stat-label">Atendimentos registrados</div>
+            </div>
+            <div class="proof-stat">
+              <div class="proof-stat-num">3</div>
+              <div class="proof-stat-label">Setores operando juntos</div>
+            </div>
+            <div class="proof-stat">
+              <div class="proof-stat-num">8</div>
+              <div class="proof-stat-label">Vendedores ativos</div>
+            </div>
+            <div class="proof-stat">
+              <div class="proof-stat-num">100%</div>
+              <div class="proof-stat-label">Disponibilidade (uptime)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
      PRICING
      ================================================================== -->
-<section class="section" id="precos">
-  <div class="container">
-    <div class="section-head center reveal">
-      <span class="section-label">Preços</span>
-      <h2 class="section-title">Simples. Transparente.<br>Sem contrato.</h2>
-      <p class="section-sub">Comece pelo plano que atende hoje. Suba quando precisar de mais. Cancele quando quiser, sem ligar pra ninguém.</p>
-    </div>
-    <div class="pricing-grid">
-      <!-- STARTER -->
-      <div class="plan reveal">
-        <h3>Starter</h3>
-        <div class="plan-price"><span class="currency">R$</span><span class="v">49</span><span class="per">/mês</span></div>
-        <p class="plan-desc">Pra operação até 5 vendedores. Fila, dashboard básico, tablet — tudo o essencial.</p>
-        <ul class="plan-features">
-          <li><i class="fa-solid fa-check"></i>Até 5 vendedores</li>
-          <li><i class="fa-solid fa-check"></i>Tablet com fila inteligente</li>
-          <li><i class="fa-solid fa-check"></i>Dashboard em tempo real</li>
-          <li><i class="fa-solid fa-check"></i>Timer + controle de saídas</li>
-          <li class="muted"><i class="fa-solid fa-minus"></i>Trocas avançadas</li>
-          <li class="muted"><i class="fa-solid fa-minus"></i>IA Assist</li>
-        </ul>
-        <button class="plan-btn" onclick="openCheckout('starter')">Assinar Starter</button>
-      </div>
-
-      <!-- PRO — FEATURED -->
-      <div class="plan featured reveal">
-        <div class="plan-tag">Mais escolhido</div>
-        <h3>Pro</h3>
-        <div class="plan-price"><span class="currency">R$</span><span class="v">99</span><span class="per">/mês</span></div>
-        <p class="plan-desc">Pra loja séria que precisa de IA, CSV/PDF e comunicados. Pode até 15 vendedores.</p>
-        <ul class="plan-features">
-          <li><i class="fa-solid fa-check"></i>Até 15 vendedores</li>
-          <li><i class="fa-solid fa-check"></i>Tudo do Starter</li>
-          <li><i class="fa-solid fa-check"></i>Gestão de trocas (com diferença)</li>
-          <li><i class="fa-solid fa-check"></i>Exportação CSV / PDF</li>
-          <li><i class="fa-solid fa-check"></i>Comunicados pro time</li>
-          <li><i class="fa-solid fa-check"></i><strong>IA Assist</strong> — resumo de turno + sugestão de missões</li>
-        </ul>
-        <button class="plan-btn" onclick="openCheckout('pro')">Assinar Pro</button>
-      </div>
-
-      <!-- ELITE -->
-      <div class="plan plan-elite reveal">
-        <h3>Elite</h3>
-        <div class="plan-price-elite">
-          <div class="v-wrap"><span class="currency">R$</span><span class="v">149</span></div>
-          <div class="unit">/mês base<br><span class="seat">+ R$ 19 por vendedor</span></div>
+    <section class="section" id="precos">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="section-label">Preços</span>
+          <h2 class="section-title">Simples. Transparente.<br />Sem contrato.</h2>
+          <p class="section-sub">
+            Comece pelo plano que atende hoje. Suba quando precisar de mais. Cancele quando quiser, sem ligar pra
+            ninguém.
+          </p>
         </div>
-        <p class="plan-desc">Quando engajamento é parte da estratégia. Vendedor vira protagonista da operação — XP, tiers, missões e avatar próprio. IA coacha o time.</p>
-        <div class="plan-section-label">Tudo do Pro +</div>
-        <ul class="plan-features plan-features-rich">
-          <li>
-            <i class="fa-solid fa-gamepad"></i>
-            <div><strong>App vendedor gamificado</strong><span>XP, 13 tiers RPG, avatar pixel-art</span></div>
-          </li>
-          <li>
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-            <div><strong>IA avançada</strong><span>Previsão de fluxo + coaching 1:1</span></div>
-          </li>
-          <li>
-            <i class="fa-solid fa-camera-retro"></i>
-            <div><strong>VM Missions</strong><span>Vitrine, display, fachada (multi-loja)</span></div>
-          </li>
-          <li>
-            <i class="fa-solid fa-headset"></i>
-            <div><strong>Onboarding dedicado</strong><span>Call de 1h + suporte prioritário</span></div>
-          </li>
-        </ul>
-        <button class="plan-btn" onclick="openDemo()">
-          <i class="fa-solid fa-calendar-check"></i> Agendar demo
-        </button>
-        <div class="plan-footnote">Ideal pra lojas com 10+ vendedores ou operação multi-loja</div>
-      </div>
-    </div>
-  </div>
-</section>
+        <div class="pricing-grid">
+          <!-- STARTER -->
+          <div class="plan reveal">
+            <h3>Starter</h3>
+            <div class="plan-price">
+              <span class="currency">R$</span><span class="v">49</span><span class="per">/mês</span>
+            </div>
+            <p class="plan-desc">Pra operação até 5 vendedores. Fila, dashboard básico, tablet — tudo o essencial.</p>
+            <ul class="plan-features">
+              <li><i class="fa-solid fa-check"></i>Até 5 vendedores</li>
+              <li><i class="fa-solid fa-check"></i>Tablet com fila inteligente</li>
+              <li><i class="fa-solid fa-check"></i>Dashboard em tempo real</li>
+              <li><i class="fa-solid fa-check"></i>Timer + controle de saídas</li>
+              <li class="muted"><i class="fa-solid fa-minus"></i>Trocas avançadas</li>
+              <li class="muted"><i class="fa-solid fa-minus"></i>IA Assist</li>
+            </ul>
+            <button class="plan-btn" onclick="openCheckout('starter')">Assinar Starter</button>
+          </div>
 
-<!-- ==================================================================
+          <!-- PRO — FEATURED -->
+          <div class="plan featured reveal">
+            <div class="plan-tag">Mais escolhido</div>
+            <h3>Pro</h3>
+            <div class="plan-price">
+              <span class="currency">R$</span><span class="v">99</span><span class="per">/mês</span>
+            </div>
+            <p class="plan-desc">Pra loja séria que precisa de IA, CSV/PDF e comunicados. Pode até 15 vendedores.</p>
+            <ul class="plan-features">
+              <li><i class="fa-solid fa-check"></i>Até 15 vendedores</li>
+              <li><i class="fa-solid fa-check"></i>Tudo do Starter</li>
+              <li><i class="fa-solid fa-check"></i>Gestão de trocas (com diferença)</li>
+              <li><i class="fa-solid fa-check"></i>Exportação CSV / PDF</li>
+              <li><i class="fa-solid fa-check"></i>Comunicados pro time</li>
+              <li>
+                <i class="fa-solid fa-check"></i><strong>IA Assist</strong> — resumo de turno + sugestão de missões
+              </li>
+            </ul>
+            <button class="plan-btn" onclick="openCheckout('pro')">Assinar Pro</button>
+          </div>
+
+          <!-- ELITE -->
+          <div class="plan plan-elite reveal">
+            <h3>Elite</h3>
+            <div class="plan-price-elite">
+              <div class="v-wrap"><span class="currency">R$</span><span class="v">149</span></div>
+              <div class="unit">/mês base<br /><span class="seat">+ R$ 19 por vendedor</span></div>
+            </div>
+            <p class="plan-desc">
+              Quando engajamento é parte da estratégia. Vendedor vira protagonista da operação — XP, tiers, missões e
+              avatar próprio. IA coacha o time.
+            </p>
+            <div class="plan-section-label">Tudo do Pro +</div>
+            <ul class="plan-features plan-features-rich">
+              <li>
+                <i class="fa-solid fa-gamepad"></i>
+                <div><strong>App vendedor gamificado</strong><span>XP, 13 tiers RPG, avatar pixel-art</span></div>
+              </li>
+              <li>
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <div><strong>IA avançada</strong><span>Previsão de fluxo + coaching 1:1</span></div>
+              </li>
+              <li>
+                <i class="fa-solid fa-camera-retro"></i>
+                <div><strong>VM Missions</strong><span>Vitrine, display, fachada (multi-loja)</span></div>
+              </li>
+              <li>
+                <i class="fa-solid fa-headset"></i>
+                <div><strong>Onboarding dedicado</strong><span>Call de 1h + suporte prioritário</span></div>
+              </li>
+            </ul>
+            <button class="plan-btn" onclick="openDemo()">
+              <i class="fa-solid fa-calendar-check"></i> Agendar demo
+            </button>
+            <div class="plan-footnote">Ideal pra lojas com 10+ vendedores ou operação multi-loja</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
      FAQ
      ================================================================== -->
-<section class="section" style="background:var(--bg-surface);border-top:1px solid var(--border)">
-  <div class="container">
-    <div class="section-head center reveal">
-      <span class="section-label">FAQ</span>
-      <h2 class="section-title">Perguntas que todo lojista faz.</h2>
-    </div>
-    <div class="faq-list">
-      <details class="faq-item reveal"><summary>Quais dispositivos eu preciso?</summary>
-        <p>Qualquer tablet Android (mesmo modelo básico de R$ 600 serve) ou iPad. Os vendedores usam o próprio celular. Dashboard abre em qualquer navegador moderno.</p>
-      </details>
-      <details class="faq-item reveal"><summary>Cancela a qualquer momento?</summary>
-        <p>Sim. Sem contrato, sem multa. Cancela dentro do próprio sistema em 2 cliques. Cobrança pro-rata no mês corrente.</p>
-      </details>
-      <details class="faq-item reveal"><summary>Funciona com múltiplas lojas?</summary>
-        <p>Sim. Cada loja é um tenant separado com dashboard próprio. No plano Elite, gestor regional vê consolidado multi-loja.</p>
-      </details>
-      <details class="faq-item reveal"><summary>E se a internet cair?</summary>
-        <p>O tablet funciona em modo offline: registra fila, atendimentos e vendas localmente. Sincroniza automático quando a conexão volta.</p>
-      </details>
-      <details class="faq-item reveal"><summary>Onde ficam os dados?</summary>
-        <p>Servidor AWS São Paulo via Supabase. Dados criptografados em trânsito e em repouso. LGPD compliant. Você é dono, exporta a hora que quiser.</p>
-      </details>
-      <details class="faq-item reveal"><summary>Como é o suporte?</summary>
-        <p>WhatsApp direto no horário comercial pra todos os planos. Pro e Elite têm resposta prioritária. Elite inclui onboarding (call de 1h pra subir).</p>
-      </details>
-    </div>
-  </div>
-</section>
+    <section class="section" style="background: var(--bg-surface); border-top: 1px solid var(--border)">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="section-label">FAQ</span>
+          <h2 class="section-title">Perguntas que todo lojista faz.</h2>
+        </div>
+        <div class="faq-list">
+          <details class="faq-item reveal">
+            <summary>Quais dispositivos eu preciso?</summary>
+            <p>
+              Qualquer tablet Android (mesmo modelo básico de R$ 600 serve) ou iPad. Os vendedores usam o próprio
+              celular. Dashboard abre em qualquer navegador moderno.
+            </p>
+          </details>
+          <details class="faq-item reveal">
+            <summary>Cancela a qualquer momento?</summary>
+            <p>
+              Sim. Sem contrato, sem multa. Cancela dentro do próprio sistema em 2 cliques. Cobrança pro-rata no mês
+              corrente.
+            </p>
+          </details>
+          <details class="faq-item reveal">
+            <summary>Funciona com múltiplas lojas?</summary>
+            <p>
+              Sim. Cada loja é um tenant separado com dashboard próprio. No plano Elite, gestor regional vê consolidado
+              multi-loja.
+            </p>
+          </details>
+          <details class="faq-item reveal">
+            <summary>E se a internet cair?</summary>
+            <p>
+              O tablet funciona em modo offline: registra fila, atendimentos e vendas localmente. Sincroniza automático
+              quando a conexão volta.
+            </p>
+          </details>
+          <details class="faq-item reveal">
+            <summary>Onde ficam os dados?</summary>
+            <p>
+              Servidor AWS São Paulo via Supabase. Dados criptografados em trânsito e em repouso. LGPD compliant. Você é
+              dono, exporta a hora que quiser.
+            </p>
+          </details>
+          <details class="faq-item reveal">
+            <summary>Como é o suporte?</summary>
+            <p>
+              WhatsApp direto no horário comercial pra todos os planos. Pro e Elite têm resposta prioritária. Elite
+              inclui onboarding (call de 1h pra subir).
+            </p>
+          </details>
+        </div>
+      </div>
+    </section>
 
-<!-- ==================================================================
+    <!-- ==================================================================
      FOOTER
      ================================================================== -->
-<footer class="footer">
-  <div class="container">
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <div class="logo-inline"><img src="/assets/logo-minhavez-transparent.png" alt="minhavez"></div>
-        <p>Gestão inteligente de fila + engajamento gamificado pra lojas físicas. Feito no Brasil, em produção real.</p>
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="logo-inline"><img src="/assets/logo-minhavez-transparent.png" alt="minhavez" /></div>
+            <p>
+              Gestão inteligente de fila + engajamento gamificado pra lojas físicas. Feito no Brasil, em produção real.
+            </p>
+          </div>
+          <div class="footer-col">
+            <h4>Produto</h4>
+            <a href="#produto">Features</a>
+            <a href="#precos">Preços</a>
+            <a href="#como-funciona">Como funciona</a>
+          </div>
+          <div class="footer-col">
+            <h4>Empresa</h4>
+            <a href="#produto">Sobre</a>
+            <a href="javascript:openDemo()">Contato</a>
+            <a href="/">Entrar</a>
+          </div>
+          <div class="footer-col">
+            <h4>Legal</h4>
+            <a href="/termos">Termos</a>
+            <a href="/privacidade">Privacidade</a>
+            <a href="/privacidade#lgpd">LGPD</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <div>© 2026 minhavez — Todos os direitos reservados.</div>
+          <div>Stripe · pagamento seguro · LGPD compliant</div>
+        </div>
       </div>
-      <div class="footer-col">
-        <h4>Produto</h4>
-        <a href="#produto">Features</a>
-        <a href="#precos">Preços</a>
-        <a href="#como-funciona">Como funciona</a>
-      </div>
-      <div class="footer-col">
-        <h4>Empresa</h4>
-        <a href="#produto">Sobre</a>
-        <a href="javascript:openDemo()">Contato</a>
-        <a href="/">Entrar</a>
-      </div>
-      <div class="footer-col">
-        <h4>Legal</h4>
-        <a href="/termos">Termos</a>
-        <a href="/privacidade">Privacidade</a>
-        <a href="/privacidade#lgpd">LGPD</a>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <div>© 2026 minhavez — Todos os direitos reservados.</div>
-      <div>Stripe · pagamento seguro · LGPD compliant</div>
-    </div>
-  </div>
-</footer>
+    </footer>
 
-<!-- ==================================================================
+    <!-- ==================================================================
      MODAL: CHECKOUT (Stripe)
      ================================================================== -->
-<div class="modal-overlay" id="checkoutModal" onclick="if(event.target===this)closeCheckout()">
-  <div class="modal">
-    <button class="modal-close" onclick="closeCheckout()" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
-    <h3 id="checkoutTitle">Assinar plano</h3>
-    <p class="modal-sub" id="checkoutSub">Informe seu email pra criar a loja e ir pro pagamento seguro.</p>
-    <div class="modal-field">
-      <label>Email</label>
-      <input id="checkoutEmail" type="email" placeholder="seu@email.com" autocomplete="email">
+    <div class="modal-overlay" id="checkoutModal" onclick="if (event.target === this) closeCheckout();">
+      <div class="modal">
+        <button class="modal-close" onclick="closeCheckout()" aria-label="Fechar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <h3 id="checkoutTitle">Assinar plano</h3>
+        <p class="modal-sub" id="checkoutSub">Informe seu email pra criar a loja e ir pro pagamento seguro.</p>
+        <div class="modal-field">
+          <label>Email</label>
+          <input id="checkoutEmail" type="email" placeholder="seu@email.com" autocomplete="email" />
+        </div>
+        <div class="modal-footer">
+          <button id="btnCheckout" class="btn btn-primary" onclick="startCheckout()">
+            <i class="fa-solid fa-lock" style="font-size: 12px"></i> Ir pro pagamento seguro
+          </button>
+          <div class="modal-note">Pagamento via Stripe · cartão, pix, boleto</div>
+        </div>
+      </div>
     </div>
-    <div class="modal-footer">
-      <button id="btnCheckout" class="btn btn-primary" onclick="startCheckout()">
-        <i class="fa-solid fa-lock" style="font-size:12px"></i> Ir pro pagamento seguro
-      </button>
-      <div class="modal-note">Pagamento via Stripe · cartão, pix, boleto</div>
-    </div>
-  </div>
-</div>
 
-<!-- ==================================================================
+    <!-- ==================================================================
      MODAL: DEMO (Elite)
      ================================================================== -->
-<div class="modal-overlay" id="demoModal" onclick="if(event.target===this)closeDemo()">
-  <div class="modal">
-    <button class="modal-close" onclick="closeDemo()" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
-    <h3>Agendar demo Elite</h3>
-    <p class="modal-sub">Conte um pouco da sua operação que o time entra em contato em até 24h.</p>
-    <div class="modal-field">
-      <label>Nome</label>
-      <input id="demoNome" type="text" placeholder="Seu nome" autocomplete="name">
+    <div class="modal-overlay" id="demoModal" onclick="if (event.target === this) closeDemo();">
+      <div class="modal">
+        <button class="modal-close" onclick="closeDemo()" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+        <h3>Agendar demo Elite</h3>
+        <p class="modal-sub">Conte um pouco da sua operação que o time entra em contato em até 24h.</p>
+        <div class="modal-field">
+          <label>Nome</label>
+          <input id="demoNome" type="text" placeholder="Seu nome" autocomplete="name" />
+        </div>
+        <div class="modal-field">
+          <label>WhatsApp</label>
+          <input id="demoPhone" type="tel" placeholder="(00) 00000-0000" autocomplete="tel" />
+        </div>
+        <div class="modal-field">
+          <label>Quantos vendedores?</label>
+          <select id="demoSize">
+            <option value="">Selecione</option>
+            <option value="5-10">5 a 10</option>
+            <option value="10-20">10 a 20</option>
+            <option value="20-50">20 a 50</option>
+            <option value="50+">50+</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button id="btnDemo" class="btn btn-primary" onclick="sendDemo()">
+            <i class="fa-brands fa-whatsapp" style="font-size: 14px"></i> Enviar pelo WhatsApp
+          </button>
+          <div class="modal-note">Você será redirecionado pro WhatsApp do time comercial</div>
+        </div>
+      </div>
     </div>
-    <div class="modal-field">
-      <label>WhatsApp</label>
-      <input id="demoPhone" type="tel" placeholder="(00) 00000-0000" autocomplete="tel">
-    </div>
-    <div class="modal-field">
-      <label>Quantos vendedores?</label>
-      <select id="demoSize">
-        <option value="">Selecione</option>
-        <option value="5-10">5 a 10</option>
-        <option value="10-20">10 a 20</option>
-        <option value="20-50">20 a 50</option>
-        <option value="50+">50+</option>
-      </select>
-    </div>
-    <div class="modal-footer">
-      <button id="btnDemo" class="btn btn-primary" onclick="sendDemo()">
-        <i class="fa-brands fa-whatsapp" style="font-size:14px"></i> Enviar pelo WhatsApp
-      </button>
-      <div class="modal-note">Você será redirecionado pro WhatsApp do time comercial</div>
-    </div>
-  </div>
-</div>
 
-<!-- ==================================================================
+    <!-- ==================================================================
      JS
      ================================================================== -->
-<script>
-const SUPABASE_URL = 'https://cnpnviaigrdmnixnqjqp.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_0AJbQVEVFsL71gAGtks6rw_V1rYn3Ne';
-const WHATSAPP_NUMBER = '5562999999999'; // TODO: confirmar número real
+    <script>
+      const SUPABASE_URL = 'https://cnpnviaigrdmnixnqjqp.supabase.co';
+      const SUPABASE_ANON_KEY = 'sb_publishable_0AJbQVEVFsL71gAGtks6rw_V1rYn3Ne';
+      const WHATSAPP_NUMBER = '5562982727569';
 
-// ─── Nav scroll state ───
-const nav = document.getElementById('nav');
-let lastScroll = 0;
-window.addEventListener('scroll', () => {
-  const y = window.scrollY;
-  nav.classList.toggle('scrolled', y > 12);
-  lastScroll = y;
-}, { passive: true });
+      // ─── Nav scroll state ───
+      const nav = document.getElementById('nav');
+      let lastScroll = 0;
+      window.addEventListener(
+        'scroll',
+        () => {
+          const y = window.scrollY;
+          nav.classList.toggle('scrolled', y > 12);
+          lastScroll = y;
+        },
+        { passive: true }
+      );
 
-// ─── Scroll spy: marca link ativo do nav conforme seção visível ───
-const navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
-const sections = Array.from(navLinks)
-  .map(a => document.getElementById(a.getAttribute('href').slice(1)))
-  .filter(Boolean);
-const sectionSpy = new IntersectionObserver((entries) => {
-  entries.forEach((e) => {
-    if (e.isIntersecting) {
-      const id = e.target.id;
-      navLinks.forEach((a) => {
-        a.classList.toggle('nav-link-active', a.getAttribute('href') === '#' + id);
+      // ─── Scroll spy: marca link ativo do nav conforme seção visível ───
+      const navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
+      const sections = Array.from(navLinks)
+        .map((a) => document.getElementById(a.getAttribute('href').slice(1)))
+        .filter(Boolean);
+      const sectionSpy = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              const id = e.target.id;
+              navLinks.forEach((a) => {
+                a.classList.toggle('nav-link-active', a.getAttribute('href') === '#' + id);
+              });
+            }
+          });
+        },
+        { rootMargin: '-40% 0px -55% 0px', threshold: 0 }
+      );
+      sections.forEach((s) => sectionSpy.observe(s));
+
+      // ─── Social proof: KPIs vivos via RPC (cache 5min sessionStorage) ───
+      (async () => {
+        const FALLBACK = { atendimentos_mes: 850, vendedores_ativos: 4, tempo_medio_min: 6.5, lojas_count: 1 };
+        const KEY = 'mv-proof-cache';
+        const TTL = 5 * 60 * 1000;
+        const fmt = (n) => new Intl.NumberFormat('pt-BR').format(n);
+        const fmtMin = (n) =>
+          (Number(n) || 0).toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+
+        function paint(stats) {
+          const a = document.getElementById('proofAtend');
+          const v = document.getElementById('proofVend');
+          const t = document.getElementById('proofTempo');
+          const l = document.getElementById('proofLojas');
+          if (!a) return;
+          a.textContent = fmt(stats.atendimentos_mes);
+          v.textContent = fmt(stats.vendedores_ativos);
+          t.textContent = fmtMin(stats.tempo_medio_min);
+          l.textContent = fmt(stats.lojas_count);
+        }
+
+        // Cache hit
+        try {
+          const cached = JSON.parse(sessionStorage.getItem(KEY) || 'null');
+          if (cached && Date.now() - cached.ts < TTL) {
+            paint(cached.data);
+            return;
+          }
+        } catch {}
+
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_landing_stats`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              apikey: SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+            },
+            body: '{}'
+          });
+          if (!res.ok) throw new Error('rpc failed');
+          const data = await res.json();
+          paint(data);
+          sessionStorage.setItem(KEY, JSON.stringify({ ts: Date.now(), data }));
+        } catch {
+          paint(FALLBACK);
+        }
+      })();
+
+      // ─── Hero video lazy-load (poupar 1.7MB no first paint) ───
+      (() => {
+        const v = document.getElementById('heroVideo');
+        if (!v) return;
+        const load = () => {
+          if (v.dataset.loaded) return;
+          v.dataset.loaded = '1';
+          v.innerHTML =
+            '<source src="/assets/hero-ambient.webm" type="video/webm">' +
+            '<source src="/assets/hero-ambient.mp4" type="video/mp4">';
+          v.load();
+          v.play().catch(() => {});
+        };
+        // Carrega assim que o hero estiver no viewport (que é praticamente imediato no load)
+        // mas deixa o crítico (texto, fonte, css) renderizar primeiro
+        if ('IntersectionObserver' in window) {
+          const io = new IntersectionObserver(
+            (entries) => {
+              if (entries.some((e) => e.isIntersecting)) {
+                load();
+                io.disconnect();
+              }
+            },
+            { rootMargin: '200px' }
+          );
+          io.observe(v);
+        } else {
+          setTimeout(load, 1500);
+        }
+      })();
+
+      // ─── Hero typewriter ───
+      window.addEventListener('load', () => {
+        const lines = document.querySelectorAll('#heroH1 .hero-line');
+        if (!lines.length) return;
+        // Build char spans + reserve layout (chars hidden, cursor at end)
+        const cursor = document.createElement('span');
+        cursor.className = 'hero-cursor';
+        const chars = [];
+        lines.forEach((line) => {
+          const text = line.dataset.text || '';
+          for (const ch of text) {
+            const span = document.createElement('span');
+            span.className = 'hero-char';
+            span.textContent = ch;
+            if (ch === ' ') span.classList.add('on');
+            line.appendChild(span);
+            chars.push(span);
+          }
+        });
+        // Cursor lives in the last line so it sits at the end after typing
+        lines[lines.length - 1].appendChild(cursor);
+        // Loop typewriter: type → hold → erase → hold → repeat
+        const TYPE_MS = 55; // delay entre chars no type
+        const ERASE_MS = 28; // delay entre chars no erase (mais rápido)
+        const HOLD_MS = 2400; // segura no final
+        const PAUSE_MS = 450; // pausa antes de re-digitar
+        const isTypeable = (c) => !c.classList.contains('on') || c.textContent !== ' ';
+
+        let cancelled = false;
+        async function sleep(ms) {
+          return new Promise((r) => setTimeout(r, ms));
+        }
+        async function typeAll() {
+          for (const c of chars) {
+            if (cancelled) return;
+            if (c.textContent === ' ') {
+              c.classList.add('on');
+              continue;
+            }
+            c.classList.add('on');
+            await sleep(TYPE_MS);
+          }
+        }
+        async function eraseAll() {
+          for (let i = chars.length - 1; i >= 0; i--) {
+            if (cancelled) return;
+            const c = chars[i];
+            if (c.textContent === ' ') {
+              c.classList.remove('on');
+              continue;
+            }
+            c.classList.remove('on');
+            await sleep(ERASE_MS);
+          }
+        }
+        async function loop() {
+          while (!cancelled) {
+            await typeAll();
+            await sleep(HOLD_MS);
+            await eraseAll();
+            await sleep(PAUSE_MS);
+          }
+        }
+        // Pausa quando aba está oculta pra não desperdiçar CPU
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) cancelled = true;
+          else if (cancelled) {
+            cancelled = false;
+            loop();
+          }
+        });
+        setTimeout(loop, 280);
       });
-    }
-  });
-}, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
-sections.forEach((s) => sectionSpy.observe(s));
 
-// ─── Social proof: KPIs vivos via RPC (cache 5min sessionStorage) ───
-(async () => {
-  const FALLBACK = { atendimentos_mes: 850, vendedores_ativos: 4, tempo_medio_min: 6.5, lojas_count: 1 };
-  const KEY = 'mv-proof-cache';
-  const TTL = 5 * 60 * 1000;
-  const fmt = (n) => new Intl.NumberFormat('pt-BR').format(n);
-  const fmtMin = (n) => (Number(n) || 0).toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+      // ─── Reveal on scroll ───
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add('in');
+              observer.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.12, rootMargin: '0px 0px -60px 0px' }
+      );
+      document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
 
-  function paint(stats) {
-    const a = document.getElementById('proofAtend');
-    const v = document.getElementById('proofVend');
-    const t = document.getElementById('proofTempo');
-    const l = document.getElementById('proofLojas');
-    if (!a) return;
-    a.textContent = fmt(stats.atendimentos_mes);
-    v.textContent = fmt(stats.vendedores_ativos);
-    t.textContent = fmtMin(stats.tempo_medio_min);
-    l.textContent = fmt(stats.lojas_count);
-  }
+      // ─── Smooth scroll ancoras ───
+      document.querySelectorAll('a[href^="#"]').forEach((a) => {
+        a.addEventListener('click', (e) => {
+          const id = a.getAttribute('href').slice(1);
+          if (!id) return;
+          const t = document.getElementById(id);
+          if (t) {
+            e.preventDefault();
+            t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      });
 
-  // Cache hit
-  try {
-    const cached = JSON.parse(sessionStorage.getItem(KEY) || 'null');
-    if (cached && Date.now() - cached.ts < TTL) { paint(cached.data); return; }
-  } catch {}
-
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_landing_stats`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-      },
-      body: '{}'
-    });
-    if (!res.ok) throw new Error('rpc failed');
-    const data = await res.json();
-    paint(data);
-    sessionStorage.setItem(KEY, JSON.stringify({ ts: Date.now(), data }));
-  } catch {
-    paint(FALLBACK);
-  }
-})();
-
-// ─── Hero video lazy-load (poupar 1.7MB no first paint) ───
-(() => {
-  const v = document.getElementById('heroVideo');
-  if (!v) return;
-  const load = () => {
-    if (v.dataset.loaded) return;
-    v.dataset.loaded = '1';
-    v.innerHTML =
-      '<source src="/assets/hero-ambient.webm" type="video/webm">' +
-      '<source src="/assets/hero-ambient.mp4" type="video/mp4">';
-    v.load();
-    v.play().catch(() => {});
-  };
-  // Carrega assim que o hero estiver no viewport (que é praticamente imediato no load)
-  // mas deixa o crítico (texto, fonte, css) renderizar primeiro
-  if ('IntersectionObserver' in window) {
-    const io = new IntersectionObserver((entries) => {
-      if (entries.some((e) => e.isIntersecting)) {
-        load();
-        io.disconnect();
+      // ─── Showcase horizontal drag ───
+      const slider = document.getElementById('showcaseSlider');
+      if (slider) {
+        let isDown = false,
+          startX = 0,
+          scrollLeft = 0;
+        slider.addEventListener('mousedown', (e) => {
+          isDown = true;
+          slider.style.cursor = 'grabbing';
+          startX = e.pageX - slider.offsetLeft;
+          scrollLeft = slider.scrollLeft;
+        });
+        slider.addEventListener('mouseleave', () => {
+          isDown = false;
+          slider.style.cursor = '';
+        });
+        slider.addEventListener('mouseup', () => {
+          isDown = false;
+          slider.style.cursor = '';
+        });
+        slider.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - slider.offsetLeft;
+          slider.scrollLeft = scrollLeft - (x - startX) * 1.8;
+        });
+        const updateFade = () => {
+          const max = slider.scrollWidth - slider.clientWidth;
+          slider.classList.toggle('at-start', slider.scrollLeft <= 4);
+          slider.classList.toggle('at-end', slider.scrollLeft >= max - 4);
+        };
+        slider.addEventListener('scroll', updateFade, { passive: true });
+        window.addEventListener('resize', updateFade);
+        updateFade();
       }
-    }, { rootMargin: '200px' });
-    io.observe(v);
-  } else {
-    setTimeout(load, 1500);
-  }
-})();
 
-// ─── Hero typewriter ───
-window.addEventListener('load', () => {
-  const lines = document.querySelectorAll('#heroH1 .hero-line');
-  if (!lines.length) return;
-  // Build char spans + reserve layout (chars hidden, cursor at end)
-  const cursor = document.createElement('span');
-  cursor.className = 'hero-cursor';
-  const chars = [];
-  lines.forEach((line) => {
-    const text = line.dataset.text || '';
-    for (const ch of text) {
-      const span = document.createElement('span');
-      span.className = 'hero-char';
-      span.textContent = ch;
-      if (ch === ' ') span.classList.add('on');
-      line.appendChild(span);
-      chars.push(span);
-    }
-  });
-  // Cursor lives in the last line so it sits at the end after typing
-  lines[lines.length - 1].appendChild(cursor);
-  // Loop typewriter: type → hold → erase → hold → repeat
-  const TYPE_MS  = 55;   // delay entre chars no type
-  const ERASE_MS = 28;   // delay entre chars no erase (mais rápido)
-  const HOLD_MS  = 2400; // segura no final
-  const PAUSE_MS = 450;  // pausa antes de re-digitar
-  const isTypeable = (c) => !c.classList.contains('on') || c.textContent !== ' ';
+      // ─── Checkout modal (Stripe) ───
+      let selectedPlan = 'pro';
+      const planNames = { starter: 'Starter', pro: 'Pro' };
+      function openCheckout(plan) {
+        selectedPlan = plan;
+        document.getElementById('checkoutTitle').textContent = `Assinar ${planNames[plan] || 'Pro'}`;
+        document.getElementById('checkoutSub').textContent =
+          'Informe seu email pra criar a loja e ir pro pagamento seguro.';
+        document.getElementById('checkoutModal').classList.add('open');
+        setTimeout(() => document.getElementById('checkoutEmail').focus(), 100);
+        window.minhavezAnalytics?.capture('cta_click', { plan, location: 'pricing_card' });
+        window.minhavezAnalytics?.capture('checkout_modal_open', { plan });
+      }
+      function closeCheckout() {
+        document.getElementById('checkoutModal').classList.remove('open');
+      }
 
-  let cancelled = false;
-  async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-  async function typeAll() {
-    for (const c of chars) {
-      if (cancelled) return;
-      if (c.textContent === ' ') { c.classList.add('on'); continue; }
-      c.classList.add('on');
-      await sleep(TYPE_MS);
-    }
-  }
-  async function eraseAll() {
-    for (let i = chars.length - 1; i >= 0; i--) {
-      if (cancelled) return;
-      const c = chars[i];
-      if (c.textContent === ' ') { c.classList.remove('on'); continue; }
-      c.classList.remove('on');
-      await sleep(ERASE_MS);
-    }
-  }
-  async function loop() {
-    while (!cancelled) {
-      await typeAll();
-      await sleep(HOLD_MS);
-      await eraseAll();
-      await sleep(PAUSE_MS);
-    }
-  }
-  // Pausa quando aba está oculta pra não desperdiçar CPU
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) cancelled = true;
-    else if (cancelled) { cancelled = false; loop(); }
-  });
-  setTimeout(loop, 280);
-});
+      async function startCheckout() {
+        const email = document.getElementById('checkoutEmail').value.trim();
+        const input = document.getElementById('checkoutEmail');
+        if (!email || !email.includes('@')) {
+          input.style.borderColor = 'var(--coral)';
+          input.focus();
+          return;
+        }
+        input.style.borderColor = '';
+        const btn = document.getElementById('btnCheckout');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spin"></span> Redirecionando...';
+        window.minhavezAnalytics?.capture('checkout_start', { plan: selectedPlan, email });
 
-// ─── Reveal on scroll ───
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach((e) => {
-    if (e.isIntersecting) {
-      e.target.classList.add('in');
-      observer.unobserve(e.target);
-    }
-  });
-}, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
-document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+        try {
+          const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+            body: JSON.stringify({ plano: selectedPlan, email })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Erro ao criar checkout');
+          if (data.url) {
+            window.minhavezAnalytics?.capture('checkout_redirect', { plan: selectedPlan });
+            window.location.href = data.url;
+          } else {
+            throw new Error('URL de checkout não retornada');
+          }
+        } catch (err) {
+          window.minhavezAnalytics?.capture('checkout_error', { plan: selectedPlan, error: err.message });
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-lock" style="font-size:12px"></i> Ir pro pagamento seguro';
+          const existing = btn.parentElement.querySelector('.modal-error');
+          if (existing) existing.remove();
+          const errP = document.createElement('p');
+          errP.className = 'modal-error';
+          errP.textContent = err.message;
+          btn.parentElement.appendChild(errP);
+          setTimeout(() => errP.remove(), 5000);
+        }
+      }
 
-// ─── Smooth scroll ancoras ───
-document.querySelectorAll('a[href^="#"]').forEach((a) => {
-  a.addEventListener('click', (e) => {
-    const id = a.getAttribute('href').slice(1);
-    if (!id) return;
-    const t = document.getElementById(id);
-    if (t) {
-      e.preventDefault();
-      t.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  });
-});
+      // ─── Demo modal (Elite → WhatsApp) ───
+      function openDemo() {
+        document.getElementById('demoModal').classList.add('open');
+        setTimeout(() => document.getElementById('demoNome').focus(), 100);
+        window.minhavezAnalytics?.capture('demo_modal_open', { plan: 'elite' });
+      }
+      function closeDemo() {
+        document.getElementById('demoModal').classList.remove('open');
+      }
 
-// ─── Showcase horizontal drag ───
-const slider = document.getElementById('showcaseSlider');
-if (slider) {
-  let isDown = false, startX = 0, scrollLeft = 0;
-  slider.addEventListener('mousedown', (e) => {
-    isDown = true;
-    slider.style.cursor = 'grabbing';
-    startX = e.pageX - slider.offsetLeft;
-    scrollLeft = slider.scrollLeft;
-  });
-  slider.addEventListener('mouseleave', () => { isDown = false; slider.style.cursor = ''; });
-  slider.addEventListener('mouseup',    () => { isDown = false; slider.style.cursor = ''; });
-  slider.addEventListener('mousemove', (e) => {
-    if (!isDown) return;
-    e.preventDefault();
-    const x = e.pageX - slider.offsetLeft;
-    slider.scrollLeft = scrollLeft - (x - startX) * 1.8;
-  });
-  const updateFade = () => {
-    const max = slider.scrollWidth - slider.clientWidth;
-    slider.classList.toggle('at-start', slider.scrollLeft <= 4);
-    slider.classList.toggle('at-end', slider.scrollLeft >= max - 4);
-  };
-  slider.addEventListener('scroll', updateFade, { passive: true });
-  window.addEventListener('resize', updateFade);
-  updateFade();
-}
+      function getStoredUtm() {
+        try {
+          return JSON.parse(sessionStorage.getItem('mv-utm') || '{}');
+        } catch {
+          return {};
+        }
+      }
 
-// ─── Checkout modal (Stripe) ───
-let selectedPlan = 'pro';
-const planNames = { starter: 'Starter', pro: 'Pro' };
-function openCheckout(plan) {
-  selectedPlan = plan;
-  document.getElementById('checkoutTitle').textContent = `Assinar ${planNames[plan] || 'Pro'}`;
-  document.getElementById('checkoutSub').textContent = 'Informe seu email pra criar a loja e ir pro pagamento seguro.';
-  document.getElementById('checkoutModal').classList.add('open');
-  setTimeout(() => document.getElementById('checkoutEmail').focus(), 100);
-  window.minhavezAnalytics?.capture('cta_click', { plan, location: 'pricing_card' });
-  window.minhavezAnalytics?.capture('checkout_modal_open', { plan });
-}
-function closeCheckout() { document.getElementById('checkoutModal').classList.remove('open'); }
+      async function saveDemoLead(payload) {
+        // Insert direto no Supabase via REST (RLS permite anon)
+        try {
+          await fetch(`${SUPABASE_URL}/rest/v1/demo_leads`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              apikey: SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+              Prefer: 'return=minimal'
+            },
+            body: JSON.stringify(payload)
+          });
+        } catch (err) {
+          console.warn('[demo_leads] insert falhou:', err);
+          // Não bloqueia o WhatsApp — UX > captura
+        }
+      }
 
-async function startCheckout() {
-  const email = document.getElementById('checkoutEmail').value.trim();
-  const input = document.getElementById('checkoutEmail');
-  if (!email || !email.includes('@')) {
-    input.style.borderColor = 'var(--coral)';
-    input.focus();
-    return;
-  }
-  input.style.borderColor = '';
-  const btn = document.getElementById('btnCheckout');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span> Redirecionando...';
-  window.minhavezAnalytics?.capture('checkout_start', { plan: selectedPlan, email });
+      async function sendDemo() {
+        const nome = document.getElementById('demoNome').value.trim();
+        const phone = document.getElementById('demoPhone').value.trim();
+        const size = document.getElementById('demoSize').value;
+        const nomeEl = document.getElementById('demoNome');
+        const phoneEl = document.getElementById('demoPhone');
 
-  try {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-      body: JSON.stringify({ plano: selectedPlan, email })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Erro ao criar checkout');
-    if (data.url) {
-      window.minhavezAnalytics?.capture('checkout_redirect', { plan: selectedPlan });
-      window.location.href = data.url;
-    } else {
-      throw new Error('URL de checkout não retornada');
-    }
-  } catch (err) {
-    window.minhavezAnalytics?.capture('checkout_error', { plan: selectedPlan, error: err.message });
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fa-solid fa-lock" style="font-size:12px"></i> Ir pro pagamento seguro';
-    const existing = btn.parentElement.querySelector('.modal-error');
-    if (existing) existing.remove();
-    const errP = document.createElement('p');
-    errP.className = 'modal-error';
-    errP.textContent = err.message;
-    btn.parentElement.appendChild(errP);
-    setTimeout(() => errP.remove(), 5000);
-  }
-}
+        // Validação
+        const phoneClean = phone.replace(/\D/g, '');
+        let valid = true;
+        if (nome.length < 2) {
+          nomeEl.style.borderColor = 'var(--coral)';
+          valid = false;
+        }
+        if (phoneClean.length < 10 || phoneClean.length > 13) {
+          phoneEl.style.borderColor = 'var(--coral)';
+          valid = false;
+        }
+        if (!valid) {
+          window.minhavezAnalytics?.capture('demo_validation_error', {
+            missing_name: nome.length < 2,
+            invalid_phone: phoneClean.length < 10 || phoneClean.length > 13
+          });
+          return;
+        }
+        nomeEl.style.borderColor = '';
+        phoneEl.style.borderColor = '';
 
-// ─── Demo modal (Elite → WhatsApp) ───
-function openDemo() {
-  document.getElementById('demoModal').classList.add('open');
-  setTimeout(() => document.getElementById('demoNome').focus(), 100);
-  window.minhavezAnalytics?.capture('demo_modal_open', { plan: 'elite' });
-}
-function closeDemo() { document.getElementById('demoModal').classList.remove('open'); }
+        const utm = getStoredUtm();
+        const lead = {
+          name: nome,
+          whatsapp: phoneClean,
+          store_size: size || null,
+          utm_source: utm.utm_source || null,
+          utm_medium: utm.utm_medium || null,
+          utm_campaign: utm.utm_campaign || null,
+          utm_term: utm.utm_term || null,
+          utm_content: utm.utm_content || null,
+          user_agent: navigator.userAgent.slice(0, 280),
+          referrer: document.referrer.slice(0, 280) || null
+        };
 
-function getStoredUtm() {
-  try { return JSON.parse(sessionStorage.getItem('mv-utm') || '{}'); } catch { return {}; }
-}
+        // Salva PRIMEIRO (mesmo que WhatsApp não abra, lead fica capturado)
+        await saveDemoLead(lead);
+        window.minhavezAnalytics?.capture('demo_submit', {
+          store_size: size || 'unknown',
+          has_utm: !!utm.utm_source
+        });
 
-async function saveDemoLead(payload) {
-  // Insert direto no Supabase via REST (RLS permite anon)
-  try {
-    await fetch(`${SUPABASE_URL}/rest/v1/demo_leads`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify(payload)
-    });
-  } catch (err) {
-    console.warn('[demo_leads] insert falhou:', err);
-    // Não bloqueia o WhatsApp — UX > captura
-  }
-}
+        const msg = `Olá! Quero agendar uma demo do plano Elite do minhavez.\n\nNome: ${nome}\nWhatsApp: ${phone}\nVendedores: ${size || 'não informado'}`;
+        const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+        window.open(url, '_blank');
+        closeDemo();
+      }
 
-async function sendDemo() {
-  const nome = document.getElementById('demoNome').value.trim();
-  const phone = document.getElementById('demoPhone').value.trim();
-  const size = document.getElementById('demoSize').value;
-  const nomeEl = document.getElementById('demoNome');
-  const phoneEl = document.getElementById('demoPhone');
-
-  // Validação
-  const phoneClean = phone.replace(/\D/g, '');
-  let valid = true;
-  if (nome.length < 2) { nomeEl.style.borderColor = 'var(--coral)'; valid = false; }
-  if (phoneClean.length < 10 || phoneClean.length > 13) {
-    phoneEl.style.borderColor = 'var(--coral)';
-    valid = false;
-  }
-  if (!valid) {
-    window.minhavezAnalytics?.capture('demo_validation_error', {
-      missing_name: nome.length < 2,
-      invalid_phone: phoneClean.length < 10 || phoneClean.length > 13,
-    });
-    return;
-  }
-  nomeEl.style.borderColor = '';
-  phoneEl.style.borderColor = '';
-
-  const utm = getStoredUtm();
-  const lead = {
-    name: nome,
-    whatsapp: phoneClean,
-    store_size: size || null,
-    utm_source:   utm.utm_source   || null,
-    utm_medium:   utm.utm_medium   || null,
-    utm_campaign: utm.utm_campaign || null,
-    utm_term:     utm.utm_term     || null,
-    utm_content:  utm.utm_content  || null,
-    user_agent:   navigator.userAgent.slice(0, 280),
-    referrer:     document.referrer.slice(0, 280) || null,
-  };
-
-  // Salva PRIMEIRO (mesmo que WhatsApp não abra, lead fica capturado)
-  await saveDemoLead(lead);
-  window.minhavezAnalytics?.capture('demo_submit', {
-    store_size: size || 'unknown',
-    has_utm: !!utm.utm_source,
-  });
-
-  const msg = `Olá! Quero agendar uma demo do plano Elite do minhavez.\n\nNome: ${nome}\nWhatsApp: ${phone}\nVendedores: ${size || 'não informado'}`;
-  const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank');
-  closeDemo();
-}
-
-// ─── Esc fecha modais ───
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') { closeCheckout(); closeDemo(); }
-});
-</script>
-
-</body>
+      // ─── Esc fecha modais ───
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeCheckout();
+          closeDemo();
+        }
+      });
+    </script>
+  </body>
 </html>

@@ -1,437 +1,553 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR" data-theme="dark">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>minhavez — Login</title>
-<meta name="robots" content="noindex, nofollow">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/styles.v51.css">
-<meta name="theme-color" content="#0d0d0d">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/js/update-checker.js"></script>
-<script>initUpdateChecker('/index.html');</script>
-<style>
-  body { background: var(--bg-deep); }
-  .login-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    position: relative;
-    overflow: hidden;
-    background: var(--bg-deep);
-    color: var(--text-primary);
-  }
-  /* Pink spotlight behind the card */
-  .login-container::before {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 720px; height: 720px;
-    transform: translate(-50%, -50%);
-    background: radial-gradient(circle, rgba(170, 238, 196,.22) 0%, rgba(170, 238, 196,.08) 35%, transparent 65%);
-    pointer-events: none;
-    z-index: 0;
-    filter: blur(12px);
-    animation: heroGlow 5s ease-in-out infinite alternate;
-  }
-  /* Secondary soft halo */
-  .login-container::after {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 340px; height: 340px;
-    transform: translate(-50%, -50%);
-    background: radial-gradient(circle, rgba(199, 245, 214,.18) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-    animation: heroPulse 3.2s ease-in-out infinite alternate;
-  }
-  @keyframes heroGlow {
-    0% { opacity: .65; transform: translate(-50%, -50%) scale(1); }
-    100% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
-  }
-  @keyframes heroPulse {
-    0% { opacity: .4; }
-    100% { opacity: .85; }
-  }
-  /* Floating sparks */
-  .particles-bg {
-    position: fixed; inset: 0; z-index: 0;
-    pointer-events: none; overflow: hidden;
-  }
-  .particle {
-    position: absolute;
-    width: 2px; height: 2px;
-    background: rgba(199, 245, 214,.7);
-    border-radius: 50%;
-    opacity: 0;
-    box-shadow: 0 0 6px rgba(170, 238, 196,.6), 0 0 12px rgba(170, 238, 196,.3);
-    animation: particleUp linear infinite;
-  }
-  @keyframes particleUp {
-    0% { opacity: 0; transform: translateY(100vh) scale(0); }
-    10% { opacity: .9; }
-    90% { opacity: .9; }
-    100% { opacity: 0; transform: translateY(-10vh) scale(1); }
-  }
-  .login-box {
-    width: 100%;
-    max-width: 380px;
-    position: relative;
-    z-index: 1;
-    background: var(--bg-card);
-    box-shadow:
-      0 24px 70px rgba(0,0,0,.6),
-      0 0 0 1px rgba(170, 238, 196,.08);
-    border-radius: 20px;
-    border: 1px solid rgba(255,255,255,.06);
-    padding: 32px;
-  }
-  .brand-mark img {
-    filter: none !important;
-    opacity: 1 !important;
-  }
-  .gold-line {
-    background: linear-gradient(90deg, transparent, rgba(170, 238, 196,.35), transparent);
-    height: 1px;
-  }
-  .tab-switch {
-    display: flex;
-    gap: 2px;
-    background: transparent;
-    border: none;
-    padding: 0;
-    margin-bottom: 28px;
-  }
-  .tab-switch button {
-    flex: 1;
-    padding: 12px;
-    background: transparent;
-    border: none;
-    border-radius: 10px;
-    font-family: var(--font-body);
-    font-size: 13px;
-    font-weight: 500;
-    color: rgba(255,255,255,.5);
-    cursor: pointer;
-    transition: all .15s ease;
-  }
-  .tab-switch button:hover {
-    background: var(--accent);
-    color: var(--accent-ink, #0d0d0d);
-    filter: brightness(1.05);
-  }
-  .tab-switch button.active {
-    background: var(--accent);
-    color: var(--accent-ink, #0d0d0d);
-    font-weight: 700;
-  }
-  .tab-switch button:active {
-    transform: scale(.97);
-  }
-  /* Login primary button — same hover feel as sidebar-link */
-  .login-box .btn-primary {
-    color: var(--accent-ink, #0d0d0d);
-  }
-  .login-box .btn-primary:hover {
-    opacity: 1;
-    filter: brightness(1.15);
-  }
-  .login-panel { display: none; }
-  .login-panel.active { display: block; animation: fadeIn .2s ease; }
-  .pin-group {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin: 28px 0;
-  }
-  .pin-input {
-    background: rgba(12,12,14,.6);
-    border: 1px solid rgba(255,255,255,.08);
-    color: var(--accent);
-  }
-  .pin-input:focus {
-    border-color: var(--accent);
-    background: rgba(12,12,14,.8);
-  }
-  .input {
-    background: rgba(12,12,14,.6);
-    border: 1px solid rgba(255,255,255,.08);
-    color: var(--text-primary);
-  }
-  .input::placeholder {
-    color: var(--text-muted);
-  }
-  .input:focus {
-    border-color: var(--accent);
-    background: rgba(12,12,14,.8);
-  }
-  /* Force dark background for autofilled inputs (Chrome/Edge) */
-  .input:-webkit-autofill,
-  .input:-webkit-autofill:hover,
-  .input:-webkit-autofill:focus,
-  .input:-webkit-autofill:active,
-  .pin-input:-webkit-autofill,
-  .pin-input:-webkit-autofill:hover,
-  .pin-input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 1000px rgba(12,12,14,.9) inset !important;
-    -webkit-text-fill-color: var(--text-primary) !important;
-    caret-color: var(--text-primary) !important;
-    transition: background-color 9999s ease-in-out 0s;
-  }
-  .version-tag {
-    position: fixed;
-    bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 10px;
-    color: #A1A1AA;
-    font-weight: 500;
-    letter-spacing: .05em;
-    opacity: .4;
-  }
-  #loginError {
-    display: none;
-    padding: 12px 16px;
-    background: var(--danger-bg);
-    border: 1px solid rgba(232, 155, 138,.1);
-    border-radius: var(--radius-sm, 8px);
-    color: var(--danger);
-    font-size: 13px;
-    font-weight: 500;
-    margin-bottom: 16px;
-  }
-  #loginError.show { display: flex; align-items: center; gap: 8px; }
-  /* CTA links */
-  a, .cta-link { color: #aaeec4; }
-</style>
-<script>window.PUBLIC_POSTHOG_KEY="";window.PUBLIC_POSTHOG_HOST="https://us.i.posthog.com";</script>
-<script type="module" src="/js/analytics.js"></script>
-</head>
-<body>
-
-<div class="particles-bg" id="particles"></div>
-<div class="login-container">
-  <!-- Loading overlay while tenant loads -->
-  <div id="loginLoader" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:10;background:var(--bg-deep)">
-    <div style="text-align:center">
-      <div class="spinner" style="width:32px;height:32px;margin:0 auto 12px;border-width:3px"></div>
-      <p style="font-size:13px;color:#A1A1AA;font-weight:500">Carregando...</p>
-    </div>
-  </div>
-  <div class="login-box" style="opacity:0;transition:opacity .3s ease" id="loginBox">
-    <!-- Brand -->
-    <div class="brand-mark" style="text-align:center;margin-bottom:28px">
-      <img src="/assets/logo-minhavez-transparent.png" alt="MinhaVez" style="width:160px;height:auto;display:inline-block">
-    </div>
-
-    <div class="gold-line" style="margin-bottom:28px"></div>
-
-    <!-- Tabs -->
-    <div class="tab-switch">
-      <button class="active" onclick="switchTab('pin')">PIN Rápido</button>
-      <button onclick="switchTab('email')">Email</button>
-    </div>
-
-    <!-- Error -->
-    <div id="loginError">
-      <i class="fa-solid fa-circle-xmark"></i>
-      <span id="loginErrorMsg"></span>
-    </div>
-
-    <!-- PIN Login -->
-    <div id="panelPin" class="login-panel active">
-      <p style="text-align:center;font-size:13px;color:#71717A;margin-bottom:8px;font-weight:500">
-        Digite seu PIN de 4 digitos
-      </p>
-      <div class="pin-group">
-        <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="0" autofocus>
-        <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="1">
-        <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="2">
-        <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="3">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>minhavez — Login</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/styles.v51.css" />
+    <meta name="theme-color" content="#0d0d0d" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/update-checker.js"></script>
+    <script>
+      initUpdateChecker('/index.html');
+    </script>
+    <style>
+      body {
+        background: var(--bg-deep);
+      }
+      .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        position: relative;
+        overflow: hidden;
+        background: var(--bg-deep);
+        color: var(--text-primary);
+      }
+      /* Pink spotlight behind the card */
+      .login-container::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 720px;
+        height: 720px;
+        transform: translate(-50%, -50%);
+        background: radial-gradient(
+          circle,
+          rgba(170, 238, 196, 0.22) 0%,
+          rgba(170, 238, 196, 0.08) 35%,
+          transparent 65%
+        );
+        pointer-events: none;
+        z-index: 0;
+        filter: blur(12px);
+        animation: heroGlow 5s ease-in-out infinite alternate;
+      }
+      /* Secondary soft halo */
+      .login-container::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 340px;
+        height: 340px;
+        transform: translate(-50%, -50%);
+        background: radial-gradient(circle, rgba(199, 245, 214, 0.18) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+        animation: heroPulse 3.2s ease-in-out infinite alternate;
+      }
+      @keyframes heroGlow {
+        0% {
+          opacity: 0.65;
+          transform: translate(-50%, -50%) scale(1);
+        }
+        100% {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1.08);
+        }
+      }
+      @keyframes heroPulse {
+        0% {
+          opacity: 0.4;
+        }
+        100% {
+          opacity: 0.85;
+        }
+      }
+      /* Floating sparks */
+      .particles-bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      .particle {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: rgba(199, 245, 214, 0.7);
+        border-radius: 50%;
+        opacity: 0;
+        box-shadow:
+          0 0 6px rgba(170, 238, 196, 0.6),
+          0 0 12px rgba(170, 238, 196, 0.3);
+        animation: particleUp linear infinite;
+      }
+      @keyframes particleUp {
+        0% {
+          opacity: 0;
+          transform: translateY(100vh) scale(0);
+        }
+        10% {
+          opacity: 0.9;
+        }
+        90% {
+          opacity: 0.9;
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-10vh) scale(1);
+        }
+      }
+      .login-box {
+        width: 100%;
+        max-width: 380px;
+        position: relative;
+        z-index: 1;
+        background: var(--bg-card);
+        box-shadow:
+          0 24px 70px rgba(0, 0, 0, 0.6),
+          0 0 0 1px rgba(170, 238, 196, 0.08);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        padding: 32px;
+      }
+      .brand-mark img {
+        filter: none !important;
+        opacity: 1 !important;
+      }
+      .gold-line {
+        background: linear-gradient(90deg, transparent, rgba(170, 238, 196, 0.35), transparent);
+        height: 1px;
+      }
+      .tab-switch {
+        display: flex;
+        gap: 2px;
+        background: transparent;
+        border: none;
+        padding: 0;
+        margin-bottom: 28px;
+      }
+      .tab-switch button {
+        flex: 1;
+        padding: 12px;
+        background: transparent;
+        border: none;
+        border-radius: 10px;
+        font-family: var(--font-body);
+        font-size: 13px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .tab-switch button:hover {
+        background: var(--accent);
+        color: var(--accent-ink, #0d0d0d);
+        filter: brightness(1.05);
+      }
+      .tab-switch button.active {
+        background: var(--accent);
+        color: var(--accent-ink, #0d0d0d);
+        font-weight: 700;
+      }
+      .tab-switch button:active {
+        transform: scale(0.97);
+      }
+      /* Login primary button — same hover feel as sidebar-link */
+      .login-box .btn-primary {
+        color: var(--accent-ink, #0d0d0d);
+      }
+      .login-box .btn-primary:hover {
+        opacity: 1;
+        filter: brightness(1.15);
+      }
+      .login-panel {
+        display: none;
+      }
+      .login-panel.active {
+        display: block;
+        animation: fadeIn 0.2s ease;
+      }
+      .pin-group {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin: 28px 0;
+      }
+      .pin-input {
+        background: rgba(12, 12, 14, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: var(--accent);
+      }
+      .pin-input:focus {
+        border-color: var(--accent);
+        background: rgba(12, 12, 14, 0.8);
+      }
+      .input {
+        background: rgba(12, 12, 14, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: var(--text-primary);
+      }
+      .input::placeholder {
+        color: var(--text-muted);
+      }
+      .input:focus {
+        border-color: var(--accent);
+        background: rgba(12, 12, 14, 0.8);
+      }
+      /* Force dark background for autofilled inputs (Chrome/Edge) */
+      .input:-webkit-autofill,
+      .input:-webkit-autofill:hover,
+      .input:-webkit-autofill:focus,
+      .input:-webkit-autofill:active,
+      .pin-input:-webkit-autofill,
+      .pin-input:-webkit-autofill:hover,
+      .pin-input:-webkit-autofill:focus {
+        -webkit-box-shadow: 0 0 0 1000px rgba(12, 12, 14, 0.9) inset !important;
+        -webkit-text-fill-color: var(--text-primary) !important;
+        caret-color: var(--text-primary) !important;
+        transition: background-color 9999s ease-in-out 0s;
+      }
+      .version-tag {
+        position: fixed;
+        bottom: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 10px;
+        color: #a1a1aa;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        opacity: 0.4;
+      }
+      #loginError {
+        display: none;
+        padding: 12px 16px;
+        background: var(--danger-bg);
+        border: 1px solid rgba(232, 155, 138, 0.1);
+        border-radius: var(--radius-sm, 8px);
+        color: var(--danger);
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 16px;
+      }
+      #loginError.show {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      /* CTA links */
+      a,
+      .cta-link {
+        color: #aaeec4;
+      }
+    </style>
+    <script>
+      window.PUBLIC_POSTHOG_KEY = '';
+      window.PUBLIC_POSTHOG_HOST = 'https://us.i.posthog.com';
+    </script>
+    <script type="module" src="/js/analytics.js"></script>
+  </head>
+  <body>
+    <div class="particles-bg" id="particles"></div>
+    <div class="login-container">
+      <!-- Loading overlay while tenant loads -->
+      <div
+        id="loginLoader"
+        style="
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10;
+          background: var(--bg-deep);
+        "
+      >
+        <div style="text-align: center">
+          <div class="spinner" style="width: 32px; height: 32px; margin: 0 auto 12px; border-width: 3px"></div>
+          <p style="font-size: 13px; color: #a1a1aa; font-weight: 500">Carregando...</p>
+        </div>
       </div>
-      <button id="btnPin" class="btn btn-primary" style="width:100%" onclick="handlePinLogin()" disabled>
-        <i class="fa-solid fa-right-to-bracket"></i>
-        Entrar
-      </button>
+      <div class="login-box" style="opacity: 0; transition: opacity 0.3s ease" id="loginBox">
+        <!-- Brand -->
+        <div class="brand-mark" style="text-align: center; margin-bottom: 28px">
+          <img
+            src="/assets/logo-minhavez-transparent.png"
+            alt="MinhaVez"
+            style="width: 160px; height: auto; display: inline-block"
+          />
+        </div>
+
+        <div class="gold-line" style="margin-bottom: 28px"></div>
+
+        <!-- Tabs -->
+        <div class="tab-switch">
+          <button class="active" onclick="switchTab('pin')">PIN Rápido</button>
+          <button onclick="switchTab('email')">Email</button>
+        </div>
+
+        <!-- Error -->
+        <div id="loginError">
+          <i class="fa-solid fa-circle-xmark"></i>
+          <span id="loginErrorMsg"></span>
+        </div>
+
+        <!-- PIN Login -->
+        <div id="panelPin" class="login-panel active">
+          <p style="text-align: center; font-size: 13px; color: #71717a; margin-bottom: 8px; font-weight: 500">
+            Digite seu PIN de 4 digitos
+          </p>
+          <div class="pin-group">
+            <input
+              class="pin-input"
+              type="password"
+              maxlength="1"
+              inputmode="numeric"
+              pattern="[0-9]"
+              data-pin="0"
+              autofocus
+            />
+            <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="1" />
+            <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="2" />
+            <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="3" />
+          </div>
+          <button id="btnPin" class="btn btn-primary" style="width: 100%" onclick="handlePinLogin()" disabled>
+            <i class="fa-solid fa-right-to-bracket"></i>
+            Entrar
+          </button>
+        </div>
+
+        <!-- Email Login -->
+        <div id="panelEmail" class="login-panel">
+          <div style="margin-bottom: 16px">
+            <label
+              style="
+                display: block;
+                font-size: 11px;
+                font-weight: 600;
+                color: #71717a;
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                margin-bottom: 6px;
+              "
+              >Email</label
+            >
+            <input id="emailInput" class="input" type="email" placeholder="seu@email.com" autocomplete="email" />
+          </div>
+          <div style="margin-bottom: 24px">
+            <label
+              style="
+                display: block;
+                font-size: 11px;
+                font-weight: 600;
+                color: #71717a;
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                margin-bottom: 6px;
+              "
+              >Senha</label
+            >
+            <input
+              id="passInput"
+              class="input"
+              type="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+            />
+          </div>
+          <button id="btnEmail" class="btn btn-primary" style="width: 100%" onclick="handleEmailLogin()">
+            <i class="fa-solid fa-right-to-bracket"></i>
+            Entrar
+          </button>
+          <div style="text-align: center; margin-top: 14px">
+            <a
+              id="forgotLink"
+              href="/forgot-password"
+              style="font-size: 12px; color: #aaeec4; text-decoration: none; font-weight: 500"
+              >Esqueci minha senha</a
+            >
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Email Login -->
-    <div id="panelEmail" class="login-panel">
-      <div style="margin-bottom:16px">
-        <label style="display:block;font-size:11px;font-weight:600;color:#71717A;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Email</label>
-        <input id="emailInput" class="input" type="email" placeholder="seu@email.com" autocomplete="email">
-      </div>
-      <div style="margin-bottom:24px">
-        <label style="display:block;font-size:11px;font-weight:600;color:#71717A;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Senha</label>
-        <input id="passInput" class="input" type="password" placeholder="••••••••" autocomplete="current-password">
-      </div>
-      <button id="btnEmail" class="btn btn-primary" style="width:100%" onclick="handleEmailLogin()">
-        <i class="fa-solid fa-right-to-bracket"></i>
-        Entrar
-      </button>
-      <div style="text-align:center;margin-top:14px">
-        <a id="forgotLink" href="/forgot-password" style="font-size:12px;color:#aaeec4;text-decoration:none;font-weight:500">Esqueci minha senha</a>
-      </div>
-    </div>
+    <div id="toastContainer" role="status" aria-live="polite" aria-atomic="true"></div>
+    <span class="version-tag" id="versionTag">v1.1</span>
 
-  </div>
-</div>
+    <script type="module">
+      import { login, loginWithPin, getUser, redirectByRole } from '/js/auth.js';
+      import { toast } from '/js/utils.js';
+      import { loadTenant, applyBranding, getSlug } from '/js/tenant.js';
 
-<div id="toastContainer"></div>
-<span class="version-tag" id="versionTag">v1.1</span>
+      // Load tenant context from URL slug
+      const tenant = await loadTenant();
+      const slug = getSlug();
+      if (tenant) {
+        applyBranding(tenant);
+        const sub = document.querySelector('.login-box p');
+        if (sub) sub.textContent = tenant.nome_loja.toUpperCase();
+      }
+      // Reveal login box, hide loader
+      document.getElementById('loginLoader').style.display = 'none';
+      document.getElementById('loginBox').style.opacity = '1';
+      // Set slug-aware forgot password link
+      if (slug) {
+        const fLink = document.getElementById('forgotLink');
+        if (fLink) fLink.href = `/${slug}/forgot-password`;
+      }
 
-<script type="module">
-import { login, loginWithPin, getUser, redirectByRole } from '/js/auth.js';
-import { toast } from '/js/utils.js';
-import { loadTenant, applyBranding, getSlug } from '/js/tenant.js';
+      // Check if already logged in
+      const user = await getUser();
+      if (user) redirectByRole(user);
 
-// Load tenant context from URL slug
-const tenant = await loadTenant();
-const slug = getSlug();
-if (tenant) {
-  applyBranding(tenant);
-  const sub = document.querySelector('.login-box p');
-  if (sub) sub.textContent = tenant.nome_loja.toUpperCase();
-}
-// Reveal login box, hide loader
-document.getElementById('loginLoader').style.display = 'none';
-document.getElementById('loginBox').style.opacity = '1';
-// Set slug-aware forgot password link
-if (slug) {
-  const fLink = document.getElementById('forgotLink');
-  if (fLink) fLink.href = `/${slug}/forgot-password`;
-}
+      // Tab switching
+      window.switchTab = function (tab) {
+        document.querySelectorAll('.tab-switch button').forEach((b, i) => {
+          b.classList.toggle('active', (tab === 'pin' && i === 0) || (tab === 'email' && i === 1));
+        });
+        document.getElementById('panelPin').classList.toggle('active', tab === 'pin');
+        document.getElementById('panelEmail').classList.toggle('active', tab === 'email');
+        hideError();
+        if (tab === 'pin') document.querySelector('.pin-input').focus();
+        if (tab === 'email') document.getElementById('emailInput').focus();
+      };
 
-// Check if already logged in
-const user = await getUser();
-if (user) redirectByRole(user);
+      // PIN auto-advance
+      const pins = document.querySelectorAll('.pin-input');
+      pins.forEach((input, idx) => {
+        input.addEventListener('input', () => {
+          input.value = input.value.replace(/\D/g, '');
+          if (input.value && idx < 3) pins[idx + 1].focus();
+          checkPinComplete();
+        });
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Backspace' && !input.value && idx > 0) {
+            pins[idx - 1].focus();
+            pins[idx - 1].value = '';
+          }
+          if (e.key === 'Enter') handlePinLogin();
+        });
+      });
 
-// Tab switching
-window.switchTab = function(tab) {
-  document.querySelectorAll('.tab-switch button').forEach((b, i) => {
-    b.classList.toggle('active', (tab === 'pin' && i === 0) || (tab === 'email' && i === 1));
-  });
-  document.getElementById('panelPin').classList.toggle('active', tab === 'pin');
-  document.getElementById('panelEmail').classList.toggle('active', tab === 'email');
-  hideError();
-  if (tab === 'pin') document.querySelector('.pin-input').focus();
-  if (tab === 'email') document.getElementById('emailInput').focus();
-};
+      function getPin() {
+        return Array.from(pins)
+          .map((p) => p.value)
+          .join('');
+      }
 
-// PIN auto-advance
-const pins = document.querySelectorAll('.pin-input');
-pins.forEach((input, idx) => {
-  input.addEventListener('input', () => {
-    input.value = input.value.replace(/\D/g, '');
-    if (input.value && idx < 3) pins[idx + 1].focus();
-    checkPinComplete();
-  });
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Backspace' && !input.value && idx > 0) {
-      pins[idx - 1].focus();
-      pins[idx - 1].value = '';
-    }
-    if (e.key === 'Enter') handlePinLogin();
-  });
-});
+      function checkPinComplete() {
+        const pin = getPin();
+        document.getElementById('btnPin').disabled = pin.length < 4;
+      }
 
-function getPin() {
-  return Array.from(pins).map(p => p.value).join('');
-}
+      function showError(msg) {
+        const el = document.getElementById('loginError');
+        document.getElementById('loginErrorMsg').textContent = msg;
+        el.classList.add('show');
+      }
 
-function checkPinComplete() {
-  const pin = getPin();
-  document.getElementById('btnPin').disabled = pin.length < 4;
-}
+      function hideError() {
+        document.getElementById('loginError').classList.remove('show');
+      }
 
-function showError(msg) {
-  const el = document.getElementById('loginError');
-  document.getElementById('loginErrorMsg').textContent = msg;
-  el.classList.add('show');
-}
+      window.handlePinLogin = async function () {
+        const pin = getPin();
+        if (pin.length !== 4) return;
+        const btn = document.getElementById('btnPin');
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner"></div> Entrando...';
+        hideError();
+        try {
+          const user = await loginWithPin(pin);
+          toast('Bem-vindo!', 'success');
+          setTimeout(() => redirectByRole(user), 500);
+        } catch (e) {
+          showError('PIN invalido. Tente novamente.');
+          pins.forEach((p) => (p.value = ''));
+          pins[0].focus();
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Entrar';
+        }
+      };
 
-function hideError() {
-  document.getElementById('loginError').classList.remove('show');
-}
+      window.handleEmailLogin = async function () {
+        const email = document.getElementById('emailInput').value.trim();
+        const pass = document.getElementById('passInput').value;
+        if (!email || !pass) {
+          showError('Preencha email e senha.');
+          return;
+        }
+        const btn = document.getElementById('btnEmail');
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner"></div> Entrando...';
+        hideError();
+        try {
+          const user = await login(email, pass);
+          toast('Bem-vindo!', 'success');
+          setTimeout(() => redirectByRole(user), 500);
+        } catch (e) {
+          showError('Email ou senha incorretos.');
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Entrar';
+        }
+      };
 
-window.handlePinLogin = async function() {
-  const pin = getPin();
-  if (pin.length !== 4) return;
-  const btn = document.getElementById('btnPin');
-  btn.disabled = true;
-  btn.innerHTML = '<div class="spinner"></div> Entrando...';
-  hideError();
-  try {
-    const user = await loginWithPin(pin);
-    toast('Bem-vindo!', 'success');
-    setTimeout(() => redirectByRole(user), 500);
-  } catch (e) {
-    showError('PIN invalido. Tente novamente.');
-    pins.forEach(p => p.value = '');
-    pins[0].focus();
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Entrar';
-  }
-};
+      // Email form: Enter to submit
+      document.getElementById('passInput')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleEmailLogin();
+      });
 
-window.handleEmailLogin = async function() {
-  const email = document.getElementById('emailInput').value.trim();
-  const pass = document.getElementById('passInput').value;
-  if (!email || !pass) { showError('Preencha email e senha.'); return; }
-  const btn = document.getElementById('btnEmail');
-  btn.disabled = true;
-  btn.innerHTML = '<div class="spinner"></div> Entrando...';
-  hideError();
-  try {
-    const user = await login(email, pass);
-    toast('Bem-vindo!', 'success');
-    setTimeout(() => redirectByRole(user), 500);
-  } catch (e) {
-    showError('Email ou senha incorretos.');
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Entrar';
-  }
-};
-
-// Email form: Enter to submit
-document.getElementById('passInput')?.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') handleEmailLogin();
-});
-
-// Floating pink sparks on dark background
-(function initParticles() {
-  const c = document.getElementById('particles');
-  if (!c) return;
-  const n = window.innerWidth < 768 ? 18 : 34;
-  for (let i = 0; i < n; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    p.style.left = Math.random() * 100 + '%';
-    p.style.animationDuration = (7 + Math.random() * 13) + 's';
-    p.style.animationDelay = Math.random() * 10 + 's';
-    const size = 1 + Math.random() * 2.5;
-    p.style.width = p.style.height = size + 'px';
-    const r = Math.random();
-    if (r > 0.75) {
-      p.style.background = 'rgba(255,180,196,.9)';
-      p.style.boxShadow = '0 0 8px rgba(199, 245, 214,.8), 0 0 16px rgba(170, 238, 196,.5)';
-    } else if (r > 0.4) {
-      p.style.background = 'rgba(199, 245, 214,.8)';
-    } else {
-      p.style.background = 'rgba(170, 238, 196,.6)';
-    }
-    c.appendChild(p);
-  }
-})();
-</script>
-</body>
+      // Floating pink sparks on dark background
+      (function initParticles() {
+        const c = document.getElementById('particles');
+        if (!c) return;
+        const n = window.innerWidth < 768 ? 18 : 34;
+        for (let i = 0; i < n; i++) {
+          const p = document.createElement('div');
+          p.className = 'particle';
+          p.style.left = Math.random() * 100 + '%';
+          p.style.animationDuration = 7 + Math.random() * 13 + 's';
+          p.style.animationDelay = Math.random() * 10 + 's';
+          const size = 1 + Math.random() * 2.5;
+          p.style.width = p.style.height = size + 'px';
+          const r = Math.random();
+          if (r > 0.75) {
+            p.style.background = 'rgba(255,180,196,.9)';
+            p.style.boxShadow = '0 0 8px rgba(199, 245, 214,.8), 0 0 16px rgba(170, 238, 196,.5)';
+          } else if (r > 0.4) {
+            p.style.background = 'rgba(199, 245, 214,.8)';
+          } else {
+            p.style.background = 'rgba(170, 238, 196,.6)';
+          }
+          c.appendChild(p);
+        }
+      })();
+    </script>
+  </body>
 </html>

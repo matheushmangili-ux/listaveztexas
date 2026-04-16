@@ -11,7 +11,7 @@ export function playSound(type) {
   if (!audioCtx) audioCtx = new AudioCtx();
   // iOS: se o ctx ficou suspended, tenta resumir (válido dentro de gesture)
   if (audioCtx.state === 'suspended') {
-    audioCtx.resume().catch(() => {});
+    audioCtx.resume().catch((err) => console.debug('[sound] resume blocked:', err?.name || err));
   }
 
   if (type === '__silent_unlock__') {
@@ -59,7 +59,7 @@ export function playSound(type) {
       _vendaAudio.volume = 0.7;
     }
     _vendaAudio.currentTime = 0;
-    _vendaAudio.play().catch(() => {});
+    _vendaAudio.play().catch((err) => console.debug('[sound] venda play blocked:', err?.name || err));
   } else if (type === 'retorno') {
     // Two ascending notes (C6 → E6)
     const t0 = audioCtx.currentTime;
@@ -88,9 +88,9 @@ export function playSound(type) {
     // C5 → E5 → G5 (acorde maior) — 380ms total
     const t0 = audioCtx.currentTime;
     const notes = [
-      { freq: 523, start: 0 },    // C5
+      { freq: 523, start: 0 }, // C5
       { freq: 659, start: 0.08 }, // E5
-      { freq: 784, start: 0.16 }  // G5
+      { freq: 784, start: 0.16 } // G5
     ];
     notes.forEach((n) => {
       const o = audioCtx.createOscillator();
@@ -114,10 +114,10 @@ export function playSound(type) {
 
     // Fase 1: arpeggio rápido C5-E5-G5-C6 (0-320ms)
     const arp = [
-      { freq: 523, start: 0,    dur: 0.12 }, // C5
+      { freq: 523, start: 0, dur: 0.12 }, // C5
       { freq: 659, start: 0.08, dur: 0.12 }, // E5
       { freq: 784, start: 0.16, dur: 0.12 }, // G5
-      { freq: 1047, start: 0.24, dur: 0.20 } // C6
+      { freq: 1047, start: 0.24, dur: 0.2 } // C6
     ];
     arp.forEach((n) => {
       const o = audioCtx.createOscillator();
