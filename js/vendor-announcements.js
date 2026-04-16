@@ -36,6 +36,12 @@ export function unmountAnnouncements() {
   }
 }
 
+// Força re-load + render. Usado pelo botão refresh do vendor-home.
+export async function refreshAnnouncements() {
+  if (!_sb) return;
+  await loadAndRender();
+}
+
 async function loadAndRender() {
   const { data, error } = await _sb.rpc('list_announcements', { p_limit: 20 });
   if (error) {

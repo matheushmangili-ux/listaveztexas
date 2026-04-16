@@ -2,12 +2,12 @@
 // minhavez Vendedor — Home screen + real-time + actions
 // ============================================
 
-import { initAnnouncements, unmountAnnouncements } from './vendor-announcements.js';
+import { initAnnouncements, unmountAnnouncements, refreshAnnouncements } from './vendor-announcements.js';
 import { initXp, unmountXp, refreshAfterAtendimento as refreshXp } from './vendor-xp.js';
 import { initMissions, unmountMissions, refreshMissionsAfterAtendimento as refreshMissions } from './vendor-missions.js';
 import { initAchievements, unmountAchievements, refreshAchievementsAfterAtendimento as refreshAchievements } from './vendor-achievements.js';
 import { initAvatar, unmountAvatar, buildAvatarUrl } from './vendor-avatar.js';
-import { initVm, unmountVm } from './vendor-vm.js';
+import { initVm, unmountVm, refreshVm } from './vendor-vm.js';
 import { callAI } from './ai-assist.js';
 
 let _sb = null;
@@ -72,19 +72,13 @@ function grabRefs() {
   el.aiTipsSheet = document.getElementById('aiTipsSheet');
   el.aiTipsBody = document.getElementById('aiTipsSheetBody');
 
-  el.btnMenu = document.getElementById('btnMenu');
-  el.menuBadge = document.getElementById('menuBadge');
-  el.drawer = document.getElementById('vendorDrawer');
-  el.drawerOverlay = document.getElementById('drawerOverlay');
-  el.drawerClose = document.getElementById('drawerClose');
-  el.drawerName = document.getElementById('drawerName');
-  el.drawerTier = document.getElementById('drawerTier');
-  el.drawerAvatar = document.getElementById('drawerAvatar');
-  el.drawerXp = document.getElementById('drawerXp');
-  el.drawerBadgeAnn = document.getElementById('drawerBadgeAnn');
-  el.drawerBadgeMis = document.getElementById('drawerBadgeMis');
-  el.drawerBadgeVm = document.getElementById('drawerBadgeVm');
-  el.drawerCountAch = document.getElementById('drawerCountAch');
+  el.tabbar = document.getElementById('vendorTabbar');
+  el.tabBadgeAnn = document.getElementById('tabBadgeAnn');
+  el.tabBadgeMis = document.getElementById('tabBadgeMis');
+  el.tabBadgeMore = document.getElementById('tabBadgeMore');
+  el.moreBadgeVm = document.getElementById('moreBadgeVm');
+  el.moreOverlay = document.getElementById('moreOverlay');
+  el.moreSheet = document.getElementById('moreSheet');
   el.primaryActions = document.getElementById('primaryActions');
 
   el.pushPromptCard = document.getElementById('pushPromptCard');
@@ -426,8 +420,27 @@ function subscribeRealtime() {
       schema: 'public',
       table: 'atendimentos',
       filter: 'tenant_id=eq.' + _ctx.tenant_id
-    }, async () => {
+    }, async (payload) => {
       await loadStats();
+      // Se o atendimento é do próprio vendedor e foi finalizado, dispara refresh de XP/missões/conquistas
+      // pra capturar XP creditado pelo tablet (admin finaliza → vendor app precisa refletir)
+      const row = payload?.new || payload?.old;
+      const isMine = row && row.vendedor_id === _ctx.vendedor_id;
+      const wasFinalized = payload?.new && payload.new.resultado && payload.new.resultado !== 'em_andamento';
+      if (isMine && wasFinalized) {
+        refreshXp().catch((err) => console.warn('[xp] refresh via realtime falhou:', err));
+        refreshMissions().catch((err) => console.warn('[missions] refresh via realtime falhou:', err));
+        refreshAchievements().catch((err) => console.warn('[achievements] refresh via realtime falhou:', err));
+      }
+    })
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'vendor_xp_events',
+      filter: 'vendor_id=eq.' + _ctx.vendedor_id
+    }, async () => {
+      // XP creditado direto (ex: bonus manual, evento sem atendimento): reflete já na UI
+      refreshXp().catch((err) => console.warn('[xp] refresh via xp_events falhou:', err));
     })
     .subscribe();
 }
@@ -443,12 +456,15 @@ function wireActions() {
   el.btnRefresh.addEventListener('click', onRefresh);
   el.aiTipsOverlay?.addEventListener('click', closeAiTips);
 
-  // Drawer
-  el.btnMenu?.addEventListener('click', openDrawer);
-  el.drawerClose?.addEventListener('click', closeDrawer);
-  el.drawerOverlay?.addEventListener('click', closeDrawer);
-  el.drawer?.querySelectorAll('[data-action]').forEach(btn => {
-    btn.addEventListener('click', () => onDrawerAction(btn.dataset.action));
+  // Bottom tab bar
+  el.tabbar?.querySelectorAll('[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => onTabClick(btn.dataset.tab, btn));
+  });
+
+  // "Mais" sheet
+  el.moreOverlay?.addEventListener('click', closeMoreSheet);
+  el.moreSheet?.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', () => onMoreAction(btn.dataset.action));
   });
 
   // Outcome buttons
@@ -508,6 +524,7 @@ function openOutcomeSheet() {
 }
 
 function openPausaSheet() {
+  if (!_ctx) return;
   if (_ctx.status === 'em_atendimento') {
     window._vendorToast('Termine o atendimento antes de entrar em pausa', 'error');
     return;
@@ -567,19 +584,23 @@ async function onRefresh() {
   if (el.btnRefresh.classList.contains('refreshing')) return;
   el.btnRefresh.classList.add('refreshing');
   try {
+    // Aguarda TODAS as fontes de dados terminarem antes de dizer "Atualizado"
     await loadContext();
-    await Promise.all([loadCanais(), loadStats()]);
+    await Promise.all([
+      loadCanais(),
+      loadStats(),
+      refreshXp().catch((err) => console.warn('[xp] refresh pós-botão falhou:', err)),
+      refreshMissions().catch((err) => console.warn('[missions] refresh pós-botão falhou:', err)),
+      refreshAchievements().catch((err) => console.warn('[achievements] refresh pós-botão falhou:', err)),
+      refreshAnnouncements().catch((err) => console.warn('[announcements] refresh pós-botão falhou:', err)),
+      refreshVm().catch((err) => console.warn('[vm] refresh pós-botão falhou:', err))
+    ]);
     renderAll();
-    // Refresh do XP também — se houver diff, dispara toast/level up/tier up
-    // (útil pra smoke test e pra quando admin ajusta XP via banco)
-    refreshXp().catch((err) => console.warn('[xp] refresh pós-botão falhou:', err));
-    refreshMissions().catch((err) => console.warn('[missions] refresh pós-botão falhou:', err));
-    refreshAchievements().catch((err) => console.warn('[achievements] refresh pós-botão falhou:', err));
     window._vendorToast('Atualizado', 'success', 1200);
   } catch (err) {
     window._vendorToast('Erro: ' + (err?.message || err), 'error');
   } finally {
-    setTimeout(() => el.btnRefresh.classList.remove('refreshing'), 400);
+    el.btnRefresh.classList.remove('refreshing');
   }
 }
 
@@ -778,68 +799,86 @@ function arrayBufferToBase64Url(buffer) {
   return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-// ─── Drawer ───
-function openDrawer() {
-  if (!el.drawer) return;
-  updateDrawerHeader();
-  updateDrawerBadges();
-  el.drawerOverlay?.classList.remove('hidden');
-  el.drawer.classList.remove('hidden');
-  // force reflow for transition
-  requestAnimationFrame(() => {
-    el.drawerOverlay?.classList.add('open');
-    el.drawer?.classList.add('open');
-  });
-}
+// ─── Bottom tab bar + "Mais" sheet ───
+function onTabClick(tab, btn) {
+  // Marca ativo (Início é persistente; os outros abrem sheet e não mudam tab ativa)
+  if (tab === 'home') {
+    setActiveTab(btn);
+    // scroll to top da home
+    document.querySelector('.vendor-main')?.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
 
-function closeDrawer() {
-  if (!el.drawer) return;
-  el.drawerOverlay?.classList.remove('open');
-  el.drawer.classList.remove('open');
-  setTimeout(() => {
-    el.drawerOverlay?.classList.add('hidden');
-    el.drawer?.classList.add('hidden');
-  }, 250);
-}
-
-function updateDrawerHeader() {
-  if (!_ctx) return;
-  const nome = _ctx.apelido || _ctx.nome || '—';
-  if (el.drawerName) el.drawerName.textContent = nome;
-  if (el.drawerAvatar) {
-    try {
-      const url = buildAvatarUrl(_ctx.avatar_config);
-      el.drawerAvatar.innerHTML = url
-        ? `<img src="${escape(url)}" alt="${escape(nome)}">`
-        : initials(nome);
-    } catch { el.drawerAvatar.textContent = initials(nome); }
+  // Demais tabs: abrem sheet/menu, mas mantêm home como tab ativa
+  switch (tab) {
+    case 'missions':
+      window._vendorMissionsOpen?.() || _openSheetById('missionsSheet', 'missionsOverlay');
+      break;
+    case 'announcements':
+      window._vendorAnnOpen?.();
+      break;
+    case 'achievements':
+      window._vendorAchievementsOpen?.() || _openSheetById('achievementsSheet', 'achievementsOverlay');
+      break;
+    case 'more':
+      openMoreSheet();
+      break;
   }
 }
 
-function updateDrawerBadges() {
+function setActiveTab(btn) {
+  el.tabbar?.querySelectorAll('.vendor-tab').forEach(b => b.classList.remove('active'));
+  btn?.classList.add('active');
+}
+
+function openMoreSheet() {
+  el.moreOverlay?.classList.remove('hidden');
+  el.moreSheet?.classList.remove('hidden');
+}
+function closeMoreSheet() {
+  el.moreOverlay?.classList.add('hidden');
+  el.moreSheet?.classList.add('hidden');
+}
+
+function onMoreAction(action) {
+  closeMoreSheet();
+  // dispatch after close animation (sheets abrem sobre fundo limpo)
+  setTimeout(() => {
+    switch (action) {
+      case 'vm':
+        window._vendorVmOpen?.() || _openSheetById('vmSheet', 'vmOverlay');
+        break;
+      case 'xp':
+        window._vendorXpOpen?.() || _openSheetById('xpSheet', 'xpOverlay');
+        break;
+      case 'ai':
+        onAiTips();
+        break;
+      case 'avatar':
+        window._vendorAvatarOpen?.();
+        break;
+      case 'logout':
+        window._vendorLogout && window._vendorLogout();
+        break;
+    }
+  }, 240);
+}
+
+// Fallback helper for sheets without own open button
+function _openSheetById(sheetId, overlayId) {
+  document.getElementById(overlayId)?.classList.remove('hidden');
+  document.getElementById(sheetId)?.classList.remove('hidden');
+}
+
+function updateTabBadges() {
   const ann = window._vendorCounts?.announcements || 0;
   const mis = window._vendorCounts?.missions || 0;
   const vm = window._vendorCounts?.vm || 0;
-  const ach = window._vendorCounts?.achievements || null;
 
-  setBadge(el.drawerBadgeAnn, ann);
-  setBadge(el.drawerBadgeMis, mis);
-  setBadge(el.drawerBadgeVm, vm);
-
-  if (el.drawerCountAch) {
-    el.drawerCountAch.textContent = ach ? `${ach.unlocked}/${ach.total}` : '';
-  }
-
-  // Menu button composite badge
-  const total = ann + mis + vm;
-  if (el.menuBadge) {
-    if (total > 0) {
-      el.menuBadge.textContent = String(total);
-      el.menuBadge.classList.remove('hidden');
-    } else {
-      el.menuBadge.classList.add('hidden');
-    }
-  }
+  setBadge(el.tabBadgeAnn, ann);
+  setBadge(el.tabBadgeMis, mis);
+  setBadge(el.moreBadgeVm, vm);
+  setBadge(el.tabBadgeMore, vm);
 }
 
 function setBadge(elem, count) {
@@ -852,45 +891,9 @@ function setBadge(elem, count) {
   }
 }
 
-function onDrawerAction(action) {
-  closeDrawer();
-  // dispatch after close animation (so sheets abrem sobre fundo limpo)
-  setTimeout(() => {
-    switch (action) {
-      case 'announcements':
-        window._vendorAnnOpen?.();
-        break;
-      case 'missions':
-        window._vendorMissionsOpen?.() || _openSheetById('missionsSheet', 'missionsOverlay');
-        break;
-      case 'vm':
-        window._vendorVmOpen?.() || _openSheetById('vmSheet', 'vmOverlay');
-        break;
-      case 'achievements':
-        _openSheetById('achievementsSheet', 'achievementsOverlay');
-        break;
-      case 'xp':
-        _openSheetById('xpSheet', 'xpOverlay');
-        break;
-      case 'ai':
-        onAiTips();
-        break;
-      case 'logout':
-        window._vendorLogout && window._vendorLogout();
-        break;
-    }
-  }, 280);
-}
-
-// Fallback helper for sheets without own open button
-function _openSheetById(sheetId, overlayId) {
-  document.getElementById(overlayId)?.classList.remove('hidden');
-  document.getElementById(sheetId)?.classList.remove('hidden');
-}
-
 // Expose for modules to update badges
 window._vendorCounts = window._vendorCounts || { announcements: 0, missions: 0, vm: 0, achievements: null };
-window._vendorUpdateBadges = updateDrawerBadges;
+window._vendorUpdateBadges = updateTabBadges;
 
 // ─── AI Tips ───
 async function onAiTips() {

@@ -45,6 +45,12 @@ export function unmountVm() {
   _vmTasks = [];
 }
 
+// Força re-load + update de badges. Usado pelo botão refresh do vendor-home.
+export async function refreshVm() {
+  if (!_sb) return;
+  await Promise.all([refreshVmTasks(), refreshMyVms()]);
+}
+
 // ─── Data ───
 async function refreshVmTasks() {
   try {

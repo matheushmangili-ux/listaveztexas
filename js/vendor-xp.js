@@ -197,6 +197,7 @@ function showTierUp(tier) {
 function bindSheet() {
   const overlay = document.getElementById('xpOverlay');
   overlay?.addEventListener('click', closeSheet);
+  window._vendorXpOpen = openSheet;
 }
 
 async function openSheet() {

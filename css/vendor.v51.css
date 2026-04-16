@@ -2640,11 +2640,11 @@ html, body {
   line-height: 1.5;
 }
 
-/* Fase 8: cards antigos no main ficam invisíveis — conteúdo acessa via drawer */
-.vendor-main > #missionsCard,
-.vendor-main > #vmCard,
-.vendor-main > #announcementsWrap {
-  display: none !important;
+/* Fase 9 redesign: cards antigos voltam ao home feed (drawer removido) */
+.vendor-main > #missionsCard:empty,
+.vendor-main > #vmCard:empty,
+.vendor-main > #announcementsWrap:empty {
+  display: none;
 }
 
 /* ═══════════════════════════════════════════
@@ -2956,3 +2956,161 @@ html, body {
 }
 
 /* ============ FIM modernization layer v2 ============ */
+
+/* ═══════════════════════════════════════════════════════════════
+   Fase 9 — Bottom tab bar + home feed (drawer removido)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* XP strip permanente: full-width abaixo do header */
+.xp-strip {
+  padding: 8px 16px 10px;
+  background: var(--vendor-surface);
+  border-bottom: 1px solid var(--vendor-border);
+  flex-shrink: 0;
+}
+.xp-strip:empty { display: none; }
+.xp-strip-btn { width: 100%; }
+
+/* Main com padding extra pro tab bar não cobrir conteúdo */
+.vendor-main {
+  padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+}
+
+/* Tab bar fixa (bottom nav) */
+.vendor-tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  background: var(--vendor-surface);
+  border-top: 1px solid var(--vendor-border);
+  padding: 6px 0 calc(6px + env(safe-area-inset-bottom));
+  z-index: 80;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.vendor-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 4px;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  color: var(--vendor-text-muted);
+  cursor: pointer;
+  position: relative;
+  transition: color 0.15s ease, transform 0.1s ease;
+  min-height: 52px;
+}
+.vendor-tab i {
+  font-size: 18px;
+  line-height: 1;
+}
+.vendor-tab span:not(.tab-badge) {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.vendor-tab:active { transform: scale(0.94); }
+.vendor-tab.active {
+  color: var(--accent);
+}
+.vendor-tab.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 0 0 3px 3px;
+}
+
+/* Badge em tab */
+.tab-badge {
+  position: absolute;
+  top: 4px;
+  right: calc(50% - 22px);
+  min-width: 16px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: 8px;
+  background: #e89b8a;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 16px;
+  text-align: center;
+  box-shadow: 0 0 0 2px var(--vendor-surface);
+}
+.tab-badge.hidden { display: none; }
+
+/* "Mais" sheet — lista estilo drawer */
+.vendor-more-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0 12px;
+}
+.vendor-more-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--vendor-text);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+  position: relative;
+}
+.vendor-more-item i {
+  width: 22px;
+  font-size: 16px;
+  color: var(--vendor-text-muted);
+  text-align: center;
+  flex-shrink: 0;
+}
+.vendor-more-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.vendor-more-text strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--vendor-text);
+}
+.vendor-more-text span {
+  font-size: 11px;
+  color: var(--vendor-text-muted);
+  margin-top: 1px;
+}
+.vendor-more-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+.vendor-more-item:active { transform: scale(0.98); }
+.vendor-more-item.danger strong { color: #e89b8a; }
+.vendor-more-item.danger i { color: #e89b8a; }
+.vendor-more-item.danger:hover { background: rgba(232, 155, 138, 0.08); }
+
+/* Badge em "Mais" item */
+.vendor-more-item .tab-badge {
+  position: static;
+  box-shadow: none;
+  background: var(--accent);
+  color: var(--accent-ink, #0d0d0d);
+}
+
+/* ============ FIM Fase 9 tab bar redesign ============ */

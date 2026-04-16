@@ -67,6 +67,7 @@ function updateBadgeCount() {
 function wireHeaderBtn() {
   const btn = document.getElementById('btnAchievements');
   if (btn) btn.addEventListener('click', openSheet);
+  window._vendorAchievementsOpen = openSheet;
 }
 
 // ─── Sheet ───

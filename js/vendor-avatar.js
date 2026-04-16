@@ -271,6 +271,7 @@ function bindEditor() {
   if (!el) return;
   _boundOpenEditor = openEditor;
   el.addEventListener('click', _boundOpenEditor);
+  window._vendorAvatarOpen = openEditor;
 }
 
 function openEditor() {
