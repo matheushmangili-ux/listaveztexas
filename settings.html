@@ -505,7 +505,7 @@
                   <label class="form-label">Nome da loja</label>
                   <input id="settStoreName" class="input" type="text" maxlength="60" />
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="display: none">
                   <label class="form-label">Cor principal</label>
                   <div class="color-row">
                     <div class="color-swatch" id="colorSwatch">
@@ -1259,10 +1259,17 @@
         renderCanais();
       }
 
+      function iconClass(ic) {
+        if (!ic) return 'fa-solid fa-circle-question';
+        return ic.startsWith('fa-brands') || ic.startsWith('fa-solid') || ic.startsWith('fa-regular')
+          ? ic
+          : 'fa-solid ' + ic;
+      }
+
       function renderCanalRow(c, showActions) {
         const statusLabel = c.ativo ? 'Ativo' : 'Inativo';
         return `<div class="canal-row">
-    <div class="canal-icon"><i class="${c.icone}"></i></div>
+    <div class="canal-icon"><i class="${iconClass(c.icone)}"></i></div>
     <div class="canal-info">
       <div class="canal-name">${c.nome}</div>
       ${!c.ativo ? '<div class="canal-type">Inativo</div>' : ''}
@@ -1375,13 +1382,12 @@
         if (!picker) return;
         const list = icons || (_editingCanalTipo === 'fixo' ? _canalIcOpts : _eventoIcOpts);
         picker.innerHTML = list
-          .map((ic) => {
-            const isBrand = ic.startsWith('fa-brands');
-            const cls = isBrand ? ic : 'fa-solid ' + ic;
-            return `<button type="button" class="icone-option ${ic === _selectedIcone ? 'selected' : ''}" onclick="pickIcone('${ic}')">
-       <i class="${cls}"></i>
-     </button>`;
-          })
+          .map(
+            (ic) =>
+              `<button type="button" class="icone-option ${ic === _selectedIcone ? 'selected' : ''}" onclick="pickIcone('${ic}')">
+       <i class="${iconClass(ic)}"></i>
+     </button>`
+          )
           .join('');
       }
 
