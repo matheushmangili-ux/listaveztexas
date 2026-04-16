@@ -75,8 +75,7 @@ function grabRefs() {
   el.tabbar = document.getElementById('vendorTabbar');
   el.tabBadgeAnn = document.getElementById('tabBadgeAnn');
   el.tabBadgeMis = document.getElementById('tabBadgeMis');
-  el.tabBadgeMore = document.getElementById('tabBadgeMore');
-  el.moreBadgeVm = document.getElementById('moreBadgeVm');
+  el.tabBadgeVm = document.getElementById('tabBadgeVm');
   el.moreOverlay = document.getElementById('moreOverlay');
   el.moreSheet = document.getElementById('moreSheet');
   el.primaryActions = document.getElementById('primaryActions');
@@ -817,8 +816,8 @@ function onTabClick(tab, btn) {
     case 'announcements':
       window._vendorAnnOpen?.();
       break;
-    case 'achievements':
-      window._vendorAchievementsOpen?.() || _openSheetById('achievementsSheet', 'achievementsOverlay');
+    case 'vm':
+      window._vendorVmOpen?.() || _openSheetById('vmSheet', 'vmOverlay');
       break;
     case 'more':
       openMoreSheet();
@@ -845,8 +844,8 @@ function onMoreAction(action) {
   // dispatch after close animation (sheets abrem sobre fundo limpo)
   setTimeout(() => {
     switch (action) {
-      case 'vm':
-        window._vendorVmOpen?.() || _openSheetById('vmSheet', 'vmOverlay');
+      case 'achievements':
+        window._vendorAchievementsOpen?.() || _openSheetById('achievementsSheet', 'achievementsOverlay');
         break;
       case 'xp':
         window._vendorXpOpen?.() || _openSheetById('xpSheet', 'xpOverlay');
@@ -877,8 +876,7 @@ function updateTabBadges() {
 
   setBadge(el.tabBadgeAnn, ann);
   setBadge(el.tabBadgeMis, mis);
-  setBadge(el.moreBadgeVm, vm);
-  setBadge(el.tabBadgeMore, vm);
+  setBadge(el.tabBadgeVm, vm);
 }
 
 function setBadge(elem, count) {
