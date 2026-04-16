@@ -126,9 +126,9 @@ export function toast(msg, type = 'info', duration = 4000) {
   if (!container) return;
   const tone = {
     success: { accent: '#7fd9a0', iconBg: 'rgba(170,238,196,.18)' },
-    error:   { accent: '#d47a68', iconBg: 'rgba(232,155,138,.18)' },
+    error: { accent: '#d47a68', iconBg: 'rgba(232,155,138,.18)' },
     warning: { accent: '#b8875a', iconBg: 'rgba(212,163,115,.18)' },
-    info:    { accent: '#6d85ac', iconBg: 'rgba(142,165,201,.18)' }
+    info: { accent: '#6d85ac', iconBg: 'rgba(142,165,201,.18)' }
   };
   const icons = {
     success: 'fa-check',
@@ -164,4 +164,113 @@ export function toast(msg, type = 'info', duration = 4000) {
     el.style.animation = 'toastOut .28s cubic-bezier(.4,0,1,1) forwards';
     setTimeout(() => el.remove(), 280);
   }, duration);
+}
+
+// ============================================
+// Color helpers — derivam paleta de acento a partir de um hex base
+// Usado pelo white-label Elite (applyBranding → --accent e variantes)
+// ============================================
+
+function hexToRgb(hex) {
+  const h = hex.replace('#', '');
+  const v =
+    h.length === 3
+      ? h
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : h;
+  const n = parseInt(v, 16);
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+
+function rgbToHex(r, g, b) {
+  const c = (x) =>
+    Math.max(0, Math.min(255, Math.round(x)))
+      .toString(16)
+      .padStart(2, '0');
+  return '#' + c(r) + c(g) + c(b);
+}
+
+function rgbToHsl(r, g, b) {
+  r /= 255;
+  g /= 255;
+  b /= 255;
+  const max = Math.max(r, g, b),
+    min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (max === min) return { h: 0, s: 0, l };
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h;
+  switch (max) {
+    case r:
+      h = (g - b) / d + (g < b ? 6 : 0);
+      break;
+    case g:
+      h = (b - r) / d + 2;
+      break;
+    default:
+      h = (r - g) / d + 4;
+  }
+  return { h: h * 60, s, l };
+}
+
+function hslToRgb(h, s, l) {
+  h = ((h % 360) + 360) % 360;
+  if (s === 0) return { r: l * 255, g: l * 255, b: l * 255 };
+  const hk = h / 360;
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const hue = (t) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  return { r: hue(hk + 1 / 3) * 255, g: hue(hk) * 255, b: hue(hk - 1 / 3) * 255 };
+}
+
+function shift(hex, deltaL) {
+  const { r, g, b } = hexToRgb(hex);
+  const { h, s, l } = rgbToHsl(r, g, b);
+  const newL = Math.max(0, Math.min(1, l + deltaL));
+  const out = hslToRgb(h, s, newL);
+  return rgbToHex(out.r, out.g, out.b);
+}
+
+function relativeLuminance(hex) {
+  const { r, g, b } = hexToRgb(hex);
+  const toLin = (c) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * toLin(r) + 0.7152 * toLin(g) + 0.0722 * toLin(b);
+}
+
+/**
+ * Deriva { base, bright, dim, ink } a partir de um hex base.
+ * - bright: +12% luminosidade (hover/destaques)
+ * - dim:    −15% luminosidade (pressed/muted)
+ * - ink:    preto ou branco conforme contraste WCAG sobre base
+ */
+export function deriveAccentVariants(hex) {
+  if (!/^#[0-9a-fA-F]{3,6}$/.test(hex)) return null;
+  const base =
+    hex.length === 4
+      ? '#' +
+        hex
+          .slice(1)
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : hex.toLowerCase();
+  return {
+    base,
+    bright: shift(base, 0.12),
+    dim: shift(base, -0.15),
+    ink: relativeLuminance(base) > 0.5 ? '#0d0d0d' : '#ffffff'
+  };
 }

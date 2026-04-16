@@ -85,10 +85,25 @@ describe('applyBranding', () => {
     expect(() => applyBranding(null)).not.toThrow();
   });
 
-  it('aplica cor primária à variável CSS --accent', async () => {
+  it('aplica cor primária e variantes derivadas às CSS vars', async () => {
     const { applyBranding } = await freshImport();
     applyBranding({ cor_primaria: '#ff0000', nome_loja: 'Loja X' });
-    expect(document.documentElement.style.getPropertyValue('--accent')).toBe('#ff0000');
+    const style = document.documentElement.style;
+    expect(style.getPropertyValue('--accent')).toBe('#ff0000');
+    // bright/dim são derivadas via HSL; basta conferir que foram definidas
+    expect(style.getPropertyValue('--accent-bright')).toMatch(/^#[0-9a-f]{6}$/);
+    expect(style.getPropertyValue('--accent-dim')).toMatch(/^#[0-9a-f]{6}$/);
+    // --gold e --success alinham com accent (mesma paleta)
+    expect(style.getPropertyValue('--gold')).toBe('#ff0000');
+    expect(style.getPropertyValue('--success')).toBe('#ff0000');
+    // ink é preto ou branco
+    expect(['#0d0d0d', '#ffffff']).toContain(style.getPropertyValue('--accent-ink'));
+  });
+
+  it('não aplica cor quando cor_primaria está ausente (tenant non-elite ou opt-out)', async () => {
+    const { applyBranding } = await freshImport();
+    applyBranding({ nome_loja: 'Loja Y', plano: 'pro' });
+    expect(document.documentElement.style.getPropertyValue('--accent')).toBe('');
   });
 
   it('atualiza document.title com nome_loja', async () => {

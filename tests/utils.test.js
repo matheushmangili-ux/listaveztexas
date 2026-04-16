@@ -9,6 +9,7 @@ import {
   monthRange,
   initTheme,
   toggleTheme,
+  deriveAccentVariants,
   MOTIVOS,
   STATUS_CONFIG,
   SAIDA_COLORS,
@@ -235,5 +236,40 @@ describe('constants', () => {
     expect(PAUSE_LIMITS.banheiro).toBe(15);
     expect(PAUSE_LIMITS.reuniao).toBe(30);
     expect(PAUSE_LIMITS.operacional).toBe(45);
+  });
+});
+
+describe('deriveAccentVariants', () => {
+  it('retorna null para hex inválido', () => {
+    expect(deriveAccentVariants('red')).toBeNull();
+    expect(deriveAccentVariants('')).toBeNull();
+    expect(deriveAccentVariants('#xyz')).toBeNull();
+  });
+
+  it('normaliza shorthand hex (#abc → #aabbcc)', () => {
+    const v = deriveAccentVariants('#abc');
+    expect(v.base).toBe('#aabbcc');
+  });
+
+  it('base é o próprio hex (lowercase)', () => {
+    const v = deriveAccentVariants('#FF0000');
+    expect(v.base).toBe('#ff0000');
+  });
+
+  it('bright é mais claro que base; dim é mais escuro (no eixo L)', () => {
+    const v = deriveAccentVariants('#3366cc');
+    const intHex = (h) => parseInt(h.slice(1), 16);
+    // bright e dim devem existir e ser válidos
+    expect(v.bright).toMatch(/^#[0-9a-f]{6}$/);
+    expect(v.dim).toMatch(/^#[0-9a-f]{6}$/);
+    // bright tem maior soma RGB que dim (proxy grosso de luminosidade)
+    expect(intHex(v.bright)).toBeGreaterThan(intHex(v.dim));
+  });
+
+  it('ink é preto em fundos claros, branco em escuros', () => {
+    expect(deriveAccentVariants('#ffffff').ink).toBe('#0d0d0d');
+    expect(deriveAccentVariants('#000000').ink).toBe('#ffffff');
+    // mint minhavez (#aaeec4): claro → ink preto
+    expect(deriveAccentVariants('#aaeec4').ink).toBe('#0d0d0d');
   });
 });

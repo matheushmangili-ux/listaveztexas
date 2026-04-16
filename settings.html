@@ -505,9 +505,29 @@
                   <label class="form-label">Nome da loja</label>
                   <input id="settStoreName" class="input" type="text" maxlength="60" />
                 </div>
-                <div class="form-group" style="display: none">
-                  <label class="form-label">Cor principal</label>
-                  <div class="color-row">
+                <div class="form-group" id="corPrincipalGroup">
+                  <label class="form-label">
+                    Cor principal
+                    <span
+                      id="corEliteBadge"
+                      style="
+                        display: none;
+                        margin-left: 6px;
+                        padding: 2px 8px;
+                        font-size: 10px;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        letter-spacing: 0.08em;
+                        background: linear-gradient(135deg, #d4af37, #f5d76e);
+                        color: #0d0d0d;
+                        border-radius: 10px;
+                      "
+                    >
+                      <i class="fa-solid fa-lock" style="margin-right: 4px; font-size: 9px"></i>Elite
+                    </span>
+                  </label>
+                  <!-- Picker (mostrado para tenants elite) -->
+                  <div id="corPickerWrap" class="color-row" style="display: none">
                     <div class="color-swatch" id="colorSwatch">
                       <input type="color" id="settColor" value="#aaeec4" />
                     </div>
@@ -519,6 +539,29 @@
                       maxlength="7"
                       style="max-width: 120px; font-family: var(--font-mono); font-size: 13px"
                     />
+                  </div>
+                  <!-- Card de lock (mostrado para non-elite) -->
+                  <div
+                    id="corLockCard"
+                    style="
+                      display: none;
+                      padding: 14px 16px;
+                      background: var(--bg-elevated);
+                      border: 1px dashed var(--border-subtle);
+                      border-radius: 10px;
+                      color: var(--text-muted);
+                      font-size: 12px;
+                      line-height: 1.5;
+                    "
+                  >
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px">
+                      <i class="fa-solid fa-palette" style="color: var(--text-secondary)"></i>
+                      <strong style="color: var(--text-secondary); font-size: 13px">
+                        Cor personalizada — plano Elite
+                      </strong>
+                    </div>
+                    Personalize a cor de destaque do painel e app para refletir a identidade da sua loja. Disponível no
+                    plano <strong>Elite</strong>.
                   </div>
                 </div>
                 <div class="form-group" style="margin-bottom: 0">
@@ -924,6 +967,12 @@
         document.getElementById('colorSwatch').style.background = color;
         tenantSectors = tenant.setores || ['loja'];
 
+        // White-label Elite: picker só aparece para plano elite; outros veem card de lock
+        const isElite = tenant.plano === 'elite';
+        document.getElementById('corPickerWrap').style.display = isElite ? '' : 'none';
+        document.getElementById('corLockCard').style.display = isElite ? 'none' : '';
+        document.getElementById('corEliteBadge').style.display = isElite ? 'none' : '';
+
         renderSettSectors();
         renderVendorList();
         populateLinks();
@@ -1003,21 +1052,22 @@
           return;
         }
 
-        const { error } = await sb
-          .from('tenants')
-          .update({
-            nome_loja: name,
-            cor_primaria: color,
-            setores: tenantSectors
-          })
-          .eq('id', tenantId);
+        const isElite = tenant.plano === 'elite';
+        const payload = {
+          nome_loja: name,
+          setores: tenantSectors
+        };
+        // Cor personalizada só para elite (também gateado server-side via resolve_tenant)
+        if (isElite) payload.cor_primaria = color;
+
+        const { error } = await sb.from('tenants').update(payload).eq('id', tenantId);
 
         if (error) {
           toast('Erro ao salvar: ' + error.message, 'error');
           return;
         }
         toast('Configurações salvas!', 'success');
-        applyBranding({ ...tenant, nome_loja: name, cor_primaria: color });
+        applyBranding({ ...tenant, nome_loja: name, cor_primaria: isElite ? color : tenant.cor_primaria });
       };
 
       // Links

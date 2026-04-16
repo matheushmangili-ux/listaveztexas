@@ -3,6 +3,7 @@
 // Resolves tenant from URL slug, loads context
 // ============================================
 import { getSupabase } from './supabase-config.js';
+import { deriveAccentVariants } from './utils.js';
 
 let _tenantCache = null;
 let _slug = null;
@@ -88,14 +89,27 @@ export function clearTenantCache() {
 
 /**
  * Apply tenant branding (accent color, page title).
+ * cor_primaria só vem preenchido quando resolve_tenant gateia por plano='elite'
+ * (vide sql/34-resolve-tenant-white-label.sql). Gate server-side — sem checar
+ * plano aqui.
  */
 export function applyBranding(tenant) {
   if (!tenant) return;
-  // NÃO sobrescrever --accent: paleta minhavez (mint) é padrão global.
-  // Rebranding white-label per-tenant pode voltar depois como feature Elite.
-  // if (tenant.cor_primaria) {
-  //   document.documentElement.style.setProperty('--accent', tenant.cor_primaria);
-  // }
+  if (tenant.cor_primaria) {
+    const v = deriveAccentVariants(tenant.cor_primaria);
+    if (v) {
+      const root = document.documentElement.style;
+      root.setProperty('--accent', v.base);
+      root.setProperty('--accent-bright', v.bright);
+      root.setProperty('--accent-dim', v.dim);
+      root.setProperty('--accent-ink', v.ink);
+      root.setProperty('--gold', v.base);
+      root.setProperty('--gold-bright', v.bright);
+      root.setProperty('--gold-dim', v.dim);
+      root.setProperty('--success', v.base);
+      root.setProperty('--success-deep', v.dim);
+    }
+  }
   if (tenant.nome_loja) {
     document.title = `Minha Vez — ${tenant.nome_loja}`;
   }
