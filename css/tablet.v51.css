@@ -6,6 +6,97 @@
   height: 100dvh;
   gap: 0;
 }
+
+/* Ruptura picker — cascata tipo → marca → tamanho → cor */
+.ruptura-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ruptura-picker .rp-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ruptura-picker .rp-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+.ruptura-picker .rp-optional {
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.7;
+  margin-left: 4px;
+}
+.ruptura-picker .rp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ruptura-picker .rp-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  min-height: 36px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.12s ease;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.ruptura-picker .rp-chip:hover:not(.active) {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-medium);
+}
+.ruptura-picker .rp-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0d0d0d;
+  font-weight: 700;
+}
+.ruptura-picker .rp-chip:active {
+  transform: scale(0.95);
+}
+.ruptura-picker .rp-chip--ghost {
+  background: transparent;
+  border-style: dashed;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.ruptura-picker .rp-chip--ghost:hover:not(.active) {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: transparent;
+}
+.ruptura-picker .rp-color-details {
+  margin-top: 4px;
+}
+.ruptura-picker .rp-color-summary {
+  cursor: pointer;
+  padding: 8px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  user-select: none;
+}
+.ruptura-picker .rp-color-details[open] .rp-color-summary {
+  color: var(--text-secondary);
+}
 @media (max-width: 600px) {
   .tablet-layout {
     grid-template-columns: 1fr;

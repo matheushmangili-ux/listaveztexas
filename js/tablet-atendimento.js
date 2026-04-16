@@ -7,6 +7,14 @@
 import { toast, formatTime, initials, escapeHtml } from '/js/utils.js';
 import { playSound } from '/js/sound.js';
 import { createModal, currencyInputHTML, parseCurrency } from '/js/ui.js';
+import {
+  loadCatalog as loadRupturaCatalog,
+  hasCatalog as hasRupturaCatalog,
+  mountPicker as mountRupturaPicker,
+  getSelection as getRupturaSelection,
+  selectionToText as rupturaSelectionToText,
+  resetSelection as resetRupturaSelection
+} from '/js/tablet-ruptura.js';
 import { fireVendaCelebration, fireEpicTrocaAnimation, animateValueToHeader } from '/js/tablet-celebrations.js';
 import { animateFichaToAtendimento } from '/js/tablet-queue.js';
 import { invalidateQueue, scheduleRender, isTouchDragging, getTouchGhost, setTouchGhost } from '/js/tablet-queue.js';
@@ -518,14 +526,7 @@ function buildAtendCardData(atend) {
   const canalIcone = canal?.icone || '';
   const canalNome = canal?.nome || '';
   const clientCount = atend._clientCount && atend._clientCount > 1 ? atend._clientCount : 0;
-  const key = [
-    atend.id,
-    nome,
-    atend.preferencial ? 1 : 0,
-    clientCount,
-    canalIcone,
-    canalNome
-  ].join('|');
+  const key = [atend.id, nome, atend.preferencial ? 1 : 0, clientCount, canalIcone, canalNome].join('|');
   return {
     id: atend.id,
     key,
@@ -649,9 +650,7 @@ export function renderActiveAtendimentos() {
       const icon = document.createElement('i');
       icon.className = 'fa-solid fa-arrow-left service-empty-icon';
       _atendEmptyNode.appendChild(icon);
-      _atendEmptyNode.appendChild(
-        document.createTextNode('Arraste vendedores da fila para iniciar atendimento')
-      );
+      _atendEmptyNode.appendChild(document.createTextNode('Arraste vendedores da fila para iniciar atendimento'));
       list.appendChild(_atendEmptyNode);
     }
     initAtendDrag();
@@ -1217,7 +1216,7 @@ async function answerContinuar(continuar, count) {
 
 // ─── Finalize atendimento ───
 
-async function finalize(resultado, motivo, detalhe, produto, atendId, valor, continuar) {
+async function finalize(resultado, motivo, detalhe, produto, atendId, valor, continuar, rupturaSel) {
   const id = atendId || pendingAtendimentoId;
   if (!id || _ctx.actionLock) return;
   _ctx.actionLock = true;
@@ -1234,7 +1233,11 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor, con
       p_motivo: motivo || null,
       p_motivo_detalhe: detalhe || null,
       p_produto_ruptura: produto || null,
-      p_valor_venda: valor ?? null
+      p_valor_venda: valor ?? null,
+      p_ruptura_tipo_id: rupturaSel?.tipo_id || null,
+      p_ruptura_marca_id: rupturaSel?.marca_id || null,
+      p_ruptura_cor_id: rupturaSel?.cor_id || null,
+      p_ruptura_tamanho: rupturaSel?.tamanho || null
     });
     if (error) throw error;
     const msg =
@@ -1305,6 +1308,7 @@ function openMotivos() {
   document.getElementById('outroField').style.display = 'none';
   document.getElementById('btnConfirmMotivo').disabled = true;
   pendingOutcome = null;
+  resetRupturaSelection();
 }
 
 function closeMotivos() {
@@ -1312,7 +1316,7 @@ function closeMotivos() {
   document.getElementById('motivoSheet').classList.remove('open');
 }
 
-function selectMotivo(el) {
+async function selectMotivo(el) {
   document
     .getElementById('motivoList')
     ?.querySelectorAll('.motivo-option')
@@ -1322,20 +1326,49 @@ function selectMotivo(el) {
   document.getElementById('rupturaField').style.display = pendingOutcome === 'ruptura' ? 'block' : 'none';
   document.getElementById('outroField').style.display = pendingOutcome === 'outro' ? 'block' : 'none';
   document.getElementById('btnConfirmMotivo').disabled = false;
-  if (pendingOutcome === 'ruptura') document.getElementById('rupturaInput').focus();
+
+  if (pendingOutcome === 'ruptura') {
+    // Lazy-load catálogo e decide entre picker estruturado (elite/seeded) ou input fallback
+    try {
+      await loadRupturaCatalog(_ctx.sb);
+    } catch (_) {
+      /* falha silenciosa: cai no fallback */
+    }
+    const pickerEl = document.getElementById('rupturaPicker');
+    const inputWrap = document.getElementById('rupturaInputWrap');
+    if (hasRupturaCatalog() && pickerEl) {
+      inputWrap.style.display = 'none';
+      pickerEl.style.display = 'block';
+      mountRupturaPicker(pickerEl);
+    } else {
+      if (pickerEl) pickerEl.style.display = 'none';
+      inputWrap.style.display = 'block';
+      document.getElementById('rupturaInput')?.focus();
+    }
+  }
   if (pendingOutcome === 'outro') document.getElementById('outroInput').focus();
 }
 
 function confirmMotivo() {
   if (!pendingOutcome || !pendingAtendimentoId) return;
-  const produto = pendingOutcome === 'ruptura' ? document.getElementById('rupturaInput').value.trim() : null;
+  let produto = null;
+  let rupturaSel = null;
+  if (pendingOutcome === 'ruptura') {
+    if (hasRupturaCatalog()) {
+      rupturaSel = getRupturaSelection();
+      produto = rupturaSelectionToText(); // representação legível (backward compat com produto_ruptura TEXT)
+    } else {
+      produto = document.getElementById('rupturaInput').value.trim() || null;
+    }
+  }
   const detalhe = pendingOutcome === 'outro' ? document.getElementById('outroInput').value.trim() : null;
   const atendId = pendingAtendimentoId;
+  const motivoSnap = pendingOutcome;
   closeMotivos();
   askContinuar(
     atendId,
-    () => finalize('nao_convertido', pendingOutcome, detalhe, produto, atendId, null, false),
-    () => finalize('nao_convertido', pendingOutcome, detalhe, produto, atendId, null, true)
+    () => finalize('nao_convertido', motivoSnap, detalhe, produto, atendId, null, false, rupturaSel),
+    () => finalize('nao_convertido', motivoSnap, detalhe, produto, atendId, null, true, rupturaSel)
   );
 }
 
