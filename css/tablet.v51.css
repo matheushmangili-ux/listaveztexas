@@ -30,13 +30,13 @@
   color: var(--text-primary);
 }
 .t-header-logo {
-  height: 38px;
-  width: 130px;
+  height: 64px;
+  width: auto;
   max-width: none;
   background: transparent;
   padding: 0;
   object-fit: contain;
-  transform: scale(1.7);
+  transform: scale(1.85);
   transform-origin: left center;
   margin-right: 24px;
   flex-shrink: 0;
@@ -181,7 +181,10 @@
 }
 .setor-tab i {
   opacity: 0.7;
-  transition: opacity 0.18s ease, color 0.18s ease, filter 0.22s ease;
+  transition:
+    opacity 0.18s ease,
+    color 0.18s ease,
+    filter 0.22s ease;
 }
 
 .setor-tab:hover:not(.active) {
@@ -1917,19 +1920,29 @@
   transform: translateY(-1px);
 }
 .footer-card .fc-avatar {
-  box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 3px var(--border-subtle);
+  box-shadow:
+    0 0 0 2px var(--bg-card),
+    0 0 0 3px var(--border-subtle);
 }
 .footer-card.status-disponivel .fc-avatar {
-  box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 3px rgba(170, 238, 196, 0.6);
+  box-shadow:
+    0 0 0 2px var(--bg-card),
+    0 0 0 3px rgba(170, 238, 196, 0.6);
 }
 .footer-card.status-atendendo .fc-avatar {
-  box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 3px rgba(142, 165, 201, 0.6);
+  box-shadow:
+    0 0 0 2px var(--bg-card),
+    0 0 0 3px rgba(142, 165, 201, 0.6);
 }
 .footer-card.status-pausa .fc-avatar {
-  box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 3px rgba(212, 163, 115, 0.6);
+  box-shadow:
+    0 0 0 2px var(--bg-card),
+    0 0 0 3px rgba(212, 163, 115, 0.6);
 }
 .footer-card.status-fora .fc-avatar {
-  box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 3px rgba(113, 113, 122, 0.45);
+  box-shadow:
+    0 0 0 2px var(--bg-card),
+    0 0 0 3px rgba(113, 113, 122, 0.45);
 }
 
 /* Pause exceeded — mais calmo (mantém urgência sem ansiedade) */
@@ -2069,7 +2082,9 @@
 /* Currency input — mais premium */
 .currency-wrap input {
   letter-spacing: -0.01em;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 .currency-wrap input:focus {
   border-color: var(--accent);
