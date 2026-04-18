@@ -25,9 +25,15 @@
   // Lightbox genérico: abre a imagem em fullscreen sobre tudo. Fecha em click fora / ESC.
   function openLightbox(src) {
     const existing = document.getElementById('vmLightbox');
-    if (existing) existing.remove();
+    // Sem o abort, reabrir a lightbox deixava o keydown antigo órfão no document.
+    if (existing) {
+      existing._abortCtrl?.abort();
+      existing.remove();
+    }
+    const abortCtrl = new AbortController();
     const overlay = document.createElement('div');
     overlay.id = 'vmLightbox';
+    overlay._abortCtrl = abortCtrl;
     overlay.style.cssText =
       'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)';
     overlay.innerHTML = `
@@ -35,14 +41,17 @@
       <button aria-label="Fechar" style="position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:20px;border:none;background:rgba(255,255,255,0.12);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="fa-solid fa-xmark"></i></button>
     `;
     const close = () => {
+      abortCtrl.abort();
       overlay.remove();
-      document.removeEventListener('keydown', onKey);
     };
-    const onKey = (e) => {
-      if (e.key === 'Escape') close();
-    };
-    overlay.addEventListener('click', close);
-    document.addEventListener('keydown', onKey);
+    overlay.addEventListener('click', close, { signal: abortCtrl.signal });
+    document.addEventListener(
+      'keydown',
+      (e) => {
+        if (e.key === 'Escape') close();
+      },
+      { signal: abortCtrl.signal }
+    );
     document.body.appendChild(overlay);
   }
 
