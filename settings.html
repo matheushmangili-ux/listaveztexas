@@ -879,6 +879,128 @@
             "
           />
         </div>
+
+        <!-- Login do vendedor (app mobile) — plano Elite -->
+        <div id="vendorLoginSection" class="form-group" style="margin-top: 4px">
+          <!-- Lock card: tenants não-Elite -->
+          <div
+            id="vmLoginLockCard"
+            style="
+              display: none;
+              padding: 14px 16px;
+              background: var(--bg-elevated);
+              border: 1px dashed var(--border-subtle);
+              border-radius: 10px;
+              color: var(--text-muted);
+              font-size: 12px;
+              line-height: 1.5;
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px">
+              <i class="fa-solid fa-mobile-screen-button" style="color: var(--text-secondary)"></i>
+              <strong style="color: var(--text-secondary); font-size: 13px">
+                Login do vendedor — plano Elite
+              </strong>
+            </div>
+            Crie email e senha para que o vendedor acesse o app <strong>minhavez Vendedor</strong>. Disponível no plano
+            <strong>Elite</strong>.
+          </div>
+
+          <!-- Bloco Elite: criação de login (vendor novo ou ainda sem vínculo) -->
+          <div id="vmLoginCreateBlock" style="display: none">
+            <label
+              style="
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 13px;
+                color: var(--text-secondary);
+                cursor: pointer;
+                margin-bottom: 10px;
+              "
+            >
+              <input type="checkbox" id="vmCreateLoginChk" />
+              <span>
+                <i class="fa-solid fa-mobile-screen-button" style="margin-right: 6px; color: var(--text-muted)"></i>
+                Criar login de acesso ao app Vendedor
+              </span>
+              <span
+                style="
+                  margin-left: auto;
+                  padding: 2px 8px;
+                  font-size: 10px;
+                  font-weight: 700;
+                  text-transform: uppercase;
+                  letter-spacing: 0.08em;
+                  background: linear-gradient(135deg, #d4af37, #f5d76e);
+                  color: #0d0d0d;
+                  border-radius: 10px;
+                "
+              >
+                Elite
+              </span>
+            </label>
+            <div id="vmLoginFields" style="display: none; gap: 10px">
+              <input
+                id="vmLoginEmail"
+                class="input"
+                type="email"
+                placeholder="email@vendedor.com"
+                maxlength="120"
+                autocomplete="off"
+              />
+              <input
+                id="vmLoginPassword"
+                class="input"
+                type="password"
+                placeholder="Senha (mínimo 8 caracteres)"
+                minlength="8"
+                maxlength="72"
+                autocomplete="new-password"
+              />
+            </div>
+          </div>
+
+          <!-- Bloco Elite: vendor já tem login vinculado (edit mode) -->
+          <div
+            id="vmLoginExistingBlock"
+            style="
+              display: none;
+              padding: 12px 14px;
+              background: var(--bg-elevated);
+              border: 1px solid var(--border-subtle);
+              border-radius: 10px;
+              font-size: 12px;
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px">
+              <i class="fa-solid fa-circle-check" style="color: var(--success, #4ade80)"></i>
+              <span style="color: var(--text-secondary)">
+                Login: <strong id="vmLoginEmailDisplay" style="color: var(--text-primary)">—</strong>
+              </span>
+              <button
+                type="button"
+                id="vmResetPassBtn"
+                class="btn btn-ghost"
+                style="margin-left: auto; padding: 4px 10px; font-size: 11px; min-height: 28px"
+              >
+                <i class="fa-solid fa-key"></i> Resetar senha
+              </button>
+            </div>
+            <div id="vmResetPassWrap" style="display: none; gap: 8px; margin-top: 8px">
+              <input
+                id="vmResetPassInput"
+                class="input"
+                type="password"
+                placeholder="Nova senha (mínimo 8 caracteres)"
+                minlength="8"
+                maxlength="72"
+                autocomplete="new-password"
+              />
+            </div>
+          </div>
+        </div>
+
         <div class="modal-actions">
           <button class="btn btn-ghost" onclick="closeVendorModal()">Cancelar</button>
           <button id="vmSave" class="btn btn-primary" onclick="saveVendor()">
@@ -1152,6 +1274,85 @@
           .join('');
       }
 
+      // ─── Vendor login section (plano Elite) ───
+      let _vmResetRequested = false;
+
+      function isEliteTenant() {
+        return tenant && tenant.plano === 'elite';
+      }
+
+      function resetVendorLoginSection() {
+        _vmResetRequested = false;
+        const chk = document.getElementById('vmCreateLoginChk');
+        if (chk) chk.checked = false;
+        const email = document.getElementById('vmLoginEmail');
+        if (email) email.value = '';
+        const pass = document.getElementById('vmLoginPassword');
+        if (pass) pass.value = '';
+        const fields = document.getElementById('vmLoginFields');
+        if (fields) fields.style.display = 'none';
+        const resetWrap = document.getElementById('vmResetPassWrap');
+        if (resetWrap) resetWrap.style.display = 'none';
+        const resetInput = document.getElementById('vmResetPassInput');
+        if (resetInput) resetInput.value = '';
+      }
+
+      function renderVendorLoginSection(vendor) {
+        resetVendorLoginSection();
+        const lock = document.getElementById('vmLoginLockCard');
+        const createBlock = document.getElementById('vmLoginCreateBlock');
+        const existingBlock = document.getElementById('vmLoginExistingBlock');
+
+        if (!isEliteTenant()) {
+          lock.style.display = '';
+          createBlock.style.display = 'none';
+          existingBlock.style.display = 'none';
+          return;
+        }
+
+        lock.style.display = 'none';
+        if (vendor && vendor.auth_user_id) {
+          createBlock.style.display = 'none';
+          existingBlock.style.display = '';
+          const disp = document.getElementById('vmLoginEmailDisplay');
+          disp.textContent = vendor._auth_email || '—';
+        } else {
+          existingBlock.style.display = 'none';
+          createBlock.style.display = '';
+        }
+      }
+
+      async function fetchVendorAuthEmail(vendorId) {
+        try {
+          const { data, error } = await sb.rpc('get_vendor_auth_email', { p_vendedor_id: vendorId });
+          if (error) return null;
+          return data || null;
+        } catch {
+          return null;
+        }
+      }
+
+      // Toggle fields quando usuário marca "criar login"
+      document.addEventListener('change', (e) => {
+        if (e.target && e.target.id === 'vmCreateLoginChk') {
+          const fields = document.getElementById('vmLoginFields');
+          fields.style.display = e.target.checked ? 'grid' : 'none';
+          if (e.target.checked) document.getElementById('vmLoginEmail').focus();
+        }
+      });
+
+      // Botão "Resetar senha"
+      document.addEventListener('click', (e) => {
+        if (e.target && e.target.closest && e.target.closest('#vmResetPassBtn')) {
+          const wrap = document.getElementById('vmResetPassWrap');
+          const willOpen = wrap.style.display === 'none';
+          wrap.style.display = willOpen ? 'grid' : 'none';
+          _vmResetRequested = willOpen;
+          if (willOpen) document.getElementById('vmResetPassInput').focus();
+          else document.getElementById('vmResetPassInput').value = '';
+        }
+      });
+
       // Add vendor modal
       window.openAddVendor = function () {
         document.getElementById('vendorModalTitle').textContent = 'Adicionar Vendedor';
@@ -1159,11 +1360,12 @@
         document.getElementById('vmName').value = '';
         document.getElementById('vmPin').value = '';
         populateSectorSelect('');
+        renderVendorLoginSection(null);
         document.getElementById('vendorModal').classList.add('open');
         document.getElementById('vmName').focus();
       };
 
-      window.openEditVendor = function (id) {
+      window.openEditVendor = async function (id) {
         const v = vendedores.find((x) => x.id === id);
         if (!v) return;
         document.getElementById('vendorModalTitle').textContent = 'Editar Vendedor';
@@ -1171,7 +1373,15 @@
         document.getElementById('vmName').value = v.nome;
         document.getElementById('vmPin').value = v.pin || '';
         populateSectorSelect(v.setor);
+        // Render enquanto busca email (show placeholder), depois atualiza
+        renderVendorLoginSection(v);
         document.getElementById('vendorModal').classList.add('open');
+        if (isEliteTenant() && v.auth_user_id) {
+          const email = await fetchVendorAuthEmail(v.id);
+          v._auth_email = email;
+          const disp = document.getElementById('vmLoginEmailDisplay');
+          if (disp) disp.textContent = email || '—';
+        }
       };
 
       window.closeVendorModal = function () {
@@ -1199,30 +1409,90 @@
           return;
         }
 
+        // Dados de login (plano Elite)
+        const elite = isEliteTenant();
+        const createLoginChecked = elite && document.getElementById('vmCreateLoginChk')?.checked;
+        const loginEmail = document.getElementById('vmLoginEmail')?.value.trim();
+        const loginPass = document.getElementById('vmLoginPassword')?.value;
+        const resetPass = _vmResetRequested ? document.getElementById('vmResetPassInput')?.value : '';
+
+        if (createLoginChecked) {
+          if (!loginEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginEmail)) {
+            toast('Informe um email válido para o login', 'error');
+            return;
+          }
+          if (!loginPass || loginPass.length < 8) {
+            toast('Senha precisa ter ao menos 8 caracteres', 'error');
+            return;
+          }
+        }
+        if (_vmResetRequested && (!resetPass || resetPass.length < 8)) {
+          toast('Nova senha precisa ter ao menos 8 caracteres', 'error');
+          return;
+        }
+
         const btn = document.getElementById('vmSave');
         btn.disabled = true;
         btn.innerHTML = '<div class="spinner"></div>';
 
         try {
+          let vendedorId = id;
           if (id) {
             // Update
             const { error } = await sb.from('vendedores').update({ nome, setor, pin }).eq('id', id);
             if (error) throw error;
-            toast('Vendedor atualizado!', 'success');
           } else {
             // Insert
             const maxPos = vendedores.length > 0 ? Math.max(...vendedores.map((v) => v.posicao_fila || 0)) + 1 : 1;
-            const { error } = await sb.from('vendedores').insert({
-              nome,
-              setor,
-              pin,
-              tenant_id: tenantId,
-              status: 'fora',
-              posicao_fila: maxPos
-            });
+            const { data: inserted, error } = await sb
+              .from('vendedores')
+              .insert({
+                nome,
+                setor,
+                pin,
+                tenant_id: tenantId,
+                status: 'fora',
+                posicao_fila: maxPos
+              })
+              .select('id')
+              .single();
             if (error) throw error;
-            toast('Vendedor adicionado!', 'success');
+            vendedorId = inserted.id;
           }
+
+          // Criar login (Elite + checkbox marcado)
+          if (createLoginChecked) {
+            const { data: resp, error: fnErr } = await sb.functions.invoke('create-vendor-auth', {
+              body: {
+                tenant_id: tenantId,
+                vendedor_id: vendedorId,
+                email: loginEmail,
+                password: loginPass,
+                mode: 'create'
+              }
+            });
+            if (fnErr) throw new Error(fnErr.message || 'Falha ao criar login');
+            if (resp && resp.error) throw new Error(resp.error);
+          }
+
+          // Resetar senha (Elite + botão resetar aberto + nova senha preenchida)
+          if (_vmResetRequested && resetPass) {
+            const { data: resp, error: fnErr } = await sb.functions.invoke('create-vendor-auth', {
+              body: {
+                tenant_id: tenantId,
+                vendedor_id: vendedorId,
+                password: resetPass,
+                mode: 'reset'
+              }
+            });
+            if (fnErr) throw new Error(fnErr.message || 'Falha ao resetar senha');
+            if (resp && resp.error) throw new Error(resp.error);
+          }
+
+          if (id) toast('Vendedor atualizado!', 'success');
+          else toast('Vendedor adicionado!', 'success');
+          if (createLoginChecked) toast('Login criado com sucesso', 'success');
+          if (_vmResetRequested && resetPass) toast('Senha atualizada', 'success');
 
           // Reload
           const { data } = await sb.from('vendedores').select('*').eq('tenant_id', tenantId).order('posicao_fila');
