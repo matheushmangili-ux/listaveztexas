@@ -271,7 +271,7 @@
       if (error) throw error;
       _tasks = data || [];
     } catch (err) {
-      area.innerHTML = `<div style="padding:12px;color:var(--danger)">Erro: ${err?.message}</div>`;
+      area.innerHTML = `<div style="padding:12px;color:var(--danger)">Erro: ${esc(err?.message || '')}</div>`;
       return;
     }
 
@@ -317,7 +317,7 @@
       if (error) throw error;
       _taskSubs = data || [];
     } catch (err) {
-      area.innerHTML = `<div style="padding:12px;color:var(--danger)">Erro: ${err?.message}</div>`;
+      area.innerHTML = `<div style="padding:12px;color:var(--danger)">Erro: ${esc(err?.message || '')}</div>`;
       return;
     }
 
@@ -435,7 +435,7 @@
       if (error) throw error;
       _queue = data || [];
     } catch (err) {
-      area.innerHTML = `<div style="padding:12px;color:var(--danger)">Erro: ${err?.message}</div>`;
+      area.innerHTML = `<div style="padding:12px;color:var(--danger)">Erro: ${esc(err?.message || '')}</div>`;
       return;
     }
 

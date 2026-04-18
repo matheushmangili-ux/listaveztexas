@@ -10,6 +10,16 @@ import { CHART_RESIZE_DELAY } from '/js/constants.js';
 
 let _ctx = null;
 
+// Metas por tenant no localStorage (com fallback pra chave antiga sem prefixo).
+// Sem prefixo, um gerente vê meta do tenant anterior ao trocar de sessão.
+function lsGetMeta(key, tenantId) {
+  if (tenantId) {
+    const v = localStorage.getItem(`${key}_${tenantId}`);
+    if (v != null) return v;
+  }
+  return localStorage.getItem(key);
+}
+
 // ─── Module-level state ───
 const charts = {};
 const chartTypes = {}; // track rendered type per key to decide reuse vs destroy
@@ -730,9 +740,9 @@ export async function loadRanking(range, cachedData) {
     fotoMap[v.id] = v.foto_url;
   });
 
-  const metaConv = parseInt(localStorage.getItem('meta_conversao') || DEFAULT_METAS.conversao);
+  const metaConv = parseInt(lsGetMeta('meta_conversao', tenantId) || DEFAULT_METAS.conversao);
 
-  const tempoMeta = parseInt(localStorage.getItem('meta_tempo_medio') || DEFAULT_METAS.tempo_medio);
+  const tempoMeta = parseInt(lsGetMeta('meta_tempo_medio', tenantId) || DEFAULT_METAS.tempo_medio);
 
   body.innerHTML = `<div class="rank-list">
     <div class="rank-list-header">
@@ -1206,6 +1216,7 @@ export async function loadTempoMeta(range, cachedData) {
 // ─── Trend Line (evolução diária) ───
 export async function loadTrend(range) {
   const sb = _ctx.sb;
+  const tenantId = _ctx.tenantId;
 
   // Para trend, usar range mínimo de 7 dias para ter contexto visual
   let trendRange = range;
@@ -1257,7 +1268,7 @@ export async function loadTrend(range) {
   const conv = data.map((d) => d.taxa_conversao || 0);
 
   // Meta line for conversion
-  const metaConv = parseInt(localStorage.getItem('meta_conversao') || DEFAULT_METAS.conversao);
+  const metaConv = parseInt(lsGetMeta('meta_conversao', tenantId) || DEFAULT_METAS.conversao);
 
   const annotations = {};
   if (metaConv > 0) {

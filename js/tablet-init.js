@@ -111,8 +111,12 @@ const state = {
   positionLog: [] // { time, icon, vendedor, action, details } — max 200
 };
 
+// Chave tvMode prefixada por tenant — compartilhar a chave entre tenants
+// (browser/device reusado) vazava o estado de um tenant pro outro.
+const TV_MODE_KEY = `minhavez_tvMode_${tenantId || 'default'}`;
+
 const ui = {
-  tvMode: localStorage.getItem('minhavez_tvMode') === '1' || new URLSearchParams(location.search).has('tv'),
+  tvMode: localStorage.getItem(TV_MODE_KEY) === '1' || new URLSearchParams(location.search).has('tv'),
   actionLock: false, // previne double-tap em ações críticas
   localAction: false, // ignora realtime quando ação é local
   renderPending: false, // debounce render
@@ -808,7 +812,7 @@ function closeMiniRanking() {
 // ─── TV Mode ───
 window.toggleTvMode = function () {
   ui.tvMode = !ui.tvMode;
-  localStorage.setItem('minhavez_tvMode', ui.tvMode ? '1' : '0');
+  localStorage.setItem(TV_MODE_KEY, ui.tvMode ? '1' : '0');
   applyTvMode();
   toast(ui.tvMode ? 'Modo TV ativado' : 'Modo TV desativado', 'info', TOAST_SHORT);
 };
