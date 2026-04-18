@@ -921,12 +921,13 @@ let _rtChannel = sb
   });
 
 // ─── Auto-sync: recarrega dados a cada 30s (funciona sempre, independente de tab/app switch) ───
+// Sem catch, uma falha de rede no interval virava unhandled rejection — agora loga e segue.
 setInterval(() => {
   if (document.hidden || !state.turno) return;
   ui.loadingVendedores = false;
   ui.localAction = false;
-  loadVendedores();
-  checkActiveAtendimentos();
+  loadVendedores().catch((e) => console.warn('[auto-sync] loadVendedores:', e?.message || e));
+  checkActiveAtendimentos().catch((e) => console.warn('[auto-sync] checkActiveAtendimentos:', e?.message || e));
 }, AUTO_SYNC_INTERVAL);
 
 // ─── Visibility: pause timer when hidden, refetch on return ───

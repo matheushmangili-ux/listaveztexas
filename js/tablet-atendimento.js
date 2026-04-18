@@ -1337,12 +1337,12 @@ async function selectMotivo(el) {
     const pickerEl = document.getElementById('rupturaPicker');
     const inputWrap = document.getElementById('rupturaInputWrap');
     if (hasRupturaCatalog() && pickerEl) {
-      inputWrap.style.display = 'none';
+      if (inputWrap) inputWrap.style.display = 'none';
       pickerEl.style.display = 'block';
       mountRupturaPicker(pickerEl);
     } else {
       if (pickerEl) pickerEl.style.display = 'none';
-      inputWrap.style.display = 'block';
+      if (inputWrap) inputWrap.style.display = 'block';
       document.getElementById('rupturaInput')?.focus();
     }
   }
