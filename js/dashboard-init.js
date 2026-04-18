@@ -80,7 +80,7 @@ if (tenant) {
       navigator.clipboard
         .writeText(slug)
         .then(() => toast('ID copiado!', 'success'))
-        .catch(() => {});
+        .catch(() => toast('Erro ao copiar ID', 'error'));
     });
   }
 }
