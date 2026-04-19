@@ -470,25 +470,9 @@
               <i class="fa-solid fa-clock"></i>Sem fluxo de atendimentos neste período
             </p>
           </div>
-          <div class="chart-card" style="margin-bottom: var(--gap)">
-            <h3>
-              <i class="fa-solid fa-chart-line" style="margin-right: 6px; color: var(--accent-dim)"></i>Evolução Diária
-            </h3>
-            <div
-              style="
-                overflow-x: auto;
-                overflow-y: hidden;
-                -webkit-overflow-scrolling: touch;
-                scrollbar-width: thin;
-                scrollbar-color: var(--accent-dim) transparent;
-              "
-            >
-              <div class="chart-box" style="height: 320px; min-width: 700px"><div id="chartTrend"></div></div>
-            </div>
-            <p id="chartTrendEmpty" class="chart-empty-state" style="display: none">
-              <i class="fa-solid fa-chart-line"></i>Sem evolução registrada neste período
-            </p>
-          </div>
+          <!-- Evolução Diária removida — redundante com hero area charts
+               (Atend/Vendas/Conv) que já mostram last 7-8 dias no topo. -->
+          <div id="chartTrend" style="display: none"></div>
         </div>
 
         <!-- Section: Por Vendedor -->

@@ -450,7 +450,9 @@
   position: relative;
   height: 300px;
   z-index: 1;
-  overflow: hidden;
+  /* overflow: visible pra tooltip do Apex escapar do limite quando
+     o ponto est\u00e1 na parte baixa do chart. */
+  overflow: visible;
 }
 [data-theme='dark'] .chart-card h3 {
   color: var(--text-muted);
