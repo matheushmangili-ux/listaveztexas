@@ -465,6 +465,7 @@ document.addEventListener('click', function (e) {
 // ─── Gestão de Vendedores ───
 async function loadVendedores() {
   const el = document.getElementById('vendedorList');
+  if (!el) return;
   const { data, error } = await fetchTodosVendedores(sb, tenantId);
   if (error || !data || data.length === 0) {
     el.innerHTML =
