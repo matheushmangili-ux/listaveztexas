@@ -522,17 +522,39 @@ export async function loadMotivos(range) {
 
   const labels = (data || []).map((d) => MOTIVOS[d.motivo]?.label || d.motivo);
   const values = (data || []).map((d) => d.total);
-  const colors = (data || []).map((d) => MOTIVOS[d.motivo]?.color || '#6b7280');
+  // Stripe-style: paleta qualitativa (chart-1..7) em vez das cores legadas dos motivos
+  const palette = chartPalette();
+  const colors = (data || []).map((_, i) => palette[i % palette.length]);
 
   const totalMotivos = values.reduce((a, b) => a + b, 0);
   const emptyMotivos = document.getElementById('chartMotivosEmpty');
+  const legendEl = document.getElementById('motivosLegend');
+  const totalEl = document.getElementById('motivosTotal');
   if (totalMotivos === 0) {
     if (el) el.style.display = 'none';
     if (emptyMotivos) emptyMotivos.style.display = 'block';
+    if (legendEl) legendEl.innerHTML = '';
+    if (totalEl) totalEl.textContent = '—';
     return;
   }
   if (el) el.style.display = '';
   if (emptyMotivos) emptyMotivos.style.display = 'none';
+  if (totalEl) totalEl.textContent = totalMotivos + ' TOTAL';
+
+  // Render legend-list (Stripe-style: dot | label | % | count)
+  if (legendEl) {
+    legendEl.innerHTML = labels
+      .map((label, i) => {
+        const pct = Math.round((values[i] / totalMotivos) * 100);
+        return `<div class="row">
+          <span class="sw" style="background:${colors[i]}"></span>
+          <span>${label}</span>
+          <span class="pct">${pct}%</span>
+          <span class="abs">${values[i]}</span>
+        </div>`;
+      })
+      .join('');
+  }
 
   renderChart(
     'motivos',
@@ -735,27 +757,31 @@ export async function loadHourly(range) {
       }
     }
 
+    // Stripe-style: area chart com linha principal (atend) + linha dashed (vendas) + overlay hoje
+    const areaSeries = [{ name: series[0].name, type: 'area', data: atend }];
+    if (series.length > 1) areaSeries.push({ name: series[1].name, type: 'line', data: vendas });
+    if (series.length > 2) areaSeries.push({ name: series[2].name, type: 'line', data: series[2].data });
+
     renderChart('hourly', '#chartHourly', {
-      chart: { type: 'bar', height: 300, stacked: false },
-      series,
+      chart: { type: 'area', height: 300, stacked: false },
+      series: areaSeries,
       xaxis: { categories: hours, labels: { style: { fontSize: '11px', fontWeight: 500 } } },
       yaxis: { labels: { style: { fontSize: '11px', fontWeight: 500 } }, forceNiceScale: true },
-      plotOptions: { bar: { borderRadius: 6, columnWidth: '60%' } },
       colors: TRIPLE,
       fill: {
-        type: ['gradient', 'gradient', 'solid'],
+        type: ['gradient', 'solid', 'solid'],
         gradient: {
           shade: 'dark',
           type: 'vertical',
-          shadeIntensity: 0.5,
-          opacityFrom: 1.0,
-          opacityTo: 0.55,
+          shadeIntensity: 1,
+          opacityFrom: 0.35,
+          opacityTo: 0.02,
           stops: [0, 100]
         },
-        opacity: [1.0, 0.85, 0.2]
+        opacity: [1, 1, 1]
       },
-      stroke: { width: [0, 0, 2], curve: 'smooth' },
-      markers: { size: [0, 0, 3] },
+      stroke: { width: [2.5, 1.5, 2], curve: 'smooth', dashArray: [0, 4, 0] },
+      markers: { size: 0, hover: { size: 4 } },
       grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { left: 14, right: 20, top: 10 } },
       legend: {
         position: 'top',
@@ -1489,16 +1515,88 @@ export async function loadTrend(range) {
     }
   });
   const p = chartPalette();
-  // Hero sparklines (XL)
-  if (atend.length > 1) renderChart('sparkAtend', '#sparkAtend', sparkOpts(atend, p[0], sparkDates, ''));
-  if (vendas.length > 1) renderChart('sparkVendas', '#sparkVendas', sparkOpts(vendas, p[1], sparkDates, ''));
-  if (conv.length > 1) renderChart('sparkConv', '#sparkConv', sparkOpts(conv, p[2], sparkDates, '%'));
 
-  // Secondary sparklines (smaller). Loss = atend - vendas; Pref reaproveita vendas; Tempo = atend.
+  // ─── Hero area charts (120px, gradient area) ───
+  const heroOpts = (series, color, labels, suffix) => ({
+    chart: { type: 'area', height: 120, sparkline: { enabled: true }, animations: { enabled: true, speed: 400 } },
+    series: [{ name: 'Valor', data: series }],
+    stroke: { width: 2.5, curve: 'smooth' },
+    colors: [color],
+    fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0, stops: [0, 100] } },
+    tooltip: {
+      enabled: true,
+      fixed: { enabled: false },
+      x: { show: false },
+      y: {
+        title: { formatter: () => '' },
+        formatter: (val, { dataPointIndex }) =>
+          (labels[dataPointIndex] || '') + ': ' + (Number.isInteger(val) ? val : val.toFixed(1)) + suffix
+      },
+      marker: { show: false }
+    }
+  });
+  if (atend.length > 1) renderChart('heroAtend', '#chartHeroAtend', heroOpts(atend, p[0], sparkDates, ''));
+  if (vendas.length > 1) renderChart('heroVendas', '#chartHeroVendas', heroOpts(vendas, p[1], sparkDates, ''));
+  if (conv.length > 1) renderChart('heroConv', '#chartHeroConv', heroOpts(conv, p[2], sparkDates, '%'));
+
+  // ─── Populate hero compare (Hoje · X / Ontem · Y + delta) ───
+  const last = (arr) => (arr.length > 0 ? arr[arr.length - 1] : 0);
+  const prev = (arr) => (arr.length > 1 ? arr[arr.length - 2] : 0);
+  const fmtDelta = (now, before, suffix = '') => {
+    if (!before) return '';
+    const pct = ((now - before) / before) * 100;
+    const arrow = pct >= 0 ? '↑' : '↓';
+    return arrow + ' ' + Math.abs(pct).toFixed(0) + '%' + suffix;
+  };
+  const setText = (id, v) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = v;
+  };
+  const setDelta = (id, now, before) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (!before) {
+      el.textContent = '';
+      return;
+    }
+    const pct = ((now - before) / before) * 100;
+    el.textContent = fmtDelta(now, before);
+    el.classList.toggle('up', pct >= 0);
+    el.classList.toggle('down', pct < 0);
+  };
+  const tNow = last(atend),
+    tPrev = prev(atend);
+  const vNow = last(vendas),
+    vPrev = prev(vendas);
+  const cNow = last(conv),
+    cPrev = prev(conv);
+  setText('kpiTotalNow', tNow);
+  setText('kpiTotalPrev', tPrev);
+  setDelta('kpiTotalDelta', tNow, tPrev);
+  setText('kpiVendasNow', vNow);
+  setText('kpiVendasPrev', vPrev);
+  setDelta('kpiVendasDelta', vNow, vPrev);
+  setText('kpiConvNow', Math.round(cNow) + '%');
+  setText('kpiConvPrev', Math.round(cPrev) + '%');
+  setDelta('kpiConvDelta', cNow, cPrev);
+
+  // ─── Secondary sparklines (64x30, line-only per mockup) ───
+  const secOpts = (series, color) => ({
+    chart: { type: 'line', height: 30, width: 64, sparkline: { enabled: true } },
+    series: [{ data: series }],
+    stroke: { width: 1.5, curve: 'smooth' },
+    colors: [color],
+    tooltip: { enabled: false }
+  });
   const loss = atend.map((a, i) => Math.max(0, a - (vendas[i] || 0)));
-  if (loss.length > 1) renderChart('sparkLoss', '#sparkLoss', sparkOpts(loss, p[4], sparkDates, ''));
-  if (vendas.length > 1) renderChart('sparkPref', '#sparkPref', sparkOpts(vendas, p[3], sparkDates, ''));
-  if (atend.length > 1) renderChart('sparkTempo', '#sparkTempo', sparkOpts(atend, p[5], sparkDates, ''));
+  if (loss.length > 1) renderChart('sparkLoss', '#sparkLoss', secOpts(loss, p[4]));
+  if (vendas.length > 1) renderChart('sparkPref', '#sparkPref', secOpts(vendas, p[3]));
+  if (atend.length > 1) renderChart('sparkTempo', '#sparkTempo', secOpts(atend, p[5]));
+
+  // Secondary deltas
+  setDelta('kpiLossDelta', last(loss), prev(loss));
+  setDelta('kpiPrefDelta', last(vendas), prev(vendas));
+  setDelta('kpiTimeDelta', last(atend), prev(atend));
 }
 
 // ─── Origem dos Clientes (ApexCharts donut) ───

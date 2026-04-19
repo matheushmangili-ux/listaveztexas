@@ -161,131 +161,118 @@
 
       <!-- Main content -->
       <div class="dash-main">
-        <!-- Topbar: Period + Filters + Greeting -->
-        <div class="dash-topbar">
-          <!-- Row 1: Period tabs + Greeting -->
-          <div class="topbar-row">
-            <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0">
-              <div class="period-tabs" id="periodTabs">
-                <button data-period="hoje" class="active" onclick="setPeriod('hoje')">Hoje</button>
-                <button data-period="ontem" onclick="setPeriod('ontem')">Ontem</button>
-                <button data-period="semana" onclick="setPeriod('semana')">Semana</button>
-                <button data-period="mes" onclick="setPeriod('mes')">Mês</button>
-                <button
-                  data-period="custom"
-                  onclick="toggleCalendar(event)"
-                  title="Período personalizado"
-                  style="position: relative"
-                >
-                  <i class="fa-solid fa-calendar-days" style="font-size: 10px"></i>
-                </button>
-              </div>
-              <span
-                id="customRangeLabel"
-                style="
-                  display: none;
-                  font-size: 11px;
-                  color: var(--text-muted);
-                  font-weight: 600;
-                  font-family: var(--font-body);
-                "
-              ></span>
-            </div>
-            <!-- Calendar Popover -->
-            <div id="calendarPopover" class="cal-popover" style="display: none">
-              <div class="cal-header">
-                <button class="cal-nav" onclick="calNav(-1)" aria-label="M\u00eas anterior" type="button">
-                  <i class="fa-solid fa-chevron-left"></i>
-                </button>
-                <span id="calMonthLabel" class="cal-month-label"></span>
-                <button class="cal-nav" onclick="calNav(1)" aria-label="Pr\u00f3ximo m\u00eas" type="button">
-                  <i class="fa-solid fa-chevron-right"></i>
-                </button>
-              </div>
-              <div class="cal-weekdays">
-                <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
-              </div>
-              <div class="cal-grid" id="calGrid"></div>
-              <div class="cal-footer">
-                <span id="calSelectionHint" class="cal-hint">Clique no dia inicial</span>
-                <button class="cal-clear" onclick="calClear()">Limpar</button>
-              </div>
-            </div>
-            <div class="topbar-greeting" id="topbarGreeting">
-              <span class="greeting-text" id="greetingText"></span>
-              <span class="greeting-meta">
-                <span id="greetingCity"><i class="fa-solid fa-location-dot"></i> —</span>
-                <span class="greeting-sep">·</span>
-                <span id="greetingClock">--:--</span>
-                <span class="greeting-sep">·</span>
-                <span id="greetingTemp"><i class="fa-solid fa-temperature-half"></i> —</span>
-                <span class="greeting-sep">·</span>
-                <span id="refreshCountdown" class="refresh-countdown" title="Próxima atualização automática">
-                  <i class="fa-solid fa-rotate" style="font-size: 9px"></i>
-                  <span id="refreshCountdownText">sync</span>
-                </span>
-              </span>
+        <!-- Topbar Stripe: Overview title + period chips + theme toggle -->
+        <div class="topbar-stripe">
+          <h1 class="topbar-title">Overview</h1>
+          <div class="topbar-actions">
+            <div class="period-tabs" id="periodTabs" role="tablist">
+              <button data-period="hoje" class="active" onclick="setPeriod('hoje')">Hoje</button>
+              <button data-period="ontem" onclick="setPeriod('ontem')">Ontem</button>
+              <button data-period="semana" onclick="setPeriod('semana')">Semana</button>
+              <button data-period="mes" onclick="setPeriod('mes')">Mês</button>
               <button
-                id="topbarThemeToggle"
-                class="topbar-theme-btn"
-                type="button"
-                aria-label="Alternar tema"
-                title="Alternar dark/light"
+                data-period="custom"
+                onclick="toggleCalendar(event)"
+                title="Período personalizado"
+                style="position: relative"
               >
-                <i class="fa-solid fa-moon" id="topbarThemeIcon"></i>
+                <i class="fa-solid fa-calendar-days" style="font-size: 10px"></i>
               </button>
             </div>
+            <button
+              id="topbarThemeToggle"
+              class="topbar-theme-btn"
+              type="button"
+              aria-label="Alternar tema"
+              title="Alternar dark/light"
+            >
+              <i class="fa-solid fa-moon" id="topbarThemeIcon"></i>
+            </button>
           </div>
-          <!-- Row 2: Filters + Export -->
-          <div class="topbar-filter-card">
-            <div class="filter-bar">
-              <label>Setor:</label>
-              <select id="filterSetor" onchange="onSetorChange()">
-                <option value="">Todos os setores</option>
-              </select>
-              <label>Vendedor:</label>
-              <select id="filterVendedor">
-                <option value="">Todos os vendedores</option>
-              </select>
-              <button class="filter-apply-btn" onclick="applyFilters()" title="Aplicar filtros">
-                <i class="fa-solid fa-filter"></i> Aplicar
+        </div>
+        <!-- Subhead: tenant + city + last updated + next sync -->
+        <div class="topbar-subhead" id="topbarSubhead">
+          <span id="subheadTenant">—</span>
+          <span class="sub-sep">·</span>
+          <span id="subheadCity"><i class="fa-solid fa-location-dot"></i> —</span>
+          <span class="sub-sep">·</span>
+          <span>Atualizado há <span id="subheadUpdated">--</span></span>
+          <span class="sub-sep">·</span>
+          <span>Próxima sync em <span id="refreshCountdownText" class="sub-accent">--s</span></span>
+          <span
+            id="customRangeLabel"
+            style="display: none; margin-left: 12px; color: var(--accent); font-weight: 600"
+          ></span>
+        </div>
+        <!-- Calendar Popover (float absolute, anchored ao chip do calendário) -->
+        <div id="calendarPopover" class="cal-popover" style="display: none">
+          <div class="cal-header">
+            <button class="cal-nav" onclick="calNav(-1)" aria-label="M\u00eas anterior" type="button">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <span id="calMonthLabel" class="cal-month-label"></span>
+            <button class="cal-nav" onclick="calNav(1)" aria-label="Pr\u00f3ximo m\u00eas" type="button">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+          <div class="cal-weekdays">
+            <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <div class="cal-footer">
+            <span id="calSelectionHint" class="cal-hint">Clique no dia inicial</span>
+            <button class="cal-clear" onclick="calClear()">Limpar</button>
+          </div>
+        </div>
+        <!-- Filter row: Setor + Vendedor + Export -->
+        <div class="topbar-filter-card">
+          <div class="filter-bar">
+            <label>Setor:</label>
+            <select id="filterSetor" onchange="onSetorChange()">
+              <option value="">Todos os setores</option>
+            </select>
+            <label>Vendedor:</label>
+            <select id="filterVendedor">
+              <option value="">Todos os vendedores</option>
+            </select>
+            <button class="filter-apply-btn" onclick="applyFilters()" title="Aplicar filtros">
+              <i class="fa-solid fa-filter"></i> Aplicar
+            </button>
+            <button
+              class="filter-clear-btn"
+              id="filterClearBtn"
+              onclick="clearFilters()"
+              title="Limpar filtros"
+              style="display: none"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div style="position: relative; display: inline-block" id="exportDropdown">
+            <button
+              class="filter-apply-btn"
+              onclick="document.getElementById('exportMenu').classList.toggle('open')"
+              title="Exportar dados"
+            >
+              <i class="fa-solid fa-file-export"></i> Exportar
+            </button>
+            <div id="exportMenu" class="export-menu">
+              <button
+                onclick="
+                  exportCSV();
+                  document.getElementById('exportMenu').classList.remove('open');
+                "
+              >
+                <i class="fa-solid fa-file-csv" style="color: var(--success)"></i> CSV
               </button>
               <button
-                class="filter-clear-btn"
-                id="filterClearBtn"
-                onclick="clearFilters()"
-                title="Limpar filtros"
-                style="display: none"
+                onclick="
+                  exportPDF();
+                  document.getElementById('exportMenu').classList.remove('open');
+                "
               >
-                <i class="fa-solid fa-xmark"></i>
+                <i class="fa-solid fa-file-pdf" style="color: var(--danger)"></i> PDF
               </button>
-            </div>
-            <div style="position: relative; display: inline-block" id="exportDropdown">
-              <button
-                class="filter-apply-btn"
-                onclick="document.getElementById('exportMenu').classList.toggle('open')"
-                title="Exportar dados"
-              >
-                <i class="fa-solid fa-file-export"></i> Exportar
-              </button>
-              <div id="exportMenu" class="export-menu">
-                <button
-                  onclick="
-                    exportCSV();
-                    document.getElementById('exportMenu').classList.remove('open');
-                  "
-                >
-                  <i class="fa-solid fa-file-csv" style="color: var(--success)"></i> CSV
-                </button>
-                <button
-                  onclick="
-                    exportPDF();
-                    document.getElementById('exportMenu').classList.remove('open');
-                  "
-                >
-                  <i class="fa-solid fa-file-pdf" style="color: var(--danger)"></i> PDF
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -344,107 +331,121 @@
           ></div>
         </div>
 
-        <!-- KPI Cards — Hero Row (Stripe-style: valor + delta + sparkline XL) -->
-        <div class="kpi-grid-hero" id="kpiGrid">
-          <div class="kpi-card kpi-card--hero">
-            <div class="kpi-head">
-              <span class="kpi-label"><i class="fa-solid fa-users"></i> Total Atendimentos</span>
-            </div>
-            <div class="kpi-main">
-              <div class="kpi-main-left">
-                <div class="kpi-value" id="kpiTotal"><div class="skeleton skeleton-kpi-value"></div></div>
-                <div class="kpi-compare" id="kpiTotalCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+        <!-- HERO KPIs — Stripe-style: label + valor + delta + compare + area chart embutido -->
+        <div class="hero-kpi" id="kpiGrid">
+          <div class="hero-card">
+            <div class="hero-card-head">
+              <div class="hero-label">Atendimentos</div>
+              <div class="hero-value">
+                <span id="kpiTotal">0</span>
+                <span class="hero-delta" id="kpiTotalDelta"></span>
               </div>
-              <div id="sparkAtend" class="kpi-spark kpi-spark--xl"></div>
+              <div class="hero-compare">
+                <span class="today">Hoje · <span id="kpiTotalNow">0</span></span>
+                <span class="yesterday">Ontem · <span id="kpiTotalPrev">0</span></span>
+              </div>
             </div>
+            <div class="hero-chart" id="chartHeroAtend"></div>
           </div>
-          <div class="kpi-card kpi-card--hero">
-            <div class="kpi-head">
-              <span class="kpi-label"><i class="fa-solid fa-bag-shopping"></i> Total Vendas</span>
-            </div>
-            <div class="kpi-main">
-              <div class="kpi-main-left">
-                <div class="kpi-value" id="kpiVendas"><div class="skeleton skeleton-kpi-value"></div></div>
-                <div class="kpi-compare" id="kpiVendasCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+          <div class="hero-card">
+            <div class="hero-card-head">
+              <div class="hero-label">Vendas</div>
+              <div class="hero-value">
+                <span id="kpiVendas">0</span>
+                <span class="hero-delta" id="kpiVendasDelta"></span>
               </div>
-              <div id="sparkVendas" class="kpi-spark kpi-spark--xl"></div>
+              <div class="hero-compare">
+                <span class="today" style="--dot: var(--chart-2)">Hoje · <span id="kpiVendasNow">0</span></span>
+                <span class="yesterday">Ontem · <span id="kpiVendasPrev">0</span></span>
+              </div>
             </div>
+            <div class="hero-chart" id="chartHeroVendas"></div>
           </div>
-          <div class="kpi-card kpi-card--hero">
-            <div class="kpi-head">
-              <span class="kpi-label"><i class="fa-solid fa-chart-line"></i> Taxa de Conversão</span>
-            </div>
-            <div class="kpi-main">
-              <div class="kpi-main-left">
-                <div class="kpi-value" id="kpiConv"><div class="skeleton skeleton-kpi-value"></div></div>
-                <div class="kpi-compare" id="kpiConvCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+          <div class="hero-card">
+            <div class="hero-card-head">
+              <div class="hero-label">Taxa de conversão</div>
+              <div class="hero-value">
+                <span id="kpiConv">0%</span>
+                <span class="hero-delta" id="kpiConvDelta"></span>
               </div>
-              <div id="sparkConv" class="kpi-spark kpi-spark--xl"></div>
+              <div class="hero-compare">
+                <span class="today" style="--dot: var(--chart-3)">Hoje · <span id="kpiConvNow">0%</span></span>
+                <span class="yesterday">Ontem · <span id="kpiConvPrev">0%</span></span>
+              </div>
             </div>
+            <div class="hero-chart" id="chartHeroConv"></div>
           </div>
-        </div>
-        <!-- KPI Cards — Secondary Row (Stripe-style: compacto com mini-sparkline) -->
-        <div class="kpi-grid-secondary">
-          <div class="kpi-card">
-            <div class="kpi-head">
-              <span class="kpi-label"><i class="fa-solid fa-xmark"></i> Não Convertidos</span>
-            </div>
-            <div class="kpi-main">
-              <div class="kpi-main-left">
-                <div class="kpi-value" id="kpiLoss"><div class="skeleton skeleton-kpi-value"></div></div>
-                <div class="kpi-compare" id="kpiLossCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
-              </div>
-              <div id="sparkLoss" class="kpi-spark"></div>
-            </div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-head">
-              <span class="kpi-label"><i class="fa-solid fa-star" style="color: var(--warning)"></i> Fidelizados</span>
-            </div>
-            <div class="kpi-main">
-              <div class="kpi-main-left">
-                <div class="kpi-value" id="kpiPref"><div class="skeleton skeleton-kpi-value"></div></div>
-                <div class="kpi-compare" id="kpiPrefCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
-              </div>
-              <div id="sparkPref" class="kpi-spark"></div>
-            </div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-head">
-              <span class="kpi-label"><i class="fa-solid fa-clock"></i> Tempo Médio</span>
-            </div>
-            <div class="kpi-main">
-              <div class="kpi-main-left">
-                <div class="kpi-value" id="kpiTime"><div class="skeleton skeleton-kpi-value"></div></div>
-                <div class="kpi-compare" id="kpiTimeCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
-              </div>
-              <div id="sparkTempo" class="kpi-spark"></div>
-            </div>
+          <!-- Hidden legacy compare/skeleton pra compat com código existente -->
+          <div style="display: none">
+            <div id="kpiTotalCmp"></div>
+            <div id="kpiVendasCmp"></div>
+            <div id="kpiConvCmp"></div>
           </div>
         </div>
 
-        <!-- Chart Section Tabs -->
-        <div class="chart-tabs" id="chartTabs">
-          <button class="chart-tab active" data-section="geral" onclick="setChartTab('geral')">
-            <i class="fa-solid fa-chart-pie" style="margin-right: 6px"></i>Visão Geral
-          </button>
-          <button class="chart-tab" data-section="vendedor" onclick="setChartTab('vendedor')">
-            <i class="fa-solid fa-users" style="margin-right: 6px"></i>Por Vendedor
-          </button>
-          <button class="chart-tab" data-section="operacional" onclick="setChartTab('operacional')">
-            <i class="fa-solid fa-gears" style="margin-right: 6px"></i>Operacional
-          </button>
+        <!-- SECONDARY KPIs — Stripe-style: label+val esquerda, delta+mini-spark direita -->
+        <div class="sec-kpi">
+          <div class="sec-card">
+            <div class="sec-left">
+              <div class="sec-left-label">Não convertidos</div>
+              <div class="sec-val" id="kpiLoss">0</div>
+            </div>
+            <div class="sec-right">
+              <div class="sec-delta" id="kpiLossDelta"></div>
+              <div class="mini-spark" id="sparkLoss"></div>
+            </div>
+            <div style="display: none"><div id="kpiLossCmp"></div></div>
+          </div>
+          <div class="sec-card">
+            <div class="sec-left">
+              <div class="sec-left-label">Fidelizados</div>
+              <div class="sec-val" id="kpiPref">0</div>
+            </div>
+            <div class="sec-right">
+              <div class="sec-delta" id="kpiPrefDelta"></div>
+              <div class="mini-spark" id="sparkPref"></div>
+            </div>
+            <div style="display: none"><div id="kpiPrefCmp"></div></div>
+          </div>
+          <div class="sec-card">
+            <div class="sec-left">
+              <div class="sec-left-label">Tempo médio</div>
+              <div class="sec-val" id="kpiTime">0 min</div>
+            </div>
+            <div class="sec-right">
+              <div class="sec-delta" id="kpiTimeDelta"></div>
+              <div class="mini-spark" id="sparkTempo"></div>
+            </div>
+            <div style="display: none"><div id="kpiTimeCmp"></div></div>
+          </div>
         </div>
+
+        <!-- Tabs removidas (Opção C) — todas as sections renderizam linearmente -->
 
         <!-- Section: Visão Geral -->
-        <div class="chart-section" id="section-geral">
+        <div class="chart-section" id="section-geral" style="display: block">
           <div class="charts-grid">
             <div class="chart-card">
-              <h3>
-                <i class="fa-solid fa-chart-pie" style="margin-right: 6px; color: var(--accent-dim)"></i>Motivos de
-                Perda
-              </h3>
-              <div class="chart-box" style="height: 300px"><div id="chartMotivos"></div></div>
+              <div class="chart-card-header" style="margin-bottom: 14px">
+                <h3 style="margin: 0">
+                  <i class="fa-solid fa-chart-pie" style="margin-right: 6px; color: var(--accent-dim)"></i>Motivos de
+                  Perda
+                </h3>
+                <span
+                  id="motivosTotal"
+                  style="
+                    font-family: var(--font-mono);
+                    font-size: 10px;
+                    color: var(--text-muted);
+                    letter-spacing: 0.08em;
+                  "
+                  >—</span
+                >
+              </div>
+              <div class="donut-wrap">
+                <div id="chartMotivos" class="donut-compact"></div>
+                <div class="donut-legend" id="motivosLegend"></div>
+              </div>
               <p id="chartMotivosEmpty" class="chart-empty-state" style="display: none">
                 <i class="fa-solid fa-face-smile-beam"></i>Nenhuma perda registrada neste período
               </p>
@@ -491,7 +492,7 @@
         </div>
 
         <!-- Section: Por Vendedor -->
-        <div class="chart-section" id="section-vendedor" style="display: none">
+        <div class="chart-section" id="section-vendedor" style="display: block">
           <div class="chart-card" style="margin-bottom: var(--gap)">
             <div class="chart-card-header" onclick="toggleSection('ranking')">
               <h3>
@@ -546,7 +547,7 @@
         </div>
 
         <!-- Section: Operacional -->
-        <div class="chart-section" id="section-operacional" style="display: none">
+        <div class="chart-section" id="section-operacional" style="display: block">
           <div class="charts-grid">
             <div class="chart-card">
               <div class="chart-card-header" onclick="toggleSection('rupturas')">
