@@ -2109,8 +2109,9 @@
    MODERNIZATION LAYER v2 — rebrand mint + charcoal, shadows premium
    ================================================================= */
 
-/* KPI Cards — depth sutil + hover lift */
+/* KPI Cards — polished após rebrand: border sutil padrão, mais respiro, mono label */
 .kpi-card {
+  border-color: transparent;
   box-shadow: none;
   transition:
     transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
@@ -2126,11 +2127,49 @@
   font-family: 'Inter Tight', system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
-  font-weight: 700;
+  font-weight: 600;
 }
 .kpi-label {
-  font-family: 'Inter Tight', system-ui, sans-serif;
-  letter-spacing: 0.08em;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.kpi-delta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+}
+
+/* Topbar: toggle dark/light ao lado do greeting */
+.topbar-theme-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 12px;
+  font-size: 13px;
+  transition:
+    background-color var(--transition),
+    border-color var(--transition),
+    color var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+.topbar-theme-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-medium);
+  color: var(--accent);
+}
+.topbar-theme-btn:active {
+  transform: scale(0.94);
 }
 
 /* Sidebar — active state mint + texto escuro (BEM: sidebar-link--active) */

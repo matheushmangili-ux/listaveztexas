@@ -679,16 +679,16 @@ export async function loadHourly(range) {
       plotOptions: { bar: { borderRadius: 6, columnWidth: '60%' } },
       colors: TRIPLE,
       fill: {
-        type: ['gradient', 'solid', 'solid'],
+        type: ['gradient', 'gradient', 'solid'],
         gradient: {
           shade: 'dark',
           type: 'vertical',
-          shadeIntensity: 0.2,
-          opacityFrom: 0.9,
-          opacityTo: 0.65,
+          shadeIntensity: 0.5,
+          opacityFrom: 1.0,
+          opacityTo: 0.55,
           stops: [0, 100]
         },
-        opacity: [0.9, 0.5, 0.2]
+        opacity: [1.0, 0.85, 0.2]
       },
       stroke: { width: [0, 0, 2], curve: 'smooth' },
       markers: { size: [0, 0, 3] },

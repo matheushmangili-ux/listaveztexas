@@ -1071,6 +1071,26 @@ showChangelog(APP_CHANGELOG, 'minhavez_dash_update_seen_');
   setInterval(updateGreeting, 15000);
 })();
 
+// ─── Topbar theme toggle (dark ↔ light) ───
+(function initTopbarThemeToggle() {
+  const btn = document.getElementById('topbarThemeToggle');
+  const icon = document.getElementById('topbarThemeIcon');
+  if (!btn || !icon) return;
+
+  function currentMode() {
+    return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+  }
+  function render(mode) {
+    document.documentElement.setAttribute('data-theme', mode);
+    localStorage.setItem('lv-theme', mode);
+    icon.className = mode === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+    btn.setAttribute('aria-label', mode === 'dark' ? 'Alternar para claro' : 'Alternar para escuro');
+  }
+
+  render(currentMode());
+  btn.addEventListener('click', () => render(currentMode() === 'dark' ? 'light' : 'dark'));
+})();
+
 await populateFilters();
 // Wait for Satoshi font to load before rendering charts
 await document.fonts.ready;
