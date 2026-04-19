@@ -8,13 +8,10 @@
   "background_color": "#0a0614",
   "theme_color": "#6d28d9",
   "icons": [
-    { "src": "assets/logo/mv-chevron-primary.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "assets/logo-minhavez-transparent.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    {
-      "src": "assets/logo-minhavez-transparent.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+    { "src": "/assets/logo/mv-chevron-primary.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icons/icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/assets/icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
