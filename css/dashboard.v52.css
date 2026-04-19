@@ -83,7 +83,8 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.2);
+  color: var(--text-muted);
+  opacity: 0.6;
   padding: 0 12px;
   margin-bottom: 8px;
   display: block;
@@ -102,7 +103,7 @@
   border-radius: 10px;
   font-size: 13px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
   text-decoration: none;
   border: none;
   background: none;
@@ -154,30 +155,30 @@
   gap: 6px;
   padding: 12px 12px;
   margin-bottom: 8px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--bg-elevated);
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
 }
 .sidebar-info-row {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--text-muted);
   font-weight: 500;
 }
 .sidebar-info-row i {
   font-size: 10px;
   width: 14px;
   text-align: center;
-  opacity: 0.5;
+  opacity: 0.7;
 }
 .sidebar-footer {
   display: flex;
   flex-direction: column;
   gap: 2px;
   padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--border-subtle);
 }
 
 /* ─── Mobile sidebar toggle ─── */
@@ -1470,7 +1471,7 @@
   transition: background 0.15s ease;
 }
 .marquee-pill:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-hover);
 }
 .marquee-pill .mp-dot {
   width: 6px;
@@ -1502,7 +1503,7 @@
   letter-spacing: 0.03em;
 }
 .marquee-pill .mp-status.fora {
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--text-muted);
 }
 
 /* ═══ VM Photos Admin (Fase 6) ═══ */

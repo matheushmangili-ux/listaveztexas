@@ -941,16 +941,24 @@ function renderHeaderMarquee(vendedoresData) {
     track.style.animation = 'none';
     return;
   }
+  // Map status → CSS var slug (em_atendimento → atendendo)
+  const STATUS_VAR = {
+    disponivel: '--status-disponivel',
+    em_atendimento: '--status-atendendo',
+    pausa: '--status-pausa',
+    fora: '--status-fora'
+  };
   const pills = vendedoresData
     .map((v) => {
       const cfg = STATUS_CONFIG[v.status] || STATUS_CONFIG.fora;
+      const cssVar = STATUS_VAR[v.status] || '--status-fora';
       const pos = v.posicao_fila ? ` #${v.posicao_fila}` : '';
       const isFora = v.status === 'fora';
       const isOnTime = v.status === 'disponivel';
       return `<div class="marquee-pill">
-      <div class="mp-dot${isOnTime ? ' pulse-on' : ''}" style="background:${cfg.color}"></div>
+      <div class="mp-dot${isOnTime ? ' pulse-on' : ''}" style="background:var(${cssVar})"></div>
       <span class="mp-name">${escapeHtml(v.apelido || v.nome.split(' ')[0])}</span>
-      <span class="mp-status${isFora ? ' fora' : ''}" style="color:${isFora ? '' : cfg.color}">${cfg.short}${pos}</span>
+      <span class="mp-status${isFora ? ' fora' : ''}" style="color:${isFora ? '' : `var(${cssVar})`}">${cfg.short}${pos}</span>
     </div>`;
     })
     .join('');
