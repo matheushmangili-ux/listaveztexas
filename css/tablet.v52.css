@@ -121,15 +121,9 @@
   color: var(--text-primary);
 }
 .t-header-logo {
-  height: 64px;
-  width: auto;
-  max-width: none;
-  background: transparent;
-  padding: 0;
-  object-fit: contain;
-  transform: scale(1.85);
-  transform-origin: left center;
-  margin-right: 104px;
+  /* mv-logo size="S" (chevron 24px + wordmark proporcional) — não escala */
+  display: inline-flex;
+  align-items: center;
   flex-shrink: 0;
 }
 .t-header-version {

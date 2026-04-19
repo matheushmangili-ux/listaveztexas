@@ -22,12 +22,11 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <script>
-      // Apply saved theme before CSS paints (avoid flash)
+      // Tablet roda em quiosque — forçado em dark sempre (ignora lv-theme do user).
+      document.documentElement.setAttribute('data-theme', 'dark');
       (function () {
-        var t = localStorage.getItem('lv-theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', t);
         var m = document.querySelector('meta[name="theme-color"]');
-        if (m) m.content = t === 'dark' ? '#060606' : '#F5F5F7';
+        if (m) m.content = '#060606';
       })();
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -70,7 +69,7 @@
       <!-- HEADER -->
       <header class="t-header">
         <div class="flex-center gap-8 shrink-0">
-          <mv-logo size="M" wordmark class="t-header-logo"></mv-logo>
+          <mv-logo size="S" wordmark class="t-header-logo"></mv-logo>
           <span id="appVersion" class="mono fs-9 t-header-version"></span>
         </div>
         <div id="headerKpis" class="flex-center gap-16 mono fw-700 t-header-kpis">

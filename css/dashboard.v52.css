@@ -2151,8 +2151,8 @@
 
 /* KPI Cards — polished após rebrand: border sutil padrão, mais respiro, mono label */
 .kpi-card {
-  border-color: transparent;
-  box-shadow: none;
+  border-color: var(--border-subtle);
+  box-shadow: var(--shadow-xs);
   transition:
     transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow 0.18s ease,
@@ -2265,7 +2265,7 @@
 
 /* Chart cards — sem shadow default (só hover) */
 .chart-card {
-  box-shadow: none;
+  box-shadow: var(--shadow-xs);
   transition: box-shadow 0.2s ease;
 }
 .chart-card:hover {

@@ -11,16 +11,16 @@
   /* ─── Light mode (default) ─── */
 
   /* Backgrounds — neutros (slate) Stripe-style. Roxo só em accent. */
-  --bg-deep: #fafbfc;
+  --bg-deep: #f1f4f9;
   --bg-surface: #ffffff;
   --bg-card: #ffffff;
-  --bg-elevated: #f4f6f9;
-  --bg-hover: #eef1f5;
+  --bg-elevated: #e9edf3;
+  --bg-hover: #e2e7ee;
 
-  /* Borders neutras */
-  --border-subtle: rgba(15, 23, 42, 0.06);
-  --border-medium: rgba(15, 23, 42, 0.1);
-  --border-strong: rgba(15, 23, 42, 0.16);
+  /* Borders neutras — mais firmes em light pra cards brancos ficarem visíveis */
+  --border-subtle: rgba(15, 23, 42, 0.08);
+  --border-medium: rgba(15, 23, 42, 0.12);
+  --border-strong: rgba(15, 23, 42, 0.2);
 
   /* Text */
   --text-primary: #0f172a;
