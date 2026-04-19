@@ -83,10 +83,10 @@
     <link
       rel="preload"
       as="style"
-      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
@@ -109,29 +109,28 @@
     <link rel="stylesheet" href="/css/tokens.css" />
     <style>
       /* ==================================================================
-   TOKENS — paleta mint+charcoal (alinhada com o rebrand do app)
+   TOKENS LOCAIS — derivados de /css/tokens.css (slate neutro).
+   Nomes preservados p/ compat com o CSS da landing; valores agora
+   vêm dos tokens globais (alinhamento com dashboard Stripe-style).
    ================================================================== */
       :root {
-        --bg: #0d0d0d;
-        --bg-surface: #1a1a1a;
-        --bg-card: #222222;
-        --bg-elev: #2a2a2a;
-        --text: #fafafa;
-        --text-dim: #a3a3a3;
-        --text-muted: #6b6b6b;
-        --border: rgba(255, 255, 255, 0.08);
-        --border-strong: rgba(255, 255, 255, 0.16);
-        --accent: #a78bfa;
-        --accent-deep: #8b5cf6;
-        --accent-ink: #0d0d0d;
-        --coral: #e89b8a;
-        --sand: #d4a373;
-        --dusty: #8ea5c9;
-        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-        --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-        --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-        --shadow-accent: 0 8px 32px rgba(167, 139, 250, 0.28);
-        --radius: 14px;
+        --bg: var(--bg-deep);
+        --bg-surface: var(--bg-surface);
+        --bg-card: var(--bg-card);
+        --bg-elev: var(--bg-elevated);
+        --text: var(--text-primary);
+        --text-dim: var(--text-secondary);
+        --text-muted: var(--text-muted);
+        --border: var(--border-subtle);
+        --border-strong: var(--border-medium);
+        /* --accent, --accent-deep (antes --accent-dim), coral/sand/dusty vêm dos tokens --chart-* */
+        --accent-deep: var(--accent-dim, #8b5cf6);
+        --accent-ink: #ffffff;
+        --coral: var(--chart-5);
+        --sand: var(--chart-3);
+        --dusty: var(--chart-6);
+        --shadow-accent: 0 8px 32px color-mix(in srgb, var(--accent) 28%, transparent);
+        --radius: 12px; /* alinhamento com dashboard */
         --radius-lg: 20px;
         --ease: cubic-bezier(0.16, 1, 0.3, 1);
       }
@@ -180,10 +179,10 @@
         color: var(--accent-ink);
       }
 
-      /* Scrollbar blush mint */
+      /* Scrollbar slate */
       * {
         scrollbar-width: thin;
-        scrollbar-color: rgba(167, 139, 250, 0.3) transparent;
+        scrollbar-color: color-mix(in srgb, var(--accent) 30%, transparent) transparent;
       }
       *::-webkit-scrollbar {
         width: 10px;
@@ -193,14 +192,14 @@
         background: transparent;
       }
       *::-webkit-scrollbar-thumb {
-        background: rgba(167, 139, 250, 0.22);
+        background: color-mix(in srgb, var(--accent) 22%, transparent);
         border-radius: 5px;
         border: 2px solid transparent;
         background-clip: padding-box;
         transition: background 0.2s;
       }
       *::-webkit-scrollbar-thumb:hover {
-        background: rgba(167, 139, 250, 0.5);
+        background: color-mix(in srgb, var(--accent) 50%, transparent);
         background-clip: padding-box;
         border: 2px solid transparent;
       }
@@ -216,7 +215,12 @@
       }
       .section-proof {
         padding: 80px 0;
-        background: linear-gradient(180deg, transparent, rgba(167, 139, 250, 0.04), transparent);
+        background: linear-gradient(
+          180deg,
+          transparent,
+          color-mix(in srgb, var(--accent) 4%, transparent),
+          transparent
+        );
       }
       .proof-grid {
         display: grid;
@@ -232,15 +236,16 @@
       .proof-card {
         background: var(--bg-card);
         border: 1px solid var(--border);
-        border-radius: 14px;
+        border-radius: 12px;
         padding: 28px 20px;
         text-align: center;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
         transition:
           border-color 0.25s,
           transform 0.25s;
       }
       .proof-card:hover {
-        border-color: rgba(167, 139, 250, 0.35);
+        border-color: color-mix(in srgb, var(--accent) 35%, transparent);
         transform: translateY(-3px);
       }
       .proof-value {
@@ -278,8 +283,8 @@
         gap: 6px;
         padding: 4px 10px;
         border-radius: 999px;
-        background: rgba(167, 139, 250, 0.08);
-        border: 1px solid rgba(167, 139, 250, 0.2);
+        background: color-mix(in srgb, var(--accent) 8%, transparent);
+        border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
         color: var(--accent);
         font-size: 11px;
         font-weight: 500;
@@ -377,13 +382,13 @@
         0%,
         100% {
           box-shadow:
-            0 0 0 0 rgba(167, 139, 250, 0.45),
-            inset 0 0 0 1px rgba(167, 139, 250, 0.55);
+            0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent),
+            inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent);
         }
         50% {
           box-shadow:
-            0 0 0 6px rgba(167, 139, 250, 0),
-            inset 0 0 0 1px rgba(167, 139, 250, 0.9);
+            0 0 0 6px color-mix(in srgb, var(--accent) 0%, transparent),
+            inset 0 0 0 1px color-mix(in srgb, var(--accent) 90%, transparent);
         }
       }
       .nav-cta {
@@ -433,7 +438,11 @@
         position: absolute;
         inset: 0;
         pointer-events: none;
-        background-image: radial-gradient(circle, rgba(167, 139, 250, 0.08) 1px, transparent 1px);
+        background-image: radial-gradient(
+          circle,
+          color-mix(in srgb, var(--accent) 8%, transparent) 1px,
+          transparent 1px
+        );
         background-size: 48px 48px;
         background-position: center center;
         mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
@@ -475,8 +484,8 @@
         height: 600px;
         background: radial-gradient(
           ellipse,
-          rgba(167, 139, 250, 0.14) 0%,
-          rgba(167, 139, 250, 0.04) 35%,
+          color-mix(in srgb, var(--accent) 14%, transparent) 0%,
+          color-mix(in srgb, var(--accent) 4%, transparent) 35%,
           transparent 70%
         );
         filter: blur(40px);
@@ -506,10 +515,10 @@
         margin-bottom: 24px;
       }
       .hero h1 {
-        font-size: clamp(36px, 6.2vw, 84px);
-        font-weight: 800;
-        line-height: 1.18;
-        letter-spacing: -0.035em;
+        font-size: clamp(36px, 6vw, 76px);
+        font-weight: 400;
+        line-height: 1.08;
+        letter-spacing: -0.04em;
         text-wrap: balance;
         margin-bottom: 24px;
         max-width: 17ch;
@@ -543,7 +552,7 @@
         margin-left: 0.04em;
         vertical-align: -0.1em;
         border-radius: 1px;
-        box-shadow: 0 0 8px rgba(167, 139, 250, 0.55);
+        box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 55%, transparent);
         animation: heroCursorBlink 0.85s steps(2) infinite;
         -webkit-text-fill-color: var(--accent);
       }
@@ -597,7 +606,7 @@
       .btn-primary:hover {
         background: var(--accent-deep);
         transform: translateY(-2px);
-        box-shadow: 0 12px 36px rgba(167, 139, 250, 0.38);
+        box-shadow: 0 12px 36px color-mix(in srgb, var(--accent) 38%, transparent);
       }
       .btn-ghost {
         background: transparent;
@@ -631,18 +640,19 @@
    ================================================================== */
       .section-label {
         display: inline-block;
-        font-size: 12px;
-        font-weight: 600;
-        letter-spacing: 0.12em;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.14em;
         text-transform: uppercase;
         color: var(--accent);
         margin-bottom: 16px;
       }
       .section-title {
-        font-size: clamp(32px, 5vw, 56px);
-        font-weight: 700;
-        line-height: 1.05;
-        letter-spacing: -0.03em;
+        font-size: clamp(30px, 4.5vw, 48px);
+        font-weight: 600;
+        line-height: 1.08;
+        letter-spacing: -0.025em;
         margin-bottom: 20px;
         text-wrap: balance;
       }
@@ -717,7 +727,7 @@
       }
       .showcase-card:hover {
         transform: translateY(-4px);
-        border-color: rgba(167, 139, 250, 0.22);
+        border-color: color-mix(in srgb, var(--accent) 22%, transparent);
         box-shadow: var(--shadow-md);
       }
       .showcase-tag {
@@ -725,7 +735,7 @@
         align-items: center;
         gap: 6px;
         padding: 4px 10px;
-        background: rgba(167, 139, 250, 0.1);
+        background: color-mix(in srgb, var(--accent) 10%, transparent);
         color: var(--accent);
         border-radius: 999px;
         font-size: 11px;
@@ -819,7 +829,7 @@
       }
       .mock-dot.mint {
         background: var(--accent);
-        box-shadow: 0 0 8px rgba(167, 139, 250, 0.6);
+        box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 60%, transparent);
       }
 
       /* Dashboard mock */
@@ -849,9 +859,9 @@
         color: var(--text-muted);
       }
       .mock-sidebar .icn.active {
-        background: rgba(167, 139, 250, 0.14);
+        background: color-mix(in srgb, var(--accent) 14%, transparent);
         color: var(--accent);
-        box-shadow: inset 0 0 0 1px rgba(167, 139, 250, 0.35);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
       }
       .mock-main {
         padding: 10px 12px;
@@ -921,8 +931,8 @@
         right: 10px;
         bottom: 10px;
         max-width: 62%;
-        background: rgba(167, 139, 250, 0.08);
-        border: 1px solid rgba(167, 139, 250, 0.28);
+        background: color-mix(in srgb, var(--accent) 8%, transparent);
+        border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
         border-radius: 7px;
         padding: 6px 8px;
         font-size: 9px;
@@ -943,7 +953,11 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: radial-gradient(ellipse at center, rgba(167, 139, 250, 0.06), transparent 60%);
+        background: radial-gradient(
+          ellipse at center,
+          color-mix(in srgb, var(--accent) 6%, transparent),
+          transparent 60%
+        );
         padding: 10px;
       }
       .mock-phone-frame {
@@ -985,7 +999,7 @@
         border-radius: 6px;
         image-rendering: pixelated;
         box-shadow:
-          0 0 12px rgba(167, 139, 250, 0.35),
+          0 0 12px color-mix(in srgb, var(--accent) 35%, transparent),
           inset 0 -6px 0 rgba(0, 0, 0, 0.2);
         position: relative;
       }
@@ -1020,7 +1034,7 @@
         height: 100%;
         width: 68%;
         background: linear-gradient(90deg, var(--accent), #8b5cf6);
-        box-shadow: 0 0 6px rgba(167, 139, 250, 0.5);
+        box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 50%, transparent);
       }
       .mock-xp-meta {
         display: flex;
@@ -1049,7 +1063,7 @@
         width: 9px;
         height: 9px;
         border-radius: 2px;
-        border: 1px solid rgba(167, 139, 250, 0.4);
+        border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
         flex-shrink: 0;
       }
       .mock-missions .chk.done {
@@ -1061,13 +1075,13 @@
         top: 18px;
         right: -18px;
         background: var(--bg-card);
-        border: 1px solid rgba(167, 139, 250, 0.35);
+        border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
         border-radius: 7px;
         padding: 5px 7px;
         font-size: 8px;
         box-shadow:
           0 4px 14px rgba(0, 0, 0, 0.4),
-          0 0 10px rgba(167, 139, 250, 0.15);
+          0 0 10px color-mix(in srgb, var(--accent) 15%, transparent);
         display: flex;
         gap: 5px;
         align-items: center;
@@ -1107,11 +1121,11 @@
       }
       .mock-tablet-tabs .tab.active {
         color: var(--accent);
-        border-color: rgba(167, 139, 250, 0.5);
-        text-shadow: 0 0 4px rgba(167, 139, 250, 0.6);
+        border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+        text-shadow: 0 0 4px color-mix(in srgb, var(--accent) 60%, transparent);
         box-shadow:
-          0 0 10px rgba(167, 139, 250, 0.2),
-          inset 0 0 0 1px rgba(167, 139, 250, 0.3);
+          0 0 10px color-mix(in srgb, var(--accent) 20%, transparent),
+          inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
       }
       .mock-queue {
         flex: 1;
@@ -1133,9 +1147,9 @@
         font-size: 9px;
       }
       .mock-queue-row.active {
-        border-color: rgba(167, 139, 250, 0.5);
-        background: rgba(167, 139, 250, 0.06);
-        box-shadow: 0 0 12px rgba(167, 139, 250, 0.12);
+        border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+        background: color-mix(in srgb, var(--accent) 6%, transparent);
+        box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 12%, transparent);
       }
       .mock-queue-row .pos {
         font-weight: 700;
@@ -1189,13 +1203,14 @@
         padding: 32px;
         background: var(--bg-card);
         border: 1px solid var(--border);
-        border-radius: var(--radius);
+        border-radius: 12px;
         position: relative;
         overflow: hidden;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
         transition: all 0.25s var(--ease);
       }
       .step:hover {
-        border-color: rgba(167, 139, 250, 0.22);
+        border-color: color-mix(in srgb, var(--accent) 22%, transparent);
         transform: translateY(-2px);
       }
       .step-num {
@@ -1212,7 +1227,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(167, 139, 250, 0.1);
+        background: color-mix(in srgb, var(--accent) 10%, transparent);
         border-radius: 12px;
         color: var(--accent);
         font-size: 20px;
@@ -1342,10 +1357,11 @@
       .plan {
         background: var(--bg-card);
         border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
+        border-radius: 16px;
         padding: 36px 28px;
         display: flex;
         flex-direction: column;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
         transition: all 0.25s var(--ease);
         position: relative;
       }
@@ -1354,10 +1370,10 @@
         border-color: var(--border-strong);
       }
       .plan.featured {
-        border-color: rgba(167, 139, 250, 0.5);
-        background: linear-gradient(180deg, rgba(167, 139, 250, 0.04) 0%, var(--bg-card) 100%);
+        border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+        background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 4%, transparent) 0%, var(--bg-card) 100%);
         box-shadow:
-          0 0 0 1px rgba(167, 139, 250, 0.2),
+          0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent),
           var(--shadow-md);
         transform: scale(1.03);
       }
@@ -1589,7 +1605,7 @@
         transition: border-color 0.2s;
       }
       .faq-item[open] {
-        border-color: rgba(167, 139, 250, 0.22);
+        border-color: color-mix(in srgb, var(--accent) 22%, transparent);
       }
       .faq-item summary {
         padding: 20px 24px;
@@ -1883,1016 +1899,515 @@
   </head>
   <body>
     <!-- ==================================================================
-     NARRATIVE STYLES (Direção B — story-driven redesign)
-     Classes com prefixo .nv- pra não colidir com o CSS legado acima.
-     ================================================================== -->
-    <style>
-      body {
-        background: var(--bg-deep) !important;
-        overflow-x: hidden;
-      }
-      body::before {
-        content: '';
-        position: fixed;
-        top: -200px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 900px;
-        height: 900px;
-        background: radial-gradient(circle, color-mix(in srgb, var(--accent) 15%, transparent), transparent 60%);
-        pointer-events: none;
-        z-index: 0;
-        animation: nvHeroGlow 8s ease-in-out infinite;
-      }
-      @keyframes nvHeroGlow {
-        0%,
-        100% {
-          opacity: 0.6;
-        }
-        50% {
-          opacity: 1;
-        }
-      }
-      .nv-wrap {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 32px;
-        position: relative;
-        z-index: 1;
-      }
-      /* NAV */
-      .nv-nav {
-        position: sticky;
-        top: 0;
-        z-index: 20;
-        background: color-mix(in srgb, var(--bg-deep) 70%, transparent);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        border-bottom: 1px solid var(--border-subtle);
-      }
-      .nv-nav-inner {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 18px 0;
-      }
-      .nv-nav-links {
-        display: inline-flex;
-        gap: 28px;
-      }
-      .nv-nav-links a {
-        color: var(--text-secondary);
-        font-size: 13.5px;
-        font-weight: 500;
-        text-decoration: none;
-        transition: color 0.15s;
-      }
-      .nv-nav-links a:hover {
-        color: var(--text-primary);
-      }
-      .nv-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 9px 16px;
-        border-radius: 999px;
-        font-size: 13px;
-        font-weight: 600;
-        text-decoration: none;
-        cursor: pointer;
-        border: 1px solid transparent;
-        transition: all 0.2s;
-        font-family: inherit;
-        background: transparent;
-        color: inherit;
-      }
-      .nv-btn-primary {
-        background: var(--accent);
-        color: #fff;
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
-      }
-      .nv-btn-primary:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 15%, transparent);
-      }
-      .nv-btn-ghost {
-        color: var(--text-primary);
-        border-color: var(--border-medium);
-      }
-      .nv-btn-ghost:hover {
-        background: var(--bg-elevated);
-      }
-
-      /* HERO SPLIT */
-      .nv-hero {
-        padding: 72px 0 96px;
-      }
-      .nv-hero-split {
-        display: grid;
-        grid-template-columns: 1.1fr 1fr;
-        gap: 48px;
-        align-items: center;
-      }
-      .nv-eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-family: var(--font-mono);
-        font-size: 11px;
-        color: var(--text-muted);
-        padding: 6px 12px;
-        border: 1px solid var(--border-subtle);
-        border-radius: 999px;
-        margin-bottom: 28px;
-        background: color-mix(in srgb, var(--bg-card) 50%, transparent);
-      }
-      .nv-eyebrow::before {
-        content: '';
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: var(--chart-4);
-        box-shadow: 0 0 8px var(--chart-4);
-      }
-      .nv-hero h1 {
-        font-size: 68px;
-        line-height: 1;
-        font-weight: 300;
-        letter-spacing: -0.035em;
-        margin: 0 0 24px 0;
-        color: var(--text-primary);
-      }
-      .nv-hero h1 strong {
-        font-weight: 700;
-        background: linear-gradient(135deg, var(--accent), var(--chart-2));
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-      }
-      .nv-hero p.sub {
-        font-size: 18px;
-        color: var(--text-secondary);
-        line-height: 1.55;
-        margin-bottom: 36px;
-        max-width: 480px;
-      }
-      .nv-ctas {
-        display: inline-flex;
-        gap: 12px;
-        align-items: center;
-      }
-
-      /* Hero cycle animation */
-      .nv-cycle {
-        position: relative;
-        aspect-ratio: 1;
-        max-width: 480px;
-        margin-left: auto;
-      }
-      .nv-cycle-node {
-        position: absolute;
-        width: 110px;
-        height: 110px;
-        background: var(--bg-card);
-        border: 1px solid var(--border-subtle);
-        border-radius: 16px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        font-size: 11px;
-        font-family: var(--font-mono);
-        color: var(--text-muted);
-        box-shadow:
-          inset 0 1px 0 rgba(255, 255, 255, 0.06),
-          0 10px 30px rgba(0, 0, 0, 0.3);
-        transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-      }
-      .nv-cycle-node .big {
-        font-size: 28px;
-      }
-      .nv-cycle-node.n1 {
-        top: 0;
-        left: 50%;
-        transform: translateX(-50%);
-      }
-      .nv-cycle-node.n2 {
-        top: 35%;
-        right: 0;
-      }
-      .nv-cycle-node.n3 {
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-      }
-      .nv-cycle-node.n4 {
-        top: 35%;
-        left: 0;
-      }
-      .nv-cycle-node.active {
-        border-color: var(--accent);
-        color: var(--text-primary);
-        box-shadow:
-          inset 0 1px 0 rgba(255, 255, 255, 0.1),
-          0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent),
-          0 20px 40px rgba(0, 0, 0, 0.4);
-      }
-      .nv-cycle-node.active .big {
-        color: var(--accent);
-      }
-      .nv-cycle-arrow {
-        position: absolute;
-        font-size: 20px;
-        color: var(--text-muted);
-        font-family: var(--font-mono);
-      }
-      .nv-cycle-arrow.a1 {
-        top: 15%;
-        right: 25%;
-      }
-      .nv-cycle-arrow.a2 {
-        bottom: 15%;
-        right: 25%;
-        transform: rotate(90deg);
-      }
-      .nv-cycle-arrow.a3 {
-        bottom: 15%;
-        left: 25%;
-        transform: rotate(180deg);
-      }
-      .nv-cycle-arrow.a4 {
-        top: 15%;
-        left: 25%;
-        transform: rotate(270deg);
-      }
-
-      /* JOURNEY */
-      .nv-journey {
-        padding: 140px 0;
-      }
-      .nv-journey + .nv-journey {
-        border-top: 1px solid var(--border-subtle);
-      }
-      .nv-journey-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 48px;
-        align-items: center;
-      }
-      .nv-journey-step {
-        font-family: var(--font-mono);
-        font-size: 12px;
-        color: var(--accent);
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        margin-bottom: 14px;
-      }
-      .nv-journey-title {
-        font-size: 44px;
-        font-weight: 300;
-        letter-spacing: -0.03em;
-        line-height: 1.1;
-        margin: 0 0 20px 0;
-        color: var(--text-primary);
-      }
-      .nv-journey-title em {
-        font-weight: 700;
-        font-style: normal;
-        color: var(--accent);
-      }
-      .nv-journey-desc {
-        font-size: 16px;
-        color: var(--text-secondary);
-        line-height: 1.6;
-      }
-      .nv-journey-visual {
-        background: var(--bg-card);
-        border: 1px solid var(--border-subtle);
-        border-radius: 18px;
-        padding: 28px;
-        box-shadow:
-          inset 0 1px 0 rgba(255, 255, 255, 0.04),
-          0 30px 80px -20px rgba(0, 0, 0, 0.5);
-        min-height: 320px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .nv-journey:nth-child(even) .nv-journey-grid {
-        direction: rtl;
-      }
-      .nv-journey:nth-child(even) .nv-journey-grid > * {
-        direction: ltr;
-      }
-
-      /* SPOTLIGHT */
-      .nv-spotlight {
-        padding: 96px 0;
-        background:
-          radial-gradient(circle at 30% 50%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 60%),
-          var(--bg-deep);
-        border-top: 1px solid var(--border-subtle);
-        border-bottom: 1px solid var(--border-subtle);
-        text-align: center;
-      }
-      .nv-spotlight-eyebrow {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        color: var(--accent);
-        text-transform: uppercase;
-        letter-spacing: 0.14em;
-        margin-bottom: 20px;
-      }
-      .nv-spot-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 28px;
-        max-width: 900px;
-        margin: 0 auto 48px;
-      }
-      .nv-spot-item .n {
-        font-size: 52px;
-        font-weight: 200;
-        letter-spacing: -0.04em;
-        background: linear-gradient(180deg, var(--text-primary), var(--text-muted));
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        line-height: 1;
-      }
-      .nv-spot-item .l {
-        margin-top: 10px;
-        font-family: var(--font-mono);
-        font-size: 11px;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-      }
-      .nv-spot-quote {
-        max-width: 640px;
-        margin: 0 auto;
-        font-size: 22px;
-        font-weight: 300;
-        color: var(--text-primary);
-        line-height: 1.45;
-        font-style: italic;
-      }
-      .nv-spot-author {
-        margin-top: 24px;
-        font-family: var(--font-mono);
-        font-size: 12px;
-        color: var(--text-muted);
-        letter-spacing: 0.08em;
-      }
-
-      /* PRICING */
-      .nv-pricing {
-        padding: 120px 0;
-      }
-      .nv-section-eyebrow {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        color: var(--accent);
-        text-transform: uppercase;
-        letter-spacing: 0.14em;
-        margin-bottom: 16px;
-        text-align: center;
-      }
-      .nv-section-title {
-        font-size: 42px;
-        font-weight: 300;
-        letter-spacing: -0.03em;
-        text-align: center;
-        margin: 0 0 14px 0;
-        color: var(--text-primary);
-      }
-      .nv-section-title em {
-        font-weight: 700;
-        font-style: normal;
-        color: var(--accent);
-      }
-      .nv-section-sub {
-        font-size: 16px;
-        color: var(--text-secondary);
-        text-align: center;
-        margin: 0 auto 56px;
-        max-width: 520px;
-      }
-      .nv-plans {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-      }
-      .nv-plan {
-        background: var(--bg-card);
-        border: 1px solid var(--border-subtle);
-        border-radius: 20px;
-        padding: 32px 28px;
-        position: relative;
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-      }
-      .nv-plan:hover {
-        transform: translateY(-4px);
-        border-color: var(--border-medium);
-      }
-      .nv-plan.featured {
-        border-color: var(--accent);
-        background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 6%, var(--bg-card)), var(--bg-card));
-      }
-      .nv-plan.featured::before {
-        content: 'Mais escolhido';
-        position: absolute;
-        top: -10px;
-        left: 28px;
-        background: var(--accent);
-        color: #fff;
-        font-family: var(--font-mono);
-        font-size: 10px;
-        padding: 3px 10px;
-        border-radius: 999px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-      .nv-plan-name {
-        font-size: 16px;
-        font-weight: 600;
-        margin: 0 0 6px;
-        color: var(--text-primary);
-      }
-      .nv-plan-sub {
-        font-size: 13px;
-        color: var(--text-muted);
-        margin-bottom: 24px;
-      }
-      .nv-plan-price {
-        font-size: 44px;
-        font-weight: 300;
-        letter-spacing: -0.03em;
-        margin-bottom: 4px;
-        color: var(--text-primary);
-      }
-      .nv-plan-price small {
-        font-size: 14px;
-        color: var(--text-muted);
-        font-weight: 500;
-      }
-      .nv-plan-freq {
-        font-size: 12px;
-        color: var(--text-muted);
-        margin-bottom: 28px;
-      }
-      .nv-plan ul {
-        list-style: none;
-        margin: 0 0 28px;
-        padding: 0;
-      }
-      .nv-plan ul li {
-        padding: 8px 0;
-        font-size: 14px;
-        color: var(--text-secondary);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .nv-plan ul li::before {
-        content: '✓';
-        color: var(--accent);
-        font-weight: 700;
-      }
-      .nv-plan .nv-btn {
-        width: 100%;
-        justify-content: center;
-        padding: 12px;
-      }
-
-      /* FAQ */
-      .nv-faq {
-        padding: 72px 0 96px;
-      }
-      .nv-faq-grid {
-        max-width: 760px;
-        margin: 0 auto;
-      }
-      .nv-faq-item {
-        border-bottom: 1px solid var(--border-subtle);
-        padding: 22px 0;
-      }
-      .nv-faq-item summary {
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: 500;
-        list-style: none;
-        display: flex;
-        justify-content: space-between;
-        color: var(--text-primary);
-      }
-      .nv-faq-item summary::-webkit-details-marker {
-        display: none;
-      }
-      .nv-faq-item summary::after {
-        content: '+';
-        color: var(--text-muted);
-        font-size: 20px;
-      }
-      .nv-faq-item[open] summary::after {
-        content: '−';
-      }
-      .nv-faq-item p {
-        margin-top: 14px;
-        color: var(--text-secondary);
-        font-size: 14.5px;
-        line-height: 1.65;
-      }
-
-      /* FOOTER */
-      .nv-footer {
-        padding: 64px 0 40px;
-        border-top: 1px solid var(--border-subtle);
-      }
-      .nv-footer-top {
-        display: grid;
-        grid-template-columns: 1.5fr 1fr 1fr 1fr;
-        gap: 32px;
-        margin-bottom: 40px;
-      }
-      .nv-footer-top h4 {
-        font-size: 11px;
-        font-family: var(--font-mono);
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        margin: 0 0 14px;
-        font-weight: 500;
-      }
-      .nv-footer-top a {
-        display: block;
-        color: var(--text-secondary);
-        text-decoration: none;
-        font-size: 14px;
-        margin-bottom: 10px;
-      }
-      .nv-footer-top a:hover {
-        color: var(--text-primary);
-      }
-      .nv-footer-bottom {
-        padding-top: 24px;
-        border-top: 1px solid var(--border-subtle);
-        font-size: 12px;
-        color: var(--text-muted);
-        text-align: center;
-      }
-
-      /* Scroll-reveal */
-      .nv-reveal {
-        opacity: 0;
-        transform: translateY(30px);
-        transition:
-          opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-          transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-        will-change: opacity, transform;
-      }
-      .nv-reveal.nv-in-view {
-        opacity: 1;
-        transform: translateY(0);
-      }
-      @media (prefers-reduced-motion: reduce) {
-        .nv-reveal {
-          opacity: 1;
-          transform: none;
-          transition: none;
-        }
-      }
-
-      /* Responsive */
-      @media (max-width: 900px) {
-        .nv-hero-split,
-        .nv-journey-grid {
-          grid-template-columns: 1fr;
-        }
-        .nv-hero h1 {
-          font-size: 44px;
-        }
-        .nv-journey-title {
-          font-size: 32px;
-        }
-        .nv-spot-grid {
-          grid-template-columns: 1fr 1fr;
-        }
-        .nv-plans,
-        .nv-footer-top {
-          grid-template-columns: 1fr;
-        }
-      }
-    </style>
-
-    <!-- ==================================================================
      NAV
      ================================================================== -->
-    <nav class="nv-nav">
-      <div class="nv-wrap nv-nav-inner">
-        <div style="display: inline-flex; align-items: center; gap: 36px">
-          <mv-logo size="M" wordmark></mv-logo>
-          <div class="nv-nav-links">
-            <a href="#como-funciona">Como funciona</a>
-            <a href="#case">Case</a>
-            <a href="#precos">Preços</a>
-            <a href="/" style="margin-right: 4px">Entrar</a>
-          </div>
-        </div>
-        <a class="nv-btn nv-btn-primary" href="#precos">Começar agora</a>
+    <nav class="nav" id="nav">
+      <a href="#" class="nav-logo" aria-label="minhavez">
+        <mv-logo size="M" wordmark></mv-logo>
+      </a>
+      <div class="nav-links">
+        <a href="#produto">Produto</a>
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#precos">Preços</a>
+        <a href="/" style="margin-right: 8px">Entrar</a>
+        <a href="#precos" class="nav-cta">Começar agora</a>
       </div>
     </nav>
 
     <!-- ==================================================================
-     HERO SPLIT (texto + ciclo animado)
+     HERO
      ================================================================== -->
-    <section class="nv-hero">
-      <div class="nv-wrap nv-hero-split">
-        <div>
-          <span class="nv-eyebrow">Texas Center · Goiânia · ao vivo</span>
-          <h1>Transforme o seu varejo em <strong>competição saudável</strong>.</h1>
-          <p class="sub">
-            Cada cliente que entra é um ponto ganho. Cada venda, uma missão. Seus vendedores não batem ponto — eles
-            conquistam território. E você vê tudo em dados.
-          </p>
-          <div class="nv-ctas">
-            <a href="#precos" class="nv-btn nv-btn-primary">Começar jornada</a>
-            <a href="#case" class="nv-btn nv-btn-ghost">Ver o case</a>
-          </div>
+    <section class="hero">
+      <video class="hero-video" id="heroVideo" muted loop playsinline preload="none" poster="" aria-hidden="true">
+        <!-- sources injetados via JS quando hero entra no viewport (lazy 1.7MB) -->
+      </video>
+      <div class="hero-video-overlay"></div>
+      <div class="hero-grid-dots"></div>
+      <div class="hero-glow"></div>
+      <div class="container hero-inner">
+        <div class="hero-badge reveal">
+          <span class="badge-mono"><span class="dot"></span>Em produção real na Texas Center desde Jan/2026</span>
         </div>
-        <!-- Animated cycle: cliente → fila → atende → XP -->
-        <div class="nv-cycle">
-          <div class="nv-cycle-node n1 active">
-            <span class="big">🚪</span>
-            <span>Cliente</span>
-          </div>
-          <div class="nv-cycle-node n2">
-            <span class="big">📋</span>
-            <span>Fila</span>
-          </div>
-          <div class="nv-cycle-node n3">
-            <span class="big">🤝</span>
-            <span>Atende</span>
-          </div>
-          <div class="nv-cycle-node n4">
-            <span class="big">⭐</span>
-            <span>+XP</span>
-          </div>
-          <span class="nv-cycle-arrow a1">→</span>
-          <span class="nv-cycle-arrow a2">→</span>
-          <span class="nv-cycle-arrow a3">→</span>
-          <span class="nv-cycle-arrow a4">→</span>
+        <h1 id="heroH1" aria-label="Cada vendedor no lugar certo. Cada venda no momento certo.">
+          <span class="hero-line" data-text="Cada vendedor no lugar certo."></span>
+          <span class="hero-line accent" data-text="Cada venda no momento certo."></span>
+        </h1>
+        <p class="hero-sub reveal">
+          Sistema de gestão de fila + engajamento gamificado que transforma
+          <strong>loja física em operação de dados</strong>. Vendedores veem seu progresso em tempo real. Gestor decide
+          com base em número, não em achismo.
+        </p>
+        <div class="hero-ctas reveal">
+          <a href="#precos" class="btn btn-primary">
+            Começar agora <i class="fa-solid fa-arrow-right" style="font-size: 13px"></i>
+          </a>
+          <a href="#produto" class="btn btn-ghost">
+            <i class="fa-solid fa-play" style="font-size: 12px"></i> Ver em 2 minutos
+          </a>
+        </div>
+        <div class="hero-footnote reveal">
+          <span><i class="fa-solid fa-check"></i>Sem contrato de fidelidade</span>
+          <span><i class="fa-solid fa-check"></i>Cancele quando quiser</span>
+          <span><i class="fa-solid fa-check"></i>Funciona no tablet que você já tem</span>
         </div>
       </div>
     </section>
 
     <!-- ==================================================================
-     JOURNEY SECTIONS (scrollytelling: 5 momentos)
+     PRODUCT SHOWCASE (horizontal slider)
      ================================================================== -->
-    <section class="nv-journey" id="como-funciona">
-      <div class="nv-wrap nv-journey-grid">
-        <div>
-          <div class="nv-journey-step">01 · CHEGADA</div>
-          <h2 class="nv-journey-title">O cliente <em>entra na loja.</em></h2>
-          <p class="nv-journey-desc">
-            O tablet no balcão registra o check-in em 2 toques. Setor escolhido, ticket emitido, posição na fila
-            atribuída. Ninguém anota no caderno. Ninguém esquece de avisar.
+    <section class="section showcase" id="produto">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="section-label">Produto</span>
+          <h2 class="section-title">Três peças que conversam.<br />Um time que performa.</h2>
+          <p class="section-sub">
+            Arraste pra explorar. Cada módulo resolve uma dor específica do varejo físico — e todos se conectam em tempo
+            real.
           </p>
-        </div>
-        <div class="nv-journey-visual">
-          <svg viewBox="0 0 300 200" width="100%" style="max-width: 400px">
-            <rect
-              x="20"
-              y="20"
-              width="260"
-              height="160"
-              rx="12"
-              fill="var(--bg-elevated)"
-              stroke="var(--border-subtle)"
-            />
-            <text x="40" y="50" fill="var(--text-muted)" font-family="JetBrains Mono" font-size="10">CHECK-IN</text>
-            <rect
-              x="40"
-              y="60"
-              width="220"
-              height="40"
-              rx="8"
-              fill="color-mix(in srgb, var(--chart-1) 15%, transparent)"
-              stroke="var(--chart-1)"
-            />
-            <text x="54" y="84" fill="var(--text-primary)" font-family="Inter Tight" font-size="14" font-weight="600">
-              Cliente #247 → Chapelaria
-            </text>
-            <rect x="40" y="110" width="60" height="20" rx="4" fill="var(--bg-card)" stroke="var(--border-subtle)" />
-            <text x="56" y="124" fill="var(--chart-4)" font-family="JetBrains Mono" font-size="10">POS #3</text>
-            <rect x="110" y="110" width="80" height="20" rx="4" fill="var(--bg-card)" stroke="var(--border-subtle)" />
-            <text x="124" y="124" fill="var(--text-muted)" font-family="JetBrains Mono" font-size="10">~4min</text>
-          </svg>
         </div>
       </div>
-    </section>
-
-    <section class="nv-journey">
-      <div class="nv-wrap nv-journey-grid">
-        <div>
-          <div class="nv-journey-step">02 · DISTRIBUIÇÃO</div>
-          <h2 class="nv-journey-title">A fila <em>sabe quem é o próximo.</em></h2>
-          <p class="nv-journey-desc">
-            Rodízio automático entre vendedores do setor. O app do vendedor avisa com push quando ele vira o próximo.
-            Sem disputa no balcão, sem vendedor esperando sem saber a vez.
-          </p>
-        </div>
-        <div class="nv-journey-visual">
-          <svg viewBox="0 0 300 200" width="100%" style="max-width: 400px">
-            <rect
-              x="20"
-              y="20"
-              width="260"
-              height="160"
-              rx="12"
-              fill="var(--bg-elevated)"
-              stroke="var(--border-subtle)"
-            />
-            <g font-family="Inter Tight" font-size="13">
-              <rect
-                x="40"
-                y="40"
-                width="220"
-                height="32"
-                rx="6"
-                fill="color-mix(in srgb, var(--accent) 15%, transparent)"
-                stroke="var(--accent)"
-              />
-              <text x="54" y="60" fill="var(--accent)" font-weight="600">#1 · João · PRÓXIMO</text>
-              <rect x="40" y="80" width="220" height="28" rx="6" fill="var(--bg-card)" stroke="var(--border-subtle)" />
-              <text x="54" y="98" fill="var(--text-secondary)">#2 · Karol</text>
-              <rect x="40" y="116" width="220" height="28" rx="6" fill="var(--bg-card)" stroke="var(--border-subtle)" />
-              <text x="54" y="134" fill="var(--text-secondary)">#3 · Ledson</text>
-              <rect x="40" y="152" width="220" height="20" rx="6" fill="var(--bg-card)" stroke="var(--border-subtle)" />
-              <text x="54" y="166" fill="var(--text-muted)" font-size="10">#4 · Julio</text>
-            </g>
-          </svg>
-        </div>
-      </div>
-    </section>
-
-    <section class="nv-journey">
-      <div class="nv-wrap nv-journey-grid">
-        <div>
-          <div class="nv-journey-step">03 · ATENDIMENTO</div>
-          <h2 class="nv-journey-title">O vendedor <em>fecha a venda.</em></h2>
-          <p class="nv-journey-desc">
-            Venda, não venda, motivo de perda, valor. Dois toques no tablet. Dado fica gravado no painel em tempo real —
-            nada de planilha no fim do dia.
-          </p>
-        </div>
-        <div class="nv-journey-visual">
-          <svg viewBox="0 0 300 200" width="100%" style="max-width: 400px">
-            <rect
-              x="20"
-              y="20"
-              width="260"
-              height="160"
-              rx="12"
-              fill="var(--bg-elevated)"
-              stroke="var(--border-subtle)"
-            />
-            <text x="40" y="50" fill="var(--text-muted)" font-family="JetBrains Mono" font-size="10">RESULTADO</text>
-            <rect
-              x="40"
-              y="62"
-              width="100"
-              height="52"
-              rx="10"
-              fill="color-mix(in srgb, var(--chart-4) 15%, transparent)"
-              stroke="var(--chart-4)"
-            />
-            <text
-              x="90"
-              y="90"
-              fill="var(--chart-4)"
-              font-family="Inter Tight"
-              font-size="14"
-              font-weight="600"
-              text-anchor="middle"
-            >
-              ✓ Vendeu
-            </text>
-            <text x="90" y="104" fill="var(--chart-4)" font-family="JetBrains Mono" font-size="11" text-anchor="middle">
-              R$ 842
-            </text>
-            <rect x="150" y="62" width="100" height="52" rx="10" fill="var(--bg-card)" stroke="var(--border-subtle)" />
-            <text
-              x="200"
-              y="90"
-              fill="var(--text-secondary)"
-              font-family="Inter Tight"
-              font-size="13"
-              text-anchor="middle"
-            >
-              Não fechou
-            </text>
-            <rect x="40" y="128" width="210" height="28" rx="6" fill="var(--bg-card)" stroke="var(--border-subtle)" />
-            <text x="54" y="146" fill="var(--text-muted)" font-family="JetBrains Mono" font-size="10">
-              +40 XP · Missão: 5/day ✓
-            </text>
-          </svg>
-        </div>
-      </div>
-    </section>
-
-    <section class="nv-journey">
-      <div class="nv-wrap nv-journey-grid">
-        <div>
-          <div class="nv-journey-step">04 · RECOMPENSA</div>
-          <h2 class="nv-journey-title">O vendedor <em>evolui.</em></h2>
-          <p class="nv-journey-desc">
-            XP, tiers RPG, missões diárias, avatar pixel-art que desbloqueia conforme performa. Time quer performar
-            porque tem jogo. Cabra batedor entra na parede do mural — de verdade.
-          </p>
-        </div>
-        <div class="nv-journey-visual" style="flex-direction: column; gap: 16px; padding: 36px 28px">
-          <div
-            style="
-              display: flex;
-              gap: 12px;
-              align-items: center;
-              padding: 16px;
-              background: var(--bg-elevated);
-              border-radius: 12px;
-              width: 100%;
-            "
-          >
-            <div
-              style="
-                width: 56px;
-                height: 56px;
-                border-radius: 12px;
-                background: var(--accent);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: #fff;
-                font-weight: 700;
-                font-size: 20px;
-              "
-            >
-              J
-            </div>
-            <div style="flex: 1">
-              <div style="font-weight: 600; color: var(--text-primary)">João</div>
-              <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted)">
-                Tier 7 · Caminhoneiro
+      <div class="container" style="max-width: 1280px">
+        <div class="showcase-slider reveal" id="showcaseSlider">
+          <!-- Card 1: Dashboard + IA -->
+          <article class="showcase-card">
+            <span class="showcase-tag"><i class="fa-solid fa-bolt" style="font-size: 10px"></i>Tempo real</span>
+            <h3>Dashboard com IA Assist</h3>
+            <p>
+              Veja atendimentos, vendas e conversão rolando em tempo real. A IA resume o turno em 1 parágrafo, sugere
+              missões e prevê horários de pico.
+            </p>
+            <ul class="showcase-bullets">
+              <li>
+                <i class="fa-solid fa-check"></i>Comparativo vs ontem / semana / mês (detecta queda antes que doa)
+              </li>
+              <li><i class="fa-solid fa-check"></i>Resumo automático do turno gerado por IA</li>
+              <li><i class="fa-solid fa-check"></i>Previsão de fluxo com sugestão de escala</li>
+            </ul>
+            <div class="showcase-visual">
+              <div class="mock">
+                <div class="mock-topbar">
+                  <span class="mock-dot mint"></span>
+                  <span class="mock-dot"></span>
+                  <span class="mock-dot"></span>
+                  <span style="margin-left: 8px">minhavez.app/dashboard</span>
+                  <span style="margin-left: auto; color: var(--accent)">● ao vivo</span>
+                </div>
+                <div class="mock-dash">
+                  <div class="mock-sidebar">
+                    <div class="icn active"><i class="fa-solid fa-chart-line"></i></div>
+                    <div class="icn"><i class="fa-solid fa-users"></i></div>
+                    <div class="icn"><i class="fa-solid fa-bag-shopping"></i></div>
+                    <div class="icn"><i class="fa-solid fa-gear"></i></div>
+                  </div>
+                  <div class="mock-main">
+                    <div class="mock-kpis">
+                      <div class="mock-kpi">
+                        <div class="mock-kpi-label">Vendas hoje</div>
+                        <div class="mock-kpi-val">R$ 18.420</div>
+                        <div class="mock-kpi-delta">▲ 12,4% vs ontem</div>
+                      </div>
+                      <div class="mock-kpi">
+                        <div class="mock-kpi-label">Ticket médio</div>
+                        <div class="mock-kpi-val">R$ 287</div>
+                        <div class="mock-kpi-delta">▲ 4,8%</div>
+                      </div>
+                      <div class="mock-kpi">
+                        <div class="mock-kpi-label">Conversão</div>
+                        <div class="mock-kpi-val">42%</div>
+                        <div class="mock-kpi-delta down">▼ 2,1%</div>
+                      </div>
+                    </div>
+                    <div class="mock-charts">
+                      <div class="mock-chart">
+                        <div class="mock-chart-title">Vendas · últimas 12h</div>
+                        <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+                          <defs>
+                            <linearGradient id="gsp" x1="0" x2="0" y1="0" y2="1">
+                              <stop offset="0" stop-color="#a78bfa" stop-opacity="0.4" />
+                              <stop offset="1" stop-color="#a78bfa" stop-opacity="0" />
+                            </linearGradient>
+                          </defs>
+                          <path
+                            d="M0,48 L15,44 L30,46 L45,38 L60,40 L75,30 L90,34 L105,22 L120,26 L135,18 L150,22 L165,14 L180,10 L200,8 L200,60 L0,60 Z"
+                            fill="url(#gsp)"
+                          />
+                          <path
+                            d="M0,48 L15,44 L30,46 L45,38 L60,40 L75,30 L90,34 L105,22 L120,26 L135,18 L150,22 L165,14 L180,10 L200,8"
+                            fill="none"
+                            stroke="#a78bfa"
+                            stroke-width="1.5"
+                          />
+                        </svg>
+                      </div>
+                      <div class="mock-chart">
+                        <div class="mock-chart-title">Por setor</div>
+                        <svg viewBox="0 0 60 60">
+                          <circle cx="30" cy="30" r="22" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8" />
+                          <circle
+                            cx="30"
+                            cy="30"
+                            r="22"
+                            fill="none"
+                            stroke="#a78bfa"
+                            stroke-width="8"
+                            stroke-dasharray="70 138"
+                            stroke-dashoffset="0"
+                            transform="rotate(-90 30 30)"
+                          />
+                          <circle
+                            cx="30"
+                            cy="30"
+                            r="22"
+                            fill="none"
+                            stroke="#8ea5c9"
+                            stroke-width="8"
+                            stroke-dasharray="40 138"
+                            stroke-dashoffset="-70"
+                            transform="rotate(-90 30 30)"
+                          />
+                          <circle
+                            cx="30"
+                            cy="30"
+                            r="22"
+                            fill="none"
+                            stroke="#d4a373"
+                            stroke-width="8"
+                            stroke-dasharray="28 138"
+                            stroke-dashoffset="-110"
+                            transform="rotate(-90 30 30)"
+                          />
+                          <text x="30" y="33" text-anchor="middle" fill="#e6e6e6" font-size="10" font-weight="700">
+                            R$18k
+                          </text>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mock-ia">
+                  <span class="spark"><i class="fa-solid fa-sparkles"></i></span>
+                  <span
+                    ><strong style="color: var(--accent)">IA:</strong> pico esperado às 19h. Sugiro reforçar Masculino
+                    com +1 vendedor.</span
+                  >
+                </div>
               </div>
             </div>
-            <div style="font-family: var(--font-mono); font-size: 12px; color: var(--chart-4); font-weight: 600">
-              1.420 XP
+          </article>
+
+          <!-- Card 2: Vendor gamificado -->
+          <article class="showcase-card">
+            <span class="showcase-tag"><i class="fa-solid fa-trophy" style="font-size: 10px"></i>Exclusivo Elite</span>
+            <h3>App do vendedor gamificado</h3>
+            <p>
+              Cada venda vira XP. XP vira tier (Pedra, Bronze, Ouro, Diamante, Mítico). Tier desbloqueia cosméticos do
+              avatar pixel-art. Engajamento sem manager.
+            </p>
+            <ul class="showcase-bullets">
+              <li><i class="fa-solid fa-check"></i>13 tiers RPG com progressão visível (XP + missões diárias)</li>
+              <li><i class="fa-solid fa-check"></i>Avatar pixel-art customizável (120+ cosméticos)</li>
+              <li><i class="fa-solid fa-check"></i>Push quando é a vez — notifica no celular</li>
+            </ul>
+            <div class="showcase-visual">
+              <div class="mock">
+                <div class="mock-phone">
+                  <div class="mock-phone-frame">
+                    <div class="mock-avatar"></div>
+                    <div class="mock-tier">Ouro <span class="lvl">· nível 7</span></div>
+                    <div class="mock-xp"><span></span></div>
+                    <div class="mock-xp-meta">
+                      <span>2.480 XP</span>
+                      <span>3.650</span>
+                    </div>
+                    <ul class="mock-missions">
+                      <li><span class="chk done"></span>5 atendimentos · 100 XP</li>
+                      <li><span class="chk done"></span>Ticket &gt; R$ 300 · 80 XP</li>
+                      <li><span class="chk"></span>3 trocas resolvidas · 60 XP</li>
+                    </ul>
+                    <div class="mock-push">
+                      <span class="dot"></span>
+                      <span><strong style="color: var(--accent)">É a sua vez!</strong></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-          <div style="height: 8px; border-radius: 4px; background: var(--bg-elevated); overflow: hidden; width: 100%">
-            <div
-              style="height: 100%; width: 65%; background: linear-gradient(90deg, var(--accent), var(--chart-2))"
-            ></div>
-          </div>
-          <div style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); text-align: center">
-            PRÓXIMO TIER · CORONEL · 2.180 XP
-          </div>
+          </article>
+
+          <!-- Card 3: Tablet fila -->
+          <article class="showcase-card">
+            <span class="showcase-tag"
+              ><i class="fa-solid fa-tablet-screen-button" style="font-size: 10px"></i>Operação</span
+            >
+            <h3>Tablet no balcão</h3>
+            <p>
+              Touch, drag &amp; swipe. Quem encosta no tablet entende em 30s. Funciona no Android que você já tem. Modo
+              offline se a internet cair.
+            </p>
+            <ul class="showcase-bullets">
+              <li><i class="fa-solid fa-check"></i>Fila com rodízio automático e setores</li>
+              <li><i class="fa-solid fa-check"></i>Timer de atendimento + controle de saídas</li>
+              <li><i class="fa-solid fa-check"></i>Gestão de trocas (simples e com diferença)</li>
+            </ul>
+            <div class="showcase-visual">
+              <div class="mock">
+                <div class="mock-topbar">
+                  <span class="mock-dot mint"></span>
+                  <span style="margin-left: 8px">Texas Center · Balcão 2</span>
+                  <span style="margin-left: auto"
+                    ><i class="fa-solid fa-wifi" style="color: var(--accent)"></i> online</span
+                  >
+                </div>
+                <div class="mock-tablet">
+                  <div class="mock-tablet-tabs">
+                    <div class="tab">Todos</div>
+                    <div class="tab active">Masculino</div>
+                    <div class="tab">Feminino</div>
+                    <div class="tab">Calçados</div>
+                    <div class="tab">Caixa</div>
+                  </div>
+                  <div class="mock-queue">
+                    <div class="mock-queue-row active">
+                      <div class="pos">1</div>
+                      <div class="avatar">JP</div>
+                      <div class="name">
+                        João P. <span style="color: var(--text-muted); font-weight: 400">· atendendo</span>
+                      </div>
+                      <div class="timer">04:12</div>
+                    </div>
+                    <div class="mock-queue-row">
+                      <div class="pos">2</div>
+                      <div class="avatar" style="background: linear-gradient(135deg, #d4a373, #b8875a)">MR</div>
+                      <div class="name">Marina R.</div>
+                      <div class="timer">próximo</div>
+                    </div>
+                    <div class="mock-queue-row">
+                      <div class="pos">3</div>
+                      <div class="avatar" style="background: linear-gradient(135deg, #b8a8d4, #9d8bc4)">LS</div>
+                      <div class="name">Lucas S.</div>
+                      <div class="timer">aguarda</div>
+                    </div>
+                    <div class="mock-queue-row">
+                      <div class="pos">4</div>
+                      <div class="avatar" style="background: linear-gradient(135deg, #e89b8a, #d47a68)">AC</div>
+                      <div class="name">Ana C.</div>
+                      <div class="timer">aguarda</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
         </div>
+        <p class="showcase-hint reveal">
+          Arraste lateralmente <i class="fa-solid fa-arrows-left-right"></i> pra explorar os módulos
+        </p>
       </div>
     </section>
 
-    <section class="nv-journey">
-      <div class="nv-wrap nv-journey-grid">
-        <div>
-          <div class="nv-journey-step">05 · DECISÃO</div>
-          <h2 class="nv-journey-title">E você <em>vê tudo acontecendo.</em></h2>
-          <p class="nv-journey-desc">
-            Dashboard em tempo real. IA resume o turno, sugere escala do dia seguinte, aponta rupturas antes de você
-            sentir. A gestão vira leitura, não adivinhação.
-          </p>
+    <!-- ==================================================================
+     SOCIAL PROOF — Texas Center hoje (KPIs vivos via RPC)
+     ================================================================== -->
+    <section class="section section-proof" id="proof">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="section-label">Em produção real</span>
+          <h2 class="section-title">Texas Center, últimos 30 dias</h2>
+          <p class="section-sub">Números agregados, atualizados a cada 5 minutos. Sem dado fake.</p>
         </div>
-        <div class="nv-journey-visual">
-          <svg viewBox="0 0 300 200" width="100%" style="max-width: 400px">
-            <defs>
-              <linearGradient id="chartG" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="var(--chart-1)" stop-opacity=".4" />
-                <stop offset="1" stop-color="var(--chart-1)" stop-opacity="0" />
-              </linearGradient>
-            </defs>
-            <rect
-              x="20"
-              y="20"
-              width="260"
-              height="160"
-              rx="12"
-              fill="var(--bg-elevated)"
-              stroke="var(--border-subtle)"
-            />
-            <path
-              d="M 40 150 L 80 130 L 120 100 L 160 70 L 200 110 L 240 90 L 260 100 L 260 170 L 40 170 Z"
-              fill="url(#chartG)"
-            />
-            <path
-              d="M 40 150 L 80 130 L 120 100 L 160 70 L 200 110 L 240 90 L 260 100"
-              stroke="var(--chart-1)"
-              stroke-width="2.5"
-              fill="none"
-            />
-            <circle cx="160" cy="70" r="5" fill="var(--chart-1)" />
-            <text x="140" y="50" fill="var(--chart-1)" font-family="JetBrains Mono" font-size="9" font-weight="600">
-              13H · PICO
-            </text>
-          </svg>
+        <div class="proof-grid reveal" id="proofGrid">
+          <div class="proof-card">
+            <div class="proof-value" id="proofAtend">—</div>
+            <div class="proof-label">atendimentos finalizados</div>
+          </div>
+          <div class="proof-card">
+            <div class="proof-value" id="proofVend">—</div>
+            <div class="proof-label">vendedores ativos</div>
+          </div>
+          <div class="proof-card">
+            <div class="proof-value"><span id="proofTempo">—</span><span class="proof-unit">min</span></div>
+            <div class="proof-label">tempo médio de atendimento</div>
+          </div>
+          <div class="proof-card">
+            <div class="proof-value" id="proofLojas">—</div>
+            <div class="proof-label">loja(s) usando agora</div>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- ==================================================================
-     SPOTLIGHT — Texas Center case (KPIs vivos via RPC, IDs preservados)
+     HOW IT WORKS
      ================================================================== -->
-    <section class="nv-spotlight" id="case">
-      <div class="nv-wrap">
-        <div class="nv-spotlight-eyebrow">Case · Texas Center · Goiânia</div>
-        <div class="nv-spot-grid">
-          <div class="nv-spot-item">
-            <div class="n" id="proofAtend">—</div>
-            <div class="l">atendimentos</div>
+    <section class="section" id="como-funciona">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="section-label">Como funciona</span>
+          <h2 class="section-title">5 minutos pra subir.<br />O resto acontece sozinho.</h2>
+        </div>
+        <div class="steps-grid">
+          <div class="step reveal">
+            <div class="step-num">01</div>
+            <div class="step-icon"><i class="fa-solid fa-user-plus"></i></div>
+            <h3>Conecte os vendedores</h3>
+            <p>
+              Cada vendedor entra com PIN de 4 dígitos ou QR. Avatar e perfil começam vazios — vão preenchendo com o
+              uso.
+            </p>
           </div>
-          <div class="nv-spot-item">
-            <div class="n" id="proofVend">—</div>
-            <div class="l">vendedores ativos</div>
+          <div class="step reveal">
+            <div class="step-num">02</div>
+            <div class="step-icon"><i class="fa-solid fa-hand-pointer"></i></div>
+            <h3>Opere o turno no tablet</h3>
+            <p>
+              Ao chegar cliente, gestor arrasta o próximo vendedor pro atendimento. Timer, sells e pausas rolam
+              automáticas.
+            </p>
           </div>
-          <div class="nv-spot-item">
-            <div class="n">
-              <span id="proofTempo">—</span><span style="font-size: 20px; color: var(--text-muted)">min</span>
-            </div>
-            <div class="l">tempo médio</div>
-          </div>
-          <div class="nv-spot-item">
-            <div class="n" id="proofLojas">—</div>
-            <div class="l">loja(s) ao vivo</div>
+          <div class="step reveal">
+            <div class="step-num">03</div>
+            <div class="step-icon"><i class="fa-solid fa-chart-line"></i></div>
+            <h3>Todo mundo vê resultado</h3>
+            <p>Gestor vê números no dashboard. Vendedor vê XP subir no celular. IA resume o dia em 1 parágrafo.</p>
           </div>
         </div>
-        <blockquote class="nv-spot-quote">
-          "Antes a gente adivinhava. Hoje abro o dashboard às 9h e sei exatamente quem vai puxar o dia. Vendedor compete
-          com ele mesmo e a loja ganha."
-        </blockquote>
-        <div class="nv-spot-author">— GESTÃO TEXAS CENTER</div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+     SOCIAL PROOF
+     ================================================================== -->
+    <section class="section proof">
+      <div class="container">
+        <div class="section-head reveal" style="margin-bottom: 40px">
+          <span class="section-label">Em produção</span>
+          <h2 class="section-title">Texas Center.<br />3 meses de operação real.</h2>
+        </div>
+        <div class="proof-inner">
+          <div class="reveal">
+            <p class="proof-quote">
+              A gente tinha achismo. Agora tem número. Vendedor que produz menos, aparece. Vendedor que produz muito,
+              também. Tudo mudou quando cada um passou a ver o próprio resultado.
+            </p>
+            <div class="proof-author">
+              <div class="proof-author-avatar">MC</div>
+              <div class="proof-author-info">
+                <strong>Matheus C.</strong>
+                <span>Gestor comercial · Texas Center · Goiânia</span>
+              </div>
+            </div>
+          </div>
+          <div class="proof-stats reveal">
+            <div class="proof-stat">
+              <div class="proof-stat-num">12k+</div>
+              <div class="proof-stat-label">Atendimentos registrados</div>
+            </div>
+            <div class="proof-stat">
+              <div class="proof-stat-num">3</div>
+              <div class="proof-stat-label">Setores operando juntos</div>
+            </div>
+            <div class="proof-stat">
+              <div class="proof-stat-num">8</div>
+              <div class="proof-stat-label">Vendedores ativos</div>
+            </div>
+            <div class="proof-stat">
+              <div class="proof-stat-num">100%</div>
+              <div class="proof-stat-label">Disponibilidade (uptime)</div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- ==================================================================
      PRICING
      ================================================================== -->
-    <section class="nv-pricing" id="precos">
-      <div class="nv-wrap">
-        <div class="nv-section-eyebrow">Planos</div>
-        <h2 class="nv-section-title">Escolha o seu <em>ritmo de jogo.</em></h2>
-        <p class="nv-section-sub">Começa pequeno. Cresce quando a loja crescer. Sem letras miúdas.</p>
+    <section class="section" id="precos">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="section-label">Preços</span>
+          <h2 class="section-title">Simples. Transparente.<br />Sem contrato.</h2>
+          <p class="section-sub">
+            Comece pelo plano que atende hoje. Suba quando precisar de mais. Cancele quando quiser, sem ligar pra
+            ninguém.
+          </p>
+        </div>
+        <div class="pricing-grid">
+          <!-- STARTER -->
+          <div class="plan reveal">
+            <h3>Starter</h3>
+            <div class="plan-price">
+              <span class="currency">R$</span><span class="v">49</span><span class="per">/mês</span>
+            </div>
+            <p class="plan-desc">Pra operação até 5 vendedores. Fila, dashboard básico, tablet — tudo o essencial.</p>
+            <ul class="plan-features">
+              <li><i class="fa-solid fa-check"></i>Até 5 vendedores</li>
+              <li><i class="fa-solid fa-check"></i>Tablet com fila inteligente</li>
+              <li><i class="fa-solid fa-check"></i>Dashboard em tempo real</li>
+              <li><i class="fa-solid fa-check"></i>Timer + controle de saídas</li>
+              <li class="muted"><i class="fa-solid fa-minus"></i>Trocas avançadas</li>
+              <li class="muted"><i class="fa-solid fa-minus"></i>IA Assist</li>
+            </ul>
+            <button class="plan-btn" onclick="openCheckout('starter')">Assinar Starter</button>
+          </div>
 
-        <div class="nv-plans">
-          <div class="nv-plan">
-            <div class="nv-plan-name">Starter</div>
-            <div class="nv-plan-sub">Pra quem tá começando</div>
-            <div class="nv-plan-price">R$49<small>/mês</small></div>
-            <div class="nv-plan-freq">Cancela quando quiser</div>
-            <ul>
-              <li>Até 3 vendedores</li>
-              <li>Dashboard completo</li>
-              <li>Tablet de fila</li>
-              <li>Suporte por e-mail</li>
+          <!-- PRO — FEATURED -->
+          <div class="plan featured reveal">
+            <div class="plan-tag">Mais escolhido</div>
+            <h3>Pro</h3>
+            <div class="plan-price">
+              <span class="currency">R$</span><span class="v">99</span><span class="per">/mês</span>
+            </div>
+            <p class="plan-desc">Pra loja séria que precisa de IA, CSV/PDF e comunicados. Pode até 15 vendedores.</p>
+            <ul class="plan-features">
+              <li><i class="fa-solid fa-check"></i>Até 15 vendedores</li>
+              <li><i class="fa-solid fa-check"></i>Tudo do Starter</li>
+              <li><i class="fa-solid fa-check"></i>Gestão de trocas (com diferença)</li>
+              <li><i class="fa-solid fa-check"></i>Exportação CSV / PDF</li>
+              <li><i class="fa-solid fa-check"></i>Comunicados pro time</li>
+              <li>
+                <i class="fa-solid fa-check"></i>
+                <span><strong>IA Assist</strong> — resumo de turno + sugestão de missões</span>
+              </li>
             </ul>
-            <button class="nv-btn nv-btn-ghost" onclick="openCheckout('starter')">Começar agora</button>
+            <button class="plan-btn" onclick="openCheckout('pro')">Assinar Pro</button>
           </div>
-          <div class="nv-plan featured">
-            <div class="nv-plan-name">Pro</div>
-            <div class="nv-plan-sub">Pra lojas com time</div>
-            <div class="nv-plan-price">R$99<small>/mês</small></div>
-            <div class="nv-plan-freq">Cancela quando quiser</div>
-            <ul>
-              <li>Até 10 vendedores</li>
-              <li>Dashboard + Tablet</li>
-              <li>App com gamificação</li>
-              <li>XP, tiers, missões</li>
-              <li>Push notifications</li>
+
+          <!-- ELITE -->
+          <div class="plan plan-elite reveal">
+            <h3>Elite</h3>
+            <div class="plan-price-elite">
+              <div class="v-wrap"><span class="currency">R$</span><span class="v">149</span></div>
+              <div class="unit">/mês base<br /><span class="seat">+ R$ 19 por vendedor</span></div>
+            </div>
+            <p class="plan-desc">
+              Quando engajamento é parte da estratégia. Vendedor vira protagonista da operação — XP, tiers, missões e
+              avatar próprio. IA coacha o time.
+            </p>
+            <div class="plan-section-label">Tudo do Pro +</div>
+            <ul class="plan-features plan-features-rich">
+              <li>
+                <i class="fa-solid fa-gamepad"></i>
+                <div><strong>App vendedor gamificado</strong><span>XP, 13 tiers RPG, avatar pixel-art</span></div>
+              </li>
+              <li>
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <div><strong>IA avançada</strong><span>Previsão de fluxo + coaching 1:1</span></div>
+              </li>
+              <li>
+                <i class="fa-solid fa-camera-retro"></i>
+                <div><strong>VM Missions</strong><span>Vitrine, display, fachada (multi-loja)</span></div>
+              </li>
+              <li>
+                <i class="fa-solid fa-headset"></i>
+                <div><strong>Onboarding dedicado</strong><span>Call de 1h + suporte prioritário</span></div>
+              </li>
             </ul>
-            <button class="nv-btn nv-btn-primary" onclick="openCheckout('pro')">Começar agora</button>
-          </div>
-          <div class="nv-plan">
-            <div class="nv-plan-name">Elite</div>
-            <div class="nv-plan-sub">Pra quem quer escalar</div>
-            <div class="nv-plan-price">R$149<small>+R$19/vend</small></div>
-            <div class="nv-plan-freq">A partir do 11º vendedor</div>
-            <ul>
-              <li>Vendedores ilimitados</li>
-              <li>IA Assist (resumo + escala)</li>
-              <li>White-label (cor + logo)</li>
-              <li>Suporte WhatsApp</li>
-              <li>Onboarding dedicado</li>
-            </ul>
-            <button class="nv-btn nv-btn-ghost" onclick="openDemo()">Agendar demo</button>
+            <button class="plan-btn" onclick="openDemo()">
+              <i class="fa-solid fa-calendar-check"></i> Agendar demo
+            </button>
+            <div class="plan-footnote">Ideal pra lojas com 10+ vendedores ou operação multi-loja</div>
           </div>
         </div>
       </div>
@@ -2901,114 +2416,96 @@
     <!-- ==================================================================
      FAQ
      ================================================================== -->
-    <section class="nv-faq">
-      <div class="nv-wrap nv-faq-grid">
-        <div class="nv-section-eyebrow">Dúvidas</div>
-        <h2 class="nv-section-title" style="margin-bottom: 48px">Perguntas frequentes</h2>
-        <details class="nv-faq-item">
-          <summary>Quanto tempo pra começar?</summary>
-          <p>3 minutos. Você cria a conta, cadastra vendedores, abre o turno no tablet. Sério.</p>
-        </details>
-        <details class="nv-faq-item">
-          <summary>Meu time vai curtir gamificação?</summary>
-          <p>
-            No Texas Center o XP virou assunto de almoço. Vendedor olha o ranking antes da loja abrir. Mas é opcional —
-            se o seu time preferir operar sem, desliga nas configurações.
-          </p>
-        </details>
-        <details class="nv-faq-item">
-          <summary>Funciona offline?</summary>
-          <p>Sim. Tablet e app têm cache local. Tudo sincroniza quando volta a conexão.</p>
-        </details>
-        <details class="nv-faq-item">
-          <summary>Preciso treinar minha equipe?</summary>
-          <p>
-            Onboarding interativo no tablet cobre os primeiros 5 minutos. Depois a UX faz o resto — foi desenhada pra
-            equipes de varejo, não pra power users.
-          </p>
-        </details>
-        <details class="nv-faq-item">
-          <summary>Meus dados são meus?</summary>
-          <p>
-            Sim. Arquitetura multi-tenant com RLS no Postgres (Supabase). Isolamento por policy em todas as tabelas.
-          </p>
-        </details>
+    <section class="section" style="background: var(--bg-surface); border-top: 1px solid var(--border)">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="section-label">FAQ</span>
+          <h2 class="section-title">Perguntas que todo lojista faz.</h2>
+        </div>
+        <div class="faq-list">
+          <details class="faq-item reveal">
+            <summary>Quais dispositivos eu preciso?</summary>
+            <p>
+              Qualquer tablet Android (mesmo modelo básico de R$ 600 serve) ou iPad. Os vendedores usam o próprio
+              celular. Dashboard abre em qualquer navegador moderno.
+            </p>
+          </details>
+          <details class="faq-item reveal">
+            <summary>Cancela a qualquer momento?</summary>
+            <p>
+              Sim. Sem contrato, sem multa. Cancela dentro do próprio sistema em 2 cliques. Cobrança pro-rata no mês
+              corrente.
+            </p>
+          </details>
+          <details class="faq-item reveal">
+            <summary>Funciona com múltiplas lojas?</summary>
+            <p>
+              Sim. Cada loja é um tenant separado com dashboard próprio. No plano Elite, gestor regional vê consolidado
+              multi-loja.
+            </p>
+          </details>
+          <details class="faq-item reveal">
+            <summary>E se a internet cair?</summary>
+            <p>
+              O tablet funciona em modo offline: registra fila, atendimentos e vendas localmente. Sincroniza automático
+              quando a conexão volta.
+            </p>
+          </details>
+          <details class="faq-item reveal">
+            <summary>Onde ficam os dados?</summary>
+            <p>
+              Servidor AWS São Paulo via Supabase. Dados criptografados em trânsito e em repouso. LGPD compliant. Você é
+              dono, exporta a hora que quiser.
+            </p>
+          </details>
+          <details class="faq-item reveal">
+            <summary>Como é o suporte?</summary>
+            <p>
+              WhatsApp direto no horário comercial pra todos os planos. Pro e Elite têm resposta prioritária. Elite
+              inclui onboarding (call de 1h pra subir).
+            </p>
+          </details>
+        </div>
       </div>
     </section>
 
     <!-- ==================================================================
      FOOTER
      ================================================================== -->
-    <footer class="nv-footer">
-      <div class="nv-wrap">
-        <div class="nv-footer-top">
-          <div>
-            <mv-logo size="M" wordmark></mv-logo>
-            <p
-              style="margin-top: 16px; color: var(--text-muted); font-size: 13.5px; max-width: 280px; line-height: 1.6"
-            >
-              Operação de varejo virou jogo competitivo. Sua equipe evolui, sua loja cresce.
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="logo-inline"><mv-logo size="M" wordmark></mv-logo></div>
+            <p>
+              Gestão inteligente de fila + engajamento gamificado pra lojas físicas. Feito no Brasil, em produção real.
             </p>
           </div>
-          <div>
+          <div class="footer-col">
             <h4>Produto</h4>
-            <a href="#como-funciona">Como funciona</a>
-            <a href="#case">Case Texas</a>
+            <a href="#produto">Features</a>
             <a href="#precos">Preços</a>
+            <a href="#como-funciona">Como funciona</a>
           </div>
-          <div>
+          <div class="footer-col">
             <h4>Empresa</h4>
+            <a href="#produto">Sobre</a>
             <a href="javascript:openDemo()">Contato</a>
             <a href="/">Entrar</a>
           </div>
-          <div>
+          <div class="footer-col">
             <h4>Legal</h4>
             <a href="/termos">Termos</a>
             <a href="/privacidade">Privacidade</a>
             <a href="/privacidade#lgpd">LGPD</a>
           </div>
         </div>
-        <div class="nv-footer-bottom">© 2026 minhavez · Stripe · LGPD compliant · Feito no Brasil</div>
+        <div class="footer-bottom">
+          <div>© 2026 minhavez — Todos os direitos reservados.</div>
+          <div>Stripe · pagamento seguro · LGPD compliant</div>
+        </div>
       </div>
     </footer>
-
-    <script>
-      // Narrative cycle node rotator (cliente → fila → atende → XP)
-      (function () {
-        const nodes = document.querySelectorAll('.nv-cycle-node');
-        if (!nodes.length) return;
-        let i = 0;
-        setInterval(() => {
-          nodes.forEach((n) => n.classList.remove('active'));
-          i = (i + 1) % nodes.length;
-          nodes[i].classList.add('active');
-        }, 1400);
-      })();
-
-      // Scroll-reveal (IntersectionObserver) — fade + translateY on journey/spotlight/pricing/faq
-      (function () {
-        const targets = document.querySelectorAll('.nv-journey, .nv-spotlight, .nv-pricing, .nv-faq, .nv-footer');
-        if (!targets.length) return;
-        if (!('IntersectionObserver' in window)) {
-          // Fallback: mostra tudo sem anima\u00e7\u00e3o
-          targets.forEach((el) => el.classList.add('nv-in-view'));
-          return;
-        }
-        targets.forEach((el) => el.classList.add('nv-reveal'));
-        const io = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((e) => {
-              if (e.isIntersecting) {
-                e.target.classList.add('nv-in-view');
-                io.unobserve(e.target);
-              }
-            });
-          },
-          { threshold: 0.12, rootMargin: '0px 0px -60px 0px' }
-        );
-        targets.forEach((el) => io.observe(el));
-      })();
-    </script>
 
     <!-- ==================================================================
      MODAL: CHECKOUT (Stripe)
