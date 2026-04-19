@@ -1,153 +1,11 @@
 /* ============================================
-   MinhaVez — Theme & Design Tokens
-   Visual: clean, light, moderno
-   ============================================
-
-   VARIÁVEIS CSS DISPONÍVEIS (fonte da verdade):
-   ─────────────────────────────────────────────
-   Backgrounds:  --bg-deep, --bg-surface, --bg-card, --bg-elevated, --bg-hover
-   Borders:      --border-subtle, --border-medium, --border-strong
-   Text:         --text-primary, --text-secondary, --text-muted
-   Accent:       --accent, --accent-bright, --accent-dim
-   Gold:         --gold, --gold-bright, --gold-dim
-   Status:       --success, --success-bg, --warning, --warning-bg,
-                 --danger, --danger-bg, --info, --info-bg
-   Fonts:        --font-body, --font-mono
-   Radius:       --radius (14px), --radius-sm (8px), --radius-lg (20px)
-   Touch:        --touch-min (48px)
-   Transition:   --transition (150ms ease)
-
-   NÃO EXISTEM (não usar):
-   --text-strong, --bg-primary, --color-*, --font-sans (exceto landing)
-
-   Específicas do dashboard (em dashboard.css):
-   --gap (16px)
+   minhavez — Theme & Base styles (v52 · purple)
+   Tokens em tokens.css (single source).
+   Dark/light overrides em theme-dark.css / theme-light.css.
    ============================================ */
-/* Font: Satoshi (Fontshare) loaded via <link> in HTML */
-
-:root {
-  --bg-deep: #f8f8f8;
-  --bg-surface: #ffffff;
-  --bg-card: #ffffff;
-  --bg-elevated: #f0f0f0;
-  --bg-hover: #eaeaea;
-  --border-subtle: rgba(0, 0, 0, 0.06);
-  --border-medium: rgba(0, 0, 0, 0.1);
-  --border-strong: rgba(0, 0, 0, 0.16);
-  --text-primary: #0d0d0d;
-  --text-secondary: #525252;
-  --text-muted: #a3a3a3;
-  /* Brand — mint (inspirado awwwards) */
-  --accent: #aaeec4;
-  --accent-bright: #c7f5d6;
-  --accent-dim: #7fd9a0;
-  --accent-ink: #0d0d0d; /* texto sobre bg mint */
-  --gold: #aaeec4;
-  --gold-bright: #c7f5d6;
-  --gold-dim: #7fd9a0;
-  /* Status semânticos — harmonizados com mint + charcoal */
-  --success: #aaeec4;
-  --success-deep: #7fd9a0;
-  --success-bg: rgba(170, 238, 196, 0.12);
-  --warning: #d4a373;
-  --warning-deep: #b8875a;
-  --warning-bg: rgba(212, 163, 115, 0.14);
-  --danger: #e89b8a;
-  --danger-deep: #d47a68;
-  --danger-bg: rgba(232, 155, 138, 0.12);
-  --info: #8ea5c9;
-  --info-deep: #6d85ac;
-  --info-bg: rgba(142, 165, 201, 0.12);
-  --special: #b8a8d4;
-  --special-bg: rgba(184, 168, 212, 0.12);
-  /* Status disponibilidade (vendedores) */
-  --status-disponivel: #aaeec4;
-  --status-atendendo: #8ea5c9;
-  --status-pausa: #d4a373;
-  --status-fora: #71717a;
-  /* Motivos de perda — desbotados, diferenciados por matiz */
-  --motivo-preco: #d4a373;
-  --motivo-ruptura: #e89b8a;
-  --motivo-indecisao: #b8a8d4;
-  --motivo-so-olhando: #9ca3af;
-  --motivo-outro: #8ea5c9;
-  /* Motivos de saída/pausa */
-  --saida-almoco: #d4a373;
-  --saida-banheiro: #8ea5c9;
-  --saida-reuniao: #a1a1aa;
-  --saida-operacional: #b8a8d4;
-  --saida-finalizar: #e89b8a;
-  --saida-outro: #9ca3af;
-  --font-body: 'Inter Tight', system-ui, -apple-system, sans-serif;
-  --font-mono: 'Inter Tight', system-ui, sans-serif;
-  --font-display: 'Inter Tight', system-ui, sans-serif;
-  --radius: 14px;
-  --radius-sm: 8px;
-  --radius-lg: 20px;
-  --touch-min: 48px;
-  --transition: 150ms ease;
-  /* Spacing scale (8pt grid) */
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-  --space-2xl: 48px;
-  /* Sombras premium (estilo Linear/Arc) */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
-  --shadow-accent: 0 8px 24px rgba(170, 238, 196, 0.35);
-  --glow-accent: 0 0 0 1px rgba(170, 238, 196, 0.4), 0 8px 32px rgba(170, 238, 196, 0.28);
-  /* Gradientes sutis */
-  --grad-surface: linear-gradient(180deg, var(--bg-elevated), var(--bg-surface));
-  --grad-accent: linear-gradient(135deg, #aaeec4, #7fd9a0);
-  --grad-success: linear-gradient(135deg, #aaeec4, #7fd9a0);
-  --grad-gold: linear-gradient(135deg, #aaeec4, #7fd9a0);
-}
-
-/* ─── Dark Mode ─── */
-[data-theme='dark'] {
-  --bg-deep: #0d0d0d;
-  --bg-surface: #1a1a1a;
-  --bg-card: #222222;
-  --bg-elevated: #2a2a2a;
-  --bg-hover: #323232;
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  --glow-accent: 0 0 0 1px rgba(170, 238, 196, 0.35), 0 8px 32px rgba(170, 238, 196, 0.28);
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-medium: rgba(255, 255, 255, 0.1);
-  --border-strong: rgba(255, 255, 255, 0.16);
-  --text-primary: #fafafa;
-  --text-secondary: #a3a3a3;
-  --text-muted: #6b6b6b;
-  --accent: #aaeec4;
-  --accent-bright: #c7f5d6;
-  --accent-dim: #7fd9a0;
-  --accent-ink: #0d0d0d;
-  --gold: #aaeec4;
-  --gold-bright: #c7f5d6;
-  --gold-dim: #7fd9a0;
-  --status-disponivel: #aaeec4;
-  --status-atendendo: #8ea5c9;
-  --status-pausa: #d4a373;
-  --status-fora: #71717a;
-  --motivo-preco: #d4a373;
-  --motivo-ruptura: #e89b8a;
-  --motivo-indecisao: #b8a8d4;
-  --motivo-so-olhando: #9ca3af;
-  --motivo-outro: #94a3b8;
-  --saida-almoco: #d4a373;
-  --saida-banheiro: #8ea5c9;
-  --saida-reuniao: #a1a1aa;
-  --saida-operacional: #b8a8d4;
-  --saida-finalizar: #e89b8a;
-  --saida-outro: #94a3b8;
-}
+@import url('./tokens.css');
+@import url('./theme-dark.css');
+@import url('./theme-light.css');
 
 * {
   box-sizing: border-box;
@@ -862,66 +720,62 @@ h3,
   }
 }
 
-.texas-loader {
+/* ─── Loading: chevron mark (fallback CSS p/ quando mv-loader WC não carregou ainda) ─── */
+.mv-loader {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
-.texas-loader svg {
-  width: 56px;
-  height: 38px;
+.mv-loader svg {
+  width: 96px;
+  height: 72px;
+  color: var(--accent);
 }
-.texas-loader .flag-outline {
+.mv-loader .chv {
   fill: none;
-  stroke: var(--accent);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 300;
-  stroke-dashoffset: 300;
-  animation: drawFlag 1.8s ease-in-out infinite;
+  stroke: currentColor;
+  stroke-width: 14;
+  stroke-linejoin: miter;
 }
-.texas-loader .flag-star {
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 100;
-  stroke-dashoffset: 100;
-  animation: drawFlag 1.8s ease-in-out infinite 0.4s;
+.mv-loader .chv-1 {
+  animation: mvChevronStep 2.4s cubic-bezier(0.22, 0.7, 0.3, 1) infinite;
 }
-.texas-loader .flag-lines {
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 1;
-  opacity: 0.4;
-  stroke-dasharray: 100;
-  stroke-dashoffset: 100;
-  animation: drawFlag 1.8s ease-in-out infinite 0.2s;
+.mv-loader .chv-2 {
+  animation: mvChevronStep 2.4s cubic-bezier(0.22, 0.7, 0.3, 1) 0.3s infinite;
 }
-@keyframes drawFlag {
-  0% {
-    stroke-dashoffset: 300;
-    opacity: 0.3;
+.mv-loader .chv-3 {
+  animation: mvChevronStep 2.4s cubic-bezier(0.22, 0.7, 0.3, 1) 0.6s infinite;
+}
+@keyframes mvChevronStep {
+  0%,
+  15% {
+    opacity: 0.35;
   }
-  50% {
-    stroke-dashoffset: 0;
+  30%,
+  45% {
+    opacity: 0.7;
+  }
+  60%,
+  100% {
     opacity: 1;
   }
-  100% {
-    stroke-dashoffset: -300;
-    opacity: 0.3;
-  }
 }
-.texas-loader-text {
+.mv-loader-text {
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 600;
   color: var(--text-muted);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mv-loader .chv-1,
+  .mv-loader .chv-2,
+  .mv-loader .chv-3 {
+    animation: none;
+    opacity: 1;
+  }
 }
 
 /* ─── Toast container ─── */

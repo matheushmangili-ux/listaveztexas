@@ -1,0 +1,26 @@
+/* ============================================
+   minhavez — Dark theme overrides
+   ============================================
+   Tokens core em tokens.css.
+   Este arquivo contém overrides específicos de dark mode
+   que não cabem no sistema de tokens (efeitos contextuais,
+   filtros de imagem, assets dark-aware).
+   ============================================ */
+
+[data-theme='dark'] img.theme-aware-logo,
+[data-theme='dark'] .logo-minhavez {
+  filter: none;
+}
+
+[data-theme='dark'] .video-overlay {
+  filter: brightness(0.8) saturate(1.1);
+}
+
+[data-theme='dark'] .grid-dots-bg {
+  background-image: radial-gradient(rgba(167, 139, 250, 0.08) 1px, transparent 1px);
+}
+
+[data-theme='dark'] ::selection {
+  background: rgba(167, 139, 250, 0.3);
+  color: #f5f0ff;
+}

@@ -1,0 +1,238 @@
+/* ============================================
+   minhavez — Design Tokens (single source)
+   ============================================
+   Paleta roxa (purple) + dark/light parity.
+   Substitui mint (#aaeec4) → purple (#8b5cf6).
+   Nomes de variáveis preservados para não quebrar o sistema existente;
+   só os VALORES mudam.
+   ============================================ */
+
+:root {
+  /* ─── Light mode (default) ─── */
+
+  /* Backgrounds */
+  --bg-deep: #f7f5fb;
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-elevated: #f0ecf7;
+  --bg-hover: #ebe5f5;
+
+  /* Borders */
+  --border-subtle: rgba(19, 8, 44, 0.06);
+  --border-medium: rgba(19, 8, 44, 0.1);
+  --border-strong: rgba(19, 8, 44, 0.16);
+
+  /* Text */
+  --text-primary: #13082c;
+  --text-secondary: #5a4b78;
+  --text-muted: #958aa8;
+
+  /* Brand — purple */
+  --accent: #8b5cf6; /* purple-500 */
+  --accent-bright: #a78bfa; /* purple-400 */
+  --accent-dim: #6d28d9; /* purple-700 */
+  --accent-ink: #ffffff; /* texto sobre bg roxo */
+
+  /* Accent ramp (full) */
+  --accent-50: #f5f3ff;
+  --accent-100: #ede9fe;
+  --accent-200: #ddd6fe;
+  --accent-300: #c4b5fd;
+  --accent-400: #a78bfa;
+  --accent-500: #8b5cf6;
+  --accent-600: #7c3aed;
+  --accent-700: #6d28d9;
+  --accent-800: #5b21b6;
+  --accent-900: #4c1d95;
+  --accent-950: #3b0d6b;
+
+  /* Gold — alias legado, agora espelha accent */
+  --gold: #8b5cf6;
+  --gold-bright: #a78bfa;
+  --gold-dim: #6d28d9;
+
+  /* Status semânticos — cores distintas do accent */
+  --success: #22c55e;
+  --success-deep: #16a34a;
+  --success-bg: rgba(34, 197, 94, 0.12);
+  --warning: #f59e0b;
+  --warning-deep: #d97706;
+  --warning-bg: rgba(245, 158, 11, 0.14);
+  --danger: #ef4444;
+  --danger-deep: #dc2626;
+  --danger-bg: rgba(239, 68, 68, 0.12);
+  --info: #3b82f6;
+  --info-deep: #2563eb;
+  --info-bg: rgba(59, 130, 246, 0.12);
+  --special: #c4b5fd;
+  --special-bg: rgba(196, 181, 253, 0.14);
+
+  /* Status disponibilidade (vendedores) — mantém diferenciação visual */
+  --status-disponivel: #22c55e;
+  --status-atendendo: #8b5cf6;
+  --status-pausa: #f59e0b;
+  --status-fora: #71717a;
+
+  /* Motivos de perda — paleta variada, não-accent */
+  --motivo-preco: #d4a373;
+  --motivo-ruptura: #e89b8a;
+  --motivo-indecisao: #b8a8d4;
+  --motivo-so-olhando: #9ca3af;
+  --motivo-outro: #8ea5c9;
+
+  /* Motivos de saída/pausa */
+  --saida-almoco: #d4a373;
+  --saida-banheiro: #8ea5c9;
+  --saida-reuniao: #a1a1aa;
+  --saida-operacional: #b8a8d4;
+  --saida-finalizar: #e89b8a;
+  --saida-outro: #9ca3af;
+
+  /* Tipografia */
+  --font-body: 'Inter Tight', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --font-display: 'Inter Tight', system-ui, sans-serif;
+
+  /* Radius */
+  --radius: 14px;
+  --radius-sm: 8px;
+  --radius-lg: 20px;
+
+  /* Touch / transitions */
+  --touch-min: 48px;
+  --transition: 150ms ease;
+
+  /* Spacing (8pt grid) */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(19, 8, 44, 0.04);
+  --shadow-sm: 0 2px 8px rgba(19, 8, 44, 0.06), 0 1px 2px rgba(19, 8, 44, 0.04);
+  --shadow-md: 0 8px 24px rgba(19, 8, 44, 0.08), 0 2px 6px rgba(19, 8, 44, 0.04);
+  --shadow-lg: 0 20px 48px rgba(19, 8, 44, 0.12), 0 4px 12px rgba(19, 8, 44, 0.06);
+  --shadow-accent: 0 8px 24px rgba(139, 92, 246, 0.35);
+  --glow-accent: 0 0 0 1px rgba(139, 92, 246, 0.4), 0 8px 32px rgba(139, 92, 246, 0.28);
+
+  /* Gradients */
+  --grad-surface: linear-gradient(180deg, var(--bg-elevated), var(--bg-surface));
+  --grad-accent: linear-gradient(135deg, #a78bfa, #6d28d9);
+  --grad-success: linear-gradient(135deg, #4ade80, #16a34a);
+  --grad-gold: linear-gradient(135deg, #a78bfa, #6d28d9);
+}
+
+/* ─── Dark mode ─── */
+[data-theme='dark'] {
+  /* Backgrounds */
+  --bg-deep: #0a0614;
+  --bg-surface: #14102a;
+  --bg-card: #1a1538;
+  --bg-elevated: #221d45;
+  --bg-hover: #2b2556;
+
+  /* Borders */
+  --border-subtle: rgba(167, 139, 250, 0.08);
+  --border-medium: rgba(167, 139, 250, 0.14);
+  --border-strong: rgba(167, 139, 250, 0.22);
+
+  /* Text */
+  --text-primary: #f5f0ff;
+  --text-secondary: #b5a8d4;
+  --text-muted: #7a6e99;
+
+  /* Brand — purple (inverte hierarquia: tons mais claros no dark) */
+  --accent: #a78bfa; /* purple-400 */
+  --accent-bright: #c4b5fd; /* purple-300 */
+  --accent-dim: #8b5cf6; /* purple-500 */
+  --accent-ink: #0a0614; /* texto sobre bg roxo claro */
+
+  /* Gold alias */
+  --gold: #a78bfa;
+  --gold-bright: #c4b5fd;
+  --gold-dim: #8b5cf6;
+
+  /* Shadows dark-aware */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --shadow-accent: 0 8px 24px rgba(167, 139, 250, 0.28);
+  --glow-accent: 0 0 0 1px rgba(167, 139, 250, 0.35), 0 8px 32px rgba(167, 139, 250, 0.28);
+
+  /* Status semânticos — mantêm cor, ganham luminosidade pra dark */
+  --success: #4ade80;
+  --success-deep: #22c55e;
+  --success-bg: rgba(74, 222, 128, 0.14);
+  --warning: #fbbf24;
+  --warning-deep: #f59e0b;
+  --warning-bg: rgba(251, 191, 36, 0.14);
+  --danger: #f87171;
+  --danger-deep: #ef4444;
+  --danger-bg: rgba(248, 113, 113, 0.14);
+  --info: #60a5fa;
+  --info-deep: #3b82f6;
+  --info-bg: rgba(96, 165, 250, 0.14);
+  --special: #c4b5fd;
+  --special-bg: rgba(196, 181, 253, 0.14);
+
+  /* Status disponibilidade */
+  --status-disponivel: #4ade80;
+  --status-atendendo: #a78bfa;
+  --status-pausa: #fbbf24;
+  --status-fora: #71717a;
+
+  /* Gradients dark */
+  --grad-accent: linear-gradient(135deg, #c4b5fd, #8b5cf6);
+  --grad-success: linear-gradient(135deg, #86efac, #22c55e);
+  --grad-gold: linear-gradient(135deg, #c4b5fd, #8b5cf6);
+}
+
+/* ─── Light mode explicit override (para páginas com toggle) ─── */
+[data-theme='light'] {
+  --bg-deep: #f7f5fb;
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-elevated: #f0ecf7;
+  --bg-hover: #ebe5f5;
+  --border-subtle: rgba(19, 8, 44, 0.06);
+  --border-medium: rgba(19, 8, 44, 0.1);
+  --border-strong: rgba(19, 8, 44, 0.16);
+  --text-primary: #13082c;
+  --text-secondary: #5a4b78;
+  --text-muted: #958aa8;
+  --accent: #8b5cf6;
+  --accent-bright: #a78bfa;
+  --accent-dim: #6d28d9;
+  --accent-ink: #ffffff;
+  --gold: #8b5cf6;
+  --gold-bright: #a78bfa;
+  --gold-dim: #6d28d9;
+  --shadow-xs: 0 1px 2px rgba(19, 8, 44, 0.04);
+  --shadow-sm: 0 2px 8px rgba(19, 8, 44, 0.06), 0 1px 2px rgba(19, 8, 44, 0.04);
+  --shadow-md: 0 8px 24px rgba(19, 8, 44, 0.08), 0 2px 6px rgba(19, 8, 44, 0.04);
+  --shadow-lg: 0 20px 48px rgba(19, 8, 44, 0.12), 0 4px 12px rgba(19, 8, 44, 0.06);
+  --shadow-accent: 0 8px 24px rgba(139, 92, 246, 0.35);
+  --glow-accent: 0 0 0 1px rgba(139, 92, 246, 0.4), 0 8px 32px rgba(139, 92, 246, 0.28);
+  --success: #22c55e;
+  --success-deep: #16a34a;
+  --success-bg: rgba(34, 197, 94, 0.12);
+  --warning: #f59e0b;
+  --warning-deep: #d97706;
+  --warning-bg: rgba(245, 158, 11, 0.14);
+  --danger: #ef4444;
+  --danger-deep: #dc2626;
+  --danger-bg: rgba(239, 68, 68, 0.12);
+  --info: #3b82f6;
+  --info-deep: #2563eb;
+  --info-bg: rgba(59, 130, 246, 0.12);
+  --status-disponivel: #22c55e;
+  --status-atendendo: #8b5cf6;
+  --status-pausa: #f59e0b;
+  --grad-accent: linear-gradient(135deg, #a78bfa, #6d28d9);
+  --grad-success: linear-gradient(135deg, #4ade80, #16a34a);
+  --grad-gold: linear-gradient(135deg, #a78bfa, #6d28d9);
+}
