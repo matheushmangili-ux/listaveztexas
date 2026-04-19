@@ -52,7 +52,7 @@
         background: var(--accent);
         color: #fff;
         font-weight: 700;
-        box-shadow: 0 2px 8px rgba(170, 238, 196, 0.3);
+        box-shadow: 0 2px 8px rgba(167, 139, 250, 0.3);
       }
       .settings-tab:hover:not(.active) {
         background: var(--bg-elevated);
@@ -271,9 +271,9 @@
         border: 1px solid rgba(142, 165, 201, 0.2);
       }
       .plan-badge.pro {
-        background: rgba(170, 238, 196, 0.1);
-        color: #aaeec4;
-        border: 1px solid rgba(170, 238, 196, 0.2);
+        background: rgba(167, 139, 250, 0.1);
+        color: #a78bfa;
+        border: 1px solid rgba(167, 139, 250, 0.2);
       }
       /* URL cards */
       .url-display {
@@ -529,13 +529,13 @@
                   <!-- Picker (mostrado para tenants elite) -->
                   <div id="corPickerWrap" class="color-row" style="display: none">
                     <div class="color-swatch" id="colorSwatch">
-                      <input type="color" id="settColor" value="#aaeec4" />
+                      <input type="color" id="settColor" value="#a78bfa" />
                     </div>
                     <input
                       id="settColorText"
                       class="input"
                       type="text"
-                      value="#aaeec4"
+                      value="#a78bfa"
                       maxlength="7"
                       style="max-width: 120px; font-family: var(--font-mono); font-size: 13px"
                     />
@@ -1081,7 +1081,7 @@
 
         // Populate UI
         document.getElementById('settStoreName').value = tenant.nome_loja || '';
-        const color = tenant.cor_primaria || '#aaeec4';
+        const color = tenant.cor_primaria || '#a78bfa';
         document.getElementById('settColor').value = color;
         document.getElementById('settColorText').value = color;
         document.getElementById('colorSwatch').style.background = color;

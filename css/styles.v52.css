@@ -566,7 +566,7 @@ h3,
 }
 .motivo-option.selected {
   border-color: var(--accent);
-  background: rgba(170, 238, 196, 0.06);
+  background: rgba(167, 139, 250, 0.06);
 }
 .motivo-option i {
   font-size: 18px;
@@ -957,8 +957,8 @@ h3,
   border-radius: 12px !important;
   box-shadow:
     0 0 0 9999px rgba(13, 13, 13, 0.78),
-    0 0 0 2px rgba(170, 238, 196, 0.55),
-    0 0 24px rgba(170, 238, 196, 0.25) !important;
+    0 0 0 2px rgba(167, 139, 250, 0.55),
+    0 0 24px rgba(167, 139, 250, 0.25) !important;
 }
 .introjs-tooltip,
 .mv-introjs-tooltip {
@@ -968,7 +968,7 @@ h3,
   border-radius: 12px !important;
   box-shadow:
     0 16px 48px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(170, 238, 196, 0.18) !important;
+    0 0 0 1px rgba(167, 139, 250, 0.18) !important;
   font-family: var(--font-body, 'Inter Tight', sans-serif) !important;
   min-width: 320px;
   max-width: 400px;
@@ -981,7 +981,7 @@ h3,
   padding: 18px 18px 12px !important;
 }
 .introjs-tooltiptext strong {
-  color: var(--accent, #aaeec4);
+  color: var(--accent, #a78bfa);
   font-weight: 700;
 }
 .introjs-arrow.top {
@@ -1021,13 +1021,13 @@ h3,
   outline: none !important;
 }
 .introjs-nextbutton {
-  background: var(--accent, #aaeec4) !important;
+  background: var(--accent, #a78bfa) !important;
   color: var(--accent-ink, #0d0d0d) !important;
-  border-color: var(--accent, #aaeec4) !important;
+  border-color: var(--accent, #a78bfa) !important;
   font-weight: 700 !important;
 }
 .introjs-nextbutton:hover {
-  background: var(--accent-bright, #c7f5d6) !important;
+  background: var(--accent-bright, #c4b5fd) !important;
   color: var(--accent-ink, #0d0d0d) !important;
 }
 .introjs-disabled,
@@ -1057,7 +1057,7 @@ h3,
   height: 7px !important;
 }
 .introjs-bullets ul li a.active {
-  background: var(--accent, #aaeec4) !important;
+  background: var(--accent, #a78bfa) !important;
   width: 22px !important;
   border-radius: 4px !important;
 }
@@ -1068,8 +1068,8 @@ h3,
   margin: 0 18px 12px !important;
 }
 .introjs-progressbar {
-  background: var(--accent, #aaeec4) !important;
-  box-shadow: 0 0 8px rgba(170, 238, 196, 0.5);
+  background: var(--accent, #a78bfa) !important;
+  box-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
 }
 
 /* ============================================
@@ -1101,6 +1101,6 @@ select:focus-visible,
 .currency-wrap input:focus-visible,
 .collapse-btn:focus-visible,
 .cal-nav:focus-visible {
-  outline: 2px solid var(--accent-dim, #7fd9a0) !important;
+  outline: 2px solid var(--accent-dim, #8b5cf6) !important;
   outline-offset: 2px !important;
 }

@@ -23,43 +23,56 @@ export function fireVendaCelebration(opts = {}) {
 
   // Overlay container
   const flash = document.createElement('div');
-  flash.style.cssText = `position:fixed;inset:0;z-index:${Z_DRAG_GHOST};pointer-events:none;display:flex;align-items:center;justify-content:center;background:rgba(170, 238, 196,.06)`;
+  flash.style.cssText = `position:fixed;inset:0;z-index:${Z_DRAG_GHOST};pointer-events:none;display:flex;align-items:center;justify-content:center;background:rgba(167, 139, 250,.06)`;
 
-  const valorHtml = valor != null
-    ? `<span class="venda-celebrate-valor" style="font-family:var(--font-mono);font-size:28px;font-weight:800;color:var(--success);letter-spacing:-.02em;margin-top:4px;text-shadow:0 0 24px rgba(170, 238, 196,.45);font-variant-numeric:tabular-nums">R$ 0,00</span>`
-    : '';
+  const valorHtml =
+    valor != null
+      ? `<span class="venda-celebrate-valor" style="font-family:var(--font-mono);font-size:28px;font-weight:800;color:var(--success);letter-spacing:-.02em;margin-top:4px;text-shadow:0 0 24px rgba(167, 139, 250,.45);font-variant-numeric:tabular-nums">R$ 0,00</span>`
+      : '';
 
   flash.innerHTML = `
     <div class="venda-celebrate-box" style="display:flex;flex-direction:column;align-items:center;gap:2px">
-      <i class="fa-solid fa-circle-check" style="font-size:64px;color:var(--success);filter:drop-shadow(0 0 24px rgba(170, 238, 196,.55))"></i>
-      <span style="font-family:var(--font-mono);font-size:22px;font-weight:800;color:var(--success);letter-spacing:.08em;text-shadow:0 0 20px rgba(170, 238, 196,.35)">VENDA!</span>
+      <i class="fa-solid fa-circle-check" style="font-size:64px;color:var(--success);filter:drop-shadow(0 0 24px rgba(167, 139, 250,.55))"></i>
+      <span style="font-family:var(--font-mono);font-size:22px;font-weight:800;color:var(--success);letter-spacing:.08em;text-shadow:0 0 20px rgba(167, 139, 250,.35)">VENDA!</span>
       ${valorHtml}
     </div>`;
   document.body.appendChild(flash);
 
   if (!gsap) {
     // Fallback sem GSAP
-    setTimeout(() => { flash.style.transition = 'opacity .4s'; flash.style.opacity = '0'; setTimeout(() => flash.remove(), 400); }, 1200);
+    setTimeout(() => {
+      flash.style.transition = 'opacity .4s';
+      flash.style.opacity = '0';
+      setTimeout(() => flash.remove(), 400);
+    }, 1200);
     return;
   }
 
   const box = flash.querySelector('.venda-celebrate-box');
   const tl = gsap.timeline({ onComplete: () => flash.remove() });
-  tl.from(box, { scale: 0.5, opacity: 0, duration: 0.45, ease: 'back.out(2)' })
-    .to(box, { scale: 1.05, duration: 0.15, ease: 'power2.inOut', yoyo: true, repeat: 1 }, '>-0.05');
+  tl.from(box, { scale: 0.5, opacity: 0, duration: 0.45, ease: 'back.out(2)' }).to(
+    box,
+    { scale: 1.05, duration: 0.15, ease: 'power2.inOut', yoyo: true, repeat: 1 },
+    '>-0.05'
+  );
 
   // Counter até valor
   if (valor != null) {
     const valorEl = flash.querySelector('.venda-celebrate-valor');
     const state = { n: 0 };
-    tl.to(state, {
-      n: valor,
-      duration: 1.1,
-      ease: 'power2.out',
-      onUpdate: () => {
-        valorEl.textContent = 'R$ ' + state.n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      }
-    }, 0.15);
+    tl.to(
+      state,
+      {
+        n: valor,
+        duration: 1.1,
+        ease: 'power2.out',
+        onUpdate: () => {
+          valorEl.textContent =
+            'R$ ' + state.n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+      },
+      0.15
+    );
   }
 
   // Partículas douradas do clique (ou centro)
@@ -77,7 +90,7 @@ function spawnGoldBurst(cx, cy) {
   const layer = document.createElement('div');
   layer.style.cssText = `position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:${Z_DRAG_GHOST + 1}`;
   document.body.appendChild(layer);
-  const colors = ['#d4a373', '#b8875a', '#e8d0a0', '#aaeec4', '#ffffff'];
+  const colors = ['#d4a373', '#b8875a', '#e8d0a0', '#a78bfa', '#ffffff'];
   const particles = [];
   for (let i = 0; i < 18; i++) {
     const p = document.createElement('div');
@@ -117,14 +130,16 @@ export function animateValueToHeader(valor, originEl) {
   const ty = tRect.top + tRect.height / 2;
 
   const badge = document.createElement('div');
-  badge.textContent = '+R$ ' + Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  badge.style.cssText = `position:fixed;left:${ox}px;top:${oy}px;transform:translate(-50%,-50%);z-index:${Z_DRAG_GHOST + 2};padding:8px 14px;border-radius:999px;background:linear-gradient(135deg,#aaeec4,#7fd9a0);color:#fff;font-family:var(--font-mono);font-weight:800;font-size:16px;box-shadow:0 8px 32px rgba(170, 238, 196,.45);pointer-events:none;white-space:nowrap;letter-spacing:-.01em`;
+  badge.textContent =
+    '+R$ ' + Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  badge.style.cssText = `position:fixed;left:${ox}px;top:${oy}px;transform:translate(-50%,-50%);z-index:${Z_DRAG_GHOST + 2};padding:8px 14px;border-radius:999px;background:linear-gradient(135deg,#a78bfa,#8b5cf6);color:#fff;font-family:var(--font-mono);font-weight:800;font-size:16px;box-shadow:0 8px 32px rgba(167, 139, 250,.45);pointer-events:none;white-space:nowrap;letter-spacing:-.01em`;
   document.body.appendChild(badge);
 
   const midX = (ox + tx) / 2;
   const arcY = Math.min(oy, ty) - 120;
 
-  gsap.timeline({ onComplete: () => badge.remove() })
+  gsap
+    .timeline({ onComplete: () => badge.remove() })
     .to(badge, { scale: 1.15, duration: 0.2, ease: 'back.out(2)' })
     .to(badge, {
       motionPath: undefined, // fallback: 2-step bezier via keyTimes
@@ -143,7 +158,10 @@ export function animateValueToHeader(valor, originEl) {
  */
 export function fireEpicTrocaAnimation(nome, valor) {
   const gsap = g();
-  if (_epicOverlay) { _epicOverlay.remove(); _epicOverlay = null; }
+  if (_epicOverlay) {
+    _epicOverlay.remove();
+    _epicOverlay = null;
+  }
 
   playSound('venda');
 
@@ -153,7 +171,8 @@ export function fireEpicTrocaAnimation(nome, valor) {
 
   const card = document.createElement('div');
   card.className = 'epic-card';
-  card.style.cssText = 'position:relative;z-index:1;text-align:center;padding:40px 52px;border-radius:20px;border:2px solid rgba(184, 168, 212,.5);background:linear-gradient(135deg,#1a0a2e 0%,#0f172a 50%,#1a0a2e 100%);box-shadow:0 30px 80px rgba(184, 168, 212,.35),inset 0 1px 0 rgba(255,255,255,.08);transform-style:preserve-3d';
+  card.style.cssText =
+    'position:relative;z-index:1;text-align:center;padding:40px 52px;border-radius:20px;border:2px solid rgba(184, 168, 212,.5);background:linear-gradient(135deg,#1a0a2e 0%,#0f172a 50%,#1a0a2e 100%);box-shadow:0 30px 80px rgba(184, 168, 212,.35),inset 0 1px 0 rgba(255,255,255,.08);transform-style:preserve-3d';
   card.innerHTML = `
     <div class="epic-label" style="font-size:11px;font-weight:800;letter-spacing:.25em;text-transform:uppercase;color:#c4b5fd;margin-bottom:14px">CONQUISTA DESBLOQUEADA</div>
     <div class="epic-gem" style="font-size:56px;margin-bottom:10px;filter:drop-shadow(0 0 24px rgba(232,121,249,.6))">💎</div>
@@ -168,8 +187,20 @@ export function fireEpicTrocaAnimation(nome, valor) {
 
   const closeBtn = card.querySelector('.epic-close');
   const closeNow = () => {
-    if (!gsap) { overlay.remove(); _epicOverlay = null; return; }
-    gsap.to(overlay, { opacity: 0, duration: 0.4, ease: 'power2.in', onComplete: () => { overlay.remove(); if (_epicOverlay === overlay) _epicOverlay = null; } });
+    if (!gsap) {
+      overlay.remove();
+      _epicOverlay = null;
+      return;
+    }
+    gsap.to(overlay, {
+      opacity: 0,
+      duration: 0.4,
+      ease: 'power2.in',
+      onComplete: () => {
+        overlay.remove();
+        if (_epicOverlay === overlay) _epicOverlay = null;
+      }
+    });
     gsap.to(card, { scale: 0.9, filter: 'blur(8px)', duration: 0.4, ease: 'power2.in' });
   };
   closeBtn.addEventListener('click', closeNow);
@@ -185,20 +216,35 @@ export function fireEpicTrocaAnimation(nome, valor) {
   tl.to(overlay, { opacity: 1, duration: 0.3, ease: 'power2.out' })
     .from(card, { scale: 0.5, rotationY: 30, opacity: 0, duration: 0.7, ease: 'back.out(1.6)' }, '<')
     .from(card.querySelector('.epic-label'), { y: -12, opacity: 0, duration: 0.35, ease: 'power2.out' }, '-=0.2')
-    .from(card.querySelector('.epic-gem'), { scale: 0, rotation: -180, opacity: 0, duration: 0.55, ease: 'back.out(2.4)' }, '-=0.2')
-    .from([card.querySelector('.epic-name'), card.querySelector('.epic-sub')], { y: 10, opacity: 0, duration: 0.3, stagger: 0.08, ease: 'power2.out' }, '-=0.3')
+    .from(
+      card.querySelector('.epic-gem'),
+      { scale: 0, rotation: -180, opacity: 0, duration: 0.55, ease: 'back.out(2.4)' },
+      '-=0.2'
+    )
+    .from(
+      [card.querySelector('.epic-name'), card.querySelector('.epic-sub')],
+      { y: 10, opacity: 0, duration: 0.3, stagger: 0.08, ease: 'power2.out' },
+      '-=0.3'
+    )
     .from(card.querySelector('.epic-valor'), { scale: 0.6, opacity: 0, duration: 0.5, ease: 'back.out(2)' }, '-=0.15')
     .from(card.querySelector('.epic-foot'), { y: 8, opacity: 0, duration: 0.3, ease: 'power2.out' }, '-=0.25')
     .from(card.querySelector('.epic-close'), { y: 8, opacity: 0, duration: 0.3, ease: 'power2.out' }, '-=0.2');
 
   // Pulso do valor (loop curto)
-  gsap.to(card.querySelector('.epic-valor'), { scale: 1.05, duration: 0.9, ease: 'sine.inOut', yoyo: true, repeat: 3, delay: 1.2 });
+  gsap.to(card.querySelector('.epic-valor'), {
+    scale: 1.05,
+    duration: 0.9,
+    ease: 'sine.inOut',
+    yoyo: true,
+    repeat: 3,
+    delay: 1.2
+  });
 
   // Confete simples (divs) em stagger
   const confettiLayer = document.createElement('div');
   confettiLayer.style.cssText = `position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0`;
   overlay.insertBefore(confettiLayer, card);
-  const palette = ['#b8a8d4', '#d4a8c4', '#c7f5d6', '#aaeec4', '#d4a373', '#e8d0a0'];
+  const palette = ['#b8a8d4', '#d4a8c4', '#c4b5fd', '#a78bfa', '#d4a373', '#e8d0a0'];
   const bits = [];
   for (let i = 0; i < 40; i++) {
     const b = document.createElement('div');

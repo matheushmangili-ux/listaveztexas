@@ -28,9 +28,9 @@ let _activeChartTab = null;
 
 // ─── Paleta harmonizada (mint + charcoal) ───
 const BRAND_PALETTE = {
-  mint: '#aaeec4',
-  mintDeep: '#7fd9a0',
-  mintSoft: '#c7f5d6',
+  mint: '#a78bfa',
+  mintDeep: '#8b5cf6',
+  mintSoft: '#c4b5fd',
   coral: '#e89b8a',
   coralDeep: '#d47a68',
   sand: '#d4a373',
@@ -43,11 +43,11 @@ const BRAND_PALETTE = {
 };
 
 // Donut categórico (motivos, setores, canais)
-const CATEGORICAL = ['#aaeec4', '#8ea5c9', '#d4a373', '#b8a8d4', '#e89b8a', '#7fd9a0', '#6d85ac', '#a3a3a3'];
+const CATEGORICAL = ['#a78bfa', '#8ea5c9', '#d4a373', '#b8a8d4', '#e89b8a', '#8b5cf6', '#6d85ac', '#a3a3a3'];
 // Dual-series (hoje vs ontem): mint + sand
-const DUAL = ['#aaeec4', '#d4a373'];
+const DUAL = ['#a78bfa', '#d4a373'];
 // Triple: mint (positivo) + dusty (info) + coral (negativo)
-const TRIPLE = ['#aaeec4', '#8ea5c9', '#e89b8a'];
+const TRIPLE = ['#a78bfa', '#8ea5c9', '#e89b8a'];
 
 // ─── Semantic tempo colors harmonizados ───
 function tempoColor(minutes, meta) {
@@ -1067,7 +1067,7 @@ export async function loadScatter(range, cachedData) {
       yaxis: [
         {
           y: metaConv,
-          borderColor: '#aaeec4',
+          borderColor: '#a78bfa',
           strokeDashArray: 5,
           opacity: 0.6,
           label: {
@@ -1076,8 +1076,8 @@ export async function loadScatter(range, cachedData) {
               fontSize: '10px',
               fontWeight: 700,
               fontFamily: "'Inter Tight'",
-              background: 'rgba(170, 238, 196,.12)',
-              color: '#aaeec4',
+              background: 'rgba(167, 139, 250,.12)',
+              color: '#a78bfa',
               padding: { left: 6, right: 6, top: 2, bottom: 2 }
             },
             position: 'right',
@@ -1276,7 +1276,7 @@ export async function loadTrend(range) {
       {
         y: metaConv,
         yAxisIndex: 1,
-        borderColor: 'rgba(170, 238, 196,.25)',
+        borderColor: 'rgba(167, 139, 250,.25)',
         strokeDashArray: 4,
         opacity: 0.5,
         label: {
@@ -1284,8 +1284,8 @@ export async function loadTrend(range) {
           style: {
             fontSize: '9px',
             fontWeight: 600,
-            background: 'rgba(170, 238, 196,.08)',
-            color: '#aaeec4',
+            background: 'rgba(167, 139, 250,.08)',
+            color: '#a78bfa',
             padding: { left: 4, right: 4, top: 2, bottom: 2 }
           },
           position: 'right',
@@ -1393,7 +1393,7 @@ export async function loadTrend(range) {
       cssClass: 'spark-tooltip'
     }
   });
-  if (conv.length > 1) renderChart('sparkConv', '#sparkConv', sparkOpts(conv, '#aaeec4', sparkDates, '%'));
+  if (conv.length > 1) renderChart('sparkConv', '#sparkConv', sparkOpts(conv, '#a78bfa', sparkDates, '%'));
   if (atend.length > 1) renderChart('sparkTempo', '#sparkTempo', sparkOpts(atend, '#8ea5c9', sparkDates, ''));
 }
 

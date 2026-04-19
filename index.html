@@ -12,13 +12,26 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/css/styles.v52.css" />
-    <meta name="theme-color" content="#0d0d0d" />
+    <meta name="theme-color" content="#0a0614" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#6d28d9" media="(prefers-color-scheme: light)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/update-checker.js"></script>
+    <script src="/js/components/mv-logo.js" defer></script>
+    <script src="/js/components/mv-loader.js" defer></script>
     <script>
+      // Theme init (antes de render para evitar flash)
+      (function () {
+        try {
+          const saved = localStorage.getItem('lv-theme');
+          const preferred = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+          document.documentElement.setAttribute('data-theme', preferred);
+        } catch (_) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
       initUpdateChecker('/index.html');
     </script>
     <style>
@@ -47,8 +60,8 @@
         transform: translate(-50%, -50%);
         background: radial-gradient(
           circle,
-          rgba(170, 238, 196, 0.22) 0%,
-          rgba(170, 238, 196, 0.08) 35%,
+          rgba(167, 139, 250, 0.22) 0%,
+          rgba(167, 139, 250, 0.08) 35%,
           transparent 65%
         );
         pointer-events: none;
@@ -65,7 +78,7 @@
         width: 340px;
         height: 340px;
         transform: translate(-50%, -50%);
-        background: radial-gradient(circle, rgba(199, 245, 214, 0.18) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(196, 181, 253, 0.18) 0%, transparent 70%);
         pointer-events: none;
         z-index: 0;
         animation: heroPulse 3.2s ease-in-out infinite alternate;
@@ -100,12 +113,12 @@
         position: absolute;
         width: 2px;
         height: 2px;
-        background: rgba(199, 245, 214, 0.7);
+        background: rgba(196, 181, 253, 0.7);
         border-radius: 50%;
         opacity: 0;
         box-shadow:
-          0 0 6px rgba(170, 238, 196, 0.6),
-          0 0 12px rgba(170, 238, 196, 0.3);
+          0 0 6px rgba(167, 139, 250, 0.6),
+          0 0 12px rgba(167, 139, 250, 0.3);
         animation: particleUp linear infinite;
       }
       @keyframes particleUp {
@@ -132,7 +145,7 @@
         background: var(--bg-card);
         box-shadow:
           0 24px 70px rgba(0, 0, 0, 0.6),
-          0 0 0 1px rgba(170, 238, 196, 0.08);
+          0 0 0 1px rgba(167, 139, 250, 0.08);
         border-radius: 20px;
         border: 1px solid rgba(255, 255, 255, 0.06);
         padding: 32px;
@@ -142,7 +155,7 @@
         opacity: 1 !important;
       }
       .gold-line {
-        background: linear-gradient(90deg, transparent, rgba(170, 238, 196, 0.35), transparent);
+        background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.35), transparent);
         height: 1px;
       }
       .tab-switch {
@@ -264,7 +277,7 @@
       /* CTA links */
       a,
       .cta-link {
-        color: #aaeec4;
+        color: #a78bfa;
       }
     </style>
     <script>
@@ -275,6 +288,48 @@
   </head>
   <body>
     <div class="particles-bg" id="particles"></div>
+    <!-- Theme toggle fixo -->
+    <button
+      id="themeToggle"
+      type="button"
+      aria-label="Alternar tema"
+      style="
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 100;
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        border: 1px solid var(--border-medium);
+        background: var(--bg-card);
+        color: var(--text-secondary);
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        box-shadow: var(--shadow-sm);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <i class="fa-solid fa-moon" id="themeToggleIcon"></i>
+    </button>
+    <script>
+      (function () {
+        const btn = document.getElementById('themeToggle');
+        const icon = document.getElementById('themeToggleIcon');
+        function apply(mode) {
+          document.documentElement.setAttribute('data-theme', mode);
+          localStorage.setItem('lv-theme', mode);
+          icon.className = mode === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+        }
+        apply(document.documentElement.getAttribute('data-theme') || 'dark');
+        btn.addEventListener('click', () => {
+          const current = document.documentElement.getAttribute('data-theme') || 'dark';
+          apply(current === 'dark' ? 'light' : 'dark');
+        });
+      })();
+    </script>
     <div class="login-container">
       <!-- Loading overlay while tenant loads -->
       <div
@@ -289,10 +344,7 @@
           background: var(--bg-deep);
         "
       >
-        <div style="text-align: center">
-          <div class="spinner" style="width: 32px; height: 32px; margin: 0 auto 12px; border-width: 3px"></div>
-          <p style="font-size: 13px; color: #a1a1aa; font-weight: 500">Carregando...</p>
-        </div>
+        <mv-loader size="72" caption="carregando a fila"></mv-loader>
       </div>
       <div class="login-box" style="opacity: 0; transition: opacity 0.3s ease" id="loginBox">
         <!-- Brand -->
@@ -389,7 +441,7 @@
             <a
               id="forgotLink"
               href="/forgot-password"
-              style="font-size: 12px; color: #aaeec4; text-decoration: none; font-weight: 500"
+              style="font-size: 12px; color: #a78bfa; text-decoration: none; font-weight: 500"
               >Esqueci minha senha</a
             >
           </div>
@@ -539,11 +591,11 @@
           const r = Math.random();
           if (r > 0.75) {
             p.style.background = 'rgba(255,180,196,.9)';
-            p.style.boxShadow = '0 0 8px rgba(199, 245, 214,.8), 0 0 16px rgba(170, 238, 196,.5)';
+            p.style.boxShadow = '0 0 8px rgba(196, 181, 253,.8), 0 0 16px rgba(167, 139, 250,.5)';
           } else if (r > 0.4) {
-            p.style.background = 'rgba(199, 245, 214,.8)';
+            p.style.background = 'rgba(196, 181, 253,.8)';
           } else {
-            p.style.background = 'rgba(170, 238, 196,.6)';
+            p.style.background = 'rgba(167, 139, 250,.6)';
           }
           c.appendChild(p);
         }

@@ -12,8 +12,8 @@
   --vendor-text: #fafafa;
   --vendor-text-dim: #a1a1aa;
   --vendor-text-muted: #71717a;
-  --vendor-accent: #aaeec4;
-  --vendor-success: #aaeec4;
+  --vendor-accent: #a78bfa;
+  --vendor-success: #a78bfa;
   --vendor-warning: #d4a373;
   --vendor-danger: #e89b8a;
   --vendor-info: #8ea5c9;
@@ -394,10 +394,10 @@ body {
 @keyframes nextPulse {
   0%,
   100% {
-    text-shadow: 0 0 0 rgba(170, 238, 196, 0);
+    text-shadow: 0 0 0 rgba(167, 139, 250, 0);
   }
   50% {
-    text-shadow: 0 0 24px rgba(170, 238, 196, 0.6);
+    text-shadow: 0 0 24px rgba(167, 139, 250, 0.6);
   }
 }
 .vendor-big-label {
@@ -439,8 +439,8 @@ body {
   text-overflow: ellipsis;
 }
 .vendor-queue-peek .peek-item.self {
-  background: rgba(170, 238, 196, 0.1);
-  border: 1px solid rgba(170, 238, 196, 0.3);
+  background: rgba(167, 139, 250, 0.1);
+  border: 1px solid rgba(167, 139, 250, 0.3);
 }
 .vendor-queue-peek .peek-item.self .peek-pos,
 .vendor-queue-peek .peek-item.self .peek-name {
@@ -463,16 +463,16 @@ body {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  box-shadow: 0 4px 24px rgba(170, 238, 196, 0.35);
+  box-shadow: 0 4px 24px rgba(167, 139, 250, 0.35);
   animation: ctaGlow 2s ease-in-out infinite;
 }
 @keyframes ctaGlow {
   0%,
   100% {
-    box-shadow: 0 4px 24px rgba(170, 238, 196, 0.35);
+    box-shadow: 0 4px 24px rgba(167, 139, 250, 0.35);
   }
   50% {
-    box-shadow: 0 4px 32px rgba(170, 238, 196, 0.6);
+    box-shadow: 0 4px 32px rgba(167, 139, 250, 0.6);
   }
 }
 .vendor-cta-next:active {
@@ -825,8 +825,8 @@ body {
   display: flex;
   align-items: center;
   gap: 14px;
-  background: linear-gradient(135deg, rgba(170, 238, 196, 0.1) 0%, rgba(170, 238, 196, 0.03) 100%);
-  border: 1px solid rgba(170, 238, 196, 0.25);
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.1) 0%, rgba(167, 139, 250, 0.03) 100%);
+  border: 1px solid rgba(167, 139, 250, 0.25);
   border-radius: 14px;
   padding: 14px 16px;
   animation: vendorCardIn 0.3s ease both;
@@ -835,7 +835,7 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(170, 238, 196, 0.15);
+  background: rgba(167, 139, 250, 0.15);
   color: var(--vendor-success);
   display: flex;
   align-items: center;
@@ -1091,7 +1091,7 @@ body {
   color: inherit;
   font-family: inherit;
   text-align: left;
-  border: 1px solid rgba(170, 238, 196, 0.2);
+  border: 1px solid rgba(167, 139, 250, 0.2);
 }
 .missions-card-btn:active {
   transform: scale(0.99);
@@ -1203,7 +1203,7 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: rgba(170, 238, 196, 0.1);
+  background: rgba(167, 139, 250, 0.1);
   color: var(--vendor-success);
   display: flex;
   align-items: center;
@@ -1212,7 +1212,7 @@ body {
   flex-shrink: 0;
 }
 .mission-sheet-row.completed .mission-sheet-icon {
-  background: rgba(170, 238, 196, 0.2);
+  background: rgba(167, 139, 250, 0.2);
 }
 .mission-sheet-body {
   flex: 1;
@@ -1286,7 +1286,7 @@ body {
   left: 50%;
   transform: translate(-50%, 12px);
   background: var(--vendor-card);
-  border: 1px solid rgba(170, 238, 196, 0.4);
+  border: 1px solid rgba(167, 139, 250, 0.4);
   border-radius: 14px;
   padding: 12px 18px;
   display: flex;
@@ -1294,7 +1294,7 @@ body {
   gap: 12px;
   box-shadow:
     0 12px 40px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(170, 238, 196, 0.15);
+    0 0 0 1px rgba(167, 139, 250, 0.15);
   z-index: 220;
   opacity: 0;
   transition:
@@ -1389,16 +1389,16 @@ body {
   text-transform: uppercase;
   padding: 3px 8px;
   border-radius: 999px;
-  box-shadow: 0 0 0 0 rgba(170, 238, 196, 0.4);
+  box-shadow: 0 0 0 0 rgba(167, 139, 250, 0.4);
   animation: annBadgePulse 2.4s ease-in-out infinite;
 }
 @keyframes annBadgePulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(170, 238, 196, 0.45);
+    box-shadow: 0 0 0 0 rgba(167, 139, 250, 0.45);
   }
   50% {
-    box-shadow: 0 0 0 6px rgba(170, 238, 196, 0);
+    box-shadow: 0 0 0 6px rgba(167, 139, 250, 0);
   }
 }
 
@@ -1434,8 +1434,8 @@ body {
   border-color: var(--vendor-border);
 }
 .vendor-ann-item.unread {
-  background: rgba(170, 238, 196, 0.06);
-  border-color: rgba(170, 238, 196, 0.2);
+  background: rgba(167, 139, 250, 0.06);
+  border-color: rgba(167, 139, 250, 0.2);
 }
 .vendor-ann-item.corrida {
   background: rgba(245, 158, 11, 0.08);
@@ -1489,7 +1489,7 @@ body {
   border-radius: 50%;
   background: var(--vendor-accent);
   flex-shrink: 0;
-  box-shadow: 0 0 8px rgba(170, 238, 196, 0.6);
+  box-shadow: 0 0 8px rgba(167, 139, 250, 0.6);
 }
 
 .vendor-ann-more {
@@ -1680,7 +1680,7 @@ body {
 }
 /* Mítico usa gradient text arco-íris — aplicado no label pra não afetar o ícone */
 .tier-badge.tier-mitico .tier-badge-label {
-  background: linear-gradient(135deg, #d4a8c4, #9488b8, #06b6d4, #aaeec4);
+  background: linear-gradient(135deg, #d4a8c4, #9488b8, #06b6d4, #a78bfa);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1882,7 +1882,7 @@ body {
 
 /* Mítico: gradient arco-íris no card */
 .xp-tierup.tier-mitico .xp-tierup-card {
-  background: linear-gradient(135deg, #d4a8c4, #b8a8d4, #8ea5c9, #06b6d4, #aaeec4);
+  background: linear-gradient(135deg, #d4a8c4, #b8a8d4, #8ea5c9, #06b6d4, #a78bfa);
   color: #fff;
 }
 .xp-tierup.tier-mitico .xp-tierup-title,
@@ -2495,8 +2495,8 @@ body {
   color: #d4a373;
 }
 .vm-status-approved {
-  background: rgba(170, 238, 196, 0.15);
-  color: #aaeec4;
+  background: rgba(167, 139, 250, 0.15);
+  color: #a78bfa;
 }
 .vm-status-rejected {
   background: rgba(232, 155, 138, 0.15);
@@ -3188,7 +3188,7 @@ body {
   line-height: 20px;
   text-align: center;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(170, 238, 196, 0.35);
+  box-shadow: 0 2px 6px rgba(167, 139, 250, 0.35);
 }
 .drawer-badge.hidden {
   display: none;
@@ -3295,10 +3295,10 @@ body {
 @keyframes vendorAchievementPulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(170, 238, 196, 0.6);
+    box-shadow: 0 0 0 0 rgba(167, 139, 250, 0.6);
   }
   50% {
-    box-shadow: 0 0 0 12px rgba(170, 238, 196, 0);
+    box-shadow: 0 0 0 12px rgba(167, 139, 250, 0);
   }
 }
 

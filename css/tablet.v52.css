@@ -292,19 +292,19 @@
 /* Active — neon mint sutil (LED discreto) */
 .setor-tab.active {
   background: var(--bg-card);
-  border-color: rgba(170, 238, 196, 0.38);
+  border-color: rgba(167, 139, 250, 0.38);
   color: var(--accent);
   box-shadow:
-    0 0 0 1px rgba(170, 238, 196, 0.15),
-    0 4px 14px rgba(170, 238, 196, 0.08);
+    0 0 0 1px rgba(167, 139, 250, 0.15),
+    0 4px 14px rgba(167, 139, 250, 0.08);
 }
 .setor-tab.active i {
   opacity: 1;
   color: var(--accent);
-  filter: drop-shadow(0 0 3px rgba(170, 238, 196, 0.45));
+  filter: drop-shadow(0 0 3px rgba(167, 139, 250, 0.45));
 }
 .setor-tab.active .tab-label {
-  text-shadow: 0 0 4px rgba(170, 238, 196, 0.3);
+  text-shadow: 0 0 4px rgba(167, 139, 250, 0.3);
 }
 
 .setor-tab:active {
@@ -324,7 +324,7 @@
 .service-panel.drop-active {
   outline: 2px dashed var(--success);
   outline-offset: -4px;
-  background: rgba(170, 238, 196, 0.03);
+  background: rgba(167, 139, 250, 0.03);
 }
 .service-panel .panel-header {
   display: flex;
@@ -405,13 +405,13 @@
 
 /* Ranking — outlined rose */
 .ranking-card {
-  background: rgba(170, 238, 196, 0.1);
+  background: rgba(167, 139, 250, 0.1);
   color: var(--accent-bright);
-  border-color: rgba(170, 238, 196, 0.2);
+  border-color: rgba(167, 139, 250, 0.2);
 }
 .ranking-card:hover {
-  background: rgba(170, 238, 196, 0.18);
-  border-color: rgba(170, 238, 196, 0.36);
+  background: rgba(167, 139, 250, 0.18);
+  border-color: rgba(167, 139, 250, 0.36);
 }
 
 /* Turno card — Iniciar (OFF): filled rose, matching sidebar-link active */
@@ -456,7 +456,7 @@
 }
 .checkin-item.checked {
   border-color: var(--success);
-  background: rgba(170, 238, 196, 0.06);
+  background: rgba(167, 139, 250, 0.06);
 }
 .checkin-switch {
   width: 40px;
@@ -483,7 +483,7 @@
     background 0.2s;
 }
 .checkin-item.checked .checkin-switch {
-  background: rgba(170, 238, 196, 0.2);
+  background: rgba(167, 139, 250, 0.2);
   border-color: var(--success);
 }
 .checkin-item.checked .checkin-switch-thumb {
@@ -495,10 +495,10 @@
   height: 0;
 }
 .t-footer.drop-highlight {
-  background: rgba(170, 238, 196, 0.12);
+  background: rgba(167, 139, 250, 0.12);
   box-shadow:
     inset 0 2px 0 0 var(--accent),
-    0 -8px 24px rgba(170, 238, 196, 0.15);
+    0 -8px 24px rgba(167, 139, 250, 0.15);
   position: relative;
   transition:
     background 0.15s ease,
@@ -709,7 +709,7 @@
   font-size: 18px;
 }
 .outcome-btn.sale {
-  border-color: rgba(170, 238, 196, 0.15);
+  border-color: rgba(167, 139, 250, 0.15);
   color: var(--success);
 }
 .outcome-btn.sale:hover {
@@ -769,15 +769,15 @@
 }
 @keyframes celebratePulse {
   0% {
-    outline: 2px solid rgba(170, 238, 196, 0.4);
+    outline: 2px solid rgba(167, 139, 250, 0.4);
     outline-offset: 0;
   }
   50% {
-    outline: 2px solid rgba(170, 238, 196, 0);
+    outline: 2px solid rgba(167, 139, 250, 0);
     outline-offset: 8px;
   }
   100% {
-    outline: 2px solid rgba(170, 238, 196, 0);
+    outline: 2px solid rgba(167, 139, 250, 0);
     outline-offset: 0;
   }
 }
@@ -836,7 +836,7 @@
 /* ─── PRÓXIMO badge (1º da fila) ─── */
 .queue-item.next-in-line {
   position: relative;
-  border-color: rgba(170, 238, 196, 0.45);
+  border-color: rgba(167, 139, 250, 0.45);
   animation: nextCardGlow 2.5s ease-in-out infinite;
   will-change: box-shadow, border-color;
 }
@@ -846,7 +846,7 @@
   position: absolute;
   inset: 0;
   border-radius: var(--radius);
-  background: rgba(170, 238, 196, 0.06);
+  background: rgba(167, 139, 250, 0.06);
   opacity: 0;
   animation: nextCardPulse 2.5s ease-in-out infinite;
   pointer-events: none;
@@ -865,15 +865,15 @@
   0%,
   100% {
     box-shadow:
-      0 0 0 0 rgba(170, 238, 196, 0),
+      0 0 0 0 rgba(167, 139, 250, 0),
       0 1px 3px rgba(0, 0, 0, 0.04);
-    border-color: rgba(170, 238, 196, 0.35);
+    border-color: rgba(167, 139, 250, 0.35);
   }
   50% {
     box-shadow:
-      0 0 0 3px rgba(170, 238, 196, 0.18),
-      0 2px 10px rgba(170, 238, 196, 0.18);
-    border-color: rgba(170, 238, 196, 0.7);
+      0 0 0 3px rgba(167, 139, 250, 0.18),
+      0 2px 10px rgba(167, 139, 250, 0.18);
+    border-color: rgba(167, 139, 250, 0.7);
   }
 }
 .queue-item.next-in-line .next-badge {
@@ -889,18 +889,18 @@
   border-radius: 4px;
   text-transform: uppercase;
   line-height: 1.2;
-  box-shadow: 0 2px 8px rgba(170, 238, 196, 0.35);
+  box-shadow: 0 2px 8px rgba(167, 139, 250, 0.35);
   animation: nextBadgePulse 2.5s ease-in-out infinite;
 }
 @keyframes nextBadgePulse {
   0%,
   100% {
     transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(170, 238, 196, 0.35);
+    box-shadow: 0 2px 8px rgba(167, 139, 250, 0.35);
   }
   50% {
     transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(170, 238, 196, 0.55);
+    box-shadow: 0 4px 14px rgba(167, 139, 250, 0.55);
   }
 }
 /* Mantém alias pra não quebrar outras referências eventuais */
@@ -990,7 +990,7 @@
   from {
     opacity: 0;
     transform: translateX(-20px);
-    background: rgba(170, 238, 196, 0.08);
+    background: rgba(167, 139, 250, 0.08);
   }
   to {
     opacity: 1;
@@ -1743,7 +1743,7 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: rgba(170, 238, 196, 0.1);
+  background: rgba(167, 139, 250, 0.1);
   color: var(--success);
   display: flex;
   align-items: center;
@@ -1987,15 +1987,15 @@
 /* Next-in-line — glow accent em vez de verde mecânico */
 .queue-item.next-in-line {
   box-shadow: var(--glow-accent);
-  border-color: rgba(170, 238, 196, 0.5);
+  border-color: rgba(167, 139, 250, 0.5);
 }
 .queue-item.next-in-line::after {
-  background: linear-gradient(90deg, rgba(170, 238, 196, 0.08), rgba(170, 238, 196, 0));
+  background: linear-gradient(90deg, rgba(167, 139, 250, 0.08), rgba(167, 139, 250, 0));
 }
 .queue-item.next-in-line .next-badge {
   background: var(--grad-accent);
   color: var(--accent-ink, #0d0d0d);
-  box-shadow: 0 4px 14px rgba(170, 238, 196, 0.45);
+  box-shadow: 0 4px 14px rgba(167, 139, 250, 0.45);
 }
 
 /* Footer cards — avatar com ring colorido por status */
@@ -2018,7 +2018,7 @@
 .footer-card.status-disponivel .fc-avatar {
   box-shadow:
     0 0 0 2px var(--bg-card),
-    0 0 0 3px rgba(170, 238, 196, 0.6);
+    0 0 0 3px rgba(167, 139, 250, 0.6);
 }
 .footer-card.status-atendendo .fc-avatar {
   box-shadow:
@@ -2072,7 +2072,7 @@
   letter-spacing: -0.01em;
 }
 .atend-card .atend-avatar {
-  box-shadow: 0 2px 8px rgba(170, 238, 196, 0.25);
+  box-shadow: 0 2px 8px rgba(167, 139, 250, 0.25);
   background: var(--grad-accent);
 }
 
@@ -2088,7 +2088,7 @@
   transform: translateY(-1px);
 }
 .outcome-btn.sale:hover {
-  box-shadow: 0 8px 24px rgba(170, 238, 196, 0.18);
+  box-shadow: 0 8px 24px rgba(167, 139, 250, 0.18);
 }
 
 /* Bottom sheets — Arc/Linear style */
@@ -2164,10 +2164,10 @@
 }
 .turno-card:not(.on) {
   background: var(--grad-accent);
-  box-shadow: 0 4px 14px rgba(170, 238, 196, 0.28);
+  box-shadow: 0 4px 14px rgba(167, 139, 250, 0.28);
 }
 .turno-card:not(.on):hover {
-  box-shadow: 0 8px 22px rgba(170, 238, 196, 0.38);
+  box-shadow: 0 8px 22px rgba(167, 139, 250, 0.38);
 }
 
 /* Currency input — mais premium */
@@ -2179,7 +2179,7 @@
 }
 .currency-wrap input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(170, 238, 196, 0.12);
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.12);
   outline: none;
 }
 

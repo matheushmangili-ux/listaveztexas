@@ -661,7 +661,7 @@
   font-weight: 700;
 }
 .cal-day.in-range {
-  background: rgba(170, 238, 196, 0.12);
+  background: rgba(167, 139, 250, 0.12);
   border-radius: 4px;
 }
 .cal-day.range-start {
@@ -824,10 +824,10 @@
   background: var(--bg-hover);
 }
 .rank-row--top {
-  background: rgba(170, 238, 196, 0.02);
+  background: rgba(167, 139, 250, 0.02);
 }
 .rank-row--top:hover {
-  background: rgba(170, 238, 196, 0.05);
+  background: rgba(167, 139, 250, 0.05);
 }
 .rl-pos {
   font-size: 13px;
@@ -866,7 +866,7 @@
   border: 1.5px solid var(--border-subtle);
 }
 .rank-row--top .rl-avatar {
-  border-color: rgba(170, 238, 196, 0.2);
+  border-color: rgba(167, 139, 250, 0.2);
 }
 .rl-bar {
   display: flex;
@@ -1126,7 +1126,7 @@
   letter-spacing: 0.04em;
 }
 .badge-ativo.on {
-  background: rgba(170, 238, 196, 0.1);
+  background: rgba(167, 139, 250, 0.1);
   color: var(--success);
 }
 .badge-ativo.off {
@@ -1442,13 +1442,13 @@
   100% {
     box-shadow:
       0 0 6px 2px var(--success),
-      0 0 12px 4px rgba(170, 238, 196, 0.4);
+      0 0 12px 4px rgba(167, 139, 250, 0.4);
     opacity: 1;
   }
   50% {
     box-shadow:
       0 0 3px 1px var(--success),
-      0 0 6px 2px rgba(170, 238, 196, 0.2);
+      0 0 6px 2px rgba(167, 139, 250, 0.2);
     opacity: 0.7;
   }
 }
@@ -1619,14 +1619,14 @@
 }
 .vm-approve-btn,
 .vm-free-approve {
-  background: rgba(170, 238, 196, 0.12);
-  border-color: rgba(170, 238, 196, 0.25);
-  color: #aaeec4;
+  background: rgba(167, 139, 250, 0.12);
+  border-color: rgba(167, 139, 250, 0.25);
+  color: #a78bfa;
 }
 .vm-approve-btn:hover,
 .vm-free-approve:hover {
-  background: rgba(170, 238, 196, 0.22);
-  border-color: rgba(170, 238, 196, 0.45);
+  background: rgba(167, 139, 250, 0.22);
+  border-color: rgba(167, 139, 250, 0.45);
 }
 .vm-reject-btn,
 .vm-free-reject {
@@ -2222,7 +2222,7 @@
 .ai-spinner {
   width: 36px;
   height: 36px;
-  border: 3px solid rgba(170, 238, 196, 0.18);
+  border: 3px solid rgba(167, 139, 250, 0.18);
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: aiSpin 0.7s linear infinite;
@@ -2285,8 +2285,8 @@
   justify-content: space-between;
   gap: 16px;
   padding: 18px 20px;
-  background: linear-gradient(180deg, rgba(170, 238, 196, 0.06), transparent);
-  border: 1px solid rgba(170, 238, 196, 0.18);
+  background: linear-gradient(180deg, rgba(167, 139, 250, 0.06), transparent);
+  border: 1px solid rgba(167, 139, 250, 0.18);
   border-radius: 14px;
 }
 .ai-headline-text {
@@ -2321,7 +2321,7 @@
   border: 2px solid;
 }
 .ai-score-badge.good {
-  background: rgba(170, 238, 196, 0.12);
+  background: rgba(167, 139, 250, 0.12);
   border-color: var(--accent);
   color: var(--accent);
 }
@@ -2415,8 +2415,8 @@
 
 .ai-action {
   padding: 16px 18px;
-  background: linear-gradient(135deg, rgba(170, 238, 196, 0.1), rgba(170, 238, 196, 0.04));
-  border: 1px solid rgba(170, 238, 196, 0.3);
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(167, 139, 250, 0.04));
+  border: 1px solid rgba(167, 139, 250, 0.3);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -2494,7 +2494,7 @@
   color: var(--text-muted);
 }
 .ai-mission-rich.easy .ai-mission-diff {
-  background: rgba(170, 238, 196, 0.14);
+  background: rgba(167, 139, 250, 0.14);
   color: var(--accent);
 }
 .ai-mission-rich.medium .ai-mission-diff {

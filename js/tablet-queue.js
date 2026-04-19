@@ -308,7 +308,9 @@ function animateNewQueueItems(nodes) {
   if (!gsap) return;
   const fresh = nodes.filter((n) => n._justCreated);
   if (!fresh.length) return;
-  fresh.forEach((n) => { n._justCreated = false; });
+  fresh.forEach((n) => {
+    n._justCreated = false;
+  });
   gsap.from(fresh, {
     opacity: 0,
     scale: 0.85,
@@ -327,17 +329,20 @@ function animateNewQueueItems(nodes) {
 export function animateFichaToAtendimento(vendedorId) {
   const gsap = window.gsap;
   if (!gsap) return;
-  const src = document.querySelector(`.queue-item[data-id="${vendedorId}"]`) || document.querySelector(`[data-vendedor-id="${vendedorId}"]`);
+  const src =
+    document.querySelector(`.queue-item[data-id="${vendedorId}"]`) ||
+    document.querySelector(`[data-vendedor-id="${vendedorId}"]`);
   const target = document.querySelector('.service-panel') || document.getElementById('activeServices');
   if (!src || !target) return;
   const sRect = src.getBoundingClientRect();
   const tRect = target.getBoundingClientRect();
   const clone = src.cloneNode(true);
-  clone.style.cssText = `position:fixed;left:${sRect.left}px;top:${sRect.top}px;width:${sRect.width}px;margin:0;z-index:${Z_DRAG_GHOST};pointer-events:none;box-shadow:0 20px 48px rgba(170, 238, 196,.3);border:1px solid rgba(170, 238, 196,.4)`;
+  clone.style.cssText = `position:fixed;left:${sRect.left}px;top:${sRect.top}px;width:${sRect.width}px;margin:0;z-index:${Z_DRAG_GHOST};pointer-events:none;box-shadow:0 20px 48px rgba(167, 139, 250,.3);border:1px solid rgba(167, 139, 250,.4)`;
   document.body.appendChild(clone);
   const tx = tRect.left + 20;
   const ty = tRect.top + 20;
-  gsap.timeline({ onComplete: () => clone.remove() })
+  gsap
+    .timeline({ onComplete: () => clone.remove() })
     .to(clone, { scale: 1.04, duration: 0.15, ease: 'power2.out' })
     .to(clone, {
       left: tx,
@@ -460,7 +465,7 @@ function initDragAndDrop() {
   dropzone.addEventListener('dragover', (e) => {
     e.preventDefault();
     dropzone.classList.add('dragging');
-    dropzone.style.background = 'rgba(170, 238, 196,.05)';
+    dropzone.style.background = 'rgba(167, 139, 250,.05)';
     const after = getDragAfterElement(dropzone, e.clientY);
     if (after !== _prevDragAfter) {
       clearDragIndicators();
@@ -704,7 +709,7 @@ function onTouchDragStart(e) {
       const elUnder = document.elementFromPoint(t.clientX, t.clientY);
 
       if (elUnder && (elUnder.id === 'queueList' || elUnder.closest('#queueList'))) {
-        queueList.style.background = 'rgba(170, 238, 196,.05)';
+        queueList.style.background = 'rgba(167, 139, 250,.05)';
         footer?.classList.remove('drop-highlight');
         hideFooterDropLabel();
         const after = getDragAfterElement(queueList, t.clientY);

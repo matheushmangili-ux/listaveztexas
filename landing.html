@@ -40,7 +40,8 @@
     />
     <meta name="twitter:image" content="https://listaveztexas.vercel.app/assets/og-image-landing.png" />
 
-    <meta name="theme-color" content="#0d0d0d" />
+    <meta name="theme-color" content="#0a0614" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#6d28d9" media="(prefers-color-scheme: light)" />
 
     <!-- JSON-LD Schema -->
     <script type="application/ld+json">
@@ -116,8 +117,8 @@
         --text-muted: #6b6b6b;
         --border: rgba(255, 255, 255, 0.08);
         --border-strong: rgba(255, 255, 255, 0.16);
-        --accent: #aaeec4;
-        --accent-deep: #7fd9a0;
+        --accent: #a78bfa;
+        --accent-deep: #8b5cf6;
         --accent-ink: #0d0d0d;
         --coral: #e89b8a;
         --sand: #d4a373;
@@ -125,7 +126,7 @@
         --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04);
         --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
         --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-        --shadow-accent: 0 8px 32px rgba(170, 238, 196, 0.28);
+        --shadow-accent: 0 8px 32px rgba(167, 139, 250, 0.28);
         --radius: 14px;
         --radius-lg: 20px;
         --ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -178,7 +179,7 @@
       /* Scrollbar blush mint */
       * {
         scrollbar-width: thin;
-        scrollbar-color: rgba(170, 238, 196, 0.3) transparent;
+        scrollbar-color: rgba(167, 139, 250, 0.3) transparent;
       }
       *::-webkit-scrollbar {
         width: 10px;
@@ -188,14 +189,14 @@
         background: transparent;
       }
       *::-webkit-scrollbar-thumb {
-        background: rgba(170, 238, 196, 0.22);
+        background: rgba(167, 139, 250, 0.22);
         border-radius: 5px;
         border: 2px solid transparent;
         background-clip: padding-box;
         transition: background 0.2s;
       }
       *::-webkit-scrollbar-thumb:hover {
-        background: rgba(170, 238, 196, 0.5);
+        background: rgba(167, 139, 250, 0.5);
         background-clip: padding-box;
         border: 2px solid transparent;
       }
@@ -211,7 +212,7 @@
       }
       .section-proof {
         padding: 80px 0;
-        background: linear-gradient(180deg, transparent, rgba(170, 238, 196, 0.04), transparent);
+        background: linear-gradient(180deg, transparent, rgba(167, 139, 250, 0.04), transparent);
       }
       .proof-grid {
         display: grid;
@@ -235,7 +236,7 @@
           transform 0.25s;
       }
       .proof-card:hover {
-        border-color: rgba(170, 238, 196, 0.35);
+        border-color: rgba(167, 139, 250, 0.35);
         transform: translateY(-3px);
       }
       .proof-value {
@@ -273,8 +274,8 @@
         gap: 6px;
         padding: 4px 10px;
         border-radius: 999px;
-        background: rgba(170, 238, 196, 0.08);
-        border: 1px solid rgba(170, 238, 196, 0.2);
+        background: rgba(167, 139, 250, 0.08);
+        border: 1px solid rgba(167, 139, 250, 0.2);
         color: var(--accent);
         font-size: 11px;
         font-weight: 500;
@@ -372,13 +373,13 @@
         0%,
         100% {
           box-shadow:
-            0 0 0 0 rgba(170, 238, 196, 0.45),
-            inset 0 0 0 1px rgba(170, 238, 196, 0.55);
+            0 0 0 0 rgba(167, 139, 250, 0.45),
+            inset 0 0 0 1px rgba(167, 139, 250, 0.55);
         }
         50% {
           box-shadow:
-            0 0 0 6px rgba(170, 238, 196, 0),
-            inset 0 0 0 1px rgba(170, 238, 196, 0.9);
+            0 0 0 6px rgba(167, 139, 250, 0),
+            inset 0 0 0 1px rgba(167, 139, 250, 0.9);
         }
       }
       .nav-cta {
@@ -428,7 +429,7 @@
         position: absolute;
         inset: 0;
         pointer-events: none;
-        background-image: radial-gradient(circle, rgba(170, 238, 196, 0.08) 1px, transparent 1px);
+        background-image: radial-gradient(circle, rgba(167, 139, 250, 0.08) 1px, transparent 1px);
         background-size: 48px 48px;
         background-position: center center;
         mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
@@ -470,8 +471,8 @@
         height: 600px;
         background: radial-gradient(
           ellipse,
-          rgba(170, 238, 196, 0.14) 0%,
-          rgba(170, 238, 196, 0.04) 35%,
+          rgba(167, 139, 250, 0.14) 0%,
+          rgba(167, 139, 250, 0.04) 35%,
           transparent 70%
         );
         filter: blur(40px);
@@ -538,7 +539,7 @@
         margin-left: 0.04em;
         vertical-align: -0.1em;
         border-radius: 1px;
-        box-shadow: 0 0 8px rgba(170, 238, 196, 0.55);
+        box-shadow: 0 0 8px rgba(167, 139, 250, 0.55);
         animation: heroCursorBlink 0.85s steps(2) infinite;
         -webkit-text-fill-color: var(--accent);
       }
@@ -592,7 +593,7 @@
       .btn-primary:hover {
         background: var(--accent-deep);
         transform: translateY(-2px);
-        box-shadow: 0 12px 36px rgba(170, 238, 196, 0.38);
+        box-shadow: 0 12px 36px rgba(167, 139, 250, 0.38);
       }
       .btn-ghost {
         background: transparent;
@@ -712,7 +713,7 @@
       }
       .showcase-card:hover {
         transform: translateY(-4px);
-        border-color: rgba(170, 238, 196, 0.22);
+        border-color: rgba(167, 139, 250, 0.22);
         box-shadow: var(--shadow-md);
       }
       .showcase-tag {
@@ -720,7 +721,7 @@
         align-items: center;
         gap: 6px;
         padding: 4px 10px;
-        background: rgba(170, 238, 196, 0.1);
+        background: rgba(167, 139, 250, 0.1);
         color: var(--accent);
         border-radius: 999px;
         font-size: 11px;
@@ -814,7 +815,7 @@
       }
       .mock-dot.mint {
         background: var(--accent);
-        box-shadow: 0 0 8px rgba(170, 238, 196, 0.6);
+        box-shadow: 0 0 8px rgba(167, 139, 250, 0.6);
       }
 
       /* Dashboard mock */
@@ -844,9 +845,9 @@
         color: var(--text-muted);
       }
       .mock-sidebar .icn.active {
-        background: rgba(170, 238, 196, 0.14);
+        background: rgba(167, 139, 250, 0.14);
         color: var(--accent);
-        box-shadow: inset 0 0 0 1px rgba(170, 238, 196, 0.35);
+        box-shadow: inset 0 0 0 1px rgba(167, 139, 250, 0.35);
       }
       .mock-main {
         padding: 10px 12px;
@@ -916,8 +917,8 @@
         right: 10px;
         bottom: 10px;
         max-width: 62%;
-        background: rgba(170, 238, 196, 0.08);
-        border: 1px solid rgba(170, 238, 196, 0.28);
+        background: rgba(167, 139, 250, 0.08);
+        border: 1px solid rgba(167, 139, 250, 0.28);
         border-radius: 7px;
         padding: 6px 8px;
         font-size: 9px;
@@ -938,7 +939,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: radial-gradient(ellipse at center, rgba(170, 238, 196, 0.06), transparent 60%);
+        background: radial-gradient(ellipse at center, rgba(167, 139, 250, 0.06), transparent 60%);
         padding: 10px;
       }
       .mock-phone-frame {
@@ -973,14 +974,14 @@
         height: 42px;
         margin: 8px auto 4px;
         background:
-          radial-gradient(circle at 35% 35%, #aaeec4 0 4px, transparent 4px) 8px 8px,
-          radial-gradient(circle at 65% 35%, #aaeec4 0 4px, transparent 4px) 8px 8px,
-          linear-gradient(180deg, #7fd9a0 50%, #5fb887 50%);
+          radial-gradient(circle at 35% 35%, #a78bfa 0 4px, transparent 4px) 8px 8px,
+          radial-gradient(circle at 65% 35%, #a78bfa 0 4px, transparent 4px) 8px 8px,
+          linear-gradient(180deg, #8b5cf6 50%, #6d28d9 50%);
         background-size: 100% 100%;
         border-radius: 6px;
         image-rendering: pixelated;
         box-shadow:
-          0 0 12px rgba(170, 238, 196, 0.35),
+          0 0 12px rgba(167, 139, 250, 0.35),
           inset 0 -6px 0 rgba(0, 0, 0, 0.2);
         position: relative;
       }
@@ -1014,8 +1015,8 @@
         display: block;
         height: 100%;
         width: 68%;
-        background: linear-gradient(90deg, var(--accent), #7fd9a0);
-        box-shadow: 0 0 6px rgba(170, 238, 196, 0.5);
+        background: linear-gradient(90deg, var(--accent), #8b5cf6);
+        box-shadow: 0 0 6px rgba(167, 139, 250, 0.5);
       }
       .mock-xp-meta {
         display: flex;
@@ -1044,7 +1045,7 @@
         width: 9px;
         height: 9px;
         border-radius: 2px;
-        border: 1px solid rgba(170, 238, 196, 0.4);
+        border: 1px solid rgba(167, 139, 250, 0.4);
         flex-shrink: 0;
       }
       .mock-missions .chk.done {
@@ -1056,13 +1057,13 @@
         top: 18px;
         right: -18px;
         background: var(--bg-card);
-        border: 1px solid rgba(170, 238, 196, 0.35);
+        border: 1px solid rgba(167, 139, 250, 0.35);
         border-radius: 7px;
         padding: 5px 7px;
         font-size: 8px;
         box-shadow:
           0 4px 14px rgba(0, 0, 0, 0.4),
-          0 0 10px rgba(170, 238, 196, 0.15);
+          0 0 10px rgba(167, 139, 250, 0.15);
         display: flex;
         gap: 5px;
         align-items: center;
@@ -1102,11 +1103,11 @@
       }
       .mock-tablet-tabs .tab.active {
         color: var(--accent);
-        border-color: rgba(170, 238, 196, 0.5);
-        text-shadow: 0 0 4px rgba(170, 238, 196, 0.6);
+        border-color: rgba(167, 139, 250, 0.5);
+        text-shadow: 0 0 4px rgba(167, 139, 250, 0.6);
         box-shadow:
-          0 0 10px rgba(170, 238, 196, 0.2),
-          inset 0 0 0 1px rgba(170, 238, 196, 0.3);
+          0 0 10px rgba(167, 139, 250, 0.2),
+          inset 0 0 0 1px rgba(167, 139, 250, 0.3);
       }
       .mock-queue {
         flex: 1;
@@ -1128,9 +1129,9 @@
         font-size: 9px;
       }
       .mock-queue-row.active {
-        border-color: rgba(170, 238, 196, 0.5);
-        background: rgba(170, 238, 196, 0.06);
-        box-shadow: 0 0 12px rgba(170, 238, 196, 0.12);
+        border-color: rgba(167, 139, 250, 0.5);
+        background: rgba(167, 139, 250, 0.06);
+        box-shadow: 0 0 12px rgba(167, 139, 250, 0.12);
       }
       .mock-queue-row .pos {
         font-weight: 700;
@@ -1190,7 +1191,7 @@
         transition: all 0.25s var(--ease);
       }
       .step:hover {
-        border-color: rgba(170, 238, 196, 0.22);
+        border-color: rgba(167, 139, 250, 0.22);
         transform: translateY(-2px);
       }
       .step-num {
@@ -1207,7 +1208,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(170, 238, 196, 0.1);
+        background: rgba(167, 139, 250, 0.1);
         border-radius: 12px;
         color: var(--accent);
         font-size: 20px;
@@ -1349,10 +1350,10 @@
         border-color: var(--border-strong);
       }
       .plan.featured {
-        border-color: rgba(170, 238, 196, 0.5);
-        background: linear-gradient(180deg, rgba(170, 238, 196, 0.04) 0%, var(--bg-card) 100%);
+        border-color: rgba(167, 139, 250, 0.5);
+        background: linear-gradient(180deg, rgba(167, 139, 250, 0.04) 0%, var(--bg-card) 100%);
         box-shadow:
-          0 0 0 1px rgba(170, 238, 196, 0.2),
+          0 0 0 1px rgba(167, 139, 250, 0.2),
           var(--shadow-md);
         transform: scale(1.03);
       }
@@ -1584,7 +1585,7 @@
         transition: border-color 0.2s;
       }
       .faq-item[open] {
-        border-color: rgba(170, 238, 196, 0.22);
+        border-color: rgba(167, 139, 250, 0.22);
       }
       .faq-item summary {
         padding: 20px 24px;
@@ -2002,8 +2003,8 @@
                         <svg viewBox="0 0 200 60" preserveAspectRatio="none">
                           <defs>
                             <linearGradient id="gsp" x1="0" x2="0" y1="0" y2="1">
-                              <stop offset="0" stop-color="#aaeec4" stop-opacity="0.4" />
-                              <stop offset="1" stop-color="#aaeec4" stop-opacity="0" />
+                              <stop offset="0" stop-color="#a78bfa" stop-opacity="0.4" />
+                              <stop offset="1" stop-color="#a78bfa" stop-opacity="0" />
                             </linearGradient>
                           </defs>
                           <path
@@ -2013,7 +2014,7 @@
                           <path
                             d="M0,48 L15,44 L30,46 L45,38 L60,40 L75,30 L90,34 L105,22 L120,26 L135,18 L150,22 L165,14 L180,10 L200,8"
                             fill="none"
-                            stroke="#aaeec4"
+                            stroke="#a78bfa"
                             stroke-width="1.5"
                           />
                         </svg>
@@ -2027,7 +2028,7 @@
                             cy="30"
                             r="22"
                             fill="none"
-                            stroke="#aaeec4"
+                            stroke="#a78bfa"
                             stroke-width="8"
                             stroke-dasharray="70 138"
                             stroke-dashoffset="0"

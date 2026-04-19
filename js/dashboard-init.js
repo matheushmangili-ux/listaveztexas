@@ -719,21 +719,21 @@ window.exportPDF = async function () {
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter Tight',sans-serif;background:#fff;color:#18181B;padding:40px}
-.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:16px;border-bottom:3px solid #aaeec4}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:16px;border-bottom:3px solid #a78bfa}
 .header h1{font-size:22px;font-weight:800;letter-spacing:-.02em}
 .header .sub{font-size:11px;color:#71717A;font-weight:600}
 .kpi-row{display:flex;gap:16px;margin-bottom:28px}
 .kpi{flex:1;background:#FAFAFA;border:1px solid #E4E4E7;border-radius:6px;padding:16px;text-align:center}
 .kpi .label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#71717A;margin-bottom:4px}
 .kpi .value{font-size:28px;font-weight:800;letter-spacing:-.02em}
-.kpi .value.green{color:#7fd9a0} .kpi .value.red{color:#d47a68} .kpi .value.blue{color:#6d85ac} .kpi .value.amber{color:#aaeec4}
+.kpi .value.green{color:#8b5cf6} .kpi .value.red{color:#d47a68} .kpi .value.blue{color:#6d85ac} .kpi .value.amber{color:#a78bfa}
 table{width:100%;border-collapse:collapse;margin-bottom:24px;font-size:12px}
 th{background:#18181B;color:#FAFAFA;padding:10px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 td{padding:10px 12px;border-bottom:1px solid #E4E4E7;font-weight:500}
 tr:nth-child(even){background:#FAFAFA}
 .medal{font-size:16px;text-align:center}
 .conv-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-weight:700;font-size:11px}
-.conv-high{background:rgba(170,238,196,0.15);color:#7fd9a0} .conv-mid{background:rgba(212,163,115,0.15);color:#b8875a} .conv-low{background:rgba(232,155,138,0.14);color:#d47a68}
+.conv-high{background:rgba(167, 139, 250,0.15);color:#8b5cf6} .conv-mid{background:rgba(212,163,115,0.15);color:#b8875a} .conv-low{background:rgba(232,155,138,0.14);color:#d47a68}
 .section-title{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#71717A;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #E4E4E7}
 .motivos{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px}
 .motivo-tag{padding:6px 14px;border-radius:4px;font-size:11px;font-weight:700;background:#F4F4F5;border:1px solid #E4E4E7}
@@ -759,10 +759,10 @@ tr:nth-child(even){background:#FAFAFA}
       const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1;
       const conv = r.taxa_conversao || 0;
       const cls = conv >= 50 ? 'conv-high' : conv >= 30 ? 'conv-mid' : 'conv-low';
-      return `<tr><td class="medal">${medal}</td><td style="font-weight:700">${r.nome}</td><td>${r.total_atendimentos || 0}</td><td style="color:#7fd9a0;font-weight:700">${r.total_vendas || 0}</td><td><span class="conv-badge ${cls}">${conv}%</span></td><td>${formatTempo(r.tempo_medio_min || 0)}</td></tr>`;
+      return `<tr><td class="medal">${medal}</td><td style="font-weight:700">${r.nome}</td><td>${r.total_atendimentos || 0}</td><td style="color:#8b5cf6;font-weight:700">${r.total_vendas || 0}</td><td><span class="conv-badge ${cls}">${conv}%</span></td><td>${formatTempo(r.tempo_medio_min || 0)}</td></tr>`;
     })
     .join('')}
-  <tr style="font-weight:800;background:#F4F4F5"><td></td><td>TOTAL</td><td>${totAtend}</td><td style="color:#7fd9a0">${totVendas}</td><td><span class="conv-badge ${avgConv >= 50 ? 'conv-high' : avgConv >= 30 ? 'conv-mid' : 'conv-low'}">${avgConv}%</span></td><td>—</td></tr>
+  <tr style="font-weight:800;background:#F4F4F5"><td></td><td>TOTAL</td><td>${totAtend}</td><td style="color:#8b5cf6">${totVendas}</td><td><span class="conv-badge ${avgConv >= 50 ? 'conv-high' : avgConv >= 30 ? 'conv-mid' : 'conv-low'}">${avgConv}%</span></td><td>—</td></tr>
   </tbody>
 </table>
 ${d.motivos.length > 0 ? `<div class="section-title">Motivos de Perda</div><div class="motivos">${d.motivos.map((m) => `<div class="motivo-tag">${motivoLabels[m.motivo] || m.motivo}: <strong>${m.total}</strong></div>`).join('')}</div>` : ''}

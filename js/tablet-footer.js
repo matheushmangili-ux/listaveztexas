@@ -122,7 +122,7 @@ function buildFooterCardData(v, atendMap) {
   // Avatar color by status
   let avatarBg = '#525252';
   if (atendendo) avatarBg = '#8ea5c9';
-  else if (inQueue) avatarBg = '#aaeec4';
+  else if (inQueue) avatarBg = '#a78bfa';
   else if (v.status === 'pausa') avatarBg = statusColor;
 
   // Fingerprint — tudo que altera a saída renderizada

@@ -11,10 +11,10 @@ let _channel = null;
 let _countdownTimer = null;
 
 const TYPE_META = {
-  comunicado:  { icon: 'fa-bullhorn',     label: 'Comunicado', color: '#8ea5c9' },
-  corrida:     { icon: 'fa-flag-checkered', label: 'Corrida',  color: '#d4a373' },
-  evento:      { icon: 'fa-calendar-day', label: 'Evento',     color: '#aaeec4' },
-  treinamento: { icon: 'fa-graduation-cap', label: 'Treino',   color: '#b8a8d4' }
+  comunicado: { icon: 'fa-bullhorn', label: 'Comunicado', color: '#8ea5c9' },
+  corrida: { icon: 'fa-flag-checkered', label: 'Corrida', color: '#d4a373' },
+  evento: { icon: 'fa-calendar-day', label: 'Evento', color: '#a78bfa' },
+  treinamento: { icon: 'fa-graduation-cap', label: 'Treino', color: '#b8a8d4' }
 };
 
 export async function initAnnouncements(sb, ctx) {
@@ -52,7 +52,7 @@ async function loadAndRender() {
   }
   renderCard();
   if (window._vendorCounts) {
-    window._vendorCounts.announcements = _announcements.filter(a => !a.read_at).length;
+    window._vendorCounts.announcements = _announcements.filter((a) => !a.read_at).length;
     window._vendorUpdateBadges?.();
   }
 }
@@ -109,14 +109,13 @@ function renderCard() {
 
 function renderItem(a) {
   const meta = TYPE_META[a.type] || TYPE_META.comunicado;
-  const iconHtml = a.icon && !a.icon.startsWith('fa-')
-    ? `<span class="vendor-ann-emoji">${escapeHtml(a.icon)}</span>`
-    : `<i class="fa-solid ${escapeHtml(a.icon || meta.icon)}"></i>`;
+  const iconHtml =
+    a.icon && !a.icon.startsWith('fa-')
+      ? `<span class="vendor-ann-emoji">${escapeHtml(a.icon)}</span>`
+      : `<i class="fa-solid ${escapeHtml(a.icon || meta.icon)}"></i>`;
   const color = a.color || meta.color;
   const isCorrida = a.type === 'corrida';
-  const subline = isCorrida
-    ? renderCorridaSubline(a)
-    : escapeHtml(a.body || meta.label).slice(0, 80);
+  const subline = isCorrida ? renderCorridaSubline(a) : escapeHtml(a.body || meta.label).slice(0, 80);
   return `
     <button class="vendor-ann-item ${a.is_read ? '' : 'unread'} ${isCorrida ? 'corrida' : ''}" data-ann-id="${a.id}" type="button">
       <span class="vendor-ann-icon" style="color:${escapeHtml(color)}">${iconHtml}</span>
@@ -157,9 +156,10 @@ function openSheet(ann) {
   const meta = TYPE_META[ann.type] || TYPE_META.comunicado;
   const color = ann.color || meta.color;
   const isCorrida = ann.type === 'corrida';
-  const iconHtml = ann.icon && !ann.icon.startsWith('fa-')
-    ? `<span class="vendor-ann-emoji">${escapeHtml(ann.icon)}</span>`
-    : `<i class="fa-solid ${escapeHtml(ann.icon || meta.icon)}"></i>`;
+  const iconHtml =
+    ann.icon && !ann.icon.startsWith('fa-')
+      ? `<span class="vendor-ann-emoji">${escapeHtml(ann.icon)}</span>`
+      : `<i class="fa-solid ${escapeHtml(ann.icon || meta.icon)}"></i>`;
 
   body.innerHTML = `
     <div class="vendor-ann-sheet-head" style="--ann-color:${escapeHtml(color)}">
@@ -268,14 +268,18 @@ function subscribeRealtime() {
   if (_channel) _sb.removeChannel(_channel);
   _channel = _sb
     .channel('announcements-' + _tenantId)
-    .on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'tenant_announcements',
-      filter: 'tenant_id=eq.' + _tenantId
-    }, async () => {
-      await loadAndRender();
-    })
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'tenant_announcements',
+        filter: 'tenant_id=eq.' + _tenantId
+      },
+      async () => {
+        await loadAndRender();
+      }
+    )
     .subscribe();
 }
 
