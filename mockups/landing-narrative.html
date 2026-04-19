@@ -1,0 +1,1031 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup · Landing B — Story-driven</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/tokens.css" />
+    <script src="/js/components/mv-logo.js" defer></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: 'Inter Tight', system-ui, sans-serif;
+        background: var(--bg-deep);
+        color: var(--text-primary);
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+      .wrap {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 32px;
+      }
+
+      /* Glow ambient */
+      body::before {
+        content: '';
+        position: fixed;
+        top: -200px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 900px;
+        height: 900px;
+        background: radial-gradient(circle, color-mix(in srgb, var(--accent) 15%, transparent), transparent 60%);
+        pointer-events: none;
+        z-index: 0;
+        animation: heroGlow 8s ease-in-out infinite;
+      }
+      @keyframes heroGlow {
+        0%,
+        100% {
+          opacity: 0.6;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      /* NAV */
+      nav.main {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: color-mix(in srgb, var(--bg-deep) 70%, transparent);
+        backdrop-filter: blur(14px);
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .nav-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 0;
+        position: relative;
+        z-index: 2;
+      }
+      .nav-links {
+        display: inline-flex;
+        gap: 28px;
+      }
+      .nav-links a {
+        color: var(--text-secondary);
+        font-size: 13.5px;
+        font-weight: 500;
+        text-decoration: none;
+      }
+      .nav-links a:hover {
+        color: var(--text-primary);
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 16px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.2s ease;
+        font-family: inherit;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+      }
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 15%, transparent);
+      }
+      .btn-ghost {
+        color: var(--text-primary);
+        border-color: var(--border-medium);
+      }
+      .btn-ghost:hover {
+        background: var(--bg-elevated);
+      }
+
+      /* HERO SPLIT */
+      .hero {
+        padding: 72px 0 96px;
+        position: relative;
+        z-index: 1;
+      }
+      .hero-split {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        gap: 48px;
+        align-items: center;
+      }
+      .hero-left .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: var(--text-muted);
+        padding: 6px 12px;
+        border: 1px solid var(--border-subtle);
+        border-radius: 999px;
+        margin-bottom: 28px;
+        background: color-mix(in srgb, var(--bg-card) 50%, transparent);
+      }
+      .hero-left .eyebrow::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--chart-4);
+        box-shadow: 0 0 8px var(--chart-4);
+      }
+      .hero-left h1 {
+        font-size: 68px;
+        line-height: 1;
+        font-weight: 300;
+        letter-spacing: -0.035em;
+        margin-bottom: 24px;
+      }
+      .hero-left h1 strong {
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--accent), var(--chart-2));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .hero-left p.sub {
+        font-size: 18px;
+        color: var(--text-secondary);
+        line-height: 1.55;
+        margin-bottom: 36px;
+        max-width: 480px;
+      }
+      .hero-ctas {
+        display: inline-flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      /* HERO RIGHT — cycle animation */
+      .hero-cycle {
+        position: relative;
+        aspect-ratio: 1;
+        max-width: 480px;
+        margin-left: auto;
+      }
+      .cycle-node {
+        position: absolute;
+        width: 110px;
+        height: 110px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        font-size: 11px;
+        font-family: 'JetBrains Mono', monospace;
+        color: var(--text-muted);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.06),
+          0 10px 30px rgba(0, 0, 0, 0.3);
+        transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .cycle-node .big {
+        font-size: 28px;
+      }
+      .cycle-node.n1 {
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .cycle-node.n2 {
+        top: 35%;
+        right: 0;
+      }
+      .cycle-node.n3 {
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .cycle-node.n4 {
+        top: 35%;
+        left: 0;
+      }
+      .cycle-node.active {
+        border-color: var(--accent);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.1),
+          0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent),
+          0 20px 40px rgba(0, 0, 0, 0.4);
+        color: var(--text-primary);
+      }
+      .cycle-node.active .big {
+        color: var(--accent);
+      }
+      .cycle-arrow {
+        position: absolute;
+        font-size: 20px;
+        color: var(--text-muted);
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .cycle-arrow.a1 {
+        top: 15%;
+        right: 25%;
+      }
+      .cycle-arrow.a2 {
+        bottom: 15%;
+        right: 25%;
+        transform: rotate(90deg);
+      }
+      .cycle-arrow.a3 {
+        bottom: 15%;
+        left: 25%;
+        transform: rotate(180deg);
+      }
+      .cycle-arrow.a4 {
+        top: 15%;
+        left: 25%;
+        transform: rotate(270deg);
+      }
+
+      /* JOURNEY SECTIONS (scrollytelling) */
+      section.journey-section {
+        padding: 140px 0;
+        position: relative;
+        z-index: 1;
+      }
+      .journey-section + .journey-section {
+        border-top: 1px solid var(--border-subtle);
+      }
+      .journey-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 48px;
+        align-items: center;
+      }
+      .journey-step {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: var(--accent);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        margin-bottom: 14px;
+      }
+      .journey-title {
+        font-size: 44px;
+        font-weight: 300;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+        margin-bottom: 20px;
+      }
+      .journey-title em {
+        font-weight: 700;
+        font-style: normal;
+        color: var(--accent);
+      }
+      .journey-desc {
+        font-size: 16px;
+        color: var(--text-secondary);
+        line-height: 1.6;
+      }
+      .journey-visual {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 18px;
+        padding: 28px;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.04),
+          0 30px 80px -20px rgba(0, 0, 0, 0.5);
+        min-height: 320px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .journey-section:nth-child(even) .journey-grid {
+        direction: rtl;
+      }
+      .journey-section:nth-child(even) .journey-grid > * {
+        direction: ltr;
+      }
+
+      /* SPOTLIGHT (Texas Center case) */
+      section.spotlight {
+        padding: 96px 0;
+        background:
+          radial-gradient(circle at 30% 50%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 60%),
+          var(--bg-deep);
+        border-top: 1px solid var(--border-subtle);
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .spotlight-inner {
+        text-align: center;
+      }
+      .spotlight-eyebrow {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: var(--accent);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        margin-bottom: 20px;
+      }
+      .spotlight-number {
+        font-size: 180px;
+        font-weight: 200;
+        letter-spacing: -0.05em;
+        background: linear-gradient(180deg, var(--text-primary), var(--text-muted));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        line-height: 1;
+        margin-bottom: 14px;
+      }
+      .spotlight-cap {
+        font-size: 18px;
+        color: var(--text-secondary);
+        margin-bottom: 36px;
+      }
+      .spotlight-quote {
+        max-width: 640px;
+        margin: 0 auto;
+        font-size: 22px;
+        font-weight: 300;
+        color: var(--text-primary);
+        line-height: 1.45;
+        font-style: italic;
+      }
+      .spotlight-author {
+        margin-top: 24px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: var(--text-muted);
+        letter-spacing: 0.08em;
+      }
+
+      /* PRICING */
+      section.pricing {
+        padding: 120px 0;
+        position: relative;
+        z-index: 1;
+      }
+      .section-eyebrow {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: var(--accent);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        margin-bottom: 16px;
+        text-align: center;
+      }
+      .section-title {
+        font-size: 42px;
+        font-weight: 300;
+        letter-spacing: -0.03em;
+        text-align: center;
+        margin-bottom: 14px;
+      }
+      .section-title em {
+        font-weight: 700;
+        font-style: normal;
+        color: var(--accent);
+      }
+      .section-sub {
+        font-size: 16px;
+        color: var(--text-secondary);
+        text-align: center;
+        margin: 0 auto 56px;
+        max-width: 520px;
+      }
+      .plans {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
+      .plan {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 20px;
+        padding: 32px 28px;
+        position: relative;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      }
+      .plan:hover {
+        transform: translateY(-4px);
+        border-color: var(--border-medium);
+      }
+      .plan.featured {
+        border-color: var(--accent);
+        background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 6%, var(--bg-card)), var(--bg-card));
+      }
+      .plan.featured::before {
+        content: 'Mais escolhido';
+        position: absolute;
+        top: -10px;
+        left: 28px;
+        background: var(--accent);
+        color: #fff;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        padding: 3px 10px;
+        border-radius: 999px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .plan-name {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+      .plan-sub {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-bottom: 24px;
+      }
+      .plan-price {
+        font-size: 44px;
+        font-weight: 300;
+        letter-spacing: -0.03em;
+        margin-bottom: 4px;
+      }
+      .plan-price small {
+        font-size: 14px;
+        color: var(--text-muted);
+      }
+      .plan-frequency {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-bottom: 28px;
+      }
+      .plan ul {
+        list-style: none;
+        margin-bottom: 28px;
+      }
+      .plan ul li {
+        padding: 8px 0;
+        font-size: 14px;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .plan ul li::before {
+        content: '✓';
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .plan .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 12px;
+      }
+
+      /* FAQ */
+      section.faq {
+        padding: 72px 0 96px;
+        position: relative;
+        z-index: 1;
+      }
+      .faq-grid {
+        max-width: 760px;
+        margin: 0 auto;
+      }
+      .faq-item {
+        border-bottom: 1px solid var(--border-subtle);
+        padding: 22px 0;
+      }
+      .faq-item summary {
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+      }
+      .faq-item p {
+        margin-top: 14px;
+        color: var(--text-secondary);
+        font-size: 14.5px;
+        line-height: 1.65;
+      }
+
+      /* FOOTER */
+      footer.main {
+        padding: 64px 0 40px;
+        border-top: 1px solid var(--border-subtle);
+        position: relative;
+        z-index: 1;
+      }
+      .footer-top {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr 1fr 1fr;
+        gap: 32px;
+        margin-bottom: 40px;
+      }
+      .footer-top h4 {
+        font-size: 11px;
+        font-family: 'JetBrains Mono', monospace;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        margin-bottom: 14px;
+      }
+      .footer-top a {
+        display: block;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 14px;
+        margin-bottom: 10px;
+      }
+      .footer-top a:hover {
+        color: var(--text-primary);
+      }
+
+      @media (max-width: 900px) {
+        .hero-split,
+        .journey-grid {
+          grid-template-columns: 1fr;
+        }
+        .hero-left h1 {
+          font-size: 44px;
+        }
+        .journey-title {
+          font-size: 32px;
+        }
+        .spotlight-number {
+          font-size: 110px;
+        }
+        .plans,
+        .footer-top {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="main">
+      <div class="wrap nav-inner">
+        <div style="display: inline-flex; align-items: center; gap: 36px">
+          <mv-logo size="M" wordmark></mv-logo>
+          <div class="nav-links">
+            <a href="#journey">Como funciona</a>
+            <a href="#spotlight">Case</a>
+            <a href="#pricing">Preços</a>
+          </div>
+        </div>
+        <a class="btn btn-primary" href="#pricing">Começar agora</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div class="wrap hero-split">
+        <div class="hero-left">
+          <span class="eyebrow">Texas Center · Goiânia · ao vivo</span>
+          <h1>Transforme o seu varejo em <strong>competição saudável</strong>.</h1>
+          <p class="sub">
+            Cada cliente que entra é um ponto ganho. Cada venda, uma missão. Seus vendedores não batem ponto — eles
+            conquistam território. E você vê tudo em dados.
+          </p>
+          <div class="hero-ctas">
+            <a href="#pricing" class="btn btn-primary">Começar jornada</a>
+            <a href="#spotlight" class="btn btn-ghost">Ver o case</a>
+          </div>
+        </div>
+
+        <!-- Cycle animation: cliente → fila → vendedor → XP -->
+        <div class="hero-cycle">
+          <div class="cycle-node n1 active">
+            <span class="big">🚪</span>
+            <span>Cliente</span>
+          </div>
+          <div class="cycle-node n2">
+            <span class="big">📋</span>
+            <span>Fila</span>
+          </div>
+          <div class="cycle-node n3">
+            <span class="big">🤝</span>
+            <span>Atende</span>
+          </div>
+          <div class="cycle-node n4">
+            <span class="big">⭐</span>
+            <span>+XP</span>
+          </div>
+          <span class="cycle-arrow a1">→</span>
+          <span class="cycle-arrow a2">→</span>
+          <span class="cycle-arrow a3">→</span>
+          <span class="cycle-arrow a4">→</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="journey-section" id="journey">
+      <div class="wrap journey-grid">
+        <div>
+          <div class="journey-step">01 · CHEGADA</div>
+          <h2 class="journey-title">O cliente <em>entra na loja.</em></h2>
+          <p class="journey-desc">
+            O tablet no balcão registra o check-in em 2 toques. Setor escolhido, ticket emitido, posição na fila
+            atribuída. Ninguém anota no caderno. Ninguém esquece de avisar.
+          </p>
+        </div>
+        <div class="journey-visual">
+          <svg viewBox="0 0 300 200" width="100%" style="max-width: 400px">
+            <rect
+              x="20"
+              y="20"
+              width="260"
+              height="160"
+              rx="12"
+              fill="var(--bg-elevated)"
+              stroke="var(--border-subtle)"
+            />
+            <text x="40" y="50" fill="var(--text-muted)" font-family="JetBrains Mono" font-size="10">CHECK-IN</text>
+            <rect
+              x="40"
+              y="60"
+              width="220"
+              height="40"
+              rx="8"
+              fill="color-mix(in srgb, var(--chart-1) 15%, transparent)"
+              stroke="var(--chart-1)"
+            />
+            <text x="54" y="84" fill="var(--text-primary)" font-family="Inter Tight" font-size="14" font-weight="600">
+              Cliente #247 → Chapelaria
+            </text>
+            <rect x="40" y="110" width="60" height="20" rx="4" fill="var(--bg-card)" stroke="var(--border-subtle)" />
+            <text x="56" y="124" fill="var(--chart-4)" font-family="JetBrains Mono" font-size="10">POS #3</text>
+            <rect x="110" y="110" width="80" height="20" rx="4" fill="var(--bg-card)" stroke="var(--border-subtle)" />
+            <text x="124" y="124" fill="var(--text-muted)" font-family="JetBrains Mono" font-size="10">~4min</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="journey-section">
+      <div class="wrap journey-grid">
+        <div>
+          <div class="journey-step">02 · DISTRIBUIÇÃO</div>
+          <h2 class="journey-title">A fila <em>sabe quem é o próximo.</em></h2>
+          <p class="journey-desc">
+            Rodízio automático entre vendedores do setor. O app do vendedor avisa com push quando ele vira o próximo.
+            Sem disputa no balcão, sem vendedor esperando sem saber a vez.
+          </p>
+        </div>
+        <div class="journey-visual">
+          <svg viewBox="0 0 300 200" width="100%" style="max-width: 400px">
+            <rect
+              x="20"
+              y="20"
+              width="260"
+              height="160"
+              rx="12"
+              fill="var(--bg-elevated)"
+              stroke="var(--border-subtle)"
+            />
+            <g font-family="Inter Tight" font-size="13">
+              <rect
+                x="40"
+                y="40"
+                width="220"
+                height="32"
+                rx="6"
+                fill="color-mix(in srgb, var(--accent) 15%, transparent)"
+                stroke="var(--accent)"
+              />
+              <text x="54" y="60" fill="var(--accent)" font-weight="600">#1 · João · PRÓXIMO</text>
+              <rect x="40" y="80" width="220" height="28" rx="6" fill="var(--bg-card)" stroke="var(--border-subtle)" />
+              <text x="54" y="98" fill="var(--text-secondary)">#2 · Karol</text>
+              <rect x="40" y="116" width="220" height="28" rx="6" fill="var(--bg-card)" stroke="var(--border-subtle)" />
+              <text x="54" y="134" fill="var(--text-secondary)">#3 · Ledson</text>
+              <rect x="40" y="152" width="220" height="20" rx="6" fill="var(--bg-card)" stroke="var(--border-subtle)" />
+              <text x="54" y="166" fill="var(--text-muted)" font-size="10">#4 · Julio</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="journey-section">
+      <div class="wrap journey-grid">
+        <div>
+          <div class="journey-step">03 · ATENDIMENTO</div>
+          <h2 class="journey-title">O vendedor <em>fecha a venda.</em></h2>
+          <p class="journey-desc">
+            Venda, não venda, motivo de perda, valor. Dois toques no tablet. Dado fica gravado no painel em tempo real —
+            nada de planilha no fim do dia.
+          </p>
+        </div>
+        <div class="journey-visual">
+          <svg viewBox="0 0 300 200" width="100%" style="max-width: 400px">
+            <rect
+              x="20"
+              y="20"
+              width="260"
+              height="160"
+              rx="12"
+              fill="var(--bg-elevated)"
+              stroke="var(--border-subtle)"
+            />
+            <text x="40" y="50" fill="var(--text-muted)" font-family="JetBrains Mono" font-size="10">RESULTADO</text>
+            <rect
+              x="40"
+              y="62"
+              width="100"
+              height="52"
+              rx="10"
+              fill="color-mix(in srgb, var(--chart-4) 15%, transparent)"
+              stroke="var(--chart-4)"
+            />
+            <text
+              x="90"
+              y="90"
+              fill="var(--chart-4)"
+              font-family="Inter Tight"
+              font-size="14"
+              font-weight="600"
+              text-anchor="middle"
+            >
+              ✓ Vendeu
+            </text>
+            <text x="90" y="104" fill="var(--chart-4)" font-family="JetBrains Mono" font-size="11" text-anchor="middle">
+              R$ 842
+            </text>
+            <rect x="150" y="62" width="100" height="52" rx="10" fill="var(--bg-card)" stroke="var(--border-subtle)" />
+            <text
+              x="200"
+              y="90"
+              fill="var(--text-secondary)"
+              font-family="Inter Tight"
+              font-size="13"
+              text-anchor="middle"
+            >
+              Não fechou
+            </text>
+            <rect x="40" y="128" width="210" height="28" rx="6" fill="var(--bg-card)" stroke="var(--border-subtle)" />
+            <text x="54" y="146" fill="var(--text-muted)" font-family="JetBrains Mono" font-size="10">
+              +40 XP · Missão: 5/day ✓
+            </text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="journey-section">
+      <div class="wrap journey-grid">
+        <div>
+          <div class="journey-step">04 · RECOMPENSA</div>
+          <h2 class="journey-title">O vendedor <em>evolui.</em></h2>
+          <p class="journey-desc">
+            XP, tiers RPG, missões diárias, avatar pixel-art que desbloqueia conforme performa. Time quer performar
+            porque tem jogo. Cabra batedor entra na parede do mural — de verdade.
+          </p>
+        </div>
+        <div class="journey-visual" style="display: flex; flex-direction: column; gap: 16px">
+          <div
+            style="
+              display: flex;
+              gap: 12px;
+              align-items: center;
+              padding: 16px;
+              background: var(--bg-elevated);
+              border-radius: 12px;
+            "
+          >
+            <div
+              style="
+                width: 56px;
+                height: 56px;
+                border-radius: 12px;
+                background: var(--accent);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #fff;
+                font-weight: 700;
+                font-size: 20px;
+              "
+            >
+              J
+            </div>
+            <div style="flex: 1">
+              <div style="font-weight: 600">João</div>
+              <div style="font-family: JetBrains Mono; font-size: 11px; color: var(--text-muted)">
+                Tier 7 · Caminhoneiro
+              </div>
+            </div>
+            <div style="font-family: JetBrains Mono; font-size: 12px; color: var(--chart-4)">1.420 XP</div>
+          </div>
+          <div style="height: 8px; border-radius: 4px; background: var(--bg-elevated); overflow: hidden">
+            <div
+              style="height: 100%; width: 65%; background: linear-gradient(90deg, var(--accent), var(--chart-2))"
+            ></div>
+          </div>
+          <div style="font-family: JetBrains Mono; font-size: 10px; color: var(--text-muted); text-align: center">
+            PRÓXIMO TIER · CORONEL · 2.180 XP
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="journey-section">
+      <div class="wrap journey-grid">
+        <div>
+          <div class="journey-step">05 · DECISÃO</div>
+          <h2 class="journey-title">E você <em>vê tudo acontecendo.</em></h2>
+          <p class="journey-desc">
+            Dashboard em tempo real. IA resume o turno, sugere escala do dia seguinte, aponta rupturas antes de você
+            sentir. A gestão vira leitura, não adivinhação.
+          </p>
+        </div>
+        <div class="journey-visual">
+          <svg viewBox="0 0 300 200" width="100%" style="max-width: 400px">
+            <defs>
+              <linearGradient id="chartG" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="var(--chart-1)" stop-opacity=".4" />
+                <stop offset="1" stop-color="var(--chart-1)" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+            <rect
+              x="20"
+              y="20"
+              width="260"
+              height="160"
+              rx="12"
+              fill="var(--bg-elevated)"
+              stroke="var(--border-subtle)"
+            />
+            <path
+              d="M 40 150 L 80 130 L 120 100 L 160 70 L 200 110 L 240 90 L 260 100 L 260 170 L 40 170 Z"
+              fill="url(#chartG)"
+            />
+            <path
+              d="M 40 150 L 80 130 L 120 100 L 160 70 L 200 110 L 240 90 L 260 100"
+              stroke="var(--chart-1)"
+              stroke-width="2.5"
+              fill="none"
+            />
+            <circle cx="160" cy="70" r="5" fill="var(--chart-1)" />
+            <text x="140" y="50" fill="var(--chart-1)" font-family="JetBrains Mono" font-size="9" font-weight="600">
+              13H · PICO
+            </text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="spotlight" id="spotlight">
+      <div class="wrap spotlight-inner">
+        <div class="spotlight-eyebrow">Case · Texas Center</div>
+        <div class="spotlight-number">12.3k</div>
+        <p class="spotlight-cap">atendimentos nos últimos 3 meses, com 8 vendedores</p>
+        <blockquote class="spotlight-quote">
+          "Antes a gente adivinhava. Hoje abro o dashboard às 9h e sei exatamente quem vai puxar o dia. Vendedor compete
+          com ele mesmo e a loja ganha."
+        </blockquote>
+        <div class="spotlight-author">— GESTÃO TEXAS CENTER · GOIÂNIA</div>
+      </div>
+    </section>
+
+    <section class="pricing" id="pricing">
+      <div class="wrap">
+        <div class="section-eyebrow">Planos</div>
+        <h2 class="section-title">Escolha o seu <em>ritmo de jogo.</em></h2>
+        <p class="section-sub">Começa pequeno. Cresce quando a loja crescer. Sem letras miúdas.</p>
+
+        <div class="plans">
+          <div class="plan">
+            <div class="plan-name">Starter</div>
+            <div class="plan-sub">Pra quem tá começando</div>
+            <div class="plan-price">R$49<small>/mês</small></div>
+            <div class="plan-frequency">Cancela quando quiser</div>
+            <ul>
+              <li>Até 3 vendedores</li>
+              <li>Dashboard completo</li>
+              <li>Tablet de fila</li>
+              <li>Suporte por e-mail</li>
+            </ul>
+            <a href="#" class="btn btn-ghost">Começar grátis</a>
+          </div>
+          <div class="plan featured">
+            <div class="plan-name">Pro</div>
+            <div class="plan-sub">Pra lojas com time</div>
+            <div class="plan-price">R$99<small>/mês</small></div>
+            <div class="plan-frequency">Cancela quando quiser</div>
+            <ul>
+              <li>Até 10 vendedores</li>
+              <li>Dashboard + Tablet</li>
+              <li>App com gamificação</li>
+              <li>XP, tiers, missões</li>
+              <li>Push notifications</li>
+            </ul>
+            <a href="#" class="btn btn-primary">Começar agora</a>
+          </div>
+          <div class="plan">
+            <div class="plan-name">Elite</div>
+            <div class="plan-sub">Pra quem quer escalar</div>
+            <div class="plan-price">R$149<small>+R$19/vend</small></div>
+            <div class="plan-frequency">A partir do 11º vendedor</div>
+            <ul>
+              <li>Vendedores ilimitados</li>
+              <li>IA Assist (resumo + escala)</li>
+              <li>White-label (cor + logo)</li>
+              <li>Suporte WhatsApp</li>
+              <li>Onboarding dedicado</li>
+            </ul>
+            <a href="#" class="btn btn-ghost">Agendar demo</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="faq">
+      <div class="wrap faq-grid">
+        <div class="section-eyebrow">Dúvidas</div>
+        <h2 class="section-title" style="margin-bottom: 48px">Perguntas frequentes</h2>
+        <details class="faq-item">
+          <summary>Quanto tempo pra começar?</summary>
+          <p>3 minutos. Você cria a conta, cadastra vendedores, abre o turno no tablet. Sério.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Meu time vai curtir gamificação?</summary>
+          <p>
+            No Texas Center o XP virou assunto de almoço. Vendedor olha o ranking antes da loja abrir. Mas é opcional —
+            se o seu time preferir operar sem, desliga nas configurações.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary>Funciona offline?</summary>
+          <p>Sim. Tablet e app têm cache local. Tudo sincroniza quando volta a conexão.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Preciso treinar minha equipe?</summary>
+          <p>
+            Onboarding interativo no tablet cobre os primeiros 5 minutos. Depois a UX faz o resto — foi desenhada pra
+            equipes de varejo, não pra power users.
+          </p>
+        </details>
+      </div>
+    </section>
+
+    <footer class="main">
+      <div class="wrap">
+        <div class="footer-top">
+          <div>
+            <mv-logo size="M" wordmark></mv-logo>
+            <p
+              style="margin-top: 16px; color: var(--text-muted); font-size: 13.5px; max-width: 280px; line-height: 1.6"
+            >
+              Operação de varejo virou jogo competitivo. Sua equipe evolui, sua loja cresce.
+            </p>
+          </div>
+          <div>
+            <h4>Produto</h4>
+            <a href="#">Dashboard</a><a href="#">Tablet</a><a href="#">App vendedor</a>
+          </div>
+          <div>
+            <h4>Empresa</h4>
+            <a href="#">Sobre</a><a href="#">Case Texas</a><a href="#">Contato</a>
+          </div>
+          <div>
+            <h4>Legal</h4>
+            <a href="#">Termos</a><a href="#">Privacidade</a><a href="#">LGPD</a>
+          </div>
+        </div>
+        <div
+          style="
+            padding-top: 24px;
+            border-top: 1px solid var(--border-subtle);
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: center;
+          "
+        >
+          © 2026 minhavez · Feito no Brasil com Supabase + amor pelo varejo
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // Rotate active cycle node
+      const nodes = document.querySelectorAll('.cycle-node');
+      let i = 0;
+      setInterval(() => {
+        nodes.forEach((n) => n.classList.remove('active'));
+        i = (i + 1) % nodes.length;
+        nodes[i].classList.add('active');
+      }, 1400);
+    </script>
+  </body>
+</html>
