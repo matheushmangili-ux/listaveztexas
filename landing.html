@@ -2444,6 +2444,27 @@
         text-align: center;
       }
 
+      /* Scroll-reveal */
+      .nv-reveal {
+        opacity: 0;
+        transform: translateY(30px);
+        transition:
+          opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+          transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        will-change: opacity, transform;
+      }
+      .nv-reveal.nv-in-view {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .nv-reveal {
+          opacity: 1;
+          transform: none;
+          transition: none;
+        }
+      }
+
       /* Responsive */
       @media (max-width: 900px) {
         .nv-hero-split,
@@ -2962,6 +2983,30 @@
           i = (i + 1) % nodes.length;
           nodes[i].classList.add('active');
         }, 1400);
+      })();
+
+      // Scroll-reveal (IntersectionObserver) — fade + translateY on journey/spotlight/pricing/faq
+      (function () {
+        const targets = document.querySelectorAll('.nv-journey, .nv-spotlight, .nv-pricing, .nv-faq, .nv-footer');
+        if (!targets.length) return;
+        if (!('IntersectionObserver' in window)) {
+          // Fallback: mostra tudo sem anima\u00e7\u00e3o
+          targets.forEach((el) => el.classList.add('nv-in-view'));
+          return;
+        }
+        targets.forEach((el) => el.classList.add('nv-reveal'));
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                e.target.classList.add('nv-in-view');
+                io.unobserve(e.target);
+              }
+            });
+          },
+          { threshold: 0.12, rootMargin: '0px 0px -60px 0px' }
+        );
+        targets.forEach((el) => io.observe(el));
       })();
     </script>
 

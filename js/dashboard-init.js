@@ -1118,7 +1118,34 @@ window.toggleTheme = function () {
   loadAll();
 };
 
-// ─── Collapsible Sections ───
+// ─── Section-level collapsibles (Por Vendedor / Operacional) ───
+window.toggleSectionCollapse = function (key) {
+  const wrap = document.querySelector('.section-collapse[data-section-key="' + key + '"]');
+  if (!wrap) return;
+  const isOpen = wrap.classList.toggle('open');
+  const header = wrap.querySelector('.section-collapse-header');
+  if (header) header.setAttribute('aria-expanded', String(isOpen));
+  const stored = JSON.parse(localStorage.getItem('lv-section-open') || '{}');
+  stored[key] = isOpen;
+  localStorage.setItem('lv-section-open', JSON.stringify(stored));
+  // Apex charts escondidos renderizam 0px — for\u00e7a resize quando abre
+  if (isOpen) setTimeout(() => window.dispatchEvent(new Event('resize')), 420);
+};
+(function restoreSectionCollapse() {
+  const stored = JSON.parse(localStorage.getItem('lv-section-open') || '{}');
+  document.querySelectorAll('.section-collapse').forEach((wrap) => {
+    const key = wrap.dataset.sectionKey;
+    if (!key) return;
+    // Default: collapsed. S\u00f3 abre se lv-section-open tiver true explicit.
+    if (stored[key] === true) {
+      wrap.classList.add('open');
+      const header = wrap.querySelector('.section-collapse-header');
+      if (header) header.setAttribute('aria-expanded', 'true');
+    }
+  });
+})();
+
+// ─── Collapsible Sections (per-card) ───
 window.toggleSection = function (id) {
   const btn = document.getElementById('collapseBtn-' + id);
   const body = document.getElementById('collapseBody-' + id);

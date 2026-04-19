@@ -475,130 +475,168 @@
           <div id="chartTrend" style="display: none"></div>
         </div>
 
-        <!-- Section: Por Vendedor -->
-        <div class="chart-section" id="section-vendedor" style="display: block">
-          <div class="chart-card" style="margin-bottom: var(--gap)">
-            <div class="chart-card-header" onclick="toggleSection('ranking')">
-              <h3>
-                <i class="fa-solid fa-ranking-star" style="margin-right: 6px; color: var(--accent-dim)"></i>Ranking
-                Vendedores
-              </h3>
-              <button
-                class="collapse-btn"
-                id="collapseBtn-ranking"
-                type="button"
-                aria-label="Recolher/expandir Ranking Vendedores"
-                aria-expanded="true"
-                aria-controls="collapseBody-ranking"
-                onclick="
-                  event.stopPropagation();
-                  toggleSection('ranking');
-                "
-              >
-                <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
-              </button>
-            </div>
-            <div class="chart-card-body" id="collapseBody-ranking" style="margin-top: 16px">
-              <div class="ranking-grid" id="rankingBody">
-                <div style="grid-column: 1/-1; text-align: center; padding: 32px; color: var(--text-muted)">
-                  Carregando...
+        <!-- Section: Por Vendedor (colaps\u00e1vel, padr\u00e3o collapsed) -->
+        <div class="section-collapse" data-section-key="vendedor">
+          <button
+            type="button"
+            class="section-collapse-header"
+            onclick="toggleSectionCollapse('vendedor')"
+            aria-expanded="false"
+            aria-controls="sectionCollapseBody-vendedor"
+          >
+            <span class="sch-title"><i class="fa-solid fa-users"></i> Por Vendedor</span>
+            <span class="sch-sub">Ranking, volume × conversão, tempo médio</span>
+            <i class="fa-solid fa-chevron-down sch-chevron" aria-hidden="true"></i>
+          </button>
+          <div class="section-collapse-body" id="sectionCollapseBody-vendedor">
+            <div class="chart-section" id="section-vendedor" style="display: block">
+              <div class="chart-card" style="margin-bottom: var(--gap)">
+                <div class="chart-card-header" onclick="toggleSection('ranking')">
+                  <h3>
+                    <i class="fa-solid fa-ranking-star" style="margin-right: 6px; color: var(--accent-dim)"></i>Ranking
+                    Vendedores
+                  </h3>
+                  <button
+                    class="collapse-btn"
+                    id="collapseBtn-ranking"
+                    type="button"
+                    aria-label="Recolher/expandir Ranking Vendedores"
+                    aria-expanded="true"
+                    aria-controls="collapseBody-ranking"
+                    onclick="
+                      event.stopPropagation();
+                      toggleSection('ranking');
+                    "
+                  >
+                    <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                  </button>
+                </div>
+                <div class="chart-card-body" id="collapseBody-ranking" style="margin-top: 16px">
+                  <div class="ranking-grid" id="rankingBody">
+                    <div style="grid-column: 1/-1; text-align: center; padding: 32px; color: var(--text-muted)">
+                      Carregando...
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="charts-grid">
+                <div class="chart-card">
+                  <h3>
+                    <i class="fa-solid fa-chart-scatter" style="margin-right: 6px; color: var(--accent-dim)"></i>Volume
+                    × Conversão por Vendedor
+                  </h3>
+                  <div class="chart-box"><div id="chartScatter"></div></div>
+                  <p id="chartScatterEmpty" class="chart-empty-state" style="display: none">
+                    <i class="fa-solid fa-chart-scatter"></i>Sem dados de conversão neste período
+                  </p>
+                </div>
+                <div class="chart-card">
+                  <h3>
+                    <i class="fa-solid fa-stopwatch" style="margin-right: 6px; color: var(--accent-dim)"></i>Tempo Médio
+                    por Vendedor
+                  </h3>
+                  <div class="chart-box"><div id="chartTempoMeta"></div></div>
+                  <p id="chartTempoEmpty" class="chart-empty-state" style="display: none">
+                    <i class="fa-solid fa-stopwatch"></i>Sem dados de tempo neste período
+                  </p>
                 </div>
               </div>
             </div>
           </div>
-          <div class="charts-grid">
-            <div class="chart-card">
-              <h3>
-                <i class="fa-solid fa-chart-scatter" style="margin-right: 6px; color: var(--accent-dim)"></i>Volume ×
-                Conversão por Vendedor
-              </h3>
-              <div class="chart-box"><div id="chartScatter"></div></div>
-              <p id="chartScatterEmpty" class="chart-empty-state" style="display: none">
-                <i class="fa-solid fa-chart-scatter"></i>Sem dados de conversão neste período
-              </p>
-            </div>
-            <div class="chart-card">
-              <h3>
-                <i class="fa-solid fa-stopwatch" style="margin-right: 6px; color: var(--accent-dim)"></i>Tempo Médio por
-                Vendedor
-              </h3>
-              <div class="chart-box"><div id="chartTempoMeta"></div></div>
-              <p id="chartTempoEmpty" class="chart-empty-state" style="display: none">
-                <i class="fa-solid fa-stopwatch"></i>Sem dados de tempo neste período
-              </p>
-            </div>
-          </div>
         </div>
+        <!-- /section-collapse vendedor -->
 
-        <!-- Section: Operacional -->
-        <div class="chart-section" id="section-operacional" style="display: block">
-          <div class="charts-grid">
-            <div class="chart-card">
-              <div class="chart-card-header" onclick="toggleSection('rupturas')">
-                <h3>
-                  <i class="fa-solid fa-box-open" style="margin-right: 6px; color: var(--danger)"></i>Rupturas —
-                  Produtos em Falta
-                </h3>
-                <button
-                  class="collapse-btn"
-                  id="collapseBtn-rupturas"
-                  type="button"
-                  aria-label="Recolher/expandir Rupturas"
-                  aria-expanded="true"
-                  aria-controls="collapseBody-rupturas"
-                  onclick="
-                    event.stopPropagation();
-                    toggleSection('rupturas');
-                  "
-                >
-                  <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
-                </button>
-              </div>
-              <div class="chart-card-body" id="collapseBody-rupturas" style="margin-top: 16px">
-                <div id="ruptureList">
-                  <div style="text-align: center; padding: 32px; color: var(--text-muted); font-size: 13px">
-                    <i
-                      class="fa-solid fa-check-circle"
-                      style="font-size: 20px; margin-bottom: 8px; display: block; color: var(--success); opacity: 0.4"
-                    ></i>
-                    Nenhuma ruptura registrada
+        <!-- Section: Operacional (colaps\u00e1vel, padr\u00e3o collapsed) -->
+        <div class="section-collapse" data-section-key="operacional">
+          <button
+            type="button"
+            class="section-collapse-header"
+            onclick="toggleSectionCollapse('operacional')"
+            aria-expanded="false"
+            aria-controls="sectionCollapseBody-operacional"
+          >
+            <span class="sch-title"><i class="fa-solid fa-gears"></i> Operacional</span>
+            <span class="sch-sub">Rupturas, log de pausas</span>
+            <i class="fa-solid fa-chevron-down sch-chevron" aria-hidden="true"></i>
+          </button>
+          <div class="section-collapse-body" id="sectionCollapseBody-operacional">
+            <div class="chart-section" id="section-operacional" style="display: block">
+              <div class="charts-grid">
+                <div class="chart-card">
+                  <div class="chart-card-header" onclick="toggleSection('rupturas')">
+                    <h3>
+                      <i class="fa-solid fa-box-open" style="margin-right: 6px; color: var(--danger)"></i>Rupturas —
+                      Produtos em Falta
+                    </h3>
+                    <button
+                      class="collapse-btn"
+                      id="collapseBtn-rupturas"
+                      type="button"
+                      aria-label="Recolher/expandir Rupturas"
+                      aria-expanded="true"
+                      aria-controls="collapseBody-rupturas"
+                      onclick="
+                        event.stopPropagation();
+                        toggleSection('rupturas');
+                      "
+                    >
+                      <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                  <div class="chart-card-body" id="collapseBody-rupturas" style="margin-top: 16px">
+                    <div id="ruptureList">
+                      <div style="text-align: center; padding: 32px; color: var(--text-muted); font-size: 13px">
+                        <i
+                          class="fa-solid fa-check-circle"
+                          style="
+                            font-size: 20px;
+                            margin-bottom: 8px;
+                            display: block;
+                            color: var(--success);
+                            opacity: 0.4;
+                          "
+                        ></i>
+                        Nenhuma ruptura registrada
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="chart-card">
+                  <div class="chart-card-header" onclick="toggleSection('pausas')">
+                    <h3>
+                      <i class="fa-solid fa-clipboard-list" style="margin-right: 6px; color: var(--warning)"></i>Log de
+                      Pausas
+                    </h3>
+                    <button
+                      class="collapse-btn"
+                      id="collapseBtn-pausas"
+                      type="button"
+                      aria-label="Recolher/expandir Log de Pausas"
+                      aria-expanded="true"
+                      aria-controls="collapseBody-pausas"
+                      onclick="
+                        event.stopPropagation();
+                        toggleSection('pausas');
+                      "
+                    >
+                      <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                  <div class="chart-card-body" id="collapseBody-pausas" style="margin-top: 16px">
+                    <div id="pauseStatsList" class="pause-log" style="max-height: 420px; overflow-y: auto">
+                      <div style="text-align: center; padding: 32px; color: var(--text-muted); font-size: 13px">
+                        Carregando...
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
+              <!-- Gestão de Vendedores movida para Settings > Equipe -->
             </div>
-            <div class="chart-card">
-              <div class="chart-card-header" onclick="toggleSection('pausas')">
-                <h3>
-                  <i class="fa-solid fa-clipboard-list" style="margin-right: 6px; color: var(--warning)"></i>Log de
-                  Pausas
-                </h3>
-                <button
-                  class="collapse-btn"
-                  id="collapseBtn-pausas"
-                  type="button"
-                  aria-label="Recolher/expandir Log de Pausas"
-                  aria-expanded="true"
-                  aria-controls="collapseBody-pausas"
-                  onclick="
-                    event.stopPropagation();
-                    toggleSection('pausas');
-                  "
-                >
-                  <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
-                </button>
-              </div>
-              <div class="chart-card-body" id="collapseBody-pausas" style="margin-top: 16px">
-                <div id="pauseStatsList" class="pause-log" style="max-height: 420px; overflow-y: auto">
-                  <div style="text-align: center; padding: 32px; color: var(--text-muted); font-size: 13px">
-                    Carregando...
-                  </div>
-                </div>
-              </div>
-            </div>
+            <!-- /section-operacional -->
           </div>
-          <!-- Gestão de Vendedores movida para Settings > Equipe -->
         </div>
-        <!-- /section-operacional -->
+        <!-- /section-collapse operacional -->
 
         <!-- Footer -->
         <footer
