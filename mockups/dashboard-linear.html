@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup 02 · Linear-like · Dashboard minhavez</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/tokens.css" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: 'Inter Tight', system-ui, sans-serif;
+        background: var(--bg-deep);
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        font-feature-settings: 'ss01', 'cv11';
+      }
+      /* Sidebar */
+      .side {
+        border-right: 1px solid var(--border-subtle);
+        padding: 22px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 24px;
+        padding: 0 6px;
+        color: var(--accent);
+      }
+      .brand svg {
+        width: 22px;
+        height: 22px;
+      }
+      .brand span {
+        font-family: 'Inter Tight';
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
+      }
+      .brand span em {
+        font-style: normal;
+        color: var(--accent);
+      }
+      .nav-section {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 9px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        padding: 12px 6px 6px;
+      }
+      .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 13px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.12s ease;
+      }
+      .nav-link:hover {
+        background: var(--bg-hover);
+        color: var(--text-primary);
+      }
+      .nav-link.active {
+        background: var(--bg-elevated);
+        color: var(--text-primary);
+        font-weight: 500;
+      }
+      .nav-link .dot {
+        width: 6px;
+        height: 6px;
+        background: var(--text-muted);
+        border-radius: 50%;
+      }
+      .nav-link.active .dot {
+        background: var(--accent);
+      }
+
+      /* Main */
+      main {
+        padding: 28px 32px 60px;
+        max-width: 1240px;
+      }
+      .main-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+      }
+      .main-head h1 {
+        font-size: 18px;
+        font-weight: 500;
+        letter-spacing: -0.01em;
+      }
+      .crumbs {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--text-muted);
+      }
+      .crumbs span.sep {
+        opacity: 0.4;
+      }
+      .main-actions {
+        display: flex;
+        gap: 6px;
+      }
+      .btn {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 6px 10px;
+        background: transparent;
+        border: 1px solid var(--border-subtle);
+        color: var(--text-secondary);
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      .btn.primary {
+        background: var(--accent);
+        color: var(--accent-ink);
+        border-color: var(--accent);
+      }
+
+      /* Hero metric — Linear-style big number */
+      .hero-metric {
+        padding: 36px 0 36px;
+        border-bottom: 1px solid var(--border-subtle);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 48px;
+        align-items: end;
+      }
+      .hero-label {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 14px;
+      }
+      .hero-number {
+        font-size: 84px;
+        font-weight: 500;
+        line-height: 0.9;
+        letter-spacing: -0.045em;
+        font-variant-numeric: tabular-nums;
+        margin-bottom: 10px;
+      }
+      .hero-meta {
+        display: flex;
+        gap: 18px;
+        align-items: center;
+        font-size: 13px;
+        color: var(--text-secondary);
+      }
+      .hero-meta .delta {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: #10b981;
+        padding: 2px 7px;
+        border-radius: 4px;
+        background: color-mix(in srgb, #10b981 14%, transparent);
+      }
+      [data-theme='dark'] .hero-meta .delta {
+        color: #34d399;
+      }
+      .hero-chart {
+        height: 150px;
+      }
+
+      /* Secondary grid — dense */
+      .grid-sec {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .metric {
+        padding: 24px 0;
+        padding-right: 32px;
+        border-right: 1px solid var(--border-subtle);
+      }
+      .metric:nth-child(4n) {
+        border-right: none;
+      }
+      .metric:first-child {
+        padding-left: 0;
+      }
+      .metric:nth-child(2),
+      .metric:nth-child(3),
+      .metric:nth-child(4) {
+        padding-left: 32px;
+      }
+      .metric-label {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+      }
+      .metric-value {
+        font-size: 28px;
+        font-weight: 500;
+        letter-spacing: -0.025em;
+        font-variant-numeric: tabular-nums;
+        line-height: 1;
+        margin-bottom: 6px;
+      }
+      .metric-sub {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+      .metric-sub .up {
+        color: #10b981;
+      }
+      .metric-sub .down {
+        color: #ef4444;
+      }
+      [data-theme='dark'] .metric-sub .up {
+        color: #34d399;
+      }
+      [data-theme='dark'] .metric-sub .down {
+        color: #f87171;
+      }
+
+      /* Panels — dense + monochromatic */
+      .grid-panels {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+        padding: 40px 0;
+      }
+      .panel-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 18px;
+      }
+      .panel-head h3 {
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: -0.005em;
+      }
+      .panel-head .note {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        color: var(--text-muted);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      /* Linear-style chart: monochrome, subtle */
+      .chart-linear {
+        height: 180px;
+      }
+
+      /* Sellers list (Linear style — dense) */
+      .sellers-list {
+        display: flex;
+        flex-direction: column;
+      }
+      .seller-row {
+        display: grid;
+        grid-template-columns: 1fr auto auto auto;
+        gap: 16px;
+        padding: 10px 0;
+        align-items: center;
+        border-bottom: 1px solid var(--border-subtle);
+        font-size: 13px;
+      }
+      .seller-row:last-child {
+        border-bottom: none;
+      }
+      .seller-row .name {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .seller-row .ini {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        background: var(--bg-elevated);
+        color: var(--text-muted);
+        font-size: 9px;
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .seller-row .name.top .ini {
+        background: var(--accent);
+        color: var(--accent-ink);
+      }
+      .seller-row .num {
+        font-family: 'JetBrains Mono', monospace;
+        font-variant-numeric: tabular-nums;
+        font-size: 12px;
+        color: var(--text-secondary);
+        min-width: 40px;
+        text-align: right;
+      }
+      .seller-row .meter {
+        width: 80px;
+        height: 4px;
+        background: var(--bg-elevated);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .seller-row .meter span {
+        display: block;
+        height: 100%;
+        background: var(--accent);
+      }
+
+      /* Theme toggle */
+      .theme-toggle {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 6px;
+        padding: 4px 8px;
+        color: var(--text-secondary);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        cursor: pointer;
+        z-index: 100;
+        letter-spacing: 0.08em;
+      }
+    </style>
+  </head>
+  <body>
+    <button
+      class="theme-toggle"
+      onclick="
+        document.documentElement.setAttribute(
+          'data-theme',
+          document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
+        )
+      "
+    >
+      DARK ↔ LIGHT
+    </button>
+
+    <!-- SIDEBAR -->
+    <aside class="side">
+      <a class="brand" href="/mockups/index.html">
+        <svg viewBox="0 0 120 120">
+          <g fill="none" stroke="currentColor" stroke-linejoin="miter" stroke-width="12">
+            <path d="M 18 42 L 38 60 L 18 78" opacity=".35" />
+            <path d="M 42 42 L 62 60 L 42 78" opacity=".7" />
+            <path d="M 66 42 L 86 60 L 66 78" />
+          </g>
+        </svg>
+        <span>minha<em>vez</em></span>
+      </a>
+      <div class="nav-section">Workspace</div>
+      <a class="nav-link active"><span class="dot"></span>Dashboard</a>
+      <a class="nav-link"><span class="dot"></span>Tablet</a>
+      <a class="nav-link"><span class="dot"></span>Comunicados</a>
+      <div class="nav-section">Performance</div>
+      <a class="nav-link"><span class="dot"></span>Gamificação</a>
+      <a class="nav-link"><span class="dot"></span>Missões</a>
+      <a class="nav-link"><span class="dot"></span>VM Photos</a>
+      <div class="nav-section">Sistema</div>
+      <a class="nav-link"><span class="dot"></span>IA Assist</a>
+      <a class="nav-link"><span class="dot"></span>Configurações</a>
+    </aside>
+
+    <!-- MAIN -->
+    <main>
+      <div class="main-head">
+        <div class="crumbs">
+          <span>Texas Center</span>
+          <span class="sep">/</span>
+          <span style="color: var(--text-primary); font-weight: 500">Dashboard</span>
+          <span class="sep">·</span>
+          <span>Hoje, 16:07</span>
+        </div>
+        <div class="main-actions">
+          <button class="btn">Hoje</button>
+          <button class="btn">Ontem</button>
+          <button class="btn">Semana</button>
+          <button class="btn primary">Mês</button>
+          <button class="btn" style="border-left: 1px solid var(--border-subtle); margin-left: 4px">Exportar</button>
+        </div>
+      </div>
+
+      <!-- HERO METRIC — Linear-style big number -->
+      <div class="hero-metric">
+        <div>
+          <div class="hero-label">Atendimentos · hoje</div>
+          <div class="hero-number">47</div>
+          <div class="hero-meta">
+            <span class="delta">↑ 14%</span>
+            <span>+6 vs ontem</span>
+            <span style="color: var(--text-muted); font-family: 'JetBrains Mono'; font-size: 11px">
+              MÉDIA 7D · 41
+            </span>
+          </div>
+        </div>
+        <div class="hero-chart">
+          <svg width="100%" height="100%" viewBox="0 0 600 150" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="heroG" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="var(--accent)" stop-opacity="0.25" />
+                <stop offset="1" stop-color="var(--accent)" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+            <!-- Gridlines -->
+            <g stroke="var(--border-subtle)" stroke-dasharray="2 4">
+              <line x1="0" y1="40" x2="600" y2="40" />
+              <line x1="0" y1="80" x2="600" y2="80" />
+              <line x1="0" y1="120" x2="600" y2="120" />
+            </g>
+            <!-- Previous 7d (dim gray) -->
+            <path
+              d="M 0 110 L 50 100 L 100 85 L 150 90 L 200 80 L 250 70 L 300 85 L 350 65 L 400 75 L 450 60 L 500 70 L 550 55 L 600 65"
+              stroke="var(--text-muted)"
+              stroke-width="1"
+              fill="none"
+              stroke-dasharray="3 3"
+              opacity="0.5"
+            />
+            <!-- Current -->
+            <path
+              d="M 0 130 L 50 115 L 100 95 L 150 80 L 200 60 L 250 70 L 300 55 L 350 40 L 400 50 L 450 30 L 500 42 L 550 24 L 600 30 L 600 150 L 0 150 Z"
+              fill="url(#heroG)"
+            />
+            <path
+              d="M 0 130 L 50 115 L 100 95 L 150 80 L 200 60 L 250 70 L 300 55 L 350 40 L 400 50 L 450 30 L 500 42 L 550 24 L 600 30"
+              stroke="var(--accent)"
+              stroke-width="1.75"
+              fill="none"
+            />
+            <circle cx="600" cy="30" r="4" fill="var(--accent)" />
+            <circle cx="600" cy="30" r="9" fill="var(--accent)" opacity="0.2" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Secondary metrics -->
+      <div class="grid-sec">
+        <div class="metric">
+          <div class="metric-label">Vendas</div>
+          <div class="metric-value">31</div>
+          <div class="metric-sub"><span class="up">↑ 22%</span> · +5 vs ontem</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Conversão</div>
+          <div class="metric-value">66%</div>
+          <div class="metric-sub"><span class="up">↑ 4 p.p.</span> · meta 65%</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Ticket médio</div>
+          <div class="metric-value">R$ 842</div>
+          <div class="metric-sub"><span class="down">↓ R$ 18</span> · vs ontem</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Tempo médio</div>
+          <div class="metric-value">6.4<span style="font-size: 14px; color: var(--text-muted)"> min</span></div>
+          <div class="metric-sub"><span class="up">↓ 1.2 min</span> · mais rápido</div>
+        </div>
+      </div>
+
+      <!-- PANELS -->
+      <div class="grid-panels">
+        <!-- Hourly chart -->
+        <div>
+          <div class="panel-head">
+            <h3>Fluxo por hora</h3>
+            <span class="note">9h–19h</span>
+          </div>
+          <svg class="chart-linear" width="100%" viewBox="0 0 600 180" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="var(--accent)" stop-opacity="0.18" />
+                <stop offset="1" stop-color="var(--accent)" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+            <g stroke="var(--border-subtle)" stroke-dasharray="2 4">
+              <line x1="0" y1="45" x2="600" y2="45" />
+              <line x1="0" y1="90" x2="600" y2="90" />
+              <line x1="0" y1="135" x2="600" y2="135" />
+            </g>
+            <path
+              d="M 0 150 L 55 130 L 110 100 L 165 60 L 220 40 L 275 80 L 330 90 L 385 110 L 440 80 L 495 50 L 550 90 L 600 85"
+              stroke="var(--accent)"
+              stroke-width="1.75"
+              fill="none"
+            />
+            <path
+              d="M 0 150 L 55 130 L 110 100 L 165 60 L 220 40 L 275 80 L 330 90 L 385 110 L 440 80 L 495 50 L 550 90 L 600 85 L 600 180 L 0 180 Z"
+              fill="url(#lg)"
+            />
+            <!-- X axis labels -->
+            <g font-family="JetBrains Mono" font-size="9" fill="var(--text-muted)">
+              <text x="0" y="175">9h</text>
+              <text x="200" y="175" text-anchor="middle">12h</text>
+              <text x="400" y="175" text-anchor="middle">15h</text>
+              <text x="600" y="175" text-anchor="end">19h</text>
+            </g>
+            <!-- Annotation peak -->
+            <circle cx="220" cy="40" r="3" fill="var(--accent)" />
+            <line x1="220" y1="40" x2="220" y2="12" stroke="var(--text-muted)" stroke-dasharray="2 2" />
+            <text
+              x="220"
+              y="10"
+              text-anchor="middle"
+              font-family="JetBrains Mono"
+              font-size="9"
+              fill="var(--text-muted)"
+            >
+              PICO · 12H
+            </text>
+          </svg>
+        </div>
+
+        <!-- Sellers list — Linear-style dense -->
+        <div>
+          <div class="panel-head">
+            <h3>Por vendedor</h3>
+            <span class="note">12 ativos</span>
+          </div>
+          <div class="sellers-list">
+            <div class="seller-row">
+              <span class="name top"><span class="ini">MN</span>Manoel</span>
+              <span class="num">12</span>
+              <span class="num" style="color: var(--accent); font-weight: 600">83%</span>
+              <span class="meter"><span style="width: 83%"></span></span>
+            </div>
+            <div class="seller-row">
+              <span class="name"><span class="ini">AL</span>Alexandre</span>
+              <span class="num">9</span>
+              <span class="num">78%</span>
+              <span class="meter"><span style="width: 78%"></span></span>
+            </div>
+            <div class="seller-row">
+              <span class="name"><span class="ini">JL</span>Julio</span>
+              <span class="num">8</span>
+              <span class="num">63%</span>
+              <span class="meter"><span style="width: 63%"></span></span>
+            </div>
+            <div class="seller-row">
+              <span class="name"><span class="ini">KR</span>Karol</span>
+              <span class="num">7</span>
+              <span class="num">57%</span>
+              <span class="meter"><span style="width: 57%"></span></span>
+            </div>
+            <div class="seller-row">
+              <span class="name"><span class="ini">MC</span>Michele</span>
+              <span class="num">6</span>
+              <span class="num">50%</span>
+              <span class="meter"><span style="width: 50%"></span></span>
+            </div>
+            <div class="seller-row">
+              <span class="name"><span class="ini">FR</span>Fernando</span>
+              <span class="num">5</span>
+              <span class="num">40%</span>
+              <span class="meter"><span style="width: 40%"></span></span>
+            </div>
+            <div class="seller-row" style="color: var(--text-muted)">
+              <span class="name"><span class="ini">JO</span>João</span>
+              <span class="num">—</span>
+              <span class="num">—</span>
+              <span class="meter"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

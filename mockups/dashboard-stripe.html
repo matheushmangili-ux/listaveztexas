@@ -1,0 +1,815 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup 03 · Stripe-like · Dashboard minhavez</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/tokens.css" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      /* Paleta pastel/muted (Stripe-inspired) */
+      :root {
+        --s-purple: #7c3aed;
+        --s-cyan: #0891b2;
+        --s-amber: #d97706;
+        --s-emerald: #059669;
+        --s-rose: #db2777;
+        --s-blue: #2563eb;
+        --s-purple-soft: #ede9fe;
+        --s-cyan-soft: #cffafe;
+        --s-amber-soft: #fed7aa;
+      }
+      [data-theme='dark'] {
+        --s-purple: #a78bfa;
+        --s-cyan: #22d3ee;
+        --s-amber: #fbbf24;
+        --s-emerald: #34d399;
+        --s-rose: #f472b6;
+        --s-blue: #60a5fa;
+        --s-purple-soft: rgba(167, 139, 250, 0.15);
+        --s-cyan-soft: rgba(34, 211, 238, 0.15);
+        --s-amber-soft: rgba(251, 191, 36, 0.15);
+      }
+      body {
+        font-family: 'Inter Tight', system-ui, sans-serif;
+        background: var(--bg-deep);
+        color: var(--text-primary);
+        min-height: 100vh;
+        padding: 28px;
+      }
+      .wrap {
+        max-width: 1380px;
+        margin: 0 auto;
+      }
+
+      /* Top header */
+      .head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .head h1 {
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: -0.025em;
+      }
+      .head .chips {
+        display: inline-flex;
+        gap: 6px;
+      }
+      .chip {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        font-weight: 500;
+        padding: 5px 11px;
+        border-radius: 6px;
+        border: 1px solid var(--border-subtle);
+        color: var(--text-secondary);
+        background: var(--bg-card);
+        cursor: pointer;
+      }
+      .chip.on {
+        background: var(--text-primary);
+        color: var(--bg-deep);
+        border-color: var(--text-primary);
+      }
+      .subhead {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-bottom: 24px;
+        font-family: 'JetBrains Mono', monospace;
+        letter-spacing: 0.02em;
+      }
+
+      /* Main KPI trio — Stripe hero style */
+      .hero-kpi {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+      .hero-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 10px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .hero-card-head {
+        padding: 16px 20px 10px;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .hero-label {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+      }
+      .hero-value {
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        font-variant-numeric: tabular-nums;
+      }
+      .hero-compare {
+        display: flex;
+        gap: 12px;
+        font-size: 11px;
+        font-family: 'JetBrains Mono', monospace;
+        margin-top: 8px;
+      }
+      .hero-compare .today {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .hero-compare .today::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: var(--s-purple);
+        border-radius: 50%;
+      }
+      .hero-compare .yesterday {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--text-muted);
+      }
+      .hero-compare .yesterday::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: var(--text-muted);
+        border-radius: 50%;
+        opacity: 0.5;
+      }
+      .hero-chart {
+        height: 120px;
+        padding: 10px 8px 6px;
+      }
+
+      /* Secondary KPI row */
+      .sec-kpi {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 28px;
+      }
+      .sec-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 10px;
+        padding: 14px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .sec-left-label {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+        font-weight: 500;
+      }
+      .sec-val {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+      .sec-val small {
+        font-size: 11px;
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+      .sec-delta {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        font-weight: 600;
+      }
+      .sec-delta.up {
+        color: var(--s-emerald);
+      }
+      .sec-delta.down {
+        color: var(--s-rose);
+      }
+      .mini-spark {
+        width: 64px;
+        height: 30px;
+      }
+
+      /* Panels — Stripe uses rounded card with header border */
+      .panels {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+      .panel {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .panel-head {
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--border-subtle);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .panel-title {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .panel-tabs {
+        display: inline-flex;
+        gap: 0;
+        border: 1px solid var(--border-subtle);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .panel-tabs button {
+        background: transparent;
+        border: none;
+        padding: 4px 10px;
+        font-size: 11px;
+        color: var(--text-secondary);
+        font-family: 'JetBrains Mono', monospace;
+        cursor: pointer;
+      }
+      .panel-tabs button.on {
+        background: var(--bg-hover);
+        color: var(--text-primary);
+      }
+      .panel-body {
+        padding: 20px;
+      }
+
+      /* Annotated chart */
+      .annot-chart {
+        height: 260px;
+        position: relative;
+      }
+      .annot {
+        position: absolute;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 6px;
+        padding: 6px 10px;
+        pointer-events: none;
+      }
+      .annot .annot-time {
+        color: var(--text-muted);
+        font-size: 9px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .annot .annot-val {
+        font-weight: 600;
+        margin-top: 2px;
+      }
+
+      /* Right panel: donut + legend */
+      .donut-wrap {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+      .donut-wrap svg {
+        flex-shrink: 0;
+      }
+      .donut-legend {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .donut-legend .row {
+        display: grid;
+        grid-template-columns: 14px 1fr auto auto;
+        gap: 8px;
+        align-items: center;
+        font-size: 12px;
+      }
+      .donut-legend .sw {
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+      }
+      .donut-legend .pct {
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+      }
+      .donut-legend .abs {
+        font-family: 'JetBrains Mono', monospace;
+        color: var(--text-muted);
+        font-size: 11px;
+      }
+
+      .theme-toggle {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 6px;
+        padding: 5px 9px;
+        color: var(--text-secondary);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        cursor: pointer;
+        z-index: 100;
+      }
+    </style>
+  </head>
+  <body>
+    <button
+      class="theme-toggle"
+      onclick="
+        document.documentElement.setAttribute(
+          'data-theme',
+          document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
+        )
+      "
+    >
+      dark ↔ light
+    </button>
+
+    <div class="wrap">
+      <div class="head">
+        <h1>Overview</h1>
+        <div class="chips">
+          <button class="chip on">Hoje</button>
+          <button class="chip">Ontem</button>
+          <button class="chip">Últimos 7 dias</button>
+          <button class="chip">Mês</button>
+          <button class="chip" style="background: var(--s-purple); color: #fff; border-color: var(--s-purple)">
+            Exportar
+          </button>
+        </div>
+      </div>
+      <div class="subhead">
+        Texas Center · Goiânia · Atualizado há 2 min · Próxima sincronização em
+        <span style="color: var(--s-purple)">14s</span>
+      </div>
+
+      <!-- HERO KPIs (3) -->
+      <div class="hero-kpi">
+        <!-- Atendimentos -->
+        <div class="hero-card">
+          <div class="hero-card-head">
+            <div class="hero-label">Atendimentos</div>
+            <div class="hero-value">
+              47
+              <span
+                style="
+                  font-size: 12px;
+                  color: var(--s-emerald);
+                  font-family: 'JetBrains Mono';
+                  font-weight: 600;
+                  margin-left: 6px;
+                "
+                >↑ 14%</span
+              >
+            </div>
+            <div class="hero-compare">
+              <span class="today">Hoje · 47</span>
+              <span class="yesterday">Ontem · 41</span>
+            </div>
+          </div>
+          <div class="hero-chart">
+            <svg width="100%" height="100%" viewBox="0 0 400 100" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="hg1" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="var(--s-purple)" stop-opacity="0.35" />
+                  <stop offset="1" stop-color="var(--s-purple)" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <!-- Yesterday line (faded) -->
+              <path
+                d="M 0 75 L 40 72 L 80 65 L 120 62 L 160 55 L 200 58 L 240 50 L 280 45 L 320 42 L 360 44 L 400 46"
+                stroke="var(--text-muted)"
+                stroke-width="1.5"
+                stroke-dasharray="3 3"
+                fill="none"
+                opacity="0.5"
+              />
+              <!-- Today filled -->
+              <path
+                d="M 0 85 L 40 78 L 80 70 L 120 55 L 160 45 L 200 50 L 240 38 L 280 28 L 320 32 L 360 20 L 400 25 L 400 100 L 0 100 Z"
+                fill="url(#hg1)"
+              />
+              <path
+                d="M 0 85 L 40 78 L 80 70 L 120 55 L 160 45 L 200 50 L 240 38 L 280 28 L 320 32 L 360 20 L 400 25"
+                stroke="var(--s-purple)"
+                stroke-width="2"
+                fill="none"
+              />
+              <circle cx="400" cy="25" r="4" fill="var(--s-purple)" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Vendas -->
+        <div class="hero-card">
+          <div class="hero-card-head">
+            <div class="hero-label">Vendas</div>
+            <div class="hero-value">
+              31
+              <span
+                style="
+                  font-size: 12px;
+                  color: var(--s-emerald);
+                  font-family: 'JetBrains Mono';
+                  font-weight: 600;
+                  margin-left: 6px;
+                "
+                >↑ 22%</span
+              >
+            </div>
+            <div class="hero-compare">
+              <span class="today" style="color: var(--text-primary)">
+                <span
+                  style="width: 8px; height: 8px; background: var(--s-cyan); border-radius: 50%; display: inline-block"
+                ></span>
+                Hoje · 31</span
+              >
+              <span class="yesterday">Ontem · 25</span>
+            </div>
+          </div>
+          <div class="hero-chart">
+            <svg width="100%" height="100%" viewBox="0 0 400 100" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="hg2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="var(--s-cyan)" stop-opacity="0.35" />
+                  <stop offset="1" stop-color="var(--s-cyan)" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M 0 82 L 40 75 L 80 68 L 120 72 L 160 62 L 200 65 L 240 55 L 280 50 L 320 45 L 360 48 L 400 50"
+                stroke="var(--text-muted)"
+                stroke-width="1.5"
+                stroke-dasharray="3 3"
+                fill="none"
+                opacity="0.5"
+              />
+              <path
+                d="M 0 88 L 40 82 L 80 75 L 120 60 L 160 55 L 200 60 L 240 45 L 280 35 L 320 38 L 360 25 L 400 30 L 400 100 L 0 100 Z"
+                fill="url(#hg2)"
+              />
+              <path
+                d="M 0 88 L 40 82 L 80 75 L 120 60 L 160 55 L 200 60 L 240 45 L 280 35 L 320 38 L 360 25 L 400 30"
+                stroke="var(--s-cyan)"
+                stroke-width="2"
+                fill="none"
+              />
+              <circle cx="400" cy="30" r="4" fill="var(--s-cyan)" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Conversão -->
+        <div class="hero-card">
+          <div class="hero-card-head">
+            <div class="hero-label">Taxa de conversão</div>
+            <div class="hero-value">
+              66%
+              <span
+                style="
+                  font-size: 12px;
+                  color: var(--s-emerald);
+                  font-family: 'JetBrains Mono';
+                  font-weight: 600;
+                  margin-left: 6px;
+                "
+                >↑ 4 p.p.</span
+              >
+            </div>
+            <div class="hero-compare">
+              <span class="today" style="color: var(--text-primary)">
+                <span
+                  style="width: 8px; height: 8px; background: var(--s-amber); border-radius: 50%; display: inline-block"
+                ></span>
+                Hoje · 66%</span
+              >
+              <span class="yesterday">Meta · 65%</span>
+            </div>
+          </div>
+          <div class="hero-chart">
+            <svg width="100%" height="100%" viewBox="0 0 400 100" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="hg3" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="var(--s-amber)" stop-opacity="0.35" />
+                  <stop offset="1" stop-color="var(--s-amber)" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <!-- Meta line -->
+              <line x1="0" y1="38" x2="400" y2="38" stroke="var(--s-emerald)" stroke-width="1" stroke-dasharray="4 4" />
+              <path
+                d="M 0 78 L 40 70 L 80 60 L 120 55 L 160 50 L 200 45 L 240 48 L 280 42 L 320 40 L 360 35 L 400 32 L 400 100 L 0 100 Z"
+                fill="url(#hg3)"
+              />
+              <path
+                d="M 0 78 L 40 70 L 80 60 L 120 55 L 160 50 L 200 45 L 240 48 L 280 42 L 320 40 L 360 35 L 400 32"
+                stroke="var(--s-amber)"
+                stroke-width="2"
+                fill="none"
+              />
+              <circle cx="400" cy="32" r="4" fill="var(--s-amber)" />
+              <text x="395" y="34" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="var(--s-emerald)">
+                META
+              </text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Secondary KPIs -->
+      <div class="sec-kpi">
+        <div class="sec-card">
+          <div>
+            <div class="sec-left-label">Ticket médio</div>
+            <div class="sec-val">R$ 842</div>
+          </div>
+          <div style="text-align: right">
+            <div class="sec-delta down">↓ R$ 18</div>
+            <svg class="mini-spark" viewBox="0 0 64 30" preserveAspectRatio="none">
+              <path
+                d="M 0 8 L 10 10 L 20 6 L 30 12 L 40 10 L 50 18 L 64 22"
+                stroke="var(--s-rose)"
+                stroke-width="1.5"
+                fill="none"
+              />
+            </svg>
+          </div>
+        </div>
+        <div class="sec-card">
+          <div>
+            <div class="sec-left-label">Não convertidos</div>
+            <div class="sec-val">16</div>
+          </div>
+          <div style="text-align: right">
+            <div class="sec-delta up">↓ 3</div>
+            <svg class="mini-spark" viewBox="0 0 64 30" preserveAspectRatio="none">
+              <path
+                d="M 0 8 L 10 14 L 20 12 L 30 18 L 40 14 L 50 22 L 64 20"
+                stroke="var(--s-emerald)"
+                stroke-width="1.5"
+                fill="none"
+              />
+            </svg>
+          </div>
+        </div>
+        <div class="sec-card">
+          <div>
+            <div class="sec-left-label">Fidelizados</div>
+            <div class="sec-val">8</div>
+          </div>
+          <div style="text-align: right">
+            <div class="sec-delta up">↑ 2</div>
+            <svg class="mini-spark" viewBox="0 0 64 30" preserveAspectRatio="none">
+              <path
+                d="M 0 22 L 10 20 L 20 18 L 30 14 L 40 16 L 50 10 L 64 8"
+                stroke="var(--s-emerald)"
+                stroke-width="1.5"
+                fill="none"
+              />
+            </svg>
+          </div>
+        </div>
+        <div class="sec-card">
+          <div>
+            <div class="sec-left-label">Tempo médio</div>
+            <div class="sec-val">6.4 <small>min</small></div>
+          </div>
+          <div style="text-align: right">
+            <div class="sec-delta up">↓ 1.2 min</div>
+            <svg class="mini-spark" viewBox="0 0 64 30" preserveAspectRatio="none">
+              <path
+                d="M 0 10 L 10 14 L 20 8 L 30 12 L 40 15 L 50 18 L 64 20"
+                stroke="var(--s-emerald)"
+                stroke-width="1.5"
+                fill="none"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANELS -->
+      <div class="panels">
+        <!-- Hourly -->
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Fluxo por hora</div>
+            <div class="panel-tabs">
+              <button class="on">1D</button>
+              <button>7D</button>
+              <button>30D</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="annot-chart">
+              <svg width="100%" height="100%" viewBox="0 0 720 240" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="areaG" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="var(--s-purple)" stop-opacity="0.25" />
+                    <stop offset="1" stop-color="var(--s-purple)" stop-opacity="0" />
+                  </linearGradient>
+                </defs>
+                <!-- Gridlines -->
+                <g stroke="var(--border-subtle)" stroke-dasharray="2 4">
+                  <line x1="0" y1="60" x2="720" y2="60" />
+                  <line x1="0" y1="120" x2="720" y2="120" />
+                  <line x1="0" y1="180" x2="720" y2="180" />
+                </g>
+                <!-- Yesterday shadow -->
+                <path
+                  d="M 0 180 L 60 170 L 120 145 L 180 130 L 240 110 L 300 140 L 360 148 L 420 155 L 480 132 L 540 122 L 600 140 L 660 135 L 720 145"
+                  stroke="var(--text-muted)"
+                  stroke-width="1.5"
+                  stroke-dasharray="3 4"
+                  fill="none"
+                  opacity="0.5"
+                />
+                <!-- Today area -->
+                <path
+                  d="M 0 195 L 60 175 L 120 140 L 180 110 L 240 60 L 300 115 L 360 130 L 420 145 L 480 110 L 540 80 L 600 130 L 660 118 L 720 125 L 720 240 L 0 240 Z"
+                  fill="url(#areaG)"
+                />
+                <!-- Today line -->
+                <path
+                  d="M 0 195 L 60 175 L 120 140 L 180 110 L 240 60 L 300 115 L 360 130 L 420 145 L 480 110 L 540 80 L 600 130 L 660 118 L 720 125"
+                  stroke="var(--s-purple)"
+                  stroke-width="2.5"
+                  fill="none"
+                  stroke-linejoin="round"
+                />
+                <!-- Peak annotation -->
+                <circle cx="240" cy="60" r="5" fill="var(--s-purple)" />
+                <circle cx="240" cy="60" r="10" fill="var(--s-purple)" opacity="0.25" />
+                <line x1="240" y1="60" x2="240" y2="30" stroke="var(--text-muted)" stroke-dasharray="2 2" />
+                <!-- X labels -->
+                <g font-family="JetBrains Mono" font-size="10" fill="var(--text-muted)">
+                  <text x="0" y="232">9h</text>
+                  <text x="120" y="232">11h</text>
+                  <text x="240" y="232">13h</text>
+                  <text x="360" y="232">15h</text>
+                  <text x="480" y="232">17h</text>
+                  <text x="600" y="232">19h</text>
+                </g>
+              </svg>
+              <!-- Floating annotation -->
+              <div class="annot" style="left: 28%; top: 0%">
+                <div class="annot-time">13H · Pico</div>
+                <div class="annot-val">15 atendimentos</div>
+                <div style="color: var(--text-muted); font-size: 10px; margin-top: 1px">
+                  Conversão 73% · +8 vs ontem
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Motivos donut legend-heavy -->
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Motivos de perda</div>
+            <span style="font-family: 'JetBrains Mono'; font-size: 10px; color: var(--text-muted)">16 TOTAL</span>
+          </div>
+          <div class="panel-body">
+            <div class="donut-wrap">
+              <svg width="140" height="140" viewBox="0 0 140 140">
+                <circle cx="70" cy="70" r="55" fill="none" stroke="var(--bg-elevated)" stroke-width="18" />
+                <!-- Arcs (total 345.6 circumference) — 37/25/19/12/7 % -->
+                <circle
+                  cx="70"
+                  cy="70"
+                  r="55"
+                  fill="none"
+                  stroke="var(--s-purple)"
+                  stroke-width="18"
+                  stroke-dasharray="127.8 345.6"
+                  stroke-dashoffset="0"
+                  transform="rotate(-90 70 70)"
+                />
+                <circle
+                  cx="70"
+                  cy="70"
+                  r="55"
+                  fill="none"
+                  stroke="var(--s-cyan)"
+                  stroke-width="18"
+                  stroke-dasharray="86.4 345.6"
+                  stroke-dashoffset="-127.8"
+                  transform="rotate(-90 70 70)"
+                />
+                <circle
+                  cx="70"
+                  cy="70"
+                  r="55"
+                  fill="none"
+                  stroke="var(--s-amber)"
+                  stroke-width="18"
+                  stroke-dasharray="65.6 345.6"
+                  stroke-dashoffset="-214.2"
+                  transform="rotate(-90 70 70)"
+                />
+                <circle
+                  cx="70"
+                  cy="70"
+                  r="55"
+                  fill="none"
+                  stroke="var(--s-emerald)"
+                  stroke-width="18"
+                  stroke-dasharray="41.5 345.6"
+                  stroke-dashoffset="-279.8"
+                  transform="rotate(-90 70 70)"
+                />
+                <circle
+                  cx="70"
+                  cy="70"
+                  r="55"
+                  fill="none"
+                  stroke="var(--s-rose)"
+                  stroke-width="18"
+                  stroke-dasharray="24.1 345.6"
+                  stroke-dashoffset="-321.3"
+                  transform="rotate(-90 70 70)"
+                />
+                <text
+                  x="70"
+                  y="65"
+                  text-anchor="middle"
+                  fill="var(--text-primary)"
+                  font-size="28"
+                  font-weight="600"
+                  letter-spacing="-0.02em"
+                >
+                  16
+                </text>
+                <text
+                  x="70"
+                  y="82"
+                  text-anchor="middle"
+                  fill="var(--text-muted)"
+                  font-size="9"
+                  font-family="JetBrains Mono"
+                  letter-spacing="1.5"
+                >
+                  PERDIDOS
+                </text>
+              </svg>
+              <div class="donut-legend">
+                <div class="row">
+                  <span class="sw" style="background: var(--s-purple)"></span>
+                  <span>Só olhando</span>
+                  <span class="pct">37%</span>
+                  <span class="abs">6</span>
+                </div>
+                <div class="row">
+                  <span class="sw" style="background: var(--s-cyan)"></span>
+                  <span>Preço</span>
+                  <span class="pct">25%</span>
+                  <span class="abs">4</span>
+                </div>
+                <div class="row">
+                  <span class="sw" style="background: var(--s-amber)"></span>
+                  <span>Ruptura</span>
+                  <span class="pct">19%</span>
+                  <span class="abs">3</span>
+                </div>
+                <div class="row">
+                  <span class="sw" style="background: var(--s-emerald)"></span>
+                  <span>Indecisão</span>
+                  <span class="pct">12%</span>
+                  <span class="abs">2</span>
+                </div>
+                <div class="row">
+                  <span class="sw" style="background: var(--s-rose)"></span>
+                  <span>Outro</span>
+                  <span class="pct">7%</span>
+                  <span class="abs">1</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
