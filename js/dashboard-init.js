@@ -465,6 +465,7 @@ document.addEventListener('click', function (e) {
 // ─── Gestão de Vendedores ───
 async function loadVendedores() {
   const el = document.getElementById('vendedorList');
+  if (!el) return;
   const { data, error } = await fetchTodosVendedores(sb, tenantId);
   if (error || !data || data.length === 0) {
     el.innerHTML =
@@ -874,13 +875,21 @@ window.addEventListener('beforeunload', () => {
   }
 });
 
-// Indicador de última atualização
-const _lastUpdateEl = document.getElementById('lastUpdateIndicator');
+// Indicador de última atualização (topbar subhead)
+let _lastUpdateAt = Date.now();
 function updateTimestamp() {
-  if (_lastUpdateEl)
-    _lastUpdateEl.textContent =
-      '· atualizado ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  _lastUpdateAt = Date.now();
+  renderUpdatedAgo();
 }
+function renderUpdatedAgo() {
+  const el = document.getElementById('subheadUpdated');
+  if (!el) return;
+  const s = Math.max(0, Math.round((Date.now() - _lastUpdateAt) / 1000));
+  if (s < 60) el.textContent = s + 's';
+  else if (s < 3600) el.textContent = Math.floor(s / 60) + ' min';
+  else el.textContent = Math.floor(s / 3600) + ' h';
+}
+setInterval(renderUpdatedAgo, 10000);
 
 // ─── Changelog versionado (mesma lista do tablet — adicione novas entradas no TOPO) ───
 const APP_CHANGELOG = [
@@ -1019,56 +1028,33 @@ const APP_CHANGELOG = [
 
 showChangelog(APP_CHANGELOG, 'minhavez_dash_update_seen_');
 
-// ─── Topbar Greeting + City / Clock / Temp ───
-(function initGreeting() {
-  const greetEl = document.getElementById('greetingText');
-  const clockEl = document.getElementById('greetingClock');
-  const cityEl = document.getElementById('greetingCity');
-  const tempEl = document.getElementById('greetingTemp');
-  const storeName = tenant?.nome_loja || '';
+// ─── Topbar Subhead: tenant + city + last updated ───
+(function initSubhead() {
+  const tenantEl = document.getElementById('subheadTenant');
+  const cityEl = document.getElementById('subheadCity');
+  if (tenantEl) tenantEl.textContent = tenant?.nome_loja || '—';
 
-  function updateGreeting() {
-    const now = new Date();
-    const h = now.getHours();
-    const saudacao = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
-    if (greetEl) greetEl.textContent = storeName ? `${saudacao}, ${storeName}` : saudacao;
-    if (clockEl) clockEl.textContent = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  }
-
-  // Auto-detect city + temperature via IP geolocation (fallback chain)
-  async function fetchGeo() {
+  async function fetchGeoCity() {
     const apis = ['https://get.geojs.io/v1/ip/geo.json', 'https://ipwho.is/'];
     for (const url of apis) {
       try {
         const r = await fetch(url);
         const d = await r.json();
-        if (d.city && d.latitude && d.longitude) return d;
+        if (d.city) return d.city;
       } catch {
         /* try next */
       }
     }
     return null;
   }
-  async function fetchGeoAndTemp() {
+  (async () => {
     try {
-      const geo = await fetchGeo();
-      if (!geo) return;
-      if (cityEl) cityEl.innerHTML = '<i class="fa-solid fa-location-dot"></i> ' + geo.city;
-      const weatherRes = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${geo.latitude}&longitude=${geo.longitude}&current_weather=true`
-      );
-      const weather = await weatherRes.json();
-      const t = Math.round(weather.current_weather?.temperature ?? 0);
-      if (tempEl) tempEl.innerHTML = '<i class="fa-solid fa-temperature-half"></i> ' + t + '°C';
+      const city = await fetchGeoCity();
+      if (city && cityEl) cityEl.innerHTML = '<i class="fa-solid fa-location-dot"></i> ' + city;
     } catch (e) {
-      console.warn('Geo/temp fetch failed:', e);
+      console.warn('Geo fetch failed:', e);
     }
-  }
-  fetchGeoAndTemp();
-  setInterval(fetchGeoAndTemp, 30 * 60 * 1000);
-
-  updateGreeting();
-  setInterval(updateGreeting, 15000);
+  })();
 })();
 
 // ─── Topbar theme toggle (dark ↔ light) ───
@@ -1098,13 +1084,101 @@ await Promise.all([loadAll(), loadVendedores()]);
 setFirstLoadDone();
 updateTimestamp();
 
+// ─── Refresh countdown (subhead) — 60s loop que triggera refresh suave ───
+(function initRefreshCountdown() {
+  const textEl = document.getElementById('refreshCountdownText');
+  if (!textEl) return;
+
+  const PERIOD = 60;
+  let counter = PERIOD;
+
+  function render() {
+    textEl.textContent = counter + 's';
+  }
+  render();
+
+  setInterval(async () => {
+    counter -= 1;
+    if (counter <= 0) {
+      counter = PERIOD;
+      try {
+        await loadAll();
+        updateTimestamp();
+      } catch (_) {
+        /* fail silently, próximo tick tenta de novo */
+      }
+    }
+    render();
+  }, 1000);
+})();
+
 // ─── Theme ───
 window.toggleTheme = function () {
   toggleTheme();
   loadAll();
 };
 
-// ─── Collapsible Sections ───
+// ─── Sidebar dropdown (Dashboard views) ───
+window.toggleDashDropdown = function () {
+  const dd = document.getElementById('dashDropdown');
+  if (!dd) return;
+  const isOpen = dd.classList.toggle('open');
+  const trigger = dd.querySelector('.sidebar-dropdown-trigger');
+  if (trigger) trigger.setAttribute('aria-expanded', String(isOpen));
+  localStorage.setItem('lv-dash-dropdown', isOpen ? '1' : '0');
+};
+(function initDashDropdown() {
+  const dd = document.getElementById('dashDropdown');
+  if (!dd) return;
+  const saved = localStorage.getItem('lv-dash-dropdown');
+  if (saved === '0') {
+    dd.classList.remove('open');
+    const trigger = dd.querySelector('.sidebar-dropdown-trigger');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+  }
+  // Mark active sublink based on current page
+  const path = location.pathname.toLowerCase();
+  let activeView = 'overview';
+  if (path.includes('dashboard-vendedor')) activeView = 'vendedor';
+  else if (path.includes('dashboard-operacional')) activeView = 'operacional';
+  dd.querySelectorAll('.sidebar-sublink').forEach((el) => {
+    el.classList.toggle('sidebar-sublink--active', el.dataset.view === activeView);
+  });
+  // Also update parent trigger active state (only if on overview — sub-pages get own active in their own HTMLs)
+  const trigger = dd.querySelector('.sidebar-dropdown-trigger');
+  if (trigger && activeView !== 'overview') {
+    trigger.classList.remove('sidebar-link--active');
+  }
+})();
+
+// ─── Section-level collapsibles (Por Vendedor / Operacional) ───
+window.toggleSectionCollapse = function (key) {
+  const wrap = document.querySelector('.section-collapse[data-section-key="' + key + '"]');
+  if (!wrap) return;
+  const isOpen = wrap.classList.toggle('open');
+  const header = wrap.querySelector('.section-collapse-header');
+  if (header) header.setAttribute('aria-expanded', String(isOpen));
+  const stored = JSON.parse(localStorage.getItem('lv-section-open') || '{}');
+  stored[key] = isOpen;
+  localStorage.setItem('lv-section-open', JSON.stringify(stored));
+  // Apex charts escondidos renderizam 0px — for\u00e7a resize quando abre
+  if (isOpen) setTimeout(() => window.dispatchEvent(new Event('resize')), 420);
+};
+(function restoreSectionCollapse() {
+  const stored = JSON.parse(localStorage.getItem('lv-section-open') || '{}');
+  document.querySelectorAll('.section-collapse').forEach((wrap) => {
+    const key = wrap.dataset.sectionKey;
+    if (!key) return;
+    // Default: collapsed. S\u00f3 abre se lv-section-open tiver true explicit.
+    if (stored[key] === true) {
+      wrap.classList.add('open');
+      const header = wrap.querySelector('.section-collapse-header');
+      if (header) header.setAttribute('aria-expanded', 'true');
+    }
+  });
+})();
+
+// ─── Collapsible Sections (per-card) ───
 window.toggleSection = function (id) {
   const btn = document.getElementById('collapseBtn-' + id);
   const body = document.getElementById('collapseBody-' + id);

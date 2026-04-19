@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Minha Vez — Dashboard</title>
+    <title>Por Vendedor — Minha Vez</title>
     <script>
       (function () {
         var t = localStorage.getItem('lv-theme') || 'dark';
@@ -73,10 +73,10 @@
               <i class="fa-solid fa-chevron-down sidebar-chev"></i>
             </button>
             <div class="sidebar-dropdown-items">
-              <a data-view="overview" class="sidebar-sublink sidebar-sublink--active" href="dashboard.html">
+              <a data-view="overview" class="sidebar-sublink" href="dashboard.html">
                 <span class="sublink-dot"></span>Overview
               </a>
-              <a data-view="vendedor" class="sidebar-sublink" href="dashboard-vendedor.html">
+              <a data-view="vendedor" class="sidebar-sublink sidebar-sublink--active" href="dashboard-vendedor.html">
                 <span class="sublink-dot"></span>Por Vendedor
               </a>
               <a data-view="operacional" class="sidebar-sublink" href="dashboard-operacional.html">
@@ -183,7 +183,7 @@
       <div class="dash-main">
         <!-- Topbar Stripe: Overview title + period chips + theme toggle -->
         <div class="topbar-stripe">
-          <h1 class="topbar-title">Overview</h1>
+          <h1 class="topbar-title">Por Vendedor</h1>
           <div class="topbar-actions">
             <div class="period-tabs" id="periodTabs" role="tablist">
               <button data-period="hoje" class="active" onclick="setPeriod('hoje')">Hoje</button>
@@ -297,202 +297,65 @@
           </div>
         </div>
 
-        <!-- Status Marquee -->
-        <div
-          id="statusMarquee"
-          style="
-            overflow: hidden;
-            white-space: nowrap;
-            margin-bottom: var(--space-lg);
-            background: var(--bg-surface);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius);
-            padding: 10px 0;
-            position: relative;
-          "
-        >
-          <div
-            style="
-              position: absolute;
-              left: 0;
-              top: 0;
-              bottom: 0;
-              display: flex;
-              align-items: center;
-              padding: 0 14px;
-              background: linear-gradient(90deg, var(--bg-surface) 80%, transparent);
-              z-index: 2;
-              font-size: 9px;
-              font-weight: 800;
-              text-transform: uppercase;
-              letter-spacing: 0.1em;
-              color: var(--text-muted);
-            "
-          >
-            <span
-              style="
-                display: inline-block;
-                width: 8px;
-                height: 8px;
-                border-radius: 50%;
-                background: var(--success);
-                margin-right: 8px;
-                box-shadow:
-                  0 0 6px 2px var(--success),
-                  0 0 12px 4px rgba(167, 139, 250, 0.4);
-                animation: pulseGlow 2s ease-in-out infinite;
-              "
-            ></span
-            >On Time
-          </div>
-          <div
-            id="marqueeTrack"
-            style="display: inline-flex; gap: 16px; animation: marqueeHeader 25s linear infinite; padding-left: 120px"
-          ></div>
-        </div>
+        <!-- Main content: Por Vendedor -->
+        <section class="vendedor-page-intro">
+          <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 24px">
+            Rankings, scatter e performáticas por vendedor do período selecionado.
+          </p>
+        </section>
 
-        <!-- HERO KPIs — Stripe-style: label + valor + delta + compare + area chart embutido -->
-        <div class="hero-kpi" id="kpiGrid">
-          <div class="hero-card">
-            <div class="hero-card-head">
-              <div class="hero-label">Atendimentos</div>
-              <div class="hero-value">
-                <span id="kpiTotal">0</span>
-                <span class="hero-delta" id="kpiTotalDelta"></span>
-              </div>
-              <div class="hero-compare">
-                <span class="today">Hoje · <span id="kpiTotalNow">0</span></span>
-                <span class="yesterday">Ontem · <span id="kpiTotalPrev">0</span></span>
-              </div>
+        <div class="chart-section" id="section-vendedor" style="display: block">
+          <div class="chart-card" style="margin-bottom: var(--gap)">
+            <div class="chart-card-header" onclick="toggleSection('ranking')">
+              <h3>
+                <i class="fa-solid fa-ranking-star" style="margin-right: 6px; color: var(--accent-dim)"></i>Ranking
+                Vendedores
+              </h3>
+              <button
+                class="collapse-btn"
+                id="collapseBtn-ranking"
+                type="button"
+                aria-label="Recolher/expandir Ranking Vendedores"
+                aria-expanded="true"
+                aria-controls="collapseBody-ranking"
+                onclick="
+                  event.stopPropagation();
+                  toggleSection('ranking');
+                "
+              >
+                <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+              </button>
             </div>
-            <div class="hero-chart" id="chartHeroAtend"></div>
-          </div>
-          <div class="hero-card">
-            <div class="hero-card-head">
-              <div class="hero-label">Vendas</div>
-              <div class="hero-value">
-                <span id="kpiVendas">0</span>
-                <span class="hero-delta" id="kpiVendasDelta"></span>
-              </div>
-              <div class="hero-compare">
-                <span class="today" style="--dot: var(--chart-2)">Hoje · <span id="kpiVendasNow">0</span></span>
-                <span class="yesterday">Ontem · <span id="kpiVendasPrev">0</span></span>
-              </div>
-            </div>
-            <div class="hero-chart" id="chartHeroVendas"></div>
-          </div>
-          <div class="hero-card">
-            <div class="hero-card-head">
-              <div class="hero-label">Taxa de conversão</div>
-              <div class="hero-value">
-                <span id="kpiConv">0%</span>
-                <span class="hero-delta" id="kpiConvDelta"></span>
-              </div>
-              <div class="hero-compare">
-                <span class="today" style="--dot: var(--chart-3)">Hoje · <span id="kpiConvNow">0%</span></span>
-                <span class="yesterday">Ontem · <span id="kpiConvPrev">0%</span></span>
+            <div class="chart-card-body" id="collapseBody-ranking" style="margin-top: 16px">
+              <div class="ranking-grid" id="rankingBody">
+                <div style="grid-column: 1/-1; text-align: center; padding: 32px; color: var(--text-muted)">
+                  Carregando...
+                </div>
               </div>
             </div>
-            <div class="hero-chart" id="chartHeroConv"></div>
           </div>
-          <!-- Hidden legacy compare/skeleton pra compat com código existente -->
-          <div style="display: none">
-            <div id="kpiTotalCmp"></div>
-            <div id="kpiVendasCmp"></div>
-            <div id="kpiConvCmp"></div>
-          </div>
-        </div>
-
-        <!-- SECONDARY KPIs — Stripe-style: label+val esquerda, delta+mini-spark direita -->
-        <div class="sec-kpi">
-          <div class="sec-card">
-            <div class="sec-left">
-              <div class="sec-left-label">Não convertidos</div>
-              <div class="sec-val" id="kpiLoss">0</div>
-            </div>
-            <div class="sec-right">
-              <div class="sec-delta" id="kpiLossDelta"></div>
-              <div class="mini-spark" id="sparkLoss"></div>
-            </div>
-            <div style="display: none"><div id="kpiLossCmp"></div></div>
-          </div>
-          <div class="sec-card">
-            <div class="sec-left">
-              <div class="sec-left-label">Fidelizados</div>
-              <div class="sec-val" id="kpiPref">0</div>
-            </div>
-            <div class="sec-right">
-              <div class="sec-delta" id="kpiPrefDelta"></div>
-              <div class="mini-spark" id="sparkPref"></div>
-            </div>
-            <div style="display: none"><div id="kpiPrefCmp"></div></div>
-          </div>
-          <div class="sec-card">
-            <div class="sec-left">
-              <div class="sec-left-label">Tempo médio</div>
-              <div class="sec-val" id="kpiTime">0 min</div>
-            </div>
-            <div class="sec-right">
-              <div class="sec-delta" id="kpiTimeDelta"></div>
-              <div class="mini-spark" id="sparkTempo"></div>
-            </div>
-            <div style="display: none"><div id="kpiTimeCmp"></div></div>
-          </div>
-        </div>
-
-        <!-- Tabs removidas (Opção C) — todas as sections renderizam linearmente -->
-
-        <!-- Section: Visão Geral -->
-        <div class="chart-section" id="section-geral" style="display: block">
           <div class="charts-grid">
             <div class="chart-card">
-              <div class="chart-card-header" style="margin-bottom: 14px">
-                <h3 style="margin: 0">
-                  <i class="fa-solid fa-chart-pie" style="margin-right: 6px; color: var(--accent-dim)"></i>Motivos de
-                  Perda
-                </h3>
-                <span
-                  id="motivosTotal"
-                  style="
-                    font-family: var(--font-mono);
-                    font-size: 10px;
-                    color: var(--text-muted);
-                    letter-spacing: 0.08em;
-                  "
-                  >—</span
-                >
-              </div>
-              <div class="donut-wrap">
-                <div id="chartMotivos" class="donut-compact"></div>
-                <div class="donut-legend" id="motivosLegend"></div>
-              </div>
-              <p id="chartMotivosEmpty" class="chart-empty-state" style="display: none">
-                <i class="fa-solid fa-face-smile-beam"></i>Nenhuma perda registrada neste período
+              <h3>
+                <i class="fa-solid fa-chart-scatter" style="margin-right: 6px; color: var(--accent-dim)"></i>Volume ×
+                Conversão por Vendedor
+              </h3>
+              <div class="chart-box"><div id="chartScatter"></div></div>
+              <p id="chartScatterEmpty" class="chart-empty-state" style="display: none">
+                <i class="fa-solid fa-chart-scatter"></i>Sem dados de conversão neste período
               </p>
             </div>
             <div class="chart-card">
               <h3>
-                <i class="fa-solid fa-signs-post" style="margin-right: 6px; color: var(--accent-dim)"></i>Origem dos
-                Clientes
+                <i class="fa-solid fa-stopwatch" style="margin-right: 6px; color: var(--accent-dim)"></i>Tempo Médio por
+                Vendedor
               </h3>
-              <div class="chart-box" style="height: 300px"><div id="chartOrigem"></div></div>
-              <p id="chartOrigemEmpty" class="chart-empty-state" style="display: none">
-                <i class="fa-solid fa-signs-post"></i>Nenhum dado de origem registrado neste período
+              <div class="chart-box"><div id="chartTempoMeta"></div></div>
+              <p id="chartTempoEmpty" class="chart-empty-state" style="display: none">
+                <i class="fa-solid fa-stopwatch"></i>Sem dados de tempo neste período
               </p>
             </div>
           </div>
-          <div class="chart-card" style="margin-bottom: var(--gap)">
-            <h3>
-              <i class="fa-solid fa-chart-bar" style="margin-right: 6px; color: var(--accent-dim)"></i>Fluxo por Hora
-            </h3>
-            <div class="chart-box"><div id="chartHourly"></div></div>
-            <p id="chartHourlyEmpty" class="chart-empty-state" style="display: none">
-              <i class="fa-solid fa-clock"></i>Sem fluxo de atendimentos neste período
-            </p>
-          </div>
-          <!-- Evolução Diária removida — redundante com hero area charts
-               (Atend/Vendas/Conv) que já mostram last 7-8 dias no topo. -->
-          <div id="chartTrend" style="display: none"></div>
         </div>
 
         <!-- Footer -->

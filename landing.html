@@ -83,10 +83,10 @@
     <link
       rel="preload"
       as="style"
-      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
@@ -109,29 +109,28 @@
     <link rel="stylesheet" href="/css/tokens.css" />
     <style>
       /* ==================================================================
-   TOKENS — paleta mint+charcoal (alinhada com o rebrand do app)
+   TOKENS LOCAIS — derivados de /css/tokens.css (slate neutro).
+   Nomes preservados p/ compat com o CSS da landing; valores agora
+   vêm dos tokens globais (alinhamento com dashboard Stripe-style).
    ================================================================== */
       :root {
-        --bg: #0d0d0d;
-        --bg-surface: #1a1a1a;
-        --bg-card: #222222;
-        --bg-elev: #2a2a2a;
-        --text: #fafafa;
-        --text-dim: #a3a3a3;
-        --text-muted: #6b6b6b;
-        --border: rgba(255, 255, 255, 0.08);
-        --border-strong: rgba(255, 255, 255, 0.16);
-        --accent: #a78bfa;
-        --accent-deep: #8b5cf6;
-        --accent-ink: #0d0d0d;
-        --coral: #e89b8a;
-        --sand: #d4a373;
-        --dusty: #8ea5c9;
-        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-        --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-        --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-        --shadow-accent: 0 8px 32px rgba(167, 139, 250, 0.28);
-        --radius: 14px;
+        --bg: var(--bg-deep);
+        --bg-surface: var(--bg-surface);
+        --bg-card: var(--bg-card);
+        --bg-elev: var(--bg-elevated);
+        --text: var(--text-primary);
+        --text-dim: var(--text-secondary);
+        --text-muted: var(--text-muted);
+        --border: var(--border-subtle);
+        --border-strong: var(--border-medium);
+        /* --accent, --accent-deep (antes --accent-dim), coral/sand/dusty vêm dos tokens --chart-* */
+        --accent-deep: var(--accent-dim, #8b5cf6);
+        --accent-ink: #ffffff;
+        --coral: var(--chart-5);
+        --sand: var(--chart-3);
+        --dusty: var(--chart-6);
+        --shadow-accent: 0 8px 32px color-mix(in srgb, var(--accent) 28%, transparent);
+        --radius: 12px; /* alinhamento com dashboard */
         --radius-lg: 20px;
         --ease: cubic-bezier(0.16, 1, 0.3, 1);
       }
@@ -180,10 +179,10 @@
         color: var(--accent-ink);
       }
 
-      /* Scrollbar blush mint */
+      /* Scrollbar slate */
       * {
         scrollbar-width: thin;
-        scrollbar-color: rgba(167, 139, 250, 0.3) transparent;
+        scrollbar-color: color-mix(in srgb, var(--accent) 30%, transparent) transparent;
       }
       *::-webkit-scrollbar {
         width: 10px;
@@ -193,14 +192,14 @@
         background: transparent;
       }
       *::-webkit-scrollbar-thumb {
-        background: rgba(167, 139, 250, 0.22);
+        background: color-mix(in srgb, var(--accent) 22%, transparent);
         border-radius: 5px;
         border: 2px solid transparent;
         background-clip: padding-box;
         transition: background 0.2s;
       }
       *::-webkit-scrollbar-thumb:hover {
-        background: rgba(167, 139, 250, 0.5);
+        background: color-mix(in srgb, var(--accent) 50%, transparent);
         background-clip: padding-box;
         border: 2px solid transparent;
       }
@@ -216,7 +215,12 @@
       }
       .section-proof {
         padding: 80px 0;
-        background: linear-gradient(180deg, transparent, rgba(167, 139, 250, 0.04), transparent);
+        background: linear-gradient(
+          180deg,
+          transparent,
+          color-mix(in srgb, var(--accent) 4%, transparent),
+          transparent
+        );
       }
       .proof-grid {
         display: grid;
@@ -232,15 +236,16 @@
       .proof-card {
         background: var(--bg-card);
         border: 1px solid var(--border);
-        border-radius: 14px;
+        border-radius: 12px;
         padding: 28px 20px;
         text-align: center;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
         transition:
           border-color 0.25s,
           transform 0.25s;
       }
       .proof-card:hover {
-        border-color: rgba(167, 139, 250, 0.35);
+        border-color: color-mix(in srgb, var(--accent) 35%, transparent);
         transform: translateY(-3px);
       }
       .proof-value {
@@ -278,8 +283,8 @@
         gap: 6px;
         padding: 4px 10px;
         border-radius: 999px;
-        background: rgba(167, 139, 250, 0.08);
-        border: 1px solid rgba(167, 139, 250, 0.2);
+        background: color-mix(in srgb, var(--accent) 8%, transparent);
+        border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
         color: var(--accent);
         font-size: 11px;
         font-weight: 500;
@@ -377,13 +382,13 @@
         0%,
         100% {
           box-shadow:
-            0 0 0 0 rgba(167, 139, 250, 0.45),
-            inset 0 0 0 1px rgba(167, 139, 250, 0.55);
+            0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent),
+            inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent);
         }
         50% {
           box-shadow:
-            0 0 0 6px rgba(167, 139, 250, 0),
-            inset 0 0 0 1px rgba(167, 139, 250, 0.9);
+            0 0 0 6px color-mix(in srgb, var(--accent) 0%, transparent),
+            inset 0 0 0 1px color-mix(in srgb, var(--accent) 90%, transparent);
         }
       }
       .nav-cta {
@@ -433,7 +438,11 @@
         position: absolute;
         inset: 0;
         pointer-events: none;
-        background-image: radial-gradient(circle, rgba(167, 139, 250, 0.08) 1px, transparent 1px);
+        background-image: radial-gradient(
+          circle,
+          color-mix(in srgb, var(--accent) 8%, transparent) 1px,
+          transparent 1px
+        );
         background-size: 48px 48px;
         background-position: center center;
         mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
@@ -475,8 +484,8 @@
         height: 600px;
         background: radial-gradient(
           ellipse,
-          rgba(167, 139, 250, 0.14) 0%,
-          rgba(167, 139, 250, 0.04) 35%,
+          color-mix(in srgb, var(--accent) 14%, transparent) 0%,
+          color-mix(in srgb, var(--accent) 4%, transparent) 35%,
           transparent 70%
         );
         filter: blur(40px);
@@ -506,10 +515,10 @@
         margin-bottom: 24px;
       }
       .hero h1 {
-        font-size: clamp(36px, 6.2vw, 84px);
-        font-weight: 800;
-        line-height: 1.18;
-        letter-spacing: -0.035em;
+        font-size: clamp(36px, 6vw, 76px);
+        font-weight: 400;
+        line-height: 1.08;
+        letter-spacing: -0.04em;
         text-wrap: balance;
         margin-bottom: 24px;
         max-width: 17ch;
@@ -543,7 +552,7 @@
         margin-left: 0.04em;
         vertical-align: -0.1em;
         border-radius: 1px;
-        box-shadow: 0 0 8px rgba(167, 139, 250, 0.55);
+        box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 55%, transparent);
         animation: heroCursorBlink 0.85s steps(2) infinite;
         -webkit-text-fill-color: var(--accent);
       }
@@ -597,7 +606,7 @@
       .btn-primary:hover {
         background: var(--accent-deep);
         transform: translateY(-2px);
-        box-shadow: 0 12px 36px rgba(167, 139, 250, 0.38);
+        box-shadow: 0 12px 36px color-mix(in srgb, var(--accent) 38%, transparent);
       }
       .btn-ghost {
         background: transparent;
@@ -631,18 +640,19 @@
    ================================================================== */
       .section-label {
         display: inline-block;
-        font-size: 12px;
-        font-weight: 600;
-        letter-spacing: 0.12em;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.14em;
         text-transform: uppercase;
         color: var(--accent);
         margin-bottom: 16px;
       }
       .section-title {
-        font-size: clamp(32px, 5vw, 56px);
-        font-weight: 700;
-        line-height: 1.05;
-        letter-spacing: -0.03em;
+        font-size: clamp(30px, 4.5vw, 48px);
+        font-weight: 600;
+        line-height: 1.08;
+        letter-spacing: -0.025em;
         margin-bottom: 20px;
         text-wrap: balance;
       }
@@ -717,7 +727,7 @@
       }
       .showcase-card:hover {
         transform: translateY(-4px);
-        border-color: rgba(167, 139, 250, 0.22);
+        border-color: color-mix(in srgb, var(--accent) 22%, transparent);
         box-shadow: var(--shadow-md);
       }
       .showcase-tag {
@@ -725,7 +735,7 @@
         align-items: center;
         gap: 6px;
         padding: 4px 10px;
-        background: rgba(167, 139, 250, 0.1);
+        background: color-mix(in srgb, var(--accent) 10%, transparent);
         color: var(--accent);
         border-radius: 999px;
         font-size: 11px;
@@ -819,7 +829,7 @@
       }
       .mock-dot.mint {
         background: var(--accent);
-        box-shadow: 0 0 8px rgba(167, 139, 250, 0.6);
+        box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 60%, transparent);
       }
 
       /* Dashboard mock */
@@ -849,9 +859,9 @@
         color: var(--text-muted);
       }
       .mock-sidebar .icn.active {
-        background: rgba(167, 139, 250, 0.14);
+        background: color-mix(in srgb, var(--accent) 14%, transparent);
         color: var(--accent);
-        box-shadow: inset 0 0 0 1px rgba(167, 139, 250, 0.35);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
       }
       .mock-main {
         padding: 10px 12px;
@@ -921,8 +931,8 @@
         right: 10px;
         bottom: 10px;
         max-width: 62%;
-        background: rgba(167, 139, 250, 0.08);
-        border: 1px solid rgba(167, 139, 250, 0.28);
+        background: color-mix(in srgb, var(--accent) 8%, transparent);
+        border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
         border-radius: 7px;
         padding: 6px 8px;
         font-size: 9px;
@@ -943,7 +953,11 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: radial-gradient(ellipse at center, rgba(167, 139, 250, 0.06), transparent 60%);
+        background: radial-gradient(
+          ellipse at center,
+          color-mix(in srgb, var(--accent) 6%, transparent),
+          transparent 60%
+        );
         padding: 10px;
       }
       .mock-phone-frame {
@@ -985,7 +999,7 @@
         border-radius: 6px;
         image-rendering: pixelated;
         box-shadow:
-          0 0 12px rgba(167, 139, 250, 0.35),
+          0 0 12px color-mix(in srgb, var(--accent) 35%, transparent),
           inset 0 -6px 0 rgba(0, 0, 0, 0.2);
         position: relative;
       }
@@ -1020,7 +1034,7 @@
         height: 100%;
         width: 68%;
         background: linear-gradient(90deg, var(--accent), #8b5cf6);
-        box-shadow: 0 0 6px rgba(167, 139, 250, 0.5);
+        box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 50%, transparent);
       }
       .mock-xp-meta {
         display: flex;
@@ -1049,7 +1063,7 @@
         width: 9px;
         height: 9px;
         border-radius: 2px;
-        border: 1px solid rgba(167, 139, 250, 0.4);
+        border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
         flex-shrink: 0;
       }
       .mock-missions .chk.done {
@@ -1061,13 +1075,13 @@
         top: 18px;
         right: -18px;
         background: var(--bg-card);
-        border: 1px solid rgba(167, 139, 250, 0.35);
+        border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
         border-radius: 7px;
         padding: 5px 7px;
         font-size: 8px;
         box-shadow:
           0 4px 14px rgba(0, 0, 0, 0.4),
-          0 0 10px rgba(167, 139, 250, 0.15);
+          0 0 10px color-mix(in srgb, var(--accent) 15%, transparent);
         display: flex;
         gap: 5px;
         align-items: center;
@@ -1107,11 +1121,11 @@
       }
       .mock-tablet-tabs .tab.active {
         color: var(--accent);
-        border-color: rgba(167, 139, 250, 0.5);
-        text-shadow: 0 0 4px rgba(167, 139, 250, 0.6);
+        border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+        text-shadow: 0 0 4px color-mix(in srgb, var(--accent) 60%, transparent);
         box-shadow:
-          0 0 10px rgba(167, 139, 250, 0.2),
-          inset 0 0 0 1px rgba(167, 139, 250, 0.3);
+          0 0 10px color-mix(in srgb, var(--accent) 20%, transparent),
+          inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
       }
       .mock-queue {
         flex: 1;
@@ -1133,9 +1147,9 @@
         font-size: 9px;
       }
       .mock-queue-row.active {
-        border-color: rgba(167, 139, 250, 0.5);
-        background: rgba(167, 139, 250, 0.06);
-        box-shadow: 0 0 12px rgba(167, 139, 250, 0.12);
+        border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+        background: color-mix(in srgb, var(--accent) 6%, transparent);
+        box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 12%, transparent);
       }
       .mock-queue-row .pos {
         font-weight: 700;
@@ -1189,13 +1203,14 @@
         padding: 32px;
         background: var(--bg-card);
         border: 1px solid var(--border);
-        border-radius: var(--radius);
+        border-radius: 12px;
         position: relative;
         overflow: hidden;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
         transition: all 0.25s var(--ease);
       }
       .step:hover {
-        border-color: rgba(167, 139, 250, 0.22);
+        border-color: color-mix(in srgb, var(--accent) 22%, transparent);
         transform: translateY(-2px);
       }
       .step-num {
@@ -1212,7 +1227,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(167, 139, 250, 0.1);
+        background: color-mix(in srgb, var(--accent) 10%, transparent);
         border-radius: 12px;
         color: var(--accent);
         font-size: 20px;
@@ -1342,10 +1357,11 @@
       .plan {
         background: var(--bg-card);
         border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
+        border-radius: 16px;
         padding: 36px 28px;
         display: flex;
         flex-direction: column;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
         transition: all 0.25s var(--ease);
         position: relative;
       }
@@ -1354,10 +1370,10 @@
         border-color: var(--border-strong);
       }
       .plan.featured {
-        border-color: rgba(167, 139, 250, 0.5);
-        background: linear-gradient(180deg, rgba(167, 139, 250, 0.04) 0%, var(--bg-card) 100%);
+        border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+        background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 4%, transparent) 0%, var(--bg-card) 100%);
         box-shadow:
-          0 0 0 1px rgba(167, 139, 250, 0.2),
+          0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent),
           var(--shadow-md);
         transform: scale(1.03);
       }
@@ -1589,7 +1605,7 @@
         transition: border-color 0.2s;
       }
       .faq-item[open] {
-        border-color: rgba(167, 139, 250, 0.22);
+        border-color: color-mix(in srgb, var(--accent) 22%, transparent);
       }
       .faq-item summary {
         padding: 20px 24px;
@@ -2351,7 +2367,8 @@
               <li><i class="fa-solid fa-check"></i>Exportação CSV / PDF</li>
               <li><i class="fa-solid fa-check"></i>Comunicados pro time</li>
               <li>
-                <i class="fa-solid fa-check"></i><strong>IA Assist</strong> — resumo de turno + sugestão de missões
+                <i class="fa-solid fa-check"></i>
+                <span><strong>IA Assist</strong> — resumo de turno + sugestão de missões</span>
               </li>
             </ul>
             <button class="plan-btn" onclick="openCheckout('pro')">Assinar Pro</button>

@@ -121,15 +121,9 @@
   color: var(--text-primary);
 }
 .t-header-logo {
-  height: 64px;
-  width: auto;
-  max-width: none;
-  background: transparent;
-  padding: 0;
-  object-fit: contain;
-  transform: scale(1.85);
-  transform-origin: left center;
-  margin-right: 104px;
+  /* mv-logo size="S" (chevron 24px + wordmark proporcional) — não escala */
+  display: inline-flex;
+  align-items: center;
   flex-shrink: 0;
 }
 .t-header-version {
@@ -2192,3 +2186,95 @@
 }
 
 /* ============ FIM modernization layer v2 ============ */
+
+/* ============================================================
+   MODERNIZATION LAYER v3 — Stripe-style alignment com dashboard
+   ============================================================
+   Ap\u00f3s o redesign do dashboard (commit 6cb6bac), o tablet precisa
+   do mesmo vocabul\u00e1rio visual:
+   - Border-radius 12px em cards principais
+   - Inset highlight (1px rgba(255,255,255,0.04)) em dark pra premium feel
+   - Labels em mono uppercase, values weight 600
+   - Tokens --accent/--chart-* em vez de rgba(167,139,250,*) hardcoded
+============================================================ */
+
+/* Border-radius harmonizado 12px */
+.setor-tab,
+.queue-item,
+.atend-card,
+.footer-card,
+.service-panel,
+.ranking-card,
+.motivo-option {
+  border-radius: 12px;
+}
+
+/* Inset highlight premium (dark mode, que \u00e9 o \u00fanico do tablet) */
+.queue-item,
+.atend-card,
+.footer-card,
+.service-panel,
+.ranking-card {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.queue-item:hover,
+.footer-card:hover,
+.service-panel:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Typography weight 700\u2192600 (labels/values) com letter-spacing pro dashboard-feel */
+.t-header-kpi-value {
+  color: var(--text-primary);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.queue-item-name,
+.fc-name,
+.atend-name {
+  font-weight: 600;
+}
+
+/* Hardcodes rgba(167,139,250,*) \u2192 tokens */
+.setor-tab.active {
+  border-color: color-mix(in srgb, var(--accent) 38%, transparent);
+}
+.service-panel.drop-active {
+  background: color-mix(in srgb, var(--accent) 3%, transparent);
+}
+.ranking-card {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.checkin-item.checked {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.t-footer.drop-highlight {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.queue-empty-icon {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+/* Avatars brancos \u2192 tokens */
+.footer-card .fc-avatar,
+.atend-card .atend-avatar {
+  color: var(--text-primary);
+}
+
+/* Outcome buttons e motivo options \u2014 trocar sombra roxa antiga por accent */
+.outcome-btn.sale {
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 15%, transparent);
+}
+.motivo-option.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+/* ============ FIM modernization layer v3 ============ */

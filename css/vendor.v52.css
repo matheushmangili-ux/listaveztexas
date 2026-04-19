@@ -3481,3 +3481,81 @@ body {
 }
 
 /* ============ FIM Fase 9 tab bar redesign ============ */
+
+/* ============================================================
+   MODERNIZATION LAYER v3 — Stripe-style alignment com dashboard
+   ============================================================
+   Traz o vendor pro mesmo vocabul\u00e1rio visual do dashboard + tablet
+   (commits 6cb6bac e 7e5e6bd). Preserva XP strip, pixel-art avatar,
+   queue peek e anima\u00e7\u00f5es espec\u00edficas do vendor.
+============================================================ */
+
+/* Border-radius harmonizado 12px nos cards principais */
+.vendor-big-card,
+.vendor-ann-wrap,
+.missions-card-btn,
+.vendor-push-prompt,
+.vendor-mini-stats,
+.vm-card,
+.vendor-ann-item,
+.achievements-badge-card,
+.peek-item,
+.mission-row,
+.xp-breakdown-row {
+  border-radius: 12px;
+}
+
+/* Inset highlight premium (dark mode \u00e9 o \u00fanico no vendor tamb\u00e9m) */
+.vendor-big-card,
+.vendor-ann-wrap,
+.missions-card-btn,
+.vendor-push-prompt,
+.vendor-mini-stats,
+.vm-card {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.missions-card-btn:active,
+.vendor-push-prompt:active {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.02),
+    0 0 0 rgba(0, 0, 0, 0);
+  transform: translateY(1px);
+}
+
+/* Typography weight 700\u2192600 em labels/values */
+.vendor-header-name,
+.vendor-mini-stats .stat-value,
+.missions-title,
+.vendor-ann-title,
+.xp-history-title,
+.xp-breakdown-pts {
+  font-weight: 600;
+}
+
+/* Hardcodes rgba(167,139,250,*) \u2192 tokens via color-mix */
+.vendor-queue-peek .peek-item.self {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.vendor-ann-item.unread {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.missions-card-btn {
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.vendor-push-prompt {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent) 10%, transparent),
+    color-mix(in srgb, var(--accent) 3%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.vendor-push-icon {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+/* ============ FIM modernization layer v3 ============ */

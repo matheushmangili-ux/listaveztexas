@@ -26,8 +26,8 @@ const chartTypes = {}; // track rendered type per key to decide reuse vs destroy
 let _firstLoad = true;
 let _activeChartTab = null;
 
-// ─── Paleta harmonizada (purple + neutros) ───
-// Lê o accent atual dos CSS tokens pra refletir mudanças de tema em runtime.
+// ─── Paleta qualitativa (Stripe-inspired) ───
+// Lê tokens CSS em runtime pra suporte dark/light + fallback pra valores sólidos.
 function _cssVar(name, fallback) {
   try {
     const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -43,7 +43,20 @@ function chartAccent() {
     accentDim: _cssVar('--accent-dim', '#8b5cf6')
   };
 }
-// Atalhos legados (mantidos por compat; nomes "mint*" são históricos, valores = accent)
+// Paleta categorial (Stripe-style): roxo → ciano → amber → emerald → rose → blue → slate
+function chartPalette() {
+  return [
+    _cssVar('--chart-1', '#8b5cf6'),
+    _cssVar('--chart-2', '#0891b2'),
+    _cssVar('--chart-3', '#d97706'),
+    _cssVar('--chart-4', '#059669'),
+    _cssVar('--chart-5', '#db2777'),
+    _cssVar('--chart-6', '#2563eb'),
+    _cssVar('--chart-7', '#64748b')
+  ];
+}
+
+// Atalhos legados (nomes "mint*" são históricos, valores = accent/palette)
 const BRAND_PALETTE = {
   get mint() {
     return chartAccent().accent;
@@ -54,23 +67,39 @@ const BRAND_PALETTE = {
   get mintSoft() {
     return chartAccent().accentBright;
   },
-  coral: '#e89b8a',
-  coralDeep: '#d47a68',
-  sand: '#d4a373',
-  sandDeep: '#b8875a',
-  dusty: '#8ea5c9',
-  dustyDeep: '#6d85ac',
-  lavender: '#b8a8d4',
-  neutral: '#a3a3a3',
+  get coral() {
+    return _cssVar('--chart-5', '#db2777');
+  },
+  get coralDeep() {
+    return _cssVar('--chart-5', '#be185d');
+  },
+  get sand() {
+    return _cssVar('--chart-3', '#d97706');
+  },
+  get sandDeep() {
+    return _cssVar('--chart-3', '#b45309');
+  },
+  get dusty() {
+    return _cssVar('--chart-6', '#2563eb');
+  },
+  get dustyDeep() {
+    return _cssVar('--chart-6', '#1d4ed8');
+  },
+  get lavender() {
+    return _cssVar('--chart-1', '#a78bfa');
+  },
+  neutral: '#94a3b8',
   charcoal: '#2a2a2a'
 };
 
-// Donut categórico (motivos, setores, canais)
-const CATEGORICAL = ['#a78bfa', '#8ea5c9', '#d4a373', '#b8a8d4', '#e89b8a', '#8b5cf6', '#6d85ac', '#a3a3a3'];
-// Dual-series (hoje vs ontem): mint + sand
-const DUAL = ['#a78bfa', '#d4a373'];
-// Triple: mint (positivo) + dusty (info) + coral (negativo)
-const TRIPLE = ['#a78bfa', '#8ea5c9', '#e89b8a'];
+// Paleta agora vem de chartPalette() (tokens --chart-*). Arrays ficam frescos
+// a cada getter porque o dashboard recria charts ao trocar tema.
+// Donut categórico (motivos, setores, canais).
+const CATEGORICAL = chartPalette();
+// Dual-series (hoje vs ontem): roxo + amber.
+const DUAL = [CATEGORICAL[0], CATEGORICAL[2]];
+// Triple: accent (positivo) + ciano (info) + rose (negativo).
+const TRIPLE = [CATEGORICAL[0], CATEGORICAL[1], CATEGORICAL[4]];
 
 // ─── Semantic tempo colors harmonizados ───
 function tempoColor(minutes, meta) {
@@ -162,16 +191,12 @@ function donutConfig({ labels, values, colors, total, centerLabel, tooltipFn, ev
  */
 export function initDashboardCharts(ctx) {
   _ctx = ctx;
-  // Expose to window for onclick handlers in HTML
-  window.setChartTab = setChartTab;
-
-  // Restore last tab on load
-  const _savedTab = localStorage.getItem(CHART_TAB_KEY);
-  if (_savedTab) {
-    setChartTab(_savedTab);
-  } else {
-    setChartTab('geral');
-  }
+  // Tabs foram removidos (Op\u00e7\u00e3o C): todas as sections renderizam linearmente.
+  // Stub setChartTab pra compat com c\u00f3digo antigo que ainda possa chamar.
+  window.setChartTab = () => {};
+  document.querySelectorAll('.chart-section').forEach((s) => {
+    s.style.display = 'block';
+  });
 }
 
 // ─── Theme-aware chart colors ───
@@ -473,6 +498,46 @@ export async function loadKPIs(range, prevRange) {
   renderCompare('kpiTimeCmp', d.tempo_medio_min || 0, p.tempo_medio_min || 0, true);
   renderCompare('kpiPrefCmp', prefCurr, prefPrev);
 
+  // ─── Hero compare (Hoje · X / Ontem · Y) — valores scalar do período atual/anterior ───
+  // Corrige bug onde \"Hoje\" pegava o último dia do trend (que pode ser ontem
+  // se hoje não tiver dado). Aqui vem direto do RPC get_conversion_stats.
+  const setText = (id, v) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = v;
+  };
+  const setDelta = (id, now, before) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (!before) {
+      el.textContent = now > 0 ? '↑ novo' : '';
+      el.classList.remove('up', 'down');
+      if (now > 0) el.classList.add('up');
+      return;
+    }
+    const pct = ((now - before) / before) * 100;
+    const arrow = pct >= 0 ? '↑' : '↓';
+    el.textContent = arrow + ' ' + Math.abs(pct).toFixed(0) + '%';
+    el.classList.toggle('up', pct >= 0);
+    el.classList.toggle('down', pct < 0);
+  };
+  const tNow = d.total_atendimentos || 0;
+  const tPrev = p.total_atendimentos || 0;
+  const vNow = d.total_vendas || 0;
+  const vPrev = p.total_vendas || 0;
+  setText('kpiTotalNow', tNow);
+  setText('kpiTotalPrev', tPrev);
+  setDelta('kpiTotalDelta', tNow, tPrev);
+  setText('kpiVendasNow', vNow);
+  setText('kpiVendasPrev', vPrev);
+  setDelta('kpiVendasDelta', vNow, vPrev);
+  setText('kpiConvNow', convAtual + '%');
+  setText('kpiConvPrev', convAnterior + '%');
+  setDelta('kpiConvDelta', convAtual, convAnterior);
+  // Secondary deltas (loss, pref, time)
+  setDelta('kpiLossDelta', d.total_nao_convertido || 0, p.total_nao_convertido || 0);
+  setDelta('kpiPrefDelta', prefCurr, prefPrev);
+  setDelta('kpiTimeDelta', d.tempo_medio_min || 0, p.tempo_medio_min || 0);
+
   // ─── KPI Sparklines (Conversão + Tempo) ───
   // Sparklines are populated from trend data in loadTrend()
 
@@ -493,17 +558,39 @@ export async function loadMotivos(range) {
 
   const labels = (data || []).map((d) => MOTIVOS[d.motivo]?.label || d.motivo);
   const values = (data || []).map((d) => d.total);
-  const colors = (data || []).map((d) => MOTIVOS[d.motivo]?.color || '#6b7280');
+  // Stripe-style: paleta qualitativa (chart-1..7) em vez das cores legadas dos motivos
+  const palette = chartPalette();
+  const colors = (data || []).map((_, i) => palette[i % palette.length]);
 
   const totalMotivos = values.reduce((a, b) => a + b, 0);
   const emptyMotivos = document.getElementById('chartMotivosEmpty');
+  const legendEl = document.getElementById('motivosLegend');
+  const totalEl = document.getElementById('motivosTotal');
   if (totalMotivos === 0) {
     if (el) el.style.display = 'none';
     if (emptyMotivos) emptyMotivos.style.display = 'block';
+    if (legendEl) legendEl.innerHTML = '';
+    if (totalEl) totalEl.textContent = '—';
     return;
   }
   if (el) el.style.display = '';
   if (emptyMotivos) emptyMotivos.style.display = 'none';
+  if (totalEl) totalEl.textContent = totalMotivos + ' TOTAL';
+
+  // Render legend-list (Stripe-style: dot | label | % | count)
+  if (legendEl) {
+    legendEl.innerHTML = labels
+      .map((label, i) => {
+        const pct = Math.round((values[i] / totalMotivos) * 100);
+        return `<div class="row">
+          <span class="sw" style="background:${colors[i]}"></span>
+          <span>${label}</span>
+          <span class="pct">${pct}%</span>
+          <span class="abs">${values[i]}</span>
+        </div>`;
+      })
+      .join('');
+  }
 
   renderChart(
     'motivos',
@@ -671,27 +758,66 @@ export async function loadHourly(range) {
       });
     }
 
+    // Annotation for peak hour (Stripe-style marker) — só single-day
+    if (!isMultiDay && atend.length > 0) {
+      const peakVal = Math.max(...atend);
+      const peakIdx = atend.indexOf(peakVal);
+      if (peakVal > 0 && peakIdx >= 0) {
+        if (!annotations.points) annotations.points = [];
+        annotations.points.push({
+          x: hours[peakIdx],
+          y: peakVal,
+          seriesIndex: 0,
+          marker: {
+            size: 6,
+            fillColor: chartPalette()[0],
+            strokeColor: '#fff',
+            strokeWidth: 2,
+            radius: 6
+          },
+          label: {
+            text: 'PICO · ' + peakVal,
+            borderColor: chartPalette()[0],
+            offsetY: -4,
+            style: {
+              fontSize: '9px',
+              fontWeight: 700,
+              fontFamily: "'JetBrains Mono'",
+              color: chartPalette()[0],
+              background: isDarkTheme() ? 'rgba(26, 21, 56, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+              padding: { left: 8, right: 8, top: 3, bottom: 3 },
+              borderRadius: 6
+            }
+          }
+        });
+      }
+    }
+
+    // Stripe-style: area chart com linha principal (atend) + linha dashed (vendas) + overlay hoje
+    const areaSeries = [{ name: series[0].name, type: 'area', data: atend }];
+    if (series.length > 1) areaSeries.push({ name: series[1].name, type: 'line', data: vendas });
+    if (series.length > 2) areaSeries.push({ name: series[2].name, type: 'line', data: series[2].data });
+
     renderChart('hourly', '#chartHourly', {
-      chart: { type: 'bar', height: 300, stacked: false },
-      series,
+      chart: { type: 'area', height: 300, stacked: false },
+      series: areaSeries,
       xaxis: { categories: hours, labels: { style: { fontSize: '11px', fontWeight: 500 } } },
       yaxis: { labels: { style: { fontSize: '11px', fontWeight: 500 } }, forceNiceScale: true },
-      plotOptions: { bar: { borderRadius: 6, columnWidth: '60%' } },
       colors: TRIPLE,
       fill: {
-        type: ['gradient', 'gradient', 'solid'],
+        type: ['gradient', 'solid', 'solid'],
         gradient: {
           shade: 'dark',
           type: 'vertical',
-          shadeIntensity: 0.5,
-          opacityFrom: 1.0,
-          opacityTo: 0.55,
+          shadeIntensity: 1,
+          opacityFrom: 0.35,
+          opacityTo: 0.02,
           stops: [0, 100]
         },
-        opacity: [1.0, 0.85, 0.2]
+        opacity: [1, 1, 1]
       },
-      stroke: { width: [0, 0, 2], curve: 'smooth' },
-      markers: { size: [0, 0, 3] },
+      stroke: { width: [2.5, 1.5, 2], curve: 'smooth', dashArray: [0, 4, 0] },
+      markers: { size: 0, hover: { size: 4 } },
       grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { left: 14, right: 20, top: 10 } },
       legend: {
         position: 'top',
@@ -941,16 +1067,24 @@ function renderHeaderMarquee(vendedoresData) {
     track.style.animation = 'none';
     return;
   }
+  // Map status → CSS var slug (em_atendimento → atendendo)
+  const STATUS_VAR = {
+    disponivel: '--status-disponivel',
+    em_atendimento: '--status-atendendo',
+    pausa: '--status-pausa',
+    fora: '--status-fora'
+  };
   const pills = vendedoresData
     .map((v) => {
       const cfg = STATUS_CONFIG[v.status] || STATUS_CONFIG.fora;
+      const cssVar = STATUS_VAR[v.status] || '--status-fora';
       const pos = v.posicao_fila ? ` #${v.posicao_fila}` : '';
       const isFora = v.status === 'fora';
       const isOnTime = v.status === 'disponivel';
       return `<div class="marquee-pill">
-      <div class="mp-dot${isOnTime ? ' pulse-on' : ''}" style="background:${cfg.color}"></div>
+      <div class="mp-dot${isOnTime ? ' pulse-on' : ''}" style="background:var(${cssVar})"></div>
       <span class="mp-name">${escapeHtml(v.apelido || v.nome.split(' ')[0])}</span>
-      <span class="mp-status${isFora ? ' fora' : ''}" style="color:${isFora ? '' : cfg.color}">${cfg.short}${pos}</span>
+      <span class="mp-status${isFora ? ' fora' : ''}" style="color:${isFora ? '' : `var(${cssVar})`}">${cfg.short}${pos}</span>
     </div>`;
     })
     .join('');
@@ -1416,8 +1550,47 @@ export async function loadTrend(range) {
       cssClass: 'spark-tooltip'
     }
   });
-  if (conv.length > 1) renderChart('sparkConv', '#sparkConv', sparkOpts(conv, '#a78bfa', sparkDates, '%'));
-  if (atend.length > 1) renderChart('sparkTempo', '#sparkTempo', sparkOpts(atend, '#8ea5c9', sparkDates, ''));
+  const p = chartPalette();
+
+  // ─── Hero area charts (120px, gradient area) ───
+  const heroOpts = (series, color, labels, suffix) => ({
+    chart: { type: 'area', height: 120, sparkline: { enabled: true }, animations: { enabled: true, speed: 400 } },
+    series: [{ name: 'Valor', data: series }],
+    stroke: { width: 2.5, curve: 'smooth' },
+    colors: [color],
+    fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0, stops: [0, 100] } },
+    tooltip: {
+      enabled: true,
+      fixed: { enabled: false },
+      x: { show: false },
+      y: {
+        title: { formatter: () => '' },
+        formatter: (val, { dataPointIndex }) =>
+          (labels[dataPointIndex] || '') + ': ' + (Number.isInteger(val) ? val : val.toFixed(1)) + suffix
+      },
+      marker: { show: false }
+    }
+  });
+  if (atend.length > 1) renderChart('heroAtend', '#chartHeroAtend', heroOpts(atend, p[0], sparkDates, ''));
+  if (vendas.length > 1) renderChart('heroVendas', '#chartHeroVendas', heroOpts(vendas, p[1], sparkDates, ''));
+  if (conv.length > 1) renderChart('heroConv', '#chartHeroConv', heroOpts(conv, p[2], sparkDates, '%'));
+
+  // Hero compare (Hoje/Ontem/delta) agora vem de loadKPIs — scalars confi\u00e1veis.
+  // Este bloco s\u00f3 renderiza os charts (hero area + secondary sparklines).
+
+  // ─── Secondary sparklines (64x30, line-only per mockup) ───
+  const secOpts = (series, color) => ({
+    chart: { type: 'line', height: 30, width: 64, sparkline: { enabled: true } },
+    series: [{ data: series }],
+    stroke: { width: 1.5, curve: 'smooth' },
+    colors: [color],
+    tooltip: { enabled: false }
+  });
+  const loss = atend.map((a, i) => Math.max(0, a - (vendas[i] || 0)));
+  if (loss.length > 1) renderChart('sparkLoss', '#sparkLoss', secOpts(loss, p[4]));
+  if (vendas.length > 1) renderChart('sparkPref', '#sparkPref', secOpts(vendas, p[3]));
+  if (atend.length > 1) renderChart('sparkTempo', '#sparkTempo', secOpts(atend, p[5]));
+  // Secondary deltas (loss/pref/time) agora populados em loadKPIs com scalars reais.
 }
 
 // ─── Origem dos Clientes (ApexCharts donut) ───

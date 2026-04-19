@@ -10,22 +10,22 @@
 :root {
   /* ─── Light mode (default) ─── */
 
-  /* Backgrounds */
-  --bg-deep: #f7f5fb;
+  /* Backgrounds — neutros (slate) Stripe-style. Roxo só em accent. */
+  --bg-deep: #f1f4f9;
   --bg-surface: #ffffff;
   --bg-card: #ffffff;
-  --bg-elevated: #f0ecf7;
-  --bg-hover: #ebe5f5;
+  --bg-elevated: #e9edf3;
+  --bg-hover: #e2e7ee;
 
-  /* Borders */
-  --border-subtle: rgba(19, 8, 44, 0.06);
-  --border-medium: rgba(19, 8, 44, 0.1);
-  --border-strong: rgba(19, 8, 44, 0.16);
+  /* Borders neutras — mais firmes em light pra cards brancos ficarem visíveis */
+  --border-subtle: rgba(15, 23, 42, 0.08);
+  --border-medium: rgba(15, 23, 42, 0.12);
+  --border-strong: rgba(15, 23, 42, 0.2);
 
   /* Text */
-  --text-primary: #13082c;
-  --text-secondary: #5a4b78;
-  --text-muted: #958aa8;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
 
   /* Brand — purple */
   --accent: #8b5cf6; /* purple-500 */
@@ -123,26 +123,37 @@
   --grad-accent: linear-gradient(135deg, #a78bfa, #6d28d9);
   --grad-success: linear-gradient(135deg, #4ade80, #16a34a);
   --grad-gold: linear-gradient(135deg, #a78bfa, #6d28d9);
+
+  /* Chart palette (qualitativa — Stripe-inspired) */
+  --chart-1: #8b5cf6; /* roxo */
+  --chart-2: #0891b2; /* ciano */
+  --chart-3: #d97706; /* amber */
+  --chart-4: #059669; /* emerald */
+  --chart-5: #db2777; /* rose */
+  --chart-6: #2563eb; /* blue */
+  --chart-7: #64748b; /* slate */
+  --chart-grid: rgba(15, 23, 42, 0.06);
+  --chart-axis: rgba(15, 23, 42, 0.4);
 }
 
 /* ─── Dark mode ─── */
 [data-theme='dark'] {
-  /* Backgrounds */
-  --bg-deep: #0a0614;
-  --bg-surface: #14102a;
-  --bg-card: #1a1538;
-  --bg-elevated: #221d45;
-  --bg-hover: #2b2556;
+  /* Backgrounds — neutros (slate/zinc), Stripe-style. Roxo fica só no accent. */
+  --bg-deep: #0b0d12;
+  --bg-surface: #11141b;
+  --bg-card: #161a23;
+  --bg-elevated: #1d222d;
+  --bg-hover: #252a36;
 
-  /* Borders */
-  --border-subtle: rgba(167, 139, 250, 0.08);
-  --border-medium: rgba(167, 139, 250, 0.14);
-  --border-strong: rgba(167, 139, 250, 0.22);
+  /* Borders neutras */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-medium: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.16);
 
-  /* Text */
-  --text-primary: #f5f0ff;
-  --text-secondary: #b5a8d4;
-  --text-muted: #7a6e99;
+  /* Text neutro */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
 
   /* Brand — purple (inverte hierarquia: tons mais claros no dark) */
   --accent: #a78bfa; /* purple-400 */
@@ -189,6 +200,17 @@
   --grad-accent: linear-gradient(135deg, #c4b5fd, #8b5cf6);
   --grad-success: linear-gradient(135deg, #86efac, #22c55e);
   --grad-gold: linear-gradient(135deg, #c4b5fd, #8b5cf6);
+
+  /* Chart palette dark (tons mais claros pra contraste em bg escuro) */
+  --chart-1: #a78bfa;
+  --chart-2: #22d3ee;
+  --chart-3: #fbbf24;
+  --chart-4: #34d399;
+  --chart-5: #f472b6;
+  --chart-6: #60a5fa;
+  --chart-7: #94a3b8;
+  --chart-grid: rgba(255, 255, 255, 0.06);
+  --chart-axis: rgba(255, 255, 255, 0.4);
 }
 
 /* ─── Web components defaults ─── */
@@ -203,17 +225,17 @@ mv-loader {
 
 /* ─── Light mode explicit override (para páginas com toggle) ─── */
 [data-theme='light'] {
-  --bg-deep: #f7f5fb;
+  --bg-deep: #fafbfc;
   --bg-surface: #ffffff;
   --bg-card: #ffffff;
-  --bg-elevated: #f0ecf7;
-  --bg-hover: #ebe5f5;
-  --border-subtle: rgba(19, 8, 44, 0.06);
-  --border-medium: rgba(19, 8, 44, 0.1);
-  --border-strong: rgba(19, 8, 44, 0.16);
-  --text-primary: #13082c;
-  --text-secondary: #5a4b78;
-  --text-muted: #958aa8;
+  --bg-elevated: #f4f6f9;
+  --bg-hover: #eef1f5;
+  --border-subtle: rgba(15, 23, 42, 0.06);
+  --border-medium: rgba(15, 23, 42, 0.1);
+  --border-strong: rgba(15, 23, 42, 0.16);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
   --accent: #8b5cf6;
   --accent-bright: #a78bfa;
   --accent-dim: #6d28d9;
