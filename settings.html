@@ -14,9 +14,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#0a0614" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#6d28d9" media="(prefers-color-scheme: light)" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/update-checker.js"></script>
     <script>
+      // Init theme antes do render pra evitar flash
+      (function () {
+        try {
+          const saved = localStorage.getItem('lv-theme');
+          if (saved === 'light' || saved === 'dark') {
+            document.documentElement.setAttribute('data-theme', saved);
+          } else if (saved === 'auto' || !saved) {
+            const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+            document.documentElement.setAttribute('data-theme', prefersLight ? 'light' : 'dark');
+          }
+        } catch (_) {}
+      })();
       initUpdateChecker('/settings.html');
     </script>
     <style>
@@ -705,6 +719,85 @@
 
           <!-- TAB: Conta -->
           <div class="settings-tab-panel" id="tab-conta" style="display: none">
+            <!-- Aparência: seletor de tema -->
+            <div class="settings-section">
+              <h2><i class="fa-solid fa-palette"></i> Aparência</h2>
+              <div class="settings-card">
+                <div class="settings-row">
+                  <div>
+                    <div class="label">Tema</div>
+                    <div class="sublabel">Dark, light ou seguir preferência do sistema</div>
+                  </div>
+                  <div
+                    id="themeSelector"
+                    style="
+                      display: inline-flex;
+                      gap: 4px;
+                      background: var(--bg-elevated);
+                      border: 1px solid var(--border-subtle);
+                      border-radius: 10px;
+                      padding: 4px;
+                    "
+                  >
+                    <button
+                      type="button"
+                      class="theme-opt"
+                      data-theme-opt="light"
+                      style="
+                        min-height: 32px;
+                        padding: 4px 12px;
+                        background: transparent;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 12px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        color: var(--text-secondary);
+                      "
+                    >
+                      <i class="fa-solid fa-sun" style="margin-right: 4px"></i>Claro
+                    </button>
+                    <button
+                      type="button"
+                      class="theme-opt"
+                      data-theme-opt="dark"
+                      style="
+                        min-height: 32px;
+                        padding: 4px 12px;
+                        background: transparent;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 12px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        color: var(--text-secondary);
+                      "
+                    >
+                      <i class="fa-solid fa-moon" style="margin-right: 4px"></i>Escuro
+                    </button>
+                    <button
+                      type="button"
+                      class="theme-opt"
+                      data-theme-opt="auto"
+                      style="
+                        min-height: 32px;
+                        padding: 4px 12px;
+                        background: transparent;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 12px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        color: var(--text-secondary);
+                      "
+                    >
+                      <i class="fa-solid fa-desktop" style="margin-right: 4px"></i>Auto
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="settings-section">
               <h2><i class="fa-solid fa-crown"></i> Plano</h2>
               <div class="settings-card">
@@ -1889,6 +1982,37 @@
           btn.innerHTML = '<i class="fa-solid fa-trash" style="font-size:11px"></i> Excluir';
         }
       };
+
+      // ─── Theme selector ───
+      (function () {
+        const selector = document.getElementById('themeSelector');
+        if (!selector) return;
+        const opts = selector.querySelectorAll('.theme-opt');
+
+        function applyTheme(mode) {
+          const effective =
+            mode === 'auto' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : mode;
+          document.documentElement.setAttribute('data-theme', effective);
+          localStorage.setItem('lv-theme', mode);
+          opts.forEach((o) => {
+            const active = o.dataset.themeOpt === mode;
+            o.style.background = active ? 'var(--accent)' : 'transparent';
+            o.style.color = active ? 'var(--accent-ink)' : 'var(--text-secondary)';
+          });
+        }
+
+        const current = localStorage.getItem('lv-theme') || 'auto';
+        applyTheme(current);
+
+        opts.forEach((o) => {
+          o.addEventListener('click', () => applyTheme(o.dataset.themeOpt));
+        });
+
+        // Reage a mudança de OS quando em modo 'auto'
+        window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+          if ((localStorage.getItem('lv-theme') || 'auto') === 'auto') applyTheme('auto');
+        });
+      })();
     </script>
   </body>
 </html>

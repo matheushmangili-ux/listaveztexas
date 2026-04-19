@@ -26,11 +26,34 @@ const chartTypes = {}; // track rendered type per key to decide reuse vs destroy
 let _firstLoad = true;
 let _activeChartTab = null;
 
-// ─── Paleta harmonizada (mint + charcoal) ───
+// ─── Paleta harmonizada (purple + neutros) ───
+// Lê o accent atual dos CSS tokens pra refletir mudanças de tema em runtime.
+function _cssVar(name, fallback) {
+  try {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return v || fallback;
+  } catch (_) {
+    return fallback;
+  }
+}
+function chartAccent() {
+  return {
+    accent: _cssVar('--accent', '#a78bfa'),
+    accentBright: _cssVar('--accent-bright', '#c4b5fd'),
+    accentDim: _cssVar('--accent-dim', '#8b5cf6')
+  };
+}
+// Atalhos legados (mantidos por compat; nomes "mint*" são históricos, valores = accent)
 const BRAND_PALETTE = {
-  mint: '#a78bfa',
-  mintDeep: '#8b5cf6',
-  mintSoft: '#c4b5fd',
+  get mint() {
+    return chartAccent().accent;
+  },
+  get mintDeep() {
+    return chartAccent().accentDim;
+  },
+  get mintSoft() {
+    return chartAccent().accentBright;
+  },
   coral: '#e89b8a',
   coralDeep: '#d47a68',
   sand: '#d4a373',
