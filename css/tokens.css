@@ -191,6 +191,16 @@
   --grad-gold: linear-gradient(135deg, #c4b5fd, #8b5cf6);
 }
 
+/* ─── Web components defaults ─── */
+mv-logo {
+  color: var(--accent);
+  display: inline-block;
+  line-height: 0;
+}
+mv-loader {
+  color: var(--accent);
+}
+
 /* ─── Light mode explicit override (para páginas com toggle) ─── */
 [data-theme='light'] {
   --bg-deep: #f7f5fb;

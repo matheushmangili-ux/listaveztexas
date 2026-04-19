@@ -106,6 +106,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon-180.png" />
+    <link rel="stylesheet" href="/css/tokens.css" />
     <style>
       /* ==================================================================
    TOKENS — paleta mint+charcoal (alinhada com o rebrand do app)
@@ -1878,6 +1879,7 @@
       window.PUBLIC_POSTHOG_HOST = 'https://us.i.posthog.com';
     </script>
     <script type="module" src="/js/analytics.js"></script>
+    <script src="/js/components/mv-logo.js" defer></script>
   </head>
   <body>
     <!-- ==================================================================
@@ -1885,7 +1887,7 @@
      ================================================================== -->
     <nav class="nav" id="nav">
       <a href="#" class="nav-logo" aria-label="minhavez">
-        <img src="/assets/logo-minhavez-transparent.png" alt="minhavez" />
+        <mv-logo size="M" wordmark></mv-logo>
       </a>
       <div class="nav-links">
         <a href="#produto">Produto</a>
@@ -2457,7 +2459,7 @@
       <div class="container">
         <div class="footer-grid">
           <div class="footer-brand">
-            <div class="logo-inline"><img src="/assets/logo-minhavez-transparent.png" alt="minhavez" /></div>
+            <div class="logo-inline"><mv-logo size="M" wordmark></mv-logo></div>
             <p>
               Gestão inteligente de fila + engajamento gamificado pra lojas físicas. Feito no Brasil, em produção real.
             </p>
