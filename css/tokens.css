@@ -123,6 +123,17 @@
   --grad-accent: linear-gradient(135deg, #a78bfa, #6d28d9);
   --grad-success: linear-gradient(135deg, #4ade80, #16a34a);
   --grad-gold: linear-gradient(135deg, #a78bfa, #6d28d9);
+
+  /* Chart palette (qualitativa — Stripe-inspired) */
+  --chart-1: #8b5cf6; /* roxo */
+  --chart-2: #0891b2; /* ciano */
+  --chart-3: #d97706; /* amber */
+  --chart-4: #059669; /* emerald */
+  --chart-5: #db2777; /* rose */
+  --chart-6: #2563eb; /* blue */
+  --chart-7: #64748b; /* slate */
+  --chart-grid: rgba(19, 8, 44, 0.06);
+  --chart-axis: rgba(19, 8, 44, 0.4);
 }
 
 /* ─── Dark mode ─── */
@@ -189,6 +200,17 @@
   --grad-accent: linear-gradient(135deg, #c4b5fd, #8b5cf6);
   --grad-success: linear-gradient(135deg, #86efac, #22c55e);
   --grad-gold: linear-gradient(135deg, #c4b5fd, #8b5cf6);
+
+  /* Chart palette dark (tons mais claros pra contraste em bg escuro) */
+  --chart-1: #a78bfa;
+  --chart-2: #22d3ee;
+  --chart-3: #fbbf24;
+  --chart-4: #34d399;
+  --chart-5: #f472b6;
+  --chart-6: #60a5fa;
+  --chart-7: #94a3b8;
+  --chart-grid: rgba(167, 139, 250, 0.08);
+  --chart-axis: rgba(167, 139, 250, 0.4);
 }
 
 /* ─── Web components defaults ─── */

@@ -26,8 +26,8 @@ const chartTypes = {}; // track rendered type per key to decide reuse vs destroy
 let _firstLoad = true;
 let _activeChartTab = null;
 
-// ─── Paleta harmonizada (purple + neutros) ───
-// Lê o accent atual dos CSS tokens pra refletir mudanças de tema em runtime.
+// ─── Paleta qualitativa (Stripe-inspired) ───
+// Lê tokens CSS em runtime pra suporte dark/light + fallback pra valores sólidos.
 function _cssVar(name, fallback) {
   try {
     const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -43,7 +43,20 @@ function chartAccent() {
     accentDim: _cssVar('--accent-dim', '#8b5cf6')
   };
 }
-// Atalhos legados (mantidos por compat; nomes "mint*" são históricos, valores = accent)
+// Paleta categorial (Stripe-style): roxo → ciano → amber → emerald → rose → blue → slate
+function chartPalette() {
+  return [
+    _cssVar('--chart-1', '#8b5cf6'),
+    _cssVar('--chart-2', '#0891b2'),
+    _cssVar('--chart-3', '#d97706'),
+    _cssVar('--chart-4', '#059669'),
+    _cssVar('--chart-5', '#db2777'),
+    _cssVar('--chart-6', '#2563eb'),
+    _cssVar('--chart-7', '#64748b')
+  ];
+}
+
+// Atalhos legados (nomes "mint*" são históricos, valores = accent/palette)
 const BRAND_PALETTE = {
   get mint() {
     return chartAccent().accent;
@@ -54,23 +67,39 @@ const BRAND_PALETTE = {
   get mintSoft() {
     return chartAccent().accentBright;
   },
-  coral: '#e89b8a',
-  coralDeep: '#d47a68',
-  sand: '#d4a373',
-  sandDeep: '#b8875a',
-  dusty: '#8ea5c9',
-  dustyDeep: '#6d85ac',
-  lavender: '#b8a8d4',
-  neutral: '#a3a3a3',
+  get coral() {
+    return _cssVar('--chart-5', '#db2777');
+  },
+  get coralDeep() {
+    return _cssVar('--chart-5', '#be185d');
+  },
+  get sand() {
+    return _cssVar('--chart-3', '#d97706');
+  },
+  get sandDeep() {
+    return _cssVar('--chart-3', '#b45309');
+  },
+  get dusty() {
+    return _cssVar('--chart-6', '#2563eb');
+  },
+  get dustyDeep() {
+    return _cssVar('--chart-6', '#1d4ed8');
+  },
+  get lavender() {
+    return _cssVar('--chart-1', '#a78bfa');
+  },
+  neutral: '#94a3b8',
   charcoal: '#2a2a2a'
 };
 
-// Donut categórico (motivos, setores, canais)
-const CATEGORICAL = ['#a78bfa', '#8ea5c9', '#d4a373', '#b8a8d4', '#e89b8a', '#8b5cf6', '#6d85ac', '#a3a3a3'];
-// Dual-series (hoje vs ontem): mint + sand
-const DUAL = ['#a78bfa', '#d4a373'];
-// Triple: mint (positivo) + dusty (info) + coral (negativo)
-const TRIPLE = ['#a78bfa', '#8ea5c9', '#e89b8a'];
+// Paleta agora vem de chartPalette() (tokens --chart-*). Arrays ficam frescos
+// a cada getter porque o dashboard recria charts ao trocar tema.
+// Donut categórico (motivos, setores, canais).
+const CATEGORICAL = chartPalette();
+// Dual-series (hoje vs ontem): roxo + amber.
+const DUAL = [CATEGORICAL[0], CATEGORICAL[2]];
+// Triple: accent (positivo) + ciano (info) + rose (negativo).
+const TRIPLE = [CATEGORICAL[0], CATEGORICAL[1], CATEGORICAL[4]];
 
 // ─── Semantic tempo colors harmonizados ───
 function tempoColor(minutes, meta) {
@@ -669,6 +698,41 @@ export async function loadHourly(range) {
           offsetY: -5
         }
       });
+    }
+
+    // Annotation for peak hour (Stripe-style marker) — só single-day
+    if (!isMultiDay && atend.length > 0) {
+      const peakVal = Math.max(...atend);
+      const peakIdx = atend.indexOf(peakVal);
+      if (peakVal > 0 && peakIdx >= 0) {
+        if (!annotations.points) annotations.points = [];
+        annotations.points.push({
+          x: hours[peakIdx],
+          y: peakVal,
+          seriesIndex: 0,
+          marker: {
+            size: 6,
+            fillColor: chartPalette()[0],
+            strokeColor: '#fff',
+            strokeWidth: 2,
+            radius: 6
+          },
+          label: {
+            text: 'PICO · ' + peakVal,
+            borderColor: chartPalette()[0],
+            offsetY: -4,
+            style: {
+              fontSize: '9px',
+              fontWeight: 700,
+              fontFamily: "'JetBrains Mono'",
+              color: chartPalette()[0],
+              background: isDarkTheme() ? 'rgba(26, 21, 56, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+              padding: { left: 8, right: 8, top: 3, bottom: 3 },
+              borderRadius: 6
+            }
+          }
+        });
+      }
     }
 
     renderChart('hourly', '#chartHourly', {
@@ -1424,8 +1488,17 @@ export async function loadTrend(range) {
       cssClass: 'spark-tooltip'
     }
   });
-  if (conv.length > 1) renderChart('sparkConv', '#sparkConv', sparkOpts(conv, '#a78bfa', sparkDates, '%'));
-  if (atend.length > 1) renderChart('sparkTempo', '#sparkTempo', sparkOpts(atend, '#8ea5c9', sparkDates, ''));
+  const p = chartPalette();
+  // Hero sparklines (XL)
+  if (atend.length > 1) renderChart('sparkAtend', '#sparkAtend', sparkOpts(atend, p[0], sparkDates, ''));
+  if (vendas.length > 1) renderChart('sparkVendas', '#sparkVendas', sparkOpts(vendas, p[1], sparkDates, ''));
+  if (conv.length > 1) renderChart('sparkConv', '#sparkConv', sparkOpts(conv, p[2], sparkDates, '%'));
+
+  // Secondary sparklines (smaller). Loss = atend - vendas; Pref reaproveita vendas; Tempo = atend.
+  const loss = atend.map((a, i) => Math.max(0, a - (vendas[i] || 0)));
+  if (loss.length > 1) renderChart('sparkLoss', '#sparkLoss', sparkOpts(loss, p[4], sparkDates, ''));
+  if (vendas.length > 1) renderChart('sparkPref', '#sparkPref', sparkOpts(vendas, p[3], sparkDates, ''));
+  if (atend.length > 1) renderChart('sparkTempo', '#sparkTempo', sparkOpts(atend, p[5], sparkDates, ''));
 }
 
 // ─── Origem dos Clientes (ApexCharts donut) ───

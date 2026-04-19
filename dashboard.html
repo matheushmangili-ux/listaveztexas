@@ -219,6 +219,11 @@
                 <span id="greetingClock">--:--</span>
                 <span class="greeting-sep">·</span>
                 <span id="greetingTemp"><i class="fa-solid fa-temperature-half"></i> —</span>
+                <span class="greeting-sep">·</span>
+                <span id="refreshCountdown" class="refresh-countdown" title="Próxima atualização automática">
+                  <i class="fa-solid fa-rotate" style="font-size: 9px"></i>
+                  <span id="refreshCountdownText">sync</span>
+                </span>
               </span>
               <button
                 id="topbarThemeToggle"
@@ -339,45 +344,77 @@
           ></div>
         </div>
 
-        <!-- KPI Cards — Hero Row -->
+        <!-- KPI Cards — Hero Row (Stripe-style: valor + delta + sparkline XL) -->
         <div class="kpi-grid-hero" id="kpiGrid">
           <div class="kpi-card kpi-card--hero">
-            <div class="kpi-label"><i class="fa-solid fa-users"></i> Total Atendimentos</div>
-            <div class="kpi-value" id="kpiTotal"><div class="skeleton skeleton-kpi-value"></div></div>
-            <div class="kpi-compare" id="kpiTotalCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label"><i class="fa-solid fa-bag-shopping"></i> Total Vendas</div>
-            <div class="kpi-value" id="kpiVendas"><div class="skeleton skeleton-kpi-value"></div></div>
-            <div class="kpi-compare" id="kpiVendasCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+            <div class="kpi-head">
+              <span class="kpi-label"><i class="fa-solid fa-users"></i> Total Atendimentos</span>
+            </div>
+            <div class="kpi-main">
+              <div class="kpi-main-left">
+                <div class="kpi-value" id="kpiTotal"><div class="skeleton skeleton-kpi-value"></div></div>
+                <div class="kpi-compare" id="kpiTotalCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+              </div>
+              <div id="sparkAtend" class="kpi-spark kpi-spark--xl"></div>
+            </div>
           </div>
           <div class="kpi-card kpi-card--hero">
-            <div class="kpi-label"><i class="fa-solid fa-chart-line"></i> Taxa de Conversão</div>
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
-              <div style="flex: 1; min-width: 0">
+            <div class="kpi-head">
+              <span class="kpi-label"><i class="fa-solid fa-bag-shopping"></i> Total Vendas</span>
+            </div>
+            <div class="kpi-main">
+              <div class="kpi-main-left">
+                <div class="kpi-value" id="kpiVendas"><div class="skeleton skeleton-kpi-value"></div></div>
+                <div class="kpi-compare" id="kpiVendasCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+              </div>
+              <div id="sparkVendas" class="kpi-spark kpi-spark--xl"></div>
+            </div>
+          </div>
+          <div class="kpi-card kpi-card--hero">
+            <div class="kpi-head">
+              <span class="kpi-label"><i class="fa-solid fa-chart-line"></i> Taxa de Conversão</span>
+            </div>
+            <div class="kpi-main">
+              <div class="kpi-main-left">
                 <div class="kpi-value" id="kpiConv"><div class="skeleton skeleton-kpi-value"></div></div>
                 <div class="kpi-compare" id="kpiConvCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
               </div>
-              <div id="sparkConv" class="kpi-spark"></div>
+              <div id="sparkConv" class="kpi-spark kpi-spark--xl"></div>
             </div>
           </div>
         </div>
-        <!-- KPI Cards — Secondary Row -->
+        <!-- KPI Cards — Secondary Row (Stripe-style: compacto com mini-sparkline) -->
         <div class="kpi-grid-secondary">
           <div class="kpi-card">
-            <div class="kpi-label"><i class="fa-solid fa-xmark"></i> Não Convertidos</div>
-            <div class="kpi-value" id="kpiLoss"><div class="skeleton skeleton-kpi-value"></div></div>
-            <div class="kpi-compare" id="kpiLossCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+            <div class="kpi-head">
+              <span class="kpi-label"><i class="fa-solid fa-xmark"></i> Não Convertidos</span>
+            </div>
+            <div class="kpi-main">
+              <div class="kpi-main-left">
+                <div class="kpi-value" id="kpiLoss"><div class="skeleton skeleton-kpi-value"></div></div>
+                <div class="kpi-compare" id="kpiLossCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+              </div>
+              <div id="sparkLoss" class="kpi-spark"></div>
+            </div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label"><i class="fa-solid fa-star" style="color: var(--warning)"></i> Fidelizados</div>
-            <div class="kpi-value" id="kpiPref"><div class="skeleton skeleton-kpi-value"></div></div>
-            <div class="kpi-compare" id="kpiPrefCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+            <div class="kpi-head">
+              <span class="kpi-label"><i class="fa-solid fa-star" style="color: var(--warning)"></i> Fidelizados</span>
+            </div>
+            <div class="kpi-main">
+              <div class="kpi-main-left">
+                <div class="kpi-value" id="kpiPref"><div class="skeleton skeleton-kpi-value"></div></div>
+                <div class="kpi-compare" id="kpiPrefCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
+              </div>
+              <div id="sparkPref" class="kpi-spark"></div>
+            </div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label"><i class="fa-solid fa-clock"></i> Tempo Médio</div>
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
-              <div style="flex: 1; min-width: 0">
+            <div class="kpi-head">
+              <span class="kpi-label"><i class="fa-solid fa-clock"></i> Tempo Médio</span>
+            </div>
+            <div class="kpi-main">
+              <div class="kpi-main-left">
                 <div class="kpi-value" id="kpiTime"><div class="skeleton skeleton-kpi-value"></div></div>
                 <div class="kpi-compare" id="kpiTimeCmp"><div class="skeleton skeleton-kpi-compare"></div></div>
               </div>

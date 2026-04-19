@@ -1098,6 +1098,37 @@ await Promise.all([loadAll(), loadVendedores()]);
 setFirstLoadDone();
 updateTimestamp();
 
+// ─── Refresh countdown (Stripe-style) — 60s loop que triggera refresh suave ───
+(function initRefreshCountdown() {
+  const textEl = document.getElementById('refreshCountdownText');
+  const pillEl = document.getElementById('refreshCountdown');
+  if (!textEl || !pillEl) return;
+
+  const PERIOD = 60;
+  let counter = PERIOD;
+
+  function render() {
+    textEl.textContent = counter + 's';
+  }
+  render();
+
+  setInterval(async () => {
+    counter -= 1;
+    if (counter <= 0) {
+      counter = PERIOD;
+      pillEl.classList.add('refreshing');
+      setTimeout(() => pillEl.classList.remove('refreshing'), 800);
+      try {
+        await loadAll();
+        updateTimestamp();
+      } catch (_) {
+        /* fail silently, próximo tick tenta de novo */
+      }
+    }
+    render();
+  }, 1000);
+})();
+
 // ─── Theme ───
 window.toggleTheme = function () {
   toggleTheme();
