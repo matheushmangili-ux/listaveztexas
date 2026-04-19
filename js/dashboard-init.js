@@ -1118,6 +1118,39 @@ window.toggleTheme = function () {
   loadAll();
 };
 
+// ─── Sidebar dropdown (Dashboard views) ───
+window.toggleDashDropdown = function () {
+  const dd = document.getElementById('dashDropdown');
+  if (!dd) return;
+  const isOpen = dd.classList.toggle('open');
+  const trigger = dd.querySelector('.sidebar-dropdown-trigger');
+  if (trigger) trigger.setAttribute('aria-expanded', String(isOpen));
+  localStorage.setItem('lv-dash-dropdown', isOpen ? '1' : '0');
+};
+(function initDashDropdown() {
+  const dd = document.getElementById('dashDropdown');
+  if (!dd) return;
+  const saved = localStorage.getItem('lv-dash-dropdown');
+  if (saved === '0') {
+    dd.classList.remove('open');
+    const trigger = dd.querySelector('.sidebar-dropdown-trigger');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+  }
+  // Mark active sublink based on current page
+  const path = location.pathname.toLowerCase();
+  let activeView = 'overview';
+  if (path.includes('dashboard-vendedor')) activeView = 'vendedor';
+  else if (path.includes('dashboard-operacional')) activeView = 'operacional';
+  dd.querySelectorAll('.sidebar-sublink').forEach((el) => {
+    el.classList.toggle('sidebar-sublink--active', el.dataset.view === activeView);
+  });
+  // Also update parent trigger active state (only if on overview — sub-pages get own active in their own HTMLs)
+  const trigger = dd.querySelector('.sidebar-dropdown-trigger');
+  if (trigger && activeView !== 'overview') {
+    trigger.classList.remove('sidebar-link--active');
+  }
+})();
+
 // ─── Section-level collapsibles (Por Vendedor / Operacional) ───
 window.toggleSectionCollapse = function (key) {
   const wrap = document.querySelector('.section-collapse[data-section-key="' + key + '"]');
