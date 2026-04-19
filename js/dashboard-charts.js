@@ -191,16 +191,12 @@ function donutConfig({ labels, values, colors, total, centerLabel, tooltipFn, ev
  */
 export function initDashboardCharts(ctx) {
   _ctx = ctx;
-  // Expose to window for onclick handlers in HTML
-  window.setChartTab = setChartTab;
-
-  // Restore last tab on load
-  const _savedTab = localStorage.getItem(CHART_TAB_KEY);
-  if (_savedTab) {
-    setChartTab(_savedTab);
-  } else {
-    setChartTab('geral');
-  }
+  // Tabs foram removidos (Op\u00e7\u00e3o C): todas as sections renderizam linearmente.
+  // Stub setChartTab pra compat com c\u00f3digo antigo que ainda possa chamar.
+  window.setChartTab = () => {};
+  document.querySelectorAll('.chart-section').forEach((s) => {
+    s.style.display = 'block';
+  });
 }
 
 // ─── Theme-aware chart colors ───
@@ -501,6 +497,46 @@ export async function loadKPIs(range, prevRange) {
   renderCompare('kpiLossCmp', d.total_nao_convertido || 0, p.total_nao_convertido || 0, true);
   renderCompare('kpiTimeCmp', d.tempo_medio_min || 0, p.tempo_medio_min || 0, true);
   renderCompare('kpiPrefCmp', prefCurr, prefPrev);
+
+  // ─── Hero compare (Hoje · X / Ontem · Y) — valores scalar do período atual/anterior ───
+  // Corrige bug onde \"Hoje\" pegava o último dia do trend (que pode ser ontem
+  // se hoje não tiver dado). Aqui vem direto do RPC get_conversion_stats.
+  const setText = (id, v) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = v;
+  };
+  const setDelta = (id, now, before) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (!before) {
+      el.textContent = now > 0 ? '↑ novo' : '';
+      el.classList.remove('up', 'down');
+      if (now > 0) el.classList.add('up');
+      return;
+    }
+    const pct = ((now - before) / before) * 100;
+    const arrow = pct >= 0 ? '↑' : '↓';
+    el.textContent = arrow + ' ' + Math.abs(pct).toFixed(0) + '%';
+    el.classList.toggle('up', pct >= 0);
+    el.classList.toggle('down', pct < 0);
+  };
+  const tNow = d.total_atendimentos || 0;
+  const tPrev = p.total_atendimentos || 0;
+  const vNow = d.total_vendas || 0;
+  const vPrev = p.total_vendas || 0;
+  setText('kpiTotalNow', tNow);
+  setText('kpiTotalPrev', tPrev);
+  setDelta('kpiTotalDelta', tNow, tPrev);
+  setText('kpiVendasNow', vNow);
+  setText('kpiVendasPrev', vPrev);
+  setDelta('kpiVendasDelta', vNow, vPrev);
+  setText('kpiConvNow', convAtual + '%');
+  setText('kpiConvPrev', convAnterior + '%');
+  setDelta('kpiConvDelta', convAtual, convAnterior);
+  // Secondary deltas (loss, pref, time)
+  setDelta('kpiLossDelta', d.total_nao_convertido || 0, p.total_nao_convertido || 0);
+  setDelta('kpiPrefDelta', prefCurr, prefPrev);
+  setDelta('kpiTimeDelta', d.tempo_medio_min || 0, p.tempo_medio_min || 0);
 
   // ─── KPI Sparklines (Conversão + Tempo) ───
   // Sparklines are populated from trend data in loadTrend()
@@ -1539,46 +1575,8 @@ export async function loadTrend(range) {
   if (vendas.length > 1) renderChart('heroVendas', '#chartHeroVendas', heroOpts(vendas, p[1], sparkDates, ''));
   if (conv.length > 1) renderChart('heroConv', '#chartHeroConv', heroOpts(conv, p[2], sparkDates, '%'));
 
-  // ─── Populate hero compare (Hoje · X / Ontem · Y + delta) ───
-  const last = (arr) => (arr.length > 0 ? arr[arr.length - 1] : 0);
-  const prev = (arr) => (arr.length > 1 ? arr[arr.length - 2] : 0);
-  const fmtDelta = (now, before, suffix = '') => {
-    if (!before) return '';
-    const pct = ((now - before) / before) * 100;
-    const arrow = pct >= 0 ? '↑' : '↓';
-    return arrow + ' ' + Math.abs(pct).toFixed(0) + '%' + suffix;
-  };
-  const setText = (id, v) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = v;
-  };
-  const setDelta = (id, now, before) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (!before) {
-      el.textContent = '';
-      return;
-    }
-    const pct = ((now - before) / before) * 100;
-    el.textContent = fmtDelta(now, before);
-    el.classList.toggle('up', pct >= 0);
-    el.classList.toggle('down', pct < 0);
-  };
-  const tNow = last(atend),
-    tPrev = prev(atend);
-  const vNow = last(vendas),
-    vPrev = prev(vendas);
-  const cNow = last(conv),
-    cPrev = prev(conv);
-  setText('kpiTotalNow', tNow);
-  setText('kpiTotalPrev', tPrev);
-  setDelta('kpiTotalDelta', tNow, tPrev);
-  setText('kpiVendasNow', vNow);
-  setText('kpiVendasPrev', vPrev);
-  setDelta('kpiVendasDelta', vNow, vPrev);
-  setText('kpiConvNow', Math.round(cNow) + '%');
-  setText('kpiConvPrev', Math.round(cPrev) + '%');
-  setDelta('kpiConvDelta', cNow, cPrev);
+  // Hero compare (Hoje/Ontem/delta) agora vem de loadKPIs — scalars confi\u00e1veis.
+  // Este bloco s\u00f3 renderiza os charts (hero area + secondary sparklines).
 
   // ─── Secondary sparklines (64x30, line-only per mockup) ───
   const secOpts = (series, color) => ({
@@ -1592,11 +1590,7 @@ export async function loadTrend(range) {
   if (loss.length > 1) renderChart('sparkLoss', '#sparkLoss', secOpts(loss, p[4]));
   if (vendas.length > 1) renderChart('sparkPref', '#sparkPref', secOpts(vendas, p[3]));
   if (atend.length > 1) renderChart('sparkTempo', '#sparkTempo', secOpts(atend, p[5]));
-
-  // Secondary deltas
-  setDelta('kpiLossDelta', last(loss), prev(loss));
-  setDelta('kpiPrefDelta', last(vendas), prev(vendas));
-  setDelta('kpiTimeDelta', last(atend), prev(atend));
+  // Secondary deltas (loss/pref/time) agora populados em loadKPIs com scalars reais.
 }
 
 // ─── Origem dos Clientes (ApexCharts donut) ───
