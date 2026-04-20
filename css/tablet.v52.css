@@ -83,20 +83,6 @@
   color: var(--accent);
   background: transparent;
 }
-.ruptura-picker .rp-color-details {
-  margin-top: 4px;
-}
-.ruptura-picker .rp-color-summary {
-  cursor: pointer;
-  padding: 8px 0;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-  user-select: none;
-}
-.ruptura-picker .rp-color-details[open] .rp-color-summary {
-  color: var(--text-secondary);
-}
 @media (max-width: 600px) {
   .tablet-layout {
     grid-template-columns: 1fr;

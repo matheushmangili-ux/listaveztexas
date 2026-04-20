@@ -113,10 +113,10 @@ export function mountPicker(root) {
       <div class="rp-label">Tamanho <span class="rp-optional">(opcional)</span></div>
       <div class="rp-chips" id="rpTamanhos"></div>
     </div>
-    <details class="rp-color-details">
-      <summary class="rp-color-summary">+ Cor <span class="rp-optional">(opcional)</span></summary>
-      <div class="rp-chips rp-chips--wrap" id="rpCores" style="margin-top:8px"></div>
-    </details>
+    <div class="rp-section">
+      <div class="rp-label">Cor <span class="rp-optional">(opcional)</span></div>
+      <div class="rp-chips rp-chips--wrap" id="rpCores"></div>
+    </div>
   `;
   const tiposEl = root.querySelector('#rpTipos');
   const marcasEl = root.querySelector('#rpMarcas');
