@@ -411,6 +411,7 @@ export async function loadAll() {
     ['hourly', loadHourly(range)],
     ['ranking', loadRanking(range, cachedRanking)],
     ['ruptures', loadRuptures(range)],
+    ['ruptureImpact', loadRuptureImpact(range)],
     ['pauseStats', loadPauseStats(range)],
     ['floor', loadFloor()],
     ['scatter', loadScatter(range, cachedRanking)],
@@ -977,6 +978,45 @@ export async function loadRuptures(range) {
     <div class="rupture-count">${r.total}</div>
   </div>`
     )
+    .join('');
+}
+
+// ─── Rupture impact (top 10 produtos específicos no overview) ───
+// Usa get_rupture_impact pra quebrar o motivo "ruptura" em tipo+marca+tamanho
+// e mostrar os itens acionáveis (o que repor). Card esconde se não há ruptura.
+export async function loadRuptureImpact(range) {
+  const sb = _ctx.sb;
+  const card = document.getElementById('ruptureImpactCard');
+  const list = document.getElementById('ruptureImpactList');
+  const counter = document.getElementById('ruptureImpactCount');
+  if (!card || !list) return;
+
+  const { data, error } = await sb.rpc('get_rupture_impact', {
+    p_inicio: range.start,
+    p_fim: range.end,
+    p_limit: 10
+  });
+  if (error || !data || data.length === 0) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = '';
+  const total = data.reduce((acc, r) => acc + r.total_rupturas, 0);
+  if (counter) counter.textContent = `${total} ${total === 1 ? 'REGISTRO' : 'REGISTROS'}`;
+
+  list.innerHTML = data
+    .map((r) => {
+      const marca = r.marca_nome ? escapeHtml(r.marca_nome) : null;
+      const noun = r.total_rupturas === 1 ? 'registro' : 'registros';
+      const sub = marca ? `${marca} · ${r.total_rupturas} ${noun}` : `${r.total_rupturas} ${noun}`;
+      return `<div class="rupture-item">
+        <div>
+          <div style="font-weight:600;font-size:13px">${escapeHtml(r.produto)}</div>
+          <div style="font-size:10px;color:var(--text-muted)">${sub}</div>
+        </div>
+        <div class="rupture-count">${r.total_rupturas}</div>
+      </div>`;
+    })
     .join('');
 }
 
