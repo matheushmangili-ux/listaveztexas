@@ -126,7 +126,7 @@ function buildTooltip(title, rows, color) {
 }
 
 // ─── Shared donut chart config factory ───
-function donutConfig({ labels, values, colors, total, centerLabel, tooltipFn, events }) {
+function donutConfig({ labels, values, colors, total, centerLabel, tooltipFn, events, showLegend = true }) {
   const cc = chartColors();
   return {
     chart: { type: 'donut', height: 280, ...(events ? { events } : {}) },
@@ -168,6 +168,7 @@ function donutConfig({ labels, values, colors, total, centerLabel, tooltipFn, ev
       style: { fontSize: '11px', fontWeight: 700, fontFamily: "'Inter Tight'" }
     },
     legend: {
+      show: showLegend,
       position: 'bottom',
       fontSize: '11px',
       fontWeight: 600,
@@ -614,6 +615,9 @@ export async function loadMotivos(range) {
       colors,
       total: totalMotivos,
       centerLabel: 'PERDAS',
+      // Legenda nativa do Apex desabilitada — #motivosLegend ao lado já
+      // mostra dot + label + % + total (mais rico). Evita duplicação.
+      showLegend: false,
       events: {
         dataPointSelection: function (event, chartCtx, config) {
           const idx = config.dataPointIndex;
