@@ -185,14 +185,6 @@ Responda APENAS em JSON válido: {
   "score": number (0-100, score geral do turno comparado ao benchmark)
 }`
 
-Responda APENAS em JSON válido: {
-  "headline": "string (1 frase, max 110 chars, com numero principal)",
-  "destaque": { "titulo": "string (max 30 chars)", "detalhe": "string com nome+numero" },
-  "alerta": { "titulo": "string (max 30 chars)", "detalhe": "string com numero+ação" },
-  "acao_imediata": "string (1 ação concreta pra executar HOJE, com nome se aplicável)",
-  "score": number (0-100, score geral do turno comparado ao benchmark)
-}`
-
   const result = await callGroq(prompt)
   await setCache(tenantId, cacheKey, result, 1800000) // 30min cache
   return result
