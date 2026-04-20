@@ -151,7 +151,7 @@
   line-height: 1.2;
 }
 .t-header-kpi-value {
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 18px;
   font-family: var(--font-mono);
   font-weight: 700;
@@ -1035,7 +1035,7 @@
   min-height: 40px;
   padding: 0 8px;
   font-size: 13px;
-  color: #ffffff;
+  color: var(--text-primary);
   background: none;
   border: none;
   cursor: pointer;
@@ -1052,7 +1052,7 @@
   min-width: 44px;
   padding: 0 10px;
   font-size: 16px;
-  color: #ffffff;
+  color: var(--text-primary);
   background: none;
   border: none;
   cursor: pointer;
@@ -1954,10 +1954,6 @@
 .t-header-kpi-value {
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
-  background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.78) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 .t-header-kpi-label {
   letter-spacing: 0.1em;
