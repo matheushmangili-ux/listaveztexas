@@ -763,6 +763,9 @@ export async function loadHourly(range) {
       const peakVal = Math.max(...atend);
       const peakIdx = atend.indexOf(peakVal);
       if (peakVal > 0 && peakIdx >= 0) {
+        // Flip label para a esquerda quando o pico está nas 2 últimas horas
+        // (evita que o label vaze o limite direito do chart-card)
+        const isPeakNearEnd = peakIdx >= atend.length - 2;
         if (!annotations.points) annotations.points = [];
         annotations.points.push({
           x: hours[peakIdx],
@@ -778,6 +781,7 @@ export async function loadHourly(range) {
           label: {
             text: 'PICO · ' + peakVal,
             borderColor: chartPalette()[0],
+            offsetX: isPeakNearEnd ? -48 : 0,
             offsetY: -4,
             style: {
               fontSize: '9px',
@@ -818,7 +822,7 @@ export async function loadHourly(range) {
       },
       stroke: { width: [2.5, 1.5, 2], curve: 'smooth', dashArray: [0, 4, 0] },
       markers: { size: 0, hover: { size: 4 } },
-      grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { left: 14, right: 20, top: 10 } },
+      grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { left: 14, right: 40, top: 10 } },
       legend: {
         position: 'top',
         fontSize: '11px',
@@ -1553,6 +1557,7 @@ export async function loadTrend(range) {
   const p = chartPalette();
 
   // ─── Hero area charts (120px, gradient area) ───
+  // tooltip.fixed.position='topRight' evita clip pelo .hero-card overflow:hidden
   const heroOpts = (series, color, labels, suffix) => ({
     chart: { type: 'area', height: 120, sparkline: { enabled: true }, animations: { enabled: true, speed: 400 } },
     series: [{ name: 'Valor', data: series }],
@@ -1561,14 +1566,16 @@ export async function loadTrend(range) {
     fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0, stops: [0, 100] } },
     tooltip: {
       enabled: true,
-      fixed: { enabled: false },
-      x: { show: false },
+      followCursor: false,
+      fixed: { enabled: true, position: 'topRight', offsetX: 0, offsetY: 8 },
+      x: { show: true },
       y: {
         title: { formatter: () => '' },
         formatter: (val, { dataPointIndex }) =>
           (labels[dataPointIndex] || '') + ': ' + (Number.isInteger(val) ? val : val.toFixed(1)) + suffix
       },
-      marker: { show: false }
+      marker: { show: false },
+      style: { fontSize: '11px' }
     }
   });
   if (atend.length > 1) renderChart('heroAtend', '#chartHeroAtend', heroOpts(atend, p[0], sparkDates, ''));

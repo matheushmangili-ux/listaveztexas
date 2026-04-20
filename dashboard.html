@@ -74,7 +74,7 @@
             </button>
             <div class="sidebar-dropdown-items">
               <a data-view="overview" class="sidebar-sublink sidebar-sublink--active" href="dashboard.html">
-                <span class="sublink-dot"></span>Overview
+                <span class="sublink-dot"></span>Visão Geral
               </a>
               <a data-view="vendedor" class="sidebar-sublink" href="dashboard-vendedor.html">
                 <span class="sublink-dot"></span>Por Vendedor
@@ -183,7 +183,7 @@
       <div class="dash-main">
         <!-- Topbar Stripe: Overview title + period chips + theme toggle -->
         <div class="topbar-stripe">
-          <h1 class="topbar-title">Overview</h1>
+          <h1 class="topbar-title">Visão Geral</h1>
           <div class="topbar-actions">
             <div class="period-tabs" id="periodTabs" role="tablist">
               <button data-period="hoje" class="active" onclick="setPeriod('hoje')">Hoje</button>
@@ -490,9 +490,27 @@
               <i class="fa-solid fa-clock"></i>Sem fluxo de atendimentos neste período
             </p>
           </div>
-          <!-- Evolução Diária removida — redundante com hero area charts
-               (Atend/Vendas/Conv) que já mostram last 7-8 dias no topo. -->
-          <div id="chartTrend" style="display: none"></div>
+          <div class="chart-card" style="margin-bottom: var(--gap)">
+            <h3>
+              <i class="fa-solid fa-chart-line" style="margin-right: 6px; color: var(--accent-dim)"></i>Evolução Diária
+            </h3>
+            <div
+              style="
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+                scrollbar-color: var(--accent-dim) transparent;
+              "
+            >
+              <div class="chart-box" style="height: 320px; min-width: 700px">
+                <div id="chartTrend"></div>
+              </div>
+            </div>
+            <p id="chartTrendEmpty" class="chart-empty-state" style="display: none">
+              <i class="fa-solid fa-chart-line"></i>Sem evolução registrada neste período
+            </p>
+          </div>
         </div>
 
         <!-- Footer -->
