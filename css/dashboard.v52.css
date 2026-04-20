@@ -1712,11 +1712,81 @@
 }
 
 /* ═══ VM Tasks Admin (Fase 6b) ═══ */
+/* VM Modal — Criar Tarefa form (refactor: .vm-field em vez de <label> wrapping) */
 .vm-create-form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
 }
+.vm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.vm-field-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.vm-field-hint {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.8;
+}
+.vm-req {
+  color: var(--accent);
+}
+.vm-input {
+  padding: 10px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 1.4;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.vm-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+textarea.vm-input {
+  resize: vertical;
+  min-height: 64px;
+}
+.vm-field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 96px;
+  gap: 12px;
+}
+@media (max-width: 600px) {
+  .vm-field-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.vm-submit-btn {
+  width: 100%;
+  margin-top: 8px;
+  min-height: 48px;
+}
+
+/* Legacy .vm-form-label / .vm-form-row \u2014 mantido pra compat
+   se outros pontos ainda usarem. Aliases leves. */
 .vm-form-label {
   display: flex;
   flex-direction: column;
