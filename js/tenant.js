@@ -56,14 +56,16 @@ export function tenantPath(path) {
 /**
  * Load tenant context from Supabase via resolve_tenant RPC.
  * Returns { id, nome_loja, logo_url, cor_primaria, setores } or null.
- * Redirects to /landing if slug is invalid or tenant not found.
+ * Por padrão, redireciona pra /landing se slug ausente ou tenant não encontrado.
+ * Passe { redirectOnMissing: false } pra obter null em vez de redirecionar
+ * (usado pelo login, que precisa mostrar um passo "qual é sua loja?").
  */
-export async function loadTenant() {
+export async function loadTenant({ redirectOnMissing = true } = {}) {
   if (_tenantCache) return _tenantCache;
 
   const slug = getSlug();
   if (!slug) {
-    window.location.href = '/landing.html';
+    if (redirectOnMissing) window.location.href = '/landing.html';
     return null;
   }
 
@@ -71,11 +73,16 @@ export async function loadTenant() {
   const { data, error } = await sb.rpc('resolve_tenant', { p_slug: slug });
 
   if (error || !data || data.length === 0) {
-    window.location.href = '/landing.html';
+    if (redirectOnMissing) window.location.href = '/landing.html';
     return null;
   }
 
   _tenantCache = data[0];
+  try {
+    localStorage.setItem('lv-last-slug', slug);
+  } catch (_) {
+    /* storage indisponível — ignora */
+  }
   return _tenantCache;
 }
 

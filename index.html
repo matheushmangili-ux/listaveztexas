@@ -446,6 +446,45 @@
             >
           </div>
         </div>
+
+        <!-- Slug Picker (visitante sem :slug na URL) -->
+        <div id="panelSlug" class="login-panel">
+          <p style="text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 16px; font-weight: 500">
+            Qual é a sua loja?
+          </p>
+          <div style="margin-bottom: 16px">
+            <label
+              style="
+                display: block;
+                font-size: 11px;
+                font-weight: 600;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                margin-bottom: 6px;
+              "
+              for="slugInput"
+              >Identificador</label
+            >
+            <input
+              id="slugInput"
+              class="input"
+              type="text"
+              placeholder="ex: texascenter"
+              autocapitalize="none"
+              autocorrect="off"
+              spellcheck="false"
+              autocomplete="off"
+            />
+          </div>
+          <button id="btnSlug" class="btn btn-primary" style="width: 100%" onclick="handleSlugSubmit()">
+            <i class="fa-solid fa-arrow-right"></i>
+            Continuar
+          </button>
+          <p style="text-align: center; margin-top: 12px; font-size: 11px; color: var(--text-muted)">
+            É o nome curto enviado pela sua loja (ex: <code>texascenter</code>).
+          </p>
+        </div>
       </div>
     </div>
 
@@ -458,25 +497,73 @@
       import { loadTenant, applyBranding, getSlug } from '/js/tenant.js';
 
       // Load tenant context from URL slug
-      const tenant = await loadTenant();
+      const tenant = await loadTenant({ redirectOnMissing: false });
       const slug = getSlug();
-      if (tenant) {
-        applyBranding(tenant);
-        const sub = document.querySelector('.login-box p');
-        if (sub) sub.textContent = tenant.nome_loja.toUpperCase();
-      }
+
       // Reveal login box, hide loader
       document.getElementById('loginLoader').style.display = 'none';
       document.getElementById('loginBox').style.opacity = '1';
-      // Set slug-aware forgot password link
-      if (slug) {
+
+      if (!slug) {
+        // Visitante veio de / (clicou Entrar na landing) — pede a loja antes.
+        showSlugPicker();
+      } else if (!tenant) {
+        // Slug na URL mas tenant não existe — volta pra landing.
+        window.location.href = '/landing.html';
+      } else {
+        // Fluxo normal: slug + tenant ok.
+        applyBranding(tenant);
+        const sub = document.querySelector('.login-box p');
+        if (sub) sub.textContent = tenant.nome_loja.toUpperCase();
+
         const fLink = document.getElementById('forgotLink');
         if (fLink) fLink.href = `/${slug}/forgot-password`;
+
+        // Ativa painel PIN por padrão (fluxo atual)
+        document.getElementById('panelPin').classList.add('active');
+
+        // Check if already logged in
+        const user = await getUser();
+        if (user) redirectByRole(user);
       }
 
-      // Check if already logged in
-      const user = await getUser();
-      if (user) redirectByRole(user);
+      function showSlugPicker() {
+        // Esconde tabs e força o painel de slug
+        const tabs = document.querySelector('.tab-switch');
+        if (tabs) tabs.style.display = 'none';
+        document.getElementById('panelPin').classList.remove('active');
+        document.getElementById('panelEmail').classList.remove('active');
+        document.getElementById('panelSlug').classList.add('active');
+
+        // Pré-preenche com o último slug usado neste navegador
+        const lastSlug = (() => {
+          try {
+            return localStorage.getItem('lv-last-slug');
+          } catch (_) {
+            return null;
+          }
+        })();
+        const input = document.getElementById('slugInput');
+        if (input) {
+          if (lastSlug) input.value = lastSlug;
+          input.focus();
+          input.select();
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleSlugSubmit();
+          });
+        }
+      }
+
+      window.handleSlugSubmit = function () {
+        const input = document.getElementById('slugInput');
+        const raw = (input?.value || '').trim().toLowerCase();
+        if (!raw) return;
+        if (!/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(raw) || raw.length < 3) {
+          showError('Identificador inválido — use apenas letras, números e hífens.');
+          return;
+        }
+        window.location.href = `/${encodeURIComponent(raw)}/login`;
+      };
 
       // Tab switching
       window.switchTab = function (tab) {
