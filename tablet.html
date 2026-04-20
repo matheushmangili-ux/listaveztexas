@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR" data-theme="dark">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -22,11 +22,9 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <script>
-      // Tablet roda em quiosque — forçado em dark sempre (ignora lv-theme do user).
-      document.documentElement.setAttribute('data-theme', 'dark');
       (function () {
-        var m = document.querySelector('meta[name="theme-color"]');
-        if (m) m.content = '#060606';
+        var t = localStorage.getItem('lv-theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
       })();
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -141,6 +139,16 @@
                 "
               >
                 <i class="fa-solid fa-circle-question"></i> Rever tour
+              </button>
+              <button
+                id="themeMenuBtn"
+                onclick="
+                  toggleTabletTheme();
+                  toggleMoreMenu();
+                "
+              >
+                <i class="fa-solid fa-moon" id="themeIcon"></i>
+                <span id="themeLabel">Modo Claro</span>
               </button>
               <div class="more-menu-divider"></div>
               <button onclick="handleLogout()">

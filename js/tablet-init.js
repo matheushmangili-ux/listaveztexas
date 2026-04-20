@@ -839,18 +839,25 @@ window._toggleTheme = function () {
   if (meta) meta.content = next === 'dark' ? '#060606' : '#F5F5F7';
 };
 
+function syncThemeMenuButton() {
+  const isDark = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
+  const lbl = document.getElementById('themeLabel');
+  const ic = document.getElementById('themeIcon');
+  if (lbl) lbl.textContent = isDark ? 'Modo Claro' : 'Modo Escuro';
+  if (ic) ic.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+}
+window.toggleTabletTheme = function () {
+  window._toggleTheme();
+  syncThemeMenuButton();
+};
+
 // ─── More menu (three dots) ───
 window.toggleMoreMenu = function () {
   const m = document.getElementById('moreMenu');
   if (!m) return;
   const open = m.style.display === 'none';
   m.style.display = open ? 'block' : 'none';
-  // Atualizar label do tema
-  if (open) {
-    const lbl = document.getElementById('themeLabel');
-    if (lbl)
-      lbl.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? 'Modo Claro' : 'Modo Escuro';
-  }
+  if (open) syncThemeMenuButton();
 };
 document.addEventListener('click', function (e) {
   const m = document.getElementById('moreMenu');
@@ -1181,3 +1188,4 @@ await checkExistingTurno();
 await loadVendedores();
 await checkActiveAtendimentos();
 loadCanaisOrigem(); // carrega canais de origem em background
+syncThemeMenuButton();
