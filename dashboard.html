@@ -361,8 +361,8 @@
                 <span class="hero-delta" id="kpiTotalDelta"></span>
               </div>
               <div class="hero-compare">
-                <span class="today">Hoje · <span id="kpiTotalNow">0</span></span>
-                <span class="yesterday">Ontem · <span id="kpiTotalPrev">0</span></span>
+                <span class="today"><span data-compare="now">Hoje</span> · <span id="kpiTotalNow">0</span></span>
+                <span class="yesterday"><span data-compare="prev">Ontem</span> · <span id="kpiTotalPrev">0</span></span>
               </div>
             </div>
             <div class="hero-chart" id="chartHeroAtend"></div>
@@ -375,8 +375,12 @@
                 <span class="hero-delta" id="kpiVendasDelta"></span>
               </div>
               <div class="hero-compare">
-                <span class="today" style="--dot: var(--chart-2)">Hoje · <span id="kpiVendasNow">0</span></span>
-                <span class="yesterday">Ontem · <span id="kpiVendasPrev">0</span></span>
+                <span class="today" style="--dot: var(--chart-2)"
+                  ><span data-compare="now">Hoje</span> · <span id="kpiVendasNow">0</span></span
+                >
+                <span class="yesterday"
+                  ><span data-compare="prev">Ontem</span> · <span id="kpiVendasPrev">0</span></span
+                >
               </div>
             </div>
             <div class="hero-chart" id="chartHeroVendas"></div>
@@ -389,8 +393,10 @@
                 <span class="hero-delta" id="kpiConvDelta"></span>
               </div>
               <div class="hero-compare">
-                <span class="today" style="--dot: var(--chart-3)">Hoje · <span id="kpiConvNow">0%</span></span>
-                <span class="yesterday">Ontem · <span id="kpiConvPrev">0%</span></span>
+                <span class="today" style="--dot: var(--chart-3)"
+                  ><span data-compare="now">Hoje</span> · <span id="kpiConvNow">0%</span></span
+                >
+                <span class="yesterday"><span data-compare="prev">Ontem</span> · <span id="kpiConvPrev">0%</span></span>
               </div>
             </div>
             <div class="hero-chart" id="chartHeroConv"></div>

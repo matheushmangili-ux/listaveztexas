@@ -498,7 +498,19 @@ export async function loadKPIs(range, prevRange) {
   renderCompare('kpiTimeCmp', d.tempo_medio_min || 0, p.tempo_medio_min || 0, true);
   renderCompare('kpiPrefCmp', prefCurr, prefPrev);
 
-  // ─── Hero compare (Hoje · X / Ontem · Y) — valores scalar do período atual/anterior ───
+  // ─── Hero compare labels (ajusta "Hoje · / Ontem ·" conforme período ativo) ───
+  const compareLabels = (() => {
+    const p = _ctx.currentPeriod;
+    if (p === 'ontem') return { now: 'Ontem', prev: 'Anteontem' };
+    if (p === 'semana') return { now: 'Semana', prev: 'Sem. anterior' };
+    if (p === 'mes') return { now: 'Mês', prev: 'Mês anterior' };
+    if (p === 'custom') return { now: 'Período', prev: 'Anterior' };
+    return { now: 'Hoje', prev: 'Ontem' };
+  })();
+  document.querySelectorAll('[data-compare="now"]').forEach((el) => (el.textContent = compareLabels.now));
+  document.querySelectorAll('[data-compare="prev"]').forEach((el) => (el.textContent = compareLabels.prev));
+
+  // ─── Hero compare (valores scalar do período atual/anterior) ───
   // Corrige bug onde \"Hoje\" pegava o último dia do trend (que pode ser ontem
   // se hoje não tiver dado). Aqui vem direto do RPC get_conversion_stats.
   const setText = (id, v) => {
