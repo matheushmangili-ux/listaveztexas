@@ -102,29 +102,48 @@
 
     area.innerHTML = `
       <div class="vm-create-form">
-        <label class="vm-form-label">Título *<input type="text" id="vmTaskTitle" maxlength="100" placeholder="Ex: Vitrine Coleção Inverno"></label>
-        <label class="vm-form-label">Descrição<textarea id="vmTaskDesc" rows="2" maxlength="300" placeholder="Instruções detalhadas..."></textarea></label>
-        <div class="vm-form-label">Categoria *
-          <div class="vm-cat-row">${CATS.map((c) => `<button class="vm-cat-pill-sm" data-cat="${c.id}">${c.label}</button>`).join('')}</div>
+        <div class="vm-field">
+          <label class="vm-field-label" for="vmTaskTitle">Título <span class="vm-req">*</span></label>
+          <input type="text" id="vmTaskTitle" class="vm-input" maxlength="100" placeholder="Ex: Vitrine Coleção Inverno">
         </div>
-        <div class="vm-form-row">
-          <label class="vm-form-label">Prioridade
-            <select id="vmTaskPriority"><option value="normal">Normal</option><option value="urgente">Urgente</option></select>
-          </label>
-          <label class="vm-form-label">Prazo<input type="datetime-local" id="vmTaskDue"></label>
-          <label class="vm-form-label">XP<input type="number" id="vmTaskXp" value="30" min="0" max="500"></label>
+        <div class="vm-field">
+          <label class="vm-field-label" for="vmTaskDesc">Descrição</label>
+          <textarea id="vmTaskDesc" class="vm-input" rows="3" maxlength="300" placeholder="Instruções detalhadas…"></textarea>
         </div>
-        <div class="vm-form-label">Fotos de referência (até 5)
+        <div class="vm-field">
+          <label class="vm-field-label">Categoria <span class="vm-req">*</span></label>
+          <div class="vm-cat-row">${CATS.map((c) => `<button type="button" class="vm-cat-pill-sm" data-cat="${c.id}">${c.label}</button>`).join('')}</div>
+        </div>
+        <div class="vm-field-grid">
+          <div class="vm-field">
+            <label class="vm-field-label" for="vmTaskPriority">Prioridade</label>
+            <select id="vmTaskPriority" class="vm-input">
+              <option value="normal">Normal</option>
+              <option value="urgente">Urgente</option>
+            </select>
+          </div>
+          <div class="vm-field">
+            <label class="vm-field-label" for="vmTaskDue">Prazo</label>
+            <input type="datetime-local" id="vmTaskDue" class="vm-input">
+          </div>
+          <div class="vm-field">
+            <label class="vm-field-label" for="vmTaskXp">XP</label>
+            <input type="number" id="vmTaskXp" class="vm-input" value="30" min="0" max="500">
+          </div>
+        </div>
+        <div class="vm-field">
+          <label class="vm-field-label">Fotos de referência <span class="vm-field-hint">até 5</span></label>
           <div class="vm-ref-upload" id="vmRefUpload">
-            <button class="vm-ref-add" id="vmRefAddBtn"><i class="fa-solid fa-plus"></i></button>
+            <button type="button" class="vm-ref-add" id="vmRefAddBtn"><i class="fa-solid fa-plus"></i></button>
           </div>
           <input type="file" accept="image/*" id="vmRefInput" class="hidden" multiple>
         </div>
-        <div class="vm-form-label">Checklist
+        <div class="vm-field">
+          <label class="vm-field-label">Checklist</label>
           <div id="vmChecklistBuilder"></div>
-          <button class="vm-checklist-add" id="vmAddCheckItem"><i class="fa-solid fa-plus"></i> Adicionar item</button>
+          <button type="button" class="vm-checklist-add" id="vmAddCheckItem"><i class="fa-solid fa-plus"></i> Adicionar item</button>
         </div>
-        <button class="vendor-btn-primary" id="vmCreateBtn" style="width:100%;margin-top:12px">
+        <button type="button" class="vendor-btn-primary vm-submit-btn" id="vmCreateBtn">
           <i class="fa-solid fa-paper-plane"></i> Criar e enviar
         </button>
       </div>
