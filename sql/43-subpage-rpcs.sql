@@ -92,12 +92,13 @@ AS $$
     GROUP BY vendedor_id
   ),
   xp AS (
-    SELECT vendedor_id, SUM(xp_amount)::bigint AS xp
+    -- vendor_xp_events usa colunas vendor_id + points (não vendedor_id/xp_amount)
+    SELECT vendor_id AS vendedor_id, SUM(points)::bigint AS xp
     FROM public.vendor_xp_events
     WHERE tenant_id = public.get_my_tenant_id()
-      AND vendedor_id IN (p_vendedor_a, p_vendedor_b)
+      AND vendor_id IN (p_vendedor_a, p_vendedor_b)
       AND created_at >= p_inicio AND created_at < p_fim
-    GROUP BY vendedor_id
+    GROUP BY vendor_id
   )
   SELECT
     v.id,
