@@ -112,11 +112,9 @@ body {
 .vendor-brand-logo {
   width: auto;
   height: 100%;
-  max-width: none;
+  max-width: 100%;
   object-fit: contain;
   display: block;
-  transform: scale(1.85);
-  transform-origin: center;
 }
 .vendor-brand-sub {
   font-size: 11px;
