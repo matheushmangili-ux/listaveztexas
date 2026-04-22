@@ -11,16 +11,16 @@
   /* ─── Light mode (default) ─── */
 
   /* Backgrounds — neutros (slate) Stripe-style. Roxo só em accent. */
-  --bg-deep: #f1f4f9;
+  --bg-deep: #fafbfc;
   --bg-surface: #ffffff;
   --bg-card: #ffffff;
-  --bg-elevated: #e9edf3;
-  --bg-hover: #e2e7ee;
+  --bg-elevated: #f4f6f9;
+  --bg-hover: #eef1f5;
 
-  /* Borders neutras — mais firmes em light pra cards brancos ficarem visíveis */
-  --border-subtle: rgba(15, 23, 42, 0.08);
-  --border-medium: rgba(15, 23, 42, 0.12);
-  --border-strong: rgba(15, 23, 42, 0.2);
+  /* Borders neutras — sutis. Cards brancos sobre bg-deep já contrastam. */
+  --border-subtle: rgba(15, 23, 42, 0.06);
+  --border-medium: rgba(15, 23, 42, 0.1);
+  --border-strong: rgba(15, 23, 42, 0.16);
 
   /* Text */
   --text-primary: #0f172a;
@@ -223,48 +223,5 @@ mv-loader {
   color: var(--accent);
 }
 
-/* ─── Light mode explicit override (para páginas com toggle) ─── */
-[data-theme='light'] {
-  --bg-deep: #fafbfc;
-  --bg-surface: #ffffff;
-  --bg-card: #ffffff;
-  --bg-elevated: #f4f6f9;
-  --bg-hover: #eef1f5;
-  --border-subtle: rgba(15, 23, 42, 0.06);
-  --border-medium: rgba(15, 23, 42, 0.1);
-  --border-strong: rgba(15, 23, 42, 0.16);
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --accent: #8b5cf6;
-  --accent-bright: #a78bfa;
-  --accent-dim: #6d28d9;
-  --accent-ink: #ffffff;
-  --gold: #8b5cf6;
-  --gold-bright: #a78bfa;
-  --gold-dim: #6d28d9;
-  --shadow-xs: 0 1px 2px rgba(19, 8, 44, 0.04);
-  --shadow-sm: 0 2px 8px rgba(19, 8, 44, 0.06), 0 1px 2px rgba(19, 8, 44, 0.04);
-  --shadow-md: 0 8px 24px rgba(19, 8, 44, 0.08), 0 2px 6px rgba(19, 8, 44, 0.04);
-  --shadow-lg: 0 20px 48px rgba(19, 8, 44, 0.12), 0 4px 12px rgba(19, 8, 44, 0.06);
-  --shadow-accent: 0 8px 24px rgba(139, 92, 246, 0.35);
-  --glow-accent: 0 0 0 1px rgba(139, 92, 246, 0.4), 0 8px 32px rgba(139, 92, 246, 0.28);
-  --success: #22c55e;
-  --success-deep: #16a34a;
-  --success-bg: rgba(34, 197, 94, 0.12);
-  --warning: #f59e0b;
-  --warning-deep: #d97706;
-  --warning-bg: rgba(245, 158, 11, 0.14);
-  --danger: #ef4444;
-  --danger-deep: #dc2626;
-  --danger-bg: rgba(239, 68, 68, 0.12);
-  --info: #3b82f6;
-  --info-deep: #2563eb;
-  --info-bg: rgba(59, 130, 246, 0.12);
-  --status-disponivel: #22c55e;
-  --status-atendendo: #8b5cf6;
-  --status-pausa: #f59e0b;
-  --grad-accent: linear-gradient(135deg, #a78bfa, #6d28d9);
-  --grad-success: linear-gradient(135deg, #4ade80, #16a34a);
-  --grad-gold: linear-gradient(135deg, #a78bfa, #6d28d9);
-}
+/* :root já é o light theme. Páginas com data-theme="light" explícito caem no
+   :root por cascata. Só [data-theme='dark'] precisa de override. */
