@@ -318,22 +318,6 @@ function countUp(el, endVal, suffix = '', duration = 800, formatter = null) {
   requestAnimationFrame(step);
 }
 
-function renderCompare(elId, current, previous, invertGood = false) {
-  const el = document.getElementById(elId);
-  if (!el) return;
-  if (previous === 0 || previous == null) {
-    el.innerHTML = '<span class="neutral">—</span>';
-    return;
-  }
-  const diff = ((current - previous) / previous) * 100;
-  const isUp = diff > 0;
-  const isGood = invertGood ? !isUp : isUp;
-  const cls = Math.abs(diff) < 1 ? 'neutral' : isGood ? 'up' : 'down';
-  const sign = isUp ? '+' : '−';
-  const arrow = isUp ? '↑' : '↓';
-  el.innerHTML = `<span class="${cls}">${arrow} ${sign}${Math.abs(diff).toFixed(0)}% vs anterior</span>`;
-}
-
 // ─── Load all data ───
 export async function loadAll() {
   const sb = _ctx.sb;
@@ -402,10 +386,6 @@ export async function loadAll() {
     if (_kpi.loss) _kpi.loss.textContent = totNaoConv;
     if (_kpi.time) _kpi.time.textContent = formatTempo(tempoMed);
     if (_kpi.pref) _kpi.pref.textContent = items.filter((a) => a.preferencial).length;
-    ['kpiTotalCmp', 'kpiVendasCmp', 'kpiConvCmp', 'kpiLossCmp', 'kpiTimeCmp', 'kpiPrefCmp'].forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) el.innerHTML = '<span class="neutral">filtrado</span>';
-    });
   }
   const loaders = [
     ['motivos', loadMotivos(range)],
@@ -493,12 +473,6 @@ export async function loadKPIs(range, prevRange) {
   const prefCurr = (currPrefRes.data || []).filter((a) => a.preferencial).length;
   const prefPrev = (prevPrefRes.data || []).filter((a) => a.preferencial).length;
   countUp(_kpi.pref, prefCurr);
-  renderCompare('kpiTotalCmp', d.total_atendimentos || 0, p.total_atendimentos || 0);
-  renderCompare('kpiVendasCmp', d.total_vendas || 0, p.total_vendas || 0);
-  renderCompare('kpiConvCmp', convAtual, convAnterior);
-  renderCompare('kpiLossCmp', d.total_nao_convertido || 0, p.total_nao_convertido || 0, true);
-  renderCompare('kpiTimeCmp', d.tempo_medio_min || 0, p.tempo_medio_min || 0, true);
-  renderCompare('kpiPrefCmp', prefCurr, prefPrev);
 
   // ─── Hero compare labels (ajusta "Hoje · / Ontem ·" conforme período ativo) ───
   const compareLabels = (() => {
