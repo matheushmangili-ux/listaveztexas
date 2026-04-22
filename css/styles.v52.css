@@ -77,16 +77,9 @@ h3,
 }
 
 /* ─── Typography ─── */
-.font-display {
-  font-family: var(--font-mono);
-  letter-spacing: -0.025em;
-}
-.text-gold {
-  color: var(--gold);
-}
-.text-gold-bright {
-  color: var(--gold-bright);
-}
+
+
+
 .text-muted {
   color: var(--text-muted);
 }
@@ -105,11 +98,7 @@ h3,
   display: flex;
   flex-direction: column;
 }
-.flex-col-center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+
 .flex-between {
   display: flex;
   align-items: center;
@@ -122,12 +111,8 @@ h3,
   flex: 1;
   min-width: 0;
 }
-.text-center {
-  text-align: center;
-}
-.gap-4 {
-  gap: 4px;
-}
+
+
 .gap-6 {
   gap: 6px;
 }
@@ -137,9 +122,7 @@ h3,
 .gap-10 {
   gap: 10px;
 }
-.gap-12 {
-  gap: 12px;
-}
+
 .gap-16 {
   gap: 16px;
 }
@@ -181,41 +164,23 @@ h3,
 .fs-18 {
   font-size: 18px;
 }
-.fs-20 {
-  font-size: 20px;
-}
-.fs-24 {
-  font-size: 24px;
-}
+
+
 .uppercase {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-.truncate {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+
 
 /* Colors (text-muted and text-secondary already above) */
 .text-primary {
   color: var(--text-primary);
 }
-.text-success {
-  color: var(--success);
-}
-.text-warning {
-  color: var(--warning);
-}
-.text-danger {
-  color: var(--danger);
-}
-.text-info {
-  color: var(--info);
-}
-.text-accent {
-  color: var(--accent);
-}
+
+
+
+
+
 
 /* Spacing */
 .mr-4 {
@@ -264,11 +229,7 @@ h3,
   border-color: var(--border-medium);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
-.card-elevated {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-medium);
-  border-radius: var(--radius);
-}
+
 
 /* ─── Buttons ─── */
 .btn {
@@ -332,13 +293,8 @@ h3,
   opacity: 0.85;
 }
 
-.btn-gold {
-  background: var(--accent);
-  color: #060606;
-}
-.btn-gold:hover {
-  opacity: 0.85;
-}
+
+
 
 .btn-ghost {
   background: transparent;
@@ -351,21 +307,9 @@ h3,
   border-color: var(--border-medium);
 }
 
-.btn-lg {
-  min-height: 64px;
-  padding: 0 28px;
-  font-size: 16px;
-  border-radius: var(--radius);
-}
 
-.btn-xl {
-  min-height: 72px;
-  padding: 0 36px;
-  font-size: 18px;
-  font-weight: 700;
-  border-radius: var(--radius-lg);
-  letter-spacing: -0.01em;
-}
+
+
 
 /* ─── Inputs ─── */
 .input {
@@ -579,24 +523,8 @@ h3,
 }
 
 /* ─── KPI Card (Dashboard) ─── */
-.kpi-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius);
-  padding: 24px;
-  position: relative;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    border-color 0.2s ease;
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.04),
-    0 1px 2px rgba(0, 0, 0, 0.03);
-}
-.kpi-card:hover {
-  border-color: var(--border-medium);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
-}
+
+
 .kpi-value {
   font-family: var(--font-body);
   font-weight: 700;
@@ -623,41 +551,11 @@ h3,
   opacity: 0.5;
 }
 /* Variation badge pills — harmonizados mint/coral */
-.kpi-compare .up {
-  display: inline-block;
-  background: var(--success-bg);
-  color: var(--success-deep);
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-}
-.kpi-compare .down {
-  display: inline-block;
-  background: var(--danger-bg);
-  color: var(--danger-deep);
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-}
-.kpi-compare .neutral {
-  display: inline-block;
-  background: rgba(148, 163, 184, 0.1);
-  color: #94a3b8;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-}
+
+
+
 [data-theme='dark'] .kpi-label {
   color: rgba(255, 255, 255, 0.45);
-}
-[data-theme='dark'] .kpi-card {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-[data-theme='dark'] .kpi-card:hover {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
 }
 
 /* ─── Animations ─── */
@@ -702,12 +600,8 @@ h3,
   }
 }
 
-.animate-fade {
-  animation: fadeIn 0.3s ease forwards;
-}
-.animate-slide {
-  animation: slideUp 0.3s ease forwards;
-}
+
+
 
 /* ─── Loading: spinner ─── */
 .spinner {
@@ -735,51 +629,6 @@ h3,
   width: 96px;
   height: 72px;
   color: var(--accent);
-}
-.mv-loader .chv {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 14;
-  stroke-linejoin: miter;
-}
-.mv-loader .chv-1 {
-  animation: mvChevronStep 2.4s cubic-bezier(0.22, 0.7, 0.3, 1) infinite;
-}
-.mv-loader .chv-2 {
-  animation: mvChevronStep 2.4s cubic-bezier(0.22, 0.7, 0.3, 1) 0.3s infinite;
-}
-.mv-loader .chv-3 {
-  animation: mvChevronStep 2.4s cubic-bezier(0.22, 0.7, 0.3, 1) 0.6s infinite;
-}
-@keyframes mvChevronStep {
-  0%,
-  15% {
-    opacity: 0.35;
-  }
-  30%,
-  45% {
-    opacity: 0.7;
-  }
-  60%,
-  100% {
-    opacity: 1;
-  }
-}
-.mv-loader-text {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--text-muted);
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-}
-@media (prefers-reduced-motion: reduce) {
-  .mv-loader .chv-1,
-  .mv-loader .chv-2,
-  .mv-loader .chv-3 {
-    animation: none;
-    opacity: 1;
-  }
 }
 
 /* ─── Toast container ─── */
@@ -809,10 +658,6 @@ h3,
     min-height: 48px;
     font-size: 14px;
   }
-  .btn-xl {
-    min-height: 80px;
-    font-size: 20px;
-  }
   .input {
     min-height: 48px;
     font-size: 15px;
@@ -825,11 +670,6 @@ h3,
     width: 32px;
     height: 32px;
     font-size: 13px;
-  }
-  .status-pill {
-    min-height: 40px;
-    padding: 8px 16px;
-    font-size: 12px;
   }
   .motivo-option {
     padding: 18px 20px;
@@ -862,10 +702,6 @@ h3,
     min-height: 44px;
     font-size: 13px;
   }
-  .btn-xl {
-    min-height: 64px;
-    font-size: 18px;
-  }
   .input {
     min-height: 44px;
     font-size: 14px;
@@ -893,10 +729,6 @@ h3,
 
 /* Tablets grandes (1281px+, ex: Tab S7+, Tab S8 Ultra) */
 @media (min-width: 1281px) {
-  .btn-xl {
-    min-height: 84px;
-    font-size: 22px;
-  }
   .timer-display {
     font-size: 64px;
   }
@@ -926,14 +758,7 @@ h3,
 
 /* ─── Prevent text selection on touch elements ─── */
 .btn,
-.status-pill,
-.queue-item,
-.motivo-option,
-.outcome-btn,
-.pin-input {
-  -webkit-user-select: none;
-  user-select: none;
-}
+
 
 /* ─── Safe area (notch) ─── */
 @supports (padding: env(safe-area-inset-bottom)) {
