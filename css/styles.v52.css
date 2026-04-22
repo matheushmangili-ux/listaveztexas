@@ -384,6 +384,8 @@ h3,
 }
 .input:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
+  outline: none;
 }
 .input::placeholder {
   color: var(--text-muted);
@@ -408,6 +410,8 @@ h3,
 }
 .pin-input:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
+  outline: none;
 }
 
 /* ─── Queue Item ─── */
@@ -1079,13 +1083,11 @@ h3,
    ============================================ */
 button:focus-visible,
 a:focus-visible,
+/* Focus ring global — só em elementos SEM tratamento próprio de border no focus.
+   Inputs têm border-color + box-shadow ring (padrão Stripe) em suas próprias
+   regras :focus — aplicar outline por cima causava o bug de "dois frames". */
 [role='button']:focus-visible,
 [tabindex]:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible,
-.input:focus-visible,
-.pin-input:focus-visible,
 .btn:focus-visible,
 .btn-primary:focus-visible,
 .btn-ghost:focus-visible,
@@ -1094,13 +1096,9 @@ select:focus-visible,
 .vendor-icon-btn:focus-visible,
 .vendor-cta-next:focus-visible,
 .vendor-cta-finish:focus-visible,
-.vendor-field input:focus-visible,
-.filter-bar select:focus-visible,
-.modal-box input:focus-visible,
 .modal-close:focus-visible,
-.currency-wrap input:focus-visible,
 .collapse-btn:focus-visible,
 .cal-nav:focus-visible {
-  outline: 2px solid var(--accent-dim, #8b5cf6) !important;
-  outline-offset: 2px !important;
+  outline: 2px solid var(--accent-dim, #8b5cf6);
+  outline-offset: 2px;
 }
