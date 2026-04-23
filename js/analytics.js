@@ -24,6 +24,18 @@ const stub = {
 // Exporta global pra inline scripts conseguirem chamar
 window.minhavezAnalytics = stub;
 
+function detectAppContext() {
+  const p = (location.pathname || '').toLowerCase();
+  if (p.endsWith('vendor.html') || p.endsWith('/vendor')) return 'vendor';
+  if (p.endsWith('tablet.html') || p.endsWith('/tablet')) return 'tablet';
+  if (p.includes('dashboard')) return 'dashboard';
+  if (p.endsWith('settings.html') || p.endsWith('/settings')) return 'settings';
+  if (p.endsWith('setup.html') || p.endsWith('/setup')) return 'setup';
+  if (p.includes('forgot-password') || p.includes('reset-password')) return 'auth';
+  if (p.endsWith('landing.html') || p.endsWith('/landing')) return 'landing';
+  return 'login';
+}
+
 if (KEY) {
   // Snippet oficial PostHog (loader assíncrono)
   /* eslint-disable */
@@ -31,12 +43,27 @@ if (KEY) {
   /* eslint-enable */
   posthog.init(KEY, {
     api_host: HOST,
+    // ui_host garante que links do UI do PostHog (ex: session replay) apontam
+    // pro painel real e nao pro proxy /ingest que nao serve UI.
+    ui_host: 'https://us.posthog.com',
     person_profiles: 'identified_only',
     capture_pageview: true,
     capture_pageleave: true,
     autocapture: false, // explicit events only
     disable_session_recording: true,
+    // Bloqueia props com PII se entrarem por acidente via evento descuidado.
+    property_blacklist: ['$password', '$token', 'password', 'senha', 'token'],
   });
+  // Super properties — enviadas em TODO evento. app_context permite filtrar
+  // funil por pagina (vendor/tablet/dashboard/...) sem repetir em cada capture.
+  posthog.register({
+    app_context: detectAppContext(),
+    release: window.MINHAVEZ_VERSION || 'v52',
+  });
+  try {
+    const slug = localStorage.getItem('lv-last-slug');
+    if (slug) posthog.register({ tenant_slug: slug });
+  } catch (_e) { /* ignore */ }
   // Substitui stub pelo real
   window.minhavezAnalytics = {
     capture: (event, props) => posthog.capture(event, props),

@@ -3,9 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://js.sentry-cdn.com/2281ed2b3027429746fd575a47c75046.min.js" crossorigin="anonymous"></script>
-    <script src="/js/sentry-init.js"></script>
-    <script src="/js/posthog-init.js"></script>
     <title>Minha Vez — Dashboard</title>
     <script>
       (function () {
@@ -38,11 +35,11 @@
     <!-- ECharts removed — only ApexCharts is used -->
 
     <script>
-      window.PUBLIC_POSTHOG_KEY = '';
-      window.PUBLIC_POSTHOG_HOST = 'https://us.i.posthog.com';
+      window.PUBLIC_POSTHOG_KEY = 'phc_mxauxpwWdL9gGNcpQTEyrwjJsnV6kytaYvZgQNQMxrBS';
+      window.PUBLIC_POSTHOG_HOST = '/ingest';
     </script>
     <script>
-      window.PUBLIC_SENTRY_DSN = '';
+      window.PUBLIC_SENTRY_DSN = 'https://2281ed2b3027429746fd575a47c75046@o4511269047500800.ingest.us.sentry.io/4511269057003520';
       window.PUBLIC_SENTRY_ENV = 'production';
     </script>
     <script type="module" src="/js/sentry.js"></script>
