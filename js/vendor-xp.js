@@ -10,29 +10,29 @@
 import { playSound } from './sound.js';
 
 const EVENT_META = {
-  atendimento_concluido: { icon: 'fa-handshake',       label: 'Atendimento concluído' },
-  venda_realizada:       { icon: 'fa-bag-shopping',    label: 'Venda realizada'       },
-  troca_realizada:       { icon: 'fa-arrow-right-arrow-left', label: 'Troca realizada' },
-  conversao_bonus:       { icon: 'fa-chart-line',      label: 'Conversão acima da média' }
+  atendimento_concluido: { icon: 'fa-handshake', label: 'Atendimento concluído' },
+  venda_realizada: { icon: 'fa-bag-shopping', label: 'Venda realizada' },
+  troca_realizada: { icon: 'fa-arrow-right-arrow-left', label: 'Troca realizada' },
+  conversao_bonus: { icon: 'fa-chart-line', label: 'Conversão acima da média' }
 };
 
 // Fallback local caso a RPC por alguma razão não traga `tier` (ex: cache de SW
 // antigo). Backend continua sendo source of truth — se os dois divergirem,
 // confia no que veio da RPC.
 const TIER_META_FALLBACK = {
-  pedra:       { label: 'Pedra',      short: 'PED',     icon: 'fa-mountain',      color: '#9ca3af' },
-  madeira:     { label: 'Madeira',    short: 'MAD',     icon: 'fa-tree',          color: '#a07c5a' },
-  ferro:       { label: 'Ferro',      short: 'FER',     icon: 'fa-shield',        color: '#94a3b8' },
-  bronze:      { label: 'Bronze',     short: 'BRZ',     icon: 'fa-medal',         color: '#b8875a' },
-  prata:       { label: 'Prata',      short: 'PRA',     icon: 'fa-medal',         color: '#d4d4d4' },
-  ouro:        { label: 'Ouro',       short: 'OUR',     icon: 'fa-medal',         color: '#d4a373' },
-  platina:     { label: 'Platina',    short: 'PLA',     icon: 'fa-shield-halved', color: '#a8d4d8' },
-  diamante:    { label: 'Diamante',   short: 'DIA',     icon: 'fa-gem',           color: '#8ea5c9' },
-  mestre:      { label: 'Mestre',     short: 'MES',     icon: 'fa-crown',         color: '#b8a8d4' },
-  grao_mestre: { label: 'Grão-Mestre',short: 'GMS',     icon: 'fa-crown',         color: '#9488b8' },
-  rubi:        { label: 'Rubi',       short: 'RUB',     icon: 'fa-gem',           color: '#e89b8a' },
-  lendario:    { label: 'Lendário',   short: 'LEN',     icon: 'fa-trophy',        color: '#d4a373' },
-  mitico:      { label: 'Mítico',     short: 'MIT',     icon: 'fa-dragon',        color: '#d4a8c4' }
+  pedra: { label: 'Pedra', short: 'PED', icon: 'fa-mountain', color: '#9ca3af' },
+  madeira: { label: 'Madeira', short: 'MAD', icon: 'fa-tree', color: '#a07c5a' },
+  ferro: { label: 'Ferro', short: 'FER', icon: 'fa-shield', color: '#94a3b8' },
+  bronze: { label: 'Bronze', short: 'BRZ', icon: 'fa-medal', color: '#b8875a' },
+  prata: { label: 'Prata', short: 'PRA', icon: 'fa-medal', color: '#d4d4d4' },
+  ouro: { label: 'Ouro', short: 'OUR', icon: 'fa-medal', color: '#d4a373' },
+  platina: { label: 'Platina', short: 'PLA', icon: 'fa-shield-halved', color: '#a8d4d8' },
+  diamante: { label: 'Diamante', short: 'DIA', icon: 'fa-gem', color: '#8ea5c9' },
+  mestre: { label: 'Mestre', short: 'MES', icon: 'fa-crown', color: '#b8a8d4' },
+  grao_mestre: { label: 'Grão-Mestre', short: 'GMS', icon: 'fa-crown', color: '#9488b8' },
+  rubi: { label: 'Rubi', short: 'RUB', icon: 'fa-gem', color: '#e89b8a' },
+  lendario: { label: 'Lendário', short: 'LEN', icon: 'fa-trophy', color: '#d4a373' },
+  mitico: { label: 'Mítico', short: 'MIT', icon: 'fa-dragon', color: '#d4a8c4' }
 };
 
 function tierOf(xp) {
@@ -63,7 +63,9 @@ function primeAudioUnlock() {
     try {
       // Som mudo mínimo só pra criar/resumir o AudioCtx
       playSound('__silent_unlock__');
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     document.removeEventListener('touchstart', unlock);
     document.removeEventListener('click', unlock);
   };
@@ -100,7 +102,10 @@ async function refresh() {
   try {
     const { data, error } = await _sb.rpc('get_my_xp');
     if (error) throw error;
-    if (!data || data.length === 0) { render(null); return; }
+    if (!data || data.length === 0) {
+      render(null);
+      return;
+    }
     _last = data[0];
     render(_last);
   } catch (err) {
@@ -118,10 +123,10 @@ function render(xp) {
   }
   strip.classList.remove('hidden');
   const pct = Math.max(0, Math.min(100, Number(xp.progress_pct) || 0));
-  const levelXp  = Number(xp.level_xp) || 0;
-  const nextXp   = Number(xp.next_level_xp) || 0;
+  const levelXp = Number(xp.level_xp) || 0;
+  const nextXp = Number(xp.next_level_xp) || 0;
   const intoLevel = Math.max(0, xp.total_xp - levelXp);
-  const span      = Math.max(1, nextXp - levelXp);
+  const span = Math.max(1, nextXp - levelXp);
   const tier = tierOf(xp);
   strip.innerHTML = `
     <button type="button" class="xp-strip-btn" aria-label="Minha jornada — ${escapeHtml(tier.label)}">
@@ -167,7 +172,11 @@ function showLevelUp(newLevel) {
     setTimeout(() => box.remove(), 400);
   }, 3000);
   if (navigator.vibrate) navigator.vibrate([100, 60, 160]);
-  try { playSound('levelup'); } catch { /* ignore */ }
+  try {
+    playSound('levelup');
+  } catch {
+    /* ignore */
+  }
 }
 
 // Fanfarra maior: atravessou threshold de tier (ex: Diamante III → Mestre)
@@ -190,7 +199,11 @@ function showTierUp(tier) {
     setTimeout(() => box.remove(), 500);
   }, 4200);
   if (navigator.vibrate) navigator.vibrate([100, 80, 200, 80, 300]);
-  try { playSound('tierup'); } catch { /* ignore */ }
+  try {
+    playSound('tierup');
+  } catch {
+    /* ignore */
+  }
 }
 
 // ─── Sheet "Minha jornada" ───
@@ -202,11 +215,12 @@ function bindSheet() {
 
 async function openSheet() {
   const overlay = document.getElementById('xpOverlay');
-  const sheet   = document.getElementById('xpSheet');
-  const body    = document.getElementById('xpSheetBody');
+  const sheet = document.getElementById('xpSheet');
+  const body = document.getElementById('xpSheetBody');
   if (!overlay || !sheet || !body) return;
 
-  body.innerHTML = renderSheetHeader(_last) +
+  body.innerHTML =
+    renderSheetHeader(_last) +
     '<div class="xp-breakdown-title">Últimos 30 dias</div>' +
     renderBreakdown(_last) +
     '<div class="xp-history-title">Últimos eventos</div>' +
@@ -235,7 +249,7 @@ function renderSheetHeader(xp) {
   if (!xp) return '<div class="xp-loading">Sem dados ainda</div>';
   const pct = Math.max(0, Math.min(100, Number(xp.progress_pct) || 0));
   const intoLevel = Math.max(0, xp.total_xp - xp.level_xp);
-  const span      = Math.max(1, xp.next_level_xp - xp.level_xp);
+  const span = Math.max(1, xp.next_level_xp - xp.level_xp);
   const tier = tierOf(xp);
   return `
     <div class="xp-sheet-hero tier-${escapeHtml(tier.major_code)}" style="--tier-color:${escapeHtml(tier.color)}">
@@ -255,29 +269,39 @@ function renderBreakdown(xp) {
   if (keys.length === 0) {
     return '<div class="xp-breakdown-empty">Nenhum XP nos últimos 30 dias.</div>';
   }
-  return '<div class="xp-breakdown">' + keys.map((k) => {
-    const meta = EVENT_META[k] || { icon: 'fa-star', label: k };
-    return `
+  return (
+    '<div class="xp-breakdown">' +
+    keys
+      .map((k) => {
+        const meta = EVENT_META[k] || { icon: 'fa-star', label: k };
+        return `
       <div class="xp-breakdown-row">
         <i class="fa-solid ${meta.icon}"></i>
         <span class="xp-breakdown-label">${escapeHtml(meta.label)}</span>
         <span class="xp-breakdown-pts mono">+${bd[k]}</span>
       </div>
     `;
-  }).join('') + '</div>';
+      })
+      .join('') +
+    '</div>'
+  );
 }
 
 function renderHistory(events) {
   const box = document.getElementById('xpHistory');
   if (!box) return;
   if (events.length === 0) {
-    box.innerHTML = '<div class="xp-loading">Nenhum evento ainda. Finalize um atendimento pra começar.</div>';
+    box.innerHTML = `<div class="empty-state empty-state--compact">
+      <i class="fa-solid fa-bolt empty-state__icon"></i>
+      <div class="empty-state__prose">Nenhum evento ainda. Finalize um atendimento pra começar.</div>
+    </div>`;
     return;
   }
-  box.innerHTML = events.map((e) => {
-    const meta = EVENT_META[e.event_type] || { icon: 'fa-star', label: e.event_type };
-    const when = formatRelative(e.created_at);
-    return `
+  box.innerHTML = events
+    .map((e) => {
+      const meta = EVENT_META[e.event_type] || { icon: 'fa-star', label: e.event_type };
+      const when = formatRelative(e.created_at);
+      return `
       <div class="xp-history-row">
         <i class="fa-solid ${meta.icon}"></i>
         <div class="xp-history-text">
@@ -287,7 +311,8 @@ function renderHistory(events) {
         <span class="xp-history-pts mono">+${e.points}</span>
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 }
 
 // ─── Utils ───
@@ -305,5 +330,9 @@ function formatRelative(iso) {
 }
 
 function escapeHtml(s) {
-  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }

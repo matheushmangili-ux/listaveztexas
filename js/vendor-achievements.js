@@ -10,9 +10,9 @@ let _achievements = [];
 let _prevUnlockedCodes = new Set();
 
 const TIER_COLORS = {
-  bronze:   { bg: 'rgba(184,135,90,0.14)',  border: 'rgba(184,135,90,0.32)',  text: '#b8875a' },
-  prata:    { bg: 'rgba(212,212,212,0.10)', border: 'rgba(212,212,212,0.22)', text: '#d4d4d4' },
-  ouro:     { bg: 'rgba(212,163,115,0.14)', border: 'rgba(212,163,115,0.32)', text: '#d4a373' },
+  bronze: { bg: 'rgba(184,135,90,0.14)', border: 'rgba(184,135,90,0.32)', text: '#b8875a' },
+  prata: { bg: 'rgba(212,212,212,0.10)', border: 'rgba(212,212,212,0.22)', text: '#d4d4d4' },
+  ouro: { bg: 'rgba(212,163,115,0.14)', border: 'rgba(212,163,115,0.32)', text: '#d4a373' },
   lendario: { bg: 'rgba(184,168,212,0.14)', border: 'rgba(184,168,212,0.32)', text: '#b8a8d4' }
 };
 
@@ -50,7 +50,7 @@ async function refresh() {
     _achievements = [];
   }
   if (window._vendorCounts) {
-    const unlocked = _achievements.filter(a => a.unlocked).length;
+    const unlocked = _achievements.filter((a) => a.unlocked).length;
     window._vendorCounts.achievements = { unlocked, total: _achievements.length };
     window._vendorUpdateBadges?.();
   }
@@ -77,16 +77,20 @@ function bindSheet() {
 
 function openSheet() {
   const overlay = document.getElementById('achievementsOverlay');
-  const sheet   = document.getElementById('achievementsSheet');
-  const body    = document.getElementById('achievementsSheetBody');
+  const sheet = document.getElementById('achievementsSheet');
+  const body = document.getElementById('achievementsSheetBody');
   if (!overlay || !sheet || !body) return;
 
   refresh().then(() => {
     if (_achievements.length === 0) {
-      body.innerHTML = '<div style="padding:24px;text-align:center;color:var(--vendor-text-muted);font-size:12px;font-style:italic">Nenhuma conquista disponível.</div>';
+      body.innerHTML = `<div class="empty-state">
+        <i class="fa-solid fa-trophy empty-state__icon"></i>
+        <div class="empty-state__title">Nenhuma conquista ainda</div>
+        <div class="empty-state__prose">Continue atendendo — suas primeiras conquistas vão aparecer aqui.</div>
+      </div>`;
     } else {
       const unlocked = _achievements.filter((a) => a.unlocked);
-      const locked   = _achievements.filter((a) => !a.unlocked);
+      const locked = _achievements.filter((a) => !a.unlocked);
       body.innerHTML =
         (unlocked.length > 0 ? '<div class="ach-section-label">Desbloqueadas</div>' + renderGrid(unlocked) : '') +
         (locked.length > 0 ? '<div class="ach-section-label">Em progresso</div>' + renderGrid(locked) : '');
@@ -138,9 +142,17 @@ function showAchievementUnlocked(a) {
     setTimeout(() => box.remove(), 400);
   }, 4000);
   if (navigator.vibrate) navigator.vibrate([60, 40, 120, 40, 200]);
-  try { playSound('tierup'); } catch { /* ignore */ }
+  try {
+    playSound('tierup');
+  } catch {
+    /* ignore */
+  }
 }
 
 function esc(s) {
-  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }

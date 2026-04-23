@@ -11,22 +11,22 @@ let _vmTasks = [];
 let _activeVmTab = 'tasks';
 
 const VM_CATEGORIES = [
-  { id: 'vitrine',    label: 'Vitrine',    icon: 'fa-store' },
-  { id: 'gondola',    label: 'Gôndola',    icon: 'fa-table-cells' },
-  { id: 'display',    label: 'Display',    icon: 'fa-tv' },
+  { id: 'vitrine', label: 'Vitrine', icon: 'fa-store' },
+  { id: 'gondola', label: 'Gôndola', icon: 'fa-table-cells' },
+  { id: 'display', label: 'Display', icon: 'fa-tv' },
   { id: 'prateleira', label: 'Prateleira', icon: 'fa-bars-staggered' },
-  { id: 'checkout',   label: 'Checkout',   icon: 'fa-cash-register' },
-  { id: 'fachada',    label: 'Fachada',    icon: 'fa-building' },
-  { id: 'outro',      label: 'Outro',      icon: 'fa-ellipsis' }
+  { id: 'checkout', label: 'Checkout', icon: 'fa-cash-register' },
+  { id: 'fachada', label: 'Fachada', icon: 'fa-building' },
+  { id: 'outro', label: 'Outro', icon: 'fa-ellipsis' }
 ];
 
 const STATUS_LABELS = {
-  pending:     { label: 'Pendente',   cls: 'vm-status-pending' },
+  pending: { label: 'Pendente', cls: 'vm-status-pending' },
   in_progress: { label: 'Em execução', cls: 'vm-status-pending' },
-  submitted:   { label: 'Enviado',    cls: 'vm-status-pending' },
-  approved:    { label: 'Aprovado',   cls: 'vm-status-approved' },
-  rejected:    { label: 'Rejeitado',  cls: 'vm-status-rejected' },
-  revision:    { label: 'Ajuste',     cls: 'vm-status-revision' }
+  submitted: { label: 'Enviado', cls: 'vm-status-pending' },
+  approved: { label: 'Aprovado', cls: 'vm-status-approved' },
+  rejected: { label: 'Rejeitado', cls: 'vm-status-rejected' },
+  revision: { label: 'Ajuste', cls: 'vm-status-revision' }
 };
 
 export async function initVm(sb, ctx) {
@@ -62,7 +62,9 @@ async function refreshVmTasks() {
     _vmTasks = [];
   }
   if (window._vendorCounts) {
-    window._vendorCounts.vm = _vmTasks.filter(t => ['pending','in_progress','revision'].includes(t.assignment_status)).length;
+    window._vendorCounts.vm = _vmTasks.filter((t) =>
+      ['pending', 'in_progress', 'revision'].includes(t.assignment_status)
+    ).length;
     window._vendorUpdateBadges?.();
   }
 }
@@ -99,15 +101,18 @@ function renderCard() {
   const wrap = document.getElementById('vmCard');
   if (!wrap) return;
 
-  const actionable = _vmTasks.filter(t => ['pending','in_progress','revision'].includes(t.assignment_status)).length;
-  const freeApproved = _myVms.filter(v => v.status === 'approved').length;
-  const freePending = _myVms.filter(v => v.status === 'pending').length;
+  const actionable = _vmTasks.filter((t) =>
+    ['pending', 'in_progress', 'revision'].includes(t.assignment_status)
+  ).length;
+  const freeApproved = _myVms.filter((v) => v.status === 'approved').length;
+  const freePending = _myVms.filter((v) => v.status === 'pending').length;
 
   wrap.classList.remove('hidden');
   const badge = actionable > 0 ? `<span class="vm-card-badge">${actionable}</span>` : '';
-  const sub = actionable > 0
-    ? `${actionable} tarefa${actionable !== 1 ? 's' : ''} pendente${actionable !== 1 ? 's' : ''}`
-    : `${freeApproved} foto${freeApproved !== 1 ? 's' : ''} aprovada${freeApproved !== 1 ? 's' : ''}`;
+  const sub =
+    actionable > 0
+      ? `${actionable} tarefa${actionable !== 1 ? 's' : ''} pendente${actionable !== 1 ? 's' : ''}`
+      : `${freeApproved} foto${freeApproved !== 1 ? 's' : ''} aprovada${freeApproved !== 1 ? 's' : ''}`;
 
   wrap.innerHTML = `
     <div class="vm-card-inner">
@@ -146,7 +151,7 @@ function renderSheetBody() {
   const body = document.getElementById('vmSheetBody');
   if (!body) return;
 
-  const taskBadge = _vmTasks.filter(t => ['pending','in_progress','revision'].includes(t.assignment_status)).length;
+  const taskBadge = _vmTasks.filter((t) => ['pending', 'in_progress', 'revision'].includes(t.assignment_status)).length;
 
   body.innerHTML = `
     <div class="vm-tabs">
@@ -160,7 +165,7 @@ function renderSheetBody() {
     <div id="vmListArea"></div>
   `;
 
-  body.querySelectorAll('.vm-tab').forEach(btn => {
+  body.querySelectorAll('.vm-tab').forEach((btn) => {
     btn.addEventListener('click', async () => {
       _activeVmTab = btn.dataset.tab;
       if (_activeVmTab === 'gallery' && _gallery.length === 0) await loadGallery();
@@ -182,18 +187,23 @@ function renderTasksList() {
   if (!area) return;
 
   if (_vmTasks.length === 0) {
-    area.innerHTML = '<div class="vm-empty">Nenhuma tarefa VM no momento.<br>Fique de olho — novas tarefas podem chegar a qualquer momento!</div>';
+    area.innerHTML = `<div class="empty-state">
+      <i class="fa-solid fa-camera-retro empty-state__icon"></i>
+      <div class="empty-state__title">Nenhuma tarefa VM</div>
+      <div class="empty-state__prose">Fique de olho — novas tarefas podem chegar a qualquer momento.</div>
+    </div>`;
     return;
   }
 
-  area.innerHTML = _vmTasks.map(t => {
-    const cat = VM_CATEGORIES.find(c => c.id === t.category);
-    const st = STATUS_LABELS[t.assignment_status] || STATUS_LABELS.pending;
-    const isUrgent = t.priority === 'urgente';
-    const dueStr = t.due_at ? formatDue(t.due_at) : '';
-    const actionable = ['pending','in_progress','revision'].includes(t.assignment_status);
+  area.innerHTML = _vmTasks
+    .map((t) => {
+      const cat = VM_CATEGORIES.find((c) => c.id === t.category);
+      const st = STATUS_LABELS[t.assignment_status] || STATUS_LABELS.pending;
+      const isUrgent = t.priority === 'urgente';
+      const dueStr = t.due_at ? formatDue(t.due_at) : '';
+      const actionable = ['pending', 'in_progress', 'revision'].includes(t.assignment_status);
 
-    return `<div class="vm-task-card${isUrgent ? ' urgent' : ''}${actionable ? '' : ' done'}" data-task="${t.task_id}">
+      return `<div class="vm-task-card${isUrgent ? ' urgent' : ''}${actionable ? '' : ' done'}" data-task="${t.task_id}">
       <div class="vm-task-card-top">
         <span class="vm-cat-tag"><i class="fa-solid ${cat?.icon || 'fa-image'}"></i> ${esc(cat?.label || t.category)}</span>
         ${isUrgent ? '<span class="vm-priority-badge">URGENTE</span>' : ''}
@@ -209,9 +219,10 @@ function renderTasksList() {
       </div>
       ${t.feedback && t.assignment_status === 'revision' ? `<div class="vm-task-feedback"><i class="fa-solid fa-comment-dots"></i> ${esc(t.feedback)}</div>` : ''}
     </div>`;
-  }).join('');
+    })
+    .join('');
 
-  area.querySelectorAll('.vm-task-card[data-task]').forEach(card => {
+  area.querySelectorAll('.vm-task-card[data-task]').forEach((card) => {
     card.addEventListener('click', () => openTaskBriefing(card.dataset.task));
   });
 }
@@ -235,7 +246,10 @@ async function openTaskBriefing(taskId) {
     const { data, error } = await _sb.rpc('vendor_get_task_detail', { p_task_id: taskId });
     if (error) throw error;
     const task = data?.[0];
-    if (!task) { body.innerHTML = '<div class="vm-empty">Tarefa não encontrada.</div>'; return; }
+    if (!task) {
+      body.innerHTML = '<div class="vm-empty">Tarefa não encontrada.</div>';
+      return;
+    }
     renderBriefing(body, task);
   } catch (err) {
     body.innerHTML = `<div class="vm-empty">Erro: ${esc(err?.message || err)}</div>`;
@@ -249,20 +263,20 @@ function closeTaskView() {
 }
 
 function renderBriefing(container, task) {
-  const cat = VM_CATEGORIES.find(c => c.id === task.category);
+  const cat = VM_CATEGORIES.find((c) => c.id === task.category);
   const refs = task.refs || [];
   const checklist = task.checklist || [];
-  const canStart = ['pending','revision'].includes(task.assignment_status);
+  const canStart = ['pending', 'revision'].includes(task.assignment_status);
   const isInProgress = task.assignment_status === 'in_progress';
-  const isDone = ['submitted','approved','rejected'].includes(task.assignment_status);
+  const isDone = ['submitted', 'approved', 'rejected'].includes(task.assignment_status);
 
   let html = '';
 
   // Reference carousel
   if (refs.length > 0) {
-    html += `<div class="vm-ref-carousel">${refs.map(r =>
-      `<img src="${esc(r.url)}" alt="Referência" class="vm-ref-img" loading="lazy">`
-    ).join('')}</div>`;
+    html += `<div class="vm-ref-carousel">${refs
+      .map((r) => `<img src="${esc(r.url)}" alt="Referência" class="vm-ref-img" loading="lazy">`)
+      .join('')}</div>`;
   }
 
   // Task info
@@ -285,8 +299,10 @@ function renderBriefing(container, task) {
 
   // Checklist preview
   if (checklist.length > 0) {
-    html += '<div class="vm-checklist-preview"><strong>Checklist:</strong><ul>' +
-      checklist.map(c => `<li>${esc(c.label)}</li>`).join('') + '</ul></div>';
+    html +=
+      '<div class="vm-checklist-preview"><strong>Checklist:</strong><ul>' +
+      checklist.map((c) => `<li>${esc(c.label)}</li>`).join('') +
+      '</ul></div>';
   }
 
   // Action button
@@ -327,30 +343,44 @@ function openExecution(task, assignmentId) {
 
   const checklist = task.checklist || [];
   const checkStates = {};
-  checklist.forEach(c => { checkStates[c.id] = false; });
-  let capturedPhotos = [];
+  checklist.forEach((c) => {
+    checkStates[c.id] = false;
+  });
+  const capturedPhotos = [];
 
   function render() {
     body.innerHTML = `
       <div class="vm-exec-section">
         <strong>Fotos da execução</strong>
         <div class="vm-exec-photos" id="vmExecPhotos">
-          ${capturedPhotos.map((p, i) => `<div class="vm-exec-photo-wrap">
+          ${capturedPhotos
+            .map(
+              (p, i) => `<div class="vm-exec-photo-wrap">
             <img src="${p.preview}" class="vm-exec-photo">
             <button class="vm-exec-photo-remove" data-idx="${i}"><i class="fa-solid fa-xmark"></i></button>
-          </div>`).join('')}
+          </div>`
+            )
+            .join('')}
           ${capturedPhotos.length < 3 ? '<button class="vm-exec-add-photo" id="vmExecAddPhoto"><i class="fa-solid fa-plus"></i></button>' : ''}
         </div>
       </div>
-      ${checklist.length > 0 ? `<div class="vm-exec-section">
+      ${
+        checklist.length > 0
+          ? `<div class="vm-exec-section">
         <strong>Checklist</strong>
         <div class="vm-exec-checklist">
-          ${checklist.map(c => `<label class="vm-exec-check-item">
+          ${checklist
+            .map(
+              (c) => `<label class="vm-exec-check-item">
             <input type="checkbox" ${checkStates[c.id] ? 'checked' : ''} data-cid="${c.id}">
             <span>${esc(c.label)}</span>
-          </label>`).join('')}
+          </label>`
+            )
+            .join('')}
         </div>
-      </div>` : ''}
+      </div>`
+          : ''
+      }
       <textarea id="vmExecNote" class="vm-desc-input" placeholder="Observação (opcional)" rows="2" maxlength="300"></textarea>
       <div class="vm-submit-actions">
         <button class="vendor-btn-ghost" id="vmExecCancel">Cancelar</button>
@@ -374,7 +404,7 @@ function openExecution(task, assignmentId) {
       input.click();
     });
 
-    body.querySelectorAll('.vm-exec-photo-remove').forEach(btn => {
+    body.querySelectorAll('.vm-exec-photo-remove').forEach((btn) => {
       btn.addEventListener('click', () => {
         const idx = parseInt(btn.dataset.idx);
         URL.revokeObjectURL(capturedPhotos[idx]?.preview);
@@ -383,16 +413,20 @@ function openExecution(task, assignmentId) {
       });
     });
 
-    body.querySelectorAll('.vm-exec-check-item input').forEach(cb => {
-      cb.addEventListener('change', () => { checkStates[cb.dataset.cid] = cb.checked; });
+    body.querySelectorAll('.vm-exec-check-item input').forEach((cb) => {
+      cb.addEventListener('change', () => {
+        checkStates[cb.dataset.cid] = cb.checked;
+      });
     });
 
     document.getElementById('vmExecCancel')?.addEventListener('click', () => {
-      capturedPhotos.forEach(p => URL.revokeObjectURL(p.preview));
+      capturedPhotos.forEach((p) => URL.revokeObjectURL(p.preview));
       closeTaskView();
     });
 
-    document.getElementById('vmExecSubmit')?.addEventListener('click', () => submitExecution(assignmentId, capturedPhotos, checkStates));
+    document
+      .getElementById('vmExecSubmit')
+      ?.addEventListener('click', () => submitExecution(assignmentId, capturedPhotos, checkStates));
   }
 
   render();
@@ -400,7 +434,10 @@ function openExecution(task, assignmentId) {
 
 async function submitExecution(assignmentId, photos, checkStates) {
   const submitBtn = document.getElementById('vmExecSubmit');
-  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Enviando…'; }
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Enviando…';
+  }
   const note = document.getElementById('vmExecNote')?.value?.trim() || '';
 
   try {
@@ -436,7 +473,10 @@ async function submitExecution(assignmentId, photos, checkStates) {
     renderSheetBody();
   } catch (err) {
     window._vendorToast?.(err?.message || 'Erro ao enviar', 'error');
-    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Enviar'; }
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Enviar';
+    }
   }
 }
 
@@ -445,13 +485,20 @@ function renderMyList() {
   const area = document.getElementById('vmListArea');
   if (!area) return;
   if (_myVms.length === 0) {
-    area.innerHTML = '<div class="vm-empty">Nenhuma foto enviada ainda.<br>Toque em "Nova foto VM" pra começar!</div>';
+    area.innerHTML = `<div class="empty-state">
+      <i class="fa-solid fa-image empty-state__icon"></i>
+      <div class="empty-state__title">Nenhuma foto ainda</div>
+      <div class="empty-state__prose">Toque em "Nova foto VM" pra começar e ganhar XP.</div>
+    </div>`;
     return;
   }
-  area.innerHTML = '<div class="vm-grid">' + _myVms.map(v => {
-    const st = STATUS_LABELS[v.status] || STATUS_LABELS.pending;
-    const cat = VM_CATEGORIES.find(c => c.id === v.category);
-    return `<div class="vm-grid-item">
+  area.innerHTML =
+    '<div class="vm-grid">' +
+    _myVms
+      .map((v) => {
+        const st = STATUS_LABELS[v.status] || STATUS_LABELS.pending;
+        const cat = VM_CATEGORIES.find((c) => c.id === v.category);
+        return `<div class="vm-grid-item">
       <img src="${esc(v.photo_url)}" alt="VM" class="vm-thumb" loading="lazy">
       <div class="vm-grid-meta">
         <span class="vm-status-badge ${st.cls}">${st.label}</span>
@@ -459,27 +506,37 @@ function renderMyList() {
       </div>
       ${v.feedback ? `<div class="vm-feedback"><i class="fa-solid fa-comment"></i> ${esc(v.feedback)}</div>` : ''}
     </div>`;
-  }).join('') + '</div>';
+      })
+      .join('') +
+    '</div>';
 }
 
 function renderGalleryList() {
   const area = document.getElementById('vmListArea');
   if (!area) return;
   if (_gallery.length === 0) {
-    area.innerHTML = '<div class="vm-empty">Nenhuma foto aprovada ainda.</div>';
+    area.innerHTML = `<div class="empty-state empty-state--compact">
+      <i class="fa-solid fa-images empty-state__icon"></i>
+      <div class="empty-state__prose">Nenhuma foto aprovada ainda.</div>
+    </div>`;
     return;
   }
-  area.innerHTML = '<div class="vm-grid">' + _gallery.map(v => {
-    const cat = VM_CATEGORIES.find(c => c.id === v.category);
-    const nome = v.vendor_apelido || v.vendor_nome || '';
-    return `<div class="vm-grid-item">
+  area.innerHTML =
+    '<div class="vm-grid">' +
+    _gallery
+      .map((v) => {
+        const cat = VM_CATEGORIES.find((c) => c.id === v.category);
+        const nome = v.vendor_apelido || v.vendor_nome || '';
+        return `<div class="vm-grid-item">
       <img src="${esc(v.photo_url)}" alt="VM" class="vm-thumb" loading="lazy">
       <div class="vm-grid-meta">
         <span class="vm-cat-tag"><i class="fa-solid ${cat?.icon || 'fa-image'}"></i> ${esc(cat?.label || v.category)}</span>
         <span class="vm-author">${esc(nome)}</span>
       </div>
     </div>`;
-  }).join('') + '</div>';
+      })
+      .join('') +
+    '</div>';
 }
 
 function startCapture() {
@@ -500,7 +557,7 @@ async function onFreeFormSelected(e) {
   body.innerHTML = `
     <div class="vm-submit-form">
       <img src="${previewUrl}" alt="Preview" class="vm-preview-img">
-      <div class="vm-cat-picker">${VM_CATEGORIES.map(c => `<button class="vm-cat-pill" data-cat="${c.id}"><i class="fa-solid ${c.icon}"></i> ${c.label}</button>`).join('')}</div>
+      <div class="vm-cat-picker">${VM_CATEGORIES.map((c) => `<button class="vm-cat-pill" data-cat="${c.id}"><i class="fa-solid ${c.icon}"></i> ${c.label}</button>`).join('')}</div>
       <textarea id="vmDesc" class="vm-desc-input" placeholder="Descrição (opcional)" rows="2" maxlength="200"></textarea>
       <div class="vm-submit-actions">
         <button class="vendor-btn-ghost" id="vmCancelBtn"><i class="fa-solid fa-xmark"></i> Cancelar</button>
@@ -510,38 +567,54 @@ async function onFreeFormSelected(e) {
   `;
 
   let selectedCat = null;
-  body.querySelectorAll('.vm-cat-pill').forEach(btn => {
+  body.querySelectorAll('.vm-cat-pill').forEach((btn) => {
     btn.addEventListener('click', () => {
-      body.querySelectorAll('.vm-cat-pill').forEach(b => b.classList.remove('active'));
+      body.querySelectorAll('.vm-cat-pill').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       selectedCat = btn.dataset.cat;
       document.getElementById('vmSubmitBtn').disabled = false;
     });
   });
 
-  document.getElementById('vmCancelBtn')?.addEventListener('click', () => { URL.revokeObjectURL(previewUrl); renderSheetBody(); });
+  document.getElementById('vmCancelBtn')?.addEventListener('click', () => {
+    URL.revokeObjectURL(previewUrl);
+    renderSheetBody();
+  });
 
   document.getElementById('vmSubmitBtn')?.addEventListener('click', async () => {
     if (!selectedCat) return;
     const desc = document.getElementById('vmDesc')?.value?.trim() || '';
     const submitBtn = document.getElementById('vmSubmitBtn');
-    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Enviando…'; }
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Enviando…';
+    }
     try {
       const blob = await resizeImage(file, 800, 0.8);
       URL.revokeObjectURL(previewUrl);
       const uuid = crypto.randomUUID();
       const path = `${_ctx.tenant_id}/${_ctx.vendedor_id}/${uuid}.jpg`;
-      const { error: upErr } = await _sb.storage.from('vm-photos').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+      const { error: upErr } = await _sb.storage
+        .from('vm-photos')
+        .upload(path, blob, { contentType: 'image/jpeg', upsert: false });
       if (upErr) throw upErr;
       const { data: urlData } = _sb.storage.from('vm-photos').getPublicUrl(path);
-      const { error: rpcErr } = await _sb.rpc('vendor_submit_vm', { p_photo_url: urlData?.publicUrl, p_photo_path: path, p_category: selectedCat, p_description: desc });
+      const { error: rpcErr } = await _sb.rpc('vendor_submit_vm', {
+        p_photo_url: urlData?.publicUrl,
+        p_photo_path: path,
+        p_category: selectedCat,
+        p_description: desc
+      });
       if (rpcErr) throw rpcErr;
       window._vendorToast?.('Foto enviada! Aguardando aprovação.', 'success');
       await refreshMyVms();
       renderSheetBody();
     } catch (err) {
       window._vendorToast?.(err?.message || 'Erro ao enviar foto', 'error');
-      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Enviar'; }
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Enviar';
+      }
     }
   });
 }
@@ -552,20 +625,34 @@ function resizeImage(file, maxSize, quality) {
     const img = new Image();
     const objUrl = URL.createObjectURL(file);
     img.onload = () => {
-      let w = img.width, h = img.height;
+      let w = img.width,
+        h = img.height;
       if (w > maxSize || h > maxSize) {
-        if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
-        else { w = Math.round(w * maxSize / h); h = maxSize; }
+        if (w > h) {
+          h = Math.round((h * maxSize) / w);
+          w = maxSize;
+        } else {
+          w = Math.round((w * maxSize) / h);
+          h = maxSize;
+        }
       }
       const canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
+      canvas.width = w;
+      canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      canvas.toBlob(blob => {
-        URL.revokeObjectURL(objUrl);
-        blob ? resolve(blob) : reject(new Error('Canvas toBlob falhou'));
-      }, 'image/jpeg', quality);
+      canvas.toBlob(
+        (blob) => {
+          URL.revokeObjectURL(objUrl);
+          blob ? resolve(blob) : reject(new Error('Canvas toBlob falhou'));
+        },
+        'image/jpeg',
+        quality
+      );
     };
-    img.onerror = () => { URL.revokeObjectURL(objUrl); reject(new Error('Falha ao carregar imagem')); };
+    img.onerror = () => {
+      URL.revokeObjectURL(objUrl);
+      reject(new Error('Falha ao carregar imagem'));
+    };
     img.src = objUrl;
   });
 }
@@ -581,5 +668,9 @@ function formatDue(isoStr) {
 }
 
 function esc(s) {
-  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
