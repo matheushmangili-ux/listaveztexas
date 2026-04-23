@@ -856,6 +856,13 @@ export async function loadPreferenciais() {
 
 // ─── Ranking cards ───
 export async function loadRanking(range, cachedData) {
+  // Este arquivo e compartilhado por 3 paginas (dashboard.html,
+  // dashboard-vendedor.html, dashboard-operacional.html). `rankingBody` so
+  // existe na pagina por-vendedor — sai cedo nas outras pra nao gastar RPC
+  // nem estourar TypeError tentando escrever em elemento null.
+  const body = document.getElementById('rankingBody');
+  if (!body) return;
+
   const sb = _ctx.sb;
   const tenantId = _ctx.tenantId;
 
@@ -868,7 +875,6 @@ export async function loadRanking(range, cachedData) {
     cachedData = res.data;
   }
   const data = cachedData;
-  const body = document.getElementById('rankingBody');
   if (!data || data.length === 0) {
     body.innerHTML =
       '<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text-muted)">Sem dados no período</div>';
@@ -933,6 +939,11 @@ export async function loadRanking(range, cachedData) {
 
 // ─── Ruptures ───
 export async function loadRuptures(range) {
+  // `ruptureList` so existe em dashboard-operacional.html — guard pras
+  // outras paginas que compartilham esse JS.
+  const el = document.getElementById('ruptureList');
+  if (!el) return;
+
   const sb = _ctx.sb;
 
   const { data, error } = await fetchRuptureLog(sb, range);
@@ -940,7 +951,6 @@ export async function loadRuptures(range) {
     toast('Erro ao carregar rupturas: ' + error.message, 'error');
     return;
   }
-  const el = document.getElementById('ruptureList');
   if (!data || data.length === 0) {
     el.innerHTML =
       '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px"><i class="fa-solid fa-check-circle" style="font-size:20px;margin-bottom:8px;display:block;color:var(--success);opacity:.4"></i>Nenhuma ruptura registrada</div>';
