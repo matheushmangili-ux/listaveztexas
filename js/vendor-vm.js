@@ -10,6 +10,12 @@ let _gallery = [];
 let _vmTasks = [];
 let _activeVmTab = 'tasks';
 
+// Tamanho máximo do arquivo antes do resize. Sem isso, vendedor podia enviar
+// fotos de 50MB+ (câmera raw de celular) que estouravam memória ao criar
+// objectURL e pressionavam a quota do Storage bucket.
+const MAX_UPLOAD_BYTES = 12 * 1024 * 1024; // 12MB — generoso, mas barra abusos
+const MAX_UPLOAD_LABEL = '12MB';
+
 const VM_CATEGORIES = [
   { id: 'vitrine', label: 'Vitrine', icon: 'fa-store' },
   { id: 'gondola', label: 'Gôndola', icon: 'fa-table-cells' },
@@ -397,6 +403,10 @@ function openExecution(task, assignmentId) {
       input.onchange = async (ev) => {
         const f = ev.target.files?.[0];
         if (!f || capturedPhotos.length >= 3) return;
+        if (f.size > MAX_UPLOAD_BYTES) {
+          window._vendorToast?.(`Foto muito grande (máx ${MAX_UPLOAD_LABEL})`, 'error');
+          return;
+        }
         const preview = URL.createObjectURL(f);
         capturedPhotos.push({ file: f, preview });
         render();
@@ -550,6 +560,10 @@ function startCapture() {
 async function onFreeFormSelected(e) {
   const file = e.target.files?.[0];
   if (!file) return;
+  if (file.size > MAX_UPLOAD_BYTES) {
+    window._vendorToast?.(`Foto muito grande (máx ${MAX_UPLOAD_LABEL})`, 'error');
+    return;
+  }
   const body = document.getElementById('vmSheetBody');
   if (!body) return;
 
