@@ -323,6 +323,14 @@ async function _executeAtendimento(vendedorId, canalOrigemId) {
       p_preferencial: isPreferencial
     });
     if (error) throw error;
+    try {
+      window.minhavezAnalytics?.capture('tablet_atendimento_iniciado', {
+        atendimento_id: data,
+        vendedor_id: vendedorId,
+        preferencial: !!isPreferencial,
+        has_canal_origem: !!canalOrigemId
+      });
+    } catch (_e) { /* ignore */ }
     // Se canal de origem foi selecionado, gravar no atendimento
     if (canalOrigemId && data) {
       await _ctx.sb.from('atendimentos').update({ canal_origem_id: canalOrigemId }).eq('id', data);
@@ -1240,6 +1248,33 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor, con
       p_ruptura_tamanho: rupturaSel?.tamanho || null
     });
     if (error) throw error;
+
+    try {
+      // Calcula duracao do atendimento pra metrica de tempo medio no PostHog.
+      const duracaoSeg = atendInfo?.inicio
+        ? Math.max(0, Math.round((Date.now() - new Date(atendInfo.inicio).getTime()) / 1000))
+        : null;
+      window.minhavezAnalytics?.capture('tablet_atendimento_finalizado', {
+        atendimento_id: id,
+        vendedor_id: vendedorId,
+        resultado,
+        motivo: motivo || null,
+        has_valor: valor != null,
+        duracao_segundos: duracaoSeg
+      });
+      // Evento separado pra ruptura com props quebradas — casa com o card
+      // de rupturas especificas no dashboard e permite analise por marca/tipo.
+      if (rupturaSel && (rupturaSel.tipo_id || rupturaSel.marca_id)) {
+        window.minhavezAnalytics?.capture('tablet_ruptura_reportada', {
+          atendimento_id: id,
+          tipo_id: rupturaSel.tipo_id || null,
+          marca_id: rupturaSel.marca_id || null,
+          cor_id: rupturaSel.cor_id || null,
+          tamanho: rupturaSel.tamanho || null
+        });
+      }
+    } catch (_e) { /* ignore */ }
+
     const msg =
       resultado === 'venda'
         ? 'Venda registrada!'
