@@ -2155,7 +2155,7 @@
 }
 .currency-wrap input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.12);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 15%, transparent);
   outline: none;
 }
 
@@ -2278,6 +2278,16 @@
 [data-theme='light'] .t-setor-tab.active {
   background: rgba(139, 92, 246, 0.1);
 }
-[data-theme='light'] .currency-wrap input:focus {
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 15%, transparent);
+
+/* ═════════════════════════════════════════════════════════
+   Leva 2 — tactile feedback universal (touch targets tablet)
+   ═════════════════════════════════════════════════════════ */
+.setor-tab:active:not(.active),
+.queue-item:active,
+.atend-card:active,
+.motivo-option:active,
+.btn-confirm-motivo:active:not(:disabled),
+.footer-card:active {
+  transform: scale(0.98);
+  transition: transform 0.08s ease;
 }
