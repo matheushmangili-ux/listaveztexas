@@ -3557,3 +3557,35 @@ body {
 }
 
 /* ============ FIM modernization layer v3 ============ */
+
+/* ═════════════════════════════════════════════════════════
+   Light mode overrides — vendor
+   ═════════════════════════════════════════════════════════
+   Vendor tem sistema de tokens próprio (--vendor-*) definido
+   em :root com valores hardcoded dark. Aqui redefinimos pra
+   light quando data-theme='light'. localStorage['lv-theme'] é
+   compartilhado com dashboard, então toggle do dashboard
+   aplica aqui também. accent e tiers ficam iguais (funcionam
+   em ambos os modos).
+   ═════════════════════════════════════════════════════════ */
+[data-theme='light'] {
+  --vendor-bg: var(--bg-deep);
+  --vendor-surface: var(--bg-surface);
+  --vendor-card: var(--bg-card);
+  --vendor-border: var(--border-subtle);
+  --vendor-border-strong: var(--border-medium);
+  --vendor-text: var(--text-primary);
+  --vendor-text-dim: var(--text-secondary);
+  --vendor-text-muted: var(--text-muted);
+}
+/* Overlays rgba(255,255,255,*) hardcoded em vendor — inverter no light */
+[data-theme='light'] .vendor-chip,
+[data-theme='light'] .mission-card,
+[data-theme='light'] .achievement-chip,
+[data-theme='light'] .vendor-sheet-item {
+  background: rgba(15, 23, 42, 0.04);
+}
+[data-theme='light'] .xp-strip-btn,
+[data-theme='light'] .vendor-cta-next {
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
