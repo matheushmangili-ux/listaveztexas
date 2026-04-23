@@ -30,7 +30,11 @@
 
   try {
     window.posthog.init('phc_mxauxpwWdL9gGNcpQTEyrwjJsnV6kytaYvZgQNQMxrBS', {
-      api_host: 'https://us.i.posthog.com',
+      // Reverse proxy via /ingest/* (rewrites no vercel.json apontam pra
+      // us.i.posthog.com). Contorna adblockers que bloqueiam dominios
+      // conhecidos de tracking — requests agora saem pro proprio dominio.
+      api_host: '/ingest',
+      ui_host: 'https://us.posthog.com',
 
       // Autocapture OFF — events manuais nos fluxos criticos. Evita
       // capturar texto de elementos com PII (nomes de clientes, valores
