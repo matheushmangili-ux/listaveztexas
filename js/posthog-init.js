@@ -30,7 +30,7 @@
 
   try {
     window.posthog.init('phc_mxauxpwWdL9gGNcpQTEyrwjJsnV6kytaYvZgQNQMxrBS', {
-      api_host: 'https://eu.i.posthog.com',
+      api_host: 'https://us.i.posthog.com',
 
       // Autocapture OFF — events manuais nos fluxos criticos. Evita
       // capturar texto de elementos com PII (nomes de clientes, valores
