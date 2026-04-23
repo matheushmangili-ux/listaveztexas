@@ -84,14 +84,35 @@ loginForm.addEventListener('submit', async (e) => {
 });
 
 // ─── Logout handler (exposto pra home chamar) ───
+// Flag pra distinguir logout deliberado (user clicou "Sair") de logout
+// involuntário (refresh token expirou). Sem isso, o listener de authstate
+// mostraria o toast "Sua sessão expirou" em cima do clique do user.
+let _intentionalLogout = false;
+
 window._vendorLogout = async function () {
+  _intentionalLogout = true;
   try {
     await sb.auth.signOut({ scope: 'local' });
   } catch (e) {
     console.warn('[logout] erro:', e);
   }
+  _intentionalLogout = false;
   showLogin();
 };
+
+// ─── Auth state listener ───
+// Escuta SIGNED_OUT disparado pelo próprio Supabase quando o refresh token
+// falha (sessão expirou, user deslogado de outro device, token revogado).
+// Sem isso, o vendor ficava na home com todas as RPCs retornando 401 em
+// silêncio — user só percebia pelo app "travado" sem nunca carregar dados.
+sb.auth.onAuthStateChange((event) => {
+  if (event === 'SIGNED_OUT' && !_intentionalLogout) {
+    if (!screenHome.classList.contains('hidden')) {
+      window._vendorToast?.('Sua sessão expirou. Faça login novamente.', 'info', 5000);
+    }
+    showLogin();
+  }
+});
 
 // ─── Bootstrap: checa sessão existente ───
 (async function boot() {

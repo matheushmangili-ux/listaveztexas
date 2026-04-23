@@ -453,16 +453,23 @@ async function submitExecution(assignmentId, photos, checkStates) {
   try {
     const responses = [];
 
-    // Upload photos
+    // Upload photos. Cada foto já uploadada é marcada em `p.uploaded` pra
+    // evitar re-upload em retry (user clicar Enviar de novo após falha
+    // parcial). Sem isso, foto subia duplicada no Storage a cada tentativa.
     for (const p of photos) {
+      if (p.uploaded) {
+        responses.push({ photo_url: p.uploaded.url, photo_path: p.uploaded.path, note });
+        continue;
+      }
       const blob = await resizeImage(p.file, 800, 0.8);
-      URL.revokeObjectURL(p.preview);
       const uuid = crypto.randomUUID();
       const path = `${_ctx.tenant_id}/${_ctx.vendedor_id}/${uuid}.jpg`;
       const { error: upErr } = await _sb.storage.from('vm-photos').upload(path, blob, { contentType: 'image/jpeg' });
       if (upErr) throw upErr;
       const { data: urlData } = _sb.storage.from('vm-photos').getPublicUrl(path);
-      responses.push({ photo_url: urlData?.publicUrl || '', photo_path: path, note });
+      const url = urlData?.publicUrl || '';
+      p.uploaded = { url, path };
+      responses.push({ photo_url: url, photo_path: path, note });
     }
 
     // Checklist responses
@@ -476,6 +483,11 @@ async function submitExecution(assignmentId, photos, checkStates) {
     });
     if (error) throw error;
 
+    // Sucesso — revoga todas as previews e zera o array pra prevenir leak
+    // e re-submit acidental se o user reabrir a modal antes do close.
+    photos.forEach((p) => URL.revokeObjectURL(p.preview));
+    photos.length = 0;
+
     window._vendorToast?.('Tarefa enviada! Aguardando revisão.', 'success');
     closeTaskView();
     await refreshVmTasks();
@@ -487,6 +499,9 @@ async function submitExecution(assignmentId, photos, checkStates) {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Enviar';
     }
+    // Em erro, mantém previews vivas pra retry (revoke só no cancel/close
+    // ou no próximo sucesso). Fotos já uploadadas ficam marcadas em
+    // `p.uploaded` e não serão re-enviadas.
   }
 }
 
