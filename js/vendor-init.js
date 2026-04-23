@@ -61,21 +61,46 @@ loginForm.addEventListener('submit', async (e) => {
       throw new Error('Essa conta não é de vendedor. Use o login do tablet/dashboard.');
     }
 
+    // Telemetria: identify pra poder correlacionar eventos futuros ao
+    // vendedor. Usa o auth user UUID (estavel entre sessoes). Tag de
+    // tenant_slug ajuda filtrar funil por cliente em rollouts multi-tenant.
+    try {
+      const tenantSlug = localStorage.getItem('lv-last-slug') || null;
+      window.minhavezAnalytics?.identify(data.user.id, {
+        user_role: 'vendedor',
+        tenant_slug: tenantSlug
+      });
+      window.minhavezAnalytics?.capture('vendor_login_success', { tenant_slug: tenantSlug });
+    } catch (_e) {
+      // analytics nao pode bloquear o fluxo de login
+    }
+
     await showHome();
   } catch (err) {
     const raw = err?.message || '';
     let msg;
+    let reason = 'unknown';
     if (!navigator.onLine) {
       msg = 'Sem conexão. Confira sua internet e tente de novo.';
+      reason = 'offline';
     } else if (/invalid login credentials/i.test(raw)) {
       msg = 'Email ou senha incorretos.';
+      reason = 'invalid_credentials';
     } else if (/rate limit|too many/i.test(raw)) {
       msg = 'Muitas tentativas. Aguarde um instante e tente novamente.';
+      reason = 'rate_limit';
     } else if (/email not confirmed/i.test(raw)) {
       msg = 'Email ainda não confirmado. Confira sua caixa de entrada.';
+      reason = 'email_not_confirmed';
+    } else if (/conta não é de vendedor/i.test(raw)) {
+      msg = raw;
+      reason = 'wrong_role';
     } else {
       msg = raw || 'Falha no login. Tente novamente.';
     }
+    try {
+      window.minhavezAnalytics?.capture('vendor_login_failed', { reason });
+    } catch (_e) { /* ignore */ }
     loginError.textContent = msg;
     loginError.classList.remove('hidden');
   } finally {
@@ -91,6 +116,10 @@ let _intentionalLogout = false;
 
 window._vendorLogout = async function () {
   _intentionalLogout = true;
+  try {
+    window.minhavezAnalytics?.capture('vendor_logout');
+    window.minhavezAnalytics?.reset();
+  } catch (_e) { /* ignore */ }
   try {
     await sb.auth.signOut({ scope: 'local' });
   } catch (e) {

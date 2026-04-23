@@ -488,6 +488,15 @@ async function submitExecution(assignmentId, photos, checkStates) {
     photos.forEach((p) => URL.revokeObjectURL(p.preview));
     photos.length = 0;
 
+    try {
+      window.minhavezAnalytics?.capture('vendor_vm_task_submitted', {
+        assignment_id: assignmentId,
+        n_photos: responses.filter((r) => r.photo_path).length,
+        checklist_count: Object.keys(checkStates).length,
+        checklist_completed: Object.values(checkStates).filter(Boolean).length
+      });
+    } catch (_e) { /* ignore */ }
+
     window._vendorToast?.('Tarefa enviada! Aguardando revisão.', 'success');
     closeTaskView();
     await refreshVmTasks();
@@ -635,6 +644,12 @@ async function onFreeFormSelected(e) {
         p_description: desc
       });
       if (rpcErr) throw rpcErr;
+      try {
+        window.minhavezAnalytics?.capture('vendor_vm_free_form_submitted', {
+          category: selectedCat,
+          has_description: desc.length > 0
+        });
+      } catch (_e) { /* ignore */ }
       window._vendorToast?.('Foto enviada! Aguardando aprovação.', 'success');
       await refreshMyVms();
       renderSheetBody();
