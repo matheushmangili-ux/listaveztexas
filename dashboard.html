@@ -298,57 +298,9 @@
         </div>
 
         <!-- Status Marquee -->
-        <div
-          id="statusMarquee"
-          style="
-            overflow: hidden;
-            white-space: nowrap;
-            margin-bottom: var(--space-lg);
-            background: var(--bg-surface);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius);
-            padding: 10px 0;
-            position: relative;
-          "
-        >
-          <div
-            style="
-              position: absolute;
-              left: 0;
-              top: 0;
-              bottom: 0;
-              display: flex;
-              align-items: center;
-              padding: 0 14px;
-              background: linear-gradient(90deg, var(--bg-surface) 80%, transparent);
-              z-index: 2;
-              font-size: 9px;
-              font-weight: 800;
-              text-transform: uppercase;
-              letter-spacing: 0.1em;
-              color: var(--text-muted);
-            "
-          >
-            <span
-              style="
-                display: inline-block;
-                width: 8px;
-                height: 8px;
-                border-radius: 50%;
-                background: var(--success);
-                margin-right: 8px;
-                box-shadow:
-                  0 0 6px 2px var(--success),
-                  0 0 12px 4px rgba(167, 139, 250, 0.4);
-                animation: pulseGlow 2s ease-in-out infinite;
-              "
-            ></span
-            >On Time
-          </div>
-          <div
-            id="marqueeTrack"
-            style="display: inline-flex; gap: 16px; animation: marqueeHeader 25s linear infinite; padding-left: 120px"
-          ></div>
+        <div id="statusMarquee" class="status-marquee">
+          <div class="marquee-label"><span class="marquee-indicator"></span>On Time</div>
+          <div id="marqueeTrack" class="marquee-track"></div>
         </div>
 
         <!-- HERO KPIs — Stripe-style: label + valor + delta + compare + area chart embutido -->
@@ -401,12 +353,6 @@
             </div>
             <div class="hero-chart" id="chartHeroConv"></div>
           </div>
-          <!-- Hidden legacy compare/skeleton pra compat com código existente -->
-          <div style="display: none">
-            <div id="kpiTotalCmp"></div>
-            <div id="kpiVendasCmp"></div>
-            <div id="kpiConvCmp"></div>
-          </div>
         </div>
 
         <!-- SECONDARY KPIs — Stripe-style: label+val esquerda, delta+mini-spark direita -->
@@ -420,7 +366,6 @@
               <div class="sec-delta" id="kpiLossDelta"></div>
               <div class="mini-spark" id="sparkLoss"></div>
             </div>
-            <div style="display: none"><div id="kpiLossCmp"></div></div>
           </div>
           <div class="sec-card">
             <div class="sec-left">
@@ -431,7 +376,6 @@
               <div class="sec-delta" id="kpiPrefDelta"></div>
               <div class="mini-spark" id="sparkPref"></div>
             </div>
-            <div style="display: none"><div id="kpiPrefCmp"></div></div>
           </div>
           <div class="sec-card">
             <div class="sec-left">
@@ -442,7 +386,6 @@
               <div class="sec-delta" id="kpiTimeDelta"></div>
               <div class="mini-spark" id="sparkTempo"></div>
             </div>
-            <div style="display: none"><div id="kpiTimeCmp"></div></div>
           </div>
         </div>
 
@@ -572,22 +515,10 @@
         id="aiModal"
         onclick="if (event.target === this) window._dashAiClose && window._dashAiClose();"
       >
-        <div class="modal-box" style="max-width: 640px; max-height: 90vh; overflow-y: auto">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px">
-            <h3 style="margin: 0; font-size: 15px">
-              <i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 8px; color: var(--warning)"></i>IA Assist
-            </h3>
-            <button
-              onclick="window._dashAiClose && window._dashAiClose()"
-              style="
-                background: none;
-                border: none;
-                cursor: pointer;
-                color: var(--text-muted);
-                font-size: 16px;
-                padding: 4px;
-              "
-            >
+        <div class="modal-box modal-box--lg">
+          <div class="modal-header">
+            <h3><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--warning)"></i>IA Assist</h3>
+            <button class="modal-close-btn" onclick="window._dashAiClose && window._dashAiClose()">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -601,22 +532,10 @@
         id="vmModal"
         onclick="if (event.target === this) window._dashVmClose && window._dashVmClose();"
       >
-        <div class="modal-box" style="max-width: 720px; max-height: 90vh; overflow-y: auto">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px">
-            <h3 style="margin: 0; font-size: 15px">
-              <i class="fa-solid fa-camera-retro" style="margin-right: 8px; color: var(--info)"></i>VM Photos
-            </h3>
-            <button
-              onclick="window._dashVmClose && window._dashVmClose()"
-              style="
-                background: none;
-                border: none;
-                cursor: pointer;
-                color: var(--text-muted);
-                font-size: 16px;
-                padding: 4px;
-              "
-            >
+        <div class="modal-box modal-box--xl">
+          <div class="modal-header">
+            <h3><i class="fa-solid fa-camera-retro" style="color: var(--info)"></i>VM Photos</h3>
+            <button class="modal-close-btn" onclick="window._dashVmClose && window._dashVmClose()">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -630,22 +549,10 @@
         id="missionsModal"
         onclick="if (event.target === this) window._dashMissionsClose && window._dashMissionsClose();"
       >
-        <div class="modal-box" style="max-width: 640px; max-height: 90vh; overflow-y: auto">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px">
-            <h3 style="margin: 0; font-size: 15px">
-              <i class="fa-solid fa-bullseye" style="margin-right: 8px; color: var(--success)"></i>Missões diárias
-            </h3>
-            <button
-              onclick="window._dashMissionsClose && window._dashMissionsClose()"
-              style="
-                background: none;
-                border: none;
-                cursor: pointer;
-                color: var(--text-muted);
-                font-size: 16px;
-                padding: 4px;
-              "
-            >
+        <div class="modal-box modal-box--lg">
+          <div class="modal-header">
+            <h3><i class="fa-solid fa-bullseye" style="color: var(--success)"></i>Missões diárias</h3>
+            <button class="modal-close-btn" onclick="window._dashMissionsClose && window._dashMissionsClose()">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -884,23 +791,10 @@
         id="xpConfigModal"
         onclick="if (event.target === this) window._dashXpConfigClose && window._dashXpConfigClose();"
       >
-        <div class="modal-box" style="max-width: 540px">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px">
-            <h3 style="margin: 0; font-size: 15px">
-              <i class="fa-solid fa-bolt" style="margin-right: 8px; color: var(--warning)"></i>Gamificação · Pontos por
-              evento
-            </h3>
-            <button
-              onclick="window._dashXpConfigClose && window._dashXpConfigClose()"
-              style="
-                background: none;
-                border: none;
-                cursor: pointer;
-                color: var(--text-muted);
-                font-size: 16px;
-                padding: 4px;
-              "
-            >
+        <div class="modal-box modal-box--md">
+          <div class="modal-header">
+            <h3><i class="fa-solid fa-bolt" style="color: var(--warning)"></i>Gamificação · Pontos por evento</h3>
+            <button class="modal-close-btn" onclick="window._dashXpConfigClose && window._dashXpConfigClose()">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -1073,21 +967,12 @@
         id="annModal"
         onclick="if (event.target === this) window._dashAnnouncementsClose && window._dashAnnouncementsClose();"
       >
-        <div class="modal-box" style="max-width: 640px; max-height: 90vh; overflow-y: auto">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px">
-            <h3 style="margin: 0; font-size: 15px">
-              <i class="fa-solid fa-bullhorn" style="margin-right: 8px; color: var(--accent)"></i>Comunicados
-            </h3>
+        <div class="modal-box modal-box--lg">
+          <div class="modal-header">
+            <h3><i class="fa-solid fa-bullhorn" style="color: var(--accent)"></i>Comunicados</h3>
             <button
+              class="modal-close-btn"
               onclick="window._dashAnnouncementsClose && window._dashAnnouncementsClose()"
-              style="
-                background: none;
-                border: none;
-                cursor: pointer;
-                color: var(--text-muted);
-                font-size: 16px;
-                padding: 4px;
-              "
             >
               <i class="fa-solid fa-xmark"></i>
             </button>
@@ -1322,20 +1207,10 @@
 
       <!-- Modal Drill-down -->
       <div class="modal-overlay" id="drillModal" onclick="if (event.target === this) closeDrillModal();">
-        <div class="modal-box" style="max-width: 480px">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px">
-            <h3 id="drillTitle" style="margin: 0; font-size: 15px"></h3>
-            <button
-              onclick="closeDrillModal()"
-              style="
-                background: none;
-                border: none;
-                cursor: pointer;
-                color: var(--text-muted);
-                font-size: 16px;
-                padding: 4px;
-              "
-            >
+        <div class="modal-box modal-box--sm">
+          <div class="modal-header">
+            <h3 id="drillTitle"></h3>
+            <button class="modal-close-btn" onclick="closeDrillModal()">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
