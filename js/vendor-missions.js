@@ -8,10 +8,10 @@ let _missions = [];
 let _prevCompletedIds = new Set();
 
 const GOAL_LABEL = {
-  atendimentos_count:   { unit: 'atendimento(s)',  fmt: (v) => Math.floor(v) },
-  vendas_count:         { unit: 'venda(s)',        fmt: (v) => Math.floor(v) },
-  vendas_canal_count:   { unit: 'venda(s)',        fmt: (v) => Math.floor(v) },
-  valor_vendido_total:  { unit: 'em vendas',       fmt: (v) => 'R$ ' + Number(v).toFixed(2).replace('.', ',') }
+  atendimentos_count: { unit: 'atendimento(s)', fmt: (v) => Math.floor(v) },
+  vendas_count: { unit: 'venda(s)', fmt: (v) => Math.floor(v) },
+  vendas_canal_count: { unit: 'venda(s)', fmt: (v) => Math.floor(v) },
+  valor_vendido_total: { unit: 'em vendas', fmt: (v) => 'R$ ' + Number(v).toFixed(2).replace('.', ',') }
 };
 
 export async function initMissions(sb) {
@@ -48,7 +48,7 @@ async function refresh() {
     render();
   }
   if (window._vendorCounts) {
-    window._vendorCounts.missions = _missions.filter(m => !m.completed).length;
+    window._vendorCounts.missions = _missions.filter((m) => !m.completed).length;
     window._vendorUpdateBadges?.();
   }
 }
@@ -86,9 +86,10 @@ function render() {
 function renderRow(m) {
   const pct = Math.max(0, Math.min(100, Number(m.progress_pct) || 0));
   const fmt = (GOAL_LABEL[m.goal_type] || { fmt: (v) => v }).fmt;
-  const progressText = m.goal_type === 'valor_vendido_total'
-    ? `${fmt(m.progress)} / ${fmt(m.goal_value)}`
-    : `${fmt(m.progress)}/${fmt(m.goal_value)}`;
+  const progressText =
+    m.goal_type === 'valor_vendido_total'
+      ? `${fmt(m.progress)} / ${fmt(m.goal_value)}`
+      : `${fmt(m.progress)}/${fmt(m.goal_value)}`;
   return `
     <div class="mission-row ${m.completed ? 'completed' : ''}">
       <i class="fa-solid ${esc(m.icon || 'fa-bullseye')}"></i>
@@ -108,13 +109,18 @@ function bindSheet() {
 window._vendorMissionsOpen = openSheet;
 function openSheet() {
   const overlay = document.getElementById('missionsOverlay');
-  const sheet   = document.getElementById('missionsSheet');
-  const body    = document.getElementById('missionsSheetBody');
+  const sheet = document.getElementById('missionsSheet');
+  const body = document.getElementById('missionsSheetBody');
   if (!overlay || !sheet || !body) return;
 
-  body.innerHTML = _missions.length === 0
-    ? '<div class="missions-empty">Nenhuma missão ativa pra hoje.</div>'
-    : _missions.map(renderSheetRow).join('');
+  body.innerHTML =
+    _missions.length === 0
+      ? `<div class="empty-state">
+        <i class="fa-solid fa-bullseye empty-state__icon"></i>
+        <div class="empty-state__title">Nenhuma missão hoje</div>
+        <div class="empty-state__prose">Quando o gerente lançar missões, elas aparecem aqui. Elas valem XP extra.</div>
+      </div>`
+      : _missions.map(renderSheetRow).join('');
 
   overlay.classList.remove('hidden');
   sheet.classList.remove('hidden');
@@ -167,5 +173,9 @@ function showMissionCompleted(m) {
 }
 
 function esc(s) {
-  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }

@@ -698,8 +698,10 @@ async function updateQuickStats() {
 window.openPosLog = function () {
   const list = document.getElementById('posLogList');
   if (state.positionLog.length === 0) {
-    list.innerHTML =
-      '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px">Nenhuma movimentação registrada nesta sessão</div>';
+    list.innerHTML = `<div class="empty-state empty-state--compact">
+      <i class="fa-solid fa-clock-rotate-left empty-state__icon"></i>
+      <div class="empty-state__prose">Nenhuma movimentação registrada nesta sessão</div>
+    </div>`;
   } else {
     list.innerHTML = state.positionLog
       .map((entry) => {
@@ -755,8 +757,10 @@ window.toggleMiniRanking = async function () {
     .eq('turno_id', state.turno.id)
     .neq('resultado', 'em_andamento');
   if (!data || data.length === 0) {
-    document.getElementById('miniRankingList').innerHTML =
-      '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px">Nenhum atendimento finalizado</div>';
+    document.getElementById('miniRankingList').innerHTML = `<div class="empty-state empty-state--compact">
+      <i class="fa-solid fa-medal empty-state__icon"></i>
+      <div class="empty-state__prose">Nenhum atendimento finalizado</div>
+    </div>`;
   } else {
     // Agrupar por vendedor
     const map = new Map();
