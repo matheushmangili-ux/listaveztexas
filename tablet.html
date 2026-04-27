@@ -412,10 +412,7 @@
     <div id="toastContainer" role="status" aria-live="polite" aria-atomic="true"></div>
 
     <script type="module" src="/js/tablet-init.js"></script>
-    <script type="module">
-      import { startTourIfFirstTime } from '/js/tour.js';
-      window.addEventListener('load', () => setTimeout(() => startTourIfFirstTime('tablet'), 1500));
-    </script>
+    <script type="module" src="/js/tour.js"></script>
     <!-- Origin Channel Modal -->
     <div class="origin-overlay" id="originOverlay">
       <div class="origin-box">
