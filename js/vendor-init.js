@@ -2,6 +2,7 @@
 // minhavez Vendedor — Bootstrap + auth + routing
 // ============================================
 import { getSupabase } from '/js/supabase-config.js';
+import { getAuthContext } from '/js/auth.js';
 import { initHome, unmountHome } from '/js/vendor-home.js';
 
 const sb = getSupabase();
@@ -40,6 +41,11 @@ async function showHome() {
   await initHome(sb);
 }
 
+async function isVendorUser(user) {
+  const context = await getAuthContext(user);
+  return context?.role === 'vendedor';
+}
+
 // ─── Login handler ───
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -55,8 +61,7 @@ loginForm.addEventListener('submit', async (e) => {
     if (error) throw error;
 
     // Garante que é vendedor
-    const role = data.user?.user_metadata?.user_role;
-    if (role !== 'vendedor') {
+    if (!(await isVendorUser(data.user))) {
       await sb.auth.signOut({ scope: 'local' });
       throw new Error('Essa conta não é de vendedor. Use o login do tablet/dashboard.');
     }
@@ -161,7 +166,7 @@ sb.auth.onAuthStateChange((event) => {
   const {
     data: { session }
   } = await sb.auth.getSession();
-  if (session?.user?.user_metadata?.user_role === 'vendedor') {
+  if (session?.user && (await isVendorUser(session.user))) {
     await showHome();
   } else {
     showLogin();

@@ -38,6 +38,11 @@ function closeModal() {
 
 async function ensureTenant() {
   if (_tenantId) return;
+  const { data: tenantId } = await sb.rpc('get_my_tenant_id');
+  if (tenantId) {
+    _tenantId = tenantId;
+    return;
+  }
   const {
     data: { user }
   } = await sb.auth.getUser();
