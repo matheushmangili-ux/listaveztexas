@@ -193,7 +193,7 @@ BEGIN
   v_tid := public.get_my_tenant_id();
   IF v_tid IS NULL THEN RAISE EXCEPTION 'no tenant'; END IF;
 
-  v_role := (current_setting('request.jwt.claims', true)::jsonb -> 'user_metadata' ->> 'user_role');
+  v_role := public.get_my_tenant_role();
   IF v_role NOT IN ('owner','admin','gerente') THEN
     RAISE EXCEPTION 'Apenas owner/admin/gerente podem editar missões';
   END IF;
@@ -247,7 +247,7 @@ BEGIN
   v_tid := public.get_my_tenant_id();
   IF v_tid IS NULL THEN RAISE EXCEPTION 'no tenant'; END IF;
 
-  v_role := (current_setting('request.jwt.claims', true)::jsonb -> 'user_metadata' ->> 'user_role');
+  v_role := public.get_my_tenant_role();
   IF v_role NOT IN ('owner','admin','gerente') THEN
     RAISE EXCEPTION 'Apenas owner/admin/gerente podem apagar missões';
   END IF;

@@ -115,7 +115,7 @@ DECLARE
   v_vendor RECORD;
   v_idx INT;
 BEGIN
-  v_role := (current_setting('request.jwt.claims', true)::jsonb -> 'user_metadata' ->> 'user_role');
+  v_role := public.get_my_tenant_role();
   IF v_role NOT IN ('owner','admin','gerente') THEN
     RAISE EXCEPTION 'Apenas admin/gerente podem criar tarefas VM';
   END IF;
@@ -183,7 +183,7 @@ DECLARE
   v_tenant UUID := public.get_my_tenant_id();
   v_role TEXT;
 BEGIN
-  v_role := (current_setting('request.jwt.claims', true)::jsonb -> 'user_metadata' ->> 'user_role');
+  v_role := public.get_my_tenant_role();
   IF v_role NOT IN ('owner','admin','gerente') THEN
     RAISE EXCEPTION 'Acesso negado';
   END IF;
@@ -215,7 +215,7 @@ DECLARE
   v_tenant UUID := public.get_my_tenant_id();
   v_role TEXT;
 BEGIN
-  v_role := (current_setting('request.jwt.claims', true)::jsonb -> 'user_metadata' ->> 'user_role');
+  v_role := public.get_my_tenant_role();
   IF v_role NOT IN ('owner','admin','gerente') THEN
     RAISE EXCEPTION 'Acesso negado';
   END IF;
@@ -258,7 +258,7 @@ DECLARE
   v_xp_granted BOOLEAN;
   v_reward_xp INT;
 BEGIN
-  v_role := (current_setting('request.jwt.claims', true)::jsonb -> 'user_metadata' ->> 'user_role');
+  v_role := public.get_my_tenant_role();
   IF v_role NOT IN ('owner','admin','gerente') THEN
     RAISE EXCEPTION 'Acesso negado';
   END IF;

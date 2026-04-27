@@ -136,7 +136,7 @@ DECLARE
   v_tenant UUID := public.get_my_tenant_id();
   v_role TEXT;
 BEGIN
-  v_role := (current_setting('request.jwt.claims', true)::jsonb -> 'user_metadata' ->> 'user_role');
+  v_role := public.get_my_tenant_role();
   IF v_role NOT IN ('owner','admin','gerente') THEN
     RAISE EXCEPTION 'Apenas admin/gerente podem acessar a fila de VM';
   END IF;
@@ -168,7 +168,7 @@ DECLARE
   v_xp_points INT;
   v_config JSONB;
 BEGIN
-  v_role := (current_setting('request.jwt.claims', true)::jsonb -> 'user_metadata' ->> 'user_role');
+  v_role := public.get_my_tenant_role();
   IF v_role NOT IN ('owner','admin','gerente') THEN
     RAISE EXCEPTION 'Apenas admin/gerente podem revisar VM';
   END IF;

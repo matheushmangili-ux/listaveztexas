@@ -361,7 +361,7 @@ DECLARE
   v_caller_role TEXT;
 BEGIN
   v_caller_tenant := public.get_my_tenant_id();
-  v_caller_role := (current_setting('request.jwt.claims', true)::jsonb -> 'user_metadata' ->> 'user_role');
+  v_caller_role := public.get_my_tenant_role();
 
   IF v_caller_role NOT IN ('owner', 'admin', 'gerente') THEN
     RAISE EXCEPTION 'Apenas owner/admin/gerente podem vincular vendedores';
