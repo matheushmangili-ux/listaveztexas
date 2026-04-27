@@ -1,0 +1,2 @@
+-- Remote baseline placeholder.
+-- This migration was already applied before this repo had supabase/migrations.
