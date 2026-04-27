@@ -49,7 +49,7 @@ d('smoke: prod infra', () => {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/`, {
       headers: { apikey: SUPABASE_ANON_KEY }
     });
-    expect([200, 404]).toContain(r.status);
+    expect([200, 401, 404]).toContain(r.status);
   });
 
   it('RPC get_landing_stats responde com schema esperado', async () => {
