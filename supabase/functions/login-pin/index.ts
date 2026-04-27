@@ -6,35 +6,6 @@ import { getCorsHeaders } from '../_shared/cors.ts'
 const MAX_ATTEMPTS = 5
 const LOCKOUT_MINUTES = 15
 
-async function findVendedorByPin(supabaseAdmin, tenantId, pin) {
-  const { data, error } = await supabaseAdmin
-    .rpc('find_vendedor_by_pin', { p_tenant_id: tenantId, p_pin: pin })
-    .maybeSingle()
-
-  if (!error) {
-    return { data, error: null }
-  }
-
-  const missingRpc =
-    error.code === 'PGRST202' ||
-    /find_vendedor_by_pin|schema cache/i.test(error.message || '')
-
-  if (!missingRpc) {
-    return { data: null, error }
-  }
-
-  // Compatibility path for production before sql/47 is applied.
-  // Service role is used only inside this function; browser clients still do
-  // not receive PIN values.
-  return await supabaseAdmin
-    .from('vendedores')
-    .select('id, nome')
-    .eq('tenant_id', tenantId)
-    .eq('ativo', true)
-    .eq('pin', pin)
-    .maybeSingle()
-}
-
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req)
 
@@ -93,7 +64,9 @@ Deno.serve(async (req) => {
     }
 
     // Validate PIN through a SECURITY DEFINER RPC so hashes never leave Postgres.
-    const { data: vendedor, error: vendErr } = await findVendedorByPin(supabaseAdmin, tenant.id, pin)
+    const { data: vendedor, error: vendErr } = await supabaseAdmin
+      .rpc('find_vendedor_by_pin', { p_tenant_id: tenant.id, p_pin: pin })
+      .maybeSingle()
 
     if (vendErr) {
       return new Response(JSON.stringify({ error: 'Erro ao validar PIN' }), {
