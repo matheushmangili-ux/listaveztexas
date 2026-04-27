@@ -1150,6 +1150,7 @@
       import { requireRole, logout, getTenantId } from '/js/auth.js';
       import { loadTenant, applyBranding, tenantPath } from '/js/tenant.js';
       import { toast, initTheme, escapeHtml } from '/js/utils.js';
+      import { fetchTodosVendedores } from '/js/dashboard-api.js';
       initTheme();
 
       const sb = getSupabase();
@@ -1157,9 +1158,6 @@
       let tenantId = null;
       let vendedores = [];
       let tenantSectors = [];
-      const VENDOR_SETTINGS_COLUMNS =
-        'id,nome,apelido,status,posicao_fila,ativo,created_at,updated_at,tenant_id,setor,foto_url,auth_user_id,avatar_config';
-
       (async function init() {
         tenant = await loadTenant();
         if (!tenant) return;
@@ -1176,11 +1174,7 @@
         if (tenantData) tenant = tenantData;
 
         // Load vendors
-        const { data: vData } = await sb
-          .from('vendedores')
-          .select(VENDOR_SETTINGS_COLUMNS)
-          .eq('tenant_id', tenantId)
-          .order('posicao_fila');
+        const { data: vData } = await fetchTodosVendedores(sb, tenantId);
         vendedores = vData || [];
 
         // Populate UI
@@ -1604,11 +1598,7 @@
           if (_vmResetRequested && resetPass) toast('Senha atualizada', 'success');
 
           // Reload
-          const { data } = await sb
-            .from('vendedores')
-            .select(VENDOR_SETTINGS_COLUMNS)
-            .eq('tenant_id', tenantId)
-            .order('posicao_fila');
+          const { data } = await fetchTodosVendedores(sb, tenantId);
           vendedores = data || [];
           renderVendorList();
           populatePlan();
@@ -1929,7 +1919,7 @@
           if (!tid) throw new Error('Tenant não encontrado');
           // Coleta dados de todas as tabelas relevantes
           const [vendedores, atendimentos, turnos, pausas, configuracoes] = await Promise.all([
-            sb.from('vendedores').select(VENDOR_SETTINGS_COLUMNS).eq('tenant_id', tid),
+            fetchTodosVendedores(sb, tid),
             sb
               .from('atendimentos')
               .select('*')

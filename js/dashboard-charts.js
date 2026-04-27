@@ -880,9 +880,7 @@ export async function loadRanking(range, cachedData) {
   }
 
   // Buscar fotos dos vendedores
-  let vendQuery = sb.from('vendedores').select('id, foto_url, apelido').eq('ativo', true);
-  if (tenantId) vendQuery = vendQuery.eq('tenant_id', tenantId);
-  const { data: vendedoresData } = await vendQuery;
+  const { data: vendedoresData } = await fetchVendedores(sb, tenantId);
   const fotoMap = {};
   (vendedoresData || []).forEach((v) => {
     fotoMap[v.id] = v.foto_url;

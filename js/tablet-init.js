@@ -6,6 +6,7 @@
 import { getSupabase } from '/js/supabase-config.js';
 import { requireRole, logout, getTenantId } from '/js/auth.js';
 import { SAIDA_COLORS, toast, initTheme, toggleTheme, escapeHtml } from '/js/utils.js';
+import { fetchVendedores } from '/js/dashboard-api.js';
 import { loadTenant, applyBranding, tenantPath } from '/js/tenant.js';
 import { showChangelog, setVersionLabel } from '/js/changelog.js';
 import { playSound } from '/js/sound.js';
@@ -57,8 +58,6 @@ initTheme();
 const tenant = await loadTenant();
 if (tenant) applyBranding(tenant);
 const tenantId = tenant?.id || null;
-const VENDEDOR_PUBLIC_COLUMNS =
-  'id,nome,apelido,status,posicao_fila,ativo,created_at,updated_at,tenant_id,setor,foto_url,auth_user_id,avatar_config';
 
 // Render setor tabs dynamically from tenant config
 const SETOR_ICONS = { loja: 'fa-store', chapelaria: 'fa-hat-cowboy', selaria: 'fa-horse' };
@@ -372,9 +371,7 @@ async function loadVendedores() {
   if (ui.loadingVendedores) return;
   ui.loadingVendedores = true;
   try {
-    const vq = sb.from('vendedores').select(VENDEDOR_PUBLIC_COLUMNS).eq('ativo', true);
-    if (tenantId) vq.eq('tenant_id', tenantId);
-    const { data, error } = await vq.order('posicao_fila', { ascending: true, nullsFirst: false });
+    const { data, error } = await fetchVendedores(sb, tenantId);
     if (error) {
       const backup = localStorage.getItem('minhavez_vendedores');
       if (backup) {
@@ -386,7 +383,7 @@ async function loadVendedores() {
       scheduleRender();
       return;
     }
-    state.vendedores = data || [];
+    state.vendedores = (data || []).sort((a, b) => (a.posicao_fila ?? 999999) - (b.posicao_fila ?? 999999));
     try {
       localStorage.setItem('minhavez_vendedores', JSON.stringify(state.vendedores));
     } catch (e) {

@@ -20,7 +20,7 @@ import { loadTenant, applyBranding, tenantPath, getSlug } from '/js/tenant.js';
 import { METAS_KEY, DEFAULT_METAS, PERIODS } from '/js/dashboard-config.js';
 const setorLabel = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 import { showChangelog } from '/js/changelog.js';
-import { fetchTodosVendedores, fetchDrillMotivo } from '/js/dashboard-api.js';
+import { fetchVendedores, fetchTodosVendedores, fetchDrillMotivo } from '/js/dashboard-api.js';
 import {
   initDashboardCharts,
   loadAll,
@@ -217,9 +217,7 @@ initDashboardCharts({
 
 // ─── Filters ───
 async function populateFilters() {
-  const vq = sb.from('vendedores').select('id, nome, apelido, setor').eq('ativo', true);
-  if (tenantId) vq.eq('tenant_id', tenantId);
-  const { data } = await vq.order('nome');
+  const { data } = await fetchVendedores(sb, tenantId);
   _cachedVendedores = data || [];
 
   const setores = [...new Set(_cachedVendedores.map((v) => v.setor || 'loja'))];

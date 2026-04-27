@@ -4,9 +4,6 @@
 // Cada função retorna { data, error } consistentemente.
 // ============================================
 
-export const VENDEDOR_PUBLIC_COLUMNS =
-  'id,nome,apelido,status,posicao_fila,ativo,created_at,updated_at,tenant_id,setor,foto_url,auth_user_id,avatar_config';
-
 /** Log de rupturas de estoque */
 export async function fetchRuptureLog(sb, range) {
   return sb.rpc('get_rupture_log', { p_inicio: range.start, p_fim: range.end });
@@ -19,16 +16,16 @@ export async function fetchPauseLog(sb, range) {
 
 /** Vendedores ativos (usado em floor, ranking, filtros) */
 export async function fetchVendedores(sb, tenantId) {
-  let q = sb.from('vendedores').select(VENDEDOR_PUBLIC_COLUMNS).eq('ativo', true);
-  if (tenantId) q = q.eq('tenant_id', tenantId);
-  return q.order('nome');
+  const res = await sb.rpc('get_vendedores_public', { p_include_inactive: false });
+  if (res.error || !tenantId) return res;
+  return { ...res, data: (res.data || []).filter((v) => v.tenant_id === tenantId) };
 }
 
 /** Todos os vendedores incluindo inativos (gestão) */
 export async function fetchTodosVendedores(sb, tenantId) {
-  let q = sb.from('vendedores').select(VENDEDOR_PUBLIC_COLUMNS);
-  if (tenantId) q = q.eq('tenant_id', tenantId);
-  return q.order('nome');
+  const res = await sb.rpc('get_vendedores_public', { p_include_inactive: true });
+  if (res.error || !tenantId) return res;
+  return { ...res, data: (res.data || []).filter((v) => v.tenant_id === tenantId) };
 }
 
 /** Origem dos clientes (canal) */
