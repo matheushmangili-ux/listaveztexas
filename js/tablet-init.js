@@ -5,7 +5,7 @@
 
 import { getSupabase } from '/js/supabase-config.js';
 import { requireRole, logout, getTenantId } from '/js/auth.js';
-import { SAIDA_COLORS, toast, initTheme, toggleTheme } from '/js/utils.js';
+import { SAIDA_COLORS, toast, initTheme, toggleTheme, escapeHtml } from '/js/utils.js';
 import { loadTenant, applyBranding, tenantPath } from '/js/tenant.js';
 import { showChangelog, setVersionLabel } from '/js/changelog.js';
 import { playSound } from '/js/sound.js';
@@ -69,9 +69,13 @@ if (setorTabsEl) {
   setorTabsEl.innerHTML = tenantSetores
     .map(
       (s, i) =>
-        `<button class="setor-tab${i === 0 ? ' active' : ''}" data-setor="${s}" onclick="setSetor('${s}')"><i class="fa-solid ${SETOR_ICONS[s] || 'fa-store'}"></i><span class="tab-label">${SETOR_LABELS[s] || s}</span></button>`
+        `<button class="setor-tab${i === 0 ? ' active' : ''}" data-setor="${escapeHtml(s)}"><i class="fa-solid ${SETOR_ICONS[s] || 'fa-store'}"></i><span class="tab-label">${escapeHtml(SETOR_LABELS[s] || s)}</span></button>`
     )
     .join('');
+  setorTabsEl.addEventListener('click', (event) => {
+    const btn = event.target.closest('[data-setor]');
+    if (btn) window.setSetor(btn.dataset.setor);
+  });
   if (tenantSetores.length <= 1) setorTabsEl.style.display = 'none';
 }
 
@@ -103,7 +107,7 @@ const state = {
   turno: null, // turno aberto atual
   atendimentos: [], // atendimentos ativos
   vendedores: [], // lista de vendedores
-  setor: 'loja', // setor ativo
+  setor: tenantSetores[0] || 'loja', // setor ativo
   saidaMotivos: {}, // vendedorId → motivo key
   pendingSaidaId: null, // vendedorId aguardando confirmação de saída
   vendorAtendCount: {}, // vendedor_id → count de atendimentos no turno
@@ -723,9 +727,9 @@ window.openPosLog = function () {
         return `<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid var(--border-subtle)">
         <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);flex-shrink:0;width:52px">${h}:${m}:${s}</span>
         <i class="fa-solid ${entry.icon}" style="font-size:11px;color:var(--text-muted);width:16px;text-align:center;flex-shrink:0"></i>
-        <span style="font-weight:600;font-size:13px;flex-shrink:0;max-width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${entry.vendedor}</span>
-        <span style="font-size:11px;color:var(--text-muted);flex-shrink:0">${actionLabels[entry.action] || entry.action}</span>
-        <span style="font-size:11px;color:var(--text-secondary);margin-left:auto;flex-shrink:0;text-align:right">${entry.details}</span>
+        <span style="font-weight:600;font-size:13px;flex-shrink:0;max-width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(entry.vendedor)}</span>
+        <span style="font-size:11px;color:var(--text-muted);flex-shrink:0">${escapeHtml(actionLabels[entry.action] || entry.action)}</span>
+        <span style="font-size:11px;color:var(--text-secondary);margin-left:auto;flex-shrink:0;text-align:right">${escapeHtml(entry.details)}</span>
       </div>`;
       })
       .join('');
@@ -781,7 +785,7 @@ window.toggleMiniRanking = async function () {
         const conv = s.total > 0 ? Math.round((s.vendas / s.total) * 100) : 0;
         return `<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;${i === 0 ? 'background:rgba(212, 163, 115,.08);border-radius:8px' : ''}">
         <span style="font-size:14px;width:24px;text-align:center;flex-shrink:0">${medals[i]}</span>
-        <span style="flex:1;font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.nome}</span>
+        <span style="flex:1;font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(s.nome)}</span>
         <span style="font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--success)">${s.vendas}v</span>
         <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${s.total}at</span>
         <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${conv}%</span>

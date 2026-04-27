@@ -48,8 +48,13 @@ export function getSelection() {
 
 // ─── Rendering ───────────────────────────────────────────────
 
-function chipHtml(id, label, selected, extraStyle = '') {
-  return `<button type="button" class="rp-chip ${selected ? 'active' : ''}" data-id="${id}" style="${extraStyle}">${escapeHtml(label)}</button>`;
+function chipHtml(id, label, selected) {
+  return `<button type="button" class="rp-chip ${selected ? 'active' : ''}" data-id="${escapeHtml(id)}">${escapeHtml(label)}</button>`;
+}
+
+function safeHexColor(hex) {
+  const value = String(hex || '').trim();
+  return /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(value) ? value : null;
 }
 
 function renderTipos(container) {
@@ -85,10 +90,11 @@ function renderTamanhos(section, container) {
 function renderCores(container) {
   container.innerHTML = _catalog.cores
     .map((c) => {
-      const dot = c.hex
-        ? `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${c.hex};border:1px solid rgba(255,255,255,.2);margin-right:6px;vertical-align:middle"></span>`
+      const color = safeHexColor(c.hex);
+      const dot = color
+        ? `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};border:1px solid rgba(255,255,255,.2);margin-right:6px;vertical-align:middle"></span>`
         : '';
-      return `<button type="button" class="rp-chip ${_selection.cor_id === c.id ? 'active' : ''}" data-id="${c.id}">${dot}${escapeHtml(c.nome)}</button>`;
+      return `<button type="button" class="rp-chip ${_selection.cor_id === c.id ? 'active' : ''}" data-id="${escapeHtml(c.id)}">${dot}${escapeHtml(c.nome)}</button>`;
     })
     .join('');
 }

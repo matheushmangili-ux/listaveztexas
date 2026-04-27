@@ -570,7 +570,7 @@ export async function loadMotivos(range) {
         const pct = Math.round((values[i] / totalMotivos) * 100);
         return `<div class="row">
           <span class="sw" style="background:${colors[i]}"></span>
-          <span>${label}</span>
+          <span>${escapeHtml(label)}</span>
           <span class="pct">${pct}%</span>
           <span class="abs">${values[i]}</span>
         </div>`;
@@ -910,9 +910,10 @@ export async function loadRanking(range, cachedData) {
         const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
         const isTop = i < 3;
         const foto = fotoMap[r.vendedor_id];
+        const displayName = r.apelido || (r.nome || 'Vendedor').split(' ')[0];
         const avatarContent = foto
           ? `<img src="${escapeHtml(foto)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
-          : initials(r.nome);
+          : escapeHtml(initials(r.nome));
         const tm = r.tempo_medio_min || 0;
         const tmColor = tempoColor(tm, tempoMeta);
         const delay = Math.min(i * 50, 300);
@@ -920,7 +921,7 @@ export async function loadRanking(range, cachedData) {
         <span class="rl-pos">${medal || i + 1}</span>
         <div class="rl-name">
           <div class="rl-avatar">${avatarContent}</div>
-          <span>${escapeHtml(r.apelido || r.nome.split(' ')[0])}</span>
+          <span>${escapeHtml(displayName)}</span>
         </div>
         <div class="rl-bar">
           <div class="rl-bar-track"><div class="rl-bar-fill" style="width:${barW}%;background:${convColor}"></div></div>
@@ -1123,10 +1124,11 @@ function renderHeaderMarquee(vendedoresData) {
       const pos = v.posicao_fila ? ` #${v.posicao_fila}` : '';
       const isFora = v.status === 'fora';
       const isOnTime = v.status === 'disponivel';
+      const displayName = v.apelido || (v.nome || 'Vendedor').split(' ')[0];
       return `<div class="marquee-pill">
       <div class="mp-dot${isOnTime ? ' pulse-on' : ''}" style="background:var(${cssVar})"></div>
-      <span class="mp-name">${escapeHtml(v.apelido || v.nome.split(' ')[0])}</span>
-      <span class="mp-status${isFora ? ' fora' : ''}" style="color:${isFora ? '' : `var(${cssVar})`}">${cfg.short}${pos}</span>
+      <span class="mp-name">${escapeHtml(displayName)}</span>
+      <span class="mp-status${isFora ? ' fora' : ''}" style="color:${isFora ? '' : `var(${cssVar})`}">${escapeHtml(cfg.short + pos)}</span>
     </div>`;
     })
     .join('');
