@@ -118,7 +118,9 @@ function renderCard() {
   const sub =
     actionable > 0
       ? `${actionable} tarefa${actionable !== 1 ? 's' : ''} pendente${actionable !== 1 ? 's' : ''}`
-      : `${freeApproved} foto${freeApproved !== 1 ? 's' : ''} aprovada${freeApproved !== 1 ? 's' : ''}`;
+      : freePending > 0
+        ? `${freePending} foto${freePending !== 1 ? 's' : ''} em análise`
+        : `${freeApproved} foto${freeApproved !== 1 ? 's' : ''} aprovada${freeApproved !== 1 ? 's' : ''}`;
 
   wrap.innerHTML = `
     <div class="vm-card-inner">
@@ -495,7 +497,9 @@ async function submitExecution(assignmentId, photos, checkStates) {
         checklist_count: Object.keys(checkStates).length,
         checklist_completed: Object.values(checkStates).filter(Boolean).length
       });
-    } catch (_e) { /* ignore */ }
+    } catch (_e) {
+      /* ignore */
+    }
 
     window._vendorToast?.('Tarefa enviada! Aguardando revisão.', 'success');
     closeTaskView();
@@ -649,7 +653,9 @@ async function onFreeFormSelected(e) {
           category: selectedCat,
           has_description: desc.length > 0
         });
-      } catch (_e) { /* ignore */ }
+      } catch (_e) {
+        /* ignore */
+      }
       window._vendorToast?.('Foto enviada! Aguardando aprovação.', 'success');
       await refreshMyVms();
       renderSheetBody();

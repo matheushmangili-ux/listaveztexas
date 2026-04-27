@@ -23,10 +23,22 @@ export function buildAvatarUrl(config, size = 80) {
   if (config.mouth) p.set('mouth', config.mouth);
   if (config.clothing) p.set('clothing', config.clothing);
   if (config.clothingColor) p.set('clothingColor', config.clothingColor);
-  if (config.glasses) { p.set('glasses', config.glasses); p.set('glassesProbability', '100'); }
-  if (config.hat) { p.set('hat', config.hat); p.set('hatProbability', '100'); }
-  if (config.accessories) { p.set('accessories', config.accessories); p.set('accessoriesProbability', '100'); }
-  if (config.beard) { p.set('beard', config.beard); p.set('beardProbability', '100'); }
+  if (config.glasses) {
+    p.set('glasses', config.glasses);
+    p.set('glassesProbability', '100');
+  }
+  if (config.hat) {
+    p.set('hat', config.hat);
+    p.set('hatProbability', '100');
+  }
+  if (config.accessories) {
+    p.set('accessories', config.accessories);
+    p.set('accessoriesProbability', '100');
+  }
+  if (config.beard) {
+    p.set('beard', config.beard);
+    p.set('beardProbability', '100');
+  }
   p.set('size', String(size));
   return `${DICEBEAR_BASE}?${p}`;
 }
@@ -65,16 +77,30 @@ function buildCatalog() {
   const free = null;
 
   // ── Pele (all free) ──
-  ['ffdbac','f5cfa0','eac393','e0b687','cb9e6e','b68655','a26d3d','8d5524'].forEach(v =>
+  ['ffdbac', 'f5cfa0', 'eac393', 'e0b687', 'cb9e6e', 'b68655', 'a26d3d', '8d5524'].forEach((v) =>
     items.push({ category: 'skinColor', value: v, label: skinLabel(v), req: free, tier: null })
   );
 
   // ── Cabelo variants ──
-  const hairFree = ['short01','short04','short08','short12','long01','long05','long09','long13'];
-  const hairBronze = ['short02','short05','short09','short13','long02','long06','long10','long14'];
-  const hairPrata = ['short03','short06','short10','short14','long03','long07','long11','long15'];
-  const hairOuro = ['short07','short11','short15','short16','long04','long08','long12','long16'];
-  const hairLend = ['short17','short18','short19','short20','short21','short22','short23','short24','long17','long18','long19','long20','long21'];
+  const hairFree = ['short01', 'short04', 'short08', 'short12', 'long01', 'long05', 'long09', 'long13'];
+  const hairBronze = ['short02', 'short05', 'short09', 'short13', 'long02', 'long06', 'long10', 'long14'];
+  const hairPrata = ['short03', 'short06', 'short10', 'short14', 'long03', 'long07', 'long11', 'long15'];
+  const hairOuro = ['short07', 'short11', 'short15', 'short16', 'long04', 'long08', 'long12', 'long16'];
+  const hairLend = [
+    'short17',
+    'short18',
+    'short19',
+    'short20',
+    'short21',
+    'short22',
+    'short23',
+    'short24',
+    'long17',
+    'long18',
+    'long19',
+    'long20',
+    'long21'
+  ];
   addVariants(items, 'hair', hairFree, free, null);
   addVariants(items, 'hair', hairBronze, 'atendimentos_10', 'bronze');
   addVariants(items, 'hair', hairPrata, 'atendimentos_50', 'prata');
@@ -82,10 +108,10 @@ function buildCatalog() {
   addVariants(items, 'hair', hairLend, 'atendimentos_500', 'lendario');
 
   // ── Cor do cabelo ──
-  const hcFree = ['603a14','83623b','28150a','cab188'];
-  const hcBronze = ['a78961','611c17'];
-  const hcPrata = ['603015','612616'];
-  const hcOuro = ['009bbd','bd1700'];
+  const hcFree = ['603a14', '83623b', '28150a', 'cab188'];
+  const hcBronze = ['a78961', '611c17'];
+  const hcPrata = ['603015', '612616'];
+  const hcOuro = ['009bbd', 'bd1700'];
   const hcLend = ['91cb15'];
   addColors(items, 'hairColor', hcFree, free, null);
   addColors(items, 'hairColor', hcBronze, 'vendas_5', 'bronze');
@@ -94,31 +120,31 @@ function buildCatalog() {
   addColors(items, 'hairColor', hcLend, 'vendas_300', 'lendario');
 
   // ── Olhos ──
-  const eyesFree = ['variant01','variant02','variant03','variant04'];
-  const eyesBronze = ['variant05','variant06','variant07'];
-  const eyesPrata = ['variant08','variant09','variant10'];
-  const eyesOuro = ['variant11','variant12'];
+  const eyesFree = ['variant01', 'variant02', 'variant03', 'variant04'];
+  const eyesBronze = ['variant05', 'variant06', 'variant07'];
+  const eyesPrata = ['variant08', 'variant09', 'variant10'];
+  const eyesOuro = ['variant11', 'variant12'];
   addVariants(items, 'eyes', eyesFree, free, null);
   addVariants(items, 'eyes', eyesBronze, 'primeiro_atendimento', 'bronze');
   addVariants(items, 'eyes', eyesPrata, 'xp_5000', 'prata');
   addVariants(items, 'eyes', eyesOuro, 'nivel_15', 'ouro');
 
   // ── Boca ──
-  const mouthFree = ['happy01','happy02','happy03','happy04','happy05','happy06'];
-  const mouthBronze = ['happy07','happy08','happy09','sad01','sad02','sad03'];
-  const mouthPrata = ['happy10','happy11','happy12','sad04','sad05','sad06'];
-  const mouthOuro = ['happy13','sad07','sad08','sad09','sad10'];
+  const mouthFree = ['happy01', 'happy02', 'happy03', 'happy04', 'happy05', 'happy06'];
+  const mouthBronze = ['happy07', 'happy08', 'happy09', 'sad01', 'sad02', 'sad03'];
+  const mouthPrata = ['happy10', 'happy11', 'happy12', 'sad04', 'sad05', 'sad06'];
+  const mouthOuro = ['happy13', 'sad07', 'sad08', 'sad09', 'sad10'];
   addVariants(items, 'mouth', mouthFree, free, null);
   addVariants(items, 'mouth', mouthBronze, 'primeira_venda', 'bronze');
   addVariants(items, 'mouth', mouthPrata, 'conversao_alta', 'prata');
   addVariants(items, 'mouth', mouthOuro, 'vendas_dia_5', 'ouro');
 
   // ── Roupa ──
-  const clothFree = ['variant01','variant02','variant03','variant04','variant05'];
-  const clothBronze = ['variant06','variant07','variant08','variant09','variant10'];
-  const clothPrata = ['variant11','variant12','variant13','variant14','variant15'];
-  const clothOuro = ['variant16','variant17','variant18','variant19'];
-  const clothLend = ['variant20','variant21','variant22','variant23'];
+  const clothFree = ['variant01', 'variant02', 'variant03', 'variant04', 'variant05'];
+  const clothBronze = ['variant06', 'variant07', 'variant08', 'variant09', 'variant10'];
+  const clothPrata = ['variant11', 'variant12', 'variant13', 'variant14', 'variant15'];
+  const clothOuro = ['variant16', 'variant17', 'variant18', 'variant19'];
+  const clothLend = ['variant20', 'variant21', 'variant22', 'variant23'];
   addVariants(items, 'clothing', clothFree, free, null);
   addVariants(items, 'clothing', clothBronze, 'nivel_3', 'bronze');
   addVariants(items, 'clothing', clothPrata, 'nivel_7', 'prata');
@@ -126,9 +152,9 @@ function buildCatalog() {
   addVariants(items, 'clothing', clothLend, 'nivel_25', 'lendario');
 
   // ── Cor da roupa ──
-  const ccFree = ['428bca','44c585','ffd969','ff6f69','03396c'];
-  const ccBronze = ['5bc0de','88d8b0','ffeead'];
-  const ccPrata = ['00b159','d11141','ffc425'];
+  const ccFree = ['428bca', '44c585', 'ffd969', 'ff6f69', '03396c'];
+  const ccBronze = ['5bc0de', '88d8b0', 'ffeead'];
+  const ccPrata = ['00b159', 'd11141', 'ffc425'];
   const ccOuro = ['ae0001'];
   addColors(items, 'clothingColor', ccFree, free, null);
   addColors(items, 'clothingColor', ccBronze, 'missao_1', 'bronze');
@@ -136,20 +162,20 @@ function buildCatalog() {
   addColors(items, 'clothingColor', ccOuro, 'missoes_50', 'ouro');
 
   // ── Óculos (all locked) ──
-  const glassesBronze = ['light01','light02','light03','light04'];
-  const glassesPrata = ['dark01','dark02','dark03','dark04'];
-  const glassesOuro = ['light05','light06','light07'];
-  const glassesLend = ['dark05','dark06','dark07'];
+  const glassesBronze = ['light01', 'light02', 'light03', 'light04'];
+  const glassesPrata = ['dark01', 'dark02', 'dark03', 'dark04'];
+  const glassesOuro = ['light05', 'light06', 'light07'];
+  const glassesLend = ['dark05', 'dark06', 'dark07'];
   addVariants(items, 'glasses', glassesBronze, 'atendimentos_10', 'bronze');
   addVariants(items, 'glasses', glassesPrata, 'xp_5000', 'prata');
   addVariants(items, 'glasses', glassesOuro, 'xp_30000', 'ouro');
   addVariants(items, 'glasses', glassesLend, 'xp_100000', 'lendario');
 
   // ── Chapéu (all locked) ──
-  const hatBronze = ['variant01','variant02','variant03'];
-  const hatPrata = ['variant04','variant05','variant06'];
-  const hatOuro = ['variant07','variant08'];
-  const hatLend = ['variant09','variant10'];
+  const hatBronze = ['variant01', 'variant02', 'variant03'];
+  const hatPrata = ['variant04', 'variant05', 'variant06'];
+  const hatOuro = ['variant07', 'variant08'];
+  const hatLend = ['variant09', 'variant10'];
   addVariants(items, 'hat', hatBronze, 'missao_1', 'bronze');
   addVariants(items, 'hat', hatPrata, 'missoes_10', 'prata');
   addVariants(items, 'hat', hatOuro, 'missoes_50', 'ouro');
@@ -162,10 +188,10 @@ function buildCatalog() {
   addVariants(items, 'accessories', ['variant04'], 'vendas_300', 'lendario');
 
   // ── Barba (all locked) ──
-  const beardBronze = ['variant01','variant02'];
-  const beardPrata = ['variant03','variant04'];
-  const beardOuro = ['variant05','variant06'];
-  const beardLend = ['variant07','variant08'];
+  const beardBronze = ['variant01', 'variant02'];
+  const beardPrata = ['variant03', 'variant04'];
+  const beardOuro = ['variant05', 'variant06'];
+  const beardLend = ['variant07', 'variant08'];
   addVariants(items, 'beard', beardBronze, 'atendimentos_10', 'bronze');
   addVariants(items, 'beard', beardPrata, 'atendimentos_50', 'prata');
   addVariants(items, 'beard', beardOuro, 'atendimentos_200', 'ouro');
@@ -175,19 +201,36 @@ function buildCatalog() {
 }
 
 function addVariants(items, category, values, req, tier) {
-  values.forEach(v => items.push({ category, value: v, label: variantLabel(v), req, tier }));
+  values.forEach((v) => items.push({ category, value: v, label: variantLabel(v), req, tier }));
 }
 function addColors(items, category, values, req, tier) {
-  values.forEach(v => items.push({ category, value: v, label: v, req, tier }));
+  values.forEach((v) => items.push({ category, value: v, label: v, req, tier }));
 }
 function variantLabel(v) {
   return v.replace(/^(variant|long|short|happy|sad|dark|light)0?/, (_, p) => {
-    const names = { variant: '#', long: 'Longo ', short: 'Curto ', happy: 'Feliz ', sad: 'Triste ', dark: 'Escuro ', light: 'Claro ' };
+    const names = {
+      variant: '#',
+      long: 'Longo ',
+      short: 'Curto ',
+      happy: 'Feliz ',
+      sad: 'Triste ',
+      dark: 'Escuro ',
+      light: 'Claro '
+    };
     return names[p] || '#';
   });
 }
 function skinLabel(hex) {
-  const map = { 'ffdbac': 'Clara', 'f5cfa0': 'Bege', 'eac393': 'Dourada', 'e0b687': 'Mel', 'cb9e6e': 'Canela', 'b68655': 'Morena', 'a26d3d': 'Castanha', '8d5524': 'Escura' };
+  const map = {
+    ffdbac: 'Clara',
+    f5cfa0: 'Bege',
+    eac393: 'Dourada',
+    e0b687: 'Mel',
+    cb9e6e: 'Canela',
+    b68655: 'Morena',
+    a26d3d: 'Castanha',
+    '8d5524': 'Escura'
+  };
   return map[hex] || hex;
 }
 
@@ -198,9 +241,8 @@ let _achievementTitles = {};
 export async function initAvatar(sb, ctx) {
   _sb = sb;
   _ctx = ctx;
-  _currentConfig = (ctx.avatar_config && Object.keys(ctx.avatar_config).length > 0)
-    ? { ...ctx.avatar_config }
-    : { ...DEFAULT_CONFIG };
+  _currentConfig =
+    ctx.avatar_config && Object.keys(ctx.avatar_config).length > 0 ? { ...ctx.avatar_config } : { ...DEFAULT_CONFIG };
 
   if (!ctx.avatar_config || Object.keys(ctx.avatar_config).length === 0) {
     _ctx.avatar_config = { ..._currentConfig };
@@ -236,9 +278,11 @@ async function loadAchievements() {
   try {
     const { data, error } = await _sb.rpc('get_my_achievements');
     if (error) throw error;
-    _achievements = (data || []).filter(a => a.unlocked);
+    _achievements = (data || []).filter((a) => a.unlocked);
     _achievementTitles = {};
-    (data || []).forEach(a => { _achievementTitles[a.code] = a.title; });
+    (data || []).forEach((a) => {
+      _achievementTitles[a.code] = a.title;
+    });
   } catch (err) {
     console.warn('[avatar] load achievements failed:', err);
     _achievements = [];
@@ -247,7 +291,7 @@ async function loadAchievements() {
 
 function isUnlocked(req) {
   if (!req) return true;
-  return _achievements.some(a => a.code === req);
+  return _achievements.some((a) => a.code === req);
 }
 
 // ─── Header avatar rendering ───
@@ -308,7 +352,10 @@ function closeEditor() {
 
 async function saveAvatar() {
   const saveBtn = document.getElementById('avatarEditorSave');
-  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Salvando…'; }
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Salvando…';
+  }
 
   try {
     const { error } = await _sb.rpc('vendor_save_avatar', { p_config: _currentConfig });
@@ -320,7 +367,10 @@ async function saveAvatar() {
   } catch (err) {
     window._vendorToast?.(err?.message || 'Erro ao salvar avatar', 'error');
   } finally {
-    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Salvar'; }
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Salvar';
+    }
   }
 }
 
@@ -341,10 +391,10 @@ function renderTabs() {
   const container = document.getElementById('avatarTabs');
   if (!container) return;
 
-  container.innerHTML = CATEGORIES.map(cat => {
+  container.innerHTML = CATEGORIES.map((cat) => {
     const active = cat.id === _activeTab ? ' active' : '';
-    const catItems = CATALOG.filter(i => i.category === cat.id);
-    const hasUnlocked = catItems.some(i => isUnlocked(i.req));
+    const catItems = CATALOG.filter((i) => i.category === cat.id);
+    const hasUnlocked = catItems.some((i) => isUnlocked(i.req));
     const allLocked = !hasUnlocked;
     return `<button class="avatar-tab${active}${allLocked ? ' all-locked' : ''}" data-cat="${cat.id}">
       <i class="fa-solid ${cat.icon}"></i>
@@ -352,7 +402,7 @@ function renderTabs() {
     </button>`;
   }).join('');
 
-  container.querySelectorAll('.avatar-tab').forEach(btn => {
+  container.querySelectorAll('.avatar-tab').forEach((btn) => {
     btn.addEventListener('click', () => {
       _activeTab = btn.dataset.cat;
       renderTabs();
@@ -366,8 +416,8 @@ function renderGrid() {
   const container = document.getElementById('avatarGrid');
   if (!container) return;
 
-  const catDef = CATEGORIES.find(c => c.id === _activeTab);
-  const items = CATALOG.filter(i => i.category === _activeTab);
+  const catDef = CATEGORIES.find((c) => c.id === _activeTab);
+  const items = CATALOG.filter((i) => i.category === _activeTab);
   const isColor = catDef?.type === 'color';
   const isOptional = catDef?.optional;
 
@@ -381,7 +431,7 @@ function renderGrid() {
     </button>`;
   }
 
-  items.forEach(item => {
+  items.forEach((item) => {
     const unlocked = isUnlocked(item.req);
     const selected = _currentConfig[_activeTab] === item.value;
     const tierClass = item.tier ? ` tier-${item.tier}` : '';
@@ -407,7 +457,7 @@ function renderGrid() {
 
   container.innerHTML = html;
 
-  container.querySelectorAll('.avatar-item:not(.locked)').forEach(btn => {
+  container.querySelectorAll('.avatar-item:not(.locked)').forEach((btn) => {
     btn.addEventListener('click', () => {
       const val = btn.dataset.value;
       if (val === '') {
@@ -424,13 +474,25 @@ function renderGrid() {
 function buildItemPreviewUrl(category, value) {
   const previewConfig = { ...DEFAULT_CONFIG };
   previewConfig[category] = value;
-  if (category === 'glasses') { previewConfig.glasses = value; }
-  if (category === 'hat') { previewConfig.hat = value; }
-  if (category === 'accessories') { previewConfig.accessories = value; }
-  if (category === 'beard') { previewConfig.beard = value; }
+  if (category === 'glasses') {
+    previewConfig.glasses = value;
+  }
+  if (category === 'hat') {
+    previewConfig.hat = value;
+  }
+  if (category === 'accessories') {
+    previewConfig.accessories = value;
+  }
+  if (category === 'beard') {
+    previewConfig.beard = value;
+  }
   return buildAvatarUrl(previewConfig, 64) || '';
 }
 
 function esc(s) {
-  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }

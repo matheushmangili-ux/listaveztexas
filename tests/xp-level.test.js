@@ -24,15 +24,15 @@ describe('vendor_level_from_xp (espelho SQL)', () => {
   });
 
   it('xp exatamente no threshold → sobe de nível', () => {
-    expect(levelFromXp(150)).toBe(1);     // 1² × 150
-    expect(levelFromXp(600)).toBe(2);     // 2² × 150
-    expect(levelFromXp(1350)).toBe(3);    // 3² × 150
+    expect(levelFromXp(150)).toBe(1); // 1² × 150
+    expect(levelFromXp(600)).toBe(2); // 2² × 150
+    expect(levelFromXp(1350)).toBe(3); // 3² × 150
   });
 
   it('breakpoints esperados do roadmap', () => {
-    expect(levelFromXp(3750)).toBe(5);    // 5² × 150
-    expect(levelFromXp(15000)).toBe(10);  // 10² × 150
-    expect(levelFromXp(60000)).toBe(20);  // 20² × 150
+    expect(levelFromXp(3750)).toBe(5); // 5² × 150
+    expect(levelFromXp(15000)).toBe(10); // 10² × 150
+    expect(levelFromXp(60000)).toBe(20); // 20² × 150
   });
 
   it('xp entre níveis arredonda pra baixo', () => {
@@ -80,31 +80,31 @@ describe('vendor_xp_for_level (inverso)', () => {
 // Mantido em sync manual com sql/17-tier-ranking.sql — se o SQL mudar,
 // atualizar aqui também.
 function tierFromLevel(level) {
-  if (level <= 1)  return { code: 'pedra',       major_code: 'pedra',       label: 'Pedra' };
-  if (level <= 3)  return { code: 'madeira',     major_code: 'madeira',     label: 'Madeira' };
-  if (level === 4) return { code: 'ferro_1',     major_code: 'ferro',       label: 'Ferro I' };
-  if (level === 5) return { code: 'ferro_2',     major_code: 'ferro',       label: 'Ferro II' };
-  if (level === 6) return { code: 'ferro_3',     major_code: 'ferro',       label: 'Ferro III' };
-  if (level === 7) return { code: 'bronze_1',    major_code: 'bronze',      label: 'Bronze I' };
-  if (level === 8) return { code: 'bronze_2',    major_code: 'bronze',      label: 'Bronze II' };
-  if (level === 9) return { code: 'bronze_3',    major_code: 'bronze',      label: 'Bronze III' };
-  if (level === 10) return { code: 'prata_1',    major_code: 'prata',       label: 'Prata I' };
-  if (level === 11) return { code: 'prata_2',    major_code: 'prata',       label: 'Prata II' };
-  if (level === 12) return { code: 'prata_3',    major_code: 'prata',       label: 'Prata III' };
-  if (level === 13) return { code: 'ouro_1',     major_code: 'ouro',        label: 'Ouro I' };
-  if (level === 14) return { code: 'ouro_2',     major_code: 'ouro',        label: 'Ouro II' };
-  if (level === 15) return { code: 'ouro_3',     major_code: 'ouro',        label: 'Ouro III' };
-  if (level === 16) return { code: 'platina_1',  major_code: 'platina',     label: 'Platina I' };
-  if (level === 17) return { code: 'platina_2',  major_code: 'platina',     label: 'Platina II' };
-  if (level === 18) return { code: 'platina_3',  major_code: 'platina',     label: 'Platina III' };
-  if (level === 19) return { code: 'diamante_1', major_code: 'diamante',    label: 'Diamante I' };
-  if (level === 20) return { code: 'diamante_2', major_code: 'diamante',    label: 'Diamante II' };
-  if (level === 21) return { code: 'diamante_3', major_code: 'diamante',    label: 'Diamante III' };
-  if (level <= 24) return { code: 'mestre',      major_code: 'mestre',      label: 'Mestre' };
+  if (level <= 1) return { code: 'pedra', major_code: 'pedra', label: 'Pedra' };
+  if (level <= 3) return { code: 'madeira', major_code: 'madeira', label: 'Madeira' };
+  if (level === 4) return { code: 'ferro_1', major_code: 'ferro', label: 'Ferro I' };
+  if (level === 5) return { code: 'ferro_2', major_code: 'ferro', label: 'Ferro II' };
+  if (level === 6) return { code: 'ferro_3', major_code: 'ferro', label: 'Ferro III' };
+  if (level === 7) return { code: 'bronze_1', major_code: 'bronze', label: 'Bronze I' };
+  if (level === 8) return { code: 'bronze_2', major_code: 'bronze', label: 'Bronze II' };
+  if (level === 9) return { code: 'bronze_3', major_code: 'bronze', label: 'Bronze III' };
+  if (level === 10) return { code: 'prata_1', major_code: 'prata', label: 'Prata I' };
+  if (level === 11) return { code: 'prata_2', major_code: 'prata', label: 'Prata II' };
+  if (level === 12) return { code: 'prata_3', major_code: 'prata', label: 'Prata III' };
+  if (level === 13) return { code: 'ouro_1', major_code: 'ouro', label: 'Ouro I' };
+  if (level === 14) return { code: 'ouro_2', major_code: 'ouro', label: 'Ouro II' };
+  if (level === 15) return { code: 'ouro_3', major_code: 'ouro', label: 'Ouro III' };
+  if (level === 16) return { code: 'platina_1', major_code: 'platina', label: 'Platina I' };
+  if (level === 17) return { code: 'platina_2', major_code: 'platina', label: 'Platina II' };
+  if (level === 18) return { code: 'platina_3', major_code: 'platina', label: 'Platina III' };
+  if (level === 19) return { code: 'diamante_1', major_code: 'diamante', label: 'Diamante I' };
+  if (level === 20) return { code: 'diamante_2', major_code: 'diamante', label: 'Diamante II' };
+  if (level === 21) return { code: 'diamante_3', major_code: 'diamante', label: 'Diamante III' };
+  if (level <= 24) return { code: 'mestre', major_code: 'mestre', label: 'Mestre' };
   if (level <= 29) return { code: 'grao_mestre', major_code: 'grao_mestre', label: 'Grão-Mestre' };
-  if (level <= 34) return { code: 'rubi',        major_code: 'rubi',        label: 'Rubi' };
-  if (level <= 44) return { code: 'lendario',    major_code: 'lendario',    label: 'Lendário' };
-  return              { code: 'mitico',       major_code: 'mitico',      label: 'Mítico' };
+  if (level <= 34) return { code: 'rubi', major_code: 'rubi', label: 'Rubi' };
+  if (level <= 44) return { code: 'lendario', major_code: 'lendario', label: 'Lendário' };
+  return { code: 'mitico', major_code: 'mitico', label: 'Mítico' };
 }
 
 describe('vendor_tier_from_level (espelho SQL — Fase 2b)', () => {
@@ -162,11 +162,23 @@ describe('vendor_tier_from_level (espelho SQL — Fase 2b)', () => {
     const majors = new Set();
     for (let n = 0; n <= 50; n++) majors.add(tierFromLevel(n).major_code);
     expect(majors.size).toBe(13);
-    expect([...majors]).toEqual(expect.arrayContaining([
-      'pedra', 'madeira', 'ferro', 'bronze', 'prata', 'ouro',
-      'platina', 'diamante', 'mestre', 'grao_mestre', 'rubi',
-      'lendario', 'mitico'
-    ]));
+    expect([...majors]).toEqual(
+      expect.arrayContaining([
+        'pedra',
+        'madeira',
+        'ferro',
+        'bronze',
+        'prata',
+        'ouro',
+        'platina',
+        'diamante',
+        'mestre',
+        'grao_mestre',
+        'rubi',
+        'lendario',
+        'mitico'
+      ])
+    );
   });
 
   it('fanfarra: majors adjacentes nunca colidem (N=X e N=X+1 no mesmo major ou muda)', () => {

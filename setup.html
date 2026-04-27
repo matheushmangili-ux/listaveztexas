@@ -392,7 +392,8 @@
       window.PUBLIC_POSTHOG_HOST = '/ingest';
     </script>
     <script>
-      window.PUBLIC_SENTRY_DSN = 'https://2281ed2b3027429746fd575a47c75046@o4511269047500800.ingest.us.sentry.io/4511269057003520';
+      window.PUBLIC_SENTRY_DSN =
+        'https://2281ed2b3027429746fd575a47c75046@o4511269047500800.ingest.us.sentry.io/4511269057003520';
       window.PUBLIC_SENTRY_ENV = 'production';
     </script>
     <script type="module" src="/js/sentry.js"></script>
@@ -635,7 +636,7 @@
 
     <script type="module">
       import { getSupabase, SUPABASE_URL, SUPABASE_ANON_KEY } from '/js/supabase-config.js';
-      import { toast, initTheme } from '/js/utils.js';
+      import { toast, initTheme, escapeHtml } from '/js/utils.js';
       initTheme();
 
       const sb = getSupabase();
@@ -649,19 +650,34 @@
       let token = params.get('token');
       const sessionId = params.get('session_id');
 
+      async function resolveOnboardingToken(payload) {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/resolve-onboarding-token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.token) throw new Error(data.error || 'Token de onboarding invalido');
+        return data.token;
+      }
+
+      function blockSetup(message) {
+        document.getElementById('progressBar').style.display = 'none';
+        document.querySelectorAll('.step-panel').forEach((p) => p.classList.remove('active'));
+        showError(message);
+      }
+
       // Validate token on load
       (async function init() {
         // Direct token from email link
         if (token) {
-          const { data, error } = await sb
-            .from('onboarding_tokens')
-            .select('*')
-            .eq('token', token)
-            .eq('used', false)
-            .gt('expires_at', new Date().toISOString())
-            .single();
-          if (error || !data) {
-            showError('Token inválido ou expirado. Por favor, faça uma nova compra.');
+          try {
+            token = await resolveOnboardingToken({ token });
+          } catch (error) {
+            blockSetup(error.message || 'Token invalido ou expirado. Faca uma nova compra.');
             return;
           }
         }
@@ -672,14 +688,8 @@
           let attempt = 0;
           let found = false;
           while (attempt < maxAttempts && !found) {
-            const { data } = await sb
-              .from('onboarding_tokens')
-              .select('*')
-              .eq('stripe_session_id', sessionId)
-              .eq('used', false)
-              .single();
-            if (data) {
-              token = data.token;
+            try {
+              token = await resolveOnboardingToken({ session_id: sessionId });
               found = true;
               // Update URL to use token instead of session_id
               const url = new URL(window.location);
@@ -687,6 +697,8 @@
               url.searchParams.set('token', token);
               history.replaceState(null, '', url);
               break;
+            } catch (_) {
+              /* webhook may still be creating the token */
             }
             attempt++;
             if (attempt < maxAttempts) {
@@ -695,11 +707,14 @@
           }
           document.getElementById('setupLoading').style.display = 'none';
           if (!found) {
-            showError(
-              'Pagamento em processamento. Verifique seu e-mail em alguns minutos — enviaremos o link de configuração.'
+            blockSetup(
+              'Pagamento em processamento. Verifique seu e-mail em alguns minutos; enviaremos o link de configuracao.'
             );
             return;
           }
+        } else {
+          blockSetup('Acesse esta tela pelo link seguro enviado apos o pagamento.');
+          return;
         }
         renderSectors();
         addVendor();
@@ -906,7 +921,7 @@
           .map(
             (s, i) => `
     <div class="chip selected">
-      ${s}
+      ${escapeHtml(s)}
       <span class="remove-chip" onclick="removeSector(${i})"><i class="fa-solid fa-xmark"></i></span>
     </div>
   `
@@ -949,11 +964,11 @@
           .map(
             (v, i) => `
     <div class="vendor-row" data-vid="${v.id}">
-      <input class="input" type="text" placeholder="Nome" value="${v.nome}" onchange="updateVendor(${v.id},'nome',this.value)">
+      <input class="input" type="text" placeholder="Nome" value="${escapeHtml(v.nome)}" onchange="updateVendor(${v.id},'nome',this.value)">
       <select onchange="updateVendor(${v.id},'setor',this.value)">
-        ${sectors.map((s) => `<option value="${s}" ${v.setor === s ? 'selected' : ''}>${s}</option>`).join('')}
+        ${sectors.map((s) => `<option value="${escapeHtml(s)}" ${v.setor === s ? 'selected' : ''}>${escapeHtml(s)}</option>`).join('')}
       </select>
-      <input class="pin-small" type="text" maxlength="4" inputmode="numeric" placeholder="PIN" value="${v.pin}" onchange="updateVendor(${v.id},'pin',this.value)" oninput="this.value=this.value.replace(/\\D/g,'')">
+      <input class="pin-small" type="text" maxlength="4" inputmode="numeric" placeholder="PIN" value="${escapeHtml(v.pin)}" onchange="updateVendor(${v.id},'pin',this.value)" oninput="this.value=this.value.replace(/\\D/g,'')">
       <button class="vendor-remove" onclick="removeVendor(${v.id})" title="Remover">
         <i class="fa-solid fa-trash-can"></i>
       </button>
@@ -1024,13 +1039,13 @@
         document.getElementById('reviewContent').innerHTML = `
     <div class="review-card">
       <h3><i class="fa-solid fa-store" style="margin-right:6px"></i>Loja</h3>
-      <div class="review-item"><span class="label">Nome</span><span class="value">${name}</span></div>
-      <div class="review-item"><span class="label">Link</span><span class="value">/${slug}</span></div>
+      <div class="review-item"><span class="label">Nome</span><span class="value">${escapeHtml(name)}</span></div>
+      <div class="review-item"><span class="label">Link</span><span class="value">/${escapeHtml(slug)}</span></div>
     </div>
     <div class="review-card">
       <h3><i class="fa-solid fa-layer-group" style="margin-right:6px"></i>Setores (${sectors.length})</h3>
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
-        ${sectors.map((s) => `<span style="padding:4px 10px;background:var(--bg-elevated);border-radius:12px;font-size:12px;font-weight:600;color:var(--text-secondary)">${s}</span>`).join('')}
+        ${sectors.map((s) => `<span style="padding:4px 10px;background:var(--bg-elevated);border-radius:12px;font-size:12px;font-weight:600;color:var(--text-secondary)">${escapeHtml(s)}</span>`).join('')}
       </div>
     </div>
     <div class="review-card">
@@ -1039,8 +1054,8 @@
         .map(
           (v) => `
         <div class="review-item">
-          <span class="label">${v.nome} <span style="color:var(--text-muted);font-size:11px">(${v.setor})</span></span>
-          <span class="value" style="color:var(--accent)">PIN: ${v.pin}</span>
+          <span class="label">${escapeHtml(v.nome)} <span style="color:var(--text-muted);font-size:11px">(${escapeHtml(v.setor)})</span></span>
+          <span class="value" style="color:var(--accent)">PIN: ${escapeHtml(v.pin)}</span>
         </div>
       `
         )
@@ -1048,7 +1063,7 @@
     </div>
     <div class="review-card">
       <h3><i class="fa-solid fa-user-shield" style="margin-right:6px"></i>Conta do administrador</h3>
-      <div class="review-item"><span class="label">Email</span><span class="value">${ownerEmail}</span></div>
+      <div class="review-item"><span class="label">Email</span><span class="value">${escapeHtml(ownerEmail)}</span></div>
       <div class="review-item"><span class="label">Senha</span><span class="value">••••••</span></div>
     </div>
   `;
@@ -1095,10 +1110,13 @@
           document.getElementById('urlLogin').textContent = `${baseUrl}/${slug}/login`;
           document.getElementById('credEmail').textContent = ownerEmail;
 
+          let setupEmailToken = null;
+
           // Auto-login with the credentials the user just set
           try {
             const { data } = await sb.auth.signInWithPassword({ email: ownerEmail, password: ownerPassword });
             if (data?.session) {
+              setupEmailToken = data.session.access_token;
               toast('Loja criada e login realizado!', 'success');
             }
           } catch (_) {
@@ -1106,16 +1124,18 @@
           }
 
           // Send setup-complete email (fire-and-forget — não bloqueia o fluxo)
-          fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${SUPABASE_ANON_KEY}`
-            },
-            body: JSON.stringify({ type: 'setup-complete', to: ownerEmail, slug, plano: result.plano || 'pro' })
-          }).catch(() => {
-            /* silently ignore — email é best-effort */
-          });
+          if (setupEmailToken) {
+            fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${setupEmailToken}`
+              },
+              body: JSON.stringify({ type: 'setup-complete', to: ownerEmail, slug, plano: result.plano || 'pro' })
+            }).catch(() => {
+              /* silently ignore — email é best-effort */
+            });
+          }
 
           toast('Loja criada com sucesso!', 'success');
           if (typeof clearSetupState === 'function') clearSetupState();

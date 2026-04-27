@@ -96,8 +96,6 @@ const BRAND_PALETTE = {
 // a cada getter porque o dashboard recria charts ao trocar tema.
 // Donut categórico (motivos, setores, canais).
 const CATEGORICAL = chartPalette();
-// Dual-series (hoje vs ontem): roxo + amber.
-const DUAL = [CATEGORICAL[0], CATEGORICAL[2]];
 // Triple: accent (positivo) + ciano (info) + rose (negativo).
 const TRIPLE = [CATEGORICAL[0], CATEGORICAL[1], CATEGORICAL[4]];
 
@@ -1574,25 +1572,6 @@ export async function loadTrend(range) {
   const sparkDates = data.map((d) => {
     const dt = new Date(d.dia + 'T12:00:00');
     return dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-  });
-  const sparkOpts = (series, color, labels, suffix) => ({
-    chart: { type: 'area', height: 48, sparkline: { enabled: true }, animations: { enabled: true, speed: 400 } },
-    series: [{ data: series }],
-    stroke: { width: 2, curve: 'smooth' },
-    colors: [color],
-    fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.05, stops: [0, 100] } },
-    tooltip: {
-      enabled: true,
-      fixed: { enabled: false },
-      x: { show: false },
-      y: {
-        title: { formatter: () => '' },
-        formatter: (val, { dataPointIndex }) => labels[dataPointIndex] + ': ' + Math.round(val) + suffix
-      },
-      marker: { show: false },
-      style: { fontSize: '11px' },
-      cssClass: 'spark-tooltip'
-    }
   });
   const p = chartPalette();
 

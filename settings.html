@@ -1149,7 +1149,7 @@
       import { getSupabase } from '/js/supabase-config.js';
       import { requireRole, logout, getTenantId } from '/js/auth.js';
       import { loadTenant, applyBranding, tenantPath } from '/js/tenant.js';
-      import { toast, initTheme } from '/js/utils.js';
+      import { toast, initTheme, escapeHtml } from '/js/utils.js';
       initTheme();
 
       const sb = getSupabase();
@@ -1352,21 +1352,25 @@
           return;
         }
         list.innerHTML = vendedores
-          .map(
-            (v) => `
+          .map((v) => {
+            const id = escapeHtml(v.id);
+            const nome = escapeHtml(v.nome);
+            const setor = escapeHtml(v.setor || '—');
+            const pin = escapeHtml(v.pin || '—');
+            return `
     <div class="vendor-mgmt-row">
       <div>
-        <div class="vendor-name">${v.nome}</div>
-        <div class="vendor-sector">${v.setor || '—'}</div>
+        <div class="vendor-name">${nome}</div>
+        <div class="vendor-sector">${setor}</div>
       </div>
-      <div class="vendor-sector" style="text-align:center">${v.setor || '—'}</div>
-      <div class="vendor-pin" style="text-align:center">${v.pin || '—'}</div>
+      <div class="vendor-sector" style="text-align:center">${setor}</div>
+      <div class="vendor-pin" style="text-align:center">${pin}</div>
       <div class="vendor-actions">
-        <button onclick="openEditVendor('${v.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+        <button onclick="openEditVendor('${id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
       </div>
     </div>
-  `
-          )
+  `;
+          })
           .join('');
       }
 
@@ -1683,19 +1687,22 @@
       }
 
       function renderCanalRow(c, showActions) {
-        const statusLabel = c.ativo ? 'Ativo' : 'Inativo';
+        const id = escapeHtml(c.id);
+        const nome = escapeHtml(c.nome);
+        const tipo = escapeHtml(c.tipo);
+        const icon = escapeHtml(iconClass(c.icone));
         return `<div class="canal-row">
-    <div class="canal-icon"><i class="${iconClass(c.icone)}"></i></div>
+    <div class="canal-icon"><i class="${icon}"></i></div>
     <div class="canal-info">
-      <div class="canal-name">${c.nome}</div>
+      <div class="canal-name">${nome}</div>
       ${!c.ativo ? '<div class="canal-type">Inativo</div>' : ''}
     </div>
-    <button class="canal-toggle ${c.ativo ? 'active' : ''}" onclick="toggleCanal('${c.id}', ${!c.ativo})" title="${c.ativo ? 'Desativar' : 'Ativar'}"></button>
+    <button class="canal-toggle ${c.ativo ? 'active' : ''}" onclick="toggleCanal('${id}', ${!c.ativo})" title="${c.ativo ? 'Desativar' : 'Ativar'}"></button>
     ${
       showActions
         ? `<div class="canal-actions">
-      <button onclick="editCanal('${c.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
-      <button class="danger" onclick="deleteCanal('${c.id}', '${c.nome.replace(/'/g, "\\'")}', '${c.tipo}')" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+      <button onclick="editCanal('${id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+      <button class="danger" onclick="deleteCanal('${id}', '${tipo}')" title="Excluir"><i class="fa-solid fa-trash"></i></button>
     </div>`
         : ''
     }
@@ -1853,7 +1860,9 @@
         await loadCanais();
       };
 
-      window.deleteCanal = async function (id, nome, tipo) {
+      window.deleteCanal = async function (id, tipo) {
+        const canal = _canais.find((c) => c.id === id);
+        const nome = canal?.nome || '';
         const label = tipo === 'fixo' ? 'canal' : 'evento';
         if (!confirm('Excluir o ' + label + ' "' + nome + '"?\nOs dados históricos serão mantidos.')) return;
         const { error } = await sb.from('canais_origem').delete().eq('id', id);

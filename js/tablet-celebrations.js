@@ -4,7 +4,7 @@
 // ============================================
 
 import { playSound } from '/js/sound.js';
-import { CELEBRATION_EPIC_FADE, Z_DRAG_GHOST } from '/js/constants.js';
+import { Z_DRAG_GHOST } from '/js/constants.js';
 import { escapeHtml } from '/js/utils.js';
 
 const g = () => window.gsap;

@@ -7,7 +7,7 @@
 
 import { describe, it, expect } from 'vitest';
 
-const SHOULD_RUN = process.env.SMOKE === '1';
+const SHOULD_RUN = process.env.SMOKE === '1' || process.env.npm_lifecycle_event === 'test:smoke';
 const BASE = process.env.SMOKE_BASE_URL || 'https://listaveztexas.vercel.app';
 const SUPABASE_URL = 'https://cnpnviaigrdmnixnqjqp.supabase.co';
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'sb_publishable_0AJbQVEVFsL71gAGtks6rw_V1rYn3Ne';
@@ -47,7 +47,7 @@ d('smoke: prod infra', () => {
 
   it('Supabase REST root reachable', async () => {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/`, {
-      headers: { apikey: SUPABASE_ANON_KEY },
+      headers: { apikey: SUPABASE_ANON_KEY }
     });
     expect([200, 404]).toContain(r.status);
   });
@@ -58,9 +58,9 @@ d('smoke: prod infra', () => {
       headers: {
         'Content-Type': 'application/json',
         apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`
       },
-      body: '{}',
+      body: '{}'
     });
     if (r.status === 404) {
       console.warn('[smoke] get_landing_stats não migrada ainda — pulando');
@@ -78,7 +78,7 @@ d('smoke: prod infra', () => {
     const r = await fetch(`${SUPABASE_URL}/functions/v1/ai-assist`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ feature: 'turno-summary' }),
+      body: JSON.stringify({ feature: 'turno-summary' })
     });
     // Espera 401/403/400 — qualquer coisa ≠ 5xx é OK (auth funcionou)
     expect(r.status).toBeLessThan(500);

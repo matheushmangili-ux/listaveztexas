@@ -13,6 +13,13 @@ Deno.serve(async (req) => {
   try {
     const { token, nome_loja, slug, setores, vendedores, owner_email, owner_password } = await req.json()
 
+    // Provisioning is only allowed after a paid/onboarding token is issued.
+    if (!token || typeof token !== 'string') {
+      return new Response(JSON.stringify({ error: 'Token de onboarding obrigatorio' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
     // Validate required fields
     if (!nome_loja || !slug || !setores?.length || !vendedores?.length) {
       return new Response(JSON.stringify({ error: 'Campos obrigatórios faltando' }), {
@@ -34,29 +41,24 @@ Deno.serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // Validate onboarding token if provided
-    let onboardingToken = null
-    let ownerEmail = null
-    let plano = 'pro'
+    // Validate onboarding token
+    const { data: onboardingToken, error: tkErr } = await supabaseAdmin
+      .from('onboarding_tokens')
+      .select('id, email, plano, stripe_customer_id, stripe_subscription_id')
+      .eq('token', token)
+      .eq('used', false)
+      .gt('expires_at', new Date().toISOString())
+      .single()
 
-    if (token) {
-      const { data: tkData, error: tkErr } = await supabaseAdmin
-        .from('onboarding_tokens')
-        .select('*')
-        .eq('token', token)
-        .eq('used', false)
-        .gt('expires_at', new Date().toISOString())
-        .single()
-
-      if (tkErr || !tkData) {
-        return new Response(JSON.stringify({ error: 'Token inválido ou expirado' }), {
-          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        })
-      }
-      onboardingToken = tkData
-      ownerEmail = tkData.email
-      plano = tkData.plano || 'starter'
+    if (tkErr || !onboardingToken) {
+      return new Response(JSON.stringify({ error: 'Token inválido ou expirado' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
     }
+
+    let ownerEmail = onboardingToken.email
+    const plano = onboardingToken.plano || 'starter'
 
     // Check slug uniqueness
     const { data: existing } = await supabaseAdmin
@@ -72,7 +74,7 @@ Deno.serve(async (req) => {
     }
 
     // Determine max_vendedores by plan
-    const planLimits: Record<string, number> = { starter: 5, pro: 15, advanced: 30 }
+    const planLimits: Record<string, number> = { starter: 5, pro: 15, advanced: 30, elite: 30 }
     const maxVendedores = planLimits[plano] || 15
 
     // Create or find owner auth user

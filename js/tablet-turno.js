@@ -184,7 +184,9 @@ async function confirmCloseTurno() {
         turno_id: _ctx.currentTurno?.id,
         atendimentos_fechados_auto: result?.atendimentos_finalizados || 0
       });
-    } catch (_e) { /* ignore */ }
+    } catch (_e) {
+      /* ignore */
+    }
     _ctx.logPosition(null, 'turno', 'Turno encerrado');
     _ctx.currentTurno = null;
     _ctx.activeAtendimentos = [];
@@ -277,7 +279,9 @@ async function confirmCheckin() {
         turno_id: data.id,
         n_vendedores_checkin: Array.isArray(checked) ? checked.length : 0
       });
-    } catch (_e) { /* ignore */ }
+    } catch (_e) {
+      /* ignore */
+    }
 
     _ctx.markLocal();
     const { error: errFila } = await _ctx.sb.rpc('reordenar_fila', { p_ids: checked });

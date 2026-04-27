@@ -4,16 +4,24 @@
 
 import { initAnnouncements, unmountAnnouncements, refreshAnnouncements } from './vendor-announcements.js';
 import { initXp, unmountXp, refreshAfterAtendimento as refreshXp } from './vendor-xp.js';
-import { initMissions, unmountMissions, refreshMissionsAfterAtendimento as refreshMissions } from './vendor-missions.js';
-import { initAchievements, unmountAchievements, refreshAchievementsAfterAtendimento as refreshAchievements } from './vendor-achievements.js';
+import {
+  initMissions,
+  unmountMissions,
+  refreshMissionsAfterAtendimento as refreshMissions
+} from './vendor-missions.js';
+import {
+  initAchievements,
+  unmountAchievements,
+  refreshAchievementsAfterAtendimento as refreshAchievements
+} from './vendor-achievements.js';
 import { initAvatar, unmountAvatar, buildAvatarUrl } from './vendor-avatar.js';
 import { initVm, unmountVm, refreshVm } from './vendor-vm.js';
 import { callAI } from './ai-assist.js';
 
 let _sb = null;
-let _ctx = null;        // resultado de get_my_vendedor_context()
-let _atendId = null;    // id do atendimento ativo (se houver)
-let _atendStartMs = 0;  // epoch ms do início do atendimento ativo
+let _ctx = null; // resultado de get_my_vendedor_context()
+let _atendId = null; // id do atendimento ativo (se houver)
+let _atendStartMs = 0; // epoch ms do início do atendimento ativo
 let _attendingTimer = null;
 let _pausaSinceTimer = null;
 let _realtimeChannel = null;
@@ -313,7 +321,7 @@ async function renderIdle() {
     el.btnStart.classList.remove('hidden');
   } else {
     el.bigPos.classList.remove('next-pulse');
-    el.bigLabel.textContent = (pos - 1) === 1 ? '1 pessoa na sua frente' : (pos - 1) + ' pessoas na sua frente';
+    el.bigLabel.textContent = pos - 1 === 1 ? '1 pessoa na sua frente' : pos - 1 + ' pessoas na sua frente';
     el.btnStart.classList.add('hidden');
   }
 
@@ -331,7 +339,7 @@ async function renderIdle() {
   el.queuePeek.innerHTML = (data || [])
     .map((v) => {
       const isSelf = v.id === _ctx.vendedor_id;
-      const name = isSelf ? 'Você' : (v.apelido || v.nome);
+      const name = isSelf ? 'Você' : v.apelido || v.nome;
       return `<div class="peek-item${isSelf ? ' self' : ''}">
         <span class="peek-pos">#${v.posicao_fila}</span>
         <span class="peek-name">${escape(name)}</span>
@@ -349,7 +357,8 @@ function renderPausa() {
   el.pausaCard.classList.remove('hidden');
 
   // Busca a última pausa aberta pra mostrar o motivo + tempo
-  _sb.from('pausas')
+  _sb
+    .from('pausas')
     .select('motivo, inicio')
     .eq('vendedor_id', _ctx.vendedor_id)
     .is('fim', null)
@@ -382,7 +391,10 @@ function startAttendingTimer() {
   _attendingTimer = setInterval(tick, 1000);
 }
 function stopAttendingTimer() {
-  if (_attendingTimer) { clearInterval(_attendingTimer); _attendingTimer = null; }
+  if (_attendingTimer) {
+    clearInterval(_attendingTimer);
+    _attendingTimer = null;
+  }
 }
 
 function startPausaSinceTimer(startMs) {
@@ -395,7 +407,10 @@ function startPausaSinceTimer(startMs) {
   _pausaSinceTimer = setInterval(tick, 30000);
 }
 function stopPausaSinceTimer() {
-  if (_pausaSinceTimer) { clearInterval(_pausaSinceTimer); _pausaSinceTimer = null; }
+  if (_pausaSinceTimer) {
+    clearInterval(_pausaSinceTimer);
+    _pausaSinceTimer = null;
+  }
 }
 
 // ─── Realtime ───
@@ -404,43 +419,55 @@ function subscribeRealtime() {
 
   _realtimeChannel = _sb
     .channel('vendor-' + _ctx.vendedor_id)
-    .on('postgres_changes', {
-      event: 'UPDATE',
-      schema: 'public',
-      table: 'vendedores',
-      filter: 'tenant_id=eq.' + _ctx.tenant_id
-    }, async () => {
-      // Qualquer mudança de vendedor do tenant pode afetar a posição na fila
-      await loadContext();
-      renderAll();
-    })
-    .on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'atendimentos',
-      filter: 'tenant_id=eq.' + _ctx.tenant_id
-    }, async (payload) => {
-      await loadStats();
-      // Se o atendimento é do próprio vendedor e foi finalizado, dispara refresh de XP/missões/conquistas
-      // pra capturar XP creditado pelo tablet (admin finaliza → vendor app precisa refletir)
-      const row = payload?.new || payload?.old;
-      const isMine = row && row.vendedor_id === _ctx.vendedor_id;
-      const wasFinalized = payload?.new && payload.new.resultado && payload.new.resultado !== 'em_andamento';
-      if (isMine && wasFinalized) {
-        refreshXp().catch((err) => console.warn('[xp] refresh via realtime falhou:', err));
-        refreshMissions().catch((err) => console.warn('[missions] refresh via realtime falhou:', err));
-        refreshAchievements().catch((err) => console.warn('[achievements] refresh via realtime falhou:', err));
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'vendedores',
+        filter: 'tenant_id=eq.' + _ctx.tenant_id
+      },
+      async () => {
+        // Qualquer mudança de vendedor do tenant pode afetar a posição na fila
+        await loadContext();
+        renderAll();
       }
-    })
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'vendor_xp_events',
-      filter: 'vendor_id=eq.' + _ctx.vendedor_id
-    }, async () => {
-      // XP creditado direto (ex: bonus manual, evento sem atendimento): reflete já na UI
-      refreshXp().catch((err) => console.warn('[xp] refresh via xp_events falhou:', err));
-    })
+    )
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'atendimentos',
+        filter: 'tenant_id=eq.' + _ctx.tenant_id
+      },
+      async (payload) => {
+        await loadStats();
+        // Se o atendimento é do próprio vendedor e foi finalizado, dispara refresh de XP/missões/conquistas
+        // pra capturar XP creditado pelo tablet (admin finaliza → vendor app precisa refletir)
+        const row = payload?.new || payload?.old;
+        const isMine = row && row.vendedor_id === _ctx.vendedor_id;
+        const wasFinalized = payload?.new && payload.new.resultado && payload.new.resultado !== 'em_andamento';
+        if (isMine && wasFinalized) {
+          refreshXp().catch((err) => console.warn('[xp] refresh via realtime falhou:', err));
+          refreshMissions().catch((err) => console.warn('[missions] refresh via realtime falhou:', err));
+          refreshAchievements().catch((err) => console.warn('[achievements] refresh via realtime falhou:', err));
+        }
+      }
+    )
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'vendor_xp_events',
+        filter: 'vendor_id=eq.' + _ctx.vendedor_id
+      },
+      async () => {
+        // XP creditado direto (ex: bonus manual, evento sem atendimento): reflete já na UI
+        refreshXp().catch((err) => console.warn('[xp] refresh via xp_events falhou:', err));
+      }
+    )
     .subscribe();
 }
 
@@ -456,13 +483,13 @@ function wireActions() {
   el.aiTipsOverlay?.addEventListener('click', closeAiTips);
 
   // Bottom tab bar
-  el.tabbar?.querySelectorAll('[data-tab]').forEach(btn => {
+  el.tabbar?.querySelectorAll('[data-tab]').forEach((btn) => {
     btn.addEventListener('click', () => onTabClick(btn.dataset.tab, btn));
   });
 
   // "Mais" sheet
   el.moreOverlay?.addEventListener('click', closeMoreSheet);
-  el.moreSheet?.querySelectorAll('[data-action]').forEach(btn => {
+  el.moreSheet?.querySelectorAll('[data-action]').forEach((btn) => {
     btn.addEventListener('click', () => onMoreAction(btn.dataset.action));
   });
 
@@ -484,7 +511,7 @@ function wireActions() {
   // Helper pro botão "Não informar" canal
   window._vendorStartWithoutCanal = () => {
     closeAllSheets();
-    callStartAttendance(null);  // _pendingPreferencial já foi setado no onStartAttendance
+    callStartAttendance(null); // _pendingPreferencial já foi setado no onStartAttendance
   };
 }
 
@@ -494,12 +521,16 @@ function openCanalSheet() {
     callStartAttendance(null);
     return;
   }
-  el.canalGrid.innerHTML = _canais.map((c) => `
+  el.canalGrid.innerHTML = _canais
+    .map(
+      (c) => `
     <button class="vendor-canal-btn" data-canal="${c.id}">
       <i class="fa-solid ${escape(c.icone || 'fa-circle-question')}"></i>
       <span>${escape(c.nome)}</span>
     </button>
-  `).join('');
+  `
+    )
+    .join('');
   el.canalGrid.querySelectorAll('.vendor-canal-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const canalId = btn.dataset.canal;
@@ -692,7 +723,11 @@ async function setupPushNotifications() {
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   if (isIOS && !isStandalone) {
-    showPushCard('ios-tip', 'Adicione à Tela de Início', 'Toque em Compartilhar → Adicionar à Tela de Início pra receber alertas');
+    showPushCard(
+      'ios-tip',
+      'Adicione à Tela de Início',
+      'Toque em Compartilhar → Adicionar à Tela de Início pra receber alertas'
+    );
     return;
   }
 
@@ -732,7 +767,11 @@ async function setupPushNotifications() {
     try {
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
-        showPushCard('denied', 'Notificações bloqueadas', 'Habilite nas configurações do navegador pra não perder a vez');
+        showPushCard(
+          'denied',
+          'Notificações bloqueadas',
+          'Habilite nas configurações do navegador pra não perder a vez'
+        );
         return;
       }
       await subscribeToPush(registration);
@@ -826,7 +865,7 @@ function onTabClick(tab, btn) {
 }
 
 function setActiveTab(btn) {
-  el.tabbar?.querySelectorAll('.vendor-tab').forEach(b => b.classList.remove('active'));
+  el.tabbar?.querySelectorAll('.vendor-tab').forEach((b) => b.classList.remove('active'));
   btn?.classList.add('active');
 }
 
@@ -898,35 +937,47 @@ async function onAiTips() {
   if (!_sb) return;
   el.aiTipsOverlay?.classList.remove('hidden');
   el.aiTipsSheet?.classList.remove('hidden');
-  if (el.aiTipsBody) el.aiTipsBody.innerHTML = '<div style="padding:24px;text-align:center;color:var(--vendor-text-muted);font-size:12px"><i class="fa-solid fa-spinner fa-spin" style="margin-right:6px"></i>Consultando a IA…</div>';
+  if (el.aiTipsBody)
+    el.aiTipsBody.innerHTML =
+      '<div style="padding:24px;text-align:center;color:var(--vendor-text-muted);font-size:12px"><i class="fa-solid fa-spinner fa-spin" style="margin-right:6px"></i>Consultando a IA…</div>';
 
   const vendas = parseInt(el.statVendas?.textContent || '0');
   const atend = parseInt(el.statAtend?.textContent || '0');
   const conv = parseInt(el.statConv?.textContent || '0');
 
-  const result = await callAI(_sb, 'vendor-tips', {
-    vendor_id: _ctx.vendedor_id,
-    atendimentos: atend,
-    vendas: vendas,
-    conversao: conv,
-    tempo_medio: 0,
-    rank: _ctx.posicao_fila || 0,
-    total_vendors: 0,
-    store_conversao: 0
-  }, { fallback: null });
+  const result = await callAI(
+    _sb,
+    'vendor-tips',
+    {
+      vendor_id: _ctx.vendedor_id,
+      atendimentos: atend,
+      vendas: vendas,
+      conversao: conv,
+      tempo_medio: 0,
+      rank: _ctx.posicao_fila || 0,
+      total_vendors: 0,
+      store_conversao: 0
+    },
+    { fallback: null }
+  );
 
   if (!el.aiTipsBody) return;
   if (!result || !result.tips) {
-    el.aiTipsBody.innerHTML = '<div style="padding:24px;text-align:center;color:var(--vendor-text-muted);font-size:12px">IA indisponível no momento. Tente novamente mais tarde.</div>';
+    el.aiTipsBody.innerHTML =
+      '<div style="padding:24px;text-align:center;color:var(--vendor-text-muted);font-size:12px">IA indisponível no momento. Tente novamente mais tarde.</div>';
     return;
   }
 
   el.aiTipsBody.innerHTML = `
     <div class="ai-tips-list">
-      ${result.tips.map(t => `<div class="ai-tip-item">
+      ${result.tips
+        .map(
+          (t) => `<div class="ai-tip-item">
         <span class="ai-tip-emoji">${escape(t.emoji || '💡')}</span>
         <span class="ai-tip-text">${escape(t.tip)}</span>
-      </div>`).join('')}
+      </div>`
+        )
+        .join('')}
     </div>
     ${result.motivational ? `<div class="ai-motivational">${escape(result.motivational)}</div>` : ''}
   `;
@@ -951,5 +1002,9 @@ function initials(name) {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 function escape(s) {
-  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }

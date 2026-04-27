@@ -6,7 +6,7 @@
 //
 // Sem a key configurada, vira no-op (não quebra em dev/preview).
 
-const KEY  = (typeof window !== 'undefined' && window.PUBLIC_POSTHOG_KEY)  || '';
+const KEY = (typeof window !== 'undefined' && window.PUBLIC_POSTHOG_KEY) || '';
 const HOST = (typeof window !== 'undefined' && window.PUBLIC_POSTHOG_HOST) || 'https://us.i.posthog.com';
 
 // Stub seguro pra quando PostHog não está carregado / configurado
@@ -18,7 +18,7 @@ const stub = {
   register: noop,
   setPersonProperties: noop,
   isFeatureEnabled: () => false,
-  ready: false,
+  ready: false
 };
 
 // Exporta global pra inline scripts conseguirem chamar
@@ -39,9 +39,51 @@ function detectAppContext() {
 if (KEY) {
   // Snippet oficial PostHog (loader assíncrono)
   /* eslint-disable */
-  !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing alias debug getPageViewId captureTraceFeedback captureTraceMetric".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+  !(function (t, e) {
+    var o, n, p, r;
+    e.__SV ||
+      ((window.posthog = e),
+      (e._i = []),
+      (e.init = function (i, s, a) {
+        function g(t, e) {
+          var o = e.split('.');
+          (2 == o.length && ((t = t[o[0]]), (e = o[1])),
+            (t[e] = function () {
+              t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
+            }));
+        }
+        (((p = t.createElement('script')).type = 'text/javascript'),
+          (p.crossOrigin = 'anonymous'),
+          (p.async = !0),
+          (p.src = s.api_host.replace('.i.posthog.com', '-assets.i.posthog.com') + '/static/array.js'),
+          (r = t.getElementsByTagName('script')[0]).parentNode.insertBefore(p, r));
+        var u = e;
+        for (
+          void 0 !== a ? (u = e[a] = []) : (a = 'posthog'),
+            u.people = u.people || [],
+            u.toString = function (t) {
+              var e = 'posthog';
+              return ('posthog' !== a && (e += '.' + a), t || (e += ' (stub)'), e);
+            },
+            u.people.toString = function () {
+              return u.toString(1) + '.people (stub)';
+            },
+            o =
+              'init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing alias debug getPageViewId captureTraceFeedback captureTraceMetric'.split(
+                ' '
+              ),
+            n = 0;
+          n < o.length;
+          n++
+        )
+          g(u, o[n]);
+        e._i.push([i, s, a]);
+      }),
+      (e.__SV = 1));
+  })(document, window.posthog || []);
   /* eslint-enable */
-  posthog.init(KEY, {
+  const posthogClient = window.posthog;
+  posthogClient.init(KEY, {
     api_host: HOST,
     // ui_host garante que links do UI do PostHog (ex: session replay) apontam
     // pro painel real e nao pro proxy /ingest que nao serve UI.
@@ -52,27 +94,29 @@ if (KEY) {
     autocapture: false, // explicit events only
     disable_session_recording: true,
     // Bloqueia props com PII se entrarem por acidente via evento descuidado.
-    property_blacklist: ['$password', '$token', 'password', 'senha', 'token'],
+    property_blacklist: ['$password', '$token', 'password', 'senha', 'token']
   });
   // Super properties — enviadas em TODO evento. app_context permite filtrar
   // funil por pagina (vendor/tablet/dashboard/...) sem repetir em cada capture.
-  posthog.register({
+  posthogClient.register({
     app_context: detectAppContext(),
-    release: window.MINHAVEZ_VERSION || 'v52',
+    release: window.MINHAVEZ_VERSION || 'v52'
   });
   try {
     const slug = localStorage.getItem('lv-last-slug');
-    if (slug) posthog.register({ tenant_slug: slug });
-  } catch (_e) { /* ignore */ }
+    if (slug) posthogClient.register({ tenant_slug: slug });
+  } catch (_e) {
+    /* ignore */
+  }
   // Substitui stub pelo real
   window.minhavezAnalytics = {
-    capture: (event, props) => posthog.capture(event, props),
-    identify: (id, props) => posthog.identify(id, props),
-    reset: () => posthog.reset(),
-    register: (props) => posthog.register(props),
-    setPersonProperties: (props) => posthog.setPersonProperties(props),
-    isFeatureEnabled: (key) => posthog.isFeatureEnabled(key),
-    ready: true,
+    capture: (event, props) => posthogClient.capture(event, props),
+    identify: (id, props) => posthogClient.identify(id, props),
+    reset: () => posthogClient.reset(),
+    register: (props) => posthogClient.register(props),
+    setPersonProperties: (props) => posthogClient.setPersonProperties(props),
+    isFeatureEnabled: (key) => posthogClient.isFeatureEnabled(key),
+    ready: true
   };
 }
 
@@ -81,7 +125,9 @@ if (KEY) {
   if (!window.minhavezAnalytics.ready) return;
   try {
     if (window._supabase) {
-      const { data: { user } } = await window._supabase.auth.getUser();
+      const {
+        data: { user }
+      } = await window._supabase.auth.getUser();
       if (user) {
         window.minhavezAnalytics.identify(user.id, { email: user.email });
       }

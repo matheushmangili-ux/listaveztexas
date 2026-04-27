@@ -330,7 +330,9 @@ async function _executeAtendimento(vendedorId, canalOrigemId) {
         preferencial: !!isPreferencial,
         has_canal_origem: !!canalOrigemId
       });
-    } catch (_e) { /* ignore */ }
+    } catch (_e) {
+      /* ignore */
+    }
     // Se canal de origem foi selecionado, gravar no atendimento
     if (canalOrigemId && data) {
       await _ctx.sb.from('atendimentos').update({ canal_origem_id: canalOrigemId }).eq('id', data);
@@ -1273,7 +1275,9 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor, con
           tamanho: rupturaSel.tamanho || null
         });
       }
-    } catch (_e) { /* ignore */ }
+    } catch (_e) {
+      /* ignore */
+    }
 
     const msg =
       resultado === 'venda'

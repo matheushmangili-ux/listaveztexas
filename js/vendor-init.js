@@ -100,7 +100,9 @@ loginForm.addEventListener('submit', async (e) => {
     }
     try {
       window.minhavezAnalytics?.capture('vendor_login_failed', { reason });
-    } catch (_e) { /* ignore */ }
+    } catch (_e) {
+      /* ignore */
+    }
     loginError.textContent = msg;
     loginError.classList.remove('hidden');
   } finally {
@@ -119,7 +121,9 @@ window._vendorLogout = async function () {
   try {
     window.minhavezAnalytics?.capture('vendor_logout');
     window.minhavezAnalytics?.reset();
-  } catch (_e) { /* ignore */ }
+  } catch (_e) {
+    /* ignore */
+  }
   try {
     await sb.auth.signOut({ scope: 'local' });
   } catch (e) {

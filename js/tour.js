@@ -101,8 +101,9 @@ export async function startTour(kind, opts = {}) {
   if (!config) return;
   await loadDeps();
   const intro = window.introJs();
+  const steps = config.steps.filter((step) => !step.element || document.querySelector(step.element));
   intro.setOptions({
-    steps: config.steps,
+    steps,
     nextLabel: 'Próximo →',
     prevLabel: '← Voltar',
     doneLabel: 'Beleza, comecei',

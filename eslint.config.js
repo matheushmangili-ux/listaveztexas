@@ -16,7 +16,10 @@ export default [
       }
     },
     rules: {
-      'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      'no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }
+      ],
       'no-undef': 'error',
       eqeqeq: ['warn', 'always', { null: 'ignore' }],
       'no-var': 'error',

@@ -39,7 +39,8 @@
       window.PUBLIC_POSTHOG_HOST = '/ingest';
     </script>
     <script>
-      window.PUBLIC_SENTRY_DSN = 'https://2281ed2b3027429746fd575a47c75046@o4511269047500800.ingest.us.sentry.io/4511269057003520';
+      window.PUBLIC_SENTRY_DSN =
+        'https://2281ed2b3027429746fd575a47c75046@o4511269047500800.ingest.us.sentry.io/4511269057003520';
       window.PUBLIC_SENTRY_ENV = 'production';
     </script>
     <script type="module" src="/js/sentry.js"></script>
@@ -196,7 +197,7 @@
                 title="Período personalizado"
                 style="position: relative"
               >
-                <i class="fa-solid fa-calendar-days" style="font-size: 10px"></i>
+                <i class="fa-solid fa-calendar-days icon-sm"></i>
               </button>
             </div>
             <button
@@ -268,7 +269,7 @@
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
-          <div style="position: relative; display: inline-block" id="exportDropdown">
+          <div class="export-dropdown" id="exportDropdown">
             <button
               class="filter-apply-btn"
               onclick="document.getElementById('exportMenu').classList.toggle('open')"
@@ -283,7 +284,7 @@
                   document.getElementById('exportMenu').classList.remove('open');
                 "
               >
-                <i class="fa-solid fa-file-csv" style="color: var(--success)"></i> CSV
+                <i class="fa-solid fa-file-csv icon-success"></i> CSV
               </button>
               <button
                 onclick="
@@ -291,7 +292,7 @@
                   document.getElementById('exportMenu').classList.remove('open');
                 "
               >
-                <i class="fa-solid fa-file-pdf" style="color: var(--danger)"></i> PDF
+                <i class="fa-solid fa-file-pdf icon-danger"></i> PDF
               </button>
             </div>
           </div>

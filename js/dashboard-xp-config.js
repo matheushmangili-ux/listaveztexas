@@ -100,7 +100,10 @@ function resetDefaults() {
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('xpConfigForm');
   if (form) {
-    form.addEventListener('submit', (e) => { e.preventDefault(); saveConfig(); });
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      saveConfig();
+    });
   }
   document.getElementById('xpCfgReset')?.addEventListener('click', resetDefaults);
   ['xpCfgAtend', 'xpCfgVenda', 'xpCfgTroca'].forEach((id) => {
@@ -111,13 +114,21 @@ document.addEventListener('DOMContentLoaded', () => {
 function showError(msg) {
   const box = document.getElementById('xpCfgError');
   if (!box) return;
-  if (!msg) { box.style.display = 'none'; box.textContent = ''; return; }
+  if (!msg) {
+    box.style.display = 'none';
+    box.textContent = '';
+    return;
+  }
   box.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="margin-right:6px"></i>' + escapeHtml(msg);
   box.style.display = 'block';
 }
 
 function escapeHtml(s) {
-  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function toast(msg, kind) {
@@ -126,7 +137,10 @@ function toast(msg, kind) {
     return;
   }
   const c = document.getElementById('toastContainer');
-  if (!c) { alert(msg); return; }
+  if (!c) {
+    alert(msg);
+    return;
+  }
   const el = document.createElement('div');
   el.textContent = msg;
   el.style.cssText = `background:${kind === 'error' ? 'var(--danger)' : 'var(--success)'};color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;margin-top:8px;box-shadow:0 4px 12px rgba(0,0,0,0.2)`;

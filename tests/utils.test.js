@@ -181,9 +181,9 @@ describe('theme helpers', () => {
     document.documentElement.removeAttribute('data-theme');
   });
 
-  it('initTheme aplica "light" quando não há tema salvo', () => {
+  it('initTheme aplica "dark" quando não há tema salvo', () => {
     initTheme();
-    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
   });
 
   it('initTheme aplica tema salvo no localStorage', () => {

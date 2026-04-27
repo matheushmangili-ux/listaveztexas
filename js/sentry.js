@@ -22,7 +22,7 @@ window.minhavezSentry = {
   setTag: noop,
   setContext: noop,
   addBreadcrumb: noop,
-  ready: false,
+  ready: false
 };
 
 if (DSN && !location.hostname.includes('localhost')) {
@@ -37,8 +37,8 @@ if (DSN && !location.hostname.includes('localhost')) {
       dsn: DSN,
       environment: ENV,
       release: window.MINHAVEZ_VERSION || 'unknown',
-      sampleRate: 1.0,            // 100% das exceções (são raras)
-      tracesSampleRate: 0,        // sem performance tracing por ora
+      sampleRate: 1.0, // 100% das exceções (são raras)
+      tracesSampleRate: 0, // sem performance tracing por ora
       // PII: minhavez já foge de coletar dados sensíveis no client
       sendDefaultPii: false,
       // Não captura erros de extensões / scripts third-party
@@ -51,19 +51,19 @@ if (DSN && !location.hostname.includes('localhost')) {
         // Network failures (offline, abort) — são esperados num PWA
         'NetworkError',
         'Failed to fetch',
-        'AbortError',
+        'AbortError'
       ],
       denyUrls: [
         /chrome-extension:\/\//,
         /moz-extension:\/\//,
-        /^https:\/\/cdn\.jsdelivr\.net/,  // CDN scripts (intro.js etc)
-        /^https:\/\/cdnjs\.cloudflare\.com/,
+        /^https:\/\/cdn\.jsdelivr\.net/, // CDN scripts (intro.js etc)
+        /^https:\/\/cdnjs\.cloudflare\.com/
       ],
       beforeSend(event) {
         // Filtro extra: descarta eventos sem stack útil
         if (event.exception?.values?.[0]?.stacktrace?.frames?.length === 0) return null;
         return event;
-      },
+      }
     });
     // Substitui stub pelo real
     window.minhavezSentry = {
@@ -73,13 +73,15 @@ if (DSN && !location.hostname.includes('localhost')) {
       setTag: (k, v) => window.Sentry.setTag(k, v),
       setContext: (k, v) => window.Sentry.setContext(k, v),
       addBreadcrumb: (b) => window.Sentry.addBreadcrumb(b),
-      ready: true,
+      ready: true
     };
     // Auto-identify via Supabase
     setTimeout(async () => {
       try {
         if (window._supabase) {
-          const { data: { user } } = await window._supabase.auth.getUser();
+          const {
+            data: { user }
+          } = await window._supabase.auth.getUser();
           if (user) window.minhavezSentry.setUser({ id: user.id, email: user.email });
         }
         // Tag tenant (do path /:slug/...)
@@ -110,5 +112,5 @@ if (DSN && !location.hostname.includes('localhost')) {
       clearInterval(drain);
     }
   }, 500);
-  setTimeout(() => clearInterval(drain), 10000);  // desiste após 10s
+  setTimeout(() => clearInterval(drain), 10000); // desiste após 10s
 }
