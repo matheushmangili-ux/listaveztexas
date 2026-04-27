@@ -21,6 +21,34 @@ let _groqKey: string | null = null
 const _rateCounter = new Map<string, number>()
 const _memCache = new Map<string, { data: unknown; exp: number }>()
 
+async function resolveTenantIdForUser(userId: string) {
+  const { data: tenantUser } = await sb
+    .from('tenant_users')
+    .select('tenant_id')
+    .eq('user_id', userId)
+    .limit(1)
+    .maybeSingle()
+  if (tenantUser?.tenant_id) return tenantUser.tenant_id as string
+
+  const { data: ownedTenant } = await sb
+    .from('tenants')
+    .select('id')
+    .eq('owner_user_id', userId)
+    .limit(1)
+    .maybeSingle()
+  if (ownedTenant?.id) return ownedTenant.id as string
+
+  const { data: vendor } = await sb
+    .from('vendedores')
+    .select('tenant_id')
+    .eq('auth_user_id', userId)
+    .limit(1)
+    .maybeSingle()
+  if (vendor?.tenant_id) return vendor.tenant_id as string
+
+  return null
+}
+
 async function getGroqKey(): Promise<string> {
   if (_groqKey) return _groqKey
   const { data } = await sb.from('app_secrets').select('value').eq('key', 'groq_api_key').single()
@@ -342,23 +370,7 @@ Deno.serve(async (req) => {
     const { data: { user }, error: authErr } = await sb.auth.getUser(authHeader.replace('Bearer ', ''))
     if (authErr || !user) throw new Error('Invalid token: ' + (authErr?.message || 'no user'))
 
-    // Try multiple paths to resolve tenant_id (user_metadata, app_metadata, vendedores table)
-    let tenantId = (user.user_metadata?.tenant_id || user.app_metadata?.tenant_id) as string | undefined
-
-    if (!tenantId) {
-      // Fallback 1: vendedores.tenant_id by user.id
-      const { data: vend } = await sb.from('vendedores')
-        .select('tenant_id').eq('auth_user_id', user.id).limit(1).maybeSingle()
-      if (vend?.tenant_id) tenantId = vend.tenant_id
-    }
-
-    if (!tenantId) {
-      // Fallback 2: tenant_users (gerentes/admins)
-      const { data: tu } = await sb.from('tenant_users')
-        .select('tenant_id').eq('user_id', user.id).limit(1).maybeSingle()
-      if (tu?.tenant_id) tenantId = tu.tenant_id
-    }
-
+    const tenantId = await resolveTenantIdForUser(user.id)
     if (!tenantId) throw new Error(`No tenant_id resolved for user ${user.id} (email=${user.email})`)
 
     const { type, payload } = await req.json()
