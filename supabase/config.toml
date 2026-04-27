@@ -2,3 +2,6 @@ project_id = "cnpnviaigrdmnixnqjqp"
 
 [functions.ai-assist]
 verify_jwt = false
+
+[functions.resolve-onboarding-token]
+verify_jwt = false

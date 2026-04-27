@@ -57,6 +57,8 @@ initTheme();
 const tenant = await loadTenant();
 if (tenant) applyBranding(tenant);
 const tenantId = tenant?.id || null;
+const VENDEDOR_PUBLIC_COLUMNS =
+  'id,nome,apelido,status,posicao_fila,ativo,created_at,updated_at,tenant_id,setor,foto_url,auth_user_id,avatar_config';
 
 // Render setor tabs dynamically from tenant config
 const SETOR_ICONS = { loja: 'fa-store', chapelaria: 'fa-hat-cowboy', selaria: 'fa-horse' };
@@ -366,7 +368,7 @@ async function loadVendedores() {
   if (ui.loadingVendedores) return;
   ui.loadingVendedores = true;
   try {
-    const vq = sb.from('vendedores').select('*').eq('ativo', true);
+    const vq = sb.from('vendedores').select(VENDEDOR_PUBLIC_COLUMNS).eq('ativo', true);
     if (tenantId) vq.eq('tenant_id', tenantId);
     const { data, error } = await vq.order('posicao_fila', { ascending: true, nullsFirst: false });
     if (error) {

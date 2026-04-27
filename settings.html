@@ -1157,6 +1157,8 @@
       let tenantId = null;
       let vendedores = [];
       let tenantSectors = [];
+      const VENDOR_SETTINGS_COLUMNS =
+        'id,nome,apelido,status,posicao_fila,ativo,created_at,updated_at,tenant_id,setor,foto_url,auth_user_id,avatar_config';
 
       (async function init() {
         tenant = await loadTenant();
@@ -1174,7 +1176,11 @@
         if (tenantData) tenant = tenantData;
 
         // Load vendors
-        const { data: vData } = await sb.from('vendedores').select('*').eq('tenant_id', tenantId).order('posicao_fila');
+        const { data: vData } = await sb
+          .from('vendedores')
+          .select(VENDOR_SETTINGS_COLUMNS)
+          .eq('tenant_id', tenantId)
+          .order('posicao_fila');
         vendedores = vData || [];
 
         // Populate UI
@@ -1356,7 +1362,6 @@
             const id = escapeHtml(v.id);
             const nome = escapeHtml(v.nome);
             const setor = escapeHtml(v.setor || '—');
-            const pin = escapeHtml(v.pin || '—');
             return `
     <div class="vendor-mgmt-row">
       <div>
@@ -1364,7 +1369,7 @@
         <div class="vendor-sector">${setor}</div>
       </div>
       <div class="vendor-sector" style="text-align:center">${setor}</div>
-      <div class="vendor-pin" style="text-align:center">${pin}</div>
+      <div class="vendor-pin" style="text-align:center">****</div>
       <div class="vendor-actions">
         <button onclick="openEditVendor('${id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
       </div>
@@ -1459,6 +1464,7 @@
         document.getElementById('vendorEditId').value = '';
         document.getElementById('vmName').value = '';
         document.getElementById('vmPin').value = '';
+        document.getElementById('vmPin').placeholder = '0000';
         populateSectorSelect('');
         renderVendorLoginSection(null);
         document.getElementById('vendorModal').classList.add('open');
@@ -1471,7 +1477,8 @@
         document.getElementById('vendorModalTitle').textContent = 'Editar Vendedor';
         document.getElementById('vendorEditId').value = id;
         document.getElementById('vmName').value = v.nome;
-        document.getElementById('vmPin').value = v.pin || '';
+        document.getElementById('vmPin').value = '';
+        document.getElementById('vmPin').placeholder = 'Novo PIN';
         populateSectorSelect(v.setor);
         // Render enquanto busca email (show placeholder), depois atualiza
         renderVendorLoginSection(v);
@@ -1490,7 +1497,10 @@
 
       function populateSectorSelect(selected) {
         document.getElementById('vmSector').innerHTML = tenantSectors
-          .map((s) => `<option value="${s}" ${s === selected ? 'selected' : ''}>${s}</option>`)
+          .map((s) => {
+            const setor = escapeHtml(s);
+            return `<option value="${setor}" ${s === selected ? 'selected' : ''}>${setor}</option>`;
+          })
           .join('');
       }
 
@@ -1539,7 +1549,9 @@
           let vendedorId = id;
           if (id) {
             // Update
-            const { error } = await sb.from('vendedores').update({ nome, setor, pin }).eq('id', id);
+            const update = { nome, setor };
+            if (pin) update.pin = pin;
+            const { error } = await sb.from('vendedores').update(update).eq('id', id).eq('tenant_id', tenantId);
             if (error) throw error;
           } else {
             // Insert
@@ -1595,7 +1607,11 @@
           if (_vmResetRequested && resetPass) toast('Senha atualizada', 'success');
 
           // Reload
-          const { data } = await sb.from('vendedores').select('*').eq('tenant_id', tenantId).order('posicao_fila');
+          const { data } = await sb
+            .from('vendedores')
+            .select(VENDOR_SETTINGS_COLUMNS)
+            .eq('tenant_id', tenantId)
+            .order('posicao_fila');
           vendedores = data || [];
           renderVendorList();
           populatePlan();
@@ -1916,7 +1932,7 @@
           if (!tid) throw new Error('Tenant não encontrado');
           // Coleta dados de todas as tabelas relevantes
           const [vendedores, atendimentos, turnos, pausas, configuracoes] = await Promise.all([
-            sb.from('vendedores').select('*').eq('tenant_id', tid),
+            sb.from('vendedores').select(VENDOR_SETTINGS_COLUMNS).eq('tenant_id', tid),
             sb
               .from('atendimentos')
               .select('*')
