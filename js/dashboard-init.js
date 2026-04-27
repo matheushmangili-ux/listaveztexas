@@ -598,7 +598,7 @@ window.saveVendedor = async function () {
   } else {
     const insertObj = { nome, apelido, setor, tenant_id: tenantId };
     if (pin) insertObj.pin = pin;
-    const { data: inserted, error } = await sb.from('vendedores').insert(insertObj).select().single();
+    const { data: inserted, error } = await sb.from('vendedores').insert(insertObj).select('id').single();
     if (error) {
       toast('Erro ao cadastrar: ' + error.message, 'error');
       savingVendedor = false;

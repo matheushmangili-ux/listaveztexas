@@ -63,13 +63,16 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Look up PIN in vendedores for this tenant
+    // Validate PIN through a SECURITY DEFINER RPC so hashes never leave Postgres.
     const { data: vendedor, error: vendErr } = await supabaseAdmin
-      .from('vendedores')
-      .select('id, nome, pin')
-      .eq('tenant_id', tenant.id)
-      .eq('pin', pin)
+      .rpc('find_vendedor_by_pin', { p_tenant_id: tenant.id, p_pin: pin })
       .maybeSingle()
+
+    if (vendErr) {
+      return new Response(JSON.stringify({ error: 'Erro ao validar PIN' }), {
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
 
     if (!vendedor) {
       // Record failed attempt

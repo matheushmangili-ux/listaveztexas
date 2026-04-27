@@ -1556,18 +1556,15 @@
           } else {
             // Insert
             const maxPos = vendedores.length > 0 ? Math.max(...vendedores.map((v) => v.posicao_fila || 0)) + 1 : 1;
-            const { data: inserted, error } = await sb
-              .from('vendedores')
-              .insert({
-                nome,
-                setor,
-                pin,
-                tenant_id: tenantId,
-                status: 'fora',
-                posicao_fila: maxPos
-              })
-              .select('id')
-              .single();
+            const insert = {
+              nome,
+              setor,
+              tenant_id: tenantId,
+              status: 'fora',
+              posicao_fila: maxPos
+            };
+            if (pin) insert.pin = pin;
+            const { data: inserted, error } = await sb.from('vendedores').insert(insert).select('id').single();
             if (error) throw error;
             vendedorId = inserted.id;
           }

@@ -11,7 +11,7 @@ BEGIN
   FROM information_schema.columns
   WHERE table_schema = 'public'
     AND table_name = 'vendedores'
-    AND column_name <> 'pin';
+    AND column_name NOT IN ('pin', 'pin_hash');
 
   IF selectable_columns IS NULL THEN
     RAISE EXCEPTION 'public.vendedores not found';
