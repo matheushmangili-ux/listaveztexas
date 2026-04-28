@@ -1,15 +1,19 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Política de Privacidade — MinhaVez</title>
+    <title>Política de Privacidade — minhavez</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="/css/tokens.v54.css" />
+    <link rel="stylesheet" href="/css/components.v54.css" />
+    <link rel="icon" type="image/svg+xml" href="/assets/logo/mv-chevron-primary.svg" />
+    <meta name="theme-color" content="#1e40af" />
     <meta
       name="description"
       content="Política de Privacidade da plataforma MinhaVez. Saiba como coletamos, utilizamos e protegemos seus dados pessoais em conformidade com a LGPD."
@@ -22,59 +26,21 @@
     />
     <meta property="og:type" content="website" />
     <meta name="author" content="MinhaVez" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
-      *,
-      *::before,
-      *::after {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      :root {
-        --bg-deep: #ffffff;
-        --bg-surface: #f5f5f7;
-        --bg-card: #ffffff;
-        --bg-elevated: #f0f0f2;
-        --bg-hover: #e8e8ec;
-        --border-subtle: rgba(0, 0, 0, 0.06);
-        --border-medium: rgba(0, 0, 0, 0.1);
-        --text-primary: #1a1a1a;
-        --text-secondary: #52525b;
-        --text-muted: #a1a1aa;
-        --accent: #a78bfa;
-        --accent-bright: #c4b5fd;
-        --accent-dim: #8b5cf6;
-        --accent-glow: rgba(167, 139, 250, 0.12);
-        --font-sans: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
-        --radius: 14px;
-        --radius-lg: 20px;
-      }
-
       html {
         scroll-behavior: smooth;
       }
-
       body {
-        font-family: var(--font-sans);
-        background: var(--bg-deep);
-        color: var(--text-primary);
-        -webkit-font-smoothing: antialiased;
         line-height: 1.7;
       }
-
       a {
-        color: var(--accent-bright);
-        text-decoration: none;
-        transition: color 0.2s;
+        color: var(--mv-primary);
       }
       a:hover {
-        color: var(--accent);
         text-decoration: underline;
       }
 
-      /* ─── Top bar ─── */
+      /* Top bar */
       .top-bar {
         position: sticky;
         top: 0;
@@ -82,8 +48,8 @@
         background: rgba(255, 255, 255, 0.85);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border-bottom: 1px solid var(--border-subtle);
-        padding: 16px 0;
+        border-bottom: 1px solid var(--mv-border);
+        padding: 14px 0;
       }
       .top-bar-inner {
         max-width: 900px;
@@ -93,91 +59,80 @@
         align-items: center;
         justify-content: space-between;
       }
-      .top-bar .logo {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .top-bar .logo i {
-        color: var(--accent);
-      }
-      .top-bar .logo:hover {
-        color: var(--text-primary);
-        text-decoration: none;
-      }
       .back-link {
-        font-size: 0.875rem;
-        color: var(--text-secondary);
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: 6px;
-        transition: color 0.2s;
+        font-size: 13px;
+        color: var(--mv-text-muted);
+        font-weight: 500;
+        transition: color var(--mv-dur-fast) var(--mv-ease);
       }
       .back-link:hover {
-        color: var(--accent-bright);
+        color: var(--mv-primary);
         text-decoration: none;
       }
 
-      /* ─── Content ─── */
+      /* Content */
       .content-wrapper {
         max-width: 900px;
         margin: 0 auto;
         padding: 48px 24px 80px;
       }
-
       .page-header {
         margin-bottom: 48px;
         padding-bottom: 32px;
-        border-bottom: 1px solid var(--border-medium);
+        border-bottom: 1px solid var(--mv-border-strong);
       }
       .page-header h1 {
-        font-size: 2.25rem;
-        font-weight: 800;
+        font-size: 36px;
+        font-weight: 700;
         line-height: 1.2;
-        margin-bottom: 12px;
-      }
-      .page-header h1 i {
-        color: var(--accent);
-        margin-right: 12px;
+        letter-spacing: -0.02em;
+        margin: 0 0 12px;
+        color: var(--mv-text);
       }
       .page-header .subtitle {
-        color: var(--text-secondary);
-        font-size: 1rem;
+        color: var(--mv-text-muted);
+        font-size: 16px;
+        max-width: 720px;
       }
       .update-badge {
         display: inline-flex;
         align-items: center;
         gap: 6px;
         margin-top: 16px;
-        padding: 6px 14px;
-        background: var(--bg-elevated);
-        border: 1px solid var(--border-medium);
-        border-radius: 100px;
-        font-size: 0.8rem;
-        color: var(--text-muted);
+        padding: 4px 12px;
+        background: var(--mv-surface-2);
+        border: 1px solid var(--mv-border);
+        border-radius: var(--mv-radius-pill);
+        font-size: 12px;
+        color: var(--mv-text-muted);
+        font-weight: 500;
       }
-      .update-badge i {
-        color: var(--accent);
-        font-size: 0.7rem;
+      .update-badge::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--mv-primary);
       }
 
-      /* ─── Sections ─── */
+      /* Sections */
       .policy-section {
         margin-bottom: 40px;
       }
       .policy-section h2 {
-        font-size: 1.35rem;
-        font-weight: 700;
-        margin-bottom: 16px;
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        margin: 0 0 16px;
         padding-bottom: 10px;
-        border-bottom: 1px solid var(--border-subtle);
+        border-bottom: 1px solid var(--mv-border);
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
+        color: var(--mv-text);
       }
       .policy-section h2 .section-number {
         display: inline-flex;
@@ -185,27 +140,28 @@
         justify-content: center;
         width: 32px;
         height: 32px;
-        border-radius: 8px;
-        background: var(--accent-glow);
-        color: var(--accent-bright);
-        font-size: 0.85rem;
+        border-radius: var(--mv-radius-md);
+        background: var(--mv-status-busy-bg);
+        color: var(--mv-primary);
+        font-family: var(--mv-font-mono);
+        font-size: 13px;
         font-weight: 700;
         flex-shrink: 0;
       }
       .policy-section h3 {
-        font-size: 1.05rem;
+        font-size: 16px;
         font-weight: 600;
         margin: 20px 0 10px;
-        color: var(--text-primary);
+        color: var(--mv-text);
       }
       .policy-section p,
       .policy-section li {
-        color: var(--text-secondary);
-        font-size: 0.95rem;
-        line-height: 1.75;
+        color: var(--mv-text);
+        font-size: 14px;
+        line-height: 1.7;
       }
       .policy-section p {
-        margin-bottom: 12px;
+        margin: 0 0 12px;
       }
       .policy-section ul,
       .policy-section ol {
@@ -215,100 +171,96 @@
         margin-bottom: 6px;
       }
       .policy-section li::marker {
-        color: var(--accent);
+        color: var(--mv-primary);
       }
 
-      /* ─── Info cards ─── */
+      /* Info cards */
       .info-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border-medium);
-        border-radius: var(--radius);
+        background: var(--mv-surface);
+        border: 1px solid var(--mv-border);
+        border-radius: var(--mv-radius-lg);
         padding: 20px 24px;
         margin: 16px 0;
       }
       .info-card.highlight {
-        border-left: 3px solid var(--accent);
+        border-left: 3px solid var(--mv-primary);
       }
       .info-card h4 {
-        font-size: 0.95rem;
+        font-size: 15px;
         font-weight: 600;
-        margin-bottom: 8px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .info-card h4 i {
-        color: var(--accent);
-        font-size: 0.85rem;
+        margin: 0 0 8px;
+        color: var(--mv-text);
       }
       .info-card p,
       .info-card li {
-        color: var(--text-secondary);
-        font-size: 0.9rem;
+        color: var(--mv-text-muted);
+        font-size: 13px;
       }
 
-      /* ─── Data table ─── */
+      /* Data table */
+      .table-wrapper {
+        overflow-x: auto;
+        border-radius: var(--mv-radius-lg);
+        border: 1px solid var(--mv-border);
+        margin: 16px 0;
+      }
       .data-table {
         width: 100%;
         border-collapse: collapse;
-        margin: 16px 0;
-        font-size: 0.9rem;
+        font-size: 13px;
       }
       .data-table th,
       .data-table td {
         padding: 12px 16px;
         text-align: left;
-        border-bottom: 1px solid var(--border-subtle);
+        border-bottom: 1px solid var(--mv-border);
+      }
+      .data-table tr:last-child td {
+        border-bottom: none;
       }
       .data-table th {
-        background: var(--bg-elevated);
-        color: var(--text-primary);
+        background: var(--mv-surface-2);
+        color: var(--mv-text-muted);
         font-weight: 600;
-        font-size: 0.8rem;
+        font-size: 11px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.06em;
       }
       .data-table td {
-        color: var(--text-secondary);
-      }
-      .data-table tr:hover td {
-        background: var(--bg-card);
-      }
-      .table-wrapper {
-        overflow-x: auto;
-        border-radius: var(--radius);
-        border: 1px solid var(--border-medium);
+        color: var(--mv-text);
       }
 
-      /* ─── Footer ─── */
+      /* Footer */
       .page-footer {
-        border-top: 1px solid var(--border-medium);
+        border-top: 1px solid var(--mv-border);
         padding: 32px 24px;
         text-align: center;
+        background: var(--mv-surface-2);
       }
       .page-footer .footer-inner {
         max-width: 900px;
         margin: 0 auto;
       }
       .page-footer p {
-        color: var(--text-muted);
-        font-size: 0.85rem;
-        margin-bottom: 6px;
+        color: var(--mv-text-muted);
+        font-size: 13px;
+        margin: 0 0 6px;
       }
       .page-footer a {
-        color: var(--text-secondary);
+        color: var(--mv-text);
+        font-weight: 500;
       }
       .page-footer a:hover {
-        color: var(--accent-bright);
+        color: var(--mv-primary);
       }
 
-      /* ─── Responsive ─── */
+      /* Responsive */
       @media (max-width: 640px) {
         .page-header h1 {
-          font-size: 1.6rem;
+          font-size: 26px;
         }
         .policy-section h2 {
-          font-size: 1.15rem;
+          font-size: 18px;
         }
         .content-wrapper {
           padding: 32px 16px 60px;
@@ -316,7 +268,7 @@
         .data-table th,
         .data-table td {
           padding: 10px 12px;
-          font-size: 0.8rem;
+          font-size: 12px;
         }
         .info-card {
           padding: 16px;
@@ -324,31 +276,39 @@
       }
     </style>
   </head>
-  <body>
-    <!-- ═══ Top Bar ═══ -->
+  <body class="mv-app">
+    <!-- Top Bar -->
     <header class="top-bar">
       <div class="top-bar-inner">
-        <a href="landing.html" class="logo"> <i class="fa-solid fa-bolt"></i> MinhaVez </a>
-        <a href="landing.html" class="back-link"> <i class="fa-solid fa-arrow-left"></i> Voltar ao inicio </a>
+        <a href="landing.html" class="mv-wordmark">
+          <span class="mv-wordmark__mark">m</span>
+          <span class="mv-wordmark__text">minha<em>vez</em></span>
+        </a>
+        <a href="landing.html" class="back-link">
+          <svg class="mv-icon" style="transform: scaleX(-1)">
+            <use href="/assets/icons/mv-sprite.svg#mv-arrow-right" />
+          </svg>
+          Voltar ao início
+        </a>
       </div>
     </header>
 
-    <!-- ═══ Content ═══ -->
+    <!-- Content -->
     <main class="content-wrapper">
       <div class="page-header">
-        <h1><i class="fa-solid fa-shield-halved"></i> Política de Privacidade</h1>
+        <h1>Política de Privacidade</h1>
         <p class="subtitle">
           Como a MinhaVez coleta, utiliza, armazena e protege seus dados pessoais, em conformidade com a Lei Geral de
           Proteção de Dados (Lei nº 13.709/2018 — LGPD).
         </p>
-        <div class="update-badge"><i class="fa-solid fa-circle"></i> Ultima atualização: Marco de 2026</div>
+        <div class="update-badge">Última atualização: Março de 2026</div>
       </div>
 
       <!-- 1. Identificação do Controlador -->
       <section class="policy-section">
         <h2><span class="section-number">1</span> Identificação do Controlador de Dados</h2>
         <div class="info-card highlight">
-          <h4><i class="fa-solid fa-building"></i> Controlador</h4>
+          <h4>Controlador</h4>
           <p><strong>MinhaVez</strong> — Plataforma SaaS de gestão de fila de vendedores.</p>
           <p>
             O controlador dos dados pessoais e a empresa operadora da plataforma MinhaVez, responsável pelas decisões
@@ -456,14 +416,14 @@
         </p>
 
         <div class="info-card">
-          <h4><i class="fa-solid fa-file-contract"></i> Execução de contrato (art. 7º, V)</h4>
+          <h4>Execução de contrato (art. 7º, V)</h4>
           <p>
             O tratamento e necessário para a execução do contrato de prestação de serviços (Termos de Uso) firmado entre
             o usuário e a MinhaVez, incluindo cadastro, autenticação, gestão da fila e processamento de pagamentos.
           </p>
         </div>
         <div class="info-card">
-          <h4><i class="fa-solid fa-check-circle"></i> Consentimento (art. 7º, I)</h4>
+          <h4>Consentimento (art. 7º, I)</h4>
           <p>
             Para atividades de tratamento que não se enquadrem nas demais bases legais, solicitaremos seu consentimento
             previo, livre, informado e inequivoco. O consentimento pode ser revogado a qualquer momento, sem custos,
@@ -471,7 +431,7 @@
           </p>
         </div>
         <div class="info-card">
-          <h4><i class="fa-solid fa-scale-balanced"></i> Interesse legitimo (art. 7º, IX)</h4>
+          <h4>Interesse legitimo (art. 7º, IX)</h4>
           <p>
             Podemos tratar dados com base no interesse legitimo do controlador para fins de segurança da plataforma,
             prevenção de fraudes, melhorias no serviço e análises agregadas, sempre respeitando os direitos e liberdades
@@ -479,7 +439,7 @@
           </p>
         </div>
         <div class="info-card">
-          <h4><i class="fa-solid fa-gavel"></i> Cumprimento de obrigação legal (art. 7º, II)</h4>
+          <h4>Cumprimento de obrigação legal (art. 7º, II)</h4>
           <p>
             Quando necessário para o cumprimento de obrigação legal ou regulatória pelo controlador, como obrigações
             fiscais e tributárias.
@@ -633,7 +593,7 @@
         </ul>
 
         <div class="info-card highlight">
-          <h4><i class="fa-solid fa-envelope"></i> Como exercer seus direitos</h4>
+          <h4>Como exercer seus direitos</h4>
           <p>
             Para exercer qualquer um dos direitos listados acima, envie uma solicitação para
             <a href="mailto:contato@minhavez.com.br">contato@minhavez.com.br</a>. Responderemos em ate
@@ -656,7 +616,7 @@
         </p>
 
         <div class="info-card">
-          <h4><i class="fa-solid fa-cookie-bite"></i> Cookies utilizados</h4>
+          <h4>Cookies utilizados</h4>
           <ul>
             <li>
               <strong>Cookies de sessão:</strong> Necessários para manter sua autenticação durante o uso da plataforma.
@@ -756,7 +716,7 @@
         </p>
 
         <div class="info-card highlight">
-          <h4><i class="fa-solid fa-headset"></i> Canal de Atendimento ao Titular</h4>
+          <h4>Canal de Atendimento ao Titular</h4>
           <ul>
             <li><strong>E-mail:</strong> <a href="mailto:contato@minhavez.com.br">contato@minhavez.com.br</a></li>
             <li><strong>Assunto sugerido:</strong> "Solicitação LGPD — [seu nome]"</li>

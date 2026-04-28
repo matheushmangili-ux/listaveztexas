@@ -1,15 +1,19 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Termos de Uso — MinhaVez</title>
+    <title>Termos de Uso — minhavez</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="/css/tokens.v54.css" />
+    <link rel="stylesheet" href="/css/components.v54.css" />
+    <link rel="icon" type="image/svg+xml" href="/assets/logo/mv-chevron-primary.svg" />
+    <meta name="theme-color" content="#1e40af" />
     <meta
       name="description"
       content="Termos de Uso da plataforma MinhaVez. Leia os termos e condições para utilização do nosso sistema de gestão de filas para lojas físicas."
@@ -22,55 +26,21 @@
     />
     <meta property="og:type" content="website" />
     <meta name="author" content="MinhaVez" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
-      *,
-      *::before,
-      *::after {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      :root {
-        --bg-deep: #ffffff;
-        --bg-surface: #f5f5f7;
-        --bg-card: #ffffff;
-        --bg-elevated: #f0f0f2;
-        --border-subtle: rgba(0, 0, 0, 0.06);
-        --border-medium: rgba(0, 0, 0, 0.1);
-        --text-primary: #1a1a1a;
-        --text-secondary: #52525b;
-        --text-muted: #a1a1aa;
-        --accent: #a78bfa;
-        --accent-bright: #c4b5fd;
-        --accent-dim: #8b5cf6;
-        --font-sans: 'Inter Tight', -apple-system, sans-serif;
-        --radius: 14px;
-      }
-
       html {
         scroll-behavior: smooth;
       }
-
       body {
-        font-family: var(--font-sans);
-        background: var(--bg-deep);
-        color: var(--text-primary);
-        -webkit-font-smoothing: antialiased;
         line-height: 1.7;
       }
-
       a {
-        color: var(--accent-bright);
-        text-decoration: none;
-        transition: color 0.2s;
+        color: var(--mv-primary);
       }
       a:hover {
-        color: var(--accent);
+        text-decoration: underline;
       }
 
-      /* ─── Top bar ─── */
+      /* Top bar */
       .top-bar {
         position: sticky;
         top: 0;
@@ -78,8 +48,8 @@
         background: rgba(255, 255, 255, 0.85);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border-bottom: 1px solid var(--border-subtle);
-        padding: 16px 0;
+        border-bottom: 1px solid var(--mv-border);
+        padding: 14px 0;
       }
       .top-bar-inner {
         max-width: 900px;
@@ -92,78 +62,66 @@
       .back-link {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        font-size: 14px;
+        gap: 6px;
+        font-size: 13px;
         font-weight: 500;
-        color: var(--text-secondary);
+        color: var(--mv-text-muted);
+        transition: color var(--mv-dur-fast) var(--mv-ease);
       }
       .back-link:hover {
-        color: var(--text-primary);
-      }
-      .logo-text {
-        font-size: 18px;
-        font-weight: 700;
-        color: var(--text-primary);
-      }
-      .logo-text span {
-        color: var(--accent);
+        color: var(--mv-primary);
+        text-decoration: none;
       }
 
-      /* ─── Main content ─── */
+      /* Main */
       .container {
         max-width: 900px;
         margin: 0 auto;
         padding: 48px 24px 80px;
       }
-
       .page-header {
         margin-bottom: 48px;
         padding-bottom: 32px;
-        border-bottom: 1px solid var(--border-medium);
+        border-bottom: 1px solid var(--mv-border-strong);
       }
       .page-header h1 {
-        font-size: clamp(28px, 5vw, 40px);
-        font-weight: 800;
-        margin-bottom: 12px;
+        font-size: clamp(26px, 5vw, 36px);
+        font-weight: 700;
         letter-spacing: -0.02em;
-      }
-      .page-header h1 i {
-        color: var(--accent);
-        margin-right: 12px;
-        font-size: 0.85em;
+        margin: 0 0 12px;
+        color: var(--mv-text);
       }
       .page-header .meta {
-        font-size: 14px;
-        color: var(--text-muted);
+        font-size: 13px;
+        color: var(--mv-text-muted);
         display: flex;
         flex-wrap: wrap;
         gap: 20px;
       }
-      .page-header .meta span {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-      }
 
-      /* ─── Table of contents ─── */
+      /* Table of contents */
       .toc {
-        background: var(--bg-surface);
-        border: 1px solid var(--border-subtle);
-        border-radius: var(--radius);
-        padding: 28px 32px;
+        background: var(--mv-surface-2);
+        border: 1px solid var(--mv-border);
+        border-radius: var(--mv-radius-lg);
+        padding: 24px 28px;
         margin-bottom: 48px;
       }
       .toc h2 {
-        font-size: 16px;
-        font-weight: 700;
-        margin-bottom: 16px;
-        color: var(--text-primary);
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin: 0 0 16px;
+        color: var(--mv-text-muted);
       }
       .toc ol {
         list-style: none;
         counter-reset: toc-counter;
         columns: 2;
         column-gap: 32px;
+        margin: 0;
+        padding: 0;
       }
       .toc ol li {
         counter-increment: toc-counter;
@@ -172,43 +130,50 @@
         break-inside: avoid;
       }
       .toc ol li a {
-        color: var(--text-secondary);
+        color: var(--mv-text);
         display: inline-flex;
         align-items: baseline;
         gap: 8px;
+        font-weight: 500;
       }
       .toc ol li a::before {
-        content: counter(toc-counter) '.';
-        color: var(--accent);
+        content: counter(toc-counter, decimal-leading-zero);
+        color: var(--mv-primary);
+        font-family: var(--mv-font-mono);
         font-weight: 600;
+        font-size: 12px;
         min-width: 20px;
       }
       .toc ol li a:hover {
-        color: var(--text-primary);
+        color: var(--mv-primary);
+        text-decoration: none;
       }
 
-      /* ─── Sections ─── */
+      /* Sections */
       .section {
         margin-bottom: 40px;
       }
       .section h2 {
         font-size: 20px;
-        font-weight: 700;
-        margin-bottom: 16px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        margin: 0 0 16px;
         padding-bottom: 10px;
-        border-bottom: 1px solid var(--border-subtle);
+        border-bottom: 1px solid var(--mv-border);
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
+        color: var(--mv-text);
       }
       .section h2 .num {
-        background: var(--accent);
+        background: var(--mv-primary);
         color: #fff;
-        font-size: 13px;
+        font-family: var(--mv-font-mono);
+        font-size: 12px;
         font-weight: 700;
         width: 28px;
         height: 28px;
-        border-radius: 50%;
+        border-radius: var(--mv-radius-md);
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -216,12 +181,12 @@
       }
       .section p,
       .section li {
-        color: var(--text-secondary);
-        font-size: 15px;
-        line-height: 1.8;
+        color: var(--mv-text);
+        font-size: 14px;
+        line-height: 1.75;
       }
       .section p {
-        margin-bottom: 14px;
+        margin: 0 0 14px;
       }
       .section ul,
       .section ol {
@@ -231,25 +196,26 @@
         margin-bottom: 8px;
       }
       .section strong {
-        color: var(--text-primary);
+        color: var(--mv-text);
         font-weight: 600;
       }
 
       .highlight-box {
-        background: rgba(167, 139, 250, 0.06);
-        border-left: 3px solid var(--accent);
-        border-radius: 0 var(--radius) var(--radius) 0;
+        background: var(--mv-status-busy-bg);
+        border-left: 3px solid var(--mv-primary);
+        border-radius: 0 var(--mv-radius-md) var(--mv-radius-md) 0;
         padding: 16px 20px;
         margin: 16px 0;
         font-size: 14px;
-        color: var(--text-secondary);
+        color: var(--mv-text);
       }
 
-      /* ─── Footer ─── */
+      /* Footer */
       .footer {
-        border-top: 1px solid var(--border-subtle);
+        border-top: 1px solid var(--mv-border);
         padding: 32px 24px;
         text-align: center;
+        background: var(--mv-surface-2);
       }
       .footer-inner {
         max-width: 900px;
@@ -257,17 +223,18 @@
       }
       .footer p {
         font-size: 13px;
-        color: var(--text-muted);
-        margin-bottom: 6px;
+        color: var(--mv-text-muted);
+        margin: 0 0 6px;
       }
       .footer a {
-        color: var(--text-secondary);
+        color: var(--mv-text);
+        font-weight: 500;
       }
       .footer a:hover {
-        color: var(--accent-bright);
+        color: var(--mv-primary);
       }
 
-      /* ─── Responsive ─── */
+      /* Responsive */
       @media (max-width: 640px) {
         .toc ol {
           columns: 1;
@@ -285,29 +252,37 @@
       }
     </style>
   </head>
-  <body>
+  <body class="mv-app">
     <!-- Top bar -->
     <nav class="top-bar">
       <div class="top-bar-inner">
-        <a href="landing.html" class="back-link"> <i class="fas fa-arrow-left"></i> Voltar ao site </a>
-        <div class="logo-text">Minha<span>Vez</span></div>
+        <a href="landing.html" class="mv-wordmark">
+          <span class="mv-wordmark__mark">m</span>
+          <span class="mv-wordmark__text">minha<em>vez</em></span>
+        </a>
+        <a href="landing.html" class="back-link">
+          <svg class="mv-icon" style="transform: scaleX(-1)">
+            <use href="/assets/icons/mv-sprite.svg#mv-arrow-right" />
+          </svg>
+          Voltar ao site
+        </a>
       </div>
     </nav>
 
     <main class="container">
       <!-- Header -->
       <header class="page-header">
-        <h1><i class="fas fa-file-contract"></i>Termos de Uso</h1>
+        <h1>Termos de Uso</h1>
         <div class="meta">
-          <span><i class="fas fa-calendar-alt"></i> Atualizado em março de 2026</span>
-          <span><i class="fas fa-building"></i> MinhaVez Tecnologia</span>
-          <span><i class="fas fa-globe-americas"></i> Brasil</span>
+          <span>Atualizado em março de 2026</span>
+          <span>MinhaVez Tecnologia</span>
+          <span>Brasil</span>
         </div>
       </header>
 
       <!-- Table of contents -->
       <nav class="toc">
-        <h2><i class="fas fa-list"></i> Índice</h2>
+        <h2>Índice</h2>
         <ol>
           <li><a href="#aceitacao">Aceitação e Escopo</a></li>
           <li><a href="#definicoes">Definições</a></li>
@@ -566,8 +541,8 @@
         </p>
         <p>
           O tratamento de dados pessoais realizado pela Plataforma está detalhado em nossa
-          <a href="privacidade.html"><i class="fas fa-shield-alt"></i> Política de Privacidade</a>, que complementa e
-          integra estes Termos de Uso. Recomendamos a leitura atenta desse documento.
+          <a href="privacidade.html">Política de Privacidade</a>, que complementa e integra estes Termos de Uso.
+          Recomendamos a leitura atenta desse documento.
         </p>
         <p>
           Ao utilizar a Plataforma, o Usuário reconhece que a MinhaVez atua como <strong>operadora de dados</strong> em
@@ -658,9 +633,9 @@
       <div class="footer-inner">
         <p>&copy; 2026 MinhaVez Tecnologia. Todos os direitos reservados.</p>
         <p>
-          <a href="privacidade.html"><i class="fas fa-shield-alt"></i> Política de Privacidade</a>
+          <a href="privacidade.html">Política de Privacidade</a>
           &nbsp;&middot;&nbsp;
-          <a href="landing.html"><i class="fas fa-home"></i> Página Inicial</a>
+          <a href="landing.html">Página Inicial</a>
         </p>
       </div>
     </footer>
