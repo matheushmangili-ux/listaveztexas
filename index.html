@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR" data-theme="dark">
+<html lang="pt-BR" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
@@ -8,280 +8,363 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/css/styles.v52.css" />
+    <link rel="stylesheet" href="/css/tokens.v54.css" />
+    <link rel="stylesheet" href="/css/components.v54.css" />
     <link rel="icon" type="image/svg+xml" href="/assets/logo/mv-chevron-primary.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon-180.png" />
-    <meta name="theme-color" content="#0a0614" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#6d28d9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1e40af" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/update-checker.js"></script>
-    <script src="/js/components/mv-logo.js" defer></script>
     <script src="/js/components/mv-loader.js" defer></script>
     <script>
-      // Theme init (antes de render para evitar flash)
-      (function () {
-        try {
-          const saved = localStorage.getItem('lv-theme');
-          const preferred = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-          document.documentElement.setAttribute('data-theme', preferred);
-        } catch (_) {
-          document.documentElement.setAttribute('data-theme', 'dark');
-        }
-      })();
       initUpdateChecker('/index.html');
     </script>
     <style>
-      body {
-        background: var(--bg-deep);
-      }
-      .login-container {
+      /* === Login layout (page-specific) === */
+      .mv-login {
         min-height: 100vh;
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        background: var(--mv-surface);
+      }
+
+      /* Brand panel (left) */
+      .mv-login__brand {
+        background: var(--mv-primary);
+        color: #fff;
+        padding: 48px 56px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+        min-height: 100vh;
+      }
+      .mv-login__brand-eyebrow {
+        font-size: 13px;
+        opacity: 0.7;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+        font-weight: 500;
+      }
+      .mv-login__brand-title {
+        font-size: 44px;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        margin: 0 0 20px;
+        font-weight: 600;
+        text-wrap: balance;
+      }
+      .mv-login__brand-text {
+        font-size: 16px;
+        line-height: 1.55;
+        opacity: 0.85;
+        max-width: 420px;
+        margin: 0;
+      }
+      .mv-login__brand-decor {
+        position: absolute;
+        bottom: -60px;
+        right: -80px;
+        width: 360px;
+        height: 360px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.06);
+        pointer-events: none;
+      }
+      .mv-login__brand-mock {
+        position: absolute;
+        bottom: 40px;
+        right: 40px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: var(--mv-radius-lg);
+        backdrop-filter: blur(2px);
+        font-size: 12px;
+        font-family: var(--mv-font-mono);
+        line-height: 1.6;
+      }
+      .mv-login__brand-mock i {
+        font-style: normal;
+        opacity: 0.7;
+      }
+
+      /* Form panel (right) */
+      .mv-login__form {
+        position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 24px;
-        position: relative;
-        overflow: hidden;
-        background: var(--bg-deep);
-        color: var(--text-primary);
+        padding: 40px;
+        background: var(--mv-surface);
       }
-      /* Pink spotlight behind the card */
-      .login-container::before {
-        content: '';
+
+      .mv-login__loader {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 720px;
-        height: 720px;
-        transform: translate(-50%, -50%);
-        background: radial-gradient(
-          circle,
-          rgba(167, 139, 250, 0.22) 0%,
-          rgba(167, 139, 250, 0.08) 35%,
-          transparent 65%
-        );
-        pointer-events: none;
-        z-index: 0;
-        filter: blur(12px);
-        animation: heroGlow 5s ease-in-out infinite alternate;
-      }
-      /* Secondary soft halo */
-      .login-container::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 340px;
-        height: 340px;
-        transform: translate(-50%, -50%);
-        background: radial-gradient(circle, rgba(196, 181, 253, 0.18) 0%, transparent 70%);
-        pointer-events: none;
-        z-index: 0;
-        animation: heroPulse 3.2s ease-in-out infinite alternate;
-      }
-      @keyframes heroGlow {
-        0% {
-          opacity: 0.65;
-          transform: translate(-50%, -50%) scale(1);
-        }
-        100% {
-          opacity: 1;
-          transform: translate(-50%, -50%) scale(1.08);
-        }
-      }
-      @keyframes heroPulse {
-        0% {
-          opacity: 0.4;
-        }
-        100% {
-          opacity: 0.85;
-        }
-      }
-      /* Floating sparks */
-      .particles-bg {
-        position: fixed;
         inset: 0;
-        z-index: 0;
-        pointer-events: none;
-        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        background: var(--mv-surface);
       }
-      .particle {
-        position: absolute;
-        width: 2px;
-        height: 2px;
-        background: rgba(196, 181, 253, 0.7);
-        border-radius: 50%;
-        opacity: 0;
-        box-shadow:
-          0 0 6px rgba(167, 139, 250, 0.6),
-          0 0 12px rgba(167, 139, 250, 0.3);
-        animation: particleUp linear infinite;
-      }
-      @keyframes particleUp {
-        0% {
-          opacity: 0;
-          transform: translateY(100vh) scale(0);
-        }
-        10% {
-          opacity: 0.9;
-        }
-        90% {
-          opacity: 0.9;
-        }
-        100% {
-          opacity: 0;
-          transform: translateY(-10vh) scale(1);
-        }
-      }
+
       .login-box {
         width: 100%;
         max-width: 380px;
-        position: relative;
-        z-index: 1;
-        background: var(--bg-card);
-        box-shadow:
-          0 24px 70px rgba(0, 0, 0, 0.6),
-          0 0 0 1px rgba(167, 139, 250, 0.08);
-        border-radius: 20px;
-        border: 1px solid var(--border-subtle);
-        padding: 32px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
       }
-      .brand-mark img {
-        filter: none !important;
-        opacity: 1 !important;
+      .login-box .brand-mark {
+        margin-bottom: 24px;
       }
-      .gold-line {
-        background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.35), transparent);
-        height: 1px;
+      .login-box h1 {
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        margin: 0 0 6px;
+        color: var(--mv-text);
       }
+      .login-box .mv-login__subtitle {
+        color: var(--mv-text-muted);
+        font-size: 14px;
+        margin: 0 0 24px;
+      }
+      .login-box .mv-login__subtitle:empty {
+        display: none;
+      }
+
+      /* Tabs */
       .tab-switch {
         display: flex;
-        gap: 2px;
-        background: transparent;
-        border: none;
-        padding: 0;
-        margin-bottom: 28px;
+        gap: 0;
+        padding: 3px;
+        background: var(--mv-surface-2);
+        border: 1px solid var(--mv-border);
+        border-radius: var(--mv-radius-md);
+        margin-bottom: 20px;
       }
       .tab-switch button {
         flex: 1;
-        padding: 12px;
+        padding: 8px 0;
         background: transparent;
         border: none;
-        border-radius: 10px;
-        font-family: var(--font-body);
+        border-radius: var(--mv-radius-sm);
+        font-family: inherit;
         font-size: 13px;
         font-weight: 500;
-        color: var(--text-muted);
+        color: var(--mv-text-muted);
         cursor: pointer;
-        transition: all 0.15s ease;
+        transition: all var(--mv-dur-fast) var(--mv-ease);
       }
       .tab-switch button:hover {
-        background: var(--accent);
-        color: var(--accent-ink, #0d0d0d);
-        filter: brightness(1.05);
+        color: var(--mv-text);
       }
       .tab-switch button.active {
-        background: var(--accent);
-        color: var(--accent-ink, #0d0d0d);
-        font-weight: 700;
+        background: var(--mv-surface);
+        color: var(--mv-text);
+        font-weight: 600;
+        box-shadow: var(--mv-shadow-xs);
       }
-      .tab-switch button:active {
-        transform: scale(0.97);
-      }
-      /* Login primary button — same hover feel as sidebar-link */
-      .login-box .btn-primary {
-        color: var(--accent-ink, #0d0d0d);
-      }
-      .login-box .btn-primary:hover {
-        opacity: 1;
-        filter: brightness(1.15);
-      }
+
+      /* Panels */
       .login-panel {
         display: none;
       }
       .login-panel.active {
         display: block;
-        animation: fadeIn 0.2s ease;
+        animation: mvFadeIn 0.2s ease;
       }
+      @keyframes mvFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Field stack */
+      .mv-field + .mv-field {
+        margin-top: 14px;
+      }
+      .mv-field__label {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--mv-text);
+      }
+
+      /* Submit buttons stretched */
+      .mv-login__submit {
+        width: 100%;
+        margin-top: 16px;
+      }
+
+      /* PIN inputs */
       .pin-group {
         display: flex;
         gap: 10px;
         justify-content: center;
-        margin: 28px 0;
+        margin: 8px 0 20px;
       }
       .pin-input {
-        background: rgba(12, 12, 14, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        color: var(--accent);
+        width: 60px;
+        height: 64px;
+        text-align: center;
+        font-family: var(--mv-font-mono);
+        font-size: 24px;
+        font-weight: 600;
+        border: 1.5px solid var(--mv-border-strong);
+        border-radius: var(--mv-radius-md);
+        background: var(--mv-surface);
+        color: var(--mv-text);
+        outline: none;
+        transition: border-color var(--mv-dur-fast) var(--mv-ease);
       }
       .pin-input:focus {
-        border-color: var(--accent);
-        background: rgba(12, 12, 14, 0.8);
+        border-color: var(--mv-primary);
+        box-shadow: var(--mv-shadow-focus);
       }
-      .input {
-        background: rgba(12, 12, 14, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        color: var(--text-primary);
+      .pin-input:not(:placeholder-shown),
+      .pin-input[value]:not([value='']) {
+        border-color: var(--mv-primary);
       }
-      .input::placeholder {
-        color: var(--text-muted);
-      }
-      .input:focus {
-        border-color: var(--accent);
-        background: rgba(12, 12, 14, 0.8);
-      }
-      /* Force dark background for autofilled inputs (Chrome/Edge) */
-      .input:-webkit-autofill,
-      .input:-webkit-autofill:hover,
-      .input:-webkit-autofill:focus,
-      .input:-webkit-autofill:active,
+
+      /* Force light bg for autofilled inputs */
       .pin-input:-webkit-autofill,
-      .pin-input:-webkit-autofill:hover,
-      .pin-input:-webkit-autofill:focus {
-        -webkit-box-shadow: 0 0 0 1000px rgba(12, 12, 14, 0.9) inset !important;
-        -webkit-text-fill-color: var(--text-primary) !important;
-        caret-color: var(--text-primary) !important;
+      .mv-field__control input:-webkit-autofill {
+        -webkit-box-shadow: 0 0 0 1000px var(--mv-surface) inset !important;
+        -webkit-text-fill-color: var(--mv-text) !important;
+        caret-color: var(--mv-text) !important;
         transition: background-color 9999s ease-in-out 0s;
       }
-      .version-tag {
-        position: fixed;
-        bottom: 16px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 10px;
-        color: #a1a1aa;
-        font-weight: 500;
-        letter-spacing: 0.05em;
-        opacity: 0.4;
+
+      .login-pin-hint {
+        text-align: center;
+        font-size: 13px;
+        color: var(--mv-text-muted);
+        margin: 0 0 8px;
       }
+
+      /* Error banner */
       #loginError {
         display: none;
-        padding: 12px 16px;
-        background: var(--danger-bg);
-        border: 1px solid rgba(232, 155, 138, 0.1);
-        border-radius: var(--radius-sm, 8px);
-        color: var(--danger);
+        padding: 10px 14px;
+        background: var(--mv-status-error-bg);
+        border: 1px solid #fecaca;
+        border-radius: var(--mv-radius-md);
+        color: var(--mv-status-error);
         font-size: 13px;
         font-weight: 500;
-        margin-bottom: 16px;
-      }
-      #loginError.show {
-        display: flex;
+        margin-bottom: 14px;
         align-items: center;
         gap: 8px;
       }
-      /* CTA links */
-      a,
-      .cta-link {
-        color: #a78bfa;
+      #loginError.show {
+        display: flex;
+      }
+      #loginError .mv-icon {
+        color: var(--mv-status-error);
+      }
+
+      /* Forgot link */
+      .login-forgot {
+        display: block;
+        text-align: center;
+        margin-top: 14px;
+        font-size: 13px;
+        color: var(--mv-primary);
+        font-weight: 500;
+      }
+      .login-forgot:hover {
+        text-decoration: underline;
+      }
+
+      .login-footnote {
+        margin-top: 32px;
+        padding-top: 20px;
+        border-top: 1px solid var(--mv-border);
+        font-size: 12px;
+        color: var(--mv-text-faint);
+        text-align: center;
+      }
+      .login-footnote a {
+        color: var(--mv-primary);
+        font-weight: 500;
+      }
+
+      /* Spinner inline (mantém compat com handlers que usam .spinner) */
+      .spinner {
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: mvSpin 0.7s linear infinite;
+        display: inline-block;
+      }
+      @keyframes mvSpin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Version tag */
+      .version-tag {
+        position: fixed;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 10px;
+        color: var(--mv-text-faint);
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        opacity: 0.6;
+      }
+
+      /* Toast container */
+      #toastContainer {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      /* Mobile: collapse to single column, brand becomes a thin header */
+      @media (max-width: 720px) {
+        .mv-login {
+          grid-template-columns: 1fr;
+        }
+        .mv-login__brand {
+          min-height: auto;
+          padding: 24px 24px 32px;
+        }
+        .mv-login__brand-title {
+          font-size: 28px;
+        }
+        .mv-login__brand-text {
+          font-size: 14px;
+        }
+        .mv-login__brand-decor,
+        .mv-login__brand-mock {
+          display: none;
+        }
+        .mv-login__form {
+          padding: 32px 20px;
+        }
       }
     </style>
     <script>
@@ -290,203 +373,176 @@
     </script>
     <script type="module" src="/js/analytics.js"></script>
   </head>
-  <body>
-    <div class="particles-bg" id="particles"></div>
-    <!-- Theme toggle fixo -->
-    <button
-      id="themeToggle"
-      type="button"
-      aria-label="Alternar tema"
-      style="
-        position: fixed;
-        top: 16px;
-        right: 16px;
-        z-index: 100;
-        width: 40px;
-        height: 40px;
-        border-radius: 999px;
-        border: 1px solid var(--border-medium);
-        background: var(--bg-card);
-        color: var(--text-secondary);
-        cursor: pointer;
-        backdrop-filter: blur(8px);
-        box-shadow: var(--shadow-sm);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-      "
-    >
-      <i class="fa-solid fa-moon" id="themeToggleIcon"></i>
-    </button>
-    <script>
-      (function () {
-        const btn = document.getElementById('themeToggle');
-        const icon = document.getElementById('themeToggleIcon');
-        function apply(mode) {
-          document.documentElement.setAttribute('data-theme', mode);
-          localStorage.setItem('lv-theme', mode);
-          icon.className = mode === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
-        }
-        apply(document.documentElement.getAttribute('data-theme') || 'dark');
-        btn.addEventListener('click', () => {
-          const current = document.documentElement.getAttribute('data-theme') || 'dark';
-          apply(current === 'dark' ? 'light' : 'dark');
-        });
-      })();
-    </script>
-    <div class="login-container">
-      <!-- Loading overlay while tenant loads -->
-      <div
-        id="loginLoader"
-        style="
-          position: absolute;
-          inset: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 10;
-          background: var(--bg-deep);
-        "
-      >
-        <mv-loader size="72" caption="carregando a fila"></mv-loader>
-      </div>
-      <div class="login-box" style="opacity: 0; transition: opacity 0.3s ease" id="loginBox">
-        <!-- Brand -->
-        <div class="brand-mark" style="text-align: center; margin-bottom: 28px; color: var(--accent)">
-          <mv-logo size="L" wordmark></mv-logo>
-        </div>
-
-        <div class="gold-line" style="margin-bottom: 28px"></div>
-
-        <!-- Tabs -->
-        <div class="tab-switch">
-          <button class="active" onclick="switchTab('pin')">PIN Rápido</button>
-          <button onclick="switchTab('email')">Email</button>
-        </div>
-
-        <!-- Error -->
-        <div id="loginError">
-          <i class="fa-solid fa-circle-xmark"></i>
-          <span id="loginErrorMsg"></span>
-        </div>
-
-        <!-- PIN Login -->
-        <div id="panelPin" class="login-panel active">
-          <p style="text-align: center; font-size: 13px; color: #71717a; margin-bottom: 8px; font-weight: 500">
-            Digite seu PIN de 4 digitos
-          </p>
-          <div class="pin-group">
-            <input
-              class="pin-input"
-              type="password"
-              maxlength="1"
-              inputmode="numeric"
-              pattern="[0-9]"
-              data-pin="0"
-              autofocus
-            />
-            <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="1" />
-            <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="2" />
-            <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="3" />
-          </div>
-          <button id="btnPin" class="btn btn-primary" style="width: 100%" onclick="handlePinLogin()" disabled>
-            <i class="fa-solid fa-right-to-bracket"></i>
-            Entrar
-          </button>
-        </div>
-
-        <!-- Email Login -->
-        <div id="panelEmail" class="login-panel">
-          <div style="margin-bottom: 16px">
-            <label
-              style="
-                display: block;
-                font-size: 11px;
-                font-weight: 600;
-                color: #71717a;
-                text-transform: uppercase;
-                letter-spacing: 0.06em;
-                margin-bottom: 6px;
-              "
-              >Email</label
-            >
-            <input id="emailInput" class="input" type="email" placeholder="seu@email.com" autocomplete="email" />
-          </div>
-          <div style="margin-bottom: 24px">
-            <label
-              style="
-                display: block;
-                font-size: 11px;
-                font-weight: 600;
-                color: #71717a;
-                text-transform: uppercase;
-                letter-spacing: 0.06em;
-                margin-bottom: 6px;
-              "
-              >Senha</label
-            >
-            <input
-              id="passInput"
-              class="input"
-              type="password"
-              placeholder="••••••••"
-              autocomplete="current-password"
-            />
-          </div>
-          <button id="btnEmail" class="btn btn-primary" style="width: 100%" onclick="handleEmailLogin()">
-            <i class="fa-solid fa-right-to-bracket"></i>
-            Entrar
-          </button>
-          <div style="text-align: center; margin-top: 14px">
-            <a
-              id="forgotLink"
-              href="/forgot-password"
-              style="font-size: 12px; color: #a78bfa; text-decoration: none; font-weight: 500"
-              >Esqueci minha senha</a
-            >
-          </div>
-        </div>
-
-        <!-- Slug Picker (visitante sem :slug na URL) -->
-        <div id="panelSlug" class="login-panel">
-          <p style="text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 16px; font-weight: 500">
-            Qual é a sua loja?
-          </p>
-          <div style="margin-bottom: 16px">
-            <label
-              style="
-                display: block;
-                font-size: 11px;
-                font-weight: 600;
-                color: var(--text-muted);
-                text-transform: uppercase;
-                letter-spacing: 0.06em;
-                margin-bottom: 6px;
-              "
-              for="slugInput"
-              >Identificador</label
-            >
-            <input
-              id="slugInput"
-              class="input"
-              type="text"
-              placeholder="ex: texascenter"
-              autocapitalize="none"
-              autocorrect="off"
-              spellcheck="false"
-              autocomplete="off"
-            />
-          </div>
-          <button id="btnSlug" class="btn btn-primary" style="width: 100%" onclick="handleSlugSubmit()">
-            <i class="fa-solid fa-arrow-right"></i>
-            Continuar
-          </button>
-          <p style="text-align: center; margin-top: 12px; font-size: 11px; color: var(--text-muted)">
-            É o nome curto enviado pela sua loja (ex: <code>texascenter</code>).
+  <body class="mv-app">
+    <main class="mv-login">
+      <!-- Painel de marca (esquerda) -->
+      <aside class="mv-login__brand">
+        <span class="mv-wordmark mv-wordmark--inverse">
+          <span class="mv-wordmark__mark">m</span>
+          <span class="mv-wordmark__text">minha<em>vez</em></span>
+        </span>
+        <div>
+          <div class="mv-login__brand-eyebrow">MinhaVez · Operação</div>
+          <h2 class="mv-login__brand-title">A próxima vez é<br />sempre clara.</h2>
+          <p class="mv-login__brand-text">
+            Entre como recepção, vendedor ou gestor.<br />
+            Cada papel vê a tela certa para o seu trabalho.
           </p>
         </div>
-      </div>
-    </div>
+        <div class="mv-login__brand-decor" aria-hidden="true"></div>
+        <div class="mv-login__brand-mock" aria-hidden="true">
+          <i>// fila atual</i>
+          <div>01 → Eduarda</div>
+          <div>02 &nbsp;&nbsp;&nbsp;Aline</div>
+          <div>03 &nbsp;&nbsp;&nbsp;Isabela</div>
+        </div>
+      </aside>
+
+      <!-- Painel de formulário (direita) -->
+      <section class="mv-login__form">
+        <!-- Loader sobre o formulário enquanto o tenant carrega -->
+        <div id="loginLoader" class="mv-login__loader">
+          <mv-loader size="72" caption="carregando a fila"></mv-loader>
+        </div>
+
+        <div class="login-box" id="loginBox">
+          <h1>Entrar</h1>
+          <p class="mv-login__subtitle"></p>
+
+          <!-- Tabs -->
+          <div class="tab-switch">
+            <button type="button" class="active" onclick="switchTab('pin')">PIN Rápido</button>
+            <button type="button" onclick="switchTab('email')">E-mail</button>
+          </div>
+
+          <!-- Erro -->
+          <div id="loginError">
+            <svg class="mv-icon"><use href="/assets/icons/mv-sprite.svg#mv-x" /></svg>
+            <span id="loginErrorMsg"></span>
+          </div>
+
+          <!-- PIN Login -->
+          <div id="panelPin" class="login-panel active">
+            <p class="login-pin-hint">Digite seu PIN de 4 dígitos</p>
+            <div class="pin-group">
+              <input
+                class="pin-input"
+                type="password"
+                maxlength="1"
+                inputmode="numeric"
+                pattern="[0-9]"
+                data-pin="0"
+                autofocus
+                placeholder=" "
+              />
+              <input
+                class="pin-input"
+                type="password"
+                maxlength="1"
+                inputmode="numeric"
+                pattern="[0-9]"
+                data-pin="1"
+                placeholder=" "
+              />
+              <input
+                class="pin-input"
+                type="password"
+                maxlength="1"
+                inputmode="numeric"
+                pattern="[0-9]"
+                data-pin="2"
+                placeholder=" "
+              />
+              <input
+                class="pin-input"
+                type="password"
+                maxlength="1"
+                inputmode="numeric"
+                pattern="[0-9]"
+                data-pin="3"
+                placeholder=" "
+              />
+            </div>
+            <button
+              id="btnPin"
+              class="mv-btn mv-btn--primary mv-btn--lg mv-login__submit"
+              onclick="handlePinLogin()"
+              disabled
+            >
+              <svg class="mv-icon"><use href="/assets/icons/mv-sprite.svg#mv-arrow-right" /></svg>
+              Entrar
+            </button>
+          </div>
+
+          <!-- E-mail Login -->
+          <div id="panelEmail" class="login-panel">
+            <div class="mv-field">
+              <label class="mv-field__label" for="emailInput">E-mail</label>
+              <div class="mv-field__control">
+                <svg class="mv-icon" style="color: var(--mv-text-faint)">
+                  <use href="/assets/icons/mv-sprite.svg#mv-mail" />
+                </svg>
+                <input id="emailInput" type="email" placeholder="seu@email.com" autocomplete="email" />
+              </div>
+            </div>
+            <div class="mv-field">
+              <label class="mv-field__label" for="passInput">Senha</label>
+              <div class="mv-field__control">
+                <svg class="mv-icon" style="color: var(--mv-text-faint)">
+                  <use href="/assets/icons/mv-sprite.svg#mv-lock" />
+                </svg>
+                <input id="passInput" type="password" placeholder="••••••••" autocomplete="current-password" />
+              </div>
+            </div>
+            <button
+              id="btnEmail"
+              class="mv-btn mv-btn--primary mv-btn--lg mv-login__submit"
+              onclick="handleEmailLogin()"
+            >
+              <svg class="mv-icon"><use href="/assets/icons/mv-sprite.svg#mv-arrow-right" /></svg>
+              Entrar
+            </button>
+            <a id="forgotLink" href="/forgot-password" class="login-forgot">Esqueci minha senha</a>
+          </div>
+
+          <!-- Slug picker (visitante sem :slug na URL) -->
+          <div id="panelSlug" class="login-panel">
+            <p class="login-pin-hint">Qual é a sua loja?</p>
+            <div class="mv-field">
+              <label class="mv-field__label" for="slugInput">Identificador</label>
+              <div class="mv-field__control">
+                <svg class="mv-icon" style="color: var(--mv-text-faint)">
+                  <use href="/assets/icons/mv-sprite.svg#mv-store" />
+                </svg>
+                <input
+                  id="slugInput"
+                  type="text"
+                  placeholder="ex: texascenter"
+                  autocapitalize="none"
+                  autocorrect="off"
+                  spellcheck="false"
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+            <button
+              id="btnSlug"
+              class="mv-btn mv-btn--primary mv-btn--lg mv-login__submit"
+              onclick="handleSlugSubmit()"
+            >
+              <svg class="mv-icon"><use href="/assets/icons/mv-sprite.svg#mv-arrow-right" /></svg>
+              Continuar
+            </button>
+            <p style="text-align: center; margin-top: 12px; font-size: 11px; color: var(--mv-text-muted)">
+              É o nome curto enviado pela sua loja (ex:
+              <code style="font-family: var(--mv-font-mono)">texascenter</code>).
+            </p>
+          </div>
+
+          <div class="login-footnote">Está sem acesso? <a href="#">Falar com a gerência</a></div>
+        </div>
+      </section>
+    </main>
 
     <div id="toastContainer" role="status" aria-live="polite" aria-atomic="true"></div>
     <span class="version-tag" id="versionTag">v1.1</span>
@@ -627,11 +683,11 @@
           toast('Bem-vindo!', 'success');
           setTimeout(() => redirectByRole(user), 500);
         } catch (e) {
-          showError('PIN invalido. Tente novamente.');
+          showError('PIN inválido. Tente novamente.');
           pins.forEach((p) => (p.value = ''));
           pins[0].focus();
           btn.disabled = true;
-          btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Entrar';
+          btn.innerHTML = '<svg class="mv-icon"><use href="/assets/icons/mv-sprite.svg#mv-arrow-right"/></svg> Entrar';
         }
       };
 
@@ -639,7 +695,7 @@
         const email = document.getElementById('emailInput').value.trim();
         const pass = document.getElementById('passInput').value;
         if (!email || !pass) {
-          showError('Preencha email e senha.');
+          showError('Preencha e-mail e senha.');
           return;
         }
         const btn = document.getElementById('btnEmail');
@@ -651,9 +707,9 @@
           toast('Bem-vindo!', 'success');
           setTimeout(() => redirectByRole(user), 500);
         } catch (e) {
-          showError('Email ou senha incorretos.');
+          showError('E-mail ou senha incorretos.');
           btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Entrar';
+          btn.innerHTML = '<svg class="mv-icon"><use href="/assets/icons/mv-sprite.svg#mv-arrow-right"/></svg> Entrar';
         }
       };
 
@@ -661,32 +717,6 @@
       document.getElementById('passInput')?.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') handleEmailLogin();
       });
-
-      // Floating pink sparks on dark background
-      (function initParticles() {
-        const c = document.getElementById('particles');
-        if (!c) return;
-        const n = window.innerWidth < 768 ? 18 : 34;
-        for (let i = 0; i < n; i++) {
-          const p = document.createElement('div');
-          p.className = 'particle';
-          p.style.left = Math.random() * 100 + '%';
-          p.style.animationDuration = 7 + Math.random() * 13 + 's';
-          p.style.animationDelay = Math.random() * 10 + 's';
-          const size = 1 + Math.random() * 2.5;
-          p.style.width = p.style.height = size + 'px';
-          const r = Math.random();
-          if (r > 0.75) {
-            p.style.background = 'rgba(255,180,196,.9)';
-            p.style.boxShadow = '0 0 8px rgba(196, 181, 253,.8), 0 0 16px rgba(167, 139, 250,.5)';
-          } else if (r > 0.4) {
-            p.style.background = 'rgba(196, 181, 253,.8)';
-          } else {
-            p.style.background = 'rgba(167, 139, 250,.6)';
-          }
-          c.appendChild(p);
-        }
-      })();
     </script>
   </body>
 </html>
