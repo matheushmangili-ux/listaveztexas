@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>minhavez — Fila ao vivo</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/tokens.v54.css" />
+    <link rel="icon" type="image/svg+xml" href="/assets/logo/mv-chevron-primary.svg" />
+    <meta name="theme-color" content="#0f1318" />
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+      /* ============================================================
+         fila-ao-vivo.html v54 — monitor da loja (TV)
+         Dark por design — tela de exibição em painel/TV.
+         Dark é exceção do "só light" porque é display público.
+         ============================================================ */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--mv-slate-900);
+        color: #fff;
+        font-family: var(--mv-font-sans);
+        height: 100vh;
+        overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+      }
+      .mono {
+        font-family: var(--mv-font-mono);
+        font-feature-settings: 'tnum';
+      }
+
+      .live {
+        height: 100vh;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+
+      /* ─── Header ─── */
+      .live-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 32px;
+      }
+      .live-eyebrow {
+        font-size: 12px;
+        opacity: 0.5;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        margin-bottom: 6px;
+        font-weight: 500;
+      }
+      .live-title {
+        font-size: 36px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        margin: 0;
+        line-height: 1;
+      }
+      .live-clock {
+        text-align: right;
+      }
+      .live-clock-time {
+        font-family: var(--mv-font-mono);
+        font-size: 56px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+      }
+      .live-clock-date {
+        font-size: 13px;
+        opacity: 0.5;
+        margin-top: 4px;
+      }
+
+      /* ─── Body grid ─── */
+      .live-body {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 32px;
+        overflow: hidden;
+        min-height: 0;
+      }
+
+      .live-col {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-height: 0;
+      }
+      .live-col-label {
+        font-size: 12px;
+        opacity: 0.5;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 500;
+      }
+
+      /* ─── Hero "Próximo a atender" ─── */
+      .live-next {
+        background: var(--mv-primary);
+        border-radius: 24px;
+        padding: 40px 36px;
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 24px 60px rgba(30, 64, 175, 0.35);
+      }
+      .live-next-decor {
+        position: absolute;
+        right: -60px;
+        bottom: -60px;
+        width: 240px;
+        height: 240px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+      }
+      .live-next-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: #be123c;
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 44px;
+        font-weight: 700;
+        flex-shrink: 0;
+        z-index: 1;
+      }
+      .live-next-info {
+        flex: 1;
+        min-width: 0;
+        z-index: 1;
+      }
+      .live-next-pos {
+        font-size: 14px;
+        opacity: 0.8;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        margin-bottom: 8px;
+        font-weight: 600;
+      }
+      .live-next-name {
+        font-size: 56px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1;
+        margin-bottom: 8px;
+      }
+      .live-next-sub {
+        font-size: 18px;
+        opacity: 0.85;
+      }
+
+      /* ─── Atendendo agora ─── */
+      .live-active {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .live-active-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .live-active-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+      .live-active-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .live-active-name {
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .live-active-meta {
+        font-size: 12px;
+        opacity: 0.6;
+        font-family: var(--mv-font-mono);
+        margin-top: 2px;
+      }
+      .live-active-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #60a5fa;
+        flex-shrink: 0;
+      }
+
+      /* ─── Em seguida (lista) ─── */
+      .live-queue {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .live-queue-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 14px 18px;
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 12px;
+      }
+      .live-queue-num {
+        width: 32px;
+        font-family: var(--mv-font-mono);
+        font-size: 18px;
+        font-weight: 600;
+        opacity: 0.5;
+        font-variant-numeric: tabular-nums;
+      }
+      .live-queue-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 13px;
+        flex-shrink: 0;
+      }
+      .live-queue-name {
+        flex: 1;
+        font-size: 18px;
+        font-weight: 500;
+      }
+      .live-queue-setor {
+        font-size: 12px;
+        opacity: 0.4;
+        font-family: var(--mv-font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      /* ─── Footer KPIs ─── */
+      .live-foot {
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        justify-content: space-around;
+      }
+      .live-kpi {
+        text-align: center;
+      }
+      .live-kpi-label {
+        font-size: 11px;
+        opacity: 0.5;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 4px;
+        font-weight: 500;
+      }
+      .live-kpi-value {
+        font-size: 22px;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* ─── Empty state ─── */
+      .live-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 60px 20px;
+        opacity: 0.5;
+        font-size: 16px;
+      }
+
+      /* Adapta pra TVs menores */
+      @media (max-width: 1100px) {
+        .live {
+          padding: 24px;
+        }
+        .live-title {
+          font-size: 28px;
+        }
+        .live-clock-time {
+          font-size: 40px;
+        }
+        .live-next {
+          padding: 28px 24px;
+        }
+        .live-next-avatar {
+          width: 88px;
+          height: 88px;
+          font-size: 32px;
+        }
+        .live-next-name {
+          font-size: 40px;
+        }
+        .live-body {
+          gap: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="live">
+      <header class="live-head">
+        <div>
+          <div class="live-eyebrow" id="liveTenant">Texas Center · Loja</div>
+          <h1 class="live-title">Fila de atendimento</h1>
+        </div>
+        <div class="live-clock">
+          <div class="live-clock-time mono" id="liveClock">--:--</div>
+          <div class="live-clock-date" id="liveDate">—</div>
+        </div>
+      </header>
+
+      <div class="live-body">
+        <!-- Coluna esquerda: próximo + atendendo agora -->
+        <section class="live-col">
+          <div class="live-col-label">Próximo a atender</div>
+          <div class="live-next" id="liveNext">
+            <div class="live-next-decor"></div>
+            <div class="live-next-avatar" id="liveNextAvatar" style="background: #be123c">EL</div>
+            <div class="live-next-info">
+              <div class="live-next-pos" id="liveNextPos">01 — Próximo</div>
+              <div class="live-next-name" id="liveNextName">Eduarda</div>
+              <div class="live-next-sub" id="liveNextSub">Setor chapelaria · 11 atendimentos hoje</div>
+            </div>
+          </div>
+
+          <div class="live-col-label" style="margin-top: 8px">
+            Atendendo agora · <span id="liveActiveCount">2</span>
+          </div>
+          <div class="live-active" id="liveActive">
+            <div class="live-active-card">
+              <div class="live-active-avatar" style="background: #0e7490">BT</div>
+              <div class="live-active-info">
+                <div class="live-active-name">Bruno</div>
+                <div class="live-active-meta">Cliente · 04:21</div>
+              </div>
+              <div class="live-active-dot"></div>
+            </div>
+            <div class="live-active-card">
+              <div class="live-active-avatar" style="background: #b45309">GS</div>
+              <div class="live-active-info">
+                <div class="live-active-name">Gabi</div>
+                <div class="live-active-meta">Cliente · 02:08</div>
+              </div>
+              <div class="live-active-dot"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Coluna direita: em seguida -->
+        <section class="live-col">
+          <div class="live-col-label">Em seguida</div>
+          <div class="live-queue" id="liveQueue">
+            <div class="live-queue-row">
+              <span class="live-queue-num">02</span>
+              <span class="live-queue-avatar" style="background: #1e40af">AC</span>
+              <span class="live-queue-name">Aline</span>
+              <span class="live-queue-setor">loja</span>
+            </div>
+            <div class="live-queue-row">
+              <span class="live-queue-num">03</span>
+              <span class="live-queue-avatar" style="background: #9333ea">IN</span>
+              <span class="live-queue-name">Isabela</span>
+              <span class="live-queue-setor">chapelaria</span>
+            </div>
+            <div class="live-queue-row">
+              <span class="live-queue-num">04</span>
+              <span class="live-queue-avatar" style="background: #15803d">FS</span>
+              <span class="live-queue-name">Felipe</span>
+              <span class="live-queue-setor">loja</span>
+            </div>
+            <div class="live-queue-row">
+              <span class="live-queue-num">05</span>
+              <span class="live-queue-avatar" style="background: #0f766e">JP</span>
+              <span class="live-queue-name">João</span>
+              <span class="live-queue-setor">loja</span>
+            </div>
+            <div class="live-queue-row">
+              <span class="live-queue-num">06</span>
+              <span class="live-queue-avatar" style="background: #475569">CR</span>
+              <span class="live-queue-name">Camila</span>
+              <span class="live-queue-setor">selaria</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <footer class="live-foot">
+        <div class="live-kpi">
+          <div class="live-kpi-label">Atendimentos hoje</div>
+          <div class="live-kpi-value mono" id="kpiAtend">87</div>
+        </div>
+        <div class="live-kpi">
+          <div class="live-kpi-label">Vendas</div>
+          <div class="live-kpi-value mono" id="kpiVendas">54</div>
+        </div>
+        <div class="live-kpi">
+          <div class="live-kpi-label">Conversão</div>
+          <div class="live-kpi-value mono" id="kpiConv">62%</div>
+        </div>
+        <div class="live-kpi">
+          <div class="live-kpi-label">Ticket médio</div>
+          <div class="live-kpi-value mono" id="kpiTicket">R$ 524</div>
+        </div>
+      </footer>
+    </div>
+
+    <script type="module">
+      // Relógio + data — atualiza a cada segundo
+      const clockEl = document.getElementById('liveClock');
+      const dateEl = document.getElementById('liveDate');
+      const WEEKDAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+      const MONTHS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      function tick() {
+        const d = new Date();
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mm = String(d.getMinutes()).padStart(2, '0');
+        clockEl.textContent = `${hh}:${mm}`;
+        dateEl.textContent = `${WEEKDAYS[d.getDay()]} · ${d.getDate()} ${MONTHS[d.getMonth()]}`;
+      }
+      tick();
+      setInterval(tick, 30 * 1000);
+
+      // TODO: wire-up Supabase realtime na próxima iteração
+      // import { loadTenant, getSlug } from '/js/tenant.js';
+      // const slug = getSlug();
+      // const tenant = await loadTenant({ redirectOnMissing: true });
+      // → subscribe(`fila:${tenant.id}`) → re-render queue
+      // → subscribe(`atendimentos_ativos:${tenant.id}`) → re-render active
+      // → fetch RPC get_landing_stats every 5min → update KPIs
+    </script>
+  </body>
+</html>

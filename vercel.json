@@ -21,6 +21,8 @@
     { "source": "/:slug/vendor", "destination": "/vendor.html" },
     { "source": "/:slug/setup", "destination": "/setup.html" },
     { "source": "/:slug/settings", "destination": "/settings.html" },
+    { "source": "/:slug/fila", "destination": "/fila-ao-vivo.html" },
+    { "source": "/fila", "destination": "/fila-ao-vivo.html" },
     { "source": "/vendor", "destination": "/vendor.html" },
     { "source": "/(.*)", "destination": "/$1" }
   ]
