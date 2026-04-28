@@ -5,7 +5,7 @@
   "description": "Minha Vez — Sistema de fila e atendimento para lojas multi-tenant",
   "type": "module",
   "scripts": {
-    "dev": "browser-sync start --server --files \"**/*.{html,css,js}\" --no-notify --port 3000 --startPath \"/landing.html\" --ignore \"node_modules/**\" --ignore \".git/**\"",
+    "dev": "browser-sync start --config bs-config.cjs",
     "test": "vitest run",
     "test:smoke": "vitest run tests/smoke.test.js",
     "test:watch": "vitest",
