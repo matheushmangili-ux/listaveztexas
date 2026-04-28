@@ -1,44 +1,37 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Minha Vez — Fila</title>
+    <title>minhavez — Fila</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/css/styles.v52.css" />
+    <link rel="stylesheet" href="/css/tokens.v54.css" />
+    <link rel="stylesheet" href="/css/components.v54.css" />
     <link rel="icon" type="image/svg+xml" href="/assets/logo/mv-chevron-primary.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon-180.png" />
-    <link rel="stylesheet" href="/css/tablet.v52.css" />
-    <meta name="theme-color" content="#0d0d0d" />
+    <meta name="theme-color" content="#1e40af" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <link rel="manifest" href="/tablet-manifest.json" />
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <script>
-      (function () {
-        var t = localStorage.getItem('lv-theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', t);
-      })();
-    </script>
     <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="/js/update-checker.js"></script>
     <script>
       initUpdateChecker('/tablet.html', { bannerText: 'Atualização disponível — toque para atualizar' });
-      // Error logging (sem auto-reload para evitar loops)
       window.addEventListener('error', function (e) {
         const el = document.getElementById('toastContainer');
         if (el) {
           const d = document.createElement('div');
           d.style.cssText =
-            'background:#d47a68;color:#0d0d0d;padding:8px 16px;border-radius:4px;margin:4px;font-size:12px;max-width:300px';
+            'background:#dc2626;color:#fff;padding:8px 16px;border-radius:8px;margin:4px;font-size:12px;max-width:300px;font-weight:500';
           d.textContent = 'Erro: ' + (e.message || 'desconhecido');
           el.appendChild(d);
           setTimeout(() => d.remove(), 5000);
@@ -50,12 +43,758 @@
       window.PUBLIC_POSTHOG_HOST = '/ingest';
     </script>
     <script>
-      window.PUBLIC_SENTRY_DSN = 'https://2281ed2b3027429746fd575a47c75046@o4511269047500800.ingest.us.sentry.io/4511269057003520';
+      window.PUBLIC_SENTRY_DSN =
+        'https://2281ed2b3027429746fd575a47c75046@o4511269047500800.ingest.us.sentry.io/4511269057003520';
       window.PUBLIC_SENTRY_ENV = 'production';
     </script>
     <script type="module" src="/js/sentry.js"></script>
     <script type="module" src="/js/analytics.js"></script>
-    <script src="/js/components/mv-logo.js" defer></script>
+
+    <style>
+      /* ============================================================
+         tablet.html v54 — recepção/fila (landscape)
+         Layout grid: header / [queue | service] / footer
+         ============================================================ */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--mv-bg);
+        color: var(--mv-text);
+        font-family: var(--mv-font-sans);
+        font-size: var(--mv-text-md);
+        line-height: 1.4;
+        height: 100vh;
+        overflow: hidden;
+      }
+      .hidden {
+        display: none !important;
+      }
+
+      /* ─── Utilities herdadas (preserva chamadas do JS) ─── */
+      .mono {
+        font-family: var(--mv-font-mono);
+        font-feature-settings: 'tnum';
+      }
+      .flex-center {
+        display: flex;
+        align-items: center;
+      }
+      .flex-between {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .flex-col {
+        display: flex;
+        flex-direction: column;
+      }
+      .flex-1 {
+        flex: 1;
+        min-height: 0;
+      }
+      .gap-6 {
+        gap: 6px;
+      }
+      .gap-8 {
+        gap: 8px;
+      }
+      .gap-10 {
+        gap: 10px;
+      }
+      .gap-16 {
+        gap: 16px;
+      }
+      .shrink-0 {
+        flex-shrink: 0;
+      }
+      .text-muted {
+        color: var(--mv-text-muted);
+      }
+      .text-secondary {
+        color: var(--mv-text-muted);
+      }
+      .uppercase {
+        text-transform: uppercase;
+      }
+      .tracking-wide {
+        letter-spacing: 0.06em;
+      }
+      .tracking-tight {
+        letter-spacing: -0.01em;
+      }
+      .fw-600 {
+        font-weight: 600;
+      }
+      .fw-700 {
+        font-weight: 700;
+      }
+      .fw-800 {
+        font-weight: 800;
+      }
+      .fs-9 {
+        font-size: 9px;
+      }
+      .fs-10 {
+        font-size: 10px;
+      }
+      .fs-11 {
+        font-size: 11px;
+      }
+      .fs-12 {
+        font-size: 12px;
+      }
+      .fs-13 {
+        font-size: 13px;
+      }
+      .fs-14 {
+        font-size: 14px;
+      }
+      .fs-16 {
+        font-size: 16px;
+      }
+      .fs-18 {
+        font-size: 18px;
+      }
+      .mb-4 {
+        margin-bottom: 4px;
+      }
+      .mb-8 {
+        margin-bottom: 8px;
+      }
+      .mb-12 {
+        margin-bottom: 12px;
+      }
+      .mb-16 {
+        margin-bottom: 16px;
+      }
+      .mt-16 {
+        margin-top: 16px;
+      }
+      .mr-4 {
+        margin-right: 4px;
+      }
+      .block {
+        display: block;
+      }
+
+      /* ─── Layout ─── */
+      .tablet-layout {
+        height: 100vh;
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        grid-template-rows: 64px 1fr auto;
+        grid-template-areas:
+          'header header'
+          'queue  service'
+          'footer footer';
+        gap: 0;
+      }
+
+      .offline-banner {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 200;
+        background: var(--mv-status-error);
+        color: #fff;
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .offline-banner.is-visible {
+        display: flex;
+      }
+
+      /* ─── Header ─── */
+      .t-header {
+        grid-area: header;
+        height: 64px;
+        padding: 0 20px;
+        background: var(--mv-surface);
+        border-bottom: 1px solid var(--mv-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .t-header-version {
+        color: var(--mv-text-faint);
+        margin-left: 4px;
+      }
+      .t-header-kpis {
+        gap: 12px;
+      }
+      .t-header-kpi {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 14px;
+        background: var(--mv-surface-2);
+        border: 1px solid var(--mv-border);
+        border-radius: var(--mv-radius-md);
+      }
+      .t-header-kpi i {
+        color: var(--mv-text-muted);
+        font-size: 14px;
+      }
+      .t-header-kpi-body {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.1;
+      }
+      .t-header-kpi-value {
+        font-family: var(--mv-font-mono);
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--mv-text);
+        font-variant-numeric: tabular-nums;
+      }
+      .t-header-kpi-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--mv-text-muted);
+        font-weight: 500;
+      }
+      .conv-bar-track {
+        position: absolute;
+        bottom: -1px;
+        left: 8px;
+        right: 8px;
+        height: 2px;
+        background: var(--mv-surface-3);
+        border-radius: 1px;
+        overflow: hidden;
+      }
+      .conv-bar-fill {
+        height: 100%;
+        width: 0;
+        background: var(--mv-primary);
+        transition: width 0.3s var(--mv-ease);
+      }
+
+      .action-card {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        height: 40px;
+        padding: 0 14px;
+        border-radius: var(--mv-radius-md);
+        background: var(--mv-surface-2);
+        border: 1px solid var(--mv-border-strong);
+        color: var(--mv-text);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition:
+          background var(--mv-dur-fast) var(--mv-ease),
+          border-color var(--mv-dur-fast) var(--mv-ease);
+      }
+      .action-card:hover {
+        background: var(--mv-surface);
+        border-color: var(--mv-text-faint);
+      }
+      .ranking-card i {
+        color: var(--mv-status-paused);
+      }
+      .turno-card {
+        background: var(--mv-primary);
+        color: #fff;
+        border-color: var(--mv-primary);
+      }
+      .turno-card:hover {
+        background: var(--mv-primary-hover);
+        border-color: var(--mv-primary-hover);
+      }
+      .turno-card.is-active {
+        background: var(--mv-status-error);
+        border-color: var(--mv-status-error);
+      }
+      .turno-card.is-active:hover {
+        background: #b91c1c;
+        border-color: #b91c1c;
+      }
+
+      .more-menu-wrapper {
+        position: relative;
+      }
+      .more-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--mv-radius-md);
+        background: var(--mv-surface-2);
+        border: 1px solid var(--mv-border-strong);
+        color: var(--mv-text);
+        cursor: pointer;
+        font-size: 16px;
+        font-family: inherit;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .more-btn:hover {
+        background: var(--mv-surface);
+      }
+      .more-menu {
+        position: absolute;
+        top: calc(100% + 4px);
+        right: 0;
+        z-index: 60;
+        min-width: 200px;
+        background: var(--mv-surface);
+        border: 1px solid var(--mv-border-strong);
+        border-radius: var(--mv-radius-md);
+        box-shadow: var(--mv-shadow-lg);
+        padding: 4px;
+        display: flex;
+        flex-direction: column;
+      }
+      .more-menu button {
+        text-align: left;
+        background: transparent;
+        border: none;
+        padding: 8px 12px;
+        border-radius: var(--mv-radius-sm);
+        font-size: 13px;
+        color: var(--mv-text);
+        cursor: pointer;
+        font-family: inherit;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .more-menu button:hover {
+        background: var(--mv-surface-2);
+      }
+      .more-menu-divider {
+        height: 1px;
+        background: var(--mv-border);
+        margin: 4px 0;
+      }
+      .logout-icon-danger {
+        color: var(--mv-status-error);
+      }
+
+      /* ─── Queue panel (esquerda) ─── */
+      .queue-panel {
+        grid-area: queue;
+        background: var(--mv-surface);
+        border-right: 1px solid var(--mv-border);
+        padding: 16px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+      }
+      .queue-setor-tabs {
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .queue-setor-tabs button,
+      .queue-setor-tabs .setor-tab {
+        padding: 6px 12px;
+        border-radius: var(--mv-radius-pill);
+        background: var(--mv-surface-2);
+        border: 1px solid var(--mv-border);
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--mv-text-muted);
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .queue-setor-tabs .active,
+      .queue-setor-tabs button.active {
+        background: var(--mv-status-busy-bg);
+        border-color: var(--mv-brand-200);
+        color: var(--mv-primary);
+      }
+      .queue-head-row {
+        padding-bottom: 4px;
+      }
+      .queue-history-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: var(--mv-radius-sm);
+        background: transparent;
+        border: 1px solid var(--mv-border);
+        color: var(--mv-text-muted);
+        cursor: pointer;
+        font-size: 12px;
+      }
+      .queue-history-btn:hover {
+        background: var(--mv-surface-2);
+        color: var(--mv-text);
+      }
+      .queue-list {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        overflow-y: auto;
+      }
+      .queue-blank-state {
+        margin: auto;
+        text-align: center;
+        font-size: 13px;
+        color: var(--mv-text-faint);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        padding: 32px 16px;
+      }
+      .queue-blank-state i {
+        font-size: 28px;
+        opacity: 0.5;
+      }
+
+      /* ─── Service panel (direita) ─── */
+      .service-panel {
+        grid-area: service;
+        padding: 16px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4px 4px 12px;
+        border-bottom: 1px solid var(--mv-border);
+      }
+      .panel-header > span:first-child {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--mv-text);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .panel-header-icon {
+        color: var(--mv-primary);
+        margin-right: 4px;
+      }
+
+      /* ─── Footer ─── */
+      .t-footer {
+        grid-area: footer;
+        padding: 12px 16px;
+        background: var(--mv-surface);
+        border-top: 1px solid var(--mv-border);
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        overflow-x: auto;
+        max-height: 96px;
+      }
+
+      /* ─── Bottom sheets (compartilhado) ─── */
+      .bottom-sheet-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 90;
+        background: rgba(15, 19, 24, 0.4);
+        backdrop-filter: blur(2px);
+        display: none;
+      }
+      .bottom-sheet-overlay.is-open {
+        display: block;
+      }
+      .bottom-sheet {
+        position: fixed;
+        left: 50%;
+        bottom: 0;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 480px;
+        z-index: 100;
+        background: var(--mv-surface);
+        border-radius: var(--mv-radius-xl) var(--mv-radius-xl) 0 0;
+        padding: 12px 20px 24px;
+        max-height: 86vh;
+        overflow-y: auto;
+        box-shadow: var(--mv-shadow-xl);
+        display: none;
+      }
+      .bottom-sheet.is-open {
+        display: block;
+      }
+      .sheet-max-90vh {
+        max-height: 90vh;
+      }
+      .sheet-max-80vh {
+        max-height: 80vh;
+      }
+      .bottom-sheet-handle {
+        width: 36px;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--mv-border-strong);
+        margin: 0 auto 16px;
+      }
+
+      .motivo-option {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px;
+        border: 1px solid var(--mv-border-strong);
+        border-radius: var(--mv-radius-md);
+        background: var(--mv-surface);
+        cursor: pointer;
+        transition:
+          border-color var(--mv-dur-fast) var(--mv-ease),
+          background var(--mv-dur-fast) var(--mv-ease);
+      }
+      .motivo-option:hover {
+        border-color: var(--mv-primary);
+        background: var(--mv-surface-2);
+      }
+      .motivo-option.selected {
+        border-color: var(--mv-primary);
+        background: var(--mv-status-busy-bg);
+      }
+      .motivo-option > i {
+        font-size: 20px;
+        color: var(--mv-text-muted);
+        width: 32px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+      .motivo-option.selected > i {
+        color: var(--mv-primary);
+      }
+      .motivo-option > div {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        flex: 1;
+      }
+
+      .outcome-option[data-outcome='venda'] > i {
+        color: var(--mv-status-available);
+      }
+      .outcome-option[data-outcome='troca'] > i {
+        color: var(--mv-primary);
+      }
+      .outcome-option[data-outcome='nao_convertido'] > i {
+        color: var(--mv-status-paused);
+      }
+      .outcome-option[data-outcome='cancelar'] > i {
+        color: var(--mv-status-error);
+      }
+
+      /* ─── Buttons (preserva nomes do JS) ─── */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 44px;
+        padding: 0 18px;
+        border-radius: var(--mv-radius-md);
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition:
+          background var(--mv-dur-fast) var(--mv-ease),
+          border-color var(--mv-dur-fast) var(--mv-ease);
+      }
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .btn-primary {
+        background: var(--mv-primary);
+        color: var(--mv-on-primary);
+      }
+      .btn-primary:hover:not(:disabled) {
+        background: var(--mv-primary-hover);
+      }
+      .btn-success {
+        background: var(--mv-status-available);
+        color: #fff;
+      }
+      .btn-success:hover:not(:disabled) {
+        background: #15803d;
+      }
+      .btn-danger {
+        background: var(--mv-status-error);
+        color: #fff;
+      }
+      .btn-danger:hover:not(:disabled) {
+        background: #b91c1c;
+      }
+      .btn-ghost {
+        background: var(--mv-surface);
+        color: var(--mv-text);
+        border-color: var(--mv-border-strong);
+      }
+      .btn-ghost:hover:not(:disabled) {
+        background: var(--mv-surface-2);
+      }
+      .btn-flex-1 {
+        flex: 1;
+      }
+      .btn-flex-tall {
+        flex: 1;
+        height: 56px;
+      }
+      .btn-confirm-motivo {
+        width: 100%;
+        margin-top: 16px;
+      }
+      .btn-turno-close {
+        flex: 1;
+        height: 56px;
+        background: var(--mv-status-error);
+        color: #fff;
+        font-weight: 700;
+      }
+
+      .input {
+        width: 100%;
+        height: 44px;
+        padding: 0 12px;
+        border: 1px solid var(--mv-border-strong);
+        border-radius: var(--mv-radius-md);
+        background: var(--mv-surface);
+        font-size: 14px;
+        font-family: inherit;
+        color: var(--mv-text);
+        outline: none;
+        transition: border-color var(--mv-dur-fast) var(--mv-ease);
+      }
+      .input:focus {
+        border-color: var(--mv-primary);
+        box-shadow: var(--mv-shadow-focus);
+      }
+
+      /* ─── Mini ranking dropdown ─── */
+      .mini-ranking-dropdown {
+        position: fixed;
+        top: 64px;
+        right: 16px;
+        z-index: 60;
+        width: 280px;
+        background: var(--mv-surface);
+        border: 1px solid var(--mv-border-strong);
+        border-radius: var(--mv-radius-md);
+        padding: 14px;
+        box-shadow: var(--mv-shadow-lg);
+      }
+      .mini-ranking-trophy {
+        color: var(--mv-status-paused);
+      }
+
+      /* ─── Confetti ─── */
+      #confettiCanvas {
+        position: fixed;
+        inset: 0;
+        z-index: 999;
+        pointer-events: none;
+      }
+
+      /* ─── Toast ─── */
+      #toastContainer {
+        position: fixed;
+        top: 80px;
+        right: 16px;
+        z-index: 200;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-width: 320px;
+      }
+
+      /* ─── Origin overlay (canal) ─── */
+      .origin-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 90;
+        background: rgba(15, 19, 24, 0.4);
+        backdrop-filter: blur(2px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .origin-overlay.is-open {
+        display: flex;
+      }
+      .origin-box {
+        background: var(--mv-surface);
+        border-radius: var(--mv-radius-xl);
+        padding: 24px;
+        max-width: 480px;
+        width: 100%;
+        box-shadow: var(--mv-shadow-xl);
+      }
+      .origin-title {
+        font-size: 17px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: var(--mv-text);
+      }
+      .origin-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .origin-skip {
+        width: 100%;
+        background: transparent;
+        border: 1px solid var(--mv-border-strong);
+        color: var(--mv-text-muted);
+        height: 44px;
+        border-radius: var(--mv-radius-md);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        font-family: inherit;
+      }
+
+      /* ─── Turno summary content ─── */
+      .turno-summary-content {
+        background: var(--mv-surface-2);
+        border: 1px solid var(--mv-border);
+        border-radius: var(--mv-radius-md);
+        padding: 14px;
+        margin-bottom: 16px;
+        font-size: 13px;
+        max-height: 280px;
+        overflow-y: auto;
+      }
+      .pos-log-list {
+        max-height: 60vh;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .ruptura-picker {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+    </style>
   </head>
   <body>
     <div id="offlineBanner" class="offline-banner" style="display: none" role="alert" aria-live="assertive">
@@ -67,7 +806,10 @@
       <!-- HEADER -->
       <header class="t-header">
         <div class="flex-center gap-8 shrink-0">
-          <mv-logo size="S" wordmark class="t-header-logo"></mv-logo>
+          <span class="mv-wordmark mv-wordmark--sm">
+            <span class="mv-wordmark__mark">m</span>
+            <span class="mv-wordmark__text">minha<em>vez</em></span>
+          </span>
           <span id="appVersion" class="mono fs-9 t-header-version"></span>
         </div>
         <div id="headerKpis" class="flex-center gap-16 mono fw-700 t-header-kpis">
@@ -97,7 +839,6 @@
           </div>
         </div>
         <div class="flex-center gap-8 shrink-0">
-          <!-- Ranking card -->
           <button
             class="action-card ranking-card"
             onclick="toggleMiniRanking()"
@@ -107,7 +848,6 @@
             <i class="fa-solid fa-ranking-star"></i>
             <span>Ranking</span>
           </button>
-          <!-- Iniciar / Encerrar turno card -->
           <div
             class="action-card turno-card"
             id="turnoSwitch"
@@ -159,7 +899,7 @@
         </div>
       </header>
 
-      <!-- QUEUE PANEL (left) -->
+      <!-- QUEUE PANEL -->
       <aside class="queue-panel" id="queuePanel">
         <div id="setorTabs" class="flex-center gap-6 mb-12 queue-setor-tabs"></div>
         <div class="flex-between mb-8 queue-head-row">
@@ -184,32 +924,27 @@
         </div>
       </aside>
 
-      <!-- SERVICE PANEL (right — Em Atendimento) -->
+      <!-- SERVICE PANEL -->
       <main class="service-panel" id="servicePanel">
         <div class="panel-header">
           <span><i class="fa-solid fa-headset panel-header-icon"></i>Em Atendimento</span>
           <span id="activeCount" class="fs-12 text-muted">0 ativos</span>
         </div>
-
-        <!-- Atendimentos ativos (múltiplos simultâneos) -->
         <div id="activeList" class="flex-col gap-10 flex-1">
           <p id="activeLabel" class="fs-10 fw-700 text-muted uppercase hidden tracking-wide"></p>
         </div>
       </main>
 
-      <!-- FOOTER: vendedores -->
-      <footer class="t-footer" id="statusFooter">
-        <!-- Populated dynamically -->
-      </footer>
+      <!-- FOOTER -->
+      <footer class="t-footer" id="statusFooter"></footer>
     </div>
 
-    <!-- Bottom Sheet: Motivos de Não Conversão -->
+    <!-- Sheet: Motivos não conversão -->
     <div class="bottom-sheet-overlay" id="motivoOverlay" onclick="closeMotivos()"></div>
     <div class="bottom-sheet" id="motivoSheet">
       <div class="bottom-sheet-handle"></div>
       <h3 class="mono fs-18 fw-700 mb-8">Motivo da não conversão</h3>
       <p class="fs-14 text-secondary mb-16">Selecione o motivo principal</p>
-
       <div class="flex-col gap-8" id="motivoList">
         <div class="motivo-option" data-motivo="preco" onclick="selectMotivo(this)">
           <i class="fa-solid fa-tag"></i>
@@ -248,19 +983,14 @@
         </div>
       </div>
 
-      <!-- Ruptura: picker cascata (hidden) -->
       <div id="rupturaField" class="hidden mt-16">
-        <!-- Picker estruturado (se tenant tem catálogo) -->
         <div id="rupturaPicker" class="ruptura-picker" style="display: none"></div>
-        <!-- Fallback: input de texto livre (se catálogo vazio). Default: visível
-             até a integração do picker estruturado (ruptura v2) ser concluída. -->
         <div id="rupturaInputWrap" style="display: block">
           <label class="block fs-13 fw-700 text-muted uppercase mb-4 tracking-tight">Qual produto?</label>
           <input id="rupturaInput" class="input" type="text" placeholder="Ex: Chapéu Pralana 6X" autocomplete="off" />
         </div>
       </div>
 
-      <!-- Outro: campo detalhe (hidden) -->
       <div id="outroField" class="hidden mt-16">
         <label class="block fs-13 fw-700 text-muted uppercase mb-4 tracking-tight">Descreva o motivo</label>
         <input id="outroInput" class="input" type="text" placeholder="Ex: Cliente errou de loja" autocomplete="off" />
@@ -272,7 +1002,7 @@
       </button>
     </div>
 
-    <!-- Outcome Sheet (resultado do atendimento) -->
+    <!-- Sheet: Outcome -->
     <div class="bottom-sheet-overlay" id="outcomeOverlay" onclick="closeOutcomeSheet()"></div>
     <div class="bottom-sheet" id="outcomeSheet">
       <div class="bottom-sheet-handle"></div>
@@ -315,7 +1045,7 @@
       </div>
     </div>
 
-    <!-- Check-in Overlay (abertura de turno) -->
+    <!-- Sheet: Check-in -->
     <div class="bottom-sheet-overlay" id="checkinOverlay" onclick="closeCheckin()"></div>
     <div class="bottom-sheet sheet-max-90vh" id="checkinSheet">
       <div class="bottom-sheet-handle"></div>
@@ -330,7 +1060,7 @@
       </div>
     </div>
 
-    <!-- Bottom Sheet: Motivo de Saída da Fila -->
+    <!-- Sheet: Saída fila -->
     <div class="bottom-sheet-overlay" id="saidaOverlay" onclick="closeSaida()"></div>
     <div class="bottom-sheet" id="saidaSheet">
       <div class="bottom-sheet-handle"></div>
@@ -376,7 +1106,7 @@
       </div>
     </div>
 
-    <!-- Mini Ranking Dropdown (fora do header para não afetar flex) -->
+    <!-- Mini ranking dropdown -->
     <div id="miniRankingDropdown" class="mini-ranking-dropdown" style="display: none">
       <div class="fs-11 fw-800 uppercase text-muted mb-8 tracking-wide">
         <i class="fa-solid fa-trophy mr-4 mini-ranking-trophy"></i>Ranking do Turno
@@ -384,7 +1114,7 @@
       <div id="miniRankingList" class="flex-col gap-6"></div>
     </div>
 
-    <!-- Bottom Sheet: Resumo do Turno -->
+    <!-- Sheet: Resumo turno -->
     <div class="bottom-sheet-overlay" id="turnoSummaryOverlay" onclick="closeTurnoSummary()"></div>
     <div class="bottom-sheet sheet-max-80vh" id="turnoSummarySheet">
       <div class="bottom-sheet-handle"></div>
@@ -399,7 +1129,7 @@
       </div>
     </div>
 
-    <!-- Bottom Sheet: Histórico de Posições -->
+    <!-- Sheet: Histórico posições -->
     <div class="bottom-sheet-overlay" id="posLogOverlay" onclick="closePosLog()"></div>
     <div class="bottom-sheet sheet-max-80vh" id="posLogSheet">
       <div class="bottom-sheet-handle"></div>
@@ -411,8 +1141,6 @@
     <canvas id="confettiCanvas"></canvas>
     <div id="toastContainer" role="status" aria-live="polite" aria-atomic="true"></div>
 
-    <script type="module" src="/js/tablet-init.js"></script>
-    <script type="module" src="/js/tour.js"></script>
     <!-- Origin Channel Modal -->
     <div class="origin-overlay" id="originOverlay">
       <div class="origin-box">
@@ -421,5 +1149,8 @@
         <button class="origin-skip" onclick="confirmOrigin(null)">Não informado</button>
       </div>
     </div>
+
+    <script type="module" src="/js/tablet-init.js"></script>
+    <script type="module" src="/js/tour.js"></script>
   </body>
 </html>
