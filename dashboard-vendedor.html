@@ -1,38 +1,31 @@
 <!doctype html>
-<html lang="pt-BR" data-theme="dark">
+<html lang="pt-BR" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Por Vendedor — Minha Vez</title>
-    <script>
-      (function () {
-        var t = localStorage.getItem('lv-theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', t);
-      })();
-    </script>
+    <title>Por Vendedor — minhavez</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/css/styles.v52.css" />
+    <link rel="stylesheet" href="/css/tokens.v54.css" />
+    <link rel="stylesheet" href="/css/components.v54.css" />
     <link rel="icon" type="image/svg+xml" href="/assets/logo/mv-chevron-primary.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon-180.png" />
-    <link rel="stylesheet" href="/css/dashboard.v52.css" />
-    <meta name="theme-color" content="#0d0d0d" />
+    <meta name="theme-color" content="#1e40af" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/update-checker.js"></script>
     <script>
-      initUpdateChecker('/dashboard.html');
+      initUpdateChecker('/dashboard-vendedor.html');
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.min.js"></script>
-    <!-- ECharts removed — only ApexCharts is used -->
 
     <script>
       window.PUBLIC_POSTHOG_KEY = 'phc_mxauxpwWdL9gGNcpQTEyrwjJsnV6kytaYvZgQNQMxrBS';
@@ -45,7 +38,7 @@
     </script>
     <script type="module" src="/js/sentry.js"></script>
     <script type="module" src="/js/analytics.js"></script>
-    <script src="/js/components/mv-logo.js" defer></script>
+    <link rel="stylesheet" href="/css/dashboard.v54.css" />
   </head>
   <body>
     <div class="dash-layout">
@@ -54,7 +47,9 @@
         <!-- Brand -->
         <div class="sidebar-brand">
           <div class="dash-header-logo" id="headerLogo">
-            <mv-logo size="M" wordmark></mv-logo>
+            <span class="mv-wordmark"
+              ><span class="mv-wordmark__mark">m</span><span class="mv-wordmark__text">minha<em>vez</em></span></span
+            >
           </div>
         </div>
 
@@ -364,7 +359,9 @@
           style="text-align: center; margin-top: 40px; padding: 32px 0; border-top: 1px solid var(--border-subtle)"
         >
           <div class="dash-footer-logo">
-            <mv-logo size="M" wordmark></mv-logo>
+            <span class="mv-wordmark"
+              ><span class="mv-wordmark__mark">m</span><span class="mv-wordmark__text">minha<em>vez</em></span></span
+            >
           </div>
           <div
             id="tenantSlugFooter"
