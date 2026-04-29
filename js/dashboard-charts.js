@@ -812,14 +812,7 @@ export async function loadHourly(range) {
       stroke: { width: [2.5, 1.5, 2], curve: 'smooth', dashArray: [0, 4, 0] },
       markers: { size: 0, hover: { size: 4 } },
       grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { left: 14, right: 40, top: 10 } },
-      legend: {
-        position: 'top',
-        fontSize: '11px',
-        fontWeight: 600,
-        labels: { colors: chartColors().textStrong },
-        markers: { shape: 'circle', size: 5 },
-        itemMargin: { horizontal: 12 }
-      },
+      legend: { show: false },
       annotations,
       dataLabels: { enabled: false },
       tooltip: {
@@ -1294,14 +1287,7 @@ export async function loadScatter(range, cachedData) {
       offsetX: 6,
       style: { fontSize: '10px', fontWeight: 600, colors: [chartColors().textStrong] }
     },
-    legend: {
-      position: 'top',
-      fontSize: '11px',
-      fontWeight: 600,
-      labels: { colors: chartColors().textStrong },
-      markers: { shape: 'circle', size: 5 },
-      offsetY: -5
-    },
+    legend: { show: false },
     tooltip: {
       shared: false,
       intersect: true,
@@ -1545,15 +1531,7 @@ export async function loadTrend(range) {
     colors: [BRAND_PALETTE.mint, BRAND_PALETTE.dusty, BRAND_PALETTE.sand],
     markers: { size: [0, 0, 4], strokeWidth: 2, strokeColors: '#fff', hover: { sizeOffset: 2 } },
     grid: { borderColor: chartColors().grid, strokeDashArray: 3, padding: { left: 10, right: 10, bottom: 5 } },
-    legend: {
-      position: 'top',
-      horizontalAlign: 'center',
-      fontSize: '11px',
-      fontWeight: 600,
-      labels: { colors: chartColors().textStrong },
-      markers: { shape: 'circle', size: 5 },
-      itemMargin: { horizontal: 24, vertical: 0 }
-    },
+    legend: { show: false },
     annotations,
     dataLabels: {
       enabled: isSingleDay,

@@ -198,21 +198,30 @@ a {
   background: var(--mv-surface-2);
 }
 
-/* Topbar */
+/* Topbar — alinhado ao mockup ScreenDashboard
+   Strip 1 (sticky, 64px): title + actions
+   Strip 2 (subhead inline 12px, compact): tenant · cidade · sync info
+   Strip 3 (filter strip): setor + vendedor + export
+*/
 .topbar-stripe {
   position: sticky;
   top: 0;
   z-index: 20;
-  background: var(--mv-surface);
-  border-bottom: 1px solid var(--mv-border);
-  padding: 0 28px;
-}
-.topbar-subhead {
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 64px;
+  padding: 0 28px;
+  background: var(--mv-surface);
+  border-bottom: 1px solid var(--mv-border);
   gap: 16px;
+}
+.topbar-title {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--mv-text);
 }
 .topbar-title h1 {
   font-size: 20px;
@@ -220,15 +229,6 @@ a {
   letter-spacing: -0.01em;
   margin: 0;
   color: var(--mv-text);
-}
-.topbar-title .sub-accent {
-  font-size: 12px;
-  color: var(--mv-text-muted);
-  margin-top: 2px;
-}
-.sub-sep {
-  margin: 0 6px;
-  opacity: 0.4;
 }
 .topbar-actions {
   display: inline-flex;
@@ -249,33 +249,46 @@ a {
   background: var(--mv-surface);
 }
 
-/* Filter bar */
+/* Subhead inline (informativo, abaixo do stripe principal) */
+.topbar-subhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+  padding: 8px 28px;
+  background: var(--mv-surface);
+  border-bottom: 1px solid var(--mv-border);
+  font-size: 12px;
+  color: var(--mv-text-muted);
+  line-height: 1.4;
+}
+.sub-sep {
+  margin: 0 8px;
+  opacity: 0.4;
+}
+.sub-accent {
+  color: var(--mv-text);
+  font-family: var(--mv-font-mono);
+  font-weight: 500;
+}
+
+/* Filter strip — separa filtros de export, padding consistente */
+.topbar-filter-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 28px;
+  background: var(--mv-surface-2);
+  border-bottom: 1px solid var(--mv-border);
+  font-size: 13px;
+  font-family: inherit;
+}
 .filter-bar {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 0;
-  border-top: 1px solid var(--mv-border);
   flex-wrap: wrap;
-}
-.topbar-filter-card {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 36px;
-  padding: 0 14px;
-  background: var(--mv-surface-2);
-  border: 1px solid var(--mv-border);
-  border-radius: var(--mv-radius-md);
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--mv-text);
-  font-family: inherit;
-}
-.topbar-filter-card:hover {
-  background: var(--mv-surface);
-  border-color: var(--mv-border-strong);
 }
 .period-tabs {
   display: inline-flex;
@@ -433,34 +446,25 @@ a {
   color: var(--mv-text-faint);
 }
 
-/* Status marquee */
-.status-marquee {
-  display: flex;
+/* Status chip (substitui o marquee — usado no topbar-actions) */
+.status-chip {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 16px;
-  background: var(--mv-status-busy-bg);
-  border-bottom: 1px solid var(--mv-brand-200);
-  font-size: 12px;
+  gap: 6px;
+  padding: 4px 10px;
+  background: var(--mv-status-available-bg);
+  border-radius: var(--mv-radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--mv-status-available);
+  letter-spacing: 0.02em;
 }
-.marquee-indicator {
-  width: 8px;
-  height: 8px;
+.status-chip__dot {
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--mv-status-available);
-  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.18);
-  flex-shrink: 0;
-}
-.marquee-label {
-  font-weight: 600;
-  color: var(--mv-primary);
-}
-.marquee-track {
-  flex: 1;
-  overflow: hidden;
-  font-family: var(--mv-font-mono);
-  color: var(--mv-text);
-  white-space: nowrap;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.18);
 }
 
 /* Hero card (legacy compat — não usado no novo layout) */
@@ -574,13 +578,16 @@ a {
 
 /* Charts */
 .chart-section {
-  padding: 0 28px 28px;
+  padding: 20px 28px 28px;
 }
 .charts-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
   gap: 16px;
   margin-bottom: 16px;
+}
+.charts-grid:last-child {
+  margin-bottom: 0;
 }
 .chart-card {
   background: var(--mv-surface);
