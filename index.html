@@ -22,7 +22,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/update-checker.js"></script>
-    <script src="/js/components/mv-loader.js" defer></script>
     <script>
       initUpdateChecker('/index.html');
     </script>
@@ -111,10 +110,26 @@
         position: absolute;
         inset: 0;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
+        gap: 16px;
         z-index: 10;
         background: var(--mv-surface);
+      }
+      .mv-login__loader-spinner {
+        width: 48px;
+        height: 48px;
+        border: 3px solid var(--mv-border);
+        border-top-color: var(--mv-primary);
+        border-radius: 50%;
+        animation: mvSpin 0.7s linear infinite;
+      }
+      .mv-login__loader-caption {
+        font-size: 13px;
+        color: var(--mv-text-muted);
+        font-weight: 500;
+        letter-spacing: 0.01em;
       }
 
       .login-box {
@@ -402,7 +417,8 @@
       <section class="mv-login__form">
         <!-- Loader sobre o formulário enquanto o tenant carrega -->
         <div id="loginLoader" class="mv-login__loader">
-          <mv-loader size="72" caption="carregando a fila"></mv-loader>
+          <div class="mv-login__loader-spinner" aria-hidden="true"></div>
+          <div class="mv-login__loader-caption">carregando a fila…</div>
         </div>
 
         <div class="login-box" id="loginBox">
