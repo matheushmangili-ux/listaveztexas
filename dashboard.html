@@ -823,6 +823,116 @@
         }
       }
 
+      /* ─── METRIC GRID 6-col (linha 1 do design) ─── */
+      .metric-grid-6 {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 14px;
+        padding: 20px 28px 0;
+      }
+      .metric-card {
+        background: var(--mv-surface);
+        border: 1px solid var(--mv-border);
+        border-radius: var(--mv-radius-lg);
+        padding: 16px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        box-shadow: var(--mv-shadow-xs);
+      }
+      .metric-card--featured {
+        background: var(--mv-primary);
+        border-color: var(--mv-primary);
+        color: #fff;
+      }
+      .metric-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--mv-text-muted);
+      }
+      .metric-card--featured .metric-label {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      .metric-value {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        margin-top: 2px;
+      }
+      .metric-num {
+        font-size: 30px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        font-variant-numeric: tabular-nums;
+        color: var(--mv-text);
+        line-height: 1;
+      }
+      .metric-card--featured .metric-num {
+        color: #fff;
+      }
+      .metric-delta {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--mv-status-available);
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        min-height: 14px;
+      }
+      .metric-delta.icon-danger {
+        color: var(--mv-status-error);
+      }
+      .metric-card--featured .metric-delta {
+        color: rgba(255, 255, 255, 0.92);
+      }
+      .metric-compare {
+        font-size: 10px;
+        color: var(--mv-text-faint);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        margin-top: 2px;
+      }
+      .metric-card--featured .metric-compare {
+        color: rgba(255, 255, 255, 0.65);
+      }
+      @media (max-width: 1180px) {
+        .metric-grid-6 {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      @media (max-width: 720px) {
+        .metric-grid-6 {
+          grid-template-columns: repeat(2, 1fr);
+          padding: 16px 16px 0;
+        }
+        .metric-num {
+          font-size: 24px;
+        }
+      }
+
+      /* ─── Charts grid variants ─── */
+      .charts-grid--1-5-1 {
+        grid-template-columns: 1.5fr 1fr;
+      }
+      .charts-grid--1-2-1 {
+        grid-template-columns: 1.2fr 1fr;
+      }
+      @media (max-width: 1180px) {
+        .charts-grid--1-5-1,
+        .charts-grid--1-2-1 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Drop hero-card unused (substituído por .metric-card) — mantém .hero-chart oculto pra compat */
+      .hero-chart.hidden {
+        display: none !important;
+      }
+
       /* Cores legacy mapping */
       :root {
         --bg-deep: var(--mv-surface-2);
@@ -1105,115 +1215,105 @@
           <div id="marqueeTrack" class="marquee-track"></div>
         </div>
 
-        <!-- HERO KPIs — Stripe-style: label + valor + delta + compare + area chart embutido -->
-        <div class="hero-kpi" id="kpiGrid">
-          <div class="hero-card">
-            <div class="hero-card-head">
-              <div class="hero-label">Atendimentos</div>
-              <div class="hero-value">
-                <span id="kpiTotal">0</span>
-                <span class="hero-delta" id="kpiTotalDelta"></span>
-              </div>
-              <div class="hero-compare">
-                <span class="today"><span data-compare="now">Hoje</span> · <span id="kpiTotalNow">0</span></span>
-                <span class="yesterday"><span data-compare="prev">Ontem</span> · <span id="kpiTotalPrev">0</span></span>
-              </div>
+        <!-- LINHA 1 — 6 metric cards (layout v54 derivado de ScreenDashboard) -->
+        <div class="metric-grid-6" id="kpiGrid">
+          <div class="metric-card">
+            <div class="metric-label">Atendimentos</div>
+            <div class="metric-value">
+              <span class="metric-num" id="kpiTotal">0</span>
             </div>
-            <div class="hero-chart" id="chartHeroAtend"></div>
+            <div class="metric-delta" id="kpiTotalDelta"></div>
+            <div class="metric-compare">
+              <span><span data-compare="now">Hoje</span> · <span id="kpiTotalNow">0</span></span>
+              <span><span data-compare="prev">Ontem</span> · <span id="kpiTotalPrev">0</span></span>
+            </div>
+            <div class="hero-chart hidden" id="chartHeroAtend"></div>
           </div>
-          <div class="hero-card">
-            <div class="hero-card-head">
-              <div class="hero-label">Vendas</div>
-              <div class="hero-value">
-                <span id="kpiVendas">0</span>
-                <span class="hero-delta" id="kpiVendasDelta"></span>
-              </div>
-              <div class="hero-compare">
-                <span class="today" style="--dot: var(--chart-2)"
-                  ><span data-compare="now">Hoje</span> · <span id="kpiVendasNow">0</span></span
-                >
-                <span class="yesterday"
-                  ><span data-compare="prev">Ontem</span> · <span id="kpiVendasPrev">0</span></span
-                >
-              </div>
+          <div class="metric-card metric-card--featured">
+            <div class="metric-label">Vendas</div>
+            <div class="metric-value">
+              <span class="metric-num" id="kpiVendas">0</span>
             </div>
-            <div class="hero-chart" id="chartHeroVendas"></div>
+            <div class="metric-delta" id="kpiVendasDelta"></div>
+            <div class="metric-compare">
+              <span><span data-compare="now">Hoje</span> · <span id="kpiVendasNow">0</span></span>
+              <span><span data-compare="prev">Ontem</span> · <span id="kpiVendasPrev">0</span></span>
+            </div>
+            <div class="hero-chart hidden" id="chartHeroVendas"></div>
           </div>
-          <div class="hero-card">
-            <div class="hero-card-head">
-              <div class="hero-label">Taxa de conversão</div>
-              <div class="hero-value">
-                <span id="kpiConv">0%</span>
-                <span class="hero-delta" id="kpiConvDelta"></span>
-              </div>
-              <div class="hero-compare">
-                <span class="today" style="--dot: var(--chart-3)"
-                  ><span data-compare="now">Hoje</span> · <span id="kpiConvNow">0%</span></span
-                >
-                <span class="yesterday"><span data-compare="prev">Ontem</span> · <span id="kpiConvPrev">0%</span></span>
-              </div>
+          <div class="metric-card">
+            <div class="metric-label">Conversão</div>
+            <div class="metric-value">
+              <span class="metric-num" id="kpiConv">0%</span>
             </div>
-            <div class="hero-chart" id="chartHeroConv"></div>
+            <div class="metric-delta" id="kpiConvDelta"></div>
+            <div class="metric-compare">
+              <span><span data-compare="now">Hoje</span> · <span id="kpiConvNow">0%</span></span>
+              <span><span data-compare="prev">Ontem</span> · <span id="kpiConvPrev">0%</span></span>
+            </div>
+            <div class="hero-chart hidden" id="chartHeroConv"></div>
           </div>
-        </div>
-
-        <!-- SECONDARY KPIs — Stripe-style: label+val esquerda, delta+mini-spark direita -->
-        <div class="sec-kpi">
-          <div class="sec-card">
-            <div class="sec-left">
-              <div class="sec-left-label">Não convertidos</div>
-              <div class="sec-val" id="kpiLoss">0</div>
+          <div class="metric-card">
+            <div class="metric-label">Não converteu</div>
+            <div class="metric-value">
+              <span class="metric-num" id="kpiLoss">0</span>
             </div>
-            <div class="sec-right">
-              <div class="sec-delta" id="kpiLossDelta"></div>
-              <div class="mini-spark" id="sparkLoss"></div>
-            </div>
+            <div class="metric-delta" id="kpiLossDelta"></div>
+            <div class="hero-chart hidden mini-spark" id="sparkLoss"></div>
           </div>
-          <div class="sec-card">
-            <div class="sec-left">
-              <div class="sec-left-label">Fidelizados</div>
-              <div class="sec-val" id="kpiPref">0</div>
+          <div class="metric-card">
+            <div class="metric-label">Fidelizados</div>
+            <div class="metric-value">
+              <span class="metric-num" id="kpiPref">0</span>
             </div>
-            <div class="sec-right">
-              <div class="sec-delta" id="kpiPrefDelta"></div>
-              <div class="mini-spark" id="sparkPref"></div>
-            </div>
+            <div class="metric-delta" id="kpiPrefDelta"></div>
+            <div class="hero-chart hidden mini-spark" id="sparkPref"></div>
           </div>
-          <div class="sec-card">
-            <div class="sec-left">
-              <div class="sec-left-label">Tempo médio</div>
-              <div class="sec-val" id="kpiTime">0 min</div>
+          <div class="metric-card">
+            <div class="metric-label">Tempo médio</div>
+            <div class="metric-value">
+              <span class="metric-num" id="kpiTime">0 min</span>
             </div>
-            <div class="sec-right">
-              <div class="sec-delta" id="kpiTimeDelta"></div>
-              <div class="mini-spark" id="sparkTempo"></div>
-            </div>
+            <div class="metric-delta" id="kpiTimeDelta"></div>
+            <div class="hero-chart hidden mini-spark" id="sparkTempo"></div>
           </div>
         </div>
 
-        <!-- Tabs removidas (Opção C) — todas as sections renderizam linearmente -->
-
-        <!-- Section: Visão Geral -->
+        <!-- LINHA 2 — chart 1.5fr + motivos 1fr -->
         <div class="chart-section" id="section-geral" style="display: block">
-          <div class="charts-grid">
+          <div class="charts-grid charts-grid--1-5-1">
             <div class="chart-card">
-              <div class="chart-card-header" style="margin-bottom: 14px">
-                <h3 style="margin: 0">
-                  <i class="fa-solid fa-chart-pie" style="margin-right: 6px; color: var(--accent-dim)"></i>Motivos de
-                  Perda
-                </h3>
+              <div class="chart-card-header">
+                <span
+                  ><i class="fa-solid fa-chart-bar" style="margin-right: 6px; color: var(--mv-text-muted)"></i>Fluxo por
+                  Hora</span
+                >
+              </div>
+              <div class="chart-box" style="min-height: 220px">
+                <div id="chartHourly"></div>
+              </div>
+              <p id="chartHourlyEmpty" class="chart-empty-state" style="display: none">
+                <i class="fa-solid fa-clock"></i>Sem fluxo de atendimentos neste período
+              </p>
+            </div>
+            <div class="chart-card">
+              <div class="chart-card-header">
+                <span
+                  ><i class="fa-solid fa-chart-pie" style="margin-right: 6px; color: var(--mv-text-muted)"></i>Motivos
+                  de Perda</span
+                >
                 <span
                   id="motivosTotal"
                   style="
-                    font-family: var(--font-mono);
+                    font-family: var(--mv-font-mono);
                     font-size: 10px;
-                    color: var(--text-muted);
+                    color: var(--mv-text-muted);
                     letter-spacing: 0.08em;
                   "
                   >—</span
                 >
               </div>
-              <div class="donut-wrap">
+              <div class="chart-box donut-wrap" style="min-height: 220px">
                 <div id="chartMotivos" class="donut-compact"></div>
                 <div class="donut-legend" id="motivosLegend"></div>
               </div>
@@ -1221,63 +1321,62 @@
                 <i class="fa-solid fa-face-smile-beam"></i>Nenhuma perda registrada neste período
               </p>
             </div>
+          </div>
+
+          <!-- LINHA 3 — origem 1.2fr + trend 1fr -->
+          <div class="charts-grid charts-grid--1-2-1">
             <div class="chart-card">
-              <h3>
-                <i class="fa-solid fa-signs-post" style="margin-right: 6px; color: var(--accent-dim)"></i>Origem dos
-                Clientes
-              </h3>
-              <div class="chart-box" style="height: 300px"><div id="chartOrigem"></div></div>
+              <div class="chart-card-header">
+                <span
+                  ><i class="fa-solid fa-signs-post" style="margin-right: 6px; color: var(--mv-text-muted)"></i>Origem
+                  dos Clientes</span
+                >
+              </div>
+              <div class="chart-box" style="min-height: 240px">
+                <div id="chartOrigem"></div>
+              </div>
               <p id="chartOrigemEmpty" class="chart-empty-state" style="display: none">
                 <i class="fa-solid fa-signs-post"></i>Nenhum dado de origem registrado neste período
               </p>
             </div>
+            <div class="chart-card">
+              <div class="chart-card-header">
+                <span
+                  ><i class="fa-solid fa-chart-line" style="margin-right: 6px; color: var(--mv-text-muted)"></i>Evolução
+                  Diária</span
+                >
+              </div>
+              <div
+                class="chart-box"
+                style="min-height: 240px; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch"
+              >
+                <div id="chartTrend" style="min-width: 360px"></div>
+              </div>
+              <p id="chartTrendEmpty" class="chart-empty-state" style="display: none">
+                <i class="fa-solid fa-chart-line"></i>Sem evolução registrada neste período
+              </p>
+            </div>
           </div>
-          <div class="chart-card" id="ruptureImpactCard" style="margin-bottom: var(--gap); display: none">
-            <h3>
-              <i class="fa-solid fa-box-open" style="margin-right: 6px; color: var(--danger)"></i>Rupturas específicas
+
+          <!-- Ruptura específica (mostrada por JS quando há dados) -->
+          <div class="chart-card" id="ruptureImpactCard" style="margin-top: 16px; display: none">
+            <div class="chart-card-header">
+              <span
+                ><i class="fa-solid fa-box-open" style="margin-right: 6px; color: var(--mv-status-error)"></i>Rupturas
+                específicas</span
+              >
               <span
                 id="ruptureImpactCount"
                 style="
-                  margin-left: 8px;
-                  font-family: var(--font-mono);
+                  font-family: var(--mv-font-mono);
                   font-size: 10px;
-                  color: var(--text-muted);
+                  color: var(--mv-text-muted);
                   letter-spacing: 0.08em;
                 "
                 >—</span
               >
-            </h3>
-            <div id="ruptureImpactList"></div>
-          </div>
-          <div class="chart-card" style="margin-bottom: var(--gap)">
-            <h3>
-              <i class="fa-solid fa-chart-bar" style="margin-right: 6px; color: var(--accent-dim)"></i>Fluxo por Hora
-            </h3>
-            <div class="chart-box"><div id="chartHourly"></div></div>
-            <p id="chartHourlyEmpty" class="chart-empty-state" style="display: none">
-              <i class="fa-solid fa-clock"></i>Sem fluxo de atendimentos neste período
-            </p>
-          </div>
-          <div class="chart-card" style="margin-bottom: var(--gap)">
-            <h3>
-              <i class="fa-solid fa-chart-line" style="margin-right: 6px; color: var(--accent-dim)"></i>Evolução Diária
-            </h3>
-            <div
-              style="
-                overflow-x: auto;
-                overflow-y: hidden;
-                -webkit-overflow-scrolling: touch;
-                scrollbar-width: thin;
-                scrollbar-color: var(--accent-dim) transparent;
-              "
-            >
-              <div class="chart-box" style="height: 320px; min-width: 700px">
-                <div id="chartTrend"></div>
-              </div>
             </div>
-            <p id="chartTrendEmpty" class="chart-empty-state" style="display: none">
-              <i class="fa-solid fa-chart-line"></i>Sem evolução registrada neste período
-            </p>
+            <div class="chart-box" id="ruptureImpactList"></div>
           </div>
         </div>
 
