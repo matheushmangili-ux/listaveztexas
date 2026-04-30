@@ -2,7 +2,10 @@
 <html lang="pt-BR" data-theme="light">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
     <title>minhavez — Fila</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -61,15 +64,19 @@
         box-sizing: border-box;
       }
 
+      html,
       body {
         margin: 0;
+        height: 100%;
+        height: 100dvh;
+        overflow: hidden;
+      }
+      body {
         background: var(--mv-bg);
         color: var(--mv-text);
         font-family: var(--mv-font-sans);
         font-size: var(--mv-text-md);
         line-height: 1.4;
-        height: 100vh;
-        overflow: hidden;
       }
       .hidden {
         display: none !important;
@@ -184,7 +191,14 @@
 
       /* ─── Layout ─── */
       .tablet-layout {
+        /* 100vh em browser mobile (Chrome/Safari iOS) NÃO subtrai a barra
+           de endereço/nav-buttons → header sai do viewport. Usar dvh
+           (dynamic viewport height) que respeita o chrome dinâmico.
+           Fallback 100vh pra browsers antigos (não-suportadores fazem
+           override pra dvh quando suportado). */
         height: 100vh;
+        height: 100dvh;
+        max-height: 100dvh;
         display: grid;
         grid-template-columns: 360px 1fr;
         grid-template-rows: 64px 1fr auto;
@@ -193,6 +207,7 @@
           'queue  service'
           'footer footer';
         gap: 0;
+        overflow: hidden;
       }
 
       .offline-banner {
@@ -303,8 +318,8 @@
         align-items: center;
         gap: 8px;
         height: 40px;
-        padding: 0 14px;
-        border-radius: var(--mv-radius-md);
+        padding: 0 16px;
+        border-radius: var(--mv-radius-lg);
         background: var(--mv-surface-2);
         border: 1px solid var(--mv-border-strong);
         color: var(--mv-text);
@@ -347,7 +362,7 @@
       .more-btn {
         width: 40px;
         height: 40px;
-        border-radius: var(--mv-radius-md);
+        border-radius: var(--mv-radius-lg);
         background: var(--mv-surface-2);
         border: 1px solid var(--mv-border-strong);
         color: var(--mv-text);
@@ -417,7 +432,10 @@
       }
       .queue-setor-tabs button,
       .queue-setor-tabs .setor-tab {
-        padding: 6px 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
         border-radius: var(--mv-radius-pill);
         background: var(--mv-surface-2);
         border: 1px solid var(--mv-border);
@@ -426,25 +444,51 @@
         color: var(--mv-text-muted);
         cursor: pointer;
         font-family: inherit;
+        letter-spacing: 0.01em;
+        transition:
+          background 0.15s ease,
+          border-color 0.15s ease,
+          color 0.15s ease;
+      }
+      .queue-setor-tabs button i,
+      .queue-setor-tabs .setor-tab i {
+        font-size: 12px;
+        opacity: 0.7;
+      }
+      .queue-setor-tabs button:hover:not(.active),
+      .queue-setor-tabs .setor-tab:hover:not(.active) {
+        background: var(--mv-surface);
+        border-color: var(--mv-border-strong);
+        color: var(--mv-text);
       }
       .queue-setor-tabs .active,
       .queue-setor-tabs button.active {
-        background: var(--mv-status-busy-bg);
-        border-color: var(--mv-brand-200);
-        color: var(--mv-primary);
+        background: var(--mv-primary);
+        border-color: var(--mv-primary);
+        color: #fff;
+      }
+      .queue-setor-tabs .active i,
+      .queue-setor-tabs button.active i {
+        opacity: 1;
       }
       .queue-head-row {
         padding-bottom: 4px;
       }
       .queue-history-btn {
-        width: 28px;
-        height: 28px;
-        border-radius: var(--mv-radius-sm);
+        width: 32px;
+        height: 32px;
+        border-radius: var(--mv-radius-md);
         background: transparent;
         border: 1px solid var(--mv-border);
         color: var(--mv-text-muted);
         cursor: pointer;
         font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          background 0.15s,
+          color 0.15s;
       }
       .queue-history-btn:hover {
         background: var(--mv-surface-2);
@@ -735,7 +779,7 @@
         }
       }
 
-      /* Em Atendimento — card horizontal */
+      /* Em Atendimento — card horizontal (radius unificado lg) */
       .atend-card {
         display: flex;
         align-items: center;
@@ -743,13 +787,14 @@
         padding: 14px 16px;
         background: var(--mv-surface);
         border: 1px solid var(--mv-border);
-        border-radius: var(--mv-radius-md);
+        border-radius: var(--mv-radius-lg);
         box-shadow: var(--mv-shadow-xs);
         cursor: grab;
         -webkit-tap-highlight-color: transparent;
         transition:
           border-color 0.2s,
-          box-shadow 0.2s;
+          box-shadow 0.2s,
+          background 0.2s;
       }
       .atend-card:hover {
         border-color: var(--mv-border-strong);
@@ -761,13 +806,14 @@
         justify-content: center;
         width: 40px;
         height: 40px;
-        border-radius: var(--mv-radius-sm);
+        border-radius: 50%;
         background: var(--mv-primary);
         color: #fff;
         font-family: var(--mv-font-mono);
         font-weight: 700;
-        font-size: 13px;
+        font-size: 14px;
         flex-shrink: 0;
+        letter-spacing: 0.02em;
       }
       .atend-card .atend-info {
         flex: 1;
@@ -905,15 +951,16 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        width: clamp(40px, 5vw, 52px);
-        height: clamp(40px, 5vw, 52px);
-        border-radius: var(--mv-radius-sm);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
         background: var(--mv-primary);
         color: #fff;
         font-size: 14px;
         font-weight: 700;
         flex-shrink: 0;
         overflow: hidden;
+        letter-spacing: 0.02em;
       }
       .footer-card .fc-avatar img {
         width: 100%;
