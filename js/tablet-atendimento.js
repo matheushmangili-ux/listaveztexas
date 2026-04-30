@@ -4,7 +4,7 @@
 // multi-client, troca, venda, motivos, finalize
 // ============================================
 
-import { toast, formatTime, initials, escapeHtml } from '/js/utils.js';
+import { toast, formatTime, initials, escapeHtml, setoresMatch } from '/js/utils.js';
 import { playSound } from '/js/sound.js';
 import { createModal, currencyInputHTML, parseCurrency } from '/js/ui.js';
 import {
@@ -308,7 +308,7 @@ async function _executeAtendimento(vendedorId, canalOrigemId) {
   // Se não é o primeiro da fila, é atendimento preferencial
   const setor = v.setor || 'loja';
   const fila = _ctx.vendedores
-    .filter((x) => (x.setor || 'loja') === setor && x.status === 'disponivel' && x.posicao_fila != null)
+    .filter((x) => setoresMatch(x.setor, setor) && x.status === 'disponivel' && x.posicao_fila != null)
     .sort((a, b) => a.posicao_fila - b.posicao_fila);
   const isPreferencial = fila.length > 0 && fila[0].id !== vendedorId;
   // Salvar posição original para restaurar se cancelar
@@ -776,7 +776,7 @@ async function cancelarAtendimento(atendId) {
     const savedPos = _savedQueuePositions.get(vendedorId) || 1;
     _savedQueuePositions.delete(vendedorId);
     const inQueue = _ctx.vendedores
-      .filter((x) => (x.setor || 'loja') === setor && x.status === 'disponivel' && x.posicao_fila != null)
+      .filter((x) => setoresMatch(x.setor, setor) && x.status === 'disponivel' && x.posicao_fila != null)
       .sort((a, b) => a.posicao_fila - b.posicao_fila);
 
     // Inserir na posição salva (ajustada ao tamanho atual da fila)
@@ -1103,7 +1103,7 @@ async function submitTroca(atendId, comDiferenca) {
       const setor = v2?.setor || 'loja';
       // Troca >= R$1.000 → vendedor volta pro 1º da fila (premiação)
       const inQueue = _ctx.vendedores
-        .filter((v) => (v.setor || 'loja') === setor && v.status === 'disponivel' && v.posicao_fila != null)
+        .filter((v) => setoresMatch(v.setor, setor) && v.status === 'disponivel' && v.posicao_fila != null)
         .sort((a, b) => a.posicao_fila - b.posicao_fila);
       const newOrder = [vendedorId, ...inQueue.filter((v) => v.id !== vendedorId).map((v) => v.id)];
       const { error: errReorder } = await _ctx.sb.rpc('reordenar_fila', { p_ids: newOrder });

@@ -3,7 +3,7 @@
 // renderQueue, drag desktop + touch
 // ============================================
 
-import { STATUS_CONFIG, SAIDA_COLORS, formatTime, toast, escapeHtml } from '/js/utils.js';
+import { STATUS_CONFIG, SAIDA_COLORS, formatTime, toast, escapeHtml, setoresMatch } from '/js/utils.js';
 import { renderFooter, invalidateFooter, showFooterDropLabel, hideFooterDropLabel } from '/js/tablet-footer.js';
 import {
   COLD_SELLER_TIMEOUT,
@@ -169,7 +169,7 @@ function renderPauseItemHtml(v, motivoColor, motivoLabel) {
 export function renderQueue() {
   const list = _ctx.queueList;
   const allVendedores = _ctx.vendedores || [];
-  const setorVendedores = allVendedores.filter((v) => (v.setor || 'loja') === _ctx.currentSetor);
+  const setorVendedores = allVendedores.filter((v) => setoresMatch(v.setor, _ctx.currentSetor));
   const inQueue = setorVendedores
     .filter((v) => v.status === 'disponivel' && v.posicao_fila != null)
     .sort((a, b) => a.posicao_fila - b.posicao_fila);
@@ -538,7 +538,7 @@ async function reorderInQueue(movedId, beforeId) {
   const moved = _ctx.vendedores.find((v) => v.id === movedId);
   const setor = moved?.setor || 'loja';
   const inQueue = _ctx.vendedores
-    .filter((v) => (v.setor || 'loja') === setor && v.status === 'disponivel' && v.posicao_fila != null)
+    .filter((v) => setoresMatch(v.setor, setor) && v.status === 'disponivel' && v.posicao_fila != null)
     .sort((a, b) => a.posicao_fila - b.posicao_fila);
   const ordered = inQueue.filter((v) => v.id !== movedId);
   const beforeIdx = beforeId ? ordered.findIndex((v) => v.id === beforeId) : ordered.length;
@@ -574,7 +574,7 @@ async function addToQueueAt(vendedorId, beforeId) {
   const target = _ctx.vendedores.find((x) => x.id === vendedorId);
   const setor = target?.setor || 'loja';
   const inQueue = _ctx.vendedores
-    .filter((v) => (v.setor || 'loja') === setor && v.status === 'disponivel' && v.posicao_fila != null)
+    .filter((v) => setoresMatch(v.setor, setor) && v.status === 'disponivel' && v.posicao_fila != null)
     .sort((a, b) => a.posicao_fila - b.posicao_fila);
   const beforeIdx = beforeId ? inQueue.findIndex((v) => v.id === beforeId) : inQueue.length;
   const insertAt = beforeIdx >= 0 ? beforeIdx : inQueue.length;

@@ -5,7 +5,7 @@
 
 import { getSupabase } from '/js/supabase-config.js';
 import { requireRole, logout, getTenantId } from '/js/auth.js';
-import { SAIDA_COLORS, toast, initTheme, toggleTheme, escapeHtml } from '/js/utils.js';
+import { SAIDA_COLORS, toast, initTheme, toggleTheme, escapeHtml, setoresMatch, normalizeSetor } from '/js/utils.js';
 import { fetchVendedores } from '/js/dashboard-api.js';
 import { loadTenant, applyBranding, tenantPath } from '/js/tenant.js';
 import { showChangelog, setVersionLabel } from '/js/changelog.js';
@@ -175,7 +175,9 @@ function markLocal() {
 
 window.setSetor = function (setor) {
   state.setor = setor;
-  document.querySelectorAll('.setor-tab').forEach((t) => t.classList.toggle('active', t.dataset.setor === setor));
+  document
+    .querySelectorAll('.setor-tab')
+    .forEach((t) => t.classList.toggle('active', setoresMatch(t.dataset.setor, setor)));
   invalidateQueue();
   invalidateFooter();
   renderQueue();
@@ -441,7 +443,7 @@ async function addToQueue(vendedorId) {
   }
   const v = state.vendedores.find((x) => x.id === vendedorId);
   const setor = v?.setor || 'loja';
-  const setorQueue = state.vendedores.filter((x) => (x.setor || 'loja') === setor && x.posicao_fila != null);
+  const setorQueue = state.vendedores.filter((x) => setoresMatch(x.setor, setor) && x.posicao_fila != null);
   const maxPos = Math.max(0, ...setorQueue.map((x) => x.posicao_fila));
   const newPos = maxPos + 1;
   markLocal();
@@ -475,7 +477,7 @@ async function returnToSavedPosition(vendedorId) {
 
   // Vendedores atualmente na fila, ordenados por posição
   const inQueue = state.vendedores
-    .filter((x) => x.id !== vendedorId && (x.setor || 'loja') === setor && x.posicao_fila != null)
+    .filter((x) => x.id !== vendedorId && setoresMatch(x.setor, setor) && x.posicao_fila != null)
     .sort((a, b) => a.posicao_fila - b.posicao_fila);
 
   // Quantos ainda estão à frente da posição original?

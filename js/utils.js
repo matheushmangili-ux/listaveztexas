@@ -50,6 +50,38 @@ export function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+/**
+ * Normaliza chave de setor para comparação robusta entre tabs/UI e dados.
+ *
+ * Bug-fix histórico (2026-04-30): Texas Center reportou que vendedores de
+ * selaria/chapelaria/vestuário não apareciam pra entrar na fila. Causa raiz:
+ * filtros usavam comparação `===` exata de string. Tenants configuram
+ * `tenant.setores = ['loja', 'chapelaria', 'selaria', 'vestuario']` (lowercase
+ * sem acento) mas dados em `vendedores.setor` podem estar com acento e
+ * capitalização diferentes ('Vestuário', 'Chapelaria', etc) — herança de
+ * cadastros manuais ou imports antigos.
+ *
+ * Esta função normaliza ambos os lados antes de comparar:
+ * - lowercase
+ * - remove acentos (NFD + replace combining marks)
+ * - trim espaços
+ * - fallback para 'loja' quando null/undefined/empty
+ *
+ * Uso: `setoresMatch(v.setor, currentSetor)` em vez de `(v.setor||'loja')===currentSetor`.
+ */
+export function normalizeSetor(s) {
+  const raw = String(s ?? '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '');
+  return raw === '' ? 'loja' : raw;
+}
+
+export function setoresMatch(a, b) {
+  return normalizeSetor(a) === normalizeSetor(b);
+}
+
 export function formatTime(seconds) {
   if (!seconds || !isFinite(seconds)) return '0min 0s';
   const h = Math.floor(seconds / 3600);

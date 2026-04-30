@@ -3,7 +3,7 @@
 // Render, events, confirm-fila popup
 // ============================================
 
-import { SAIDA_COLORS, PAUSE_LIMITS, initials, toast, escapeHtml } from '/js/utils.js';
+import { SAIDA_COLORS, PAUSE_LIMITS, initials, toast, escapeHtml, setoresMatch } from '/js/utils.js';
 import { FOOTER_TIMER_INTERVAL, INPUT_FOCUS_DELAY, Z_MENU } from '/js/constants.js';
 
 let _ctx = null;
@@ -253,7 +253,7 @@ export function renderFooter() {
   if (_ctx.touchDragging || _ctx.draggedId) return;
 
   const allV = _ctx.vendedores || [];
-  const setorVendedores = allV.filter((v) => (v.setor || 'loja') === _ctx.currentSetor);
+  const setorVendedores = allV.filter((v) => setoresMatch(v.setor, _ctx.currentSetor));
   const _atendMap = new Map(_ctx.activeAtendimentos.map((a) => [a.vendedor_id, a]));
   const _minGlobal = Math.floor(Date.now() / 60000);
   const footerKey =

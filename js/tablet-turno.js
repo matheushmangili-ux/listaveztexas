@@ -3,7 +3,7 @@
 // Open/close turno, check-in, turno summary
 // ============================================
 
-import { toast, initials, escapeHtml } from '/js/utils.js';
+import { toast, initials, escapeHtml, setoresMatch } from '/js/utils.js';
 
 let _ctx = null;
 
@@ -209,7 +209,7 @@ async function confirmCloseTurno() {
 // ─── Check-in de abertura ───
 
 function openCheckin() {
-  const allV = _ctx.vendedores.filter((v) => (v.setor || 'loja') === _ctx.currentSetor);
+  const allV = _ctx.vendedores.filter((v) => setoresMatch(v.setor, _ctx.currentSetor));
   const list = document.getElementById('checkinList');
   list.innerHTML = allV
     .map((v) => {

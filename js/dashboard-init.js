@@ -14,7 +14,8 @@ import {
   toast,
   initTheme,
   toggleTheme,
-  escapeHtml
+  escapeHtml,
+  setoresMatch
 } from '/js/utils.js';
 import { loadTenant, applyBranding, tenantPath, getSlug } from '/js/tenant.js';
 import { METAS_KEY, DEFAULT_METAS, PERIODS } from '/js/dashboard-config.js';
@@ -231,7 +232,7 @@ async function populateFilters() {
 function updateVendedorFilter() {
   const selVend = document.getElementById('filterVendedor');
   const filtered = filterSetor
-    ? _cachedVendedores.filter((v) => (v.setor || 'loja') === filterSetor)
+    ? _cachedVendedores.filter((v) => setoresMatch(v.setor, filterSetor))
     : _cachedVendedores;
   selVend.innerHTML =
     '<option value="">Todos os vendedores</option>' +

@@ -5,7 +5,7 @@
 
 import { fetchCanalStats, fetchRuptureLog, fetchPauseLog, fetchVendedores } from '/js/dashboard-api.js';
 import { CHART_TAB_KEY, ORIGEM_PALETTE, DEFAULT_METAS, PERIODS } from '/js/dashboard-config.js';
-import { STATUS_CONFIG, MOTIVOS, initials, toast, todayRange, escapeHtml } from '/js/utils.js';
+import { STATUS_CONFIG, MOTIVOS, initials, toast, todayRange, escapeHtml, setoresMatch } from '/js/utils.js';
 import { CHART_RESIZE_DELAY } from '/js/constants.js';
 
 let _ctx = null;
@@ -366,7 +366,7 @@ export async function loadAll() {
     if (filterVendedor) {
       aq = aq.eq('vendedor_id', filterVendedor);
     } else if (filterSetor) {
-      const setorIds = _cachedVendedores.filter((v) => (v.setor || 'loja') === filterSetor).map((v) => v.id);
+      const setorIds = _cachedVendedores.filter((v) => setoresMatch(v.setor, filterSetor)).map((v) => v.id);
       if (setorIds.length > 0) aq = aq.in('vendedor_id', setorIds);
     }
     const { data: atendData } = await aq;
