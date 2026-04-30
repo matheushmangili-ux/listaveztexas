@@ -81,21 +81,25 @@ function buildFooterCardData(v, atendMap) {
   const atendendo = v.status === 'em_atendimento';
   let statusLabel, statusColor;
 
+  // statusColor agora usa cores diretas dos tokens v54 (não vars frágeis):
+  // atendendo=primary blue, fila=available green, pausa=paused amber,
+  // disponivel-fora=away slate, fora-com-motivo=SAIDA_COLOR
   if (atendendo) {
     const atend = atendMap.get(v.id);
     const mins = atend && atend.inicio ? Math.floor((Date.now() - new Date(atend.inicio).getTime()) / 60000) : 0;
-    statusLabel = mins > 0 ? 'Atendendo (' + mins + 'min)' : 'Atendendo';
-    statusColor = 'var(--info)';
+    statusLabel = mins > 0 ? 'Atendendo · ' + mins + 'min' : 'Atendendo';
+    statusColor = '#1e40af';
   } else if (inQueue) {
-    statusLabel = 'Na fila (#' + v.posicao_fila + ')';
-    statusColor = 'var(--success)';
+    statusLabel = 'Na fila · #' + v.posicao_fila;
+    statusColor = '#16a34a';
   } else if (v.status === 'pausa') {
     const m = _ctx.saidaMotivos[v.id];
     const sc = SAIDA_COLORS[m] || SAIDA_COLORS.outro;
     const pauseStart = _ctx.pauseStartTimes.get(v.id);
     const pauseMins = pauseStart ? Math.floor((Date.now() - pauseStart.getTime()) / 60000) : 0;
-    statusLabel = sc.label + (pauseMins > 0 ? ' (' + pauseMins + 'min)' : '');
-    statusColor = sc.color;
+    statusLabel = sc.label + (pauseMins > 0 ? ' · ' + pauseMins + 'min' : '');
+    // Pausa SEMPRE âmbar pra reforçar o estado, independente do motivo específico
+    statusColor = '#d97706';
   } else if (v.status === 'disponivel') {
     statusLabel = 'Disponível';
     statusColor = '#64748b';
@@ -120,14 +124,13 @@ function buildFooterCardData(v, atendMap) {
   const firstName = v.apelido || v.nome.split(' ')[0];
 
   // Avatar color by status — paleta v54 (alinhada ao mockup ScreenTablet)
-  // inQueue → verde (status-available); atendendo → azul royal; pausa → SAIDA_COLOR;
+  // inQueue → verde (status-available); atendendo → azul royal;
+  // pausa → âmbar (status-paused) sempre, independente do SAIDA_COLOR;
   // demais → slate (status-away).
-  let avatarBg = '#64748b'; // slate-500 (was #525252)
-  if (atendendo)
-    avatarBg = '#1e40af'; // primary (was #8ea5c9 dusty)
-  else if (inQueue)
-    avatarBg = '#16a34a'; // status-available (was #a78bfa lavender)
-  else if (v.status === 'pausa') avatarBg = statusColor;
+  let avatarBg = '#64748b';
+  if (atendendo) avatarBg = '#1e40af';
+  else if (inQueue) avatarBg = '#16a34a';
+  else if (v.status === 'pausa') avatarBg = '#d97706';
 
   // Fingerprint — tudo que altera a saída renderizada
   const key = [
