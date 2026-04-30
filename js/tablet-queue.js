@@ -156,13 +156,21 @@ function ensurePauseHeader() {
 }
 
 function renderPauseItemHtml(v, motivoColor, motivoLabel) {
-  return `<div class="queue-item queue-item-pause" data-id="${v.id}" data-action="return-pause" draggable="true" style="border-left:3px solid ${motivoColor}">
-    <div class="queue-position" style="background:${motivoColor}20;color:${motivoColor}"><i class="fa-solid ${STATUS_CONFIG.pausa.icon}"></i></div>
+  // Layout v54 — match queue-item: avatar circle + body (name + status line)
+  // SEM border-left colorido (cara de IA). Usa pause-label colorido e
+  // ícone return à direita como ação.
+  const initial = (v.apelido || v.nome || '?').trim().charAt(0).toUpperCase();
+  return `<div class="queue-item queue-item-pause" data-id="${v.id}" data-action="return-pause" draggable="true">
+    <i class="fa-solid fa-grip-vertical queue-item-grip" aria-hidden="true"></i>
+    <span class="queue-pos-num"><i class="fa-solid ${STATUS_CONFIG.pausa.icon}"></i></span>
+    <span class="queue-avatar" style="background:${motivoColor}">${escapeHtml(initial)}</span>
     <div class="queue-item-body">
-      <div class="queue-item-name">${escapeHtml(v.apelido || v.nome)}</div>
-      <div class="queue-item-pause-label" style="color:${motivoColor}">${escapeHtml(motivoLabel)}</div>
+      <div class="queue-item-name-row">
+        <span class="queue-item-name">${escapeHtml(v.apelido || v.nome)}</span>
+      </div>
+      <span class="queue-item-pause-label" style="color:${motivoColor}">${escapeHtml(motivoLabel)}</span>
     </div>
-    <i class="fa-solid fa-arrow-rotate-left queue-pause-return" title="Voltar à fila"></i>
+    <button class="queue-item-action" data-action="return-pause" data-vid="${v.id}" title="Voltar à fila" aria-label="Voltar à fila"><i class="fa-solid fa-arrow-rotate-left"></i></button>
   </div>`;
 }
 

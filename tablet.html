@@ -427,15 +427,23 @@
         flex-direction: column;
       }
       .queue-setor-tabs {
-        flex-wrap: wrap;
-        margin-bottom: 12px;
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 6px;
+        margin-bottom: 14px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        padding-bottom: 2px;
+      }
+      .queue-setor-tabs::-webkit-scrollbar {
+        display: none;
       }
       .queue-setor-tabs button,
       .queue-setor-tabs .setor-tab {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 8px 14px;
+        gap: 5px;
+        padding: 7px 12px;
         border-radius: var(--mv-radius-pill);
         background: var(--mv-surface-2);
         border: 1px solid var(--mv-border);
@@ -445,6 +453,8 @@
         cursor: pointer;
         font-family: inherit;
         letter-spacing: 0.01em;
+        white-space: nowrap;
+        flex-shrink: 0;
         transition:
           background 0.15s ease,
           border-color 0.15s ease,
@@ -711,6 +721,30 @@
         text-overflow: ellipsis;
       }
       .queue-item-status {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      /* Cabeçalho "Em pausa" entre os items disponíveis e os pausados */
+      .queue-pause-header {
+        margin-top: 16px;
+        padding: 10px 4px 8px;
+        border-top: 1px solid var(--mv-border);
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--mv-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .queue-pause-header i {
+        color: var(--mv-status-paused);
+        font-size: 11px;
+      }
+      .queue-item-pause-label {
         font-size: 10px;
         font-weight: 600;
         text-transform: uppercase;
@@ -1155,13 +1189,16 @@
       }
       .atend-grip {
         flex-shrink: 0;
-        margin-left: auto;
-        color: var(--mv-text-muted);
-        font-size: 14px;
-        opacity: 0.3;
+        margin-left: 4px;
+        color: var(--mv-text-faint);
+        font-size: 11px;
+        opacity: 0.25;
+      }
+      .atend-grip:hover {
+        opacity: 0.6;
       }
       .atend-canal + .atend-grip {
-        margin-left: 8px;
+        margin-left: 6px;
       }
       .active-label {
         font-size: 10px;
