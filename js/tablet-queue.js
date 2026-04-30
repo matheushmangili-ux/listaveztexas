@@ -359,29 +359,11 @@ function renderQueueItem(v, pos, isActive, draggable) {
   const cfg = STATUS_CONFIG[v.status] || STATUS_CONFIG.fora;
   const dragAttr = draggable ? 'draggable="true"' : '';
   const dragStyle = draggable ? 'cursor:grab;' : '';
-  const posHtml = pos
-    ? `<div class="queue-position" style="background:${cfg.bg};color:${cfg.color}">${pos}</div>`
-    : `<div class="queue-position" style="background:${cfg.bg};color:${cfg.color}"><i class="fa-solid ${cfg.icon}" style="font-size:11px"></i></div>`;
 
-  let timerHtml = '';
-  if (v.status === 'em_atendimento') {
-    const atend = _ctx.activeAtendimentos.find((a) => a.vendedor_id === v.id);
-    if (atend && atend.inicio) {
-      const startMs = new Date(atend.inicio).getTime();
-      const elapsed = isNaN(startMs) ? 0 : (Date.now() - startMs) / 1000;
-      const clr = elapsed > ATTENDANCE_DANGER_SECONDS ? 'var(--danger)' : 'var(--text-primary)';
-      timerHtml = `<span data-sidebar-timer="${atend.id}" style="font-family:var(--font-mono);font-weight:700;font-size:11px;color:${clr};margin-left:auto;flex-shrink:0">${formatTime(elapsed)}</span>`;
-    }
-  }
-
-  let actionHtml = '';
-  if (draggable && _ctx.currentTurno) {
-    actionHtml = `<button data-action="send-atend" data-vid="${v.id}" style="padding:8px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-hover);color:var(--info);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font-body);transition:all .15s;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center" title="Enviar ao atendimento"><i class="fa-solid fa-arrow-right" style="font-size:12px"></i></button>`;
-  }
-
+  // ─── Layout v54 (alinhado ao mockup ScreenTablet) ───
+  // [grip] [N°mono] [⚪M circle 36px] [nome \n status / "↪ próximo"] [count] [timer] [→]
   const isNext = draggable && pos === 1;
   const nextClass = isNext ? ' next-in-line' : '';
-  const nextBadge = isNext ? '<span class="next-badge">PRÓXIMO</span>' : '';
   const coldClass =
     draggable &&
     _ctx.queueEntryTimes.has(v.id) &&
@@ -389,6 +371,40 @@ function renderQueueItem(v, pos, isActive, draggable) {
       ? ' cold-seller'
       : '';
 
+  // Posição mono inline (estilo mockup: "01", "02", "03")
+  const posStr = pos ? String(pos).padStart(2, '0') : '';
+  const posHtml = posStr
+    ? `<span class="queue-pos-num">${posStr}</span>`
+    : `<span class="queue-pos-num"><i class="fa-solid ${cfg.icon}"></i></span>`;
+
+  // Avatar circular 36px com inicial; bg pega da cor do status
+  const initial = (v.apelido || v.nome || '?').trim().charAt(0).toUpperCase();
+  const avatarHtml = `<span class="queue-avatar" style="background:${cfg.color}">${escapeHtml(initial)}</span>`;
+
+  // Linha de status: "↪ próximo cliente" (1º) ou status legível (LIVRE/ATENDENDO/etc)
+  const statusLine = isNext
+    ? `<span class="queue-item-next-text">↪ próximo cliente</span>`
+    : `<span class="queue-item-status" style="color:${cfg.color}">${cfg.short}</span>`;
+
+  // Timer (vendedor em_atendimento que ainda aparece na fila)
+  let timerHtml = '';
+  if (v.status === 'em_atendimento') {
+    const atend = _ctx.activeAtendimentos.find((a) => a.vendedor_id === v.id);
+    if (atend && atend.inicio) {
+      const startMs = new Date(atend.inicio).getTime();
+      const elapsed = isNaN(startMs) ? 0 : (Date.now() - startMs) / 1000;
+      const clr = elapsed > ATTENDANCE_DANGER_SECONDS ? 'var(--mv-status-error)' : 'var(--mv-text)';
+      timerHtml = `<span class="queue-item-timer" data-sidebar-timer="${atend.id}" style="color:${clr}">${formatTime(elapsed)}</span>`;
+    }
+  }
+
+  // Botão de ação (mandar pra atendimento) — preserva funcionalidade
+  let actionHtml = '';
+  if (draggable && _ctx.currentTurno) {
+    actionHtml = `<button class="queue-item-action" data-action="send-atend" data-vid="${v.id}" title="Enviar ao atendimento" aria-label="Enviar ao atendimento"><i class="fa-solid fa-arrow-right"></i></button>`;
+  }
+
+  // Badge de contagem de atendimentos no turno
   const atendCount = _ctx.vendorAtendCount[v.id] || 0;
   const countBadge =
     atendCount > 0
@@ -396,15 +412,15 @@ function renderQueueItem(v, pos, isActive, draggable) {
       : '';
 
   return `<div class="queue-item ${v.status}${isActive ? ' active' : ''}${nextClass}${coldClass}" data-id="${v.id}" ${dragAttr} style="${dragStyle};position:relative">
-    ${nextBadge}
-    ${draggable ? '<i class="fa-solid fa-grip-vertical" style="color:var(--text-muted);font-size:10px;opacity:.4;margin-right:2px"></i>' : ''}
+    ${draggable ? '<i class="fa-solid fa-grip-vertical queue-item-grip" aria-hidden="true"></i>' : ''}
     ${posHtml}
-    <div style="flex:1;min-width:0">
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(v.apelido || v.nome)}</span>
+    ${avatarHtml}
+    <div class="queue-item-body">
+      <div class="queue-item-name-row">
+        <span class="queue-item-name">${escapeHtml(v.apelido || v.nome)}</span>
         ${countBadge}
       </div>
-      <div style="font-size:10px;color:${cfg.color};font-weight:600;text-transform:uppercase;letter-spacing:.05em">${cfg.short}</div>
+      ${statusLine}
     </div>
     ${timerHtml}
     ${actionHtml}

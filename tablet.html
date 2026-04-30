@@ -497,21 +497,26 @@
          no lugar das cores lavanda).
          ═══════════════════════════════════════════════════════════════════ */
 
-      /* Queue item — card horizontal com posição + nome + status + ação */
+      /* ─── Queue item — layout v54 ScreenTablet ───
+         [grip] [Nº mono] [⚪M avatar 36px] [nome / linha status] [count] [timer] [→]
+         Mockup: screens/tablet.jsx linhas 121-141. Híbrido: visual do mockup
+         + ações funcionais (grip drag, arrow send, count badge). */
       .queue-item {
         display: flex;
         align-items: center;
         gap: 10px;
         padding: 10px 12px;
-        background: var(--mv-surface);
-        border: 1px solid var(--mv-border);
-        border-radius: var(--mv-radius-md);
-        box-shadow: var(--mv-shadow-xs);
+        background: var(--mv-surface-2);
+        border: 1px solid transparent;
+        border-radius: var(--mv-radius-lg);
         position: relative;
         transition:
           transform 0.18s var(--mv-ease),
-          box-shadow 0.18s var(--mv-ease),
+          background 0.18s var(--mv-ease),
           border-color 0.18s ease;
+      }
+      .queue-item:hover {
+        background: var(--mv-surface);
       }
       .queue-item.drag-above {
         transform: translateY(6px);
@@ -521,29 +526,127 @@
         transform: translateY(-6px);
         box-shadow: 0 2px 0 0 var(--mv-status-available);
       }
-      .queue-position {
-        display: flex;
+
+      /* Grip handle — drag affordance (sutil, só aparece em draggable) */
+      .queue-item-grip {
+        flex-shrink: 0;
+        font-size: 10px;
+        opacity: 0.35;
+        color: var(--mv-text-muted);
+        cursor: grab;
+      }
+      .queue-item-grip:active {
+        cursor: grabbing;
+      }
+
+      /* Posição mono inline (mockup: "01", "02", "03") */
+      .queue-pos-num {
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 32px;
-        height: 32px;
-        border-radius: var(--mv-radius-sm);
+        width: 26px;
+        flex-shrink: 0;
         font-family: var(--mv-font-mono);
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--mv-text-faint);
+        text-align: center;
+      }
+      .queue-pos-num i {
+        font-size: 11px;
+      }
+      .queue-item.next-in-line .queue-pos-num {
+        color: var(--mv-primary);
+      }
+
+      /* Avatar circular 36px com inicial — bg vem do JS (status color) */
+      .queue-avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        color: #fff;
         font-weight: 700;
         font-size: 14px;
-        flex-shrink: 0;
+        letter-spacing: 0.02em;
       }
+
+      /* Body: nome + linha de status */
       .queue-item-body {
         flex: 1;
         min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .queue-item-name-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
       }
       .queue-item-name {
-        font-weight: 700;
+        font-weight: 500;
         font-size: 14px;
         color: var(--mv-text);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+      }
+      .queue-item-status {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .queue-item-next-text {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--mv-primary);
+      }
+      .queue-item-timer {
+        margin-left: auto;
+        flex-shrink: 0;
+        font-family: var(--mv-font-mono);
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      /* Botão de ação (→ enviar pro atendimento) */
+      .queue-item-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        min-width: 36px;
+        min-height: 36px;
+        padding: 0 10px;
+        background: var(--mv-surface);
+        border: 1px solid var(--mv-border-strong);
+        border-radius: var(--mv-radius-sm);
+        color: var(--mv-primary);
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: inherit;
+        transition:
+          background 0.15s,
+          border-color 0.15s;
+      }
+      .queue-item-action:hover {
+        background: var(--mv-status-busy-bg);
+        border-color: var(--mv-brand-200);
+      }
+      .queue-item.next-in-line .queue-item-action {
+        background: var(--mv-primary);
+        color: #fff;
+        border-color: var(--mv-primary);
+      }
+      .queue-item.next-in-line .queue-item-action:hover {
+        background: var(--mv-primary-hover);
+        border-color: var(--mv-primary-hover);
       }
       .queue-item-pause {
         cursor: grab;
@@ -583,9 +686,8 @@
       }
 
       /* Próximo (1º da fila) — alinhado ao mockup ScreenTablet:
-         tint sutil brand-50 + borda brand-200, SEM pulse/glow.
-         Mockup: background brand-50, border 1px brand-200, name bold,
-         linha extra "↪ próximo cliente" em primary text. */
+         tint sutil brand-50 + borda brand-200, SEM pulse/glow, SEM badge.
+         Indicador é a linha "↪ próximo cliente" + nome em primary bold. */
       .queue-item.next-in-line {
         background: var(--mv-brand-50);
         border-color: var(--mv-brand-200);
@@ -594,22 +696,12 @@
         color: var(--mv-primary);
         font-weight: 700;
       }
-      .queue-item.next-in-line .next-badge {
-        margin-left: auto;
-        padding: 3px 8px;
-        background: var(--mv-primary);
-        color: #fff;
-        font-size: 9px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        border-radius: var(--mv-radius-pill);
-        line-height: 1.2;
-        flex-shrink: 0;
-        order: -1;
+      /* Esconde a antiga next-badge ribbon — JS antigo ainda pode emitir.
+         O novo renderQueueItem usa .queue-item-next-text inline em vez. */
+      .next-badge {
+        display: none;
       }
-      /* Esconde as animações antigas de pulse que sobraram em outros HTMLs/CSSs.
-         Mantém o keyframe definido como no-op caso JS pluga inline `animation`. */
+      /* Keyframes antigos defendidos como no-op (caso outro lugar use) */
       @keyframes nextCardPulse {
         from,
         to {
