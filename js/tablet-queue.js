@@ -381,10 +381,24 @@ function renderQueueItem(v, pos, isActive, draggable) {
   const initial = (v.apelido || v.nome || '?').trim().charAt(0).toUpperCase();
   const avatarHtml = `<span class="queue-avatar" style="background:${cfg.color}">${escapeHtml(initial)}</span>`;
 
-  // Linha de status: "↪ próximo cliente" (1º) ou status legível (LIVRE/ATENDENDO/etc)
-  const statusLine = isNext
-    ? `<span class="queue-item-next-text">↪ próximo cliente</span>`
-    : `<span class="queue-item-status" style="color:${cfg.color}">${cfg.short}</span>`;
+  // Tempo na fila — mostra há quanto tempo o vendedor está esperando
+  // (ajuda recepcionista a perceber vendedores parados há muito tempo)
+  let queueTimeText = '';
+  if (draggable && v.status === 'disponivel' && _ctx.queueEntryTimes.has(v.id)) {
+    const entry = _ctx.queueEntryTimes.get(v.id);
+    const elapsedMin = Math.floor((Date.now() - entry.time) / 60000);
+    if (elapsedMin >= 1) queueTimeText = `${elapsedMin}min na fila`;
+  }
+
+  // Linha de status: "↪ próximo cliente" (1º) ou status + tempo na fila
+  let statusLine = '';
+  if (isNext) {
+    statusLine = `<span class="queue-item-next-text">↪ próximo cliente</span>`;
+  } else if (queueTimeText) {
+    statusLine = `<span class="queue-item-status" style="color:${cfg.color}">${cfg.short}</span><span class="queue-item-time">${queueTimeText}</span>`;
+  } else {
+    statusLine = `<span class="queue-item-status" style="color:${cfg.color}">${cfg.short}</span>`;
+  }
 
   // Timer (vendedor em_atendimento que ainda aparece na fila)
   let timerHtml = '';

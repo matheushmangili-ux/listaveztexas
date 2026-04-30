@@ -68,7 +68,7 @@ if (setorTabsEl) {
   setorTabsEl.innerHTML = tenantSetores
     .map(
       (s, i) =>
-        `<button class="setor-tab${i === 0 ? ' active' : ''}" data-setor="${escapeHtml(s)}"><i class="fa-solid ${SETOR_ICONS[s] || 'fa-store'}"></i><span class="tab-label">${escapeHtml(SETOR_LABELS[s] || s)}</span></button>`
+        `<button class="setor-tab${i === 0 ? ' active' : ''}" data-setor="${escapeHtml(s)}"><i class="fa-solid ${SETOR_ICONS[s] || 'fa-store'}"></i><span class="tab-label">${escapeHtml(SETOR_LABELS[s] || s)}</span><span class="tab-count" data-setor-count="${escapeHtml(s)}"></span></button>`
     )
     .join('');
   setorTabsEl.addEventListener('click', (event) => {
@@ -77,6 +77,34 @@ if (setorTabsEl) {
   });
   if (tenantSetores.length <= 1) setorTabsEl.style.display = 'none';
 }
+
+/**
+ * Atualiza contadores de vendedores por setor nos tabs.
+ * Chamado após cada loadVendedores() pra refletir o estado atual.
+ */
+function updateSetorCounts() {
+  if (!setorTabsEl || tenantSetores.length <= 1) return;
+  const counts = {};
+  for (const v of state.vendedores) {
+    if (v.status === 'fora') continue;
+    const key = (v.setor || 'loja').toString().trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    counts[key] = (counts[key] || 0) + 1;
+  }
+  document.querySelectorAll('[data-setor-count]').forEach((el) => {
+    const key = el
+      .getAttribute('data-setor-count')
+      .toString()
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '');
+    const n = counts[key] || 0;
+    const txt = n > 0 ? String(n) : '';
+    if (el.textContent !== txt) el.textContent = txt;
+    el.classList.toggle('is-zero', n === 0);
+  });
+}
+window.updateSetorCounts = updateSetorCounts;
 
 const sb = getSupabase();
 let user;
@@ -421,6 +449,7 @@ async function loadVendedores() {
       const v = state.vendedores.find((x) => x.id === id);
       if (!v || v.status !== 'pausa') state.pauseStartTimes.delete(id);
     }
+    updateSetorCounts();
     scheduleRender();
   } finally {
     ui.loadingVendedores = false;

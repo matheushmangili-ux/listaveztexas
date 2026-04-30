@@ -471,6 +471,29 @@
       .queue-setor-tabs button.active i {
         opacity: 1;
       }
+      /* Contador de vendedores no setor (badge inline) */
+      .tab-count {
+        margin-left: 4px;
+        padding: 1px 7px;
+        min-width: 18px;
+        background: var(--mv-surface);
+        color: var(--mv-text-muted);
+        border-radius: var(--mv-radius-pill);
+        font-family: var(--mv-font-mono);
+        font-size: 10px;
+        font-weight: 700;
+        text-align: center;
+        line-height: 1.6;
+      }
+      .tab-count:empty,
+      .tab-count.is-zero {
+        display: none;
+      }
+      .queue-setor-tabs .active .tab-count,
+      .queue-setor-tabs button.active .tab-count {
+        background: rgba(255, 255, 255, 0.22);
+        color: #fff;
+      }
       .queue-head-row {
         padding-bottom: 12px;
         border-bottom: 1px solid var(--mv-border);
@@ -692,6 +715,22 @@
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
+      }
+      /* Tempo na fila — mostrado ao lado do status (ex: "LIVRE · 12min na fila") */
+      .queue-item-time {
+        margin-left: 6px;
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--mv-text-muted);
+        font-family: var(--mv-font-mono);
+      }
+      .queue-item-time::before {
+        content: '· ';
+        opacity: 0.5;
+      }
+      .queue-item.cold-seller .queue-item-time {
+        color: var(--mv-status-paused);
+        font-weight: 600;
       }
       .queue-item-next-text {
         font-size: 11px;
