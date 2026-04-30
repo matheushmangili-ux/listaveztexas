@@ -1038,7 +1038,9 @@
         }
       }
 
-      /* Em Atendimento — card horizontal compacto (Fase 6) */
+      /* Em Atendimento — card horizontal compacto.
+         Sem strip colorida lateral (cara de IA-dashboard). Visual limpo:
+         border 1px uniforme, criticidade indicada por cor do timer. */
       .atend-card {
         display: flex;
         align-items: center;
@@ -1046,25 +1048,21 @@
         padding: 12px 14px;
         background: var(--mv-surface);
         border: 1px solid var(--mv-border);
-        border-left: 3px solid var(--mv-primary);
         border-radius: var(--mv-radius-lg);
         box-shadow: var(--mv-shadow-xs);
         cursor: grab;
         -webkit-tap-highlight-color: transparent;
         position: relative;
       }
-      /* Indicação visual de tempo crítico (warning > 15min, danger > 30min)
-         Aplicado via classes setadas pelo JS em applyAtendCardData. */
-      .atend-card.is-warning {
-        border-left-color: var(--mv-status-paused);
-        background: linear-gradient(90deg, rgba(217, 119, 6, 0.04) 0%, transparent 30%);
-      }
+      /* Indicação de tempo crítico — só via cor do timer + peso da fonte.
+         (warning > 25min, danger > 40min). Sem border colorida nem
+         gradients — visual sóbrio, profissional. */
       .atend-card.is-warning .atend-timer {
         color: var(--mv-status-paused);
+        font-weight: 700;
       }
       .atend-card.is-danger {
-        border-left-color: var(--mv-status-error);
-        background: linear-gradient(90deg, rgba(220, 38, 38, 0.05) 0%, transparent 30%);
+        border-color: var(--mv-status-error);
       }
       .atend-card.is-danger .atend-timer {
         color: var(--mv-status-error);
