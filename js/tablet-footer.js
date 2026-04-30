@@ -119,10 +119,14 @@ function buildFooterCardData(v, atendMap) {
   const draggable = !inQueue && !atendendo;
   const firstName = v.apelido || v.nome.split(' ')[0];
 
-  // Avatar color by status
-  let avatarBg = '#525252';
-  if (atendendo) avatarBg = '#8ea5c9';
-  else if (inQueue) avatarBg = '#a78bfa';
+  // Avatar color by status — paleta v54 (alinhada ao mockup ScreenTablet)
+  // inQueue → verde (status-available); atendendo → azul royal; pausa → SAIDA_COLOR;
+  // demais → slate (status-away).
+  let avatarBg = '#64748b'; // slate-500 (was #525252)
+  if (atendendo)
+    avatarBg = '#1e40af'; // primary (was #8ea5c9 dusty)
+  else if (inQueue)
+    avatarBg = '#16a34a'; // status-available (was #a78bfa lavender)
   else if (v.status === 'pausa') avatarBg = statusColor;
 
   // Fingerprint — tudo que altera a saída renderizada
