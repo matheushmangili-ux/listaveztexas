@@ -852,6 +852,192 @@
         }
       }
 
+      /* ═══════════════════════════════════════════════════════════════════
+         FASE 5 — FLUIDEZ (transições, hover, drag feedback, animações)
+         ═══════════════════════════════════════════════════════════════════ */
+
+      /* Entrada suave de itens novos (queue + atend + footer) */
+      @keyframes mvSlideIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes mvFadeOut {
+        to {
+          opacity: 0;
+          transform: translateY(-4px);
+        }
+      }
+      @keyframes mvScaleIn {
+        from {
+          opacity: 0;
+          transform: scale(0.92);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      .queue-item.new-item,
+      .queue-item.entering {
+        animation: mvSlideIn 280ms var(--mv-ease) both;
+      }
+      .queue-item.leaving {
+        animation: mvFadeOut 200ms var(--mv-ease) both;
+        pointer-events: none;
+      }
+      .queue-item.returning {
+        animation: mvSlideIn 220ms var(--mv-ease) both;
+      }
+      .atend-card.new-item,
+      .atend-card.entering {
+        animation: mvSlideIn 280ms var(--mv-ease) both;
+      }
+      .footer-card.new-item {
+        animation: mvScaleIn 240ms var(--mv-ease) both;
+      }
+
+      /* Hover unificado para cards interativos */
+      .queue-item:hover {
+        background: var(--mv-surface);
+      }
+      .atend-card:hover {
+        background: var(--mv-surface-2);
+      }
+
+      /* Drag-and-drop feedback (cursor + opacity) */
+      .queue-item[draggable='true']:active,
+      .atend-card[draggable='true']:active,
+      .footer-card[draggable='true']:active {
+        cursor: grabbing;
+      }
+      .queue-item.dragging,
+      .atend-card.dragging,
+      .footer-card.dragging {
+        opacity: 0.5;
+        transform: scale(0.97);
+      }
+      /* Drop zone feedback (queue panel + service panel) */
+      .queue-panel.drop-active {
+        background: var(--mv-status-busy-bg);
+        outline: 2px dashed var(--mv-primary);
+        outline-offset: -8px;
+      }
+      .service-panel.drop-active {
+        background: var(--mv-status-busy-bg);
+        outline: 2px dashed var(--mv-primary);
+        outline-offset: -8px;
+      }
+      .t-footer.drop-active {
+        background: var(--mv-status-error-bg);
+        outline: 2px dashed var(--mv-status-error);
+        outline-offset: -6px;
+      }
+
+      /* Drop label flutuante ("Soltar para enviar atendimento") */
+      .drop-label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 12px 20px;
+        background: var(--mv-primary);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        border-radius: var(--mv-radius-pill);
+        box-shadow: var(--mv-shadow-lg);
+        pointer-events: none;
+        z-index: 10;
+        animation: mvScaleIn 180ms var(--mv-ease) both;
+      }
+
+      /* Smooth scroll nas listas internas */
+      .queue-list,
+      .service-panel,
+      .t-footer {
+        scroll-behavior: smooth;
+      }
+
+      /* Transition global suave em mudanças de classe (color/bg/border) */
+      .queue-item,
+      .atend-card,
+      .footer-card,
+      .setor-tab,
+      .action-card {
+        transition:
+          background 180ms var(--mv-ease),
+          border-color 180ms var(--mv-ease),
+          color 180ms var(--mv-ease),
+          opacity 180ms var(--mv-ease),
+          transform 180ms var(--mv-ease),
+          box-shadow 180ms var(--mv-ease);
+      }
+
+      /* Active feedback (tap on touch) */
+      .queue-item-action:active,
+      .action-card:active,
+      .more-btn:active,
+      .footer-card:active {
+        transform: scale(0.96);
+      }
+
+      /* Loading skeleton (queue list while fetching) */
+      .queue-list.is-loading {
+        position: relative;
+        min-height: 240px;
+      }
+      .queue-list.is-loading::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+          180deg,
+          var(--mv-surface-2) 0,
+          var(--mv-surface-2) 60px,
+          transparent 60px,
+          transparent 68px
+        );
+        opacity: 0.6;
+        animation: mvShimmer 1.4s ease-in-out infinite;
+        pointer-events: none;
+      }
+      @keyframes mvShimmer {
+        0%,
+        100% {
+          opacity: 0.4;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+
+      /* Respect prefers-reduced-motion */
+      @media (prefers-reduced-motion: reduce) {
+        .queue-item,
+        .atend-card,
+        .footer-card,
+        .setor-tab,
+        .action-card,
+        .queue-item.new-item,
+        .queue-item.entering,
+        .queue-item.leaving,
+        .queue-item.returning,
+        .atend-card.new-item,
+        .footer-card.new-item,
+        .drop-label {
+          animation: none !important;
+          transition: none !important;
+        }
+      }
+
       /* Em Atendimento — card horizontal (radius unificado lg) */
       .atend-card {
         display: flex;
