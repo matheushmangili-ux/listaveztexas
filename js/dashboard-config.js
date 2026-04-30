@@ -7,8 +7,9 @@ export const CHART_TAB_KEY = 'minhavez_chart_tab';
 export const METAS_KEY = 'minhavez_metas';
 export const DEFAULT_METAS = { conversao: 70, tempo_medio: 30, ticket_medio: 3000 };
 
-// Donut chart palette: diverse colors for distinct category identification
-export const ORIGEM_PALETTE = ['#8ea5c9', '#a78bfa', '#d4a373', '#b8a8d4', '#d4a8c4', '#a8d4d8', '#b8875a', '#9ca3af'];
+// Donut chart palette v54: royal blue + status (alinha com tokens --chart-N).
+// v52 era pastel-rosa-lavanda; v54 é sóbrio operacional.
+export const ORIGEM_PALETTE = ['#1e40af', '#6366f1', '#0891b2', '#16a34a', '#d97706', '#dc2626', '#64748b', '#94a3b8'];
 
 // Period identifiers
 export const PERIODS = {

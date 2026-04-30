@@ -38,20 +38,20 @@ function _cssVar(name, fallback) {
 }
 function chartAccent() {
   return {
-    accent: _cssVar('--accent', '#a78bfa'),
-    accentBright: _cssVar('--accent-bright', '#c4b5fd'),
-    accentDim: _cssVar('--accent-dim', '#8b5cf6')
+    accent: _cssVar('--accent', '#1e40af'),
+    accentBright: _cssVar('--accent-bright', '#6366f1'),
+    accentDim: _cssVar('--accent-dim', '#1e3a8a')
   };
 }
 // Paleta categorial (Stripe-style): roxo → ciano → amber → emerald → rose → blue → slate
 function chartPalette() {
   return [
-    _cssVar('--chart-1', '#8b5cf6'),
-    _cssVar('--chart-2', '#0891b2'),
+    _cssVar('--chart-1', '#1e40af'),
+    _cssVar('--chart-2', '#6366f1'),
     _cssVar('--chart-3', '#d97706'),
-    _cssVar('--chart-4', '#059669'),
-    _cssVar('--chart-5', '#db2777'),
-    _cssVar('--chart-6', '#2563eb'),
+    _cssVar('--chart-4', '#16a34a'),
+    _cssVar('--chart-5', '#dc2626'),
+    _cssVar('--chart-6', '#0891b2'),
     _cssVar('--chart-7', '#64748b')
   ];
 }
@@ -86,7 +86,7 @@ const BRAND_PALETTE = {
     return _cssVar('--chart-6', '#1d4ed8');
   },
   get lavender() {
-    return _cssVar('--chart-1', '#a78bfa');
+    return _cssVar('--chart-1', '#1e40af');
   },
   neutral: '#94a3b8',
   charcoal: '#2a2a2a'
@@ -1259,7 +1259,7 @@ export async function loadScatter(range, cachedData) {
       yaxis: [
         {
           y: metaConv,
-          borderColor: '#a78bfa',
+          borderColor: '#1e40af',
           strokeDashArray: 5,
           opacity: 0.6,
           label: {
@@ -1268,8 +1268,8 @@ export async function loadScatter(range, cachedData) {
               fontSize: '10px',
               fontWeight: 700,
               fontFamily: "'Inter Tight'",
-              background: 'rgba(167, 139, 250,.12)',
-              color: '#a78bfa',
+              background: 'rgba(30, 64, 175, 0.10)',
+              color: '#1e40af',
               padding: { left: 6, right: 6, top: 2, bottom: 2 }
             },
             position: 'right',
@@ -1469,8 +1469,8 @@ export async function loadTrend(range) {
           style: {
             fontSize: '9px',
             fontWeight: 600,
-            background: 'rgba(167, 139, 250,.08)',
-            color: '#a78bfa',
+            background: 'rgba(30, 64, 175, 0.08)',
+            color: '#1e40af',
             padding: { left: 4, right: 4, top: 2, bottom: 2 }
           },
           position: 'right',
