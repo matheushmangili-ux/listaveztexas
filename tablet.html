@@ -227,51 +227,65 @@
         justify-content: space-between;
         gap: 16px;
       }
+      /* Version tag — escondido em produção; só aparece via tour/menu */
       .t-header-version {
-        color: var(--mv-text-faint);
-        margin-left: 4px;
+        display: none;
       }
+      /* KPIs do header — agrupados num card único, mais enxuto.
+         Cada KPI separado por divider sutil. Tipografia mono pros números. */
       .t-header-kpis {
-        gap: 12px;
+        display: inline-flex;
+        align-items: stretch;
+        gap: 0;
+        padding: 0;
+        background: var(--mv-surface-2);
+        border: 1px solid var(--mv-border);
+        border-radius: var(--mv-radius-lg);
+        overflow: hidden;
       }
       .t-header-kpi {
         position: relative;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
         padding: 6px 14px;
-        background: var(--mv-surface-2);
-        border: 1px solid var(--mv-border);
-        border-radius: var(--mv-radius-md);
+        background: transparent;
+        border: none;
+        border-radius: 0;
+      }
+      .t-header-kpi + .t-header-kpi {
+        border-left: 1px solid var(--mv-border);
       }
       .t-header-kpi i {
-        color: var(--mv-text-muted);
-        font-size: 14px;
+        color: var(--mv-text-faint);
+        font-size: 13px;
       }
       .t-header-kpi-body {
         display: flex;
         flex-direction: column;
         line-height: 1.1;
+        gap: 2px;
       }
       .t-header-kpi-value {
         font-family: var(--mv-font-mono);
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 700;
         color: var(--mv-text);
         font-variant-numeric: tabular-nums;
+        letter-spacing: -0.01em;
       }
       .t-header-kpi-label {
-        font-size: 10px;
+        font-size: 9px;
         text-transform: uppercase;
         letter-spacing: 0.06em;
         color: var(--mv-text-muted);
-        font-weight: 500;
+        font-weight: 600;
       }
       .conv-bar-track {
         position: absolute;
-        bottom: -1px;
-        left: 8px;
-        right: 8px;
+        bottom: 0;
+        left: 14px;
+        right: 14px;
         height: 2px;
         background: var(--mv-surface-3);
         border-radius: 1px;
@@ -953,15 +967,55 @@
       /* ─── Footer ─── */
       .t-footer {
         grid-area: footer;
-        padding: 12px 16px;
+        padding: 14px 24px;
         background: var(--mv-surface);
         border-top: 1px solid var(--mv-border);
         display: flex;
-        gap: 8px;
+        gap: 12px;
         flex-wrap: nowrap;
         overflow-x: auto;
-        max-height: 110px;
+        max-height: 124px;
         align-items: center;
+        scrollbar-width: thin;
+      }
+      .t-footer::-webkit-scrollbar {
+        height: 6px;
+      }
+      .t-footer::-webkit-scrollbar-thumb {
+        background: var(--mv-border-strong);
+        border-radius: 3px;
+      }
+      .t-footer::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      /* Footer title — "Vendedores N" enxuto ao lado dos cards */
+      .footer-title {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        flex-shrink: 0;
+        padding-right: 16px;
+        margin-right: 4px;
+        border-right: 1px solid var(--mv-border);
+        align-self: stretch;
+        justify-content: center;
+      }
+      .footer-title-label {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--mv-text-muted);
+        line-height: 1;
+      }
+      .footer-title-count {
+        font-family: var(--mv-font-mono);
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--mv-text);
+        font-variant-numeric: tabular-nums;
+        line-height: 1;
       }
 
       /* ─── Bottom sheets (compartilhado) ─── */
