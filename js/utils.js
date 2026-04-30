@@ -10,32 +10,47 @@ export const MOTIVOS = {
   outro: { label: 'Outro', icon: 'fa-ellipsis', color: '#94A3B8' }
 };
 
+// Status v54 — alinha com paleta royal blue + status semânticos do mockup
+// (verde=disponível, azul=atendendo, âmbar=pausa, slate=fora). Antes: lavanda v52.
 export const STATUS_CONFIG = {
   disponivel: {
     label: 'Disponível',
     short: 'LIVRE',
-    color: '#a78bfa',
-    bg: 'rgba(167, 139, 250,.1)',
+    color: '#16a34a',
+    bg: 'rgba(22, 163, 74, 0.10)',
     icon: 'fa-circle-check'
   },
   em_atendimento: {
     label: 'Em atendimento',
     short: 'ATENDENDO',
-    color: '#8ea5c9',
-    bg: 'rgba(142,165,201,.1)',
+    color: '#1e40af',
+    bg: 'rgba(30, 64, 175, 0.10)',
     icon: 'fa-comments'
   },
-  pausa: { label: 'Em pausa', short: 'PAUSA', color: '#d4a373', bg: 'rgba(212,163,115,.1)', icon: 'fa-mug-hot' },
-  fora: { label: 'Fora', short: 'FORA', color: '#71717A', bg: 'rgba(113,113,122,.1)', icon: 'fa-door-open' }
+  pausa: {
+    label: 'Em pausa',
+    short: 'PAUSA',
+    color: '#d97706',
+    bg: 'rgba(217, 119, 6, 0.10)',
+    icon: 'fa-mug-hot'
+  },
+  fora: {
+    label: 'Fora',
+    short: 'FORA',
+    color: '#64748b',
+    bg: 'rgba(100, 116, 139, 0.10)',
+    icon: 'fa-door-open'
+  }
 };
 
+// Cores de motivos de saída (almoço/banheiro/etc) — também v54
 export const SAIDA_COLORS = {
-  almoco: { color: '#d4a373', label: 'Almoço', labelFull: 'Em almoço' },
-  banheiro: { color: '#8ea5c9', label: 'Banheiro', labelFull: 'Banheiro' },
-  reuniao: { color: '#A1A1AA', label: 'Reunião', labelFull: 'Em reunião' },
-  operacional: { color: '#9488b8', label: 'Operacional', labelFull: 'Operacional' },
-  finalizar: { color: '#e89b8a', label: 'Finalizou', labelFull: 'Encerrou' },
-  outro: { color: '#71717A', label: 'Fora', labelFull: 'Fora' }
+  almoco: { color: '#d97706', label: 'Almoço', labelFull: 'Em almoço' },
+  banheiro: { color: '#0891b2', label: 'Banheiro', labelFull: 'Banheiro' },
+  reuniao: { color: '#64748b', label: 'Reunião', labelFull: 'Em reunião' },
+  operacional: { color: '#6366f1', label: 'Operacional', labelFull: 'Operacional' },
+  finalizar: { color: '#dc2626', label: 'Finalizou', labelFull: 'Encerrou' },
+  outro: { color: '#64748b', label: 'Fora', labelFull: 'Fora' }
 };
 
 export const PAUSE_LIMITS = { almoco: 60, banheiro: 15, reuniao: 30, operacional: 45 }; // minutos
