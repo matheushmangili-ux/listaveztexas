@@ -156,3 +156,53 @@
 }
 /* Nota: reset de <button> é feito por .mv-btn (não global) — reset por elemento
    competiria por especificidade com modificadores .mv-btn--primary etc. */
+
+/* ═══════════════════════════════════════════════════════════════════
+   LEGACY TOKEN SHIM (v52 → v54)
+   ═══════════════════════════════════════════════════════════════════
+   Vários módulos JS (tablet-queue, tablet-atendimento, dashboard-init,
+   dashboard-charts, etc) geram HTML com inline styles usando tokens
+   v52 sem o prefixo mv-. Quando o cleanup v54 removeu tokens.css legado,
+   esses 115 usos viraram CSS inválidos → cards renderizavam sem cor/border.
+
+   Este shim mapeia os nomes v52 para os v54 atuais. Refatoração futura
+   dos arquivos JS pode remover este bloco (PR separado).
+
+   Atualizado: 2026-04-29 (alinhamento mockup TQYQ18E1...)
+   ═══════════════════════════════════════════════════════════════════ */
+:root {
+  /* cores semânticas */
+  --accent: var(--mv-primary);
+  --accent-bright: var(--mv-brand-400);
+  --info: var(--mv-primary);
+  --success: var(--mv-status-available);
+  --warning: var(--mv-status-paused);
+  --danger: var(--mv-status-error);
+
+  /* superfícies */
+  --surface: var(--mv-surface);
+  --surface-subtle: var(--mv-surface-2);
+  --bg-card: var(--mv-surface);
+  --bg-elevated: var(--mv-surface-2);
+  --bg-hover: var(--mv-surface-2);
+  --bg-surface: var(--mv-surface-2);
+
+  /* texto */
+  --text: var(--mv-text);
+  --text-primary: var(--mv-text);
+  --text-secondary: var(--mv-text-muted);
+  --text-muted: var(--mv-text-muted);
+  --vendor-text-muted: var(--mv-text-muted);
+
+  /* bordas */
+  --border-subtle: var(--mv-border);
+  --border-medium: var(--mv-border-strong);
+
+  /* tipografia */
+  --font-body: var(--mv-font-sans);
+  --font-mono: var(--mv-font-mono);
+
+  /* raios */
+  --radius: var(--mv-radius-md);
+  --radius-sm: var(--mv-radius-sm);
+}
