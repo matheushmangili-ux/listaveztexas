@@ -47,7 +47,8 @@ export const DRAG_GHOST_Y_OFFSET = 30; // ghost vertical offset from touch point
 // ─── Business Logic ───
 
 export const COLD_SELLER_TIMEOUT = 20 * 60 * 1000; // 20 min — mark vendor as "cold" in queue
-export const ATTENDANCE_DANGER_SECONDS = 2400; // 40 min — timer turns red
+export const ATTENDANCE_WARNING_SECONDS = 1500; // 25 min — card border vira âmbar (Fase 6)
+export const ATTENDANCE_DANGER_SECONDS = 2400; // 40 min — card border vira vermelho + timer red
 export const TROCA_PREMIUM_VALUE = 1000; // R$ 1000 — epic troca threshold (front of queue)
 
 // ─── Z-Indices ───

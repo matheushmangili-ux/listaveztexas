@@ -26,6 +26,7 @@ import {
   INPUT_FOCUS_DELAY,
   ACTION_LOCK_RESET,
   ATTENDANCE_DANGER_SECONDS,
+  ATTENDANCE_WARNING_SECONDS,
   DRAG_THRESHOLD_ATENDIMENTO,
   DRAG_GHOST_Y_OFFSET,
   Z_DRAG_GHOST,
@@ -66,24 +67,40 @@ function _tickAtendTimers() {
   _timerRefs.forEach((ref, id) => {
     const elapsed = (now - ref.startMs) / 1000;
     const timeStr = formatTime(elapsed);
-    if (timeStr === ref.lastText) {
+    const isWarning = elapsed > ATTENDANCE_WARNING_SECONDS && elapsed <= ATTENDANCE_DANGER_SECONDS;
+    const isDanger = elapsed > ATTENDANCE_DANGER_SECONDS;
+
+    // Skip text update se nada mudou — mas SEMPRE re-aplica classes (defesa)
+    if (timeStr === ref.lastText && ref.lastWarning === isWarning && ref.lastDanger === isDanger) {
       if (ref.main || ref.side) allDetached = false;
       return;
     }
     ref.lastText = timeStr;
-    const isDanger = elapsed > ATTENDANCE_DANGER_SECONDS;
+    ref.lastWarning = isWarning;
+    ref.lastDanger = isDanger;
+
     if (ref.main && !ref.main.isConnected) ref.main = null;
     if (!ref.main) ref.main = document.getElementById('timer-' + id) || null;
     if (ref.main) {
       ref.main.textContent = timeStr;
       ref.main.className = 'atend-timer' + (isDanger ? ' danger' : '');
+      // Toggle is-warning/is-danger no card pai (Fase 6 — visual de criticidade)
+      const card = ref.main.closest('.atend-card');
+      if (card) {
+        card.classList.toggle('is-warning', isWarning);
+        card.classList.toggle('is-danger', isDanger);
+      }
       allDetached = false;
     }
     if (ref.side && !ref.side.isConnected) ref.side = null;
     if (!ref.side) ref.side = document.querySelector(`[data-sidebar-timer="${id}"]`) || null;
     if (ref.side) {
       ref.side.textContent = timeStr;
-      ref.side.style.color = isDanger ? 'var(--danger)' : 'var(--text-primary)';
+      ref.side.style.color = isDanger
+        ? 'var(--mv-status-error)'
+        : isWarning
+          ? 'var(--mv-status-paused)'
+          : 'var(--mv-text)';
       allDetached = false;
     }
   });
