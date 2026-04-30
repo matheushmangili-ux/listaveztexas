@@ -428,26 +428,20 @@
       }
       .queue-setor-tabs {
         display: flex;
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
         gap: 6px;
         margin-bottom: 14px;
-        overflow-x: auto;
-        scrollbar-width: none;
-        padding-bottom: 2px;
-      }
-      .queue-setor-tabs::-webkit-scrollbar {
-        display: none;
       }
       .queue-setor-tabs button,
       .queue-setor-tabs .setor-tab {
         display: inline-flex;
         align-items: center;
         gap: 5px;
-        padding: 7px 12px;
+        padding: 6px 10px;
         border-radius: var(--mv-radius-pill);
         background: var(--mv-surface-2);
         border: 1px solid var(--mv-border);
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 600;
         color: var(--mv-text-muted);
         cursor: pointer;
@@ -459,6 +453,10 @@
           background 0.15s ease,
           border-color 0.15s ease,
           color 0.15s ease;
+      }
+      .queue-setor-tabs button i,
+      .queue-setor-tabs .setor-tab i {
+        font-size: 11px;
       }
       .queue-setor-tabs button i,
       .queue-setor-tabs .setor-tab i {
@@ -483,14 +481,14 @@
       }
       /* Contador de vendedores no setor (badge inline) */
       .tab-count {
-        margin-left: 4px;
-        padding: 1px 7px;
-        min-width: 18px;
+        margin-left: 3px;
+        padding: 1px 6px;
+        min-width: 16px;
         background: var(--mv-surface);
         color: var(--mv-text-muted);
         border-radius: var(--mv-radius-pill);
         font-family: var(--mv-font-mono);
-        font-size: 10px;
+        font-size: 9px;
         font-weight: 700;
         text-align: center;
         line-height: 1.6;
