@@ -290,6 +290,35 @@ a {
   gap: 8px;
   flex-wrap: wrap;
 }
+.filter-bar label {
+  color: var(--mv-text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.filter-bar select {
+  min-width: 176px;
+  height: 36px;
+  appearance: none;
+  border: 1px solid var(--mv-border-strong);
+  border-radius: var(--mv-radius-md);
+  background:
+    linear-gradient(45deg, transparent 50%, var(--mv-text-muted) 50%) right 14px center / 5px 5px no-repeat,
+    linear-gradient(135deg, var(--mv-text-muted) 50%, transparent 50%) right 9px center / 5px 5px no-repeat,
+    var(--mv-surface);
+  color: var(--mv-text);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0 32px 0 12px;
+}
+.filter-bar select:focus {
+  border-color: var(--mv-primary);
+  box-shadow: var(--mv-shadow-focus);
+  outline: none;
+}
 .period-tabs {
   display: inline-flex;
   padding: 3px;
@@ -921,6 +950,19 @@ a {
   }
   .metric-num {
     font-size: 24px;
+  }
+  .topbar-filter-card,
+  .filter-bar {
+    align-items: stretch;
+  }
+  .topbar-filter-card {
+    flex-direction: column;
+    padding: 12px 16px;
+  }
+  .filter-bar select,
+  .filter-apply-btn,
+  .filter-clear-btn {
+    width: 100%;
   }
 }
 

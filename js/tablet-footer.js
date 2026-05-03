@@ -411,15 +411,16 @@ function openConfirmFila(vendedorId) {
 
   const menu = document.createElement('div');
   menu.id = 'footerMenu';
-  menu.style.cssText = `position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--bg-card);border:1px solid var(--border-medium);border-radius:16px;padding:20px;z-index:${Z_MENU};box-shadow:0 4px 20px rgba(0,0,0,.2);min-width:280px;text-align:center;color:var(--text-primary)`;
+  menu.className = 'confirm-fila-menu';
+  menu.style.zIndex = String(Z_MENU);
 
   menu.innerHTML = `
-    <div style="font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:6px">${escapeHtml(nome)}</div>
-    <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Colocar na fila de atendimento?</div>
-    <div style="display:flex;gap:10px">
-      <button onclick="closeConfirmFila()" style="flex:1;padding:12px;border:1px solid var(--border-subtle);border-radius:12px;background:var(--bg-hover);color:var(--text-muted);font-weight:600;font-size:14px;cursor:pointer;font-family:var(--font-body)">Cancelar</button>
-      <button onclick="confirmAddToQueue('${vendedorId}')" style="flex:1;padding:12px;border:none;border-radius:12px;background:var(--success);color:#060606;font-weight:700;font-size:14px;cursor:pointer;font-family:var(--font-body)">
-        <i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar
+    <div class="confirm-fila-title">${escapeHtml(nome)}</div>
+    <div class="confirm-fila-sub">Colocar na fila de atendimento?</div>
+    <div class="confirm-fila-actions">
+      <button class="confirm-fila-cancel" onclick="closeConfirmFila()">Cancelar</button>
+      <button class="confirm-fila-ok" onclick="confirmAddToQueue('${vendedorId}')">
+        <i class="fa-solid fa-check"></i> Confirmar
       </button>
     </div>
   `;

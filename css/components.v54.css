@@ -41,14 +41,21 @@
   background: var(--mv-primary);
   color: var(--mv-on-primary);
 }
+.mv-btn.mv-btn--primary {
+  color: var(--mv-on-primary);
+}
 .mv-btn--primary:hover {
   background: var(--mv-primary-hover);
+  color: var(--mv-on-primary);
 }
 
 .mv-btn--ghost {
   background: transparent;
   color: var(--mv-text);
   border-color: var(--mv-border-strong);
+}
+.mv-btn.mv-btn--ghost {
+  color: var(--mv-text);
 }
 .mv-btn--ghost:hover {
   background: var(--mv-surface-2);

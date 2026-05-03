@@ -1670,6 +1670,377 @@
         flex-direction: column;
         gap: 8px;
       }
+
+      /* ─── Tablet polish pass: operação clara, touch first ─── */
+      .tablet-layout {
+        grid-template-columns: minmax(352px, 38vw) minmax(0, 1fr);
+        grid-template-rows: 72px minmax(0, 1fr) auto;
+        background: var(--mv-bg);
+      }
+      .t-header {
+        height: 72px;
+        padding: 0 24px;
+        box-shadow: var(--mv-shadow-xs);
+        position: relative;
+        z-index: 20;
+      }
+      .t-header-brand {
+        min-width: 146px;
+      }
+      .t-header-actions {
+        min-width: 238px;
+        justify-content: flex-end;
+      }
+      .t-header-kpis {
+        min-width: 320px;
+        box-shadow: var(--mv-shadow-xs);
+      }
+      .t-header-kpi {
+        min-width: 104px;
+        justify-content: center;
+        padding: 8px 16px;
+      }
+      .t-header-kpi-value {
+        font-size: 16px;
+      }
+      .action-card,
+      .more-btn {
+        height: 44px;
+        border-radius: var(--mv-radius-md);
+      }
+      .action-card {
+        padding: 0 18px;
+      }
+      .turno-card {
+        box-shadow: 0 8px 18px rgba(30, 64, 175, 0.18);
+      }
+      .queue-panel {
+        padding: 22px 20px 18px;
+        background: var(--mv-surface);
+      }
+      .queue-setor-tabs {
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .queue-setor-tabs button,
+      .queue-setor-tabs .setor-tab {
+        min-height: 34px;
+        padding: 7px 12px;
+      }
+      .queue-head-row,
+      .panel-header {
+        background: color-mix(in srgb, var(--mv-surface) 88%, var(--mv-bg));
+        border: 1px solid var(--mv-border);
+        border-radius: var(--mv-radius-md);
+        padding: 10px 12px;
+      }
+      .queue-head-row {
+        margin-bottom: 14px;
+      }
+      .service-panel {
+        padding: 22px 24px 20px;
+        background: var(--mv-bg);
+      }
+      .panel-header {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+      }
+      #activeList {
+        min-height: 0;
+      }
+      .queue-list {
+        gap: 10px;
+        padding-right: 2px;
+      }
+      .queue-item {
+        min-height: 64px;
+        padding: 12px 14px;
+        background: var(--mv-surface);
+        border-color: var(--mv-border);
+        border-radius: var(--mv-radius-md);
+        box-shadow: var(--mv-shadow-xs);
+      }
+      .queue-item:hover {
+        background: var(--mv-surface);
+        border-color: var(--mv-border-strong);
+        box-shadow: var(--mv-shadow-sm);
+      }
+      .queue-item.next-in-line {
+        border-color: var(--mv-brand-200);
+        box-shadow: 0 0 0 1px var(--mv-brand-100), var(--mv-shadow-sm);
+      }
+      .queue-avatar,
+      .atend-card .atend-avatar,
+      .footer-card .fc-avatar {
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+      }
+      .queue-item-action {
+        min-width: 40px;
+        min-height: 40px;
+        border-radius: var(--mv-radius-md);
+      }
+      .queue-blank-state,
+      .queue-empty-state,
+      .service-empty {
+        width: 100%;
+        max-width: 420px;
+        margin: auto;
+        padding: 28px 20px;
+        border: 1px dashed var(--mv-border-strong);
+        border-radius: var(--mv-radius-lg);
+        background: var(--mv-surface);
+        color: var(--mv-text-muted);
+        box-shadow: var(--mv-shadow-xs);
+      }
+      .queue-empty-state,
+      .service-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-align: center;
+      }
+      .queue-empty-icon,
+      .service-empty-icon {
+        width: 52px;
+        height: 52px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 6px;
+        border-radius: 50%;
+        background: var(--mv-surface-2);
+        color: var(--mv-primary);
+        font-size: 20px;
+        opacity: 1;
+      }
+      .queue-empty-state strong,
+      .service-empty strong {
+        color: var(--mv-text);
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .queue-empty-state span,
+      .service-empty span {
+        max-width: 260px;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+      .atend-card {
+        min-height: 72px;
+        padding: 14px 16px;
+        border-radius: var(--mv-radius-md);
+        box-shadow: var(--mv-shadow-xs);
+      }
+      .atend-card .atend-name {
+        font-size: 15px;
+      }
+      .atend-card .atend-timer {
+        font-size: 13px;
+      }
+      .service-empty {
+        min-height: 220px;
+        opacity: 1;
+      }
+      .t-footer {
+        min-height: 108px;
+        padding: 14px 22px calc(14px + env(safe-area-inset-bottom));
+        background: var(--mv-surface);
+        box-shadow: 0 -1px 0 var(--mv-border), var(--mv-shadow-xs);
+      }
+      .footer-card {
+        min-width: 116px;
+        border-radius: var(--mv-radius-md);
+      }
+      .footer-card.in-queue {
+        opacity: 0.46;
+      }
+      .confirm-fila-menu {
+        position: fixed;
+        z-index: 80;
+        bottom: calc(104px + env(safe-area-inset-bottom));
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(360px, calc(100vw - 32px));
+        padding: 18px;
+        border: 1px solid var(--mv-border-strong);
+        border-radius: var(--mv-radius-lg);
+        background: var(--mv-surface);
+        color: var(--mv-text);
+        box-shadow: var(--mv-shadow-xl);
+        text-align: left;
+      }
+      .confirm-fila-title {
+        margin-bottom: 4px;
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .confirm-fila-sub {
+        margin-bottom: 16px;
+        color: var(--mv-text-muted);
+        font-size: 13px;
+      }
+      .confirm-fila-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .confirm-fila-actions button {
+        height: 44px;
+        border-radius: var(--mv-radius-md);
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .confirm-fila-cancel {
+        border: 1px solid var(--mv-border-strong);
+        background: var(--mv-surface);
+        color: var(--mv-text-muted);
+      }
+      .confirm-fila-ok {
+        border: 1px solid var(--mv-status-available);
+        background: var(--mv-status-available);
+        color: #fff;
+      }
+
+      @media (max-width: 980px) {
+        .tablet-layout {
+          grid-template-columns: 332px minmax(0, 1fr);
+        }
+        .t-header {
+          padding: 0 16px;
+          gap: 10px;
+        }
+        .t-header-brand {
+          min-width: 120px;
+        }
+        .t-header-kpis {
+          min-width: 284px;
+        }
+        .t-header-kpi {
+          min-width: 92px;
+          padding: 8px 10px;
+        }
+        .ranking-card span {
+          display: none;
+        }
+        .ranking-card {
+          width: 44px;
+          padding: 0;
+          justify-content: center;
+        }
+      }
+
+      @media (max-width: 820px) {
+        html,
+        body {
+          overflow: auto;
+        }
+        .tablet-layout {
+          min-height: 100dvh;
+          height: auto;
+          max-height: none;
+          grid-template-columns: 1fr;
+          grid-template-rows: auto minmax(360px, auto) minmax(300px, auto) auto;
+          grid-template-areas:
+            'header'
+            'queue'
+            'service'
+            'footer';
+          overflow: visible;
+        }
+        .t-header {
+          height: auto;
+          min-height: 84px;
+          flex-wrap: wrap;
+          padding: 12px 14px;
+        }
+        .t-header-brand {
+          min-width: auto;
+        }
+        .t-header-actions {
+          margin-left: auto;
+          min-width: auto;
+        }
+        .t-header-kpis {
+          order: 3;
+          flex: 1 0 100%;
+          width: 100%;
+          min-width: 0;
+        }
+        .t-header-kpi {
+          flex: 1;
+          min-width: 0;
+        }
+        .queue-panel {
+          min-height: 360px;
+          border-right: 0;
+          border-bottom: 1px solid var(--mv-border);
+        }
+        .service-panel {
+          min-height: 300px;
+        }
+        .queue-panel,
+        .service-panel {
+          overflow: visible;
+          padding: 16px;
+        }
+        .t-footer {
+          position: sticky;
+          bottom: 0;
+          z-index: 10;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .tablet-layout {
+          grid-template-rows: auto minmax(330px, auto) minmax(280px, auto) auto;
+        }
+        .mv-wordmark__text {
+          display: none;
+        }
+        .t-header-actions {
+          gap: 6px;
+        }
+        .action-card {
+          padding: 0 12px;
+        }
+        .turno-card span {
+          max-width: 62px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .t-header-kpi {
+          gap: 5px;
+          padding: 8px 6px;
+        }
+        .t-header-kpi i,
+        .t-header-kpi-label {
+          display: none;
+        }
+        .t-header-kpi-value {
+          font-size: 14px;
+          text-align: center;
+        }
+        .queue-item {
+          gap: 8px;
+          padding: 11px 10px;
+        }
+        .queue-avatar,
+        .atend-card .atend-avatar {
+          width: 34px;
+          height: 34px;
+        }
+        .queue-pos-num {
+          width: 22px;
+        }
+        .footer-title {
+          display: none;
+        }
+      }
     </style>
   </head>
   <body>
@@ -1681,7 +2052,7 @@
     <div class="tablet-layout">
       <!-- HEADER -->
       <header class="t-header">
-        <div class="flex-center gap-8 shrink-0">
+        <div class="flex-center gap-8 shrink-0 t-header-brand">
           <span class="mv-wordmark mv-wordmark--sm">
             <span class="mv-wordmark__mark">m</span>
             <span class="mv-wordmark__text">minha<em>vez</em></span>
@@ -1714,7 +2085,7 @@
             </div>
           </div>
         </div>
-        <div class="flex-center gap-8 shrink-0">
+        <div class="flex-center gap-8 shrink-0 t-header-actions">
           <button
             class="action-card ranking-card"
             onclick="toggleMiniRanking()"
@@ -1756,17 +2127,6 @@
               >
                 <i class="fa-solid fa-circle-question"></i> Rever tour
               </button>
-              <button
-                id="themeMenuBtn"
-                onclick="
-                  toggleTabletTheme();
-                  toggleMoreMenu();
-                "
-              >
-                <i class="fa-solid fa-moon" id="themeIcon"></i>
-                <span id="themeLabel">Modo Claro</span>
-              </button>
-              <div class="more-menu-divider"></div>
               <button onclick="handleLogout()">
                 <i class="fa-solid fa-right-from-bracket logout-icon-danger"></i> Sair
               </button>

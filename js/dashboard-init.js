@@ -95,16 +95,12 @@ try {
   console.warn('[requireRole]', e?.message || e);
 }
 if (!user) {
+  const loginTarget = tenantPath('/login');
   window.handleLogout = () => {
-    window.location.href = tenantPath('/login');
+    window.location.href = loginTarget;
   };
-  window.toggleTheme = () => {
-    const cur = document.documentElement.getAttribute('data-theme') || 'light';
-    const next = cur === 'light' ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('lv-theme', next);
-    loadAll();
-  };
+  window.location.replace(loginTarget);
+  await new Promise(() => {});
 }
 const tenantId = tenant?.id || (user ? getTenantId(user) : null);
 

@@ -173,6 +173,7 @@
 :root {
   /* cores semânticas */
   --accent: var(--mv-primary);
+  --accent-ink: var(--mv-on-primary);
   --accent-bright: var(--mv-brand-400);
   --info: var(--mv-primary);
   --success: var(--mv-status-available);

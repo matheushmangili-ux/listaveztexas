@@ -674,10 +674,10 @@ export function renderActiveAtendimentos() {
     if (!_atendEmptyNode || !_atendEmptyNode.isConnected) {
       _atendEmptyNode = document.createElement('div');
       _atendEmptyNode.className = 'service-empty';
-      const icon = document.createElement('i');
-      icon.className = 'fa-solid fa-arrow-left service-empty-icon';
-      _atendEmptyNode.appendChild(icon);
-      _atendEmptyNode.appendChild(document.createTextNode('Arraste vendedores da fila para iniciar atendimento'));
+      _atendEmptyNode.innerHTML =
+        '<span class="service-empty-icon"><i class="fa-solid fa-arrow-left"></i></span>' +
+        '<strong>Nenhum atendimento ativo</strong>' +
+        '<span>Arraste o próximo vendedor da fila ou toque na seta do card.</span>';
       list.appendChild(_atendEmptyNode);
     }
     initAtendDrag();

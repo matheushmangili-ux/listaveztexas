@@ -181,27 +181,29 @@ describe('theme helpers', () => {
     document.documentElement.removeAttribute('data-theme');
   });
 
-  it('initTheme aplica "dark" quando não há tema salvo', () => {
+  it('initTheme aplica "light" quando não há tema salvo', () => {
     initTheme();
-    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
   });
 
-  it('initTheme aplica tema salvo no localStorage', () => {
+  it('initTheme ignora dark salvo e força light', () => {
     localStorage.setItem('lv-theme', 'dark');
     initTheme();
-    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+    expect(localStorage.getItem('lv-theme')).toBe('light');
   });
 
-  it('toggleTheme alterna light → dark', () => {
+  it('toggleTheme preserva light no sistema v54', () => {
     document.documentElement.setAttribute('data-theme', 'light');
-    expect(toggleTheme()).toBe('dark');
-    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
-    expect(localStorage.getItem('lv-theme')).toBe('dark');
+    expect(toggleTheme()).toBe('light');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+    expect(localStorage.getItem('lv-theme')).toBe('light');
   });
 
-  it('toggleTheme alterna dark → light', () => {
+  it('toggleTheme corrige dark antigo para light', () => {
     document.documentElement.setAttribute('data-theme', 'dark');
     expect(toggleTheme()).toBe('light');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
     expect(localStorage.getItem('lv-theme')).toBe('light');
   });
 });

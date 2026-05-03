@@ -36,64 +36,253 @@
 
       /* Brand panel (left) */
       .mv-login__brand {
-        background: var(--mv-primary);
+        background:
+          linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+          linear-gradient(180deg, #2547b8 0%, #1e40af 58%, #17327f 100%);
+        background-size:
+          44px 44px,
+          44px 44px,
+          auto;
         color: #fff;
-        padding: 48px 56px;
+        padding: 42px 52px;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: flex-start;
         position: relative;
         overflow: hidden;
         min-height: 100vh;
       }
+      .mv-login__brand-shell {
+        position: relative;
+        z-index: 1;
+        min-height: calc(100vh - 84px);
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+      }
+      .mv-login__brand-copy {
+        margin-top: auto;
+        max-width: 500px;
+      }
       .mv-login__brand-eyebrow {
         font-size: 13px;
-        opacity: 0.7;
+        color: rgba(255, 255, 255, 0.68);
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
         font-weight: 500;
       }
       .mv-login__brand-title {
-        font-size: 44px;
-        line-height: 1.1;
-        letter-spacing: -0.02em;
-        margin: 0 0 20px;
-        font-weight: 600;
+        font-size: clamp(40px, 4.5vw, 58px);
+        line-height: 1.03;
+        letter-spacing: -0.035em;
+        margin: 0 0 18px;
+        font-weight: 700;
         text-wrap: balance;
       }
       .mv-login__brand-text {
         font-size: 16px;
-        line-height: 1.55;
-        opacity: 0.85;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.82);
         max-width: 420px;
         margin: 0;
       }
       .mv-login__brand-decor {
-        position: absolute;
-        bottom: -60px;
-        right: -80px;
-        width: 360px;
-        height: 360px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.06);
-        pointer-events: none;
+        display: none;
       }
-      .mv-login__brand-mock {
-        position: absolute;
-        bottom: 40px;
-        right: 40px;
-        padding: 16px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: var(--mv-radius-lg);
-        backdrop-filter: blur(2px);
-        font-size: 12px;
+      .mv-login__ops-panel {
+        width: min(100%, 500px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 18px;
+        background: rgba(9, 18, 48, 0.28);
+        box-shadow: 0 24px 60px rgba(10, 20, 55, 0.22);
+        overflow: hidden;
+      }
+      .mv-login__ops-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 16px 18px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .mv-login__ops-title {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .mv-login__ops-title strong {
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .mv-login__ops-title span,
+      .mv-login__ops-pill,
+      .mv-login__queue-pos,
+      .mv-login__queue-meta,
+      .mv-login__metric-label {
         font-family: var(--mv-font-mono);
-        line-height: 1.6;
       }
-      .mv-login__brand-mock i {
-        font-style: normal;
-        opacity: 0.7;
+      .mv-login__ops-title span {
+        color: rgba(255, 255, 255, 0.58);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .mv-login__ops-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: var(--mv-radius-pill);
+        background: rgba(22, 163, 74, 0.16);
+        color: #bbf7d0;
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .mv-login__ops-pill::before {
+        content: '';
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #22c55e;
+      }
+      .mv-login__queue {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 16px 18px;
+      }
+      .mv-login__queue-row {
+        display: grid;
+        grid-template-columns: 32px 38px 1fr auto;
+        align-items: center;
+        gap: 12px;
+        min-height: 52px;
+        padding: 10px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.08);
+      }
+      .mv-login__queue-row.is-next {
+        background: rgba(255, 255, 255, 0.16);
+        border-color: rgba(255, 255, 255, 0.26);
+      }
+      .mv-login__queue-pos {
+        color: rgba(255, 255, 255, 0.58);
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .mv-login__queue-avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #0f766e;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+      }
+      .mv-login__queue-avatar.is-purple {
+        background: #7c3aed;
+      }
+      .mv-login__queue-avatar.is-amber {
+        background: #b45309;
+      }
+      .mv-login__queue-name {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        gap: 2px;
+      }
+      .mv-login__queue-name strong {
+        overflow: hidden;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .mv-login__queue-meta {
+        color: rgba(255, 255, 255, 0.58);
+        font-size: 10px;
+        font-weight: 600;
+      }
+      .mv-login__queue-status {
+        padding: 5px 8px;
+        border-radius: var(--mv-radius-pill);
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .mv-login__queue-row.is-next .mv-login__queue-status {
+        background: #fff;
+        color: var(--mv-primary);
+      }
+      .mv-login__metrics {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .mv-login__metric {
+        padding: 14px 16px;
+      }
+      .mv-login__metric + .mv-login__metric {
+        border-left: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .mv-login__metric-value {
+        display: block;
+        color: #fff;
+        font-family: var(--mv-font-mono);
+        font-size: 22px;
+        font-weight: 800;
+        line-height: 1;
+      }
+      .mv-login__metric-label {
+        display: block;
+        margin-top: 6px;
+        color: rgba(255, 255, 255, 0.58);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .mv-login__proof {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: auto;
+        padding-top: 2px;
+      }
+      .mv-login__proof span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 10px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: var(--mv-radius-pill);
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.76);
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .mv-login__proof span::before {
+        content: '';
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #86efac;
+        flex-shrink: 0;
+      }
+      .mv-login__proof i {
+        color: #86efac;
+        font-size: 11px;
       }
 
       /* Form panel (right) */
@@ -359,13 +548,20 @@
       }
 
       /* Mobile: collapse to single column, brand becomes a thin header */
-      @media (max-width: 720px) {
+      @media (max-width: 900px) {
         .mv-login {
           grid-template-columns: 1fr;
         }
         .mv-login__brand {
           min-height: auto;
-          padding: 24px 24px 32px;
+          padding: 24px;
+        }
+        .mv-login__brand-shell {
+          min-height: auto;
+          gap: 18px;
+        }
+        .mv-login__brand-copy {
+          margin-top: 14px;
         }
         .mv-login__brand-title {
           font-size: 28px;
@@ -373,8 +569,8 @@
         .mv-login__brand-text {
           font-size: 14px;
         }
-        .mv-login__brand-decor,
-        .mv-login__brand-mock {
+        .mv-login__ops-panel,
+        .mv-login__proof {
           display: none;
         }
         .mv-login__form {
@@ -392,24 +588,81 @@
     <main class="mv-login">
       <!-- Painel de marca (esquerda) -->
       <aside class="mv-login__brand">
-        <span class="mv-wordmark mv-wordmark--inverse">
-          <span class="mv-wordmark__mark">m</span>
-          <span class="mv-wordmark__text">minha<em>vez</em></span>
-        </span>
-        <div>
-          <div class="mv-login__brand-eyebrow">MinhaVez · Operação</div>
-          <h2 class="mv-login__brand-title">A próxima vez é<br />sempre clara.</h2>
-          <p class="mv-login__brand-text">
-            Entre como recepção, vendedor ou gestor.<br />
-            Cada papel vê a tela certa para o seu trabalho.
-          </p>
-        </div>
-        <div class="mv-login__brand-decor" aria-hidden="true"></div>
-        <div class="mv-login__brand-mock" aria-hidden="true">
-          <i>// fila atual</i>
-          <div>01 → Eduarda</div>
-          <div>02 &nbsp;&nbsp;&nbsp;Aline</div>
-          <div>03 &nbsp;&nbsp;&nbsp;Isabela</div>
+        <div class="mv-login__brand-shell">
+          <span class="mv-wordmark mv-wordmark--inverse">
+            <span class="mv-wordmark__mark">m</span>
+            <span class="mv-wordmark__text">minha<em>vez</em></span>
+          </span>
+
+          <div class="mv-login__brand-copy">
+            <div class="mv-login__brand-eyebrow">MinhaVez · Operação</div>
+            <h2 class="mv-login__brand-title">Fila clara.<br />Atendimento sem atrito.</h2>
+            <p class="mv-login__brand-text">
+              Recepção, vendedores e gestão enxergam a mesma operação em tempo real, sem planilha e sem dúvida sobre
+              quem atende agora.
+            </p>
+          </div>
+
+          <div class="mv-login__ops-panel" aria-hidden="true">
+            <div class="mv-login__ops-head">
+              <div class="mv-login__ops-title">
+                <strong>Texas Center · Loja</strong>
+                <span>Fila de atendimento</span>
+              </div>
+              <span class="mv-login__ops-pill">ao vivo</span>
+            </div>
+
+            <div class="mv-login__queue">
+              <div class="mv-login__queue-row is-next">
+                <span class="mv-login__queue-pos">01</span>
+                <span class="mv-login__queue-avatar is-purple">EL</span>
+                <span class="mv-login__queue-name">
+                  <strong>Eduarda</strong>
+                  <span class="mv-login__queue-meta">Chapelaria · 11 atendimentos</span>
+                </span>
+                <span class="mv-login__queue-status">Próxima</span>
+              </div>
+              <div class="mv-login__queue-row">
+                <span class="mv-login__queue-pos">02</span>
+                <span class="mv-login__queue-avatar">AC</span>
+                <span class="mv-login__queue-name">
+                  <strong>Aline</strong>
+                  <span class="mv-login__queue-meta">Loja · aguardando</span>
+                </span>
+                <span class="mv-login__queue-status">Na fila</span>
+              </div>
+              <div class="mv-login__queue-row">
+                <span class="mv-login__queue-pos">03</span>
+                <span class="mv-login__queue-avatar is-amber">FS</span>
+                <span class="mv-login__queue-name">
+                  <strong>Felipe</strong>
+                  <span class="mv-login__queue-meta">Loja · 4min na fila</span>
+                </span>
+                <span class="mv-login__queue-status">Na fila</span>
+              </div>
+            </div>
+
+            <div class="mv-login__metrics">
+              <div class="mv-login__metric">
+                <span class="mv-login__metric-value">87</span>
+                <span class="mv-login__metric-label">atend.</span>
+              </div>
+              <div class="mv-login__metric">
+                <span class="mv-login__metric-value">62%</span>
+                <span class="mv-login__metric-label">conversão</span>
+              </div>
+              <div class="mv-login__metric">
+                <span class="mv-login__metric-value">04:21</span>
+                <span class="mv-login__metric-label">tempo</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mv-login__proof" aria-hidden="true">
+            <span>Tablet da loja</span>
+            <span>PIN rápido</span>
+            <span>Dados em tempo real</span>
+          </div>
         </div>
       </aside>
 

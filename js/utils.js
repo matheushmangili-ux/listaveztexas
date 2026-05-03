@@ -154,17 +154,14 @@ export function initials(name) {
   return letters ? letters.toUpperCase() : '??';
 }
 
-// Theme toggle (light/dark)
+// Theme helpers: v54 is light-only.
 export function initTheme() {
-  const saved = localStorage.getItem('lv-theme') || 'dark';
-  document.documentElement.setAttribute('data-theme', saved);
+  document.documentElement.setAttribute('data-theme', 'light');
+  localStorage.setItem('lv-theme', 'light');
 }
 export function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme') || 'light';
-  const next = current === 'light' ? 'dark' : 'light';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('lv-theme', next);
-  return next;
+  initTheme();
+  return 'light';
 }
 
 // Toast notification — estilo Linear/Arc minimalista

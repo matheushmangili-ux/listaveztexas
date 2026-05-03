@@ -5,7 +5,7 @@
 
 import { getSupabase } from '/js/supabase-config.js';
 import { requireRole, logout, getTenantId } from '/js/auth.js';
-import { SAIDA_COLORS, toast, initTheme, toggleTheme, escapeHtml, setoresMatch, normalizeSetor } from '/js/utils.js';
+import { SAIDA_COLORS, toast, initTheme, escapeHtml, setoresMatch } from '/js/utils.js';
 import { fetchVendedores } from '/js/dashboard-api.js';
 import { loadTenant, applyBranding, tenantPath } from '/js/tenant.js';
 import { showChangelog, setVersionLabel } from '/js/changelog.js';
@@ -114,12 +114,12 @@ try {
   /* auth error */
 }
 if (!user) {
+  const loginTarget = tenantPath('/login');
   window.handleLogout = () => {
-    window.location.href = tenantPath('/login');
+    window.location.href = loginTarget;
   };
-  window._toggleTheme = () => {
-    toggleTheme();
-  };
+  window.location.replace(loginTarget);
+  await new Promise(() => {});
 }
 
 // Guard: JWT tenant must match URL tenant — force re-login if mismatched
@@ -871,31 +871,12 @@ if (ui.tvMode) requestAnimationFrame(() => applyTvMode());
 window.handleLogout = function () {
   logout();
 };
-window._toggleTheme = function () {
-  const next = toggleTheme();
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.content = next === 'dark' ? '#060606' : '#F5F5F7';
-};
-
-function syncThemeMenuButton() {
-  const isDark = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
-  const lbl = document.getElementById('themeLabel');
-  const ic = document.getElementById('themeIcon');
-  if (lbl) lbl.textContent = isDark ? 'Modo Claro' : 'Modo Escuro';
-  if (ic) ic.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-}
-window.toggleTabletTheme = function () {
-  window._toggleTheme();
-  syncThemeMenuButton();
-};
-
 // ─── More menu (three dots) ───
 window.toggleMoreMenu = function () {
   const m = document.getElementById('moreMenu');
   if (!m) return;
   const open = m.style.display === 'none';
   m.style.display = open ? 'block' : 'none';
-  if (open) syncThemeMenuButton();
 };
 document.addEventListener('click', function (e) {
   const m = document.getElementById('moreMenu');
@@ -1226,4 +1207,3 @@ await checkExistingTurno();
 await loadVendedores();
 await checkActiveAtendimentos();
 loadCanaisOrigem(); // carrega canais de origem em background
-syncThemeMenuButton();
