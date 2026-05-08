@@ -800,7 +800,10 @@ async function cancelarAtendimento(atendId) {
     const insertIdx = Math.min(savedPos - 1, inQueue.length);
     const before = inQueue.slice(0, insertIdx).map((x) => x.id);
     const after = inQueue.slice(insertIdx).map((x) => x.id);
-    const newOrder = [...before, vendedorId, ...after];
+    // Dedupe: se realtime já flipou o vendedor pra 'disponivel' antes desse cancel
+    // chegar no inQueue, ele aparece em before/after e em vendedorId — duplicar no
+    // p_ids quebra reordenar_fila (toast de erro + cards duplicados na render).
+    const newOrder = [...new Set([...before, vendedorId, ...after])];
 
     // Optimistic: update local state
     v.status = 'disponivel';

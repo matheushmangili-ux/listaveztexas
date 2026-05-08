@@ -501,8 +501,14 @@ async function returnToSavedPosition(vendedorId) {
   const v = state.vendedores.find((x) => x.id === vendedorId);
   if (!v) return;
   const setor = v.setor || 'loja';
-  const savedPos = state.savedPositions.get(vendedorId);
+  // Tenta posição salva localmente; cai pro valor persistido no banco
+  // (posicao_fila_anterior) — só esse caminho funciona se o tablet reiniciou
+  // ou se quem botou o vendedor em pausa foi outro device.
+  let savedPos = state.savedPositions.get(vendedorId);
   state.savedPositions.delete(vendedorId);
+  if (savedPos == null && v.posicao_fila_anterior != null) {
+    savedPos = v.posicao_fila_anterior;
+  }
 
   // Vendedores atualmente na fila, ordenados por posição
   const inQueue = state.vendedores
@@ -532,10 +538,11 @@ async function returnToSavedPosition(vendedorId) {
   invalidateFooter();
   scheduleRender();
 
-  // Salvar no banco — vendedor retornando primeiro
+  // Salvar no banco — vendedor retornando primeiro.
+  // Limpa posicao_fila_anterior pra evitar reuso de valor stale na próxima pausa.
   const { error } = await sb
     .from('vendedores')
-    .update({ status: 'disponivel', posicao_fila: v.posicao_fila })
+    .update({ status: 'disponivel', posicao_fila: v.posicao_fila, posicao_fila_anterior: null })
     .eq('id', vendedorId)
     .eq('tenant_id', tenantId);
   if (error) {
@@ -591,18 +598,22 @@ window.confirmSaida = async function (motivo) {
   const newStatus = motivo === 'banheiro' || motivo === 'reuniao' || motivo === 'operacional' ? 'pausa' : 'fora';
   state.saidaMotivos[state.pendingSaidaId] = motivo;
   state.pauseStartTimes.set(state.pendingSaidaId, new Date());
-  // Salvar posição na fila antes de zerá-la — usada para restaurar ao retornar
+  // Salvar posição na fila antes de zerá-la — usada para restaurar ao retornar.
+  // Mantém Map em memória pra render otimista, e grava no banco pra sobreviver
+  // a reload do tablet ou retorno via outro device (vendor mobile).
+  let posAnterior = null;
   if (newStatus === 'pausa') {
     const svTemp = state.vendedores.find((x) => x.id === state.pendingSaidaId);
-    if (svTemp?.posicao_fila != null) state.savedPositions.set(state.pendingSaidaId, svTemp.posicao_fila);
+    if (svTemp?.posicao_fila != null) {
+      state.savedPositions.set(state.pendingSaidaId, svTemp.posicao_fila);
+      posAnterior = svTemp.posicao_fila;
+    }
   }
   markLocal();
   const savedId = state.pendingSaidaId;
-  const { error } = await sb
-    .from('vendedores')
-    .update({ status: newStatus, posicao_fila: null })
-    .eq('id', savedId)
-    .eq('tenant_id', tenantId);
+  const updatePayload = { status: newStatus, posicao_fila: null };
+  if (newStatus === 'pausa') updatePayload.posicao_fila_anterior = posAnterior;
+  const { error } = await sb.from('vendedores').update(updatePayload).eq('id', savedId).eq('tenant_id', tenantId);
   if (error) {
     toast('Erro ao registrar saída', 'error');
     window.closeSaida();
