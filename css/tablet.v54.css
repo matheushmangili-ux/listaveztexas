@@ -1,0 +1,1796 @@
+/* MinhaVez — Tablet stylesheet v54
+ * ============================================================================
+ * Tela de recepção/fila no balcão (landscape, kiosk).
+ * Depende de tokens.v54.css + components.v54.css.
+ *
+ * Histórico: até v53 esse arquivo estava inline em tablet.html (~1700 linhas).
+ * Migração v54 extraiu pro arquivo dedicado, consolidou selectors duplicados
+ * que se sobrescreviam silenciosamente, e corrigiu sw.js que precacheava as
+ * versões v52 mortas (causa-raiz de "lista horizontal" — SW antigo servia
+ * CSS deletado).
+ *
+ * Layout:
+ *   grid-areas:
+ *     header  header
+ *     queue   service
+ *     footer  footer
+ *
+ * Z-INDEX LADDER (autoritativo):
+ *   999  confetti canvas (celebrations)
+ *   200  toast container, offline banner
+ *   100  bottom sheet (motivos, outcome, check-in, etc)
+ *   90   bottom-sheet overlay, origin overlay
+ *   80   confirm-fila popover
+ *   60   more-menu, mini-ranking dropdown
+ *   20   header (eleva acima do panel-header sticky)
+ *   10   footer drop-label, mode-tv panel
+ *   2    panel-header sticky
+ *
+ * Convenções:
+ *   - Tokens em var(--mv-*) — nada hardcoded.
+ *   - Sem !important (exceto .hidden — justificado).
+ *   - Lista da fila usa flex column. Não grid. Não inline. Crítico — tablets
+ *     antigos servidos pelo SW antigo renderizavam horizontal por falta de CSS.
+ *   - Touch targets ≥40px (operador toca, não clica com mouse).
+ * ============================================================================
+ */
+
+/* ─── Reset escopado ─────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+body {
+  background: var(--mv-bg);
+  color: var(--mv-text);
+  font-family: var(--mv-font-sans);
+  font-size: var(--mv-text-md);
+  line-height: 1.4;
+}
+
+/* .hidden recebe !important porque é tarefa primária dele:
+   esconder elementos independente da especificidade contextual. */
+.hidden {
+  display: none !important;
+}
+
+/* ─── Utilities herdadas (preservam chamadas do JS) ──────────────────────── */
+.mono {
+  font-family: var(--mv-font-mono);
+  font-feature-settings: 'tnum';
+}
+.flex-center {
+  display: flex;
+  align-items: center;
+}
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+.flex-1 {
+  flex: 1;
+  min-height: 0;
+}
+.gap-6 { gap: 6px; }
+.gap-8 { gap: 8px; }
+.gap-10 { gap: 10px; }
+.gap-16 { gap: 16px; }
+.shrink-0 { flex-shrink: 0; }
+.text-muted { color: var(--mv-text-muted); }
+.text-secondary { color: var(--mv-text-muted); }
+.uppercase { text-transform: uppercase; }
+.tracking-wide { letter-spacing: 0.06em; }
+.tracking-tight { letter-spacing: -0.01em; }
+.fw-600 { font-weight: 600; }
+.fw-700 { font-weight: 700; }
+.fw-800 { font-weight: 800; }
+.fs-9 { font-size: 9px; }
+.fs-10 { font-size: 10px; }
+.fs-11 { font-size: 11px; }
+.fs-12 { font-size: 12px; }
+.fs-13 { font-size: 13px; }
+.fs-14 { font-size: 14px; }
+.fs-16 { font-size: 16px; }
+.fs-18 { font-size: 18px; }
+.mb-4 { margin-bottom: 4px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+.mt-16 { margin-top: 16px; }
+.mr-4 { margin-right: 4px; }
+.block { display: block; }
+
+/* ─── Layout principal ───────────────────────────────────────────────────── */
+/* 100vh em browser mobile (Chrome/Safari iOS) NÃO subtrai a barra de
+   endereço/nav-buttons → header sairia do viewport. Usar dvh (dynamic
+   viewport height) que respeita o chrome dinâmico. Fallback 100vh pra
+   browsers antigos que ignoram a regra dvh. */
+.tablet-layout {
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(352px, 38vw) minmax(0, 1fr);
+  grid-template-rows: 72px minmax(0, 1fr) auto;
+  grid-template-areas:
+    'header header'
+    'queue  service'
+    'footer footer';
+  gap: 0;
+  background: var(--mv-bg);
+  overflow: hidden;
+}
+
+/* ─── Banner offline ─────────────────────────────────────────────────────── */
+.offline-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: var(--mv-status-error);
+  color: #fff;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.offline-banner.is-visible {
+  display: flex;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────────── */
+.t-header {
+  grid-area: header;
+  position: relative;
+  z-index: 20;
+  height: 72px;
+  padding: 0 24px;
+  background: var(--mv-surface);
+  border-bottom: 1px solid var(--mv-border);
+  box-shadow: var(--mv-shadow-xs);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.t-header-brand {
+  min-width: 146px;
+}
+.t-header-actions {
+  min-width: 238px;
+  justify-content: flex-end;
+}
+/* Version tag — escondido em produção; só aparece via tour/menu */
+.t-header-version {
+  display: none;
+}
+
+/* KPIs do header — agrupados num card único, mais enxuto. Cada KPI separado
+   por divider sutil. Tipografia mono pros números. */
+.t-header-kpis {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0;
+  min-width: 320px;
+  padding: 0;
+  background: var(--mv-surface-2);
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-radius-lg);
+  box-shadow: var(--mv-shadow-xs);
+  overflow: hidden;
+}
+.t-header-kpi {
+  /* position: relative é OBRIGATÓRIO — .conv-bar-track abaixo é absolute.
+     Sem isso, a barra de progresso escapa do KPI e ancora no header inteiro. */
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 104px;
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+.t-header-kpi + .t-header-kpi {
+  border-left: 1px solid var(--mv-border);
+}
+.t-header-kpi i {
+  color: var(--mv-text-faint);
+  font-size: 13px;
+}
+.t-header-kpi-body {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  gap: 2px;
+}
+.t-header-kpi-value {
+  font-family: var(--mv-font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--mv-text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.t-header-kpi-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mv-text-muted);
+  font-weight: 600;
+}
+.conv-bar-track {
+  position: absolute;
+  bottom: 0;
+  left: 14px;
+  right: 14px;
+  height: 2px;
+  background: var(--mv-surface-3);
+  border-radius: 1px;
+  overflow: hidden;
+}
+.conv-bar-fill {
+  height: 100%;
+  width: 0;
+  background: var(--mv-primary);
+  transition: width 0.3s var(--mv-ease);
+}
+
+/* Action cards (Ranking, Iniciar/Encerrar turno) */
+.action-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 18px;
+  border-radius: var(--mv-radius-md);
+  background: var(--mv-surface-2);
+  border: 1px solid var(--mv-border-strong);
+  color: var(--mv-text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition:
+    background var(--mv-dur-fast) var(--mv-ease),
+    border-color var(--mv-dur-fast) var(--mv-ease);
+}
+.action-card:hover {
+  background: var(--mv-surface);
+  border-color: var(--mv-text-faint);
+}
+.ranking-card i {
+  color: var(--mv-status-paused);
+}
+.turno-card {
+  background: var(--mv-primary);
+  color: #fff;
+  border-color: var(--mv-primary);
+  box-shadow: 0 8px 18px rgba(30, 64, 175, 0.18);
+}
+.turno-card:hover {
+  background: var(--mv-primary-hover);
+  border-color: var(--mv-primary-hover);
+}
+.turno-card.on {
+  background: var(--mv-status-error);
+  border-color: var(--mv-status-error);
+}
+.turno-card.on:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+.more-menu-wrapper {
+  position: relative;
+}
+.more-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--mv-radius-md);
+  background: var(--mv-surface-2);
+  border: 1px solid var(--mv-border-strong);
+  color: var(--mv-text);
+  cursor: pointer;
+  font-size: 16px;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.more-btn:hover {
+  background: var(--mv-surface);
+}
+.more-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 60;
+  min-width: 200px;
+  background: var(--mv-surface);
+  border: 1px solid var(--mv-border-strong);
+  border-radius: var(--mv-radius-md);
+  box-shadow: var(--mv-shadow-lg);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+}
+.more-menu button {
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 8px 12px;
+  border-radius: var(--mv-radius-sm);
+  font-size: 13px;
+  color: var(--mv-text);
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.more-menu button:hover {
+  background: var(--mv-surface-2);
+}
+.more-menu-divider {
+  height: 1px;
+  background: var(--mv-border);
+  margin: 4px 0;
+}
+.logout-icon-danger {
+  color: var(--mv-status-error);
+}
+
+/* ─── Queue panel (esquerda) ─────────────────────────────────────────────── */
+.queue-panel {
+  grid-area: queue;
+  background: var(--mv-surface);
+  border-right: 1px solid var(--mv-border);
+  padding: 22px 20px 18px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.queue-setor-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.queue-setor-tabs button,
+.queue-setor-tabs .setor-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 34px;
+  padding: 7px 12px;
+  border-radius: var(--mv-radius-pill);
+  background: var(--mv-surface-2);
+  border: 1px solid var(--mv-border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--mv-text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+.queue-setor-tabs button i,
+.queue-setor-tabs .setor-tab i {
+  font-size: 12px;
+  opacity: 0.7;
+}
+.queue-setor-tabs button:hover:not(.active),
+.queue-setor-tabs .setor-tab:hover:not(.active) {
+  background: var(--mv-surface);
+  border-color: var(--mv-border-strong);
+  color: var(--mv-text);
+}
+.queue-setor-tabs .active,
+.queue-setor-tabs button.active {
+  background: var(--mv-primary);
+  border-color: var(--mv-primary);
+  color: #fff;
+}
+.queue-setor-tabs .active i,
+.queue-setor-tabs button.active i {
+  opacity: 1;
+}
+
+/* Contador de vendedores no setor (badge inline) */
+.tab-count {
+  margin-left: 3px;
+  padding: 1px 6px;
+  min-width: 16px;
+  background: var(--mv-surface);
+  color: var(--mv-text-muted);
+  border-radius: var(--mv-radius-pill);
+  font-family: var(--mv-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.6;
+}
+.tab-count:empty,
+.tab-count.is-zero {
+  display: none;
+}
+.queue-setor-tabs .active .tab-count,
+.queue-setor-tabs button.active .tab-count {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.queue-head-row {
+  background: color-mix(in srgb, var(--mv-surface) 88%, var(--mv-bg));
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-radius-md);
+  padding: 10px 12px;
+  margin-bottom: 14px;
+}
+.queue-head-row > span:first-child {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--mv-text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+#queueCount {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mv-text-muted);
+  font-family: var(--mv-font-sans);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.queue-history-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--mv-radius-md);
+  background: transparent;
+  border: 1px solid var(--mv-border);
+  color: var(--mv-text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.queue-history-btn:hover {
+  background: var(--mv-surface-2);
+  color: var(--mv-text);
+}
+
+/* Lista da fila — vertical SEMPRE.
+   Cada filho .queue-item já é flex row internamente (grip+pos+avatar+...);
+   o container nunca pode virar row. Se você está aqui debugando
+   "fila aparecendo lado a lado", verifique:
+     1) sw.js está servindo CSS atual (não v52 deletado)?
+     2) Algum override em media query mudou flex-direction?
+     3) Algum estilo inline injetado no JS? */
+.queue-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 2px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+/* Empty states — unificados.
+   .queue-blank-state: aguardando turno abrir (pré-operação)
+   .queue-empty-state: turno aberto mas fila vazia
+   Visual idêntico, só copy diferente. */
+.queue-blank-state,
+.queue-empty-state,
+.service-empty {
+  width: 100%;
+  max-width: 420px;
+  margin: auto;
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px dashed var(--mv-border-strong);
+  border-radius: var(--mv-radius-lg);
+  background: var(--mv-surface);
+  color: var(--mv-text-muted);
+  box-shadow: var(--mv-shadow-xs);
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+}
+.queue-empty-icon,
+.service-empty-icon {
+  width: 52px;
+  height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+  border-radius: 50%;
+  background: var(--mv-surface-2);
+  color: var(--mv-primary);
+  font-size: 20px;
+}
+.queue-blank-state i {
+  width: 56px;
+  height: 56px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--mv-text-faint);
+  background: var(--mv-surface-2);
+  border-radius: 50%;
+  margin-bottom: 6px;
+  opacity: 0.7;
+}
+.queue-empty-state strong,
+.service-empty strong {
+  color: var(--mv-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+.queue-empty-state span,
+.service-empty span {
+  max-width: 260px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.service-empty {
+  min-height: 220px;
+  flex: 1;
+}
+
+/* ─── Queue item (cada vendedor na fila) ─────────────────────────────────── */
+/* Layout v54: [grip] [Nº mono] [⚪M avatar 36px] [nome / linha status] [count] [timer] [→]
+   Mockup: screens/tablet.jsx linhas 121-141. */
+.queue-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 64px;
+  padding: 12px 14px;
+  background: var(--mv-surface);
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-radius-md);
+  box-shadow: var(--mv-shadow-xs);
+  position: relative;
+}
+.queue-item:hover {
+  background: var(--mv-surface);
+  border-color: var(--mv-border-strong);
+  box-shadow: var(--mv-shadow-sm);
+}
+.queue-item.drag-above {
+  transform: translateY(6px);
+  box-shadow: 0 -2px 0 0 var(--mv-status-available);
+}
+.queue-item.drag-below {
+  transform: translateY(-6px);
+  box-shadow: 0 2px 0 0 var(--mv-status-available);
+}
+
+/* Grip handle — drag affordance (sutil, só aparece em draggable) */
+.queue-item-grip {
+  flex-shrink: 0;
+  font-size: 10px;
+  opacity: 0.35;
+  color: var(--mv-text-muted);
+  cursor: grab;
+}
+.queue-item-grip:active {
+  cursor: grabbing;
+}
+
+/* Posição mono inline (mockup: "01", "02", "03") */
+.queue-pos-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  flex-shrink: 0;
+  font-family: var(--mv-font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--mv-text-faint);
+  text-align: center;
+}
+.queue-pos-num i {
+  font-size: 11px;
+}
+.queue-item.next-in-line .queue-pos-num {
+  color: var(--mv-primary);
+}
+
+/* Avatar circular 36px com inicial — bg vem do JS (status color) */
+.queue-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+
+/* Body: nome + linha de status */
+.queue-item-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.queue-item-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.queue-item-name {
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--mv-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.queue-item-status {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Cabeçalho "Em pausa" entre os items disponíveis e os pausados */
+.queue-pause-header {
+  margin-top: 16px;
+  padding: 10px 4px 8px;
+  border-top: 1px solid var(--mv-border);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--mv-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.queue-pause-header i {
+  color: var(--mv-status-paused);
+  font-size: 11px;
+}
+.queue-item-pause-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Tempo na fila — mostrado ao lado do status (ex: "LIVRE · 12min na fila") */
+.queue-item-time {
+  margin-left: 6px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--mv-text-muted);
+  font-family: var(--mv-font-mono);
+}
+.queue-item-time::before {
+  content: '· ';
+  opacity: 0.5;
+}
+.queue-item.cold-seller .queue-item-time {
+  color: var(--mv-status-paused);
+  font-weight: 600;
+}
+.queue-item-next-text {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--mv-primary);
+}
+.queue-item-timer {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-family: var(--mv-font-mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Botão de ação (→ enviar pro atendimento) */
+.queue-item-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0 10px;
+  background: var(--mv-surface);
+  border: 1px solid var(--mv-border-strong);
+  border-radius: var(--mv-radius-md);
+  color: var(--mv-primary);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.queue-item-action:hover {
+  background: var(--mv-status-busy-bg);
+  border-color: var(--mv-brand-200);
+}
+.queue-item.next-in-line .queue-item-action {
+  background: var(--mv-primary);
+  color: #fff;
+  border-color: var(--mv-primary);
+}
+.queue-item.next-in-line .queue-item-action:hover {
+  background: var(--mv-primary-hover);
+  border-color: var(--mv-primary-hover);
+}
+.queue-item-pause {
+  cursor: grab;
+  opacity: 0.85;
+}
+.queue-pause-return {
+  color: var(--mv-status-available);
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+/* Atend count badge */
+.atend-count-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--mv-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--mv-surface-2);
+  color: var(--mv-text-muted);
+  border-radius: var(--mv-radius-xs);
+  padding: 1px 6px;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+
+/* Cold seller — vendedor parado há tempo na fila */
+.queue-item.cold-seller {
+  background: rgba(100, 116, 139, 0.04);
+  border-left: 3px solid rgba(100, 116, 139, 0.4);
+}
+
+/* Próximo (1º da fila) — alinhado ao mockup ScreenTablet:
+   tint sutil brand-50 + borda brand-200, SEM pulse/glow, SEM badge.
+   Indicador é a linha "↪ próximo cliente" + nome em primary bold. */
+.queue-item.next-in-line {
+  background: var(--mv-brand-50);
+  border-color: var(--mv-brand-200);
+  box-shadow: 0 0 0 1px var(--mv-brand-100), var(--mv-shadow-sm);
+}
+.queue-item.next-in-line .queue-item-name {
+  color: var(--mv-primary);
+  font-weight: 700;
+}
+
+/* Esconde a antiga next-badge ribbon — JS antigo ainda pode emitir.
+   O novo renderQueueItem usa .queue-item-next-text inline em vez. */
+.next-badge {
+  display: none;
+}
+
+/* Keyframes antigos defendidos como no-op (caso outro lugar use) */
+@keyframes nextCardPulse {
+  from, to { opacity: 0; }
+}
+@keyframes nextCardGlow {
+  from, to { box-shadow: var(--mv-shadow-xs); }
+}
+@keyframes nextBadgePulse {
+  from, to { transform: none; }
+}
+
+/* ─── Service panel (direita) ────────────────────────────────────────────── */
+.service-panel {
+  grid-area: service;
+  padding: 22px 24px 20px;
+  background: var(--mv-bg);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.panel-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: color-mix(in srgb, var(--mv-surface) 88%, var(--mv-bg));
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-radius-md);
+  padding: 10px 12px;
+}
+.panel-header > span:first-child {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--mv-text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.panel-header > span:last-child {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--mv-text-muted);
+}
+.panel-header-icon {
+  color: var(--mv-primary);
+  margin-right: 4px;
+}
+#activeList {
+  min-height: 0;
+}
+
+/* ─── Em Atendimento — atend-card ────────────────────────────────────────── */
+/* Card horizontal compacto. Sem strip colorida lateral (cara de IA-dashboard).
+   Visual limpo: border 1px uniforme, criticidade indicada por cor do timer. */
+.atend-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 72px;
+  padding: 14px 16px;
+  background: var(--mv-surface);
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-radius-md);
+  box-shadow: var(--mv-shadow-xs);
+  cursor: grab;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+.atend-card:hover {
+  background: var(--mv-surface-2);
+  border-color: var(--mv-border-strong);
+  box-shadow: var(--mv-shadow-sm);
+}
+/* Indicação de tempo crítico — só via cor do timer + peso da fonte.
+   (warning > 25min, danger > 40min). Sem border colorida nem gradients —
+   visual sóbrio, profissional. */
+.atend-card.is-warning .atend-timer {
+  color: var(--mv-status-paused);
+  font-weight: 700;
+}
+.atend-card.is-danger {
+  border-color: var(--mv-status-error);
+}
+.atend-card.is-danger .atend-timer {
+  color: var(--mv-status-error);
+  font-weight: 700;
+}
+.atend-card .atend-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--mv-primary);
+  color: #fff;
+  font-family: var(--mv-font-mono);
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+.atend-card .atend-info {
+  flex: 1;
+  min-width: 0;
+}
+.atend-card .atend-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--mv-text);
+  letter-spacing: -0.005em;
+}
+.atend-card .atend-timer {
+  margin-top: 2px;
+  font-family: var(--mv-font-mono);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--mv-text-muted);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+.atend-card .atend-timer.danger {
+  color: var(--mv-status-error);
+  font-weight: 700;
+}
+.atend-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 5px;
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: var(--mv-radius-xs);
+  vertical-align: middle;
+}
+.atend-badge-pref {
+  background: var(--mv-status-paused);
+  color: #fff;
+}
+.atend-badge-clients {
+  background: var(--mv-primary);
+  color: #fff;
+}
+.atend-canal {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 4px 8px;
+  background: var(--mv-surface-2);
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-radius-sm);
+}
+.atend-canal > i {
+  font-size: 14px;
+  color: var(--mv-primary);
+}
+.atend-canal > span {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--mv-text-muted);
+}
+.atend-grip {
+  flex-shrink: 0;
+  margin-left: 4px;
+  color: var(--mv-text-faint);
+  font-size: 11px;
+  opacity: 0.25;
+}
+.atend-grip:hover {
+  opacity: 0.6;
+}
+.atend-canal + .atend-grip {
+  margin-left: 6px;
+}
+.active-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--mv-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ─── Footer (vendedores em standby) ─────────────────────────────────────── */
+.t-footer {
+  grid-area: footer;
+  min-height: 108px;
+  max-height: 124px;
+  padding: 14px 22px calc(14px + env(safe-area-inset-bottom));
+  background: var(--mv-surface);
+  box-shadow: 0 -1px 0 var(--mv-border), var(--mv-shadow-xs);
+  display: flex;
+  gap: 12px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  align-items: center;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+.t-footer::-webkit-scrollbar {
+  height: 6px;
+}
+.t-footer::-webkit-scrollbar-thumb {
+  background: var(--mv-border-strong);
+  border-radius: 3px;
+}
+.t-footer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Footer title — "Vendedores N" enxuto ao lado dos cards */
+.footer-title {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  flex-shrink: 0;
+  padding-right: 16px;
+  margin-right: 4px;
+  border-right: 1px solid var(--mv-border);
+  align-self: stretch;
+  justify-content: center;
+}
+.footer-title-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--mv-text-muted);
+  line-height: 1;
+}
+.footer-title-count {
+  font-family: var(--mv-font-mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--mv-text);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* Footer card (vendedor pill) */
+.footer-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  min-width: 116px;
+  max-width: 140px;
+  background: var(--mv-surface);
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-radius-md);
+  box-shadow: var(--mv-shadow-xs);
+  cursor: grab;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  position: relative;
+  flex-shrink: 0;
+  transition:
+    opacity 150ms ease,
+    transform 100ms ease,
+    background 150ms ease,
+    border-color 150ms ease;
+}
+.footer-card:hover {
+  background: var(--mv-surface-2);
+  border-color: var(--mv-border-strong);
+}
+.footer-card:active {
+  transform: scale(0.96);
+}
+.footer-card.in-queue {
+  opacity: 0.46;
+  pointer-events: none;
+}
+.footer-card .fc-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--mv-primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+  overflow: hidden;
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+.footer-card .fc-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.footer-card .fc-name {
+  max-width: 100%;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mv-text);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+.footer-card .fc-status {
+  max-width: 100%;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--mv-text-muted);
+  text-align: center;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.85;
+}
+.footer-end-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  min-width: 56px;
+  border-left: 1px solid var(--mv-border);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--mv-status-error);
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.footer-end-all:hover {
+  background: var(--mv-status-error-bg);
+}
+
+/* ─── Animations (entradas suaves de itens) ──────────────────────────────── */
+@keyframes mvSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes mvFadeOut {
+  to { opacity: 0; transform: translateY(-4px); }
+}
+@keyframes mvScaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes mvShimmer {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+.queue-item.new-item,
+.queue-item.entering {
+  animation: mvSlideIn 280ms var(--mv-ease) both;
+}
+.queue-item.leaving {
+  animation: mvFadeOut 200ms var(--mv-ease) both;
+  pointer-events: none;
+}
+.queue-item.returning {
+  animation: mvSlideIn 220ms var(--mv-ease) both;
+}
+.atend-card.new-item,
+.atend-card.entering {
+  animation: mvSlideIn 280ms var(--mv-ease) both;
+}
+.footer-card.new-item {
+  animation: mvScaleIn 240ms var(--mv-ease) both;
+}
+
+/* Drag-and-drop feedback */
+.queue-item[draggable='true']:active,
+.atend-card[draggable='true']:active,
+.footer-card[draggable='true']:active {
+  cursor: grabbing;
+}
+.queue-item.dragging,
+.atend-card.dragging,
+.footer-card.dragging {
+  opacity: 0.5;
+  transform: scale(0.97);
+}
+.queue-panel.drop-active,
+.service-panel.drop-active {
+  background: var(--mv-status-busy-bg);
+  outline: 2px dashed var(--mv-primary);
+  outline-offset: -8px;
+}
+.t-footer.drop-active {
+  background: var(--mv-status-error-bg);
+  outline: 2px dashed var(--mv-status-error);
+  outline-offset: -6px;
+}
+
+/* Drop label flutuante ("Soltar para enviar atendimento") */
+.drop-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 12px 20px;
+  background: var(--mv-primary);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-radius: var(--mv-radius-pill);
+  box-shadow: var(--mv-shadow-lg);
+  pointer-events: none;
+  z-index: 10;
+  animation: mvScaleIn 180ms var(--mv-ease) both;
+}
+
+/* Transição global suave em mudanças de classe (color/bg/border) */
+.queue-item,
+.atend-card,
+.footer-card,
+.setor-tab,
+.action-card {
+  transition:
+    background 180ms var(--mv-ease),
+    border-color 180ms var(--mv-ease),
+    color 180ms var(--mv-ease),
+    opacity 180ms var(--mv-ease),
+    transform 180ms var(--mv-ease),
+    box-shadow 180ms var(--mv-ease);
+}
+
+/* Active feedback (tap on touch) */
+.queue-item-action:active,
+.action-card:active,
+.more-btn:active,
+.footer-card:active {
+  transform: scale(0.96);
+}
+
+/* Loading skeleton (queue list while fetching) */
+.queue-list.is-loading {
+  position: relative;
+  min-height: 240px;
+}
+.queue-list.is-loading::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    var(--mv-surface-2) 0,
+    var(--mv-surface-2) 60px,
+    transparent 60px,
+    transparent 68px
+  );
+  opacity: 0.6;
+  animation: mvShimmer 1.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Respeita prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .queue-item,
+  .atend-card,
+  .footer-card,
+  .setor-tab,
+  .action-card,
+  .queue-item.new-item,
+  .queue-item.entering,
+  .queue-item.leaving,
+  .queue-item.returning,
+  .atend-card.new-item,
+  .footer-card.new-item,
+  .drop-label {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ─── Bottom sheets (motivos, outcome, check-in, turno summary) ──────────── */
+.bottom-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(15, 19, 24, 0.4);
+  backdrop-filter: blur(2px);
+  display: none;
+}
+.bottom-sheet-overlay.open {
+  display: block;
+}
+.bottom-sheet {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  z-index: 100;
+  background: var(--mv-surface);
+  border-radius: var(--mv-radius-xl) var(--mv-radius-xl) 0 0;
+  padding: 12px 20px 24px;
+  max-height: 86vh;
+  overflow-y: auto;
+  box-shadow: var(--mv-shadow-xl);
+  display: none;
+}
+.bottom-sheet.open {
+  display: block;
+}
+.sheet-max-90vh { max-height: 90vh; }
+.sheet-max-80vh { max-height: 80vh; }
+.bottom-sheet-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--mv-border-strong);
+  margin: 0 auto 16px;
+}
+
+.motivo-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--mv-border-strong);
+  border-radius: var(--mv-radius-md);
+  background: var(--mv-surface);
+  cursor: pointer;
+  transition:
+    border-color var(--mv-dur-fast) var(--mv-ease),
+    background var(--mv-dur-fast) var(--mv-ease);
+}
+.motivo-option:hover {
+  border-color: var(--mv-primary);
+  background: var(--mv-surface-2);
+}
+.motivo-option.selected {
+  border-color: var(--mv-primary);
+  background: var(--mv-status-busy-bg);
+}
+.motivo-option > i {
+  font-size: 20px;
+  color: var(--mv-text-muted);
+  width: 32px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.motivo-option.selected > i {
+  color: var(--mv-primary);
+}
+.motivo-option > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.outcome-option[data-outcome='venda'] > i { color: var(--mv-status-available); }
+.outcome-option[data-outcome='troca'] > i { color: var(--mv-primary); }
+.outcome-option[data-outcome='nao_convertido'] > i { color: var(--mv-status-paused); }
+.outcome-option[data-outcome='cancelar'] > i { color: var(--mv-status-error); }
+
+/* ─── Buttons (preserva nomes do JS) ─────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 18px;
+  border-radius: var(--mv-radius-md);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition:
+    background var(--mv-dur-fast) var(--mv-ease),
+    border-color var(--mv-dur-fast) var(--mv-ease);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--mv-primary);
+  color: var(--mv-on-primary);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--mv-primary-hover);
+}
+.btn-success {
+  background: var(--mv-status-available);
+  color: #fff;
+}
+.btn-success:hover:not(:disabled) {
+  background: #15803d;
+}
+.btn-danger {
+  background: var(--mv-status-error);
+  color: #fff;
+}
+.btn-danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+.btn-ghost {
+  background: var(--mv-surface);
+  color: var(--mv-text);
+  border-color: var(--mv-border-strong);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--mv-surface-2);
+}
+.btn-flex-1 {
+  flex: 1;
+}
+.btn-flex-tall {
+  flex: 1;
+  height: 56px;
+}
+.btn-confirm-motivo {
+  width: 100%;
+  margin-top: 16px;
+}
+.btn-turno-close {
+  flex: 1;
+  height: 56px;
+  background: var(--mv-status-error);
+  color: #fff;
+  font-weight: 700;
+}
+
+.input {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--mv-border-strong);
+  border-radius: var(--mv-radius-md);
+  background: var(--mv-surface);
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--mv-text);
+  outline: none;
+  transition: border-color var(--mv-dur-fast) var(--mv-ease);
+}
+.input:focus {
+  border-color: var(--mv-primary);
+  box-shadow: var(--mv-shadow-focus);
+}
+
+/* ─── Mini ranking dropdown ──────────────────────────────────────────────── */
+.mini-ranking-dropdown {
+  position: fixed;
+  top: 72px;
+  right: 16px;
+  z-index: 60;
+  width: 280px;
+  background: var(--mv-surface);
+  border: 1px solid var(--mv-border-strong);
+  border-radius: var(--mv-radius-md);
+  padding: 14px;
+  box-shadow: var(--mv-shadow-lg);
+}
+.mini-ranking-trophy {
+  color: var(--mv-status-paused);
+}
+
+/* ─── Confetti canvas (celebrations) ─────────────────────────────────────── */
+#confettiCanvas {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  pointer-events: none;
+}
+
+/* ─── Toast container ────────────────────────────────────────────────────── */
+#toastContainer {
+  position: fixed;
+  top: 80px;
+  right: 16px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 320px;
+}
+
+/* ─── Origin overlay (canal do cliente) ──────────────────────────────────── */
+.origin-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(15, 19, 24, 0.4);
+  backdrop-filter: blur(2px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.origin-overlay.open {
+  display: flex;
+}
+.origin-box {
+  background: var(--mv-surface);
+  border-radius: var(--mv-radius-xl);
+  padding: 24px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: var(--mv-shadow-xl);
+}
+.origin-title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--mv-text);
+}
+.origin-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.origin-skip {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--mv-border-strong);
+  color: var(--mv-text-muted);
+  height: 44px;
+  border-radius: var(--mv-radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ─── Turno summary content ──────────────────────────────────────────────── */
+.turno-summary-content {
+  background: var(--mv-surface-2);
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-radius-md);
+  padding: 14px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+.pos-log-list {
+  max-height: 60vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ruptura-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ─── Confirm fila popover ───────────────────────────────────────────────── */
+.confirm-fila-menu {
+  position: fixed;
+  z-index: 80;
+  bottom: calc(104px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(360px, calc(100vw - 32px));
+  padding: 18px;
+  border: 1px solid var(--mv-border-strong);
+  border-radius: var(--mv-radius-lg);
+  background: var(--mv-surface);
+  color: var(--mv-text);
+  box-shadow: var(--mv-shadow-xl);
+  text-align: left;
+}
+.confirm-fila-title {
+  margin-bottom: 4px;
+  font-size: 16px;
+  font-weight: 700;
+}
+.confirm-fila-sub {
+  margin-bottom: 16px;
+  color: var(--mv-text-muted);
+  font-size: 13px;
+}
+.confirm-fila-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.confirm-fila-actions button {
+  height: 44px;
+  border-radius: var(--mv-radius-md);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.confirm-fila-cancel {
+  border: 1px solid var(--mv-border-strong);
+  background: var(--mv-surface);
+  color: var(--mv-text-muted);
+}
+.confirm-fila-ok {
+  border: 1px solid var(--mv-status-available);
+  background: var(--mv-status-available);
+  color: #fff;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ─────────────────────────────────────────────────────────────────────────
+   Breakpoints (mín. → max.):
+     >980px   landscape padrão (iPad pro, kiosk fixo) — layout completo
+     820-980  landscape compacto — coluna esquerda menor, ranking só ícone
+     ≤760px   portrait/celular — empilha vertical (header / queue / service / footer)
+     ≤560px   compacto extremo — esconde labels secundários, comprime KPIs
+
+   Antes do v54 o stacked começava em ≤820, mas tablets em landscape de
+   1024×600 com DPI alto às vezes caíam aí indevidamente. Pra evitar
+   regressão visual em hardware comum de balcão, mantemos landscape até 760.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 980px) {
+  .tablet-layout {
+    grid-template-columns: 332px minmax(0, 1fr);
+  }
+  .t-header {
+    padding: 0 16px;
+    gap: 10px;
+  }
+  .t-header-brand {
+    min-width: 120px;
+  }
+  .t-header-kpis {
+    min-width: 284px;
+  }
+  .t-header-kpi {
+    min-width: 92px;
+    padding: 8px 10px;
+  }
+  .ranking-card span {
+    display: none;
+  }
+  .ranking-card {
+    width: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 760px) {
+  html,
+  body {
+    overflow: auto;
+  }
+  .tablet-layout {
+    min-height: 100dvh;
+    height: auto;
+    max-height: none;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(360px, auto) minmax(300px, auto) auto;
+    grid-template-areas:
+      'header'
+      'queue'
+      'service'
+      'footer';
+    overflow: visible;
+  }
+  .t-header {
+    height: auto;
+    min-height: 84px;
+    flex-wrap: wrap;
+    padding: 12px 14px;
+  }
+  .t-header-brand {
+    min-width: auto;
+  }
+  .t-header-actions {
+    margin-left: auto;
+    min-width: auto;
+  }
+  .t-header-kpis {
+    order: 3;
+    flex: 1 0 100%;
+    width: 100%;
+    min-width: 0;
+  }
+  .t-header-kpi {
+    flex: 1;
+    min-width: 0;
+  }
+  .queue-panel {
+    min-height: 360px;
+    border-right: 0;
+    border-bottom: 1px solid var(--mv-border);
+  }
+  .service-panel {
+    min-height: 300px;
+  }
+  .queue-panel,
+  .service-panel {
+    overflow: visible;
+    padding: 16px;
+  }
+  .t-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+  }
+}
+
+@media (max-width: 560px) {
+  .tablet-layout {
+    grid-template-rows: auto minmax(330px, auto) minmax(280px, auto) auto;
+  }
+  .mv-wordmark__text {
+    display: none;
+  }
+  .t-header-actions {
+    gap: 6px;
+  }
+  .action-card {
+    padding: 0 12px;
+  }
+  .turno-card span {
+    max-width: 62px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .t-header-kpi {
+    gap: 5px;
+    padding: 8px 6px;
+  }
+  .t-header-kpi i,
+  .t-header-kpi-label {
+    display: none;
+  }
+  .t-header-kpi-value {
+    font-size: 14px;
+    text-align: center;
+  }
+  .queue-item {
+    gap: 8px;
+    padding: 11px 10px;
+  }
+  .queue-avatar,
+  .atend-card .atend-avatar {
+    width: 34px;
+    height: 34px;
+  }
+  .queue-pos-num {
+    width: 22px;
+  }
+  .footer-title {
+    display: none;
+  }
+}

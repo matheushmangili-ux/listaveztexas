@@ -3,7 +3,7 @@
 // Network-first para HTML e APIs — sempre pega a versão mais fresca
 // Web Push listener pro minhavez Vendedor
 // Bump CACHE_VERSION a cada deploy
-const CACHE_VERSION = '131';
+const CACHE_VERSION = '132';
 const CACHE_NAME = 'minhavez-v' + CACHE_VERSION;
 const STATIC_ASSETS = [
   '/tablet.html',
@@ -13,13 +13,10 @@ const STATIC_ASSETS = [
   '/dashboard-operacional.html',
   '/settings.html',
   '/vendor.html',
-  '/css/tokens.css',
-  '/css/theme-dark.css',
-  '/css/theme-light.css',
-  '/css/styles.v52.css',
-  '/css/dashboard.v52.css',
-  '/css/tablet.v52.css',
-  '/css/vendor.v52.css',
+  '/css/tokens.v54.css',
+  '/css/components.v54.css',
+  '/css/tablet.v54.css',
+  '/css/dashboard.v54.css',
   '/js/components/mv-logo.js',
   '/js/components/mv-loader.js',
   '/assets/logo/mv-chevron-primary.svg',
@@ -30,11 +27,15 @@ const STATIC_ASSETS = [
   '/js/ui.js',
   '/js/sound.js',
   '/js/update-checker.js',
+  '/js/analytics.js',
+  '/js/sentry.js',
+  '/js/tour.js',
   '/js/tablet-atendimento.js',
   '/js/tablet-celebrations.js',
   '/js/tablet-footer.js',
   '/js/tablet-init.js',
   '/js/tablet-queue.js',
+  '/js/tablet-ruptura.js',
   '/js/tablet-turno.js',
   '/js/vendor-init.js',
   '/js/vendor-home.js',
@@ -65,10 +66,24 @@ const STATIC_ASSETS = [
 
 const STATIC_EXTENSIONS = /\.(css|js|png|jpg|jpeg|svg|woff2?|ttf|eot|ico)(\?.*)?$/i;
 
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
+// Precache resiliente: 1 asset 404 não derruba o batch inteiro.
+// Histórico: na migração v52→v54, refs mortas no STATIC_ASSETS faziam
+// cache.addAll() rejeitar — SW novo nunca instalava, clientes ficavam
+// presos ao SW antigo servindo CSS deletado. allSettled isola.
+async function precache(cache) {
+  const results = await Promise.allSettled(
+    STATIC_ASSETS.map(url => cache.add(url))
   );
+  const failed = results
+    .map((r, i) => (r.status === 'rejected' ? STATIC_ASSETS[i] : null))
+    .filter(Boolean);
+  if (failed.length) {
+    console.warn('[sw] precache skipped (404 ou erro):', failed);
+  }
+}
+
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE_NAME).then(precache));
   self.skipWaiting();
 });
 
