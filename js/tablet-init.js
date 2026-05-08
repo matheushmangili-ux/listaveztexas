@@ -540,11 +540,13 @@ async function returnToSavedPosition(vendedorId) {
 
   // Salvar no banco — vendedor retornando primeiro.
   // Limpa posicao_fila_anterior pra evitar reuso de valor stale na próxima pausa.
-  const { error } = await sb
-    .from('vendedores')
-    .update({ status: 'disponivel', posicao_fila: v.posicao_fila, posicao_fila_anterior: null })
-    .eq('id', vendedorId)
-    .eq('tenant_id', tenantId);
+  const returnPayload = { status: 'disponivel', posicao_fila: v.posicao_fila, posicao_fila_anterior: null };
+  let { error } = await sb.from('vendedores').update(returnPayload).eq('id', vendedorId).eq('tenant_id', tenantId);
+  // Mesmo fallback do confirmSaida: migration sql/50 pode não estar aplicada.
+  if (error && (error.code === '42703' || /posicao_fila_anterior/.test(error.message || ''))) {
+    delete returnPayload.posicao_fila_anterior;
+    ({ error } = await sb.from('vendedores').update(returnPayload).eq('id', vendedorId).eq('tenant_id', tenantId));
+  }
   if (error) {
     toast('Erro ao salvar: ' + error.message, 'error');
     await loadVendedores();
@@ -613,7 +615,15 @@ window.confirmSaida = async function (motivo) {
   const savedId = state.pendingSaidaId;
   const updatePayload = { status: newStatus, posicao_fila: null };
   if (newStatus === 'pausa') updatePayload.posicao_fila_anterior = posAnterior;
-  const { error } = await sb.from('vendedores').update(updatePayload).eq('id', savedId).eq('tenant_id', tenantId);
+  let { error } = await sb.from('vendedores').update(updatePayload).eq('id', savedId).eq('tenant_id', tenantId);
+  // Fallback: se sql/50-posicao-fila-anterior.sql ainda não foi aplicada no
+  // Supabase, o update falha com 42703 (undefined_column). Retry sem a
+  // coluna — preserva via Map em memória até a migration rodar. Remover
+  // depois que a migration estiver garantida em prod.
+  if (error && (error.code === '42703' || /posicao_fila_anterior/.test(error.message || ''))) {
+    delete updatePayload.posicao_fila_anterior;
+    ({ error } = await sb.from('vendedores').update(updatePayload).eq('id', savedId).eq('tenant_id', tenantId));
+  }
   if (error) {
     toast('Erro ao registrar saída', 'error');
     window.closeSaida();

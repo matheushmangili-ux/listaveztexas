@@ -282,6 +282,16 @@ export async function doSendToAtendimento(vendedorId) {
   }
   let v = _ctx.vendedores.find((x) => x.id === vendedorId);
   if (!v) return;
+  // Vendedor já em atendimento: oferecer adicionar cliente paralelo.
+  // Caso de uso: vendedora atendendo cliente A, cliente B chega, recepcionista
+  // toca no card pra marcar V atendendo B em paralelo. Cada cliente vira seu
+  // próprio atendimento (linha em atendimentos), finalizável independente.
+  if (v.status === 'em_atendimento') {
+    const nome = v.apelido || v.nome;
+    if (!confirm(`${nome} já está em atendimento. Adicionar mais um cliente em paralelo?`)) return;
+    await addParallelAtendimento(vendedorId);
+    return;
+  }
   // Se vendedor está fora/pausa, colocar na fila primeiro
   if (v.status === 'fora' || v.status === 'pausa') {
     await _ctx.addToQueue(vendedorId);
@@ -369,6 +379,63 @@ async function _executeAtendimento(vendedorId, canalOrigemId) {
   } catch (err) {
     toast('Erro: ' + (err.message || 'falha ao iniciar'), 'error');
     await _ctx.loadVendedores();
+  }
+}
+
+// ─── Atendimento paralelo (vendedor já em atendimento ganha mais um cliente) ───
+// Bypassa iniciar_atendimento_vendedor (que provavelmente checa em_atendimento
+// duplicado e rejeita) — INSERT direto no estilo do fluxo "continuar" do
+// finalize. Vendor já é em_atendimento, então não mexe em status nem em fila.
+
+async function addParallelAtendimento(vendedorId) {
+  if (_ctx.actionLock) return;
+  if (!_ctx.currentTurno) return;
+  _ctx.actionLock = true;
+  try {
+    _ctx.markLocal();
+    const v = _ctx.vendedores.find((x) => x.id === vendedorId);
+    const nome = v?.apelido || v?.nome || 'Vendedor';
+    const { data: novoAtend, error } = await _ctx.sb
+      .from('atendimentos')
+      .insert({
+        turno_id: _ctx.currentTurno.id,
+        vendedor_id: vendedorId,
+        inicio: new Date().toISOString(),
+        tenant_id: _ctx.tenantId
+      })
+      .select('*, vendedores(nome, apelido), canais_origem(nome, icone)')
+      .single();
+    if (error) {
+      // 23505 = unique_violation: existe índice parcial bloqueando paralelo.
+      // Se acontecer, o índice precisa ser revisto na schema (não esperado
+      // hoje — sql/ não tem nenhum unique em atendimentos.vendedor_id).
+      if (error.code === '23505') {
+        toast('Conflito: índice no banco bloqueia atendimento paralelo', 'error');
+      } else {
+        toast('Erro ao adicionar cliente: ' + error.message, 'error');
+      }
+      return;
+    }
+    _ctx.activeAtendimentos.push(novoAtend);
+    renderActiveAtendimentos();
+    playSound('atendimento');
+    if (navigator.vibrate) navigator.vibrate(200);
+    _ctx.logPosition(v, 'atendimento', 'Paralelo');
+    toast(`${nome}: cliente adicionado em paralelo`, 'success', TOAST_MEDIUM);
+    try {
+      window.minhavezAnalytics?.capture('tablet_atendimento_paralelo_iniciado', {
+        atendimento_id: novoAtend.id,
+        vendedor_id: vendedorId
+      });
+    } catch (_e) {
+      /* ignore */
+    }
+  } catch (e) {
+    toast('Erro: ' + e.message, 'error');
+  } finally {
+    setTimeout(() => {
+      _ctx.actionLock = false;
+    }, ACTION_LOCK_RESET);
   }
 }
 
@@ -787,6 +854,21 @@ async function cancelarAtendimento(atendId) {
     // Deletar atendimento (foi engano, não conta)
     _ctx.markLocal();
     await _ctx.sb.from('atendimentos').delete().eq('id', atendId);
+
+    // Se vendedor ainda tem outro atendimento paralelo aberto, NÃO devolve
+    // pra fila — só remove esse card. Devolver à fila quebraria os paralelos
+    // restantes (vendedor sairia de em_atendimento e os outros cards ficariam
+    // órfãos com vendor disponivel + posicao_fila).
+    const temParalelo = _ctx.activeAtendimentos.some((a) => a.vendedor_id === vendedorId && a.id !== atendId);
+    if (temParalelo) {
+      removeAtendimento(atendId);
+      invalidateQueue();
+      invalidateFooter();
+      scheduleRender();
+      _ctx.logPosition(v, 'cancelar', 'Paralelo cancelado');
+      toast(`${v.apelido || v.nome}: cliente cancelado (mantém atendimento paralelo)`, 'info');
+      return;
+    }
 
     // Devolver vendedor à posição original (ou 1º se não tiver salva)
     const setor = v.setor || 'loja';
@@ -1319,6 +1401,20 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor, con
     _ctx.logPosition(fv || atendInfo?.vendedores, 'finalizar', resultado + (valor ? ' R$' + valor : ''));
     removeAtendimento(id);
     pendingAtendimentoId = null;
+
+    // Vendor ainda tem atendimento paralelo aberto? RPC finalizar_atendimento
+    // já mexeu com vendor.status (disponivel) e posicao_fila (back-of-queue).
+    // Re-marca em_atendimento pra não ficar órfão com paralelos remanescentes.
+    // (Caminho continuar=true já trata logo abaixo, então só corrige aqui se
+    // !continuar.)
+    const temParalelo = vendedorId && _ctx.activeAtendimentos.some((a) => a.vendedor_id === vendedorId);
+    if (!continuar && temParalelo) {
+      await _ctx.sb
+        .from('vendedores')
+        .update({ status: 'em_atendimento', posicao_fila: null })
+        .eq('id', vendedorId)
+        .eq('tenant_id', _ctx.tenantId);
+    }
 
     if (continuar && vendedorId && _ctx.currentTurno) {
       // Criar novo atendimento imediato para o mesmo vendedor
