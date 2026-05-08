@@ -16,12 +16,12 @@ Convenções e contexto do repositório para quem (Claude ou humano) for trabalh
 
 ## Áreas do app (4 surfaces)
 
-| Surface | Arquivo principal | Usuário | Device |
-|---|---|---|---|
-| **Vendor** | `vendor.html` | Vendedora individual | Celular |
-| **Tablet** | `tablet.html` | Operador no balcão | Tablet fixo (kiosk) |
-| **Dashboard** | `dashboard.html` + `dashboard-vendedor.html` + `dashboard-operacional.html` | Gerente | Desktop |
-| **Landing/Auth** | `landing.html` + `index.html` + `setup.html` | Visitante/admin | Qualquer |
+| Surface          | Arquivo principal                                                           | Usuário              | Device              |
+| ---------------- | --------------------------------------------------------------------------- | -------------------- | ------------------- |
+| **Vendor**       | `vendor.html`                                                               | Vendedora individual | Celular             |
+| **Tablet**       | `tablet.html`                                                               | Operador no balcão   | Tablet fixo (kiosk) |
+| **Dashboard**    | `dashboard.html` + `dashboard-vendedor.html` + `dashboard-operacional.html` | Gerente              | Desktop             |
+| **Landing/Auth** | `landing.html` + `index.html` + `setup.html`                                | Visitante/admin      | Qualquer            |
 
 Dashboard tem 3 HTMLs ~95% idênticos — consolidar em template único é débito técnico conhecido.
 
@@ -30,12 +30,12 @@ Dashboard tem 3 HTMLs ~95% idênticos — consolidar em template único é débi
 ```
 /
 ├── *.html                   — surfaces principais
-├── css/
-│   ├── tokens.css           — design tokens (cores, espaços, sombras)
-│   ├── styles.v52.css       — base compartilhada
-│   ├── vendor.v52.css       — estilos do vendor
-│   ├── tablet.v52.css       — estilos do tablet
-│   └── dashboard.v52.css    — estilos do dashboard
+├── css/                     — todas as surfaces puxam tokens + components
+│   ├── tokens.v54.css       — design tokens (cores, espaços, sombras, type)
+│   ├── components.v54.css   — primitivas compartilhadas (botões, mv-wordmark, etc)
+│   ├── tablet.v54.css       — estilos do tablet (recepção/fila landscape)
+│   ├── dashboard.v54.css    — estilos dos 3 dashboards (sidebar + main + charts)
+│   └── vendor.v54.css       — estilos do vendor (mobile, light only)
 ├── js/
 │   ├── analytics.js         — init PostHog (com reverse proxy /ingest)
 │   ├── sentry.js            — init Sentry
@@ -67,12 +67,15 @@ Pre-commit hook via Husky roda `lint-staged` — arquivos staged passam por esli
 ## Convenções
 
 ### CSS
-- **Tokens em `css/tokens.css`**. Novas cores/espaços/radius vão aqui primeiro, depois usa como `var(--foo)` nos estilos.
-- **Versionamento manual**: `v52` no nome do arquivo (`styles.v52.css`). Quando fizer mudança que precisa invalidar cache do service worker, bump pra v53 e atualiza refs em todos HTMLs.
+
+- **Tokens em `css/tokens.v54.css`**. Novas cores/espaços/radius vão aqui primeiro, depois usa como `var(--foo)` nos estilos.
+- **Versionamento manual**: `vNN` no nome do arquivo (`tokens.v54.css`). Quando fizer mudança que precisa invalidar cache do service worker, bump pra próxima versão, atualiza refs em todos HTMLs e em `sw.js` (STATIC_ASSETS + CACHE_VERSION).
+- **Estilos por surface ficam em arquivos dedicados** — nada de `<style>` inline em HTML. Migração v54 extraiu tablet/vendor pra `css/{surface}.v54.css` (dashboards já vinham externos). Inline volta a aparecer só em páginas auxiliares pequenas (auth, legal).
 - **Nada de `!important`** exceto em cenários realmente justificados. Se precisar, comenta por quê acima.
-- **Dark/light**: `[data-theme='dark']` e `[data-theme='light']` em `html`. Tokens respondem via custom properties. Default é dark exceto no tablet (que permite toggle desde v52).
+- **Dark/light**: `[data-theme='dark']` e `[data-theme='light']` em `html`. Tokens respondem via custom properties. Default é dark exceto no tablet (que permite toggle desde v52) e no vendor (light only).
 
 ### JS
+
 - **Módulos ES** (`<script type="module">`), não CommonJS.
 - **Sem bundler** → imports usam path absoluto (`/js/tenant.js`), não `../tenant`.
 - **Sem TypeScript** no src (tests podem ter JSDoc).
@@ -81,15 +84,17 @@ Pre-commit hook via Husky roda `lint-staged` — arquivos staged passam por esli
 - **Sentry**: erros graves vão automático. Pra breadcrumb manual, `window.minhavezSentry?.captureException(err, { tags: {...} })`.
 
 ### SQL
+
 - **RLS ativa** em toda tabela com dados de tenant. Policy padrão: `tenant_id = auth.jwt() ->> 'tenant_id'`.
 - **Migrations numeradas** (`NN-feature.sql`). Nunca edite migration já aplicada — crie nova.
 - **`SECURITY DEFINER`** em RPCs que precisam bypassar RLS — use com cuidado.
 - **Índices parciais + ON CONFLICT**: incompatíveis em geral. O conflict target precisa bater com o predicate do índice. Se usar partial index, use unique constraint inteira.
 
 ### Commits
+
 - **Formato**: `tipo(escopo): descricao` (ex: `fix(vendor): auth race em sessao expirada`).
 - **Tipos**: `feat`, `fix`, `refactor`, `docs`, `style`, `test`, `chore`.
-- **Descrição explica o *porquê***, não apenas o o quê.
+- **Descrição explica o _porquê_**, não apenas o o quê.
 - **Co-author**: commits assistidos terminam com `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>`.
 
 ## Gotchas (aprendidos a duras penas)
