@@ -1459,8 +1459,11 @@ function openMotivos() {
     .getElementById('motivoList')
     ?.querySelectorAll('.motivo-option')
     .forEach((o) => o.classList.remove('selected'));
-  document.getElementById('rupturaField').style.display = 'none';
-  document.getElementById('outroField').style.display = 'none';
+  // Tem que ser via classList.add('hidden') — style.display='none' nao funciona
+  // como flag de mostrar/esconder porque .hidden { display:none !important } na
+  // CSS sempre vence inline style, e isso travou ruptura/outro pra recepcao.
+  document.getElementById('rupturaField').classList.add('hidden');
+  document.getElementById('outroField').classList.add('hidden');
   document.getElementById('btnConfirmMotivo').disabled = true;
   pendingOutcome = null;
   resetRupturaSelection();
@@ -1478,8 +1481,8 @@ async function selectMotivo(el) {
     .forEach((o) => o.classList.remove('selected'));
   el.classList.add('selected');
   pendingOutcome = el.dataset.motivo;
-  document.getElementById('rupturaField').style.display = pendingOutcome === 'ruptura' ? 'block' : 'none';
-  document.getElementById('outroField').style.display = pendingOutcome === 'outro' ? 'block' : 'none';
+  document.getElementById('rupturaField').classList.toggle('hidden', pendingOutcome !== 'ruptura');
+  document.getElementById('outroField').classList.toggle('hidden', pendingOutcome !== 'outro');
   document.getElementById('btnConfirmMotivo').disabled = false;
 
   if (pendingOutcome === 'ruptura') {

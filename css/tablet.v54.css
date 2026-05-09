@@ -1909,3 +1909,176 @@ body {
     display: none;
   }
 }
+
+/* ─── Picker de ruptura (rp-*) ───────────────────────────────────────────── */
+/* Classes geradas em js/tablet-ruptura.js: chips pill pra Tipo/Marca/Tamanho/Cor.
+   Migração v54 perdeu esse bloco — chips renderizavam sem estilo. */
+.rp-section {
+  margin-bottom: 14px;
+}
+.rp-section:last-child {
+  margin-bottom: 0;
+}
+.rp-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mv-text-muted);
+  margin-bottom: 6px;
+}
+.rp-optional {
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--mv-text-faint);
+}
+.rp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.rp-chips--wrap {
+  flex-wrap: wrap;
+}
+.rp-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: var(--mv-radius-pill, 999px);
+  border: 1px solid var(--mv-border-strong);
+  background: var(--mv-surface);
+  color: var(--mv-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background var(--mv-dur-fast) var(--mv-ease),
+    border-color var(--mv-dur-fast) var(--mv-ease),
+    color var(--mv-dur-fast) var(--mv-ease);
+}
+.rp-chip:hover {
+  border-color: var(--mv-primary);
+  background: var(--mv-surface-2);
+}
+.rp-chip.active {
+  border-color: var(--mv-primary);
+  background: var(--mv-primary);
+  color: var(--mv-on-primary, #fff);
+}
+.rp-chip--ghost {
+  border-style: dashed;
+  color: var(--mv-text-muted);
+  background: transparent;
+}
+.rp-chip--ghost:hover {
+  color: var(--mv-primary);
+  background: transparent;
+}
+
+/* ─── Check-in do turno (checkin-*) ──────────────────────────────────────── */
+/* Classes geradas em js/tablet-turno.js openCheckin: toggle por vendedor.
+   Migração v54 perdeu o bloco — toggles renderizavam invisíveis. */
+.checkin-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-radius-md);
+  background: var(--mv-surface);
+  cursor: pointer;
+  transition:
+    border-color var(--mv-dur-fast) var(--mv-ease),
+    background var(--mv-dur-fast) var(--mv-ease);
+  margin-bottom: 6px;
+}
+.checkin-item:hover {
+  border-color: var(--mv-border-strong);
+  background: var(--mv-surface-2);
+}
+.checkin-item.checked {
+  border-color: var(--mv-primary);
+  background: var(--mv-status-busy-bg);
+}
+.checkin-switch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--mv-slate-200);
+  flex-shrink: 0;
+  transition: background var(--mv-dur-fast) var(--mv-ease);
+}
+.checkin-item.checked .checkin-switch {
+  background: var(--mv-primary);
+}
+.checkin-switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: left var(--mv-dur-fast) var(--mv-ease);
+}
+.checkin-item.checked .checkin-switch-thumb {
+  left: 20px;
+}
+
+/* ─── Empty states ───────────────────────────────────────────────────────── */
+/* Usados em histórico de movimentações + ranking quando não há dados.
+   Antes renderizavam nus (sem padding/centralização). */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px 24px;
+  text-align: center;
+  color: var(--mv-text-muted);
+}
+.empty-state--compact {
+  padding: 20px 16px;
+  gap: 8px;
+}
+.empty-state__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--mv-surface-2);
+  color: var(--mv-text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.empty-state--compact .empty-state__icon {
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+}
+.empty-state__prose {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 340px;
+}
+.empty-state__prose strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mv-text);
+}
+.empty-state__prose span,
+.empty-state__prose p {
+  font-size: 12px;
+  color: var(--mv-text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
