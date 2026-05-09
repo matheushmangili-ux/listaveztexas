@@ -696,12 +696,31 @@ function onTouchDragStart(e) {
   };
 
   const onMove = (ev) => {
-    ev.preventDefault();
     const t = ev.touches[0];
     const dx = t.clientX - touchStartX;
     const dy = t.clientY - touchStartY;
+    const adx = Math.abs(dx);
+    const ady = Math.abs(dy);
 
-    if (!touchDragging && Math.abs(dx) + Math.abs(dy) > DRAG_THRESHOLD_QUEUE) {
+    if (!touchDragging) {
+      // Sub-threshold: deixa o browser decidir (scroll nativo).
+      // preventDefault() so apos confirmar drag — antes disso, qualquer
+      // scroll horizontal do rodape ou vertical da fila funciona normal.
+      if (adx + ady <= DRAG_THRESHOLD_QUEUE) return;
+
+      // Footer cards rolam horizontalmente. Se o gesto eh majoritariamente
+      // horizontal, o operador esta scrollando o strip de vendedores —
+      // aborta o drag e libera o scroll nativo.
+      if (touchDragEl?.classList.contains('footer-card') && adx > ady) {
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onEnd);
+        document.removeEventListener('touchcancel', onEnd);
+        touchDragId = null;
+        touchDragEl = null;
+        return;
+      }
+
+      ev.preventDefault();
       touchDragging = true;
       item.style.opacity = '0.3';
       queueList.classList.add('dragging');
@@ -733,6 +752,9 @@ function onTouchDragStart(e) {
     }
 
     if (touchDragging && touchGhost) {
+      // Ja em drag — bloqueia scroll continuado (preventDefault inicial
+      // ficou na ativacao; precisa repetir aqui pra cada tick subsequente).
+      ev.preventDefault();
       _pendingGhostX = t.clientX - itemW / 2;
       _pendingGhostY = t.clientY - DRAG_GHOST_Y_OFFSET;
       if (!_ghostRafPending) {

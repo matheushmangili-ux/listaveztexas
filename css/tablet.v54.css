@@ -1110,34 +1110,47 @@ body {
   background: transparent;
 }
 
-/* Footer title — "Vendedores N" enxuto ao lado dos cards */
+/* Footer title — "Vendedores · N" inline, mais sobrio (cara enterprise).
+   Antes era stack vertical com label uppercase + numero mono 22px — visual
+   playful demais. Agora linha unica baseline, sans, peso medio, no peso
+   visual da Fiori/SAP. */
 .footer-title {
   display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 8px;
   flex-shrink: 0;
   padding-right: 16px;
   margin-right: 4px;
   border-right: 1px solid var(--mv-border);
   align-self: stretch;
-  justify-content: center;
+  justify-content: flex-start;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  align-content: center;
+}
+.footer-title::before {
+  /* Centraliza o conjunto verticalmente sem flexbox column. */
+  content: '';
 }
 .footer-title-label {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
   color: var(--mv-text-muted);
-  line-height: 1;
+  line-height: 1.2;
+  align-self: center;
 }
 .footer-title-count {
-  font-family: var(--mv-font-mono);
-  font-size: 22px;
-  font-weight: 700;
+  font-family: var(--mv-font-sans);
+  font-size: 18px;
+  font-weight: 600;
   color: var(--mv-text);
   font-variant-numeric: tabular-nums;
-  line-height: 1;
+  line-height: 1.1;
+  align-self: center;
 }
 
 /* Footer card (vendedor pill) */
@@ -1562,6 +1575,16 @@ body {
 }
 .btn-ghost:hover:not(:disabled) {
   background: var(--mv-surface-2);
+}
+/* btn-warning — usado em fluxos de troca/preferencial. Antes nao tinha
+   regra → caia em .btn sem cor (transparente, dificil de ver). */
+.btn-warning {
+  background: var(--mv-status-paused);
+  color: #fff;
+  border-color: var(--mv-status-paused);
+}
+.btn-warning:hover:not(:disabled) {
+  filter: brightness(0.95);
 }
 .btn-flex-1 {
   flex: 1;
