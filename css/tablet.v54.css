@@ -86,34 +86,90 @@ body {
   flex: 1;
   min-height: 0;
 }
-.gap-6 { gap: 6px; }
-.gap-8 { gap: 8px; }
-.gap-10 { gap: 10px; }
-.gap-16 { gap: 16px; }
-.shrink-0 { flex-shrink: 0; }
-.text-muted { color: var(--mv-text-muted); }
-.text-secondary { color: var(--mv-text-muted); }
-.uppercase { text-transform: uppercase; }
-.tracking-wide { letter-spacing: 0.06em; }
-.tracking-tight { letter-spacing: -0.01em; }
-.fw-600 { font-weight: 600; }
-.fw-700 { font-weight: 700; }
-.fw-800 { font-weight: 800; }
-.fs-9 { font-size: 9px; }
-.fs-10 { font-size: 10px; }
-.fs-11 { font-size: 11px; }
-.fs-12 { font-size: 12px; }
-.fs-13 { font-size: 13px; }
-.fs-14 { font-size: 14px; }
-.fs-16 { font-size: 16px; }
-.fs-18 { font-size: 18px; }
-.mb-4 { margin-bottom: 4px; }
-.mb-8 { margin-bottom: 8px; }
-.mb-12 { margin-bottom: 12px; }
-.mb-16 { margin-bottom: 16px; }
-.mt-16 { margin-top: 16px; }
-.mr-4 { margin-right: 4px; }
-.block { display: block; }
+.gap-6 {
+  gap: 6px;
+}
+.gap-8 {
+  gap: 8px;
+}
+.gap-10 {
+  gap: 10px;
+}
+.gap-16 {
+  gap: 16px;
+}
+.shrink-0 {
+  flex-shrink: 0;
+}
+.text-muted {
+  color: var(--mv-text-muted);
+}
+.text-secondary {
+  color: var(--mv-text-muted);
+}
+.uppercase {
+  text-transform: uppercase;
+}
+.tracking-wide {
+  letter-spacing: 0.06em;
+}
+.tracking-tight {
+  letter-spacing: -0.01em;
+}
+.fw-600 {
+  font-weight: 600;
+}
+.fw-700 {
+  font-weight: 700;
+}
+.fw-800 {
+  font-weight: 800;
+}
+.fs-9 {
+  font-size: 9px;
+}
+.fs-10 {
+  font-size: 10px;
+}
+.fs-11 {
+  font-size: 11px;
+}
+.fs-12 {
+  font-size: 12px;
+}
+.fs-13 {
+  font-size: 13px;
+}
+.fs-14 {
+  font-size: 14px;
+}
+.fs-16 {
+  font-size: 16px;
+}
+.fs-18 {
+  font-size: 18px;
+}
+.mb-4 {
+  margin-bottom: 4px;
+}
+.mb-8 {
+  margin-bottom: 8px;
+}
+.mb-12 {
+  margin-bottom: 12px;
+}
+.mb-16 {
+  margin-bottom: 16px;
+}
+.mt-16 {
+  margin-top: 16px;
+}
+.mr-4 {
+  margin-right: 4px;
+}
+.block {
+  display: block;
+}
 
 /* ─── Layout principal ───────────────────────────────────────────────────── */
 /* 100vh em browser mobile (Chrome/Safari iOS) NÃO subtrai a barra de
@@ -805,7 +861,9 @@ body {
 .queue-item.next-in-line {
   background: var(--mv-brand-50);
   border-color: var(--mv-brand-200);
-  box-shadow: 0 0 0 1px var(--mv-brand-100), var(--mv-shadow-sm);
+  box-shadow:
+    0 0 0 1px var(--mv-brand-100),
+    var(--mv-shadow-sm);
 }
 .queue-item.next-in-line .queue-item-name {
   color: var(--mv-primary);
@@ -820,13 +878,22 @@ body {
 
 /* Keyframes antigos defendidos como no-op (caso outro lugar use) */
 @keyframes nextCardPulse {
-  from, to { opacity: 0; }
+  from,
+  to {
+    opacity: 0;
+  }
 }
 @keyframes nextCardGlow {
-  from, to { box-shadow: var(--mv-shadow-xs); }
+  from,
+  to {
+    box-shadow: var(--mv-shadow-xs);
+  }
 }
 @keyframes nextBadgePulse {
-  from, to { transform: none; }
+  from,
+  to {
+    transform: none;
+  }
 }
 
 /* ─── Service panel (direita) ────────────────────────────────────────────── */
@@ -1020,7 +1087,9 @@ body {
   max-height: 124px;
   padding: 14px 22px calc(14px + env(safe-area-inset-bottom));
   background: var(--mv-surface);
-  box-shadow: 0 -1px 0 var(--mv-border), var(--mv-shadow-xs);
+  box-shadow:
+    0 -1px 0 var(--mv-border),
+    var(--mv-shadow-xs);
   display: flex;
   gap: 12px;
   flex-wrap: nowrap;
@@ -1173,19 +1242,39 @@ body {
 
 /* ─── Animations (entradas suaves de itens) ──────────────────────────────── */
 @keyframes mvSlideIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes mvFadeOut {
-  to { opacity: 0; transform: translateY(-4px); }
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
 }
 @keyframes mvScaleIn {
-  from { opacity: 0; transform: scale(0.92); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 @keyframes mvShimmer {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 .queue-item.new-item,
@@ -1325,17 +1414,20 @@ body {
 .bottom-sheet-overlay.open {
   display: block;
 }
+/* Tablet em landscape (kiosk) — sheet centralizado vira modal.
+   Antes era bottom: 0 (slide-from-bottom mobile), mas em tela larga o
+   popup ficava colado no rodapé e a recepcionista perdia contexto. */
 .bottom-sheet {
   position: fixed;
+  top: 50%;
   left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   width: 100%;
   max-width: 480px;
   z-index: 100;
   background: var(--mv-surface);
-  border-radius: var(--mv-radius-xl) var(--mv-radius-xl) 0 0;
-  padding: 12px 20px 24px;
+  border-radius: var(--mv-radius-xl);
+  padding: 20px 24px 24px;
   max-height: 86vh;
   overflow-y: auto;
   box-shadow: var(--mv-shadow-xl);
@@ -1343,9 +1435,24 @@ body {
 }
 .bottom-sheet.open {
   display: block;
+  animation: mvSheetIn 0.18s var(--mv-ease, ease-out);
 }
-.sheet-max-90vh { max-height: 90vh; }
-.sheet-max-80vh { max-height: 80vh; }
+@keyframes mvSheetIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+.sheet-max-90vh {
+  max-height: 90vh;
+}
+.sheet-max-80vh {
+  max-height: 80vh;
+}
 .bottom-sheet-handle {
   width: 36px;
   height: 4px;
@@ -1392,10 +1499,18 @@ body {
   flex: 1;
 }
 
-.outcome-option[data-outcome='venda'] > i { color: var(--mv-status-available); }
-.outcome-option[data-outcome='troca'] > i { color: var(--mv-primary); }
-.outcome-option[data-outcome='nao_convertido'] > i { color: var(--mv-status-paused); }
-.outcome-option[data-outcome='cancelar'] > i { color: var(--mv-status-error); }
+.outcome-option[data-outcome='venda'] > i {
+  color: var(--mv-status-available);
+}
+.outcome-option[data-outcome='troca'] > i {
+  color: var(--mv-primary);
+}
+.outcome-option[data-outcome='nao_convertido'] > i {
+  color: var(--mv-status-paused);
+}
+.outcome-option[data-outcome='cancelar'] > i {
+  color: var(--mv-status-error);
+}
 
 /* ─── Buttons (preserva nomes do JS) ─────────────────────────────────────── */
 .btn {
