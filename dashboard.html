@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>minhavez — Dashboard</title>
+    <title>Dashboard — minhavez</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -371,16 +371,7 @@
                   ><i class="fa-solid fa-chart-pie" style="margin-right: 6px; color: var(--mv-text-muted)"></i>Motivos
                   de Perda</span
                 >
-                <span
-                  id="motivosTotal"
-                  style="
-                    font-family: var(--mv-font-mono);
-                    font-size: 10px;
-                    color: var(--mv-text-muted);
-                    letter-spacing: 0.08em;
-                  "
-                  >—</span
-                >
+                <span id="motivosTotal" class="chart-card-counter">—</span>
               </div>
               <div class="chart-box donut-wrap" style="min-height: 220px">
                 <div id="chartMotivos" class="donut-compact"></div>
@@ -434,16 +425,7 @@
                 ><i class="fa-solid fa-box-open" style="margin-right: 6px; color: var(--mv-status-error)"></i>Rupturas
                 específicas</span
               >
-              <span
-                id="ruptureImpactCount"
-                style="
-                  font-family: var(--mv-font-mono);
-                  font-size: 10px;
-                  color: var(--mv-text-muted);
-                  letter-spacing: 0.08em;
-                "
-                >—</span
-              >
+              <span id="ruptureImpactCount" class="chart-card-counter">—</span>
             </div>
             <div class="chart-box" id="ruptureImpactList"></div>
           </div>

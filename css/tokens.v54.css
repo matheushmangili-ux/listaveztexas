@@ -175,6 +175,7 @@
   --accent: var(--mv-primary);
   --accent-ink: var(--mv-on-primary);
   --accent-bright: var(--mv-brand-400);
+  --accent-dim: var(--mv-brand-700);
   --info: var(--mv-primary);
   --success: var(--mv-status-available);
   --warning: var(--mv-status-paused);

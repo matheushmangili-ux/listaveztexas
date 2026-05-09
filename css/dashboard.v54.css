@@ -554,52 +554,6 @@ a {
   display: none !important;
 }
 
-/* Section cards (legacy compat) */
-.sec-card {
-  background: var(--mv-surface);
-  border: 1px solid var(--mv-border);
-  border-radius: var(--mv-radius-lg);
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: var(--mv-shadow-xs);
-}
-.sec-left {
-  flex: 1;
-  min-width: 0;
-}
-.sec-left-label {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--mv-text-muted);
-  margin-bottom: 4px;
-}
-.sec-kpi {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-.sec-val {
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  font-variant-numeric: tabular-nums;
-  color: var(--mv-text);
-}
-.sec-delta {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--mv-status-available);
-}
-.sec-delta.icon-danger {
-  color: var(--mv-status-error);
-}
-.sec-right {
-  flex-shrink: 0;
-}
 .mini-spark {
   width: 64px;
   height: 32px;
@@ -966,24 +920,305 @@ a {
   }
 }
 
-/* ─── Cores legacy mapping (compat com inline styles e código JS) ─── */
+/* ─── Aliases legacy específicos do dashboard ───
+   Os aliases compartilhados (accent, text-*, font-*, danger/success/info/warning)
+   ficam em tokens.v54.css. Aqui ficam só os que o dashboard sobrescreve com
+   valor diferente (bg-surface aponta para o canvas surface em vez do subtle)
+   ou que não são consumidos por outras surfaces. */
 :root {
   --bg-deep: var(--mv-surface-2);
-  --bg-card: var(--mv-surface);
-  --bg-elevated: var(--mv-surface-2);
   --bg-surface: var(--mv-surface);
-  --border-subtle: var(--mv-border);
-  --border-medium: var(--mv-border-strong);
-  --text-primary: var(--mv-text);
-  --text-secondary: var(--mv-text-muted);
   --text-muted: var(--mv-text-faint);
-  --accent: var(--mv-primary);
-  --accent-bright: var(--mv-brand-400);
-  --accent-dim: var(--mv-brand-700);
-  --danger: var(--mv-status-error);
-  --success: var(--mv-status-available);
-  --info: var(--mv-primary);
-  --warning: var(--mv-status-paused);
-  --font-body: var(--mv-font-sans);
-  --font-mono: var(--mv-font-mono);
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────
+   cardFadeIn: usado em rank-row e default em chart-card/metric-card
+   pra suavizar o primeiro paint depois que loadAll resolve.
+   dotPulse: indicador "live" no pause-log e em qualquer dot status. */
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes dotPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.3);
+  }
+}
+.chart-card,
+.metric-card {
+  animation: cardFadeIn 0.35s var(--mv-ease) both;
+}
+
+/* ─── Section toggle (collapse) ─────────────────────────────────────
+   .collapsed em .chart-card-body esconde o conteúdo; em .collapse-btn
+   gira o chevron interno -90deg para indicar estado fechado. Estado
+   é persistido em localStorage (lv-collapsed) por dashboard-init.js. */
+.chart-card-body.collapsed {
+  display: none;
+}
+.collapse-btn i {
+  transition: transform var(--mv-dur-fast) var(--mv-ease);
+}
+.collapse-btn.collapsed i {
+  transform: rotate(-90deg);
+}
+
+/* ─── Ranking list (dashboard-vendedor) ──────────────────────────────
+   Render emitido por loadRanking() em dashboard-charts.js. Estrutura:
+   .rank-list > .rank-list-header (título das colunas)
+              > .rank-row (linhas com .rl-pos | .rl-name (avatar + nome) |
+                           .rl-bar (track + fill + valor) | .rl-stat × 3) */
+.rank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rank-list-header,
+.rank-row {
+  display: grid;
+  grid-template-columns: 32px minmax(120px, 1.2fr) minmax(140px, 1.6fr) repeat(3, minmax(56px, 0.7fr));
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--mv-radius-md);
+}
+.rank-list-header {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mv-text-muted);
+  background: transparent;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--mv-border);
+}
+.rank-row {
+  background: var(--mv-surface);
+  border: 1px solid var(--mv-border);
+  font-size: 13px;
+  color: var(--mv-text);
+  box-shadow: var(--mv-shadow-xs);
+}
+.rank-row--top {
+  border-color: var(--mv-primary);
+}
+.rl-pos {
+  font-family: var(--mv-font-mono);
+  font-weight: 700;
+  font-size: 13px;
+  text-align: center;
+  color: var(--mv-text-muted);
+}
+.rl-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-weight: 600;
+}
+.rl-name span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rl-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--mv-surface-2);
+  border: 1px solid var(--mv-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--mv-text-muted);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.rl-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.rl-bar-track {
+  flex: 1;
+  height: 6px;
+  background: var(--mv-surface-2);
+  border-radius: var(--mv-radius-pill);
+  overflow: hidden;
+}
+.rl-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  transition: width var(--mv-dur-base) var(--mv-ease);
+}
+.rl-bar-val {
+  font-family: var(--mv-font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 36px;
+  text-align: right;
+}
+.rl-stat {
+  font-family: var(--mv-font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Rupture item ───────────────────────────────────────────────────
+   Linha do ranking de rupturas (operacional). Espelha o lite do
+   .atend-card do tablet: nome do produto + count à direita. */
+.rupture-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--mv-surface);
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-radius-md);
+  margin-bottom: 6px;
+  box-shadow: var(--mv-shadow-xs);
+}
+.rupture-item:last-child {
+  margin-bottom: 0;
+}
+.rupture-count {
+  font-family: var(--mv-font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mv-status-error);
+  background: var(--mv-status-error-bg);
+  padding: 4px 10px;
+  border-radius: var(--mv-radius-pill);
+  min-width: 36px;
+  text-align: center;
+}
+
+/* ─── Pause log entry (operacional) ──────────────────────────────────
+   Cards do log de pausas — header (nome + status), motivo (badge
+   colorido), meta (saída · retorno · duração). Layout vertical. */
+.pause-log-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--mv-surface);
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-radius-md);
+  margin-bottom: 8px;
+  box-shadow: var(--mv-shadow-xs);
+}
+.pause-log-entry:last-child {
+  margin-bottom: 0;
+}
+.pause-log-entry--active {
+  border-color: var(--mv-status-paused);
+}
+.pause-log-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.pause-log-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mv-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pause-log-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: var(--mv-radius-pill);
+}
+.pause-log-status--active {
+  background: var(--mv-status-paused-bg);
+  color: var(--mv-status-paused);
+}
+.pause-log-status--done {
+  background: var(--mv-status-available-bg);
+  color: var(--mv-status-available);
+}
+.pause-log-motivo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--mv-radius-pill);
+}
+.pause-log-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 11px;
+}
+.pause-log-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--mv-text-muted);
+}
+.pause-log-label {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 9px;
+}
+.pause-log-time {
+  font-family: var(--mv-font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mv-text);
+}
+.pause-log-duration {
+  margin-left: auto;
+  font-family: var(--mv-font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Counter chip / page intro ──────────────────────────────────────
+   Counter chip mostrado no header de chart-cards (motivosTotal,
+   ruptureImpactCount). page-intro é o subtítulo mole das páginas
+   vendedor/operacional. */
+.chart-card-counter {
+  font-family: var(--mv-font-mono);
+  font-size: 10px;
+  color: var(--mv-text-muted);
+  letter-spacing: 0.08em;
+}
+.page-intro {
+  color: var(--mv-text-muted);
+  font-size: 14px;
+  margin: 0 0 24px;
 }

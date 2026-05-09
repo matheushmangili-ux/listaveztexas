@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Por Vendedor — minhavez</title>
+    <title>Dashboard / Por vendedor — minhavez</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -284,11 +284,73 @@
           </div>
         </div>
 
+        <!-- LINHA 1 — 6 metric cards (mesmo grid do overview pra contexto rápido) -->
+        <div class="metric-grid-6" id="kpiGrid">
+          <div class="metric-card">
+            <div class="metric-label">Atendimentos</div>
+            <div class="metric-value">
+              <span class="metric-num" id="kpiTotal">0</span>
+            </div>
+            <div class="metric-delta" id="kpiTotalDelta"></div>
+            <div class="metric-compare">
+              <span><span data-compare="now">Hoje</span> · <span id="kpiTotalNow">0</span></span>
+              <span><span data-compare="prev">Ontem</span> · <span id="kpiTotalPrev">0</span></span>
+            </div>
+            <div class="hero-chart hidden" id="chartHeroAtend"></div>
+          </div>
+          <div class="metric-card metric-card--featured">
+            <div class="metric-label">Vendas</div>
+            <div class="metric-value">
+              <span class="metric-num" id="kpiVendas">0</span>
+            </div>
+            <div class="metric-delta" id="kpiVendasDelta"></div>
+            <div class="metric-compare">
+              <span><span data-compare="now">Hoje</span> · <span id="kpiVendasNow">0</span></span>
+              <span><span data-compare="prev">Ontem</span> · <span id="kpiVendasPrev">0</span></span>
+            </div>
+            <div class="hero-chart hidden" id="chartHeroVendas"></div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Conversão</div>
+            <div class="metric-value">
+              <span class="metric-num" id="kpiConv">0%</span>
+            </div>
+            <div class="metric-delta" id="kpiConvDelta"></div>
+            <div class="metric-compare">
+              <span><span data-compare="now">Hoje</span> · <span id="kpiConvNow">0%</span></span>
+              <span><span data-compare="prev">Ontem</span> · <span id="kpiConvPrev">0%</span></span>
+            </div>
+            <div class="hero-chart hidden" id="chartHeroConv"></div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Não converteu</div>
+            <div class="metric-value">
+              <span class="metric-num" id="kpiLoss">0</span>
+            </div>
+            <div class="metric-delta" id="kpiLossDelta"></div>
+            <div class="hero-chart hidden mini-spark" id="sparkLoss"></div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Fidelizados</div>
+            <div class="metric-value">
+              <span class="metric-num" id="kpiPref">0</span>
+            </div>
+            <div class="metric-delta" id="kpiPrefDelta"></div>
+            <div class="hero-chart hidden mini-spark" id="sparkPref"></div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Tempo médio</div>
+            <div class="metric-value">
+              <span class="metric-num" id="kpiTime">0 min</span>
+            </div>
+            <div class="metric-delta" id="kpiTimeDelta"></div>
+            <div class="hero-chart hidden mini-spark" id="sparkTempo"></div>
+          </div>
+        </div>
+
         <!-- Main content: Por Vendedor -->
         <section class="vendedor-page-intro">
-          <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 24px">
-            Rankings, scatter e performáticas por vendedor do período selecionado.
-          </p>
+          <p class="page-intro">Rankings, scatter e performáticas por vendedor do período selecionado.</p>
         </section>
 
         <div class="chart-section" id="section-vendedor" style="display: block">
@@ -323,20 +385,24 @@
           </div>
           <div class="charts-grid">
             <div class="chart-card">
-              <h3>
-                <i class="fa-solid fa-chart-scatter" style="margin-right: 6px; color: var(--accent-dim)"></i>Volume ×
-                Conversão por Vendedor
-              </h3>
+              <div class="chart-card-header">
+                <h3>
+                  <i class="fa-solid fa-chart-scatter" style="margin-right: 6px; color: var(--accent-dim)"></i>Volume ×
+                  Conversão por Vendedor
+                </h3>
+              </div>
               <div class="chart-box"><div id="chartScatter"></div></div>
               <p id="chartScatterEmpty" class="chart-empty-state" style="display: none">
                 <i class="fa-solid fa-chart-scatter"></i>Sem dados de conversão neste período
               </p>
             </div>
             <div class="chart-card">
-              <h3>
-                <i class="fa-solid fa-stopwatch" style="margin-right: 6px; color: var(--accent-dim)"></i>Tempo Médio por
-                Vendedor
-              </h3>
+              <div class="chart-card-header">
+                <h3>
+                  <i class="fa-solid fa-stopwatch" style="margin-right: 6px; color: var(--accent-dim)"></i>Tempo Médio
+                  por Vendedor
+                </h3>
+              </div>
               <div class="chart-box"><div id="chartTempoMeta"></div></div>
               <p id="chartTempoEmpty" class="chart-empty-state" style="display: none">
                 <i class="fa-solid fa-stopwatch"></i>Sem dados de tempo neste período
@@ -383,22 +449,10 @@
         id="aiModal"
         onclick="if (event.target === this) window._dashAiClose && window._dashAiClose();"
       >
-        <div class="modal-box" style="max-width: 640px; max-height: 90vh; overflow-y: auto">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px">
-            <h3 style="margin: 0; font-size: 15px">
-              <i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 8px; color: var(--warning)"></i>IA Assist
-            </h3>
-            <button
-              onclick="window._dashAiClose && window._dashAiClose()"
-              style="
-                background: none;
-                border: none;
-                cursor: pointer;
-                color: var(--text-muted);
-                font-size: 16px;
-                padding: 4px;
-              "
-            >
+        <div class="modal-box modal-box--lg">
+          <div class="modal-header">
+            <h3><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--warning)"></i>IA Assist</h3>
+            <button class="modal-close-btn" onclick="window._dashAiClose && window._dashAiClose()">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -412,22 +466,10 @@
         id="vmModal"
         onclick="if (event.target === this) window._dashVmClose && window._dashVmClose();"
       >
-        <div class="modal-box" style="max-width: 720px; max-height: 90vh; overflow-y: auto">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px">
-            <h3 style="margin: 0; font-size: 15px">
-              <i class="fa-solid fa-camera-retro" style="margin-right: 8px; color: var(--info)"></i>VM Photos
-            </h3>
-            <button
-              onclick="window._dashVmClose && window._dashVmClose()"
-              style="
-                background: none;
-                border: none;
-                cursor: pointer;
-                color: var(--text-muted);
-                font-size: 16px;
-                padding: 4px;
-              "
-            >
+        <div class="modal-box modal-box--xl">
+          <div class="modal-header">
+            <h3><i class="fa-solid fa-camera-retro" style="color: var(--info)"></i>VM Photos</h3>
+            <button class="modal-close-btn" onclick="window._dashVmClose && window._dashVmClose()">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -1133,20 +1175,10 @@
 
       <!-- Modal Drill-down -->
       <div class="modal-overlay" id="drillModal" onclick="if (event.target === this) closeDrillModal();">
-        <div class="modal-box" style="max-width: 480px">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px">
-            <h3 id="drillTitle" style="margin: 0; font-size: 15px"></h3>
-            <button
-              onclick="closeDrillModal()"
-              style="
-                background: none;
-                border: none;
-                cursor: pointer;
-                color: var(--text-muted);
-                font-size: 16px;
-                padding: 4px;
-              "
-            >
+        <div class="modal-box modal-box--sm">
+          <div class="modal-header">
+            <h3 id="drillTitle"></h3>
+            <button class="modal-close-btn" onclick="closeDrillModal()">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>

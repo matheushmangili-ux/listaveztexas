@@ -4,9 +4,8 @@
 // ============================================
 
 import { fetchCanalStats, fetchRuptureLog, fetchPauseLog, fetchVendedores } from '/js/dashboard-api.js';
-import { CHART_TAB_KEY, ORIGEM_PALETTE, DEFAULT_METAS, PERIODS } from '/js/dashboard-config.js';
-import { STATUS_CONFIG, MOTIVOS, initials, toast, todayRange, escapeHtml, setoresMatch } from '/js/utils.js';
-import { CHART_RESIZE_DELAY } from '/js/constants.js';
+import { ORIGEM_PALETTE, DEFAULT_METAS, PERIODS } from '/js/dashboard-config.js';
+import { MOTIVOS, initials, toast, todayRange, escapeHtml, setoresMatch } from '/js/utils.js';
 
 let _ctx = null;
 
@@ -24,7 +23,6 @@ function lsGetMeta(key, tenantId) {
 const charts = {};
 const chartTypes = {}; // track rendered type per key to decide reuse vs destroy
 let _firstLoad = true;
-let _activeChartTab = null;
 
 // ─── Paleta qualitativa (Stripe-inspired) ───
 // Lê tokens CSS em runtime pra suporte dark/light + fallback pra valores sólidos.
@@ -190,9 +188,7 @@ function donutConfig({ labels, values, colors, total, centerLabel, tooltipFn, ev
  */
 export function initDashboardCharts(ctx) {
   _ctx = ctx;
-  // Tabs foram removidos (Op\u00e7\u00e3o C): todas as sections renderizam linearmente.
-  // Stub setChartTab pra compat com c\u00f3digo antigo que ainda possa chamar.
-  window.setChartTab = () => {};
+  // Tabs removidos: todas as sections renderizam linearmente.
   document.querySelectorAll('.chart-section').forEach((s) => {
     s.style.display = 'block';
   });
@@ -392,7 +388,6 @@ export async function loadAll() {
     ['ruptures', loadRuptures(range)],
     ['ruptureImpact', loadRuptureImpact(range)],
     ['pauseStats', loadPauseStats(range)],
-    ['floor', loadFloor()],
     ['scatter', loadScatter(range, cachedRanking)],
     ['tempoMeta', loadTempoMeta(range, cachedRanking)],
     ['trend', loadTrend(range)],
@@ -532,6 +527,11 @@ export async function loadKPIs(range, prevRange) {
 
 // ─── Motivos chart ───
 export async function loadMotivos(range) {
+  // Guard antes do RPC: este chart só existe em dashboard.html.
+  // Sem o early return, vendedor/operacional gastam RPC à toa.
+  const el = document.querySelector('#chartMotivos');
+  if (!el) return;
+
   const sb = _ctx.sb;
 
   const { data, error } = await sb.rpc('get_loss_reasons', { p_inicio: range.start, p_fim: range.end });
@@ -540,7 +540,6 @@ export async function loadMotivos(range) {
     return;
   }
   _ctx._cachedMotivos = data || [];
-  const el = document.querySelector('#chartMotivos');
 
   const labels = (data || []).map((d) => MOTIVOS[d.motivo]?.label || d.motivo);
   const values = (data || []).map((d) => d.total);
@@ -623,6 +622,10 @@ export async function loadMotivos(range) {
 
 // ─── Hourly flow chart ───
 export async function loadHourly(range) {
+  // Guard antes do RPC: chartHourly só existe em dashboard.html.
+  const el = document.querySelector('#chartHourly');
+  if (!el) return;
+
   const sb = _ctx.sb;
 
   try {
@@ -647,12 +650,7 @@ export async function loadHourly(range) {
     }
     const todayHourlyData = isMultiDay ? results[1]?.data || null : null;
 
-    const el = document.querySelector('#chartHourly');
     const emptyHourly = document.getElementById('chartHourlyEmpty');
-    if (!el) {
-      console.error('[loadHourly] element not found');
-      return;
-    }
     if (!data || data.length === 0) {
       el.style.display = 'none';
       if (emptyHourly) emptyHourly.style.display = 'block';
@@ -1073,73 +1071,6 @@ export async function loadPauseStats(range) {
     .join('');
 }
 
-// ─── Floor (who's on now) — LED marquee ───
-export async function loadFloor() {
-  const sb = _ctx.sb;
-  const tenantId = _ctx.tenantId;
-
-  const { data, error } = await fetchVendedores(sb, tenantId);
-  if (error) {
-    toast('Erro ao carregar equipe: ' + error.message, 'error');
-    return;
-  }
-  if (!data || data.length === 0) {
-    renderHeaderMarquee([]);
-    return;
-  }
-
-  // Atualizar marquee do header
-  renderHeaderMarquee(data);
-}
-
-function renderHeaderMarquee(vendedoresData) {
-  const track = document.getElementById('marqueeTrack');
-  if (!track) return;
-  if (!vendedoresData || vendedoresData.length === 0) {
-    track.innerHTML =
-      '<span style="color:var(--text-muted);font-size:11px;padding:0 16px">Nenhum vendedor no turno</span>';
-    track.style.animation = 'none';
-    return;
-  }
-  // Map status → CSS var slug (em_atendimento → atendendo)
-  const STATUS_VAR = {
-    disponivel: '--status-disponivel',
-    em_atendimento: '--status-atendendo',
-    pausa: '--status-pausa',
-    fora: '--status-fora'
-  };
-  const pills = vendedoresData
-    .map((v) => {
-      const cfg = STATUS_CONFIG[v.status] || STATUS_CONFIG.fora;
-      const cssVar = STATUS_VAR[v.status] || '--status-fora';
-      const pos = v.posicao_fila ? ` #${v.posicao_fila}` : '';
-      const isFora = v.status === 'fora';
-      const isOnTime = v.status === 'disponivel';
-      const displayName = v.apelido || (v.nome || 'Vendedor').split(' ')[0];
-      return `<div class="marquee-pill">
-      <div class="mp-dot${isOnTime ? ' pulse-on' : ''}" style="background:var(${cssVar})"></div>
-      <span class="mp-name">${escapeHtml(displayName)}</span>
-      <span class="mp-status${isFora ? ' fora' : ''}" style="color:${isFora ? '' : `var(${cssVar})`}">${escapeHtml(cfg.short + pos)}</span>
-    </div>`;
-    })
-    .join('');
-  // Se poucos vendedores, mostrar estático sem marquee
-  if (vendedoresData.length <= 4) {
-    track.innerHTML = pills;
-    track.style.animation = 'none';
-    track.style.transform = 'none';
-    return;
-  }
-  // Triplicar para loop suave (garante que -50% sempre funcione)
-  track.innerHTML = pills + pills + pills;
-  const speed = Math.max(15, vendedoresData.length * 3);
-  track.style.animationDuration = speed + 's';
-  // Reiniciar animação
-  track.style.animation = 'none';
-  track.offsetHeight; // force reflow
-  track.style.animation = `marqueeHeader ${speed}s linear infinite`;
-}
-
 // ─── Scatter: Volume × Conversão ───
 export async function loadScatter(range, cachedData) {
   const sb = _ctx.sb;
@@ -1554,7 +1485,6 @@ export async function loadTrend(range) {
   const p = chartPalette();
 
   // ─── Hero area charts (120px, gradient area) ───
-  // tooltip.fixed.position='topRight' evita clip pelo .hero-card overflow:hidden
   const heroOpts = (series, color, labels, suffix) => ({
     chart: { type: 'area', height: 120, sparkline: { enabled: true }, animations: { enabled: true, speed: 400 } },
     series: [{ name: 'Valor', data: series }],
@@ -1563,8 +1493,6 @@ export async function loadTrend(range) {
     fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0, stops: [0, 100] } },
     tooltip: {
       enabled: true,
-      followCursor: false,
-      fixed: { enabled: true, position: 'topRight', offsetX: 0, offsetY: 8 },
       x: { show: true },
       y: {
         title: { formatter: () => '' },
@@ -1579,8 +1507,8 @@ export async function loadTrend(range) {
   if (vendas.length > 1) renderChart('heroVendas', '#chartHeroVendas', heroOpts(vendas, p[1], sparkDates, ''));
   if (conv.length > 1) renderChart('heroConv', '#chartHeroConv', heroOpts(conv, p[2], sparkDates, '%'));
 
-  // Hero compare (Hoje/Ontem/delta) agora vem de loadKPIs — scalars confi\u00e1veis.
-  // Este bloco s\u00f3 renderiza os charts (hero area + secondary sparklines).
+  // Hero compare (Hoje/Ontem/delta) agora vem de loadKPIs — valores confiáveis.
+  // Este bloco só renderiza os charts (hero area + sparklines secundárias).
 
   // ─── Secondary sparklines (64x30, line-only per mockup) ───
   const secOpts = (series, color) => ({
@@ -1648,28 +1576,6 @@ export async function loadOrigem(range) {
       }
     })
   );
-}
-
-// ─── Chart section tabs ───
-export function setChartTab(section) {
-  // Second click on active tab → collapse all
-  if (_activeChartTab === section) {
-    document.querySelectorAll('.chart-section').forEach((s) => (s.style.display = 'none'));
-    document.querySelectorAll('.chart-tab').forEach((b) => b.classList.remove('active'));
-    _activeChartTab = null;
-    localStorage.removeItem(CHART_TAB_KEY);
-    return;
-  }
-  document.querySelectorAll('.chart-section').forEach((s) => (s.style.display = 'none'));
-  document.querySelectorAll('.chart-tab').forEach((b) => b.classList.toggle('active', b.dataset.section === section));
-  const el = document.getElementById('section-' + section);
-  if (el) el.style.display = 'block';
-  _activeChartTab = section;
-  localStorage.setItem(CHART_TAB_KEY, section);
-  // ApexCharts renders 0px when container is display:none — force resize after reveal
-  setTimeout(() => {
-    window.dispatchEvent(new Event('resize'));
-  }, CHART_RESIZE_DELAY);
 }
 
 // ─── _firstLoad management ───
