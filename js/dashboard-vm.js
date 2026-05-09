@@ -1,5 +1,5 @@
 // ============================================
-// minhavez Dashboard — VM Photos + VM Missions Admin (Fase 6 + 6b)
+// minhavez Dashboard — VM Photos + VM Missions Admin
 // Create tasks, track compliance, approve/reject, free-form photos.
 // ============================================
 
@@ -452,7 +452,7 @@
     }
   }
 
-  // ─── Free-form photos (existing Fase 6) ───
+  // ─── Free-form photos ───
   async function renderFreeView() {
     const area = document.getElementById('vmTabContent');
     if (!area) return;

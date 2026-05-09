@@ -3,10 +3,6 @@
  * Tela do vendedor individual no celular (mobile-first, light only).
  * Depende de tokens.v54.css + components.v54.css.
  *
- * Histórico: até v53 esse arquivo estava inline em vendor.html (~890 linhas).
- * Migração v54 extraiu pro arquivo dedicado pra alinhar com tablet/dashboard
- * (que já viviam externos) e pra que o SW cacheie o CSS separado.
- *
  * Convenções:
  *   - Tokens em var(--mv-*) — nada hardcoded.
  *   - Sem !important (exceto .hidden e .vendor-dot — justificados).

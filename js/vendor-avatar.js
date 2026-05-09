@@ -1,5 +1,5 @@
 // ============================================
-// minhavez Vendedor — Avatar RPG com Cosméticos (Fase 5)
+// minhavez Vendedor — Avatar RPG com Cosméticos
 // DiceBear pixel-art + catálogo de cosméticos vinculado a conquistas
 // ============================================
 

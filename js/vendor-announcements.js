@@ -1,5 +1,5 @@
 // ============================================
-// minhavez Vendedor — Comunicados/Corridas (Fase 1)
+// minhavez Vendedor — Comunicados/Corridas
 // Módulo isolado que renderiza o card de comunicados no home,
 // abre o sheet de detalhe e marca como lido.
 // ============================================

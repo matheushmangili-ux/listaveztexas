@@ -1,5 +1,5 @@
 // ============================================
-// minhavez Vendedor — Conquistas / Badges (Fase 4)
+// minhavez Vendedor — Conquistas / Badges
 // Tela de conquistas acessível via ícone no header + toast ao desbloquear.
 // ============================================
 

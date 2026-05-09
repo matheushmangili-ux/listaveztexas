@@ -1,5 +1,5 @@
 // ============================================
-// minhavez Dashboard — IA Assist (Fase 7) — v2 com dados reais
+// minhavez Dashboard — IA Assist
 // Coleta métricas via RPCs antes de chamar a IA pra evitar respostas genéricas.
 // ============================================
 

@@ -1,5 +1,5 @@
 // ============================================
-// minhavez Vendedor — Sistema de XP (Fase 2) + Tiers RPG (Fase 2b)
+// minhavez Vendedor — Sistema de XP + Tiers RPG
 // Barra compacta no header + toast de ganho + sheet "Minha jornada"
 // Tiers visuais Pedra → Mítico sobre níveis numéricos existentes.
 // TIER_META é espelhado manualmente de sql/17-tier-ranking.sql — se o

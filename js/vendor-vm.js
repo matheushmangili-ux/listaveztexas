@@ -1,5 +1,5 @@
 // ============================================
-// minhavez Vendedor — VM Photos + VM Missions (Fase 6 + 6b)
+// minhavez Vendedor — VM Photos + VM Missions
 // Free-form VM photos + bidirectional VM tasks with briefing/checklist.
 // ============================================
 
@@ -518,7 +518,7 @@ async function submitExecution(assignmentId, photos, checkStates) {
   }
 }
 
-// ─── Free-form VM (existing Fase 6 flow) ───
+// ─── Free-form VM ───
 function renderMyList() {
   const area = document.getElementById('vmListArea');
   if (!area) return;

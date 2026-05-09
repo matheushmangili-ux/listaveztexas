@@ -1,5 +1,5 @@
 // ============================================
-// minhavez Dashboard — Missões diárias CMS (Fase 3)
+// minhavez Dashboard — Missões diárias CMS
 // Modal standalone com lista + form + sugestões pré-prontas.
 // ============================================
 

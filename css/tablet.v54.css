@@ -3,12 +3,6 @@
  * Tela de recepção/fila no balcão (landscape, kiosk).
  * Depende de tokens.v54.css + components.v54.css.
  *
- * Histórico: até v53 esse arquivo estava inline em tablet.html (~1700 linhas).
- * Migração v54 extraiu pro arquivo dedicado, consolidou selectors duplicados
- * que se sobrescreviam silenciosamente, e corrigiu sw.js que precacheava as
- * versões v52 mortas (causa-raiz de "lista horizontal" — SW antigo servia
- * CSS deletado).
- *
  * Layout:
  *   grid-areas:
  *     header  header
@@ -328,9 +322,6 @@ body {
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
-  transition:
-    background var(--mv-dur-fast) var(--mv-ease),
-    border-color var(--mv-dur-fast) var(--mv-ease);
 }
 .action-card:hover {
   background: var(--mv-surface);
@@ -452,10 +443,6 @@ body {
   letter-spacing: 0.01em;
   white-space: nowrap;
   flex-shrink: 0;
-  transition:
-    background 0.15s ease,
-    border-color 0.15s ease,
-    color 0.15s ease;
 }
 .queue-setor-tabs button i,
 .queue-setor-tabs .setor-tab i {
@@ -870,32 +857,6 @@ body {
   font-weight: 700;
 }
 
-/* Esconde a antiga next-badge ribbon — JS antigo ainda pode emitir.
-   O novo renderQueueItem usa .queue-item-next-text inline em vez. */
-.next-badge {
-  display: none;
-}
-
-/* Keyframes antigos defendidos como no-op (caso outro lugar use) */
-@keyframes nextCardPulse {
-  from,
-  to {
-    opacity: 0;
-  }
-}
-@keyframes nextCardGlow {
-  from,
-  to {
-    box-shadow: var(--mv-shadow-xs);
-  }
-}
-@keyframes nextBadgePulse {
-  from,
-  to {
-    transform: none;
-  }
-}
-
 /* ─── Service panel (direita) ────────────────────────────────────────────── */
 .service-panel {
   grid-area: service;
@@ -1110,10 +1071,7 @@ body {
   background: transparent;
 }
 
-/* Footer title — "Vendedores · N" inline, mais sobrio (cara enterprise).
-   Antes era stack vertical com label uppercase + numero mono 22px — visual
-   playful demais. Agora linha unica baseline, sans, peso medio, no peso
-   visual da Fiori/SAP. */
+/* Footer title — "Vendedores · N" inline, baseline alignment, peso medio. */
 .footer-title {
   display: inline-flex;
   flex-direction: row;
@@ -1171,11 +1129,6 @@ body {
   user-select: none;
   position: relative;
   flex-shrink: 0;
-  transition:
-    opacity 150ms ease,
-    transform 100ms ease,
-    background 150ms ease,
-    border-color 150ms ease;
 }
 .footer-card:hover {
   background: var(--mv-surface-2);
@@ -1280,15 +1233,6 @@ body {
     transform: scale(1);
   }
 }
-@keyframes mvShimmer {
-  0%,
-  100% {
-    opacity: 0.4;
-  }
-  50% {
-    opacity: 0.7;
-  }
-}
 
 .queue-item.new-item,
 .queue-item.entering {
@@ -1375,27 +1319,6 @@ body {
   transform: scale(0.96);
 }
 
-/* Loading skeleton (queue list while fetching) */
-.queue-list.is-loading {
-  position: relative;
-  min-height: 240px;
-}
-.queue-list.is-loading::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    180deg,
-    var(--mv-surface-2) 0,
-    var(--mv-surface-2) 60px,
-    transparent 60px,
-    transparent 68px
-  );
-  opacity: 0.6;
-  animation: mvShimmer 1.4s ease-in-out infinite;
-  pointer-events: none;
-}
-
 /* Respeita prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   .queue-item,
@@ -1427,9 +1350,8 @@ body {
 .bottom-sheet-overlay.open {
   display: block;
 }
-/* Tablet em landscape (kiosk) — sheet centralizado vira modal.
-   Antes era bottom: 0 (slide-from-bottom mobile), mas em tela larga o
-   popup ficava colado no rodapé e a recepcionista perdia contexto. */
+/* Tablet em landscape (kiosk) — sheet centralizado vira modal pra manter
+   contexto visual; slide-from-bottom só faz sentido em portrait/mobile. */
 .bottom-sheet {
   position: fixed;
   top: 50%;
@@ -1934,8 +1856,7 @@ body {
 }
 
 /* ─── Picker de ruptura (rp-*) ───────────────────────────────────────────── */
-/* Classes geradas em js/tablet-ruptura.js: chips pill pra Tipo/Marca/Tamanho/Cor.
-   Migração v54 perdeu esse bloco — chips renderizavam sem estilo. */
+/* Classes geradas em js/tablet-ruptura.js: chips pill pra Tipo/Marca/Tamanho/Cor. */
 .rp-section {
   margin-bottom: 14px;
 }
@@ -2002,8 +1923,7 @@ body {
 }
 
 /* ─── Check-in do turno (checkin-*) ──────────────────────────────────────── */
-/* Classes geradas em js/tablet-turno.js openCheckin: toggle por vendedor.
-   Migração v54 perdeu o bloco — toggles renderizavam invisíveis. */
+/* Classes geradas em js/tablet-turno.js openCheckin: toggle por vendedor. */
 .checkin-item {
   display: flex;
   align-items: center;

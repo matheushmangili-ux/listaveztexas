@@ -10,7 +10,6 @@ import {
   yesterdayRange,
   weekRange,
   monthRange,
-  initials,
   toast,
   initTheme,
   toggleTheme,
@@ -21,7 +20,7 @@ import { loadTenant, applyBranding, tenantPath, getSlug } from '/js/tenant.js';
 import { METAS_KEY, DEFAULT_METAS, PERIODS } from '/js/dashboard-config.js';
 const setorLabel = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 import { showChangelog } from '/js/changelog.js';
-import { fetchVendedores, fetchTodosVendedores, fetchDrillMotivo } from '/js/dashboard-api.js';
+import { fetchVendedores, fetchDrillMotivo } from '/js/dashboard-api.js';
 import {
   initDashboardCharts,
   loadAll,
@@ -29,7 +28,6 @@ import {
   loadMotivos,
   loadHourly,
   loadRanking,
-  loadFloor,
   loadScatter,
   loadTempoMeta,
   loadOrigem,
@@ -457,187 +455,6 @@ document.addEventListener('click', function (e) {
   }
 });
 
-// ─── Gestão de Vendedores ───
-async function loadVendedores() {
-  const el = document.getElementById('vendedorList');
-  if (!el) return;
-  const { data, error } = await fetchTodosVendedores(sb, tenantId);
-  if (error || !data || data.length === 0) {
-    el.innerHTML =
-      '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum vendedor cadastrado</div>';
-    return;
-  }
-  el.innerHTML = data
-    .map((v) => {
-      const avatarContent = v.foto_url
-        ? `<img src="${escapeHtml(v.foto_url)}" alt="" style="width:100%;height:100%;object-fit:cover">`
-        : initials(v.nome);
-      return `<div class="vendedor-row">
-      <div class="vendedor-avatar" style="overflow:hidden">${avatarContent}</div>
-      <div class="vendedor-info">
-        <div class="vendedor-name">${v.nome}</div>
-        ${v.apelido ? '<div class="vendedor-nick">' + v.apelido + '</div>' : ''}
-        <div style="font-size:9px;color:var(--text-muted);font-weight:600;margin-top:1px">${setorLabel(v.setor || 'loja')}</div>
-      </div>
-      <span class="badge-ativo ${v.ativo ? 'on' : 'off'}">${v.ativo ? 'Ativo' : 'Inativo'}</span>
-      <div class="vendedor-actions">
-        <button title="Editar" data-action="edit" data-id="${v.id}" data-nome="${(v.nome || '').replace(/"/g, '&quot;')}" data-apelido="${(v.apelido || '').replace(/"/g, '&quot;')}" data-setor="${v.setor || 'loja'}"><i class="fa-solid fa-pen"></i></button>
-        <button title="${v.ativo ? 'Desativar' : 'Ativar'}" data-action="toggle" data-id="${v.id}" data-ativo="${v.ativo}"><i class="fa-solid fa-${v.ativo ? 'toggle-on' : 'toggle-off'}"></i></button>
-        <button title="Desativar" class="btn-danger" data-action="delete" data-id="${v.id}" data-nome="${(v.nome || '').replace(/"/g, '&quot;')}"><i class="fa-solid fa-user-slash"></i></button>
-      </div>
-    </div>`;
-    })
-    .join('');
-}
-
-// Event delegation for vendedor action buttons (prevents XSS from inline onclick)
-document.getElementById('vendedorList')?.addEventListener('click', function (e) {
-  const btn = e.target.closest('[data-action]');
-  if (!btn) return;
-  const action = btn.dataset.action;
-  if (action === 'edit') {
-    window.editVendedor(btn.dataset.id, btn.dataset.nome, btn.dataset.apelido, btn.dataset.setor);
-  } else if (action === 'toggle') {
-    window.toggleVendedor(btn.dataset.id, btn.dataset.ativo === 'true');
-  } else if (action === 'delete') {
-    window.deleteVendedor(btn.dataset.id, btn.dataset.nome);
-  }
-});
-
-// Photo preview
-window.previewFoto = function (input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    document.getElementById('vendedorFotoPreview').innerHTML =
-      `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover">`;
-  };
-  reader.readAsDataURL(file);
-};
-
-async function uploadFoto(vendedorId, file) {
-  if (!file) return null;
-  const ext = file.name.split('.').pop();
-  const path = `vendedores/${vendedorId}.${ext}`;
-  const { error } = await sb.storage.from('Sellers').upload(path, file, { upsert: true });
-  if (error) return null;
-  const { data } = sb.storage.from('Sellers').getPublicUrl(path);
-  return data?.publicUrl || null;
-}
-
-window.openVendedorModal = function (title) {
-  document.getElementById('modalTitle').textContent = title || 'Novo Vendedor';
-  document.getElementById('vendedorModal').classList.add('open');
-  document.getElementById('vendedorNome').focus();
-};
-
-window.closeVendedorModal = function () {
-  document.getElementById('vendedorModal').classList.remove('open');
-  document.getElementById('vendedorEditId').value = '';
-  document.getElementById('vendedorNome').value = '';
-  document.getElementById('vendedorApelido').value = '';
-  document.getElementById('vendedorPin').value = '';
-  document.getElementById('vendedorSetor').value = 'loja';
-  const fotoInput = document.getElementById('vendedorFoto');
-  if (fotoInput) fotoInput.value = '';
-  const fotoPreview = document.getElementById('vendedorFotoPreview');
-  if (fotoPreview)
-    fotoPreview.innerHTML = '<i class="fa-solid fa-user" style="color:var(--text-muted);font-size:18px"></i>';
-};
-
-window.editVendedor = function (id, nome, apelido, setor) {
-  document.getElementById('vendedorEditId').value = id;
-  document.getElementById('vendedorNome').value = nome;
-  document.getElementById('vendedorApelido').value = apelido || '';
-  document.getElementById('vendedorPin').value = '';
-  document.getElementById('vendedorSetor').value = setor || 'loja';
-  window.openVendedorModal('Editar Vendedor');
-};
-
-let savingVendedor = false;
-window.saveVendedor = async function () {
-  if (savingVendedor) return;
-  savingVendedor = true;
-  const id = document.getElementById('vendedorEditId').value;
-  const nome = document.getElementById('vendedorNome').value.trim();
-  const apelido = document.getElementById('vendedorApelido').value.trim() || null;
-  const setor = document.getElementById('vendedorSetor').value || 'loja';
-  const pin = document.getElementById('vendedorPin').value.trim();
-  const fotoFile = document.getElementById('vendedorFoto')?.files[0] || null;
-  if (!nome) {
-    toast('Preencha o nome', 'warning');
-    savingVendedor = false;
-    return;
-  }
-  if (pin && (pin.length !== 4 || !/^\d{4}$/.test(pin))) {
-    toast('PIN deve ter exatamente 4 dígitos', 'warning');
-    savingVendedor = false;
-    return;
-  }
-
-  if (id) {
-    const update = { nome, apelido, setor };
-    if (pin) update.pin = pin;
-    if (fotoFile) {
-      const url = await uploadFoto(id, fotoFile);
-      if (url) update.foto_url = url;
-    }
-    const { error } = await sb.from('vendedores').update(update).eq('id', id).eq('tenant_id', tenantId);
-    if (error) {
-      toast('Erro ao atualizar: ' + error.message, 'error');
-      savingVendedor = false;
-      return;
-    }
-    toast('Vendedor atualizado', 'success');
-  } else {
-    const insertObj = { nome, apelido, setor, tenant_id: tenantId };
-    if (pin) insertObj.pin = pin;
-    const { data: inserted, error } = await sb.from('vendedores').insert(insertObj).select('id').single();
-    if (error) {
-      toast('Erro ao cadastrar: ' + error.message, 'error');
-      savingVendedor = false;
-      return;
-    }
-    if (fotoFile && inserted) {
-      const url = await uploadFoto(inserted.id, fotoFile);
-      if (url) await sb.from('vendedores').update({ foto_url: url }).eq('id', inserted.id).eq('tenant_id', tenantId);
-    }
-    toast('Vendedor cadastrado', 'success');
-  }
-  window.closeVendedorModal();
-  savingVendedor = false;
-  await loadVendedores();
-  loadFloor();
-};
-
-window.toggleVendedor = async function (id, isAtivo) {
-  const { error } = await sb.from('vendedores').update({ ativo: !isAtivo }).eq('id', id).eq('tenant_id', tenantId);
-  if (error) {
-    toast('Erro: ' + error.message, 'error');
-    return;
-  }
-  toast(isAtivo ? 'Vendedor desativado' : 'Vendedor ativado', 'success');
-  loadVendedores();
-  loadFloor();
-};
-
-window.deleteVendedor = async function (id, nome) {
-  if (!confirm('Desativar "' + nome + '"? O vendedor será removido da fila mas seu histórico será preservado.')) return;
-  const { error } = await sb
-    .from('vendedores')
-    .update({ ativo: false, status: 'fora', posicao_fila: null })
-    .eq('id', id)
-    .eq('tenant_id', tenantId);
-  if (error) {
-    toast('Erro: ' + error.message, 'error');
-    return;
-  }
-  toast('Vendedor desativado — histórico preservado', 'success');
-  await loadVendedores();
-  loadFloor();
-};
-
 // ─── Export helpers ───
 async function getExportData() {
   // Usar dados em cache quando disponíveis (evita refetch)
@@ -809,9 +626,11 @@ let _rtAtendTimer = null;
 let _isReloadingAtend = false;
 function debouncedReloadVendedores() {
   clearTimeout(_rtVendTimer);
+  // Vendedor mudou — recarrega filtros pra pegar novos nomes/setor.
+  // KPIs/charts dependem de atendimentos, não de vendedor diretamente
+  // (debouncedReloadAtendimentos cuida disso em paralelo).
   _rtVendTimer = setTimeout(() => {
-    loadFloor();
-    loadVendedores();
+    populateFilters();
   }, RT_DASHBOARD_DEBOUNCE);
 }
 function debouncedReloadAtendimentos() {
@@ -1075,7 +894,7 @@ showChangelog(APP_CHANGELOG, 'minhavez_dash_update_seen_');
 await populateFilters();
 // Wait for Satoshi font to load before rendering charts
 await document.fonts.ready;
-await Promise.all([loadAll(), loadVendedores()]);
+await loadAll();
 setFirstLoadDone();
 updateTimestamp();
 

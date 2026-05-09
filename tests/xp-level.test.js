@@ -107,7 +107,7 @@ function tierFromLevel(level) {
   return { code: 'mitico', major_code: 'mitico', label: 'Mítico' };
 }
 
-describe('vendor_tier_from_level (espelho SQL — Fase 2b)', () => {
+describe('vendor_tier_from_level (espelho SQL)', () => {
   it('N0-1 mapeia pra Pedra', () => {
     expect(tierFromLevel(0).code).toBe('pedra');
     expect(tierFromLevel(1).code).toBe('pedra');

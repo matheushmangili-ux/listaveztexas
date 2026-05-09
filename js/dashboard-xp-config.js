@@ -1,5 +1,5 @@
 // ============================================
-// minhavez Dashboard — Gamificação: config de XP por evento (Fase 2)
+// minhavez Dashboard — Gamificação: config de XP por evento
 // Modal standalone, não depende de charts/init.
 // ============================================
 

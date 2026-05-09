@@ -140,7 +140,6 @@ const state = {
   vendorAtendCount: {}, // vendedor_id → count de atendimentos no turno
   queueEntryTimes: new Map(), // vendedorId → { pos, time } para cold seller
   pauseStartTimes: new Map(), // vendedorId → Date inicio da pausa
-  savedPositions: new Map(), // vendedorId → posicao_fila antes da pausa (para restaurar ao voltar)
   positionLog: [] // { time, icon, vendedor, action, details } — max 200
 };
 
@@ -501,13 +500,9 @@ async function returnToSavedPosition(vendedorId) {
   const v = state.vendedores.find((x) => x.id === vendedorId);
   if (!v) return;
   const setor = v.setor || 'loja';
-  // Tenta posição salva localmente; cai pro valor persistido no banco
-  // (posicao_fila_anterior) — só esse caminho funciona se o tablet reiniciou
-  // ou se quem botou o vendedor em pausa foi outro device.
-  let savedPos = state.savedPositions.get(vendedorId);
-  state.savedPositions.delete(vendedorId);
-  if (savedPos == null && v.posicao_fila_anterior != null) {
-    savedPos = v.posicao_fila_anterior;
+  const savedPos = v.posicao_fila_anterior;
+  if (savedPos == null) {
+    console.warn('[returnToSavedPosition] sem posicao_fila_anterior — vendedor vai pro fim da fila', vendedorId);
   }
 
   // Vendedores atualmente na fila, ordenados por posição
@@ -515,8 +510,9 @@ async function returnToSavedPosition(vendedorId) {
     .filter((x) => x.id !== vendedorId && setoresMatch(x.setor, setor) && x.posicao_fila != null)
     .sort((a, b) => a.posicao_fila - b.posicao_fila);
 
-  // Quantos ainda estão à frente da posição original?
-  const insertIdx = savedPos != null ? inQueue.filter((x) => x.posicao_fila < savedPos).length : inQueue.length; // sem posição salva → vai para o final
+  // Sem posição salva (ex: pausa criada por outro device sem gravar a coluna)
+  // → cai no fim da fila pra evitar reinserir em posição inválida.
+  const insertIdx = savedPos != null ? inQueue.filter((x) => x.posicao_fila < savedPos).length : inQueue.length;
 
   // Reconstruir fila com o vendedor reinserido na posição correta
   const newOrder = [...inQueue.slice(0, insertIdx), v, ...inQueue.slice(insertIdx)];
@@ -538,15 +534,9 @@ async function returnToSavedPosition(vendedorId) {
   invalidateFooter();
   scheduleRender();
 
-  // Salvar no banco — vendedor retornando primeiro.
   // Limpa posicao_fila_anterior pra evitar reuso de valor stale na próxima pausa.
   const returnPayload = { status: 'disponivel', posicao_fila: v.posicao_fila, posicao_fila_anterior: null };
-  let { error } = await sb.from('vendedores').update(returnPayload).eq('id', vendedorId).eq('tenant_id', tenantId);
-  // Mesmo fallback do confirmSaida: migration sql/50 pode não estar aplicada.
-  if (error && (error.code === '42703' || /posicao_fila_anterior/.test(error.message || ''))) {
-    delete returnPayload.posicao_fila_anterior;
-    ({ error } = await sb.from('vendedores').update(returnPayload).eq('id', vendedorId).eq('tenant_id', tenantId));
-  }
+  const { error } = await sb.from('vendedores').update(returnPayload).eq('id', vendedorId).eq('tenant_id', tenantId);
   if (error) {
     toast('Erro ao salvar: ' + error.message, 'error');
     await loadVendedores();
@@ -600,30 +590,18 @@ window.confirmSaida = async function (motivo) {
   const newStatus = motivo === 'banheiro' || motivo === 'reuniao' || motivo === 'operacional' ? 'pausa' : 'fora';
   state.saidaMotivos[state.pendingSaidaId] = motivo;
   state.pauseStartTimes.set(state.pendingSaidaId, new Date());
-  // Salvar posição na fila antes de zerá-la — usada para restaurar ao retornar.
-  // Mantém Map em memória pra render otimista, e grava no banco pra sobreviver
-  // a reload do tablet ou retorno via outro device (vendor mobile).
+  // Salva a posição atual em posicao_fila_anterior pra reinserção na volta da pausa,
+  // sobrevivendo a reload do tablet ou retorno via outro device.
   let posAnterior = null;
   if (newStatus === 'pausa') {
     const svTemp = state.vendedores.find((x) => x.id === state.pendingSaidaId);
-    if (svTemp?.posicao_fila != null) {
-      state.savedPositions.set(state.pendingSaidaId, svTemp.posicao_fila);
-      posAnterior = svTemp.posicao_fila;
-    }
+    if (svTemp?.posicao_fila != null) posAnterior = svTemp.posicao_fila;
   }
   markLocal();
   const savedId = state.pendingSaidaId;
   const updatePayload = { status: newStatus, posicao_fila: null };
   if (newStatus === 'pausa') updatePayload.posicao_fila_anterior = posAnterior;
-  let { error } = await sb.from('vendedores').update(updatePayload).eq('id', savedId).eq('tenant_id', tenantId);
-  // Fallback: se sql/50-posicao-fila-anterior.sql ainda não foi aplicada no
-  // Supabase, o update falha com 42703 (undefined_column). Retry sem a
-  // coluna — preserva via Map em memória até a migration rodar. Remover
-  // depois que a migration estiver garantida em prod.
-  if (error && (error.code === '42703' || /posicao_fila_anterior/.test(error.message || ''))) {
-    delete updatePayload.posicao_fila_anterior;
-    ({ error } = await sb.from('vendedores').update(updatePayload).eq('id', savedId).eq('tenant_id', tenantId));
-  }
+  const { error } = await sb.from('vendedores').update(updatePayload).eq('id', savedId).eq('tenant_id', tenantId);
   if (error) {
     toast('Erro ao registrar saída', 'error');
     window.closeSaida();

@@ -1,5 +1,5 @@
 // ============================================
-// minhavez Vendedor — Missões Diárias (Fase 3)
+// minhavez Vendedor — Missões Diárias
 // Card no home com até 3 missões do dia + sheet "Missões" completa.
 // ============================================
 

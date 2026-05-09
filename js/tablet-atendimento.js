@@ -84,7 +84,7 @@ function _tickAtendTimers() {
     if (ref.main) {
       ref.main.textContent = timeStr;
       ref.main.className = 'atend-timer' + (isDanger ? ' danger' : '');
-      // Toggle is-warning/is-danger no card pai (Fase 6 — visual de criticidade)
+      // Toggle is-warning/is-danger no card pai (visual de criticidade no timer)
       const card = ref.main.closest('.atend-card');
       if (card) {
         card.classList.toggle('is-warning', isWarning);
