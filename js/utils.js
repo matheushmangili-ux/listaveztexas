@@ -154,10 +154,51 @@ export function initials(name) {
   return letters ? letters.toUpperCase() : '??';
 }
 
+// Safe localStorage helpers — protegem contra QuotaExceededError, JSON corrompido,
+// modo privado (Safari iOS lança SecurityError), e localStorage indisponível.
+// Falham silenciosamente retornando fallback. Logam só em dev (visibility=visible).
+export function safeStorageGet(key, fallback = null) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw == null) return fallback;
+    return raw;
+  } catch (_) {
+    return fallback;
+  }
+}
+
+export function safeStorageGetJSON(key, fallback = {}) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    return JSON.parse(raw);
+  } catch (_) {
+    return fallback;
+  }
+}
+
+export function safeStorageSet(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+export function safeStorageSetJSON(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
 // Theme helpers: v54 is light-only.
 export function initTheme() {
   document.documentElement.setAttribute('data-theme', 'light');
-  localStorage.setItem('lv-theme', 'light');
+  safeStorageSet('lv-theme', 'light');
 }
 export function toggleTheme() {
   initTheme();

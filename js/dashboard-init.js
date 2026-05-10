@@ -14,7 +14,11 @@ import {
   initTheme,
   toggleTheme,
   escapeHtml,
-  setoresMatch
+  setoresMatch,
+  safeStorageGet,
+  safeStorageGetJSON,
+  safeStorageSet,
+  safeStorageSetJSON
 } from '/js/utils.js';
 import { loadTenant, applyBranding, tenantPath, getSlug } from '/js/tenant.js';
 import { METAS_KEY, DEFAULT_METAS, PERIODS } from '/js/dashboard-config.js';
@@ -115,11 +119,7 @@ let filterVendedor = '';
 
 // Metas configuráveis (salvas no localStorage, editáveis via settings)
 function getMetas() {
-  try {
-    return { ...DEFAULT_METAS, ...JSON.parse(localStorage.getItem(METAS_KEY) || '{}') };
-  } catch {
-    return DEFAULT_METAS;
-  }
+  return { ...DEFAULT_METAS, ...safeStorageGetJSON(METAS_KEY, {}) };
 }
 const metas = getMetas();
 
@@ -882,7 +882,7 @@ showChangelog(APP_CHANGELOG, 'minhavez_dash_update_seen_');
   }
   function render(mode) {
     document.documentElement.setAttribute('data-theme', mode);
-    localStorage.setItem('lv-theme', mode);
+    safeStorageSet('lv-theme', mode);
     icon.className = mode === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
     btn.setAttribute('aria-label', mode === 'dark' ? 'Alternar para claro' : 'Alternar para escuro');
   }
@@ -987,12 +987,12 @@ window.toggleDashDropdown = function () {
   const isOpen = dd.classList.toggle('open');
   const trigger = dd.querySelector('.sidebar-dropdown-trigger');
   if (trigger) trigger.setAttribute('aria-expanded', String(isOpen));
-  localStorage.setItem('lv-dash-dropdown', isOpen ? '1' : '0');
+  safeStorageSet('lv-dash-dropdown', isOpen ? '1' : '0');
 };
 (function initDashDropdown() {
   const dd = document.getElementById('dashDropdown');
   if (!dd) return;
-  const saved = localStorage.getItem('lv-dash-dropdown');
+  const saved = safeStorageGet('lv-dash-dropdown');
   if (saved === '0') {
     dd.classList.remove('open');
     const trigger = dd.querySelector('.sidebar-dropdown-trigger');
@@ -1017,14 +1017,14 @@ window.toggleSectionCollapse = function (key) {
   const isOpen = wrap.classList.toggle('open');
   const header = wrap.querySelector('.section-collapse-header');
   if (header) header.setAttribute('aria-expanded', String(isOpen));
-  const stored = JSON.parse(localStorage.getItem('lv-section-open') || '{}');
+  const stored = safeStorageGetJSON('lv-section-open', {});
   stored[key] = isOpen;
-  localStorage.setItem('lv-section-open', JSON.stringify(stored));
+  safeStorageSetJSON('lv-section-open', stored);
   // Apex charts escondidos renderizam 0px — for\u00e7a resize quando abre
   if (isOpen) setTimeout(() => window.dispatchEvent(new Event('resize')), 420);
 };
 (function restoreSectionCollapse() {
-  const stored = JSON.parse(localStorage.getItem('lv-section-open') || '{}');
+  const stored = safeStorageGetJSON('lv-section-open', {});
   document.querySelectorAll('.section-collapse').forEach((wrap) => {
     const key = wrap.dataset.sectionKey;
     if (!key) return;
@@ -1045,13 +1045,13 @@ window.toggleSection = function (id) {
   const isCollapsed = body.classList.toggle('collapsed');
   btn.classList.toggle('collapsed', isCollapsed);
   btn.setAttribute('aria-expanded', String(!isCollapsed));
-  const stored = JSON.parse(localStorage.getItem('lv-collapsed') || '{}');
+  const stored = safeStorageGetJSON('lv-collapsed', {});
   stored[id] = isCollapsed;
-  localStorage.setItem('lv-collapsed', JSON.stringify(stored));
+  safeStorageSetJSON('lv-collapsed', stored);
 };
 // Restore collapsed state on load
 (function restoreCollapsed() {
-  const stored = JSON.parse(localStorage.getItem('lv-collapsed') || '{}');
+  const stored = safeStorageGetJSON('lv-collapsed', {});
   Object.entries(stored).forEach(([id, collapsed]) => {
     if (!collapsed) return;
     const btn = document.getElementById('collapseBtn-' + id);
