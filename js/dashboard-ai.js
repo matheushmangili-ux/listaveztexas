@@ -82,6 +82,7 @@
 
   // ─── Resumo do Turno (com dados reais) ───
   async function renderSummary(area) {
+    if (!area) return; // defensive: chamadores devem sempre passar area válida
     area.innerHTML = loadingHtml('Analisando turno em andamento');
 
     try {

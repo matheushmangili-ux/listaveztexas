@@ -65,18 +65,29 @@ function renderSuggestions() {
 }
 
 function fillForm(data) {
-  document.getElementById('missionEditId').value = data.id || '';
-  document.getElementById('missionTitle').value = data.title || '';
-  document.getElementById('missionDesc').value = data.description || '';
-  document.getElementById('missionGoalType').value = data.goal_type || 'atendimentos_count';
-  document.getElementById('missionGoalValue').value = data.goal_value || '';
-  document.getElementById('missionRewardXp').value = data.reward_xp ?? 50;
+  const editId = document.getElementById('missionEditId');
+  if (!editId) return; // modal não está montado
+  editId.value = data.id || '';
+  const title = document.getElementById('missionTitle');
+  if (title) title.value = data.title || '';
+  const desc = document.getElementById('missionDesc');
+  if (desc) desc.value = data.description || '';
+  const goalType = document.getElementById('missionGoalType');
+  if (goalType) goalType.value = data.goal_type || 'atendimentos_count';
+  const goalValue = document.getElementById('missionGoalValue');
+  if (goalValue) goalValue.value = data.goal_value || '';
+  const rewardXp = document.getElementById('missionRewardXp');
+  if (rewardXp) rewardXp.value = data.reward_xp ?? 50;
 }
 
 function resetForm() {
-  document.getElementById('missionEditId').value = '';
-  document.getElementById('missionForm').reset();
-  document.getElementById('missionRewardXp').value = '50';
+  const form = document.getElementById('missionForm');
+  if (!form) return;
+  const editId = document.getElementById('missionEditId');
+  if (editId) editId.value = '';
+  form.reset();
+  const rewardXp = document.getElementById('missionRewardXp');
+  if (rewardXp) rewardXp.value = '50';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -89,6 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function saveMission() {
   showError(null);
   const btn = document.getElementById('missionSubmit');
+  if (!btn) return; // modal não está montado — defensivo
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
 
