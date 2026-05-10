@@ -932,6 +932,54 @@ window.toggleTheme = function () {
   loadAll();
 };
 
+// ─── Dashboard view detection (single source of truth) ───
+// Lê ?view= primeiro (HTML consolidado pós-merge), cai pra pathname (backward-compat
+// enquanto dashboard-vendedor.html / dashboard-operacional.html ainda existem).
+const DASHBOARD_VIEWS = ['overview', 'vendedor', 'operacional'];
+const SECTION_BY_VIEW = {
+  overview: 'section-geral',
+  vendedor: 'section-vendedor',
+  operacional: 'section-operacional'
+};
+const TITLE_BY_VIEW = {
+  overview: { topbar: 'Visão Geral', doc: 'Dashboard — minhavez' },
+  vendedor: { topbar: 'Por Vendedor', doc: 'Dashboard / Por vendedor — minhavez' },
+  operacional: { topbar: 'Operacional', doc: 'Dashboard / Operacional — minhavez' }
+};
+
+(function detectDashboardView() {
+  let view = null;
+  try {
+    const param = new URLSearchParams(location.search).get('view');
+    if (param && DASHBOARD_VIEWS.includes(param)) view = param;
+  } catch (_) {
+    /* malformed search — ignora */
+  }
+  if (!view) {
+    const path = location.pathname.toLowerCase();
+    if (path.includes('dashboard-vendedor')) view = 'vendedor';
+    else if (path.includes('dashboard-operacional')) view = 'operacional';
+    else view = 'overview';
+  }
+  window.DASHBOARD_VIEW = view;
+
+  // Show/hide sections (no-op em pages que ainda têm só 1 section).
+  const activeSectionId = SECTION_BY_VIEW[view];
+  Object.values(SECTION_BY_VIEW).forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = id === activeSectionId ? '' : 'none';
+  });
+
+  // Atualiza títulos
+  const titles = TITLE_BY_VIEW[view];
+  if (titles) {
+    const topbar = document.querySelector('.topbar-title');
+    if (topbar) topbar.textContent = titles.topbar;
+    document.title = titles.doc;
+  }
+})();
+
 // ─── Sidebar dropdown (Dashboard views) ───
 window.toggleDashDropdown = function () {
   const dd = document.getElementById('dashDropdown');
@@ -950,11 +998,8 @@ window.toggleDashDropdown = function () {
     const trigger = dd.querySelector('.sidebar-dropdown-trigger');
     if (trigger) trigger.setAttribute('aria-expanded', 'false');
   }
-  // Mark active sublink based on current page
-  const path = location.pathname.toLowerCase();
-  let activeView = 'overview';
-  if (path.includes('dashboard-vendedor')) activeView = 'vendedor';
-  else if (path.includes('dashboard-operacional')) activeView = 'operacional';
+  // Mark active sublink lendo window.DASHBOARD_VIEW (já normalizado)
+  const activeView = window.DASHBOARD_VIEW || 'overview';
   dd.querySelectorAll('.sidebar-sublink').forEach((el) => {
     el.classList.toggle('sidebar-sublink--active', el.dataset.view === activeView);
   });
