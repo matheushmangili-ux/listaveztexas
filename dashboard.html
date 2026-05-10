@@ -599,8 +599,20 @@
       </script>
       <script type="module" src="/js/dashboard-xp-config.js"></script>
       <script type="module" src="/js/dashboard-missions.js"></script>
-      <script type="module" src="/js/dashboard-vm.js"></script>
       <script type="module" src="/js/dashboard-ai.js"></script>
+      <!-- VM modal lazy-loaded sob demanda — ~24KB economizados do boot.
+           Stub registra window._dashVmOpen que dispara dynamic import na
+           primeira invocação; módulo sobrescreve window._dashVmOpen com
+           a versão real após carregar. -->
+      <script type="module">
+        let _vmLoading = null;
+        window._dashVmOpen = async function () {
+          if (!_vmLoading) _vmLoading = import('/js/dashboard-vm.js');
+          await _vmLoading;
+          // após import, dashboard-vm.js sobrescreveu window._dashVmOpen com a real.
+          return window._dashVmOpen();
+        };
+      </script>
 
       <!-- Modal IA Assist -->
       <div
