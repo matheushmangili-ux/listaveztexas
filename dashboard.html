@@ -618,12 +618,18 @@
       <div
         class="modal-overlay"
         id="aiModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="aiModalTitle"
+        data-close-handler="_dashAiClose"
         onclick="if (event.target === this) window._dashAiClose && window._dashAiClose();"
       >
         <div class="modal-box modal-box--lg">
           <div class="modal-header">
-            <h3><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--warning)"></i>IA Assist</h3>
-            <button class="modal-close-btn" onclick="window._dashAiClose && window._dashAiClose()">
+            <h3 id="aiModalTitle">
+              <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--warning)"></i>IA Assist
+            </h3>
+            <button class="modal-close-btn" aria-label="Fechar" onclick="window._dashAiClose && window._dashAiClose()">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -635,12 +641,16 @@
       <div
         class="modal-overlay"
         id="vmModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="vmModalTitle"
+        data-close-handler="_dashVmClose"
         onclick="if (event.target === this) window._dashVmClose && window._dashVmClose();"
       >
         <div class="modal-box modal-box--xl">
           <div class="modal-header">
-            <h3><i class="fa-solid fa-camera-retro" style="color: var(--info)"></i>VM Photos</h3>
-            <button class="modal-close-btn" onclick="window._dashVmClose && window._dashVmClose()">
+            <h3 id="vmModalTitle"><i class="fa-solid fa-camera-retro" style="color: var(--info)"></i>VM Photos</h3>
+            <button class="modal-close-btn" aria-label="Fechar" onclick="window._dashVmClose && window._dashVmClose()">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -652,12 +662,22 @@
       <div
         class="modal-overlay"
         id="missionsModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="missionsModalTitle"
+        data-close-handler="_dashMissionsClose"
         onclick="if (event.target === this) window._dashMissionsClose && window._dashMissionsClose();"
       >
         <div class="modal-box modal-box--lg">
           <div class="modal-header">
-            <h3><i class="fa-solid fa-bullseye" style="color: var(--success)"></i>Missões diárias</h3>
-            <button class="modal-close-btn" onclick="window._dashMissionsClose && window._dashMissionsClose()">
+            <h3 id="missionsModalTitle">
+              <i class="fa-solid fa-bullseye" style="color: var(--success)"></i>Missões diárias
+            </h3>
+            <button
+              class="modal-close-btn"
+              aria-label="Fechar"
+              onclick="window._dashMissionsClose && window._dashMissionsClose()"
+            >
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -894,12 +914,22 @@
       <div
         class="modal-overlay"
         id="xpConfigModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="xpConfigModalTitle"
+        data-close-handler="_dashXpConfigClose"
         onclick="if (event.target === this) window._dashXpConfigClose && window._dashXpConfigClose();"
       >
         <div class="modal-box modal-box--md">
           <div class="modal-header">
-            <h3><i class="fa-solid fa-bolt" style="color: var(--warning)"></i>Gamificação · Pontos por evento</h3>
-            <button class="modal-close-btn" onclick="window._dashXpConfigClose && window._dashXpConfigClose()">
+            <h3 id="xpConfigModalTitle">
+              <i class="fa-solid fa-bolt" style="color: var(--warning)"></i>Gamificação · Pontos por evento
+            </h3>
+            <button
+              class="modal-close-btn"
+              aria-label="Fechar"
+              onclick="window._dashXpConfigClose && window._dashXpConfigClose()"
+            >
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -1070,13 +1100,18 @@
       <div
         class="modal-overlay"
         id="annModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="annModalTitle"
+        data-close-handler="_dashAnnouncementsClose"
         onclick="if (event.target === this) window._dashAnnouncementsClose && window._dashAnnouncementsClose();"
       >
         <div class="modal-box modal-box--lg">
           <div class="modal-header">
-            <h3><i class="fa-solid fa-bullhorn" style="color: var(--accent)"></i>Comunicados</h3>
+            <h3 id="annModalTitle"><i class="fa-solid fa-bullhorn" style="color: var(--accent)"></i>Comunicados</h3>
             <button
               class="modal-close-btn"
+              aria-label="Fechar"
               onclick="window._dashAnnouncementsClose && window._dashAnnouncementsClose()"
             >
               <i class="fa-solid fa-xmark"></i>
@@ -1311,11 +1346,19 @@
       </div>
 
       <!-- Modal Drill-down -->
-      <div class="modal-overlay" id="drillModal" onclick="if (event.target === this) closeDrillModal();">
+      <div
+        class="modal-overlay"
+        id="drillModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="drillTitle"
+        data-close-handler="closeDrillModal"
+        onclick="if (event.target === this) closeDrillModal();"
+      >
         <div class="modal-box modal-box--sm">
           <div class="modal-header">
             <h3 id="drillTitle"></h3>
-            <button class="modal-close-btn" onclick="closeDrillModal()">
+            <button class="modal-close-btn" aria-label="Fechar" onclick="closeDrillModal()">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>

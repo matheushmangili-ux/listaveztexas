@@ -602,6 +602,19 @@ document.addEventListener('click', (e) => {
   if (dd && menu && !dd.contains(e.target)) menu.classList.remove('open');
 });
 
+// ─── ESC fecha modal atualmente aberto (a11y + UX) ───
+// Convencao: cada .modal-overlay tem data-close-handler="fnName" apontando
+// pra window[fnName]. Se houver mais de uma modal aberta, fecha a topmost
+// (ultima do DOM, que costuma estar visualmente em cima por ordem de stack).
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  const openModals = document.querySelectorAll('.modal-overlay.open');
+  if (!openModals.length) return;
+  const topmost = openModals[openModals.length - 1];
+  const fnName = topmost.dataset.closeHandler;
+  if (fnName && typeof window[fnName] === 'function') window[fnName]();
+});
+
 // ─── Interval registry (cleanup central em pagehide/beforeunload) ───
 // Evita acúmulo de timers em tabs abertas por horas (memory leak prevention).
 const _dashboardIntervals = [];
