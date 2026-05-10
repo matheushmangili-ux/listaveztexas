@@ -313,7 +313,23 @@ function countUp(el, endVal, suffix = '', duration = 800, formatter = null) {
 }
 
 // ─── Load all data ───
+// Dedupe: usuário pode clicar filtro 2× em 1s, ou auto-reload colide com clique
+// manual. Sem guarda, "Carregando..." trava em race entre Promise.allSettled
+// concorrentes que escrevem nos mesmos elementos.
+let _loadAllInflight = null;
 export async function loadAll() {
+  if (_loadAllInflight) return _loadAllInflight;
+  _loadAllInflight = (async () => {
+    try {
+      await _loadAllImpl();
+    } finally {
+      _loadAllInflight = null;
+    }
+  })();
+  return _loadAllInflight;
+}
+
+async function _loadAllImpl() {
   const sb = _ctx.sb;
   const tenantId = _ctx.tenantId;
   const filterSetor = _ctx.filterSetor;
