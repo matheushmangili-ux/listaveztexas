@@ -615,6 +615,35 @@ document.addEventListener('keydown', (e) => {
   if (fnName && typeof window[fnName] === 'function') window[fnName]();
 });
 
+// ─── Event delegation: modal closes + period tabs ───
+// Substitui onclick inline repetitivo. Convencao:
+// - [data-action="close-modal"] em qualquer botão fecha o modal-overlay ancestral
+// - Click direto em .modal-overlay (target === overlay, fora do modal-box) fecha
+// - Click em #periodTabs button[data-period] chama setPeriod(period)
+document.addEventListener('click', (e) => {
+  const closeBtn = e.target.closest('[data-action="close-modal"]');
+  if (closeBtn) {
+    const overlay = closeBtn.closest('.modal-overlay');
+    const fnName = overlay && overlay.dataset.closeHandler;
+    if (fnName && typeof window[fnName] === 'function') window[fnName]();
+    return;
+  }
+  if (e.target.classList && e.target.classList.contains('modal-overlay')) {
+    const fnName = e.target.dataset.closeHandler;
+    if (fnName && typeof window[fnName] === 'function') window[fnName]();
+  }
+});
+
+(function initPeriodTabs() {
+  const tabs = document.getElementById('periodTabs');
+  if (!tabs) return;
+  tabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-period]');
+    if (!btn || !tabs.contains(btn)) return;
+    if (typeof window.setPeriod === 'function') window.setPeriod(btn.dataset.period);
+  });
+})();
+
 // ─── Interval registry (cleanup central em pagehide/beforeunload) ───
 // Evita acúmulo de timers em tabs abertas por horas (memory leak prevention).
 const _dashboardIntervals = [];

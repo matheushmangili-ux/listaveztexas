@@ -184,10 +184,10 @@
           <h1 class="topbar-title">Visão Geral</h1>
           <div class="topbar-actions">
             <div class="period-tabs" id="periodTabs" role="tablist">
-              <button data-period="hoje" class="active" onclick="setPeriod('hoje')">Hoje</button>
-              <button data-period="ontem" onclick="setPeriod('ontem')">Ontem</button>
-              <button data-period="semana" onclick="setPeriod('semana')">Semana</button>
-              <button data-period="mes" onclick="setPeriod('mes')">Mês</button>
+              <button type="button" data-period="hoje" class="active">Hoje</button>
+              <button type="button" data-period="ontem">Ontem</button>
+              <button type="button" data-period="semana">Semana</button>
+              <button type="button" data-period="mes">Mês</button>
               <button
                 data-period="custom"
                 onclick="toggleCalendar(event)"
@@ -622,14 +622,13 @@
         aria-modal="true"
         aria-labelledby="aiModalTitle"
         data-close-handler="_dashAiClose"
-        onclick="if (event.target === this) window._dashAiClose && window._dashAiClose();"
       >
         <div class="modal-box modal-box--lg">
           <div class="modal-header">
             <h3 id="aiModalTitle">
               <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--warning)"></i>IA Assist
             </h3>
-            <button class="modal-close-btn" aria-label="Fechar" onclick="window._dashAiClose && window._dashAiClose()">
+            <button class="modal-close-btn" aria-label="Fechar" data-action="close-modal">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -645,12 +644,11 @@
         aria-modal="true"
         aria-labelledby="vmModalTitle"
         data-close-handler="_dashVmClose"
-        onclick="if (event.target === this) window._dashVmClose && window._dashVmClose();"
       >
         <div class="modal-box modal-box--xl">
           <div class="modal-header">
             <h3 id="vmModalTitle"><i class="fa-solid fa-camera-retro" style="color: var(--info)"></i>VM Photos</h3>
-            <button class="modal-close-btn" aria-label="Fechar" onclick="window._dashVmClose && window._dashVmClose()">
+            <button class="modal-close-btn" aria-label="Fechar" data-action="close-modal">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -666,18 +664,13 @@
         aria-modal="true"
         aria-labelledby="missionsModalTitle"
         data-close-handler="_dashMissionsClose"
-        onclick="if (event.target === this) window._dashMissionsClose && window._dashMissionsClose();"
       >
         <div class="modal-box modal-box--lg">
           <div class="modal-header">
             <h3 id="missionsModalTitle">
               <i class="fa-solid fa-bullseye" style="color: var(--success)"></i>Missões diárias
             </h3>
-            <button
-              class="modal-close-btn"
-              aria-label="Fechar"
-              onclick="window._dashMissionsClose && window._dashMissionsClose()"
-            >
+            <button class="modal-close-btn" aria-label="Fechar" data-action="close-modal">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -918,18 +911,13 @@
         aria-modal="true"
         aria-labelledby="xpConfigModalTitle"
         data-close-handler="_dashXpConfigClose"
-        onclick="if (event.target === this) window._dashXpConfigClose && window._dashXpConfigClose();"
       >
         <div class="modal-box modal-box--md">
           <div class="modal-header">
             <h3 id="xpConfigModalTitle">
               <i class="fa-solid fa-bolt" style="color: var(--warning)"></i>Gamificação · Pontos por evento
             </h3>
-            <button
-              class="modal-close-btn"
-              aria-label="Fechar"
-              onclick="window._dashXpConfigClose && window._dashXpConfigClose()"
-            >
+            <button class="modal-close-btn" aria-label="Fechar" data-action="close-modal">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -1104,16 +1092,11 @@
         aria-modal="true"
         aria-labelledby="annModalTitle"
         data-close-handler="_dashAnnouncementsClose"
-        onclick="if (event.target === this) window._dashAnnouncementsClose && window._dashAnnouncementsClose();"
       >
         <div class="modal-box modal-box--lg">
           <div class="modal-header">
             <h3 id="annModalTitle"><i class="fa-solid fa-bullhorn" style="color: var(--accent)"></i>Comunicados</h3>
-            <button
-              class="modal-close-btn"
-              aria-label="Fechar"
-              onclick="window._dashAnnouncementsClose && window._dashAnnouncementsClose()"
-            >
+            <button class="modal-close-btn" aria-label="Fechar" data-action="close-modal">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -1353,12 +1336,11 @@
         aria-modal="true"
         aria-labelledby="drillTitle"
         data-close-handler="closeDrillModal"
-        onclick="if (event.target === this) closeDrillModal();"
       >
         <div class="modal-box modal-box--sm">
           <div class="modal-header">
             <h3 id="drillTitle"></h3>
-            <button class="modal-close-btn" aria-label="Fechar" onclick="closeDrillModal()">
+            <button class="modal-close-btn" aria-label="Fechar" data-action="close-modal">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
