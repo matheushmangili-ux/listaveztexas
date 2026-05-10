@@ -602,6 +602,20 @@ document.addEventListener('click', (e) => {
   if (dd && menu && !dd.contains(e.target)) menu.classList.remove('open');
 });
 
+// ─── Interval registry (cleanup central em pagehide/beforeunload) ───
+// Evita acúmulo de timers em tabs abertas por horas (memory leak prevention).
+const _dashboardIntervals = [];
+function registerInterval(fn, ms) {
+  const id = setInterval(fn, ms);
+  _dashboardIntervals.push(id);
+  return id;
+}
+function clearAllIntervals() {
+  while (_dashboardIntervals.length) clearInterval(_dashboardIntervals.pop());
+}
+// pagehide é mais confiável que beforeunload em mobile/bfcache.
+window.addEventListener('pagehide', clearAllIntervals);
+
 // ─── Session timeout (8h inactivity — dashboard pode ficar em TV) ───
 let _lastActivity = Date.now();
 ['click', 'keydown', 'touchstart', 'scroll'].forEach((evt) => {
@@ -613,7 +627,7 @@ let _lastActivity = Date.now();
     { passive: true }
   );
 });
-setInterval(() => {
+registerInterval(() => {
   if (Date.now() - _lastActivity > SESSION_TIMEOUT_DASHBOARD) {
     toast('Sessão expirada por inatividade', 'warning');
     setTimeout(() => logout(), TOAST_SHORT);
@@ -703,7 +717,7 @@ function renderUpdatedAgo() {
   else if (s < 3600) el.textContent = Math.floor(s / 60) + ' min';
   else el.textContent = Math.floor(s / 3600) + ' h';
 }
-setInterval(renderUpdatedAgo, 10000);
+registerInterval(renderUpdatedAgo, 10000);
 
 // ─── Changelog versionado (mesma lista do tablet — adicione novas entradas no TOPO) ───
 const APP_CHANGELOG = [
@@ -911,7 +925,7 @@ updateTimestamp();
   }
   render();
 
-  setInterval(async () => {
+  registerInterval(async () => {
     counter -= 1;
     if (counter <= 0) {
       counter = PERIOD;

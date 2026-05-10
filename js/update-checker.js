@@ -16,6 +16,12 @@
 function initUpdateChecker(pageUrl, opts) {
   const bannerText = (opts && opts.bannerText) || 'Atualização disponível — clique para atualizar';
 
+  // Cleanup central: pagehide é mais confiável que beforeunload em mobile/bfcache.
+  const _intervals = [];
+  window.addEventListener('pagehide', () => {
+    while (_intervals.length) clearInterval(_intervals.pop());
+  });
+
   // ─── Service Worker ───
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').then((reg) => {
@@ -27,7 +33,7 @@ function initUpdateChecker(pageUrl, opts) {
           if (nw.state === 'installed' && navigator.serviceWorker.controller) window._showUpdateBanner();
         });
       });
-      setInterval(() => { reg.update().catch((err) => console.warn('[sw] update failed:', err)); }, 5 * 60 * 1000);
+      _intervals.push(setInterval(() => { reg.update().catch((err) => console.warn('[sw] update failed:', err)); }, 5 * 60 * 1000));
     }).catch((err) => console.warn('[sw] register failed:', err));
   }
 
@@ -44,7 +50,7 @@ function initUpdateChecker(pageUrl, opts) {
       .catch((err) => console.warn('[update-checker] poll failed:', err));
   }
   setTimeout(checkForUpdate, 3000);
-  setInterval(checkForUpdate, 2 * 60 * 1000);
+  _intervals.push(setInterval(checkForUpdate, 2 * 60 * 1000));
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) setTimeout(checkForUpdate, 1000);
   });
