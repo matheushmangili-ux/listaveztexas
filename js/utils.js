@@ -206,14 +206,17 @@ export function toggleTheme() {
 }
 
 // Toast notification — estilo Linear/Arc minimalista
+// Cores referenciam diretamente os tokens semânticos --mv-status-* da v54.
+// success=available (green), error=error (red), warning=paused (amber),
+// info=busy (royal blue brand). Backgrounds usam os respectivos *-bg suaves.
 export function toast(msg, type = 'info', duration = 4000) {
   const container = document.getElementById('toastContainer');
   if (!container) return;
   const tone = {
-    success: { accent: '#8b5cf6', iconBg: 'rgba(167, 139, 250,.18)' },
-    error: { accent: '#d47a68', iconBg: 'rgba(232,155,138,.18)' },
-    warning: { accent: '#b8875a', iconBg: 'rgba(212,163,115,.18)' },
-    info: { accent: '#6d85ac', iconBg: 'rgba(142,165,201,.18)' }
+    success: { accent: 'var(--mv-status-available)', iconBg: 'var(--mv-status-available-bg)' },
+    error: { accent: 'var(--mv-status-error)', iconBg: 'var(--mv-status-error-bg)' },
+    warning: { accent: 'var(--mv-status-paused)', iconBg: 'var(--mv-status-paused-bg)' },
+    info: { accent: 'var(--mv-status-busy)', iconBg: 'var(--mv-status-busy-bg)' }
   };
   const icons = {
     success: 'fa-check',
@@ -227,9 +230,9 @@ export function toast(msg, type = 'info', duration = 4000) {
     display:flex;align-items:center;gap:12px;
     padding:12px 16px 12px 12px;
     border-radius:12px;
-    background:var(--bg-card);
-    border:1px solid var(--border-subtle);
-    color:var(--text-primary);
+    background:var(--mv-surface);
+    border:1px solid var(--mv-border);
+    color:var(--mv-text);
     font-size:13px;font-weight:500;
     font-family:'Inter Tight',system-ui,sans-serif;
     letter-spacing:-0.005em;
