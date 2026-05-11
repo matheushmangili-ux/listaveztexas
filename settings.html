@@ -610,13 +610,13 @@
                   <!-- Picker (mostrado para tenants elite) -->
                   <div id="corPickerWrap" class="color-row" style="display: none">
                     <div class="color-swatch" id="colorSwatch">
-                      <input type="color" id="settColor" value="#a78bfa" />
+                      <input type="color" id="settColor" value="#1e40af" />
                     </div>
                     <input
                       id="settColorText"
                       class="input"
                       type="text"
-                      value="#a78bfa"
+                      value="#1e40af"
                       maxlength="7"
                       style="max-width: 120px; font-family: var(--font-mono); font-size: 13px"
                     />
@@ -1241,7 +1241,7 @@
 
         // Populate UI
         document.getElementById('settStoreName').value = tenant.nome_loja || '';
-        const color = tenant.cor_primaria || '#a78bfa';
+        const color = tenant.cor_primaria || '#1e40af';
         document.getElementById('settColor').value = color;
         document.getElementById('settColorText').value = color;
         document.getElementById('colorSwatch').style.background = color;

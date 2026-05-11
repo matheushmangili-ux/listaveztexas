@@ -57,7 +57,7 @@
         this.innerHTML = `
           <span class="mv-logo-lockup" style="display:inline-flex; align-items:center; gap:${Math.round(size * 0.24)}px;">
             ${svg}
-            <span class="mv-logo-wordmark" style="font-family: 'Inter Tight', system-ui, sans-serif; font-size: ${fontSize}px; font-weight: 500; letter-spacing: -0.045em; line-height: 1;">minha<span style="color: var(--accent, #8b5cf6)">vez</span></span>
+            <span class="mv-logo-wordmark" style="font-family: 'Inter Tight', system-ui, sans-serif; font-size: ${fontSize}px; font-weight: 500; letter-spacing: -0.045em; line-height: 1;">minha<span style="color: var(--mv-primary, #1e40af)">vez</span></span>
           </span>
         `;
       } else {
