@@ -99,6 +99,10 @@ export function clearTenantCache() {
  * cor_primaria só vem preenchido quando resolve_tenant gateia por plano='elite'
  * (vide sql/34-resolve-tenant-white-label.sql). Gate server-side — sem checar
  * plano aqui.
+ *
+ * Setamos os tokens v54 (`--mv-primary*`, `--mv-brand-*`) que o CSS realmente
+ * usa, e MANTEMOS o shim legado (`--accent*`, `--gold*`, `--success*`) por
+ * compatibilidade com qualquer JS/template não-migrado.
  */
 export function applyBranding(tenant) {
   if (!tenant) return;
@@ -106,15 +110,20 @@ export function applyBranding(tenant) {
     const v = deriveAccentVariants(tenant.cor_primaria);
     if (v) {
       const root = document.documentElement.style;
+      // Tokens v54 (o que o CSS efetivamente lê)
+      root.setProperty('--mv-primary', v.base);
+      root.setProperty('--mv-primary-hover', v.dim);
+      root.setProperty('--mv-on-primary', v.ink);
+      root.setProperty('--mv-brand-400', v.bright);
+      root.setProperty('--mv-brand-500', v.base);
+      root.setProperty('--mv-brand-600', v.base);
+      root.setProperty('--mv-brand-700', v.dim);
+      // Shim legado v52 — preserva compat com JS/templates não-migrados.
+      // Pode sair em v55 quando todo o codebase usar --mv-* exclusivamente.
       root.setProperty('--accent', v.base);
       root.setProperty('--accent-bright', v.bright);
       root.setProperty('--accent-dim', v.dim);
       root.setProperty('--accent-ink', v.ink);
-      root.setProperty('--gold', v.base);
-      root.setProperty('--gold-bright', v.bright);
-      root.setProperty('--gold-dim', v.dim);
-      root.setProperty('--success', v.base);
-      root.setProperty('--success-deep', v.dim);
     }
   }
   if (tenant.nome_loja) {
