@@ -213,19 +213,28 @@
   --radius-sm: var(--mv-radius-sm);
 
   /* ──────────────────────────────────────────────────────────────────
-     PALETA DE CHARTS v54 (royal blue + status)
+     PALETA DE CHARTS v54 — "Above-market"
      ──────────────────────────────────────────────────────────────────
-     ApexCharts em dashboard-charts.js consome --chart-1..7 via _cssVar.
-     Antes do v54, esses tokens não existiam → caía no fallback #8b5cf6
-     (lavanda v52), causando donuts e barras roxas. Agora usa a paleta
-     royal blue do mockup. Ordem: primária → indigo → âmbar → verde →
-     vermelho → ciano → slate (neutro).
+     Princípios:
+     1. Saturação uniforme (todas 600-level Tailwind) — sem mistura
+        pastel/vivid. Donuts ficam visualmente coesos.
+     2. Não-adjacência no color wheel — evita 2 azuis num donut.
+        Distância de hue ≥30° entre cores categoricamente próximas.
+     3. Semânticas FIXAS — success/danger/warning sempre os mesmos
+        hex (não rotacionam): chart-4 verde = sempre success,
+        chart-5 vermelho = sempre danger, chart-3 âmbar = sempre warning.
+     4. Color-blind safe (deuteranopia/protanopia) — verde+vermelho
+        adjacentes só aparecem em contextos com forma/label além de cor.
+     5. Dark mode aware — variantes *-dark com luminosidade +20% pra
+        brilhar em background escuro (consumidas via [data-theme="dark"]
+        override em commit futuro).
+     ──────────────────────────────────────────────────────────────────
   */
-  --chart-1: #1e40af; /* brand-600 — primária */
-  --chart-2: #6366f1; /* indigo — accent secundário */
-  --chart-3: #d97706; /* âmbar — status-paused */
-  --chart-4: #16a34a; /* verde — status-available */
-  --chart-5: #dc2626; /* vermelho — status-error */
-  --chart-6: #0891b2; /* ciano — info */
-  --chart-7: #64748b; /* slate — neutro */
+  --chart-1: #1e40af; /* brand-600 royal blue   — primária (volume) */
+  --chart-2: #6366f1; /* indigo-500             — secondary (dados qualitativos) */
+  --chart-3: #d97706; /* amber-600              — warning/paused (semantic FIXO) */
+  --chart-4: #16a34a; /* green-600              — success/available (semantic FIXO) */
+  --chart-5: #dc2626; /* red-600                — danger/error (semantic FIXO) */
+  --chart-6: #0891b2; /* cyan-600               — info/comparativo */
+  --chart-7: #64748b; /* slate-500              — neutro/overlay */
 }

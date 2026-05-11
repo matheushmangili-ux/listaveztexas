@@ -94,8 +94,11 @@ const BRAND_PALETTE = {
 // a cada getter porque o dashboard recria charts ao trocar tema.
 // Donut categórico (motivos, setores, canais).
 const CATEGORICAL = chartPalette();
-// Triple: accent (positivo) + ciano (info) + rose (negativo).
-const TRIPLE = [CATEGORICAL[0], CATEGORICAL[1], CATEGORICAL[4]];
+// Triple: usada em chart "Fluxo por Hora" pra 3 séries (atend + vendas + overlay).
+// Ordem semântica: brand (volume) → success (vendas/positivo) → slate (overlay).
+// Anteriormente era [royal-blue, indigo, red] mas blue+indigo eram quase
+// indistinguíveis em curvas próximas — usuário viu como "linhas duplicadas".
+const TRIPLE = [CATEGORICAL[0], CATEGORICAL[3], CATEGORICAL[6]];
 
 // ─── Semantic tempo colors harmonizados ───
 function tempoColor(minutes, meta) {
@@ -105,7 +108,7 @@ function tempoColor(minutes, meta) {
 }
 
 // ─── Unified custom tooltip builder ───
-function buildTooltip(title, rows, color) {
+function buildTooltip(title, rows, color, footer) {
   const cc = chartColors();
   let html = `<div style="padding:10px 14px;font-family:Inter Tight,sans-serif;font-size:12px;line-height:1.6;min-width:140px;background:${cc.tooltipBg};border:1px solid ${cc.tooltipBorder};border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15)">`;
   if (title) {
@@ -117,6 +120,9 @@ function buildTooltip(title, rows, color) {
   rows.forEach(([label, value]) => {
     html += `<div style="color:${cc.tooltipBody}">${escapeHtml(label)}: <strong style="color:${cc.tooltipTitle}">${escapeHtml(String(value))}</strong></div>`;
   });
+  if (footer) {
+    html += `<div style="margin-top:6px;padding-top:6px;border-top:1px solid ${cc.tooltipBorder};font-size:10px;color:${cc.textMuted};display:flex;align-items:center;gap:4px"><i class="fa-solid fa-hand-pointer" style="font-size:9px"></i>${escapeHtml(footer)}</div>`;
+  }
   html += '</div>';
   return html;
 }
@@ -618,18 +624,14 @@ export async function loadMotivos(range) {
       tooltipFn: function ({ series, seriesIndex, dataPointIndex }) {
         const val = series[seriesIndex];
         const pct = Math.round((val / totalMotivos) * 100);
-        return (
-          buildTooltip(
-            labels[dataPointIndex],
-            [
-              ['Registros', val],
-              ['Percentual', pct + '%']
-            ],
-            colors[dataPointIndex]
-          ) +
-          '<div style="padding:0 14px 8px;font-size:10px;color:' +
-          chartColors().textMuted +
-          ';font-family:Inter Tight,sans-serif">Clique para detalhes</div>'
+        return buildTooltip(
+          labels[dataPointIndex],
+          [
+            ['Registros', val],
+            ['Percentual', pct + '%']
+          ],
+          colors[dataPointIndex],
+          'Clique para detalhes'
         );
       }
     })
@@ -1569,6 +1571,23 @@ export async function loadOrigem(range) {
   const colors = data.map((_, i) => ORIGEM_PALETTE[i % ORIGEM_PALETTE.length]);
   const total = values.reduce((a, b) => a + b, 0);
 
+  // Legend custom lateral (consistência com chart Motivos — Sprint 4).
+  // Estrutura: dot | label | % | count, mesma class .donut-legend do Motivos.
+  const legendEl = document.getElementById('origemLegend');
+  if (legendEl) {
+    legendEl.innerHTML = labels
+      .map((label, i) => {
+        const pct = Math.round((values[i] / total) * 100);
+        return `<div class="row">
+          <span class="sw" style="background:${colors[i]}"></span>
+          <span>${escapeHtml(label)}</span>
+          <span class="pct">${pct}%</span>
+          <span class="abs">${values[i]}</span>
+        </div>`;
+      })
+      .join('');
+  }
+
   renderChart(
     'origem',
     '#chartOrigem',
@@ -1578,6 +1597,7 @@ export async function loadOrigem(range) {
       colors,
       total,
       centerLabel: 'TOTAL',
+      showLegend: false, // legenda nativa Apex desabilitada — #origemLegend ao lado
       tooltipFn: function ({ series, seriesIndex, dataPointIndex }) {
         const val = series[seriesIndex];
         const pct = Math.round((val / total) * 100);
