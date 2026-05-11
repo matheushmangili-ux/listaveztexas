@@ -46,25 +46,29 @@
     <div class="dash-layout">
       <!-- Sidebar -->
       <aside class="dash-sidebar" id="dashSidebar">
-        <!-- Brand -->
+        <!-- Brand: logo + tenant + plano -->
         <div class="sidebar-brand">
           <div class="dash-header-logo" id="headerLogo">
             <span class="mv-wordmark"
               ><span class="mv-wordmark__mark">m</span><span class="mv-wordmark__text">minha<em>vez</em></span></span
             >
           </div>
+          <div class="sidebar-brand-meta">
+            <span class="sidebar-tenant" id="sidebarTenant">—</span>
+            <span class="sidebar-plan" id="sidebarPlan"></span>
+          </div>
         </div>
 
         <!-- Nav -->
         <nav class="sidebar-nav">
-          <span class="sidebar-section-label">Menu</span>
-          <!-- Dashboard dropdown: Overview / Por Vendedor / Operacional -->
+          <!-- ─── ANÁLISE ─── -->
+          <span class="sidebar-section-label">Análise</span>
           <div class="sidebar-dropdown open" id="dashDropdown">
             <button
               type="button"
               class="sidebar-link sidebar-dropdown-trigger sidebar-link--active"
               aria-expanded="true"
-              onclick="window.toggleDashDropdown && window.toggleDashDropdown()"
+              data-action="toggle-dropdown"
             >
               <i class="fa-solid fa-chart-pie"></i>
               <span>Dashboard</span>
@@ -82,70 +86,48 @@
               </a>
             </div>
           </div>
+          <button type="button" id="linkAi" class="sidebar-link" data-action="open-modal" data-modal="ai">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>IA Assist</span>
+          </button>
+
+          <!-- ─── OPERAÇÃO ─── -->
+          <span class="sidebar-section-label">Operação</span>
           <a id="linkTablet" href="#" class="sidebar-link">
             <i class="fa-solid fa-tablet-screen-button"></i>
             <span>Tablet</span>
           </a>
-          <a
+          <button type="button" id="linkVm" class="sidebar-link" data-action="open-modal" data-modal="vm">
+            <i class="fa-solid fa-camera-retro"></i>
+            <span>VM Photos</span>
+            <span class="sidebar-badge" id="badgeVm" hidden></span>
+          </button>
+
+          <!-- ─── ENGAJAMENTO ─── -->
+          <span class="sidebar-section-label">Engajamento</span>
+          <button
+            type="button"
             id="linkAnnouncements"
-            href="#"
             class="sidebar-link"
-            onclick="
-              event.preventDefault();
-              window._dashAnnouncementsOpen && window._dashAnnouncementsOpen();
-            "
+            data-action="open-modal"
+            data-modal="announcements"
           >
             <i class="fa-solid fa-bullhorn"></i>
             <span>Comunicados</span>
-          </a>
-          <a
-            id="linkXpConfig"
-            href="#"
-            class="sidebar-link"
-            onclick="
-              event.preventDefault();
-              window._dashXpConfigOpen && window._dashXpConfigOpen();
-            "
-          >
+            <span class="sidebar-badge" id="badgeAnnouncements" hidden></span>
+          </button>
+          <button type="button" id="linkXpConfig" class="sidebar-link" data-action="open-modal" data-modal="xpConfig">
             <i class="fa-solid fa-bolt"></i>
             <span>Gamificação</span>
-          </a>
-          <a
-            id="linkMissions"
-            href="#"
-            class="sidebar-link"
-            onclick="
-              event.preventDefault();
-              window._dashMissionsOpen && window._dashMissionsOpen();
-            "
-          >
+          </button>
+          <button type="button" id="linkMissions" class="sidebar-link" data-action="open-modal" data-modal="missions">
             <i class="fa-solid fa-bullseye"></i>
             <span>Missões</span>
-          </a>
-          <a
-            id="linkVm"
-            href="#"
-            class="sidebar-link"
-            onclick="
-              event.preventDefault();
-              window._dashVmOpen && window._dashVmOpen();
-            "
-          >
-            <i class="fa-solid fa-camera-retro"></i>
-            <span>VM Photos</span>
-          </a>
-          <a
-            id="linkAi"
-            href="#"
-            class="sidebar-link"
-            onclick="
-              event.preventDefault();
-              window._dashAiOpen && window._dashAiOpen();
-            "
-          >
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-            <span>IA Assist</span>
-          </a>
+            <span class="sidebar-badge" id="badgeMissions" hidden></span>
+          </button>
+
+          <!-- ─── SISTEMA ─── -->
+          <span class="sidebar-section-label">Sistema</span>
           <a id="linkSettings" href="#" class="sidebar-link">
             <i class="fa-solid fa-gear"></i>
             <span>Configurações</span>
@@ -156,11 +138,11 @@
 
         <!-- Footer -->
         <div class="sidebar-footer">
-          <button class="sidebar-link" onclick="window.minhavezTour?.start('dashboard')" aria-label="Rever tour">
+          <button type="button" class="sidebar-link" data-action="restart-tour" aria-label="Rever tour">
             <i class="fa-solid fa-circle-question"></i>
             <span>Rever tour</span>
           </button>
-          <button class="sidebar-link sidebar-link--danger" onclick="handleLogout()" aria-label="Sair">
+          <button type="button" class="sidebar-link sidebar-link--danger" data-action="logout" aria-label="Sair">
             <i class="fa-solid fa-right-from-bracket"></i>
             <span>Sair</span>
           </button>

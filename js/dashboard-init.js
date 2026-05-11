@@ -47,7 +47,10 @@ import {
 initTheme();
 
 // ─── Logout (defined early so the button works even while page is still loading) ───
+// Confirm dialog protege contra clique acidental — sessao de gestor pode estar
+// aberta por horas em TV de loja, logout sem querer e frustrante de reverter.
 window.handleLogout = async function () {
+  if (!window.confirm('Tem certeza que deseja sair?')) return;
   try {
     await logout();
   } catch (e) {
@@ -72,6 +75,11 @@ if (tenant) {
   if (headerLogo && tenant.logo_url) {
     headerLogo.innerHTML = `<img src="${escapeHtml(tenant.logo_url)}" alt="${escapeHtml(tenant.nome_loja || '')}">`;
   }
+  // Populate sidebar brand meta (tenant + plano) — Sprint 3 sidebar polish
+  const sidebarTenant = document.getElementById('sidebarTenant');
+  if (sidebarTenant && tenant.nome_loja) sidebarTenant.textContent = tenant.nome_loja;
+  const sidebarPlan = document.getElementById('sidebarPlan');
+  if (sidebarPlan && tenant.plano) sidebarPlan.textContent = tenant.plano;
   // Show tenant slug in footer for support
   const slugEl = document.getElementById('tenantSlugFooter');
   const slugVal = document.getElementById('tenantSlugValue');
@@ -643,6 +651,61 @@ document.addEventListener('click', (e) => {
     if (typeof window.setPeriod === 'function') window.setPeriod(btn.dataset.period);
   });
 })();
+
+// ─── Sidebar: event delegation pros data-action ───
+// Substitui onclick inline em 6+ links da sidebar. Convencao:
+// - data-action="open-modal" + data-modal="ai|vm|missions|xpConfig|announcements"
+// - data-action="toggle-dropdown" (Dashboard chevron)
+// - data-action="restart-tour"
+// - data-action="logout"
+(function initSidebarActions() {
+  const sidebar = document.getElementById('dashSidebar');
+  if (!sidebar) return;
+  const MODAL_OPENERS = {
+    ai: '_dashAiOpen',
+    vm: '_dashVmOpen',
+    missions: '_dashMissionsOpen',
+    xpConfig: '_dashXpConfigOpen',
+    announcements: '_dashAnnouncementsOpen'
+  };
+  sidebar.addEventListener('click', (e) => {
+    const trigger = e.target.closest('[data-action]');
+    if (!trigger || !sidebar.contains(trigger)) return;
+    const action = trigger.dataset.action;
+    if (action === 'open-modal') {
+      const fnName = MODAL_OPENERS[trigger.dataset.modal];
+      if (fnName && typeof window[fnName] === 'function') window[fnName]();
+    } else if (action === 'toggle-dropdown') {
+      if (typeof window.toggleDashDropdown === 'function') window.toggleDashDropdown();
+    } else if (action === 'restart-tour') {
+      window.minhavezTour?.start('dashboard');
+    } else if (action === 'logout') {
+      window.handleLogout();
+    }
+  });
+})();
+
+// ─── Sidebar badge helper (exposto pra qualquer modulo do dashboard atualizar) ───
+// uso: window.setSidebarBadge('announcements', 3)  → mostra "3" no item Comunicados
+//      window.setSidebarBadge('announcements', 0)  → esconde
+window.setSidebarBadge = function (key, count) {
+  const BADGE_IDS = {
+    announcements: 'badgeAnnouncements',
+    missions: 'badgeMissions',
+    vm: 'badgeVm'
+  };
+  const id = BADGE_IDS[key];
+  if (!id) return;
+  const el = document.getElementById(id);
+  if (!el) return;
+  const n = Number(count) || 0;
+  if (n > 0) {
+    el.textContent = n > 99 ? '99+' : String(n);
+    el.hidden = false;
+  } else {
+    el.hidden = true;
+  }
+};
 
 // ─── Interval registry (cleanup central em pagehide/beforeunload) ───
 // Evita acúmulo de timers em tabs abertas por horas (memory leak prevention).
