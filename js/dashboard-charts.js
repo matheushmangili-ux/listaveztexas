@@ -310,6 +310,96 @@ function renderChart(key, selector, options) {
   }
 }
 
+// ─── ECharts donut (motor novo — visual fluido) ───
+// Reutiliza a instancia por seletor; legenda fica como HTML externo.
+const echartsDonuts = {};
+function renderEChartsDonut(selector, { labels, values, colors, total, centerLabel, onSelect }) {
+  const el = document.querySelector(selector);
+  if (!el || typeof echarts === 'undefined') return null;
+  const dark = isDarkTheme();
+  const cc = chartColors();
+  const cardBg = dark ? '#161a23' : '#ffffff';
+
+  let chart = echartsDonuts[selector];
+  if (!chart || (chart.isDisposed && chart.isDisposed())) {
+    el.innerHTML = '';
+    if (!el.style.height) el.style.height = '280px';
+    chart = echarts.init(el, null, { renderer: 'canvas' });
+    echartsDonuts[selector] = chart;
+    el.style.cursor = 'pointer';
+    if (onSelect) {
+      chart.on('click', (p) => {
+        if (typeof p.dataIndex === 'number') onSelect(p.dataIndex);
+      });
+    }
+    if (typeof ResizeObserver !== 'undefined') {
+      new ResizeObserver(() => {
+        if (!chart.isDisposed || !chart.isDisposed()) chart.resize();
+      }).observe(el);
+    }
+  }
+
+  const data = values.map((v, i) => ({ value: v, name: labels[i], itemStyle: { color: colors[i] } }));
+
+  chart.setOption(
+    {
+      title: {
+        text: centerLabel,
+        subtext: String(total),
+        left: 'center',
+        top: 'middle',
+        textAlign: 'center',
+        itemGap: 2,
+        textStyle: { color: cc.textMuted, fontSize: 11, fontWeight: 600, fontFamily: 'Inter Tight' },
+        subtextStyle: { color: cc.centerText, fontSize: 30, fontWeight: 800, fontFamily: 'Inter Tight' }
+      },
+      tooltip: {
+        trigger: 'item',
+        backgroundColor: cc.tooltipBg,
+        borderColor: cc.tooltipBorder,
+        borderWidth: 1,
+        padding: [8, 12],
+        textStyle: { color: cc.tooltipBody, fontFamily: 'Inter Tight', fontSize: 12 },
+        formatter: (p) => `<b style="color:${cc.tooltipTitle}">${p.name}</b><br/>${p.value} registros · ${p.percent}%`
+      },
+      series: [
+        {
+          type: 'pie',
+          radius: ['62%', '88%'],
+          center: ['50%', '50%'],
+          avoidLabelOverlap: false,
+          padAngle: 2,
+          itemStyle: { borderRadius: 6, borderColor: cardBg, borderWidth: 2 },
+          label: {
+            show: true,
+            position: 'inside',
+            formatter: (p) => (p.percent >= 5 ? Math.round(p.percent) + '%' : ''),
+            color: '#fff',
+            fontSize: 12,
+            fontWeight: 700,
+            fontFamily: 'Inter Tight',
+            textShadowColor: 'rgba(0,0,0,.5)',
+            textShadowBlur: 3
+          },
+          labelLine: { show: false },
+          emphasis: {
+            scale: true,
+            scaleSize: 6,
+            itemStyle: { shadowBlur: 16, shadowColor: dark ? 'rgba(0,0,0,.5)' : 'rgba(0,0,0,.2)' }
+          },
+          data
+        }
+      ],
+      animationType: 'scale',
+      animationEasing: 'cubicOut',
+      animationDuration: 700
+    },
+    true
+  );
+
+  return chart;
+}
+
 // CountUp animation (first load only)
 export function formatTempo(minutes) {
   const m = parseFloat(minutes) || 0;
@@ -608,47 +698,19 @@ export async function loadMotivos(range) {
       .join('');
   }
 
-  renderChart(
-    'motivos',
-    '#chartMotivos',
-    donutConfig({
-      labels,
-      values,
-      colors,
-      total: totalMotivos,
-      centerLabel: 'PERDAS',
-      // Legenda nativa do Apex desabilitada — #motivosLegend ao lado já
-      // mostra dot + label + % + total (mais rico). Evita duplicação.
-      showLegend: false,
-      events: {
-        dataPointSelection: function (event, chartCtx, config) {
-          const idx = config.dataPointIndex;
-          const motivo = (data || [])[idx]?.motivo;
-          if (motivo && typeof window.openDrillMotivo === 'function') window.openDrillMotivo(motivo, labels[idx]);
-        },
-        dataPointMouseEnter: function (event) {
-          event.target.style.cursor = 'pointer';
-        }
-      },
-      tooltipFn: function ({ series, seriesIndex, dataPointIndex }) {
-        const val = series[seriesIndex];
-        const pct = Math.round((val / totalMotivos) * 100);
-        return (
-          buildTooltip(
-            labels[dataPointIndex],
-            [
-              ['Registros', val],
-              ['Percentual', pct + '%']
-            ],
-            colors[dataPointIndex]
-          ) +
-          '<div style="padding:0 14px 8px;font-size:10px;color:' +
-          chartColors().textMuted +
-          ';font-family:Inter Tight,sans-serif">Clique para detalhes</div>'
-        );
-      }
-    })
-  );
+  // Motor novo: ECharts (donut fluido com fatias arredondadas, hover que
+  // cresce e animacao de entrada). Legenda continua sendo o HTML #motivosLegend.
+  renderEChartsDonut('#chartMotivos', {
+    labels,
+    values,
+    colors,
+    total: totalMotivos,
+    centerLabel: 'PERDAS',
+    onSelect: (idx) => {
+      const motivo = (data || [])[idx]?.motivo;
+      if (motivo && typeof window.openDrillMotivo === 'function') window.openDrillMotivo(motivo, labels[idx]);
+    }
+  });
 }
 
 // ─── Hourly flow chart ───
