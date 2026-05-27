@@ -154,7 +154,7 @@ function donutConfig({ labels, values, colors, total, centerLabel, tooltipFn, ev
       pie: {
         expandOnClick: true,
         donut: {
-          size: '64%',
+          size: '68%',
           labels: {
             show: true,
             // Centro reativo: hover numa fatia mostra o motivo dela…
@@ -169,8 +169,8 @@ function donutConfig({ labels, values, colors, total, centerLabel, tooltipFn, ev
             // …e a contagem daquela fatia (sem hover, cai no total abaixo)
             value: {
               show: true,
-              fontSize: '30px',
-              fontWeight: 800,
+              fontSize: '28px',
+              fontWeight: 700,
               color: cc.centerText,
               offsetY: 4,
               formatter: (val) => String(val)
@@ -203,7 +203,7 @@ function donutConfig({ labels, values, colors, total, centerLabel, tooltipFn, ev
       fontFamily: "'Inter Tight'",
       labels: { colors: cc.textStrong }
     },
-    stroke: { width: 3, colors: [dark ? '#18181B' : '#FFFFFF'] },
+    stroke: { width: 2, colors: [dark ? '#18181B' : '#FFFFFF'] },
     tooltip: {
       custom: tooltipFn,
       // Âncora o tooltip no canto top-right do chart em vez de seguir o cursor.
