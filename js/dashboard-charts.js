@@ -126,31 +126,60 @@ function buildTooltip(title, rows, color) {
 // ─── Shared donut chart config factory ───
 function donutConfig({ labels, values, colors, total, centerLabel, tooltipFn, events, showLegend = true }) {
   const cc = chartColors();
+  const dark = isDarkTheme();
   return {
-    chart: { type: 'donut', height: 280, ...(events ? { events } : {}) },
+    chart: {
+      type: 'donut',
+      height: 280,
+      // Profundidade sutil — donut "flutua" sobre o card
+      dropShadow: { enabled: true, top: 4, left: 0, blur: 10, color: '#000', opacity: dark ? 0.35 : 0.12 },
+      ...(events ? { events } : {})
+    },
     series: values,
     labels: labels.map((l, i) => l + ' (' + values[i] + ')'),
     colors,
+    // Gradiente vertical leve por fatia — tira o look "chapado"
+    fill: {
+      type: 'gradient',
+      gradient: {
+        shade: dark ? 'dark' : 'light',
+        type: 'vertical',
+        shadeIntensity: 0.18,
+        opacityFrom: 1,
+        opacityTo: 0.9,
+        stops: [0, 100]
+      }
+    },
     plotOptions: {
       pie: {
         expandOnClick: true,
         donut: {
-          size: '68%',
+          size: '64%',
           labels: {
             show: true,
-            name: { show: true, fontSize: '10px', fontWeight: 600, color: cc.textMuted, offsetY: -8 },
+            // Centro reativo: hover numa fatia mostra o motivo dela…
+            name: {
+              show: true,
+              fontSize: '11px',
+              fontWeight: 600,
+              color: cc.textMuted,
+              offsetY: -6,
+              formatter: (val) => String(val).replace(/\s*\(\d+\)\s*$/, '')
+            },
+            // …e a contagem daquela fatia (sem hover, cai no total abaixo)
             value: {
               show: true,
-              fontSize: '28px',
-              fontWeight: 700,
+              fontSize: '30px',
+              fontWeight: 800,
               color: cc.centerText,
               offsetY: 4,
-              formatter: () => String(total)
+              formatter: (val) => String(val)
             },
             total: {
               show: true,
+              showAlways: false,
               label: centerLabel,
-              fontSize: '10px',
+              fontSize: '11px',
               fontWeight: 600,
               color: cc.textMuted,
               formatter: () => String(total)
@@ -162,8 +191,9 @@ function donutConfig({ labels, values, colors, total, centerLabel, tooltipFn, ev
     dataLabels: {
       enabled: true,
       formatter: (v) => Math.round(v) + '%',
-      dropShadow: { enabled: false },
-      style: { fontSize: '11px', fontWeight: 700, fontFamily: "'Inter Tight'" }
+      // Sombra no % garante leitura mesmo em fatia clara (amarelo/verde)
+      dropShadow: { enabled: true, top: 1, left: 0, blur: 2, color: '#000', opacity: 0.45 },
+      style: { fontSize: '12px', fontWeight: 700, fontFamily: "'Inter Tight'", colors: ['#fff'] }
     },
     legend: {
       show: showLegend,
@@ -173,14 +203,14 @@ function donutConfig({ labels, values, colors, total, centerLabel, tooltipFn, ev
       fontFamily: "'Inter Tight'",
       labels: { colors: cc.textStrong }
     },
-    stroke: { width: 2, colors: [isDarkTheme() ? '#18181B' : '#FFFFFF'] },
+    stroke: { width: 3, colors: [dark ? '#18181B' : '#FFFFFF'] },
     tooltip: {
       custom: tooltipFn,
       // Âncora o tooltip no canto top-right do chart em vez de seguir o cursor.
       // Evita clipping na borda superior do .chart-card (que tem overflow:hidden).
       fixed: { enabled: true, position: 'topRight', offsetX: -8, offsetY: 8 }
     },
-    states: { hover: { filter: { type: 'darken', value: 0.82 } }, active: { filter: { type: 'none' } } }
+    states: { hover: { filter: { type: 'lighten', value: 0.08 } }, active: { filter: { type: 'none' } } }
   };
 }
 
