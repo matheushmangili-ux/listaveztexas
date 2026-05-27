@@ -254,7 +254,7 @@ h3,
 
 .btn-primary {
   background: var(--accent);
-  color: #060606;
+  color: var(--ink-on-bright);
 }
 .btn-primary:hover {
   opacity: 0.85;
@@ -262,7 +262,7 @@ h3,
 
 .btn-success {
   background: var(--success);
-  color: #060606;
+  color: var(--ink-on-bright);
 }
 .btn-success:hover {
   opacity: 0.85;
@@ -270,7 +270,7 @@ h3,
 
 .btn-danger {
   background: var(--danger);
-  color: #060606;
+  color: var(--ink-on-bright);
 }
 .btn-danger:hover {
   opacity: 0.85;
@@ -278,7 +278,7 @@ h3,
 
 .btn-warning {
   background: var(--warning);
-  color: #060606;
+  color: var(--ink-on-bright);
 }
 .btn-warning:hover {
   opacity: 0.85;

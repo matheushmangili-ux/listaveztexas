@@ -32,6 +32,7 @@
   --accent-bright: #a78bfa; /* purple-400 */
   --accent-dim: #6d28d9; /* purple-700 */
   --accent-ink: #ffffff; /* texto sobre bg roxo */
+  --ink-on-bright: #060606; /* texto escuro fixo sobre fills saturados (accent/success/warning/danger). Constante nos 2 temas — black passa AA em todos */
 
   /* Accent ramp (full) */
   --accent-50: #f5f3ff;

@@ -171,8 +171,14 @@ Após mudanças de CSS, bump de versão nos nomes + refs nos HTMLs + service wor
 **Leva 1 — Acessibilidade** (~2h) · `A1 A2 A3 A4`
 Foco visível completo + formulários de auth + disabled forte + contraste de link. Base de tudo, maior impacto. **Commit único.**
 
-**Leva 2 — Tokens & paridade light/dark** (~2.5h) · `T1 T2 T3 T4`
-Sweep de cores hardcoded → tokens, overrides light que faltam, lint anti-hex. **Commit único.** Risco de contraste em T1 — testar dark + light.
+**Leva 2 — Tokens & paridade light/dark** (~1h) · `T1 T3` ✅ feito
+Na inspeção, T2/T4 eram falsos positivos: `#e89b8a` é valor de tokens semânticos
+(`--vendor-danger`/`--motivo-ruptura`/`--tier-rubi`), constante nos 2 temas; `.dash-main`
+e os tooltips ApexCharts já têm guard `[data-theme]`; overlays `rgba(0,0,0,.4)` funcionam
+no light. Entregue: **T1** — token `--ink-on-bright` (=`#060606`, constante) substitui 17
+`color:#060606` em botões/CTAs (zero mudança visual, removido o hex mágico). **T3** —
+override `[data-theme='light']` dos cards do tablet (inset highlight branco era invisível
+no light). + bump `CACHE_VERSION` no sw.js. **Commit único.**
 
 **Leva 3 — Estados** (~2h) · `E1 E2 E3`
 Skeleton/empty nos charts, progresso de upload, cold-start states. **Commit único.**

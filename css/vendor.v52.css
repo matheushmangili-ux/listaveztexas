@@ -451,7 +451,7 @@ body {
   margin-top: 10px;
   width: 100%;
   background: var(--vendor-success);
-  color: #060606;
+  color: var(--ink-on-bright);
   border: none;
   border-radius: 14px;
   padding: 16px;
@@ -540,7 +540,7 @@ body {
   margin-top: 16px;
   width: 100%;
   background: var(--vendor-success);
-  color: #060606;
+  color: var(--ink-on-bright);
   border: none;
   border-radius: 16px;
   padding: 18px;
@@ -861,7 +861,7 @@ body {
 }
 .vendor-push-btn {
   background: var(--vendor-success);
-  color: #060606;
+  color: var(--ink-on-bright);
   border: none;
   border-radius: 10px;
   padding: 10px 16px;
@@ -909,7 +909,7 @@ body {
   top: 4px;
   right: 4px;
   background: var(--vendor-warning);
-  color: #060606;
+  color: var(--ink-on-bright);
   font-size: 8px;
   font-weight: 800;
   min-width: 14px;
@@ -1727,7 +1727,7 @@ body {
   left: 50%;
   transform: translate(-50%, -12px);
   background: linear-gradient(135deg, var(--vendor-warning), #d4a373);
-  color: #060606;
+  color: var(--ink-on-bright);
   padding: 10px 20px;
   border-radius: 999px;
   font-size: 14px;
@@ -1748,7 +1748,7 @@ body {
   transform: translate(-50%, 0);
 }
 .xp-gain-toast i {
-  color: #060606;
+  color: var(--ink-on-bright);
   font-size: 15px;
 }
 
@@ -1771,7 +1771,7 @@ body {
 }
 .xp-levelup-card {
   background: linear-gradient(135deg, #d4a373 0%, #d4a373 100%);
-  color: #060606;
+  color: var(--ink-on-bright);
   padding: 32px 40px;
   border-radius: 24px;
   text-align: center;
@@ -1823,7 +1823,7 @@ body {
 }
 .xp-tierup-card {
   background: linear-gradient(135deg, var(--tier-color), color-mix(in srgb, var(--tier-color) 55%, #ffffff));
-  color: #060606;
+  color: var(--ink-on-bright);
   padding: 40px 48px;
   border-radius: 28px;
   text-align: center;
