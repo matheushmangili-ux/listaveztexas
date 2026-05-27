@@ -246,7 +246,9 @@ h3,
   transform: scale(0.97);
 }
 .btn:disabled {
-  opacity: 0.4;
+  opacity: 0.6;
+  filter: grayscale(0.3);
+  box-shadow: inset 0 0 0 1px var(--border-medium);
   pointer-events: none;
 }
 

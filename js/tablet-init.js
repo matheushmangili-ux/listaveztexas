@@ -53,6 +53,20 @@ initTheme();
   if (_m) _m.content = _t === 'dark' ? '#060606' : '#F5F5F7';
 }
 
+// a11y: .motivo-option/.outcome-option são <div onclick> no HTML estático do tablet.
+// Torna focável (anel via [tabindex]:focus-visible) + operável por teclado como botão.
+document.querySelectorAll('.motivo-option:not(button)').forEach((el) => {
+  if (!el.hasAttribute('role')) el.setAttribute('role', 'button');
+  if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0');
+});
+document.addEventListener('keydown', (e) => {
+  const t = e.target;
+  if ((e.key === 'Enter' || e.key === ' ') && t instanceof HTMLElement && t.matches('.motivo-option[role="button"]')) {
+    e.preventDefault();
+    t.click();
+  }
+});
+
 // Load tenant context
 const tenant = await loadTenant();
 if (tenant) applyBranding(tenant);

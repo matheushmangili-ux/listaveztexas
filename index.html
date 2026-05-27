@@ -281,7 +281,7 @@
       /* CTA links */
       a,
       .cta-link {
-        color: #a78bfa;
+        color: var(--accent);
       }
     </style>
     <script>
@@ -365,17 +365,25 @@
         </div>
 
         <!-- Error -->
-        <div id="loginError">
+        <div id="loginError" role="alert" aria-live="assertive">
           <i class="fa-solid fa-circle-xmark"></i>
           <span id="loginErrorMsg"></span>
         </div>
 
         <!-- PIN Login -->
         <div id="panelPin" class="login-panel active">
-          <p style="text-align: center; font-size: 13px; color: #71717a; margin-bottom: 8px; font-weight: 500">
+          <p
+            style="
+              text-align: center;
+              font-size: 13px;
+              color: var(--text-secondary);
+              margin-bottom: 8px;
+              font-weight: 500;
+            "
+          >
             Digite seu PIN de 4 digitos
           </p>
-          <div class="pin-group">
+          <div class="pin-group" role="group" aria-label="PIN de acesso de 4 dígitos">
             <input
               class="pin-input"
               type="password"
@@ -383,11 +391,40 @@
               inputmode="numeric"
               pattern="[0-9]"
               data-pin="0"
+              aria-label="Dígito 1 do PIN"
+              autocomplete="off"
               autofocus
             />
-            <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="1" />
-            <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="2" />
-            <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="3" />
+            <input
+              class="pin-input"
+              type="password"
+              maxlength="1"
+              inputmode="numeric"
+              pattern="[0-9]"
+              data-pin="1"
+              aria-label="Dígito 2 do PIN"
+              autocomplete="off"
+            />
+            <input
+              class="pin-input"
+              type="password"
+              maxlength="1"
+              inputmode="numeric"
+              pattern="[0-9]"
+              data-pin="2"
+              aria-label="Dígito 3 do PIN"
+              autocomplete="off"
+            />
+            <input
+              class="pin-input"
+              type="password"
+              maxlength="1"
+              inputmode="numeric"
+              pattern="[0-9]"
+              data-pin="3"
+              aria-label="Dígito 4 do PIN"
+              autocomplete="off"
+            />
           </div>
           <button id="btnPin" class="btn btn-primary" style="width: 100%" onclick="handlePinLogin()" disabled>
             <i class="fa-solid fa-right-to-bracket"></i>
@@ -399,11 +436,12 @@
         <div id="panelEmail" class="login-panel">
           <div style="margin-bottom: 16px">
             <label
+              for="emailInput"
               style="
                 display: block;
                 font-size: 11px;
                 font-weight: 600;
-                color: #71717a;
+                color: var(--text-secondary);
                 text-transform: uppercase;
                 letter-spacing: 0.06em;
                 margin-bottom: 6px;
@@ -414,11 +452,12 @@
           </div>
           <div style="margin-bottom: 24px">
             <label
+              for="passInput"
               style="
                 display: block;
                 font-size: 11px;
                 font-weight: 600;
-                color: #71717a;
+                color: var(--text-secondary);
                 text-transform: uppercase;
                 letter-spacing: 0.06em;
                 margin-bottom: 6px;
@@ -441,7 +480,7 @@
             <a
               id="forgotLink"
               href="/forgot-password"
-              style="font-size: 12px; color: #a78bfa; text-decoration: none; font-weight: 500"
+              style="font-size: 12px; color: var(--accent); text-decoration: none; font-weight: 500"
               >Esqueci minha senha</a
             >
           </div>
@@ -449,7 +488,9 @@
 
         <!-- Slug Picker (visitante sem :slug na URL) -->
         <div id="panelSlug" class="login-panel">
-          <p style="text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 16px; font-weight: 500">
+          <p
+            style="text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 16px; font-weight: 500"
+          >
             Qual é a sua loja?
           </p>
           <div style="margin-bottom: 16px">
@@ -613,6 +654,9 @@
 
       function hideError() {
         document.getElementById('loginError').classList.remove('show');
+        document.querySelectorAll('.input[aria-invalid], .pin-input[aria-invalid]').forEach((el) => {
+          el.removeAttribute('aria-invalid');
+        });
       }
 
       window.handlePinLogin = async function () {
@@ -636,10 +680,14 @@
       };
 
       window.handleEmailLogin = async function () {
-        const email = document.getElementById('emailInput').value.trim();
-        const pass = document.getElementById('passInput').value;
+        const emailEl = document.getElementById('emailInput');
+        const passEl = document.getElementById('passInput');
+        const email = emailEl.value.trim();
+        const pass = passEl.value;
         if (!email || !pass) {
           showError('Preencha email e senha.');
+          if (!email) emailEl.setAttribute('aria-invalid', 'true');
+          if (!pass) passEl.setAttribute('aria-invalid', 'true');
           return;
         }
         const btn = document.getElementById('btnEmail');
@@ -652,6 +700,8 @@
           setTimeout(() => redirectByRole(user), 500);
         } catch (e) {
           showError('Email ou senha incorretos.');
+          emailEl.setAttribute('aria-invalid', 'true');
+          passEl.setAttribute('aria-invalid', 'true');
           btn.disabled = false;
           btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Entrar';
         }
