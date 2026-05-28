@@ -1,7 +1,8 @@
 // minhavez — Edge Function: ai-assist
-// Proxy para Groq AI (free tier, Llama 3.3 70B). 5 features:
+// Proxy para Google Gemini (gemini-3.1-pro, multimodal). 5 features:
 //   turno-summary, mission-suggestions, vendor-tips, vm-compliance, flow-prediction
 // Cache em ai_cache, rate limit em memória.
+// Migrado de Groq/Llama 3.3 70B -> Gemini 3.1 Pro (texto + visão no mesmo modelo).
 
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'jsr:@supabase/supabase-js@2'
@@ -9,15 +10,16 @@ import { getCorsHeaders } from '../_shared/cors.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
-const GROQ_MODEL = 'llama-3.3-70b-versatile'
-const GROQ_VISION_MODEL = 'llama-3.2-90b-vision-preview'
+// Gemini 3.1 Pro: multimodal (texto + imagem), reasoning-first. Um modelo cobre
+// análise de turno/missões/fluxo e a comparação de fotos (VM compliance).
+const GEMINI_MODEL = 'gemini-3.1-pro'
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
 
 const sb = createClient(SUPABASE_URL, SERVICE_ROLE, {
   auth: { persistSession: false, autoRefreshToken: false }
 })
 
-let _groqKey: string | null = null
+let _geminiKey: string | null = null
 const _rateCounter = new Map<string, number>()
 const _memCache = new Map<string, { data: unknown; exp: number }>()
 
@@ -49,58 +51,64 @@ async function resolveTenantIdForUser(userId: string) {
   return null
 }
 
-async function getGroqKey(): Promise<string> {
-  if (_groqKey) return _groqKey
-  const { data } = await sb.from('app_secrets').select('value').eq('key', 'groq_api_key').single()
-  if (!data?.value) throw new Error('groq_api_key not found in app_secrets')
-  _groqKey = data.value
-  return _groqKey!
+async function getGeminiKey(): Promise<string> {
+  if (_geminiKey) return _geminiKey
+  const { data } = await sb.from('app_secrets').select('value').eq('key', 'google_api_key').single()
+  if (!data?.value) throw new Error('google_api_key not found in app_secrets')
+  _geminiKey = data.value
+  return _geminiKey!
 }
 
 function checkRateLimit(): boolean {
   const minute = Math.floor(Date.now() / 60000).toString()
   const count = _rateCounter.get(minute) || 0
-  if (count >= 28) return false // Groq free: 30 RPM
+  if (count >= 14) return false // Gemini free tier é mais apertado que Groq; cache cobre o resto
   _rateCounter.set(minute, count + 1)
   for (const [k] of _rateCounter) { if (k !== minute) _rateCounter.delete(k) }
   return true
 }
 
-async function callGroq(prompt: string, images?: { mime: string; b64: string }[]): Promise<unknown> {
-  const key = await getGroqKey()
-  const model = images ? GROQ_VISION_MODEL : GROQ_MODEL
+// callGemini — formato Google generateContent. Mantém a assinatura (prompt, images?)
+// pra não mexer nos handlers. JSON mode via responseMimeType; visão via inline_data.
+async function callGemini(prompt: string, images?: { mime: string; b64: string }[]): Promise<unknown> {
+  const key = await getGeminiKey()
 
-  const content: unknown[] = [{ type: 'text', text: prompt }]
+  const parts: unknown[] = [{ text: prompt }]
   if (images) {
     for (const img of images) {
-      content.push({ type: 'image_url', image_url: { url: `data:${img.mime};base64,${img.b64}` } })
+      parts.push({ inline_data: { mime_type: img.mime, data: img.b64 } })
     }
   }
 
-  const resp = await fetch(GROQ_URL, {
+  const resp = await fetch(`${GEMINI_URL}?key=${encodeURIComponent(key)}`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${key}`
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model,
-      messages: [{ role: 'user', content: images ? content : prompt }],
-      temperature: images ? 0.3 : 0.7,
-      max_tokens: images ? 800 : 1500,
-      response_format: { type: 'json_object' }
+      contents: [{ role: 'user', parts }],
+      generationConfig: {
+        temperature: images ? 0.3 : 0.7,
+        // Folga alta: gemini-3.1-pro é reasoning-first e gasta tokens "pensando"
+        // antes da saída. Budget baixo truncava (finishReason MAX_TOKENS -> vazio).
+        maxOutputTokens: images ? 2048 : 4096,
+        responseMimeType: 'application/json'
+      }
     }),
-    signal: AbortSignal.timeout(20000)
+    signal: AbortSignal.timeout(30000)
   })
 
   if (!resp.ok) {
     const txt = await resp.text().catch(() => '')
-    throw new Error(`Groq ${resp.status}: ${txt.slice(0, 200)}`)
+    throw new Error(`Gemini ${resp.status}: ${txt.slice(0, 200)}`)
   }
 
   const json = await resp.json()
-  const text = json?.choices?.[0]?.message?.content
-  if (!text) throw new Error('Empty Groq response')
+  // Resposta pode vir bloqueada por safety (sem candidates) ou truncada.
+  const cand = json?.candidates?.[0]
+  const text = cand?.content?.parts?.map((p: { text?: string }) => p.text || '').join('') || ''
+  if (!text) {
+    const reason = cand?.finishReason || json?.promptFeedback?.blockReason || 'sem conteúdo'
+    throw new Error(`Empty Gemini response (${reason})`)
+  }
   return JSON.parse(text)
 }
 
@@ -150,7 +158,7 @@ Dados do vendedor:
 
 Responda APENAS em JSON valido: { "tips": [{ "emoji": "string", "tip": "string" }], "motivational": "string" }`
 
-  const result = await callGroq(prompt)
+  const result = await callGemini(prompt)
   await setCache(tenantId, cacheKey, result, 3600000)
   return result
 }
@@ -213,7 +221,7 @@ Responda APENAS em JSON válido: {
   "score": number (0-100, score geral do turno comparado ao benchmark)
 }`
 
-  const result = await callGroq(prompt)
+  const result = await callGemini(prompt)
   await setCache(tenantId, cacheKey, result, 1800000) // 30min cache
   return result
 }
@@ -271,7 +279,7 @@ EXEMPLO DE BOA RESPOSTA:
 
 Responda APENAS em JSON válido seguindo exatamente o schema acima. Sempre 3 missões: easy + medium + hard.`
 
-  const result = await callGroq(prompt)
+  const result = await callGemini(prompt)
   await setCache(tenantId, cacheKey, result, 21600000) // 6h cache (sugestões diárias)
   return result
 }
@@ -325,7 +333,7 @@ Se dados insuficientes, retorne com headline honesta e arrays vazios + insight e
 
 Responda APENAS em JSON válido seguindo o schema acima.`
 
-  const result = await callGroq(prompt)
+  const result = await callGemini(prompt)
   await setCache(tenantId, cacheKey, result, 7200000) // 2h cache
   return result
 }
@@ -352,7 +360,7 @@ Checklist: ${JSON.stringify(payload.checklist || [])}
 
 Responda APENAS em JSON valido: { "score": number, "positivos": ["string"], "melhorias": ["string"], "resumo": "string" }`
 
-  return await callGroq(prompt, [
+  return await callGemini(prompt, [
     { mime: 'image/jpeg', b64: refB64 },
     { mime: 'image/jpeg', b64: subB64 }
   ])
