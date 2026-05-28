@@ -1064,18 +1064,13 @@ await Promise.all([loadAll(), loadVendedores()]);
 setFirstLoadDone();
 updateTimestamp();
 
-// ─── Refresh countdown (subhead) — 60s loop que triggera refresh suave ───
-(function initRefreshCountdown() {
-  const textEl = document.getElementById('refreshCountdownText');
-  if (!textEl) return;
-
+// ─── Auto-refresh (60s loop, sem display visual) ───
+// Tira o ruido visual do countdown roxo no subhead — o gerente nao precisa
+// saber quando o proximo tick vai rodar, so que os dados estao frescos
+// (a label "Atualizado ha Xs" ja cobre isso).
+(function initAutoRefresh() {
   const PERIOD = 60;
   let counter = PERIOD;
-
-  function render() {
-    textEl.textContent = counter + 's';
-  }
-  render();
 
   setInterval(async () => {
     counter -= 1;
@@ -1085,10 +1080,9 @@ updateTimestamp();
         await loadAll();
         updateTimestamp();
       } catch (_) {
-        /* fail silently, próximo tick tenta de novo */
+        /* fail silently, proximo tick tenta de novo */
       }
     }
-    render();
   }, 1000);
 })();
 
