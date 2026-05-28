@@ -2834,6 +2834,17 @@ textarea.vm-input {
   min-width: 20px;
   text-align: right;
 }
+/* Card de Motivos: o grid (.charts-grid 1fr 1fr) estica o card pra altura do
+   vizinho (Origem dos Clientes, chart-box 300px). Sem isso, donut+legenda
+   ficam presos no topo com vazio embaixo ("desalinhado"). flex column +
+   flex:1 no wrap distribui o espaco livre simetricamente acima/abaixo. */
+.chart-card:has(> .donut-wrap) {
+  display: flex;
+  flex-direction: column;
+}
+.chart-card:has(> .donut-wrap) .donut-wrap {
+  flex: 1;
+}
 @media (max-width: 600px) {
   .donut-wrap {
     flex-direction: column;
