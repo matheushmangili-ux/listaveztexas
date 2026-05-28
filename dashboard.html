@@ -4,12 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Minha Vez — Dashboard</title>
-    <script>
-      (function () {
-        var t = localStorage.getItem('lv-theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', t);
-      })();
-    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -200,15 +194,6 @@
                 <i class="fa-solid fa-calendar-days icon-sm"></i>
               </button>
             </div>
-            <button
-              id="topbarThemeToggle"
-              class="topbar-theme-btn"
-              type="button"
-              aria-label="Alternar tema"
-              title="Alternar dark/light"
-            >
-              <i class="fa-solid fa-moon" id="topbarThemeIcon"></i>
-            </button>
           </div>
         </div>
         <!-- Subhead: tenant + city + last updated + next sync -->
