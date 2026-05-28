@@ -72,17 +72,80 @@
     else renderFlow(area);
   }
 
-  function loadingHtml(msg) {
-    return `<div class="ai-loading-rich">
-      <div class="ai-spinner"></div>
-      <div class="ai-loading-msg">${msg}</div>
-      <div class="ai-loading-sub">Coletando dados reais e processando com IA...</div>
+  // Skeleton no formato do resultado final — sensacao de "ja apareceu, so falta dado".
+  // Substitui o spinner generico por shapes que aproximam o layout que vai entrar.
+  function loadingSkeleton(type) {
+    if (type === 'summary') {
+      return `<div class="ai-skeleton">
+        <div class="ai-skel-headline">
+          <div class="ai-skel-bar ai-skel-text-lg" style="width:70%"></div>
+          <div class="ai-skel-bar ai-skel-score"></div>
+        </div>
+        <div class="ai-skel-cards">
+          <div class="ai-skel-card"></div>
+          <div class="ai-skel-card"></div>
+        </div>
+        <div class="ai-skel-bar ai-skel-action"></div>
+      </div>`;
+    }
+    if (type === 'missions') {
+      return `<div class="ai-skeleton">
+        <div class="ai-skel-bar ai-skel-text-sm" style="width:60%"></div>
+        <div class="ai-skel-missions">
+          <div class="ai-skel-mission"></div>
+          <div class="ai-skel-mission"></div>
+          <div class="ai-skel-mission"></div>
+        </div>
+      </div>`;
+    }
+    // flow
+    return `<div class="ai-skeleton">
+      <div class="ai-skel-headline">
+        <div class="ai-skel-bar ai-skel-text-lg" style="width:60%"></div>
+        <div class="ai-skel-bar ai-skel-tag"></div>
+      </div>
+      <div class="ai-skel-bars">
+        ${[40, 70, 90, 60, 35, 50].map((w) => `<div class="ai-skel-bar ai-skel-flow-bar" style="width:${w}%"></div>`).join('')}
+      </div>
     </div>`;
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  // Anima um numero de 0 ate target (easeOutCubic). Honra reduce-motion.
+  function animateCountUp(el, target, duration) {
+    if (!el) return;
+    if (prefersReducedMotion()) {
+      el.textContent = String(target);
+      return;
+    }
+    const start = performance.now();
+    el.textContent = '0';
+    function tick(now) {
+      const t = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = String(Math.round(target * eased));
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // Anima as barras de fluxo (data-target-width) de 0% -> target via rAF.
+  // A transition: width 0.4s ja existe em .ai-flow-fill no CSS.
+  function animateFlowBars(scope) {
+    if (!scope) return;
+    requestAnimationFrame(() => {
+      scope.querySelectorAll('.ai-flow-fill[data-target-width]').forEach((el) => {
+        el.style.width = el.dataset.targetWidth;
+      });
+    });
   }
 
   // ─── Resumo do Turno (com dados reais) ───
   async function renderSummary(area) {
-    area.innerHTML = loadingHtml('Analisando turno em andamento');
+    area.innerHTML = loadingSkeleton('summary');
 
     try {
       const range = todayRange();
@@ -263,6 +326,9 @@
           }
         </div>
       `;
+
+      // Score num count-up (0 -> r.score em 800ms, easeOutCubic)
+      animateCountUp(area.querySelector('.ai-score-num'), r.score || 0, 800);
     } catch (err) {
       area.innerHTML = `<div class="ai-error-rich">
         <i class="fa-solid fa-circle-exclamation"></i>
@@ -274,7 +340,7 @@
 
   // ─── Sugestão de Missões (com média semanal real) ───
   async function renderMissions(area) {
-    area.innerHTML = loadingHtml('Calibrando missões com base no time');
+    area.innerHTML = loadingSkeleton('missions');
 
     try {
       const wRange = last4WeeksRange();
@@ -377,7 +443,7 @@
 
   // ─── Previsão de Fluxo (com hourly real das últimas 4 semanas) ───
   async function renderFlow(area) {
-    area.innerHTML = loadingHtml('Analisando padrões de fluxo');
+    area.innerHTML = loadingSkeleton('flow');
 
     try {
       const dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -465,7 +531,7 @@
                 const cls = p.type === 'pico' ? 'peak' : p.type === 'vale' ? 'valley' : '';
                 return `<div class="ai-flow-bar-row ${cls}">
                 <span class="ai-flow-hour">${p.hour}h</span>
-                <div class="ai-flow-bar"><div class="ai-flow-fill" style="width:${pct}%"></div></div>
+                <div class="ai-flow-bar"><div class="ai-flow-fill" data-target-width="${pct}%" style="width:0%"></div></div>
                 <span class="ai-flow-val">${p.expected}</span>
               </div>`;
               })
@@ -523,6 +589,9 @@
           }
         </div>
       `;
+
+      // Barras de fluxo: anima largura 0 -> target (transition ja existe no CSS)
+      animateFlowBars(area);
     } catch (err) {
       area.innerHTML = `<div class="ai-error-rich">
         <i class="fa-solid fa-circle-exclamation"></i>

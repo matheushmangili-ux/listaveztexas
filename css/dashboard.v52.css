@@ -3392,6 +3392,155 @@ textarea.vm-input {
   font-variant-numeric: tabular-nums;
 }
 
+/* ─── AI polish: skeleton shimmer, fade-up entrance, stagger ─── */
+@keyframes aiShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+@keyframes aiFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.ai-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 4px 0;
+  animation: aiFadeUp 200ms ease-out both;
+}
+.ai-skel-bar {
+  background: linear-gradient(90deg, var(--bg-elevated) 0%, var(--bg-hover) 50%, var(--bg-elevated) 100%);
+  background-size: 200% 100%;
+  border-radius: 6px;
+  height: 12px;
+  animation: aiShimmer 1.4s linear infinite;
+}
+.ai-skel-headline {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.ai-skel-text-lg {
+  height: 20px;
+  flex: 1;
+}
+.ai-skel-text-sm {
+  height: 14px;
+}
+.ai-skel-score {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+.ai-skel-tag {
+  width: 96px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.ai-skel-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.ai-skel-card {
+  height: 96px;
+  border-radius: 12px;
+}
+.ai-skel-action {
+  height: 56px;
+  border-radius: 10px;
+}
+.ai-skel-missions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.ai-skel-mission {
+  height: 200px;
+  border-radius: 12px;
+}
+.ai-skel-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+.ai-skel-flow-bar {
+  height: 12px;
+  border-radius: 6px;
+}
+@media (max-width: 720px) {
+  .ai-skel-cards,
+  .ai-skel-missions {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Entrance dos resultados */
+.ai-result-rich,
+.ai-missions-rich,
+.ai-context-strip {
+  animation: aiFadeUp 280ms ease-out both;
+}
+.ai-cards-row > .ai-card-rich {
+  animation: aiFadeUp 380ms ease-out both;
+}
+.ai-cards-row > .ai-card-rich:nth-child(1) {
+  animation-delay: 80ms;
+}
+.ai-cards-row > .ai-card-rich:nth-child(2) {
+  animation-delay: 160ms;
+}
+.ai-action {
+  animation: aiFadeUp 380ms ease-out 240ms both;
+}
+.ai-missions-rich > .ai-mission-rich {
+  animation: aiFadeUp 360ms ease-out both;
+}
+.ai-missions-rich > .ai-mission-rich:nth-child(1) {
+  animation-delay: 80ms;
+}
+.ai-missions-rich > .ai-mission-rich:nth-child(2) {
+  animation-delay: 150ms;
+}
+.ai-missions-rich > .ai-mission-rich:nth-child(3) {
+  animation-delay: 220ms;
+}
+.ai-missions-rich > .ai-mission-rich:nth-child(4) {
+  animation-delay: 290ms;
+}
+.ai-missions-rich > .ai-mission-rich:nth-child(5) {
+  animation-delay: 360ms;
+}
+
+/* Reduce-motion: corta animacoes e a transition da barra */
+@media (prefers-reduced-motion: reduce) {
+  .ai-skeleton,
+  .ai-skel-bar,
+  .ai-result-rich,
+  .ai-missions-rich,
+  .ai-context-strip,
+  .ai-cards-row > .ai-card-rich,
+  .ai-action,
+  .ai-missions-rich > .ai-mission-rich {
+    animation: none !important;
+  }
+  .ai-flow-fill {
+    transition: none !important;
+  }
+}
+
 .ai-section-label {
   font-size: 10px;
   font-weight: 800;
