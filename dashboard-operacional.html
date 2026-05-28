@@ -391,6 +391,28 @@
       <script type="module" src="/js/dashboard-vm.js"></script>
       <script type="module" src="/js/dashboard-ai.js"></script>
 
+      <!-- Modal: ampliacao de chart (botao expand em cada chart-card) -->
+      <div
+        class="modal-overlay"
+        id="chartExpandModal"
+        onclick="if (event.target === this) window.closeChartExpand && window.closeChartExpand();"
+      >
+        <div class="modal-box modal-box--lg">
+          <div class="modal-header">
+            <h3 id="chartExpandTitle"><i class="fa-solid fa-chart-pie"></i> Detalhe</h3>
+            <button
+              class="modal-close-btn"
+              type="button"
+              onclick="window.closeChartExpand && window.closeChartExpand()"
+              aria-label="Fechar"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div id="chartExpandBody" class="chart-expand-body"></div>
+        </div>
+      </div>
+
       <!-- Modal IA Assist -->
       <div
         class="modal-overlay"

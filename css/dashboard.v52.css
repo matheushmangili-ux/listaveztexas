@@ -2845,6 +2845,53 @@ textarea.vm-input {
 .chart-card:has(> .donut-wrap) .donut-wrap {
   flex: 1;
 }
+
+/* ─── Click-to-enlarge: botao no card + corpo do modal ─── */
+.chart-card {
+  position: relative;
+}
+.chart-expand-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  z-index: 2;
+  opacity: 0;
+  transition:
+    opacity 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease,
+    transform 100ms ease;
+}
+.chart-card:hover .chart-expand-btn,
+.chart-expand-btn:focus-visible {
+  opacity: 1;
+}
+.chart-expand-btn:hover {
+  color: var(--accent);
+  border-color: var(--border-medium);
+  background: var(--bg-hover);
+}
+.chart-expand-btn:active {
+  transform: scale(0.94);
+}
+.chart-expand-body {
+  padding: 8px 4px 16px;
+  min-height: 540px;
+}
+
 @media (max-width: 600px) {
   .donut-wrap {
     flex-direction: column;

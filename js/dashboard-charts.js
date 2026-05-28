@@ -23,6 +23,7 @@ function lsGetMeta(key, tenantId) {
 // ─── Module-level state ───
 const charts = {};
 const chartTypes = {}; // track rendered type per key to decide reuse vs destroy
+const chartOptions = {}; // ultimas options de cada chart pra re-render no modal de expand
 let _firstLoad = true;
 let _activeChartTab = null;
 
@@ -274,6 +275,16 @@ function renderChart(key, selector, options) {
   const el = document.querySelector(selector);
   if (!el) return null;
   applyChartDefaults(options);
+  // Guarda a config atual pra usar no modal de expand
+  chartOptions[key] = options;
+  // Injeta o botao de expand no chart-card (skip sparklines)
+  if (!options.chart?.sparkline?.enabled) {
+    const card = el.closest('.chart-card');
+    if (card) {
+      const title = card.querySelector('h3')?.textContent?.trim().replace(/\s+/g, ' ') || key;
+      ensureExpandBtn(card, key, title);
+    }
+  }
   const type = options.chart && options.chart.type;
 
   // Fast path: reusa chart existente com mesmo tipo
@@ -309,6 +320,84 @@ function renderChart(key, selector, options) {
     return null;
   }
 }
+
+// ─── Click-to-enlarge: botao no card + modal grande ───
+// Adiciona um icon-button no canto do .chart-card (uma vez por card).
+function ensureExpandBtn(card, key, title) {
+  if (!card || card.querySelector('.chart-expand-btn')) return;
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'chart-expand-btn';
+  btn.setAttribute('aria-label', 'Ampliar grafico');
+  btn.title = 'Ampliar';
+  btn.dataset.key = key;
+  btn.innerHTML = '<i class="fa-solid fa-up-right-and-down-left-from-center"></i>';
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    expandChart(key, title);
+  });
+  card.appendChild(btn);
+}
+
+// Abre o modal grande com o mesmo chart re-renderizado em 520px de altura
+// e legenda visivel. Re-cria instancia (a do card continua viva atras).
+export function expandChart(key, title) {
+  const opts = chartOptions[key];
+  if (!opts) return;
+  const modal = document.getElementById('chartExpandModal');
+  const body = document.getElementById('chartExpandBody');
+  const titleEl = document.getElementById('chartExpandTitle');
+  if (!modal || !body) return;
+  if (titleEl) titleEl.textContent = title || 'Detalhe';
+
+  // Limpa instancia anterior (se houver) antes de re-renderizar
+  if (body._expandedChart) {
+    try {
+      body._expandedChart.destroy();
+    } catch (_) {
+      /* no-op */
+    }
+    body._expandedChart = null;
+  }
+  body.innerHTML = '';
+
+  // Clone shallow + override de chart/legend pro tamanho grande
+  const big = {
+    ...opts,
+    chart: { ...(opts.chart || {}), height: 520, toolbar: { show: false } },
+    legend: { ...(opts.legend || {}), show: true, position: 'bottom' }
+  };
+  // Reseta o tooltip "fixed" do donut (faz sentido no card pequeno, no modal segue cursor)
+  if (big.tooltip?.fixed) big.tooltip = { ...big.tooltip, fixed: { enabled: false } };
+
+  try {
+    const chart = new ApexCharts(body, big);
+    chart.render();
+    body._expandedChart = chart;
+  } catch (err) {
+    console.error('[expandChart:' + key + '] falhou:', err);
+    body.innerHTML =
+      '<div style="padding:40px;text-align:center;color:var(--text-muted)">Nao foi possivel ampliar este grafico.</div>';
+  }
+  modal.classList.add('open');
+}
+window.expandChart = expandChart;
+
+export function closeChartExpand() {
+  const modal = document.getElementById('chartExpandModal');
+  const body = document.getElementById('chartExpandBody');
+  if (body && body._expandedChart) {
+    try {
+      body._expandedChart.destroy();
+    } catch (_) {
+      /* no-op */
+    }
+    body._expandedChart = null;
+    body.innerHTML = '';
+  }
+  if (modal) modal.classList.remove('open');
+}
+window.closeChartExpand = closeChartExpand;
 
 // CountUp animation (first load only)
 export function formatTempo(minutes) {
