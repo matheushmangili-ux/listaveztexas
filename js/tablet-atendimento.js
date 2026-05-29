@@ -1423,6 +1423,10 @@ export async function checkActiveAtendimentos() {
     .order('inicio');
   _ctx.activeAtendimentos = data || [];
   renderActiveAtendimentos();
+  // O conjunto de ativos mudou → re-renderiza a fila pra reaplicar a exclusão
+  // (quem voltou pra fila reaparece; quem entrou em atendimento some). O queueKey
+  // deriva da inQueue (já sem os ativos), então só re-renderiza se mudou de fato.
+  scheduleRender();
 }
 
 // ─── Utility exports for main page ───

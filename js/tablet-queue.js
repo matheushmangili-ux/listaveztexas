@@ -170,8 +170,13 @@ export function renderQueue() {
   const list = _ctx.queueList;
   const allVendedores = _ctx.vendedores || [];
   const setorVendedores = allVendedores.filter((v) => (v.setor || 'loja') === _ctx.currentSetor);
+  // Invariante: quem tem atendimento ATIVO nunca aparece na fila — senão, numa
+  // corrida realtime/optimistic (vendedor já marcado disponivel+posicao no banco
+  // mas atendimento ainda em_andamento, ou double-start), o card duplicava (fila
+  // + em atendimento ao mesmo tempo). O painel de atendimento é a fonte de verdade.
+  const activeVendorIds = new Set((_ctx.activeAtendimentos || []).map((a) => a.vendedor_id));
   const inQueue = setorVendedores
-    .filter((v) => v.status === 'disponivel' && v.posicao_fila != null)
+    .filter((v) => v.status === 'disponivel' && v.posicao_fila != null && !activeVendorIds.has(v.id))
     .sort((a, b) => a.posicao_fila - b.posicao_fila);
   const pausa = setorVendedores.filter((v) => v.status === 'pausa');
 
@@ -337,7 +342,7 @@ export function animateFichaToAtendimento(vendedorId) {
   const sRect = src.getBoundingClientRect();
   const tRect = target.getBoundingClientRect();
   const clone = src.cloneNode(true);
-  clone.style.cssText = `position:fixed;left:${sRect.left}px;top:${sRect.top}px;width:${sRect.width}px;margin:0;z-index:${Z_DRAG_GHOST};pointer-events:none;box-shadow:0 20px 48px rgba(167, 139, 250,.3);border:1px solid rgba(167, 139, 250,.4)`;
+  clone.style.cssText = `position:fixed;left:${sRect.left}px;top:${sRect.top}px;width:${sRect.width}px;margin:0;z-index:${Z_DRAG_GHOST};pointer-events:none;box-shadow:0 20px 48px rgba(168, 177, 255,.3);border:1px solid rgba(168, 177, 255,.4)`;
   document.body.appendChild(clone);
   const tx = tRect.left + 20;
   const ty = tRect.top + 20;
@@ -465,7 +470,7 @@ function initDragAndDrop() {
   dropzone.addEventListener('dragover', (e) => {
     e.preventDefault();
     dropzone.classList.add('dragging');
-    dropzone.style.background = 'rgba(167, 139, 250,.05)';
+    dropzone.style.background = 'rgba(168, 177, 255,.05)';
     const after = getDragAfterElement(dropzone, e.clientY);
     if (after !== _prevDragAfter) {
       clearDragIndicators();
@@ -709,7 +714,7 @@ function onTouchDragStart(e) {
       const elUnder = document.elementFromPoint(t.clientX, t.clientY);
 
       if (elUnder && (elUnder.id === 'queueList' || elUnder.closest('#queueList'))) {
-        queueList.style.background = 'rgba(167, 139, 250,.05)';
+        queueList.style.background = 'rgba(168, 177, 255,.05)';
         footer?.classList.remove('drop-highlight');
         hideFooterDropLabel();
         const after = getDragAfterElement(queueList, t.clientY);
