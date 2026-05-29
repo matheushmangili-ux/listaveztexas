@@ -100,7 +100,7 @@
       70%, 100% { opacity: 1; }
     }
     .caption {
-      font-family: var(--font-mono, 'JetBrains Mono', monospace);
+      font-family: var(--font-mono, 'Inter Tight', sans-serif);
       font-size: 10px;
       letter-spacing: 0.15em;
       text-transform: uppercase;

@@ -898,7 +898,7 @@ export async function loadHourly(range) {
             style: {
               fontSize: '9px',
               fontWeight: 700,
-              fontFamily: "'JetBrains Mono'",
+              fontFamily: "'Inter Tight'",
               color: chartPalette()[0],
               background: isDarkTheme() ? 'rgba(26, 21, 56, 0.95)' : 'rgba(255, 255, 255, 0.95)',
               padding: { left: 8, right: 8, top: 3, bottom: 3 },

@@ -1058,7 +1058,7 @@ showChangelog(APP_CHANGELOG, 'minhavez_dash_update_seen_');
 })();
 
 await populateFilters();
-// Wait for Satoshi font to load before rendering charts
+// Aguarda as fontes carregarem antes de renderizar os charts
 await document.fonts.ready;
 await Promise.all([loadAll(), loadVendedores()]);
 setFirstLoadDone();

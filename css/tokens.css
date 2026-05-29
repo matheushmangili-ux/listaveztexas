@@ -96,7 +96,9 @@
 
   /* Tipografia */
   --font-body: 'Inter Tight', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  /* "mono" agora é o Inter Tight (1 família só — harmonia). Dígitos tabulares
+     vêm de font-feature-settings 'tnum' no body. Nome do token preservado. */
+  --font-mono: 'Inter Tight', system-ui, -apple-system, sans-serif;
   --font-display: 'Inter Tight', system-ui, sans-serif;
 
   /* Radius */
