@@ -16,6 +16,37 @@
   grid-template-columns: 232px 1fr;
   min-height: 100vh;
   --gap: 16px;
+  transition: grid-template-columns 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Sidebar colapsável (rail de ícones) ─── */
+.dash-layout.sidebar-collapsed {
+  grid-template-columns: 64px 1fr;
+}
+/* No rail, some todo o texto — sobra só ícones (+ monograma M na marca) */
+.sidebar-collapsed .sidebar-link span,
+.sidebar-collapsed .sidebar-section-label,
+.sidebar-collapsed .sidebar-chev,
+.sidebar-collapsed .sidebar-dropdown-items,
+.sidebar-collapsed .mv-logo-wordmark {
+  display: none;
+}
+.sidebar-collapsed .dash-sidebar {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+.sidebar-collapsed .sidebar-link {
+  justify-content: center;
+  gap: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+/* chevron do toggle aponta pra direita quando colapsado */
+.sidebar-collapse-btn i {
+  transition: transform 0.2s ease;
+}
+.sidebar-collapsed .sidebar-collapse-btn i {
+  transform: rotate(180deg);
 }
 
 /* ─── Sidebar ─── */

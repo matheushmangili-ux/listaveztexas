@@ -1125,6 +1125,41 @@ window.toggleDashDropdown = function () {
   }
 })();
 
+// ─── Sidebar colapsável (rail de ícones) ───
+function _setCollapseBtnLabel(layout) {
+  const btn = layout.querySelector('.sidebar-collapse-btn');
+  if (!btn) return;
+  const lbl = layout.classList.contains('sidebar-collapsed') ? 'Expandir menu' : 'Recolher menu';
+  btn.setAttribute('aria-label', lbl);
+  btn.title = lbl;
+}
+window.toggleSidebarCollapse = function () {
+  const layout = document.querySelector('.dash-layout');
+  if (!layout) return;
+  layout.classList.toggle('sidebar-collapsed');
+  localStorage.setItem('lv-sidebar-collapsed', layout.classList.contains('sidebar-collapsed') ? '1' : '0');
+  _setCollapseBtnLabel(layout);
+  // ApexCharts precisa reflow após a área principal mudar de largura.
+  setTimeout(() => window.dispatchEvent(new Event('resize')), 240);
+};
+(function initSidebarCollapse() {
+  const layout = document.querySelector('.dash-layout');
+  if (!layout) return;
+  const saved = localStorage.getItem('lv-sidebar-collapsed');
+  // Preferência explícita vence; sem preferência, auto-colapsa em telas estreitas
+  // (resolve o aperto do sidebar fixo em notebook/tablet — antigo M5).
+  if (saved === '1' || (saved === null && window.innerWidth < 1024)) {
+    layout.classList.add('sidebar-collapsed');
+  }
+  _setCollapseBtnLabel(layout);
+  // Tooltips nativos no rail: usa o texto do label de cada item.
+  document.querySelectorAll('.dash-sidebar .sidebar-link').forEach((link) => {
+    if (link.title) return;
+    const label = link.querySelector('span')?.textContent?.trim();
+    if (label) link.title = label;
+  });
+})();
+
 // ─── Section-level collapsibles (Por Vendedor / Operacional) ───
 window.toggleSectionCollapse = function (key) {
   const wrap = document.querySelector('.section-collapse[data-section-key="' + key + '"]');
