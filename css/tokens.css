@@ -226,3 +226,22 @@ mv-loader {
 
 /* :root já é o light theme. Páginas com data-theme="light" explícito caem no
    :root por cascata. Só [data-theme='dark'] precisa de override. */
+
+/* ─── Reduce motion (global) ───
+   tokens.css é o único stylesheet universal: styles.v52.css faz @import dele
+   (cobre dashboard/vendor/tablet/auth/settings) e a landing o linka direto.
+   Por isso o reset global de movimento mora aqui — cobre o app inteiro + a
+   landing num só ponto. Padrão a11y-project: zera animação/transição sem
+   quebrar lógica que depende de transitionend (duração ~0 em vez de none).
+   !important justificado: precisa vencer animações locais pra respeitar a
+   preferência de acessibilidade do usuário. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
