@@ -20,7 +20,7 @@
 }
 
 [data-theme='light'] ::selection {
-  background: rgba(139, 92, 246, 0.25);
+  background: rgba(124, 140, 255, 0.25);
   color: #13082c;
 }
 

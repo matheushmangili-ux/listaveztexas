@@ -1,8 +1,8 @@
 /* ============================================
    minhavez — Design Tokens (single source)
    ============================================
-   Paleta roxa (purple) + dark/light parity.
-   Substitui mint (#aaeec4) → purple (#8b5cf6).
+   Paleta periwinkle (accent #7C8CFF) + brand grafite (#222230) + dark/light parity.
+   Histórico de accent: mint (#aaeec4) → purple (#8b5cf6) → periwinkle (#7C8CFF).
    Nomes de variáveis preservados para não quebrar o sistema existente;
    só os VALORES mudam.
    ============================================ */
@@ -27,30 +27,35 @@
   --text-secondary: #475569;
   --text-muted: #94a3b8;
 
-  /* Brand — purple */
-  --accent: #8b5cf6; /* purple-500 */
-  --accent-bright: #a78bfa; /* purple-400 */
-  --accent-dim: #6d28d9; /* purple-700 */
-  --accent-ink: #ffffff; /* texto sobre bg roxo */
+  /* Brand grafite (handoff) — primária da marca */
+  --brand: #222230;
+  --brand-strong: #15151b;
+  --brand-soft: #414155;
+
+  /* Brand — periwinkle (handoff: accent #7C8CFF / strong #5E6FEE) */
+  --accent: #7c8cff; /* periwinkle-400 */
+  --accent-bright: #a8b1ff; /* periwinkle-300 */
+  --accent-dim: #5e6fee; /* periwinkle-600 (strong) */
+  --accent-ink: #ffffff; /* texto sobre bg accent */
   --ink-on-bright: #060606; /* texto escuro fixo sobre fills saturados (accent/success/warning/danger). Constante nos 2 temas — black passa AA em todos */
 
-  /* Accent ramp (full) */
-  --accent-50: #f5f3ff;
-  --accent-100: #ede9fe;
-  --accent-200: #ddd6fe;
-  --accent-300: #c4b5fd;
-  --accent-400: #a78bfa;
-  --accent-500: #8b5cf6;
-  --accent-600: #7c3aed;
-  --accent-700: #6d28d9;
-  --accent-800: #5b21b6;
-  --accent-900: #4c1d95;
-  --accent-950: #3b0d6b;
+  /* Accent ramp (full) — periwinkle */
+  --accent-50: #eef0ff;
+  --accent-100: #e0e4ff;
+  --accent-200: #c7cdff;
+  --accent-300: #a8b1ff;
+  --accent-400: #7c8cff;
+  --accent-500: #6b7bff;
+  --accent-600: #5e6fee;
+  --accent-700: #4b5ad4;
+  --accent-800: #3e4bae;
+  --accent-900: #353f8c;
+  --accent-950: #20264f;
 
-  /* Gold — alias legado, agora espelha accent */
-  --gold: #8b5cf6;
-  --gold-bright: #a78bfa;
-  --gold-dim: #6d28d9;
+  /* Gold — alias legado, agora espelha accent (periwinkle) */
+  --gold: #7c8cff;
+  --gold-bright: #a8b1ff;
+  --gold-dim: #5e6fee;
 
   /* Status semânticos — cores distintas do accent */
   --success: #22c55e;
@@ -65,12 +70,12 @@
   --info: #3b82f6;
   --info-deep: #2563eb;
   --info-bg: rgba(59, 130, 246, 0.12);
-  --special: #c4b5fd;
-  --special-bg: rgba(196, 181, 253, 0.14);
+  --special: #c7cdff;
+  --special-bg: rgba(199, 205, 255, 0.14);
 
   /* Status disponibilidade (vendedores) — mantém diferenciação visual */
   --status-disponivel: #22c55e;
-  --status-atendendo: #8b5cf6;
+  --status-atendendo: #7c8cff;
   --status-pausa: #f59e0b;
   --status-fora: #71717a;
 
@@ -116,17 +121,17 @@
   --shadow-sm: 0 2px 8px rgba(19, 8, 44, 0.06), 0 1px 2px rgba(19, 8, 44, 0.04);
   --shadow-md: 0 8px 24px rgba(19, 8, 44, 0.08), 0 2px 6px rgba(19, 8, 44, 0.04);
   --shadow-lg: 0 20px 48px rgba(19, 8, 44, 0.12), 0 4px 12px rgba(19, 8, 44, 0.06);
-  --shadow-accent: 0 8px 24px rgba(139, 92, 246, 0.35);
-  --glow-accent: 0 0 0 1px rgba(139, 92, 246, 0.4), 0 8px 32px rgba(139, 92, 246, 0.28);
+  --shadow-accent: 0 8px 24px rgba(124, 140, 255, 0.35);
+  --glow-accent: 0 0 0 1px rgba(124, 140, 255, 0.4), 0 8px 32px rgba(124, 140, 255, 0.28);
 
   /* Gradients */
   --grad-surface: linear-gradient(180deg, var(--bg-elevated), var(--bg-surface));
-  --grad-accent: linear-gradient(135deg, #a78bfa, #6d28d9);
+  --grad-accent: linear-gradient(135deg, #a8b1ff, #5e6fee);
   --grad-success: linear-gradient(135deg, #4ade80, #16a34a);
-  --grad-gold: linear-gradient(135deg, #a78bfa, #6d28d9);
+  --grad-gold: linear-gradient(135deg, #a8b1ff, #5e6fee);
 
   /* Chart palette (qualitativa — Stripe-inspired) */
-  --chart-1: #8b5cf6; /* roxo */
+  --chart-1: #7c8cff; /* periwinkle */
   --chart-2: #0891b2; /* ciano */
   --chart-3: #d97706; /* amber */
   --chart-4: #059669; /* emerald */
@@ -156,24 +161,24 @@
   --text-secondary: #cbd5e1;
   --text-muted: #94a3b8;
 
-  /* Brand — purple (inverte hierarquia: tons mais claros no dark) */
-  --accent: #a78bfa; /* purple-400 */
-  --accent-bright: #c4b5fd; /* purple-300 */
-  --accent-dim: #8b5cf6; /* purple-500 */
-  --accent-ink: #0a0614; /* texto sobre bg roxo claro */
+  /* Brand — periwinkle (inverte hierarquia: tons mais claros no dark) */
+  --accent: #a8b1ff; /* periwinkle-300 */
+  --accent-bright: #c7cdff; /* periwinkle-200 */
+  --accent-dim: #7c8cff; /* periwinkle-400 */
+  --accent-ink: #0a0614; /* texto sobre bg accent claro */
 
-  /* Gold alias */
-  --gold: #a78bfa;
-  --gold-bright: #c4b5fd;
-  --gold-dim: #8b5cf6;
+  /* Gold alias (periwinkle) */
+  --gold: #a8b1ff;
+  --gold-bright: #c7cdff;
+  --gold-dim: #7c8cff;
 
   /* Shadows dark-aware */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  --shadow-accent: 0 8px 24px rgba(167, 139, 250, 0.28);
-  --glow-accent: 0 0 0 1px rgba(167, 139, 250, 0.35), 0 8px 32px rgba(167, 139, 250, 0.28);
+  --shadow-accent: 0 8px 24px rgba(168, 177, 255, 0.28);
+  --glow-accent: 0 0 0 1px rgba(168, 177, 255, 0.35), 0 8px 32px rgba(168, 177, 255, 0.28);
 
   /* Status semânticos — mantêm cor, ganham luminosidade pra dark */
   --success: #4ade80;
@@ -188,22 +193,22 @@
   --info: #60a5fa;
   --info-deep: #3b82f6;
   --info-bg: rgba(96, 165, 250, 0.14);
-  --special: #c4b5fd;
-  --special-bg: rgba(196, 181, 253, 0.14);
+  --special: #c7cdff;
+  --special-bg: rgba(199, 205, 255, 0.14);
 
   /* Status disponibilidade */
   --status-disponivel: #4ade80;
-  --status-atendendo: #a78bfa;
+  --status-atendendo: #a8b1ff;
   --status-pausa: #fbbf24;
   --status-fora: #71717a;
 
   /* Gradients dark */
-  --grad-accent: linear-gradient(135deg, #c4b5fd, #8b5cf6);
+  --grad-accent: linear-gradient(135deg, #c7cdff, #7c8cff);
   --grad-success: linear-gradient(135deg, #86efac, #22c55e);
-  --grad-gold: linear-gradient(135deg, #c4b5fd, #8b5cf6);
+  --grad-gold: linear-gradient(135deg, #c7cdff, #7c8cff);
 
   /* Chart palette dark (tons mais claros pra contraste em bg escuro) */
-  --chart-1: #a78bfa;
+  --chart-1: #a8b1ff;
   --chart-2: #22d3ee;
   --chart-3: #fbbf24;
   --chart-4: #34d399;

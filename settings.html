@@ -18,8 +18,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="theme-color" content="#0a0614" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#6d28d9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#15151b" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#222230" media="(prefers-color-scheme: light)" />
     <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/update-checker.js"></script>
     <script>
@@ -70,7 +70,7 @@
         background: var(--accent);
         color: #fff;
         font-weight: 700;
-        box-shadow: 0 2px 8px rgba(167, 139, 250, 0.3);
+        box-shadow: 0 2px 8px rgba(168, 177, 255, 0.3);
       }
       .settings-tab:hover:not(.active) {
         background: var(--bg-elevated);
@@ -289,9 +289,9 @@
         border: 1px solid rgba(142, 165, 201, 0.2);
       }
       .plan-badge.pro {
-        background: rgba(167, 139, 250, 0.1);
-        color: #a78bfa;
-        border: 1px solid rgba(167, 139, 250, 0.2);
+        background: rgba(168, 177, 255, 0.1);
+        color: #a8b1ff;
+        border: 1px solid rgba(168, 177, 255, 0.2);
       }
       /* URL cards */
       .url-display {
@@ -548,13 +548,13 @@
                   <!-- Picker (mostrado para tenants elite) -->
                   <div id="corPickerWrap" class="color-row" style="display: none">
                     <div class="color-swatch" id="colorSwatch">
-                      <input type="color" id="settColor" value="#a78bfa" />
+                      <input type="color" id="settColor" value="#a8b1ff" />
                     </div>
                     <input
                       id="settColorText"
                       class="input"
                       type="text"
-                      value="#a78bfa"
+                      value="#a8b1ff"
                       maxlength="7"
                       style="max-width: 120px; font-family: var(--font-mono); font-size: 13px"
                     />
@@ -1185,7 +1185,7 @@
 
         // Populate UI
         document.getElementById('settStoreName').value = tenant.nome_loja || '';
-        const color = tenant.cor_primaria || '#a78bfa';
+        const color = tenant.cor_primaria || '#a8b1ff';
         document.getElementById('settColor').value = color;
         document.getElementById('settColorText').value = color;
         document.getElementById('colorSwatch').style.background = color;

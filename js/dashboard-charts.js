@@ -39,15 +39,15 @@ function _cssVar(name, fallback) {
 }
 function chartAccent() {
   return {
-    accent: _cssVar('--accent', '#a78bfa'),
-    accentBright: _cssVar('--accent-bright', '#c4b5fd'),
-    accentDim: _cssVar('--accent-dim', '#8b5cf6')
+    accent: _cssVar('--accent', '#a8b1ff'),
+    accentBright: _cssVar('--accent-bright', '#c7cdff'),
+    accentDim: _cssVar('--accent-dim', '#7c8cff')
   };
 }
 // Paleta categorial (Stripe-style): roxo → ciano → amber → emerald → rose → blue → slate
 function chartPalette() {
   return [
-    _cssVar('--chart-1', '#8b5cf6'),
+    _cssVar('--chart-1', '#7c8cff'),
     _cssVar('--chart-2', '#0891b2'),
     _cssVar('--chart-3', '#d97706'),
     _cssVar('--chart-4', '#059669'),
@@ -87,7 +87,7 @@ const BRAND_PALETTE = {
     return _cssVar('--chart-6', '#1d4ed8');
   },
   get lavender() {
-    return _cssVar('--chart-1', '#a78bfa');
+    return _cssVar('--chart-1', '#a8b1ff');
   },
   neutral: '#94a3b8',
   charcoal: '#2a2a2a'
@@ -1391,7 +1391,7 @@ export async function loadScatter(range, cachedData) {
       yaxis: [
         {
           y: metaConv,
-          borderColor: '#a78bfa',
+          borderColor: '#a8b1ff',
           strokeDashArray: 5,
           opacity: 0.6,
           label: {
@@ -1400,8 +1400,8 @@ export async function loadScatter(range, cachedData) {
               fontSize: '10px',
               fontWeight: 700,
               fontFamily: "'Inter Tight'",
-              background: 'rgba(167, 139, 250,.12)',
-              color: '#a78bfa',
+              background: 'rgba(168, 177, 255,.12)',
+              color: '#a8b1ff',
               padding: { left: 6, right: 6, top: 2, bottom: 2 }
             },
             position: 'right',
@@ -1600,7 +1600,7 @@ export async function loadTrend(range) {
       {
         y: metaConv,
         yAxisIndex: 1,
-        borderColor: 'rgba(167, 139, 250,.25)',
+        borderColor: 'rgba(168, 177, 255,.25)',
         strokeDashArray: 4,
         opacity: 0.5,
         label: {
@@ -1608,8 +1608,8 @@ export async function loadTrend(range) {
           style: {
             fontSize: '9px',
             fontWeight: 600,
-            background: 'rgba(167, 139, 250,.08)',
-            color: '#a78bfa',
+            background: 'rgba(168, 177, 255,.08)',
+            color: '#a8b1ff',
             padding: { left: 4, right: 4, top: 2, bottom: 2 }
           },
           position: 'right',

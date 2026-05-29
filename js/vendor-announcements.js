@@ -13,7 +13,7 @@ let _countdownTimer = null;
 const TYPE_META = {
   comunicado: { icon: 'fa-bullhorn', label: 'Comunicado', color: '#8ea5c9' },
   corrida: { icon: 'fa-flag-checkered', label: 'Corrida', color: '#d4a373' },
-  evento: { icon: 'fa-calendar-day', label: 'Evento', color: '#a78bfa' },
+  evento: { icon: 'fa-calendar-day', label: 'Evento', color: '#a8b1ff' },
   treinamento: { icon: 'fa-graduation-cap', label: 'Treino', color: '#b8a8d4' }
 };
 

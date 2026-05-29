@@ -14,8 +14,8 @@ export const STATUS_CONFIG = {
   disponivel: {
     label: 'Disponível',
     short: 'LIVRE',
-    color: '#a78bfa',
-    bg: 'rgba(167, 139, 250,.1)',
+    color: '#a8b1ff',
+    bg: 'rgba(168, 177, 255,.1)',
     icon: 'fa-circle-check'
   },
   em_atendimento: {
@@ -125,7 +125,7 @@ export function toast(msg, type = 'info', duration = 4000) {
   const container = document.getElementById('toastContainer');
   if (!container) return;
   const tone = {
-    success: { accent: '#8b5cf6', iconBg: 'rgba(167, 139, 250,.18)' },
+    success: { accent: '#7c8cff', iconBg: 'rgba(168, 177, 255,.18)' },
     error: { accent: '#d47a68', iconBg: 'rgba(232,155,138,.18)' },
     warning: { accent: '#b8875a', iconBg: 'rgba(212,163,115,.18)' },
     info: { accent: '#6d85ac', iconBg: 'rgba(142,165,201,.18)' }

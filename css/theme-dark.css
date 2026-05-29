@@ -17,10 +17,10 @@
 }
 
 [data-theme='dark'] .grid-dots-bg {
-  background-image: radial-gradient(rgba(167, 139, 250, 0.08) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(168, 177, 255, 0.08) 1px, transparent 1px);
 }
 
 [data-theme='dark'] ::selection {
-  background: rgba(167, 139, 250, 0.3);
+  background: rgba(168, 177, 255, 0.3);
   color: #f5f0ff;
 }

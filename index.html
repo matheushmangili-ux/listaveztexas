@@ -16,8 +16,8 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon-180.png" />
-    <meta name="theme-color" content="#0a0614" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#6d28d9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#15151b" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#222230" media="(prefers-color-scheme: light)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -64,8 +64,8 @@
         transform: translate(-50%, -50%);
         background: radial-gradient(
           circle,
-          rgba(167, 139, 250, 0.22) 0%,
-          rgba(167, 139, 250, 0.08) 35%,
+          rgba(168, 177, 255, 0.22) 0%,
+          rgba(168, 177, 255, 0.08) 35%,
           transparent 65%
         );
         pointer-events: none;
@@ -82,7 +82,7 @@
         width: 340px;
         height: 340px;
         transform: translate(-50%, -50%);
-        background: radial-gradient(circle, rgba(196, 181, 253, 0.18) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(199, 205, 255, 0.18) 0%, transparent 70%);
         pointer-events: none;
         z-index: 0;
         animation: heroPulse 3.2s ease-in-out infinite alternate;
@@ -117,12 +117,12 @@
         position: absolute;
         width: 2px;
         height: 2px;
-        background: rgba(196, 181, 253, 0.7);
+        background: rgba(199, 205, 255, 0.7);
         border-radius: 50%;
         opacity: 0;
         box-shadow:
-          0 0 6px rgba(167, 139, 250, 0.6),
-          0 0 12px rgba(167, 139, 250, 0.3);
+          0 0 6px rgba(168, 177, 255, 0.6),
+          0 0 12px rgba(168, 177, 255, 0.3);
         animation: particleUp linear infinite;
       }
       @keyframes particleUp {
@@ -149,7 +149,7 @@
         background: var(--bg-card);
         box-shadow:
           0 24px 70px rgba(0, 0, 0, 0.6),
-          0 0 0 1px rgba(167, 139, 250, 0.08);
+          0 0 0 1px rgba(168, 177, 255, 0.08);
         border-radius: 20px;
         border: 1px solid var(--border-subtle);
         padding: 32px;
@@ -159,7 +159,7 @@
         opacity: 1 !important;
       }
       .gold-line {
-        background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.35), transparent);
+        background: linear-gradient(90deg, transparent, rgba(168, 177, 255, 0.35), transparent);
         height: 1px;
       }
       .tab-switch {
@@ -728,11 +728,11 @@
           const r = Math.random();
           if (r > 0.75) {
             p.style.background = 'rgba(255,180,196,.9)';
-            p.style.boxShadow = '0 0 8px rgba(196, 181, 253,.8), 0 0 16px rgba(167, 139, 250,.5)';
+            p.style.boxShadow = '0 0 8px rgba(199, 205, 255,.8), 0 0 16px rgba(168, 177, 255,.5)';
           } else if (r > 0.4) {
-            p.style.background = 'rgba(196, 181, 253,.8)';
+            p.style.background = 'rgba(199, 205, 255,.8)';
           } else {
-            p.style.background = 'rgba(167, 139, 250,.6)';
+            p.style.background = 'rgba(168, 177, 255,.6)';
           }
           c.appendChild(p);
         }
