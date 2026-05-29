@@ -66,7 +66,7 @@
 .ruptura-picker .rp-chip.active {
   background: var(--accent);
   border-color: var(--accent);
-  color: #0d0d0d;
+  color: var(--accent-ink);
   font-weight: 700;
 }
 .ruptura-picker .rp-chip:active {
