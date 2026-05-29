@@ -1142,12 +1142,19 @@ window.toggleSidebarCollapse = function () {
   // ApexCharts precisa reflow após a área principal mudar de largura.
   setTimeout(() => window.dispatchEvent(new Event('resize')), 240);
 };
+function _collapseSidebar(layout, persist) {
+  if (layout.classList.contains('sidebar-collapsed')) return;
+  layout.classList.add('sidebar-collapsed');
+  if (persist) localStorage.setItem('lv-sidebar-collapsed', '1');
+  _setCollapseBtnLabel(layout);
+  setTimeout(() => window.dispatchEvent(new Event('resize')), 240);
+}
 (function initSidebarCollapse() {
   const layout = document.querySelector('.dash-layout');
   if (!layout) return;
   const saved = localStorage.getItem('lv-sidebar-collapsed');
-  // Preferência explícita vence; sem preferência, auto-colapsa em telas estreitas
-  // (resolve o aperto do sidebar fixo em notebook/tablet — antigo M5).
+  // Preferência explícita vence; sem preferência, já começa colapsado em tela
+  // estreita (sidebar fixo apertava notebook/tablet — antigo M5).
   if (saved === '1' || (saved === null && window.innerWidth < 1024)) {
     layout.classList.add('sidebar-collapsed');
   }
@@ -1158,6 +1165,25 @@ window.toggleSidebarCollapse = function () {
     const label = link.querySelector('span')?.textContent?.trim();
     if (label) link.title = label;
   });
+
+  // Auto-colapso "soft": começa expandido e recolhe sozinho após alguns
+  // segundos (mostra o menu, depois tuca pra dar espaço aos gráficos).
+  // NÃO persiste — a cada load mostra-e-recolhe. Pula se: já colapsado, ou
+  // o usuário escolheu explicitamente deixar aberto (saved === '0').
+  const AUTO_COLLAPSE_MS = 4000;
+  if (!layout.classList.contains('sidebar-collapsed') && saved !== '0') {
+    const sidebar = document.querySelector('.dash-sidebar');
+    let timer = setTimeout(() => _collapseSidebar(layout, false), AUTO_COLLAPSE_MS);
+    // Se o usuário estiver mexendo no menu, não recolhe na cara dele.
+    const cancel = () => {
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+    };
+    sidebar?.addEventListener('pointerenter', cancel, { once: true });
+    sidebar?.addEventListener('focusin', cancel, { once: true });
+  }
 })();
 
 // ─── Section-level collapsibles (Por Vendedor / Operacional) ───
