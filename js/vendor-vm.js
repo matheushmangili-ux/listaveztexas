@@ -454,11 +454,18 @@ async function submitExecution(assignmentId, photos, checkStates) {
 
   try {
     const responses = [];
+    const total = photos.length;
+    let idx = 0;
 
     // Upload photos. Cada foto já uploadada é marcada em `p.uploaded` pra
     // evitar re-upload em retry (user clicar Enviar de novo após falha
     // parcial). Sem isso, foto subia duplicada no Storage a cada tentativa.
     for (const p of photos) {
+      idx++;
+      // Progresso por foto — em 3G uma foto de 12MB demora; sem contador o
+      // user acha que travou. Storage não expõe % de bytes, então mostramos
+      // o passo (foto N de M).
+      if (submitBtn) submitBtn.textContent = total > 1 ? `Enviando ${idx}/${total}…` : 'Enviando…';
       if (p.uploaded) {
         responses.push({ photo_url: p.uploaded.url, photo_path: p.uploaded.path, note });
         continue;
@@ -479,6 +486,8 @@ async function submitExecution(assignmentId, photos, checkStates) {
       responses.push({ checklist_item_id: itemId, checked });
     }
 
+    // Fotos no Storage; agora persiste a submissão (passo final, geralmente rápido).
+    if (submitBtn) submitBtn.textContent = 'Finalizando…';
     const { error } = await _sb.rpc('vendor_submit_vm_task', {
       p_assignment_id: assignmentId,
       p_responses: responses
