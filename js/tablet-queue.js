@@ -23,6 +23,7 @@ let _dragDropInitialized = false;
 let _itemObserver = null;
 let _dragRectsCache = null;
 let _dragRectsCacheTime = 0;
+let _renderDeferred = false; // render pedido durante um arraste — flush ao soltar
 
 // Per-item diffing state
 const _queueItemState = new Map(); // id -> { key, node }
@@ -168,6 +169,14 @@ function renderPauseItemHtml(v, motivoColor, motivoLabel) {
 
 export function renderQueue() {
   const list = _ctx.queueList;
+  // Durante um arraste (touch ou mouse) NÃO reconstrói a fila — reconstruir os
+  // nós faz o item arrastado saltar/recriar e trava o gesto. Eventos de realtime
+  // / auto-sync que chegam no meio do drag ficam adiados e renderizam ao soltar.
+  if (touchDragging || draggedId) {
+    _renderDeferred = true;
+    return;
+  }
+  _renderDeferred = false;
   const allVendedores = _ctx.vendedores || [];
   const setorVendedores = allVendedores.filter((v) => (v.setor || 'loja') === _ctx.currentSetor);
   // Invariante: quem tem atendimento ATIVO nunca aparece na fila — senão, numa
@@ -445,6 +454,7 @@ function initDragAndDrop() {
   });
   dropzone.addEventListener('dragend', () => {
     draggedId = null;
+    if (_renderDeferred) scheduleRender(); // flush de render adiado durante o drag
   });
   dropzone.addEventListener(
     'touchstart',
@@ -495,18 +505,20 @@ function initDragAndDrop() {
     clearDragIndicators();
     _prevDragAfter = null;
     if (!draggedId) return;
+    // Limpa ANTES do reorder pra o render dele não ser adiado pela guarda de drag.
+    const dropId = draggedId;
+    draggedId = null;
 
-    const v = _ctx.vendedores.find((x) => x.id === draggedId);
+    const v = _ctx.vendedores.find((x) => x.id === dropId);
     const isInQueue = v && v.status === 'disponivel' && v.posicao_fila != null;
     const afterEl = getDragAfterElement(dropzone, e.clientY);
     const afterId = afterEl?.dataset.id || null;
 
     if (isInQueue) {
-      await reorderInQueue(draggedId, afterId);
+      await reorderInQueue(dropId, afterId);
     } else {
-      await addToQueueAt(draggedId, afterId);
+      await addToQueueAt(dropId, afterId);
     }
-    draggedId = null;
   });
 }
 
