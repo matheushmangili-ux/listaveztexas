@@ -15,7 +15,8 @@
   if (customElements.get('mv-logo')) return;
 
   const SIZES = { S: 24, M: 40, L: 64, XL: 96, XXL: 128 };
-  const WEIGHTS = { light: 8, regular: 12, bold: 16, black: 20 };
+  // stroke-width no viewBox 100 (handoff: 11 = regular). Monograma "M".
+  const WEIGHTS = { light: 9, regular: 11, bold: 13, black: 16 };
 
   class MvLogo extends HTMLElement {
     static get observedAttributes() {
@@ -36,18 +37,20 @@
       const variant = this.getAttribute('variant') || 'default';
       const hasWordmark = this.hasAttribute('wordmark');
 
-      // inverse: força branco puro (para sobrepor imagens/fundos coloridos)
+      // Monograma "M" (handoff). inverse: M branco puro (sobre fundos coloridos).
       const strokeAttr = variant === 'inverse' ? 'stroke="#ffffff"' : 'stroke="currentColor"';
-      // mono: sem gradação de opacidade
-      const op1 = variant === 'mono' ? '1' : '.35';
-      const op2 = variant === 'mono' ? '1' : '.7';
+      // mono: M de cor única (sem perna de acento). default/inverse: perna direita
+      // em periwinkle (conceito "sua vez / movimento").
+      const accentLeg =
+        variant === 'mono'
+          ? ''
+          : `<line x1="78" y1="31" x2="78" y2="73" stroke="var(--accent, #7c8cff)" stroke-width="${weight}"/>`;
 
       const svg = `
-        <svg viewBox="0 0 120 120" width="${size}" height="${size}" aria-label="minhavez" role="img" focusable="false">
-          <g fill="none" ${strokeAttr} stroke-linejoin="miter" stroke-width="${weight}">
-            <path d="M 18 42 L 38 60 L 18 78" opacity="${op1}"/>
-            <path d="M 42 42 L 62 60 L 42 78" opacity="${op2}"/>
-            <path d="M 66 42 L 86 60 L 66 78"/>
+        <svg viewBox="0 0 100 100" width="${size}" height="${size}" aria-label="minhavez" role="img" focusable="false">
+          <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="${weight}">
+            <polyline points="22,74 22,30 50,55 78,30 78,74" ${strokeAttr}/>
+            ${accentLeg}
           </g>
         </svg>
       `;
@@ -57,7 +60,7 @@
         this.innerHTML = `
           <span class="mv-logo-lockup" style="display:inline-flex; align-items:center; gap:${Math.round(size * 0.24)}px;">
             ${svg}
-            <span class="mv-logo-wordmark" style="font-family: 'Inter Tight', system-ui, sans-serif; font-size: ${fontSize}px; font-weight: 500; letter-spacing: -0.045em; line-height: 1;">minha<span style="color: var(--accent, #8b5cf6)">vez</span></span>
+            <span class="mv-logo-wordmark" style="font-family: 'Inter Tight', system-ui, sans-serif; font-size: ${fontSize}px; font-weight: 500; letter-spacing: -0.045em; line-height: 1;">minha<span style="color: var(--accent, #7c8cff)">vez</span></span>
           </span>
         `;
       } else {

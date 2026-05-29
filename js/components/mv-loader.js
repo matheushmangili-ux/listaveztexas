@@ -19,7 +19,7 @@
     :host {
       display: inline-block;
       position: relative;
-      color: var(--accent, #8b5cf6);
+      color: var(--accent, #7c8cff);
     }
     :host([fullscreen]) {
       display: grid;
@@ -42,7 +42,7 @@
       inset: 0;
       pointer-events: none;
       z-index: 0;
-      background: radial-gradient(ellipse at center, color-mix(in srgb, var(--accent, #8b5cf6) 22%, transparent), transparent 55%);
+      background: radial-gradient(ellipse at center, color-mix(in srgb, var(--accent, #7c8cff) 22%, transparent), transparent 55%);
     }
     .particles {
       position: absolute;
@@ -56,9 +56,9 @@
       width: 3px; height: 3px;
       border-radius: 50%;
       opacity: 0;
-      background: var(--accent-bright, #a78bfa);
-      box-shadow: 0 0 8px color-mix(in srgb, var(--accent, #8b5cf6) 80%, transparent),
-                  0 0 14px color-mix(in srgb, var(--accent, #8b5cf6) 40%, transparent);
+      background: var(--accent-bright, #a8b1ff);
+      box-shadow: 0 0 8px color-mix(in srgb, var(--accent, #7c8cff) 80%, transparent),
+                  0 0 14px color-mix(in srgb, var(--accent, #7c8cff) 40%, transparent);
       animation: mv-pt linear infinite;
     }
     @keyframes mv-pt {
@@ -72,19 +72,32 @@
       height: var(--_size, 96px);
       display: block;
     }
-    .mark .c1, .mark .c2, .mark .c3 {
+    .mark .m-stroke {
       fill: none;
       stroke: currentColor;
-      stroke-width: 14;
-      stroke-linejoin: miter;
+      stroke-width: 11;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 170;
+      stroke-dashoffset: 170;
+      animation: mv-draw 2.2s ease-in-out infinite;
     }
-    .mark .c1 { animation: mv-step 2.4s cubic-bezier(.22,.7,.3,1) infinite; }
-    .mark .c2 { animation: mv-step 2.4s cubic-bezier(.22,.7,.3,1) .3s infinite; }
-    .mark .c3 { animation: mv-step 2.4s cubic-bezier(.22,.7,.3,1) .6s infinite; }
-    @keyframes mv-step {
-      0%, 15%  { opacity: .35; }
-      30%, 45% { opacity: .7; }
-      60%, 100%{ opacity: 1; }
+    .mark .m-leg {
+      fill: none;
+      stroke: var(--accent, #7c8cff);
+      stroke-width: 11;
+      stroke-linecap: round;
+      opacity: 0;
+      animation: mv-leg 2.2s ease-in-out infinite;
+    }
+    @keyframes mv-draw {
+      0%   { stroke-dashoffset: 170; }
+      55%  { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: 0; }
+    }
+    @keyframes mv-leg {
+      0%, 45% { opacity: 0; }
+      70%, 100% { opacity: 1; }
     }
     .caption {
       font-family: var(--font-mono, 'JetBrains Mono', monospace);
@@ -95,7 +108,8 @@
       opacity: .75;
     }
     @media (prefers-reduced-motion: reduce) {
-      .mark .c1, .mark .c2, .mark .c3 { animation: none; opacity: 1; }
+      .mark .m-stroke { animation: none; stroke-dashoffset: 0; }
+      .mark .m-leg { animation: none; opacity: 1; }
       .pt { animation: none; opacity: 0; }
     }
   `;
@@ -139,10 +153,9 @@
         <div class="halo"></div>
         <div class="particles">${particles.join('')}</div>
         <div class="stage" style="--_size:${size}px">
-          <svg class="mark" viewBox="0 0 160 120" aria-hidden="true" focusable="false">
-            <path class="c1" d="M 28 42 L 48 60 L 28 78"/>
-            <path class="c2" d="M 60 42 L 80 60 L 60 78"/>
-            <path class="c3" d="M 92 42 L 112 60 L 92 78"/>
+          <svg class="mark" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+            <polyline class="m-stroke" points="22,74 22,30 50,55 78,30 78,74"/>
+            <line class="m-leg" x1="78" y1="31" x2="78" y2="73"/>
           </svg>
           ${caption ? `<div class="caption">${caption}</div>` : ''}
         </div>
