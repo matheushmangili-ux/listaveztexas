@@ -2889,8 +2889,14 @@ textarea.vm-input {
   transform: scale(0.94);
 }
 .chart-expand-body {
-  padding: 8px 4px 16px;
-  min-height: 540px;
+  padding: 8px 4px 4px;
+}
+/* Reserva espaço pro botao de expandir (absolute top-right) em headers de
+   chart-card que tem conteudo a direita (ex: o "X TOTAL" do donut). Sem isso
+   o botao cobre o label. :has(> h3) so casa a linha de header, nao o
+   .donut-wrap nem o .chart-box. */
+.chart-card > div:first-child:has(> h3) {
+  padding-right: 48px;
 }
 
 @media (max-width: 600px) {

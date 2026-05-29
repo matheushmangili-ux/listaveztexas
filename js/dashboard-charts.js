@@ -361,10 +361,14 @@ export function expandChart(key, title) {
   }
   body.innerHTML = '';
 
+  // Altura responsiva ao viewport pra nao estourar o modal (max-height 90vh)
+  // e gerar scroll/corte. Cap em 460 pra nao ficar gigante em telas altas.
+  const vh = window.innerHeight || 800;
+  const bigHeight = Math.max(280, Math.min(460, Math.round(vh * 0.55)));
   // Clone shallow + override de chart/legend pro tamanho grande
   const big = {
     ...opts,
-    chart: { ...(opts.chart || {}), height: 520, toolbar: { show: false } },
+    chart: { ...(opts.chart || {}), height: bigHeight, toolbar: { show: false } },
     legend: { ...(opts.legend || {}), show: true, position: 'bottom' }
   };
   // Reseta o tooltip "fixed" do donut (faz sentido no card pequeno, no modal segue cursor)
