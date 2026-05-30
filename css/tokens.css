@@ -223,7 +223,10 @@
 
 /* ─── Web components defaults ─── */
 mv-logo {
-  color: var(--accent);
+  /* Corpo do "M" e o "minha" herdam currentColor = texto neutro; a perna
+     direita e o "vez" usam var(--accent). Assim o monograma fica DOIS-TONS
+     (neutro + periwinkle de destaque), como no handoff — não tudo numa cor. */
+  color: var(--text-primary);
   display: inline-block;
   line-height: 0;
 }
