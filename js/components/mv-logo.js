@@ -46,8 +46,13 @@
           ? ''
           : `<line x1="78" y1="31" x2="78" y2="73" stroke="var(--accent, #7c8cff)" stroke-width="${weight}"/>`;
 
+      // viewBox JUSTO ao desenho do "M" (com o stroke): tira a margem morta que
+      // fazia o M parecer pequeno e inflava o gap óptico até o wordmark.
+      // No lockup o mark renderiza um pouco menor que `size` pra casar com a
+      // altura do texto; sozinho ocupa o tamanho cheio.
+      const markPx = hasWordmark ? Math.round(size * 0.66) : size;
       const svg = `
-        <svg viewBox="0 0 100 100" width="${size}" height="${size}" aria-label="minhavez" role="img" focusable="false">
+        <svg viewBox="14 16 72 72" width="${markPx}" height="${markPx}" aria-label="minhavez" role="img" focusable="false">
           <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="${weight}">
             <polyline points="22,74 22,30 50,55 78,30 78,74" ${strokeAttr}/>
             ${accentLeg}
@@ -58,9 +63,9 @@
       if (hasWordmark) {
         const fontSize = Math.round(size * 0.56);
         this.innerHTML = `
-          <span class="mv-logo-lockup" style="display:inline-flex; align-items:center; gap:${Math.round(size * 0.24)}px;">
+          <span class="mv-logo-lockup" style="display:inline-flex; align-items:center; gap:${Math.round(size * 0.14)}px;">
             ${svg}
-            <span class="mv-logo-wordmark" style="font-family: 'Inter Tight', system-ui, sans-serif; font-size: ${fontSize}px; font-weight: 500; letter-spacing: -0.045em; line-height: 1;">minha<span style="color: var(--accent, #7c8cff)">vez</span></span>
+            <span class="mv-logo-wordmark" style="font-family: 'Inter Tight', system-ui, sans-serif; font-size: ${fontSize}px; font-weight: 500; letter-spacing: -0.03em; line-height: 1;">minha<span style="color: var(--accent, #7c8cff)">vez</span></span>
           </span>
         `;
       } else {
