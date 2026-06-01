@@ -74,7 +74,10 @@
     }
     .mark .m-stroke {
       fill: none;
-      stroke: currentColor;
+      /* corpo do M neutro (near-white no dark) — a perna direita é que recebe o
+         accent, replicando o dois-tons da <mv-logo>. Antes herdava currentColor
+         (=--accent), deixando o M todo periwinkle e escondendo a perna. */
+      stroke: var(--text-primary, #f8fafc);
       stroke-width: 11;
       stroke-linecap: round;
       stroke-linejoin: round;

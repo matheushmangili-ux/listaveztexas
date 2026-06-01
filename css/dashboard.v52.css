@@ -2518,10 +2518,10 @@ textarea.vm-input {
   font-weight: 600;
 }
 .hero-delta.up {
-  color: var(--chart-4);
+  color: var(--success);
 }
 .hero-delta.down {
-  color: var(--chart-5);
+  color: var(--danger);
 }
 .hero-compare {
   display: flex;
@@ -2626,10 +2626,10 @@ textarea.vm-input {
   color: var(--text-muted);
 }
 .sec-delta.up {
-  color: var(--chart-4);
+  color: var(--success);
 }
 .sec-delta.down {
-  color: var(--chart-5);
+  color: var(--danger);
 }
 .mini-spark {
   width: 64px;

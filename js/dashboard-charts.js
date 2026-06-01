@@ -44,16 +44,17 @@ function chartAccent() {
     accentDim: _cssVar('--accent-dim', '#7c8cff')
   };
 }
-// Paleta categorial (Stripe-style): roxo → ciano → amber → emerald → rose → blue → slate
+// Paleta categorial (arco FRIO): periwinkle → ciano → violeta → teal → azul → índigo → slate.
+// Fallbacks = valores light dos tokens --chart-* (em runtime o token vence e dá dark).
 function chartPalette() {
   return [
     _cssVar('--chart-1', '#7c8cff'),
-    _cssVar('--chart-2', '#0891b2'),
-    _cssVar('--chart-3', '#d97706'),
-    _cssVar('--chart-4', '#059669'),
-    _cssVar('--chart-5', '#db2777'),
-    _cssVar('--chart-6', '#2563eb'),
-    _cssVar('--chart-7', '#64748b')
+    _cssVar('--chart-2', '#06b6d4'),
+    _cssVar('--chart-3', '#8b5cf6'),
+    _cssVar('--chart-4', '#14b8a6'),
+    _cssVar('--chart-5', '#3b82f6'),
+    _cssVar('--chart-6', '#6366f1'),
+    _cssVar('--chart-7', '#94a3b8')
   ];
 }
 
@@ -68,26 +69,29 @@ const BRAND_PALETTE = {
   get mintSoft() {
     return chartAccent().accentBright;
   },
+  // ↓ Aliases SEMÂNTICOS — desacoplados de --chart-* (que agora é só o arco frio
+  // categórico). Apontam pros tokens de status pra "lento/queda/erro" continuarem
+  // vermelhos, "alerta" âmbar e "info" azul — significado, não decoração.
   get coral() {
-    return _cssVar('--chart-5', '#db2777');
+    return _cssVar('--danger', '#ef4444');
   },
   get coralDeep() {
-    return _cssVar('--chart-5', '#be185d');
+    return _cssVar('--danger-deep', '#dc2626');
   },
   get sand() {
-    return _cssVar('--chart-3', '#d97706');
+    return _cssVar('--warning', '#f59e0b');
   },
   get sandDeep() {
-    return _cssVar('--chart-3', '#b45309');
+    return _cssVar('--warning-deep', '#d97706');
   },
   get dusty() {
-    return _cssVar('--chart-6', '#2563eb');
+    return _cssVar('--info', '#3b82f6');
   },
   get dustyDeep() {
-    return _cssVar('--chart-6', '#1d4ed8');
+    return _cssVar('--info-deep', '#2563eb');
   },
   get lavender() {
-    return _cssVar('--chart-1', '#a8b1ff');
+    return _cssVar('--accent-bright', '#a8b1ff');
   },
   neutral: '#94a3b8',
   charcoal: '#2a2a2a'

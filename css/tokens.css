@@ -132,14 +132,18 @@
   --grad-success: linear-gradient(135deg, #4ade80, #16a34a);
   --grad-gold: linear-gradient(135deg, #a8b1ff, #5e6fee);
 
-  /* Chart palette (qualitativa — Stripe-inspired) */
-  --chart-1: #7c8cff; /* periwinkle */
-  --chart-2: #0891b2; /* ciano */
-  --chart-3: #d97706; /* amber */
-  --chart-4: #059669; /* emerald */
-  --chart-5: #db2777; /* rose */
-  --chart-6: #2563eb; /* blue */
-  --chart-7: #64748b; /* slate */
+  /* Chart palette (qualitativa — arco FRIO, harmonizada c/ periwinkle).
+     Violeta→periwinkle→índigo→azul→ciano→teal: tudo "parente" do accent, sem
+     quente (amber/rose) brigando. Ordem otimiza contraste entre vizinhos.
+     Semântica (alta/queda, meta±, semáforo de tempo) NÃO usa esta paleta —
+     usa --success/--warning/--danger/--info direto (ver dashboard-charts.js). */
+  --chart-1: #7c8cff; /* periwinkle (marca) */
+  --chart-2: #06b6d4; /* ciano */
+  --chart-3: #8b5cf6; /* violeta */
+  --chart-4: #14b8a6; /* teal */
+  --chart-5: #3b82f6; /* azul */
+  --chart-6: #6366f1; /* índigo */
+  --chart-7: #94a3b8; /* slate (neutro) */
   --chart-grid: rgba(15, 23, 42, 0.06);
   --chart-axis: rgba(15, 23, 42, 0.4);
 }
@@ -209,14 +213,14 @@
   --grad-success: linear-gradient(135deg, #86efac, #22c55e);
   --grad-gold: linear-gradient(135deg, #c7cdff, #7c8cff);
 
-  /* Chart palette dark (tons mais claros pra contraste em bg escuro) */
-  --chart-1: #a8b1ff;
-  --chart-2: #22d3ee;
-  --chart-3: #fbbf24;
-  --chart-4: #34d399;
-  --chart-5: #f472b6;
-  --chart-6: #60a5fa;
-  --chart-7: #94a3b8;
+  /* Chart palette dark — mesmo arco frio, tons mais claros pra contraste */
+  --chart-1: #a8b1ff; /* periwinkle */
+  --chart-2: #22d3ee; /* ciano */
+  --chart-3: #a78bfa; /* violeta */
+  --chart-4: #2dd4bf; /* teal */
+  --chart-5: #60a5fa; /* azul */
+  --chart-6: #818cf8; /* índigo */
+  --chart-7: #94a3b8; /* slate */
   --chart-grid: rgba(255, 255, 255, 0.06);
   --chart-axis: rgba(255, 255, 255, 0.4);
 }

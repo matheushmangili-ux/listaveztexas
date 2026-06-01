@@ -123,12 +123,13 @@
         --text-muted: var(--text-muted);
         --border: var(--border-subtle);
         --border-strong: var(--border-medium);
-        /* --accent, --accent-deep (antes --accent-dim), coral/sand/dusty vêm dos tokens --chart-* */
+        /* --accent/-deep do accent; coral/sand/dusty são SEMÂNTICOS (erro/alerta/info)
+           — apontam pros tokens de status, não pra --chart-* (que virou arco frio). */
         --accent-deep: var(--accent-dim, #7c8cff);
         --accent-ink: #ffffff;
-        --coral: var(--chart-5);
-        --sand: var(--chart-3);
-        --dusty: var(--chart-6);
+        --coral: var(--danger, #ef4444);
+        --sand: var(--warning, #f59e0b);
+        --dusty: var(--info, #3b82f6);
         --shadow-accent: 0 8px 32px color-mix(in srgb, var(--accent) 28%, transparent);
         --radius: 12px; /* alinhamento com dashboard */
         --radius-lg: 20px;
