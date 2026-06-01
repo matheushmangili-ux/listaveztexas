@@ -600,7 +600,13 @@ window.saveVendedor = async function () {
     if (pin) insertObj.pin = pin;
     const { data: inserted, error } = await sb.from('vendedores').insert(insertObj).select('id').single();
     if (error) {
-      toast('Erro ao cadastrar: ' + error.message, 'error');
+      const isLimit = /LIMITE_PLANO/.test(error.message || '');
+      toast(
+        isLimit
+          ? 'Limite de vendedores do seu plano atingido. Faça upgrade em Configurações pra liberar mais.'
+          : 'Erro ao cadastrar: ' + error.message,
+        isLimit ? 'warning' : 'error'
+      );
       savingVendedor = false;
       return;
     }
@@ -619,7 +625,14 @@ window.saveVendedor = async function () {
 window.toggleVendedor = async function (id, isAtivo) {
   const { error } = await sb.from('vendedores').update({ ativo: !isAtivo }).eq('id', id).eq('tenant_id', tenantId);
   if (error) {
-    toast('Erro: ' + error.message, 'error');
+    // Reativar acima do limite do plano é barrado pelo trigger — traduz o erro.
+    const isLimit = /LIMITE_PLANO/.test(error.message || '');
+    toast(
+      isLimit
+        ? 'Limite de vendedores do seu plano atingido. Faça upgrade em Configurações pra reativar.'
+        : 'Erro: ' + error.message,
+      isLimit ? 'warning' : 'error'
+    );
     return;
   }
   toast(isAtivo ? 'Vendedor desativado' : 'Vendedor ativado', 'success');

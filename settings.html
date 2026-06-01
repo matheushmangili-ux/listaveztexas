@@ -652,9 +652,29 @@
             <div class="settings-section">
               <h2><i class="fa-solid fa-users"></i> Vendedores</h2>
               <div id="vendorMgmtList" class="vendor-mgmt-list"></div>
-              <button class="btn btn-ghost" onclick="openAddVendor()" style="width: 100%; margin-top: 12px">
+              <button
+                id="btnAddVendor"
+                class="btn btn-ghost"
+                onclick="openAddVendor()"
+                style="width: 100%; margin-top: 12px"
+              >
                 <i class="fa-solid fa-user-plus"></i> Adicionar vendedor
               </button>
+              <p
+                id="vendorLimitHint"
+                style="display: none; text-align: center; font-size: 12px; color: var(--text-muted); margin: 8px 0 0"
+              >
+                Limite do plano atingido.
+                <a
+                  href="#"
+                  onclick="
+                    openBillingPortal();
+                    return false;
+                  "
+                  style="color: var(--accent); font-weight: 600"
+                  >Fazer upgrade</a
+                >
+              </p>
             </div>
           </div>
           <!-- /tab-equipe -->
@@ -1346,7 +1366,19 @@
         badge.textContent = plano.charAt(0).toUpperCase() + plano.slice(1);
         badge.className = 'plan-badge ' + plano;
         const max = tenant.max_vendedores || 10;
-        document.getElementById('planVendorCount').textContent = `${vendedores.length} / ${max}`;
+        // Conta só ATIVOS — bate com o que o trigger de limite enforça no banco.
+        const ativos = vendedores.filter((v) => v.ativo !== false).length;
+        document.getElementById('planVendorCount').textContent = `${ativos} / ${max}`;
+        // Gate: no limite, desabilita "Adicionar" e mostra CTA de upgrade.
+        const atLimit = ativos >= max;
+        const addBtn = document.getElementById('btnAddVendor');
+        const hint = document.getElementById('vendorLimitHint');
+        if (addBtn) {
+          addBtn.disabled = atLimit;
+          addBtn.style.opacity = atLimit ? '0.5' : '';
+          addBtn.style.cursor = atLimit ? 'not-allowed' : '';
+        }
+        if (hint) hint.style.display = atLimit ? 'block' : 'none';
       }
 
       // Vendor list
@@ -1460,6 +1492,13 @@
 
       // Add vendor modal
       window.openAddVendor = function () {
+        // Pré-checagem de limite (o trigger no banco é a fronteira real; aqui é UX).
+        const max = tenant.max_vendedores || 10;
+        const ativos = vendedores.filter((v) => v.ativo !== false).length;
+        if (ativos >= max) {
+          toast(`Limite de ${max} vendedores do seu plano atingido. Faça upgrade pra liberar mais.`, 'warning');
+          return;
+        }
         document.getElementById('vendorModalTitle').textContent = 'Adicionar Vendedor';
         document.getElementById('vendorEditId').value = '';
         document.getElementById('vmName').value = '';
@@ -1614,7 +1653,13 @@
           populatePlan();
           closeVendorModal();
         } catch (e) {
-          toast('Erro: ' + e.message, 'error');
+          const isLimit = /LIMITE_PLANO/.test(e.message || '');
+          toast(
+            isLimit
+              ? 'Limite de vendedores do seu plano atingido. Faça upgrade pra liberar mais.'
+              : 'Erro: ' + e.message,
+            isLimit ? 'warning' : 'error'
+          );
         }
 
         btn.disabled = false;
