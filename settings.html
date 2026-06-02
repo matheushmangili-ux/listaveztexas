@@ -226,29 +226,91 @@
         gap: 8px;
       }
       .vendor-mgmt-row {
-        display: grid;
-        grid-template-columns: 1fr 100px 80px 40px;
-        gap: 8px;
+        display: flex;
         align-items: center;
-        padding: 10px 12px;
+        gap: 12px;
+        padding: 12px 14px;
         background: var(--bg-surface);
         border: 1px solid var(--border-subtle);
         border-radius: var(--radius);
+        transition: border-color 0.15s ease;
+      }
+      .vendor-mgmt-row:hover {
+        border-color: var(--border-medium);
+      }
+      .vendor-mgmt-row .vendor-avatar {
+        width: 38px;
+        height: 38px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 15px;
+        text-transform: uppercase;
+        color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 16%, transparent);
+      }
+      .vendor-mgmt-row .vendor-main {
+        flex: 1;
+        min-width: 0;
       }
       .vendor-mgmt-row .vendor-name {
         font-size: 14px;
         font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
-      .vendor-mgmt-row .vendor-sector {
+      .vendor-mgmt-row .vendor-sub {
         font-size: 12px;
         color: var(--text-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
-      .vendor-mgmt-row .vendor-pin {
-        font-family: var(--font-mono);
-        font-size: 13px;
-        color: var(--accent);
-        font-weight: 700;
-        letter-spacing: 2px;
+      .vendor-mgmt-row .vendor-meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+      .vendor-mgmt-row .vendor-chip {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-subtle);
+        padding: 3px 10px;
+        border-radius: 20px;
+        text-transform: capitalize;
+        white-space: nowrap;
+      }
+      .vendor-mgmt-row .vendor-access {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .vendor-mgmt-row .vendor-access .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+      }
+      .vendor-mgmt-row .vendor-access.on {
+        color: var(--success);
+      }
+      .vendor-mgmt-row .vendor-access.on .dot {
+        background: var(--success);
+      }
+      .vendor-mgmt-row .vendor-access.off {
+        color: var(--text-muted);
+      }
+      .vendor-mgmt-row .vendor-access.off .dot {
+        background: var(--text-muted);
       }
       .vendor-mgmt-row .vendor-actions {
         display: flex;
@@ -358,8 +420,8 @@
         margin-top: 24px;
       }
       @media (max-width: 600px) {
-        .vendor-mgmt-row {
-          grid-template-columns: 1fr 1fr;
+        .vendor-mgmt-row .vendor-chip {
+          display: none;
         }
       }
       /* ─── Canais de Origem ─── */
@@ -1389,21 +1451,33 @@
             '<p style="text-align:center;color:var(--text-muted);font-size:13px;padding:20px">Nenhum vendedor cadastrado</p>';
           return;
         }
+        const showAccess = isEliteTenant();
         list.innerHTML = vendedores
           .map((v) => {
             const id = escapeHtml(v.id);
-            const nome = escapeHtml(v.nome);
+            const nome = escapeHtml(v.nome || '—');
             const setor = escapeHtml(v.setor || '—');
+            const apelido = v.apelido && v.apelido !== v.nome ? escapeHtml(v.apelido) : '';
+            const initial = escapeHtml((v.nome || '?').trim().charAt(0).toUpperCase() || '?');
+            const hasAccess = !!v.auth_user_id;
+            const accessBadge = showAccess
+              ? `<span class="vendor-access ${hasAccess ? 'on' : 'off'}" title="${hasAccess ? 'Tem login no app do vendedor' : 'Ainda sem login no app'}">
+            <span class="dot"></span>${hasAccess ? 'App ativo' : 'Sem app'}
+          </span>`
+              : '';
             return `
     <div class="vendor-mgmt-row">
-      <div>
+      <div class="vendor-avatar" aria-hidden="true">${initial}</div>
+      <div class="vendor-main">
         <div class="vendor-name">${nome}</div>
-        <div class="vendor-sector">${setor}</div>
+        ${apelido ? `<div class="vendor-sub">${apelido}</div>` : ''}
       </div>
-      <div class="vendor-sector" style="text-align:center">${setor}</div>
-      <div class="vendor-pin" style="text-align:center">****</div>
-      <div class="vendor-actions">
-        <button onclick="openEditVendor('${id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+      <div class="vendor-meta">
+        <span class="vendor-chip">${setor}</span>
+        ${accessBadge}
+        <div class="vendor-actions">
+          <button onclick="openEditVendor('${id}')" title="Editar" aria-label="Editar ${nome}"><i class="fa-solid fa-pen"></i></button>
+        </div>
       </div>
     </div>
   `;
