@@ -518,6 +518,7 @@ export async function loadAll() {
     ['ranking', loadRanking(range, cachedRanking)],
     ['ruptures', loadRuptures(range)],
     ['ruptureImpact', loadRuptureImpact(range)],
+    ['demand', loadDemandReport(range)],
     ['pauseStats', loadPauseStats(range)],
     ['floor', loadFloor()],
     ['scatter', loadScatter(range, cachedRanking)],
@@ -1129,6 +1130,53 @@ export async function loadRuptureImpact(range) {
           <div style="font-size:10px;color:var(--text-muted)">${sub}</div>
         </div>
         <div class="rupture-count">${r.total_rupturas}</div>
+      </div>`;
+    })
+    .join('');
+}
+
+// ─── Demanda perdida (P1-A) ───
+// "O que os clientes pediram e não fechamos" — produto × motivo × quantidade.
+// Lê get_demand_report (COALESCE produto_desejado, produto_ruptura). Card só
+// existe em dashboard-operacional.html; esconde se não houver dados.
+const DEMAND_MOTIVO_LABELS = {
+  preco: 'Preço',
+  ruptura: 'Ruptura',
+  indecisao: 'Indecisão',
+  so_olhando: 'Só olhando',
+  outro: 'Outro'
+};
+
+export async function loadDemandReport(range) {
+  const sb = _ctx.sb;
+  const card = document.getElementById('demandCard');
+  const list = document.getElementById('demandList');
+  const counter = document.getElementById('demandCount');
+  if (!card || !list) return;
+
+  const { data, error } = await sb.rpc('get_demand_report', {
+    p_inicio: range.start,
+    p_fim: range.end,
+    p_limit: 15
+  });
+  if (error || !data || data.length === 0) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = '';
+  const total = data.reduce((acc, r) => acc + Number(r.total), 0);
+  if (counter) counter.textContent = `${total} ${total === 1 ? 'PEDIDO' : 'PEDIDOS'}`;
+
+  list.innerHTML = data
+    .map((r) => {
+      const motivoLabel = DEMAND_MOTIVO_LABELS[r.motivo] || r.motivo || '—';
+      const noun = Number(r.total) === 1 ? 'vez' : 'vezes';
+      return `<div class="rupture-item">
+        <div>
+          <div style="font-weight:600;font-size:13px">${escapeHtml(r.produto)}</div>
+          <div style="font-size:10px;color:var(--text-muted)">${escapeHtml(motivoLabel)} · ${r.total} ${noun}</div>
+        </div>
+        <div class="rupture-count">${r.total}</div>
       </div>`;
     })
     .join('');

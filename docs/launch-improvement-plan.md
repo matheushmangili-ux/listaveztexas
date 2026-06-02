@@ -128,7 +128,33 @@ estoque** do lojista — forte candidato a diferencial de venda. Item **P1-A**.
 
 ## P1 — Importante (durante o beta / logo após abrir)
 
-### P1-A · Ruptura → Demand Capture (diferencial) ⭐
+### P1-A · Ruptura → Demand Capture (diferencial) ⭐ — ✅ FEITO (2026-06-02)
+
+**Implementado e em produção** (migração `sql/51-demand-capture.sql` aplicada via
+MCP, `demand_capture_p1a`):
+
+- **DB:** `atendimentos.produto_desejado TEXT` + índice parcial
+  `idx_atend_demanda (tenant_id, inicio) WHERE resultado='nao_convertido'`.
+- **RPC:** `finalizar_atendimento` ganhou `p_produto_desejado` (no fim, default
+  NULL → backward-compat; **hook XP preservado**, xp-hook.test verde). Nova
+  `get_demand_report(inicio, fim, motivo, limit)` SECURITY DEFINER, RLS por
+  `get_my_tenant_id()`, retorna `produto × motivo × total`, COALESCE de
+  `produto_desejado`/`produto_ruptura` (ruptura também entra no relatório).
+- **Tablet:** campo opcional "Qual produto o cliente queria?" na folha de motivo
+  pra todos os motivos exceto ruptura (que já tem catálogo). `tablet.html` +
+  `tablet-atendimento.js` (`finalize`/`selectMotivo`/`confirmMotivo`).
+- **Dashboard:** card "Demanda Perdida — O que os Clientes Pediram" em
+  `dashboard-operacional.html` + `loadDemandReport` em `dashboard-charts.js`
+  (esconde se vazio).
+- **Verificado:** lint + 102 testes; lógica do relatório rodada sobre dados reais
+  (produtos de ruptura já aparecem). Card renderizado no harness (harmonia ok).
+- **Follow-up:** captura no **mobile do vendedor** (`vendor_finish_attendance`
+  não foi alterada — segue sem `produto_desejado`; ruptura do vendor ainda entra
+  no relatório via `produto_ruptura`).
+
+---
+
+#### (Especificação original, p/ histórico)
 
 Registrar **produto desejado em todos os motivos de não-conversão** + relatório.
 

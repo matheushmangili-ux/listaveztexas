@@ -1226,7 +1226,7 @@ async function answerContinuar(continuar, count) {
 
 // ─── Finalize atendimento ───
 
-async function finalize(resultado, motivo, detalhe, produto, atendId, valor, continuar, rupturaSel) {
+async function finalize(resultado, motivo, detalhe, produto, atendId, valor, continuar, rupturaSel, produtoDesejado) {
   const id = atendId || pendingAtendimentoId;
   if (!id || _ctx.actionLock) return;
   _ctx.actionLock = true;
@@ -1247,7 +1247,8 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor, con
       p_ruptura_tipo_id: rupturaSel?.tipo_id || null,
       p_ruptura_marca_id: rupturaSel?.marca_id || null,
       p_ruptura_cor_id: rupturaSel?.cor_id || null,
-      p_ruptura_tamanho: rupturaSel?.tamanho || null
+      p_ruptura_tamanho: rupturaSel?.tamanho || null,
+      p_produto_desejado: produtoDesejado || null
     });
     if (error) throw error;
 
@@ -1345,6 +1346,10 @@ function openMotivos() {
     .forEach((o) => o.classList.remove('selected'));
   document.getElementById('rupturaField').style.display = 'none';
   document.getElementById('outroField').style.display = 'none';
+  const desejadoField = document.getElementById('desejadoField');
+  if (desejadoField) desejadoField.style.display = 'none';
+  const desejadoInput = document.getElementById('desejadoInput');
+  if (desejadoInput) desejadoInput.value = '';
   document.getElementById('btnConfirmMotivo').disabled = true;
   pendingOutcome = null;
   resetRupturaSelection();
@@ -1364,6 +1369,10 @@ async function selectMotivo(el) {
   pendingOutcome = el.dataset.motivo;
   document.getElementById('rupturaField').style.display = pendingOutcome === 'ruptura' ? 'block' : 'none';
   document.getElementById('outroField').style.display = pendingOutcome === 'outro' ? 'block' : 'none';
+  // Demanda perdida: produto desejado pra todo motivo menos ruptura (que tem
+  // captura própria via catálogo/produto_ruptura).
+  const desejadoField = document.getElementById('desejadoField');
+  if (desejadoField) desejadoField.style.display = pendingOutcome === 'ruptura' ? 'none' : 'block';
   document.getElementById('btnConfirmMotivo').disabled = false;
 
   if (pendingOutcome === 'ruptura') {
@@ -1401,13 +1410,16 @@ function confirmMotivo() {
     }
   }
   const detalhe = pendingOutcome === 'outro' ? document.getElementById('outroInput').value.trim() : null;
+  // Demanda perdida: produto desejado (todos os motivos exceto ruptura).
+  const produtoDesejado =
+    pendingOutcome !== 'ruptura' ? document.getElementById('desejadoInput')?.value.trim() || null : null;
   const atendId = pendingAtendimentoId;
   const motivoSnap = pendingOutcome;
   closeMotivos();
   askContinuar(
     atendId,
-    () => finalize('nao_convertido', motivoSnap, detalhe, produto, atendId, null, false, rupturaSel),
-    () => finalize('nao_convertido', motivoSnap, detalhe, produto, atendId, null, true, rupturaSel)
+    () => finalize('nao_convertido', motivoSnap, detalhe, produto, atendId, null, false, rupturaSel, produtoDesejado),
+    () => finalize('nao_convertido', motivoSnap, detalhe, produto, atendId, null, true, rupturaSel, produtoDesejado)
   );
 }
 

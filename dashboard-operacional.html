@@ -206,6 +206,41 @@
                 </div>
               </div>
             </div>
+            <div class="chart-card" id="demandCard" style="display: none">
+              <div class="chart-card-header" onclick="toggleSection('demanda')">
+                <h3>
+                  <i class="fa-solid fa-clipboard-question" style="margin-right: 6px; color: var(--accent)"></i>Demanda
+                  Perdida — O que os Clientes Pediram
+                  <span
+                    id="demandCount"
+                    style="
+                      margin-left: 8px;
+                      font-size: 10px;
+                      font-weight: 700;
+                      color: var(--text-muted);
+                      letter-spacing: 0.08em;
+                    "
+                  ></span>
+                </h3>
+                <button
+                  class="collapse-btn"
+                  id="collapseBtn-demanda"
+                  type="button"
+                  aria-label="Recolher/expandir Demanda Perdida"
+                  aria-expanded="true"
+                  aria-controls="collapseBody-demanda"
+                  onclick="
+                    event.stopPropagation();
+                    toggleSection('demanda');
+                  "
+                >
+                  <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                </button>
+              </div>
+              <div class="chart-card-body" id="collapseBody-demanda" style="margin-top: 16px">
+                <div id="demandList"></div>
+              </div>
+            </div>
             <div class="chart-card">
               <div class="chart-card-header" onclick="toggleSection('pausas')">
                 <h3>

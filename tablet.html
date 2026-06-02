@@ -260,6 +260,15 @@
         <input id="outroInput" class="input" type="text" placeholder="Ex: Cliente errou de loja" autocomplete="off" />
       </div>
 
+      <!-- Demanda perdida: produto que o cliente queria (todos os motivos exceto
+           ruptura, que já tem captura própria). Opcional. -->
+      <div id="desejadoField" class="hidden mt-16">
+        <label class="block fs-13 fw-700 text-muted uppercase mb-4 tracking-tight"
+          >Qual produto o cliente queria? (opcional)</label
+        >
+        <input id="desejadoInput" class="input" type="text" placeholder="Ex: Bota Ariat 42" autocomplete="off" />
+      </div>
+
       <button class="btn btn-danger btn-confirm-motivo" id="btnConfirmMotivo" onclick="confirmMotivo()" disabled>
         <i class="fa-solid fa-check"></i>
         Confirmar
