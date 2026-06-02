@@ -297,7 +297,7 @@ function isUnlocked(req) {
 // ─── Header avatar rendering ───
 function renderHeaderAvatar() {
   const el = document.getElementById('headerAvatar');
-  if (!el) return;
+  if (!el || !_ctx) return;
   const url = buildAvatarUrl(_ctx.avatar_config);
   if (url) {
     el.innerHTML = `<img src="${esc(url)}" alt="Avatar">`;
@@ -358,10 +358,17 @@ async function saveAvatar() {
   }
 
   try {
+    if (!_sb) throw new Error('Sessão expirada. Recarregue o app e tente de novo.');
     const { error } = await _sb.rpc('vendor_save_avatar', { p_config: _currentConfig });
     if (error) throw error;
-    _ctx.avatar_config = { ..._currentConfig };
-    renderHeaderAvatar();
+    if (_ctx) _ctx.avatar_config = { ..._currentConfig };
+    // O re-render do header NÃO pode derrubar o sucesso do save: se ele falhar,
+    // o avatar já foi persistido. Por isso fica num try próprio.
+    try {
+      renderHeaderAvatar();
+    } catch (e) {
+      console.warn('[avatar] render pós-save falhou (avatar já salvo):', e);
+    }
     closeEditor();
     window._vendorToast?.('Avatar salvo!', 'success');
   } catch (err) {
