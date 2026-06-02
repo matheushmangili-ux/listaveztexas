@@ -378,8 +378,13 @@
 }
 /* ─── Action Cards (header: Ranking + Iniciar/Encerrar) ─── */
 .action-card {
+  /* border-box: sem isto, o turno-card (que é <div>, content-box) somava o
+     padding na altura e ficava ~19px mais alto que o Ranking (<button>,
+     border-box). Agora os dois respeitam min-height 40 igualmente. */
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
   padding: 9px 16px;
   border-radius: var(--radius-sm);
