@@ -176,11 +176,23 @@ Registrar **produto desejado em todos os motivos de não-conversão** + relatór
 - **Aceite:** recepção registra "cliente queria Bota Ariat 42" num atendimento
   perdido por preço, e o lojista vê isso agregado no dashboard.
 
-### P1-B · Deploy do `ai-assist` (Gemini) + ligar Dicas IA
+### P1-B · ~~Deploy do `ai-assist` (Gemini) + ligar Dicas IA~~ — ✅ JÁ NO AR (premissa desatualizada)
 
-- Configurar `google_api_key` em `app_secrets`, deployar a function, remover a
-  flag de P0-3. (Trabalho já codado e parqueado.)
-- **Esforço:** Pequeno (deploy + chave) — precisa de aprovação pra mexer em prod.
+Auditado em 2026-06-02: o item está **obsoleto**. A realidade em produção:
+
+- O `ai-assist` **já está deployado** (`v12`, ACTIVE) e usa **Groq** (Llama 3.3
+  70B, free tier) lendo `groq_api_key` de `app_secrets` — **não** Gemini. A
+  "migração pro Gemini" foi parqueada e não é necessária (Groq funciona e é free).
+- **Funciona em produção**: `ai_cache` tem 23 linhas (11 das últimas 2 semanas,
+  última expiração 2026-06-01) cobrindo as 4 features (turno-summary, vendor-tips,
+  mission-suggestions, flow-prediction). Logo a chave está configurada e o Groq
+  responde.
+- **Sem flag escondendo**: dashboard (`dashboard-ai.js`) e vendor
+  (`vendor-home.js` `onAiTips`) chamam `callAI` direto, sem gate de plano/flag;
+  degradam pra "IA indisponível" se a função falhar. A função do repo
+  (`supabase/functions/ai-assist/index.ts`) está em sync com a v12 (sem drift).
+- **Conclusão:** nada a fazer. Se um dia quiser trocar Groq→Gemini, é tarefa
+  separada e opcional.
 
 ### P1-C · Painel admin de VM Missions
 
