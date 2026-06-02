@@ -78,10 +78,16 @@
 
 ## Higiene de infra
 
-- **R9 · `vendor-onboard` (drift):** função deployada em produção (`v5`) que
-  **não existe no repo**. Tem metadados diferentes do `create-vendor-auth` (não
-  seta `user_role`/`tenant_users`). Decisão: **deletar** (o caminho oficial é
-  `create-vendor-auth`) ou versionar a fonte no repo. Não usar até decidir.
+- **R9 · `vendor-onboard` (drift): ✅ RESOLVIDO (2026-06-02).** Era uma função
+  deployada solta em produção (`v5`) que **não existia no repo**, com metadados
+  divergentes do `create-vendor-auth` (criava o auth user **sem** `user_role` e
+  **sem** `tenant_users` → logins de vendedor quebrados). Verificado por grep:
+  **nenhuma UI a chamava** (o único caminho é `create-vendor-auth` em
+  `settings.html`). Como o MCP não tem `delete_edge_function`, a decisão foi
+  **versionar + neutralizar**: criado `supabase/functions/vendor-onboard/index.ts`
+  como tombstone que responde **410 Gone** (`code: DEPRECATED`) e redeploy via MCP
+  (`v6`). Confirmado por curl: `410`. Footgun eliminado e função deixou de ser
+  fantasma. Caminho oficial segue `create-vendor-auth`.
 
 ---
 
