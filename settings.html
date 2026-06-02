@@ -1299,11 +1299,17 @@
         if (tenantData) tenant = tenantData;
 
         // Load vendors
-        const { data: vData } = await sb
+        const { data: vData, error: vErr } = await sb
           .from('vendedores')
           .select(VENDOR_SETTINGS_COLUMNS)
           .eq('tenant_id', tenantId)
           .order('posicao_fila');
+        if (vErr) {
+          // Não esconder erro de carga como "lista vazia" — surfaça (já nos custou
+          // um susto com a coluna telefone sem GRANT retornando 403).
+          console.error('[settings] falha ao carregar vendedores:', vErr);
+          toast('Erro ao carregar vendedores: ' + (vErr.message || 'recarregue a página'), 'error');
+        }
         vendedores = vData || [];
 
         // Populate UI
