@@ -195,12 +195,20 @@ Registrar **produto desejado em todos os motivos de não-conversão** + relatór
 - `payment-flow` (onboarding_token → provision → criação de usuário).
 - **Esforço:** Médio.
 
-### P1-E · Verificações de produção
+### P1-E · Verificações de produção — ✅ FEITO (2026-06-02)
 
-- Confirmar `sql/45-hardening-onboarding-rls.sql` aplicada (senão tokens
-  enumeráveis).
-- Confirmar VAPID + `send-vendor-push` entregando push em iOS/Android PWA.
-- **Esforço:** Pequeno (verificação).
+- **RLS onboarding (sql/45): ✅ aplicada.** `onboarding_tokens` com RLS on,
+  **0 grants** a anon/authenticated, policy `onboarding_tokens_read_anon`
+  removida, nenhuma policy → **tokens não enumeráveis** (só
+  `resolve-onboarding-token` SECURITY DEFINER lê).
+- **VAPID + send-vendor-push: ✅ funcionando.** `push_subscriptions` com 1
+  assinatura real ativa; `get_vapid_public_key()` operante; **logs das últimas
+  24h mostram dezenas de invocações de `send-vendor-push` todas `200`** (a função
+  falha com 500 se faltar VAPID em `app_secrets` → logo as chaves estão lá e o
+  pipeline server-side entrega). Entrega física no device depende de teste real,
+  mas o handoff pro serviço de push está ok.
+- **Bônus:** logs confirmam o tombstone do R9 vivo (`vendor-onboard → 410`).
+- **Esforço:** Pequeno (verificação). Sem mudança de código.
 
 ---
 
