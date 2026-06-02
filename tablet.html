@@ -250,7 +250,14 @@
              até a integração do picker estruturado (ruptura v2) ser concluída. -->
         <div id="rupturaInputWrap" style="display: block">
           <label class="block fs-13 fw-700 text-muted uppercase mb-4 tracking-tight">Qual produto?</label>
-          <input id="rupturaInput" class="input" type="text" placeholder="Ex: Chapéu Pralana 6X" autocomplete="off" />
+          <input
+            id="rupturaInput"
+            class="input"
+            type="text"
+            placeholder="Ex: Chapéu Pralana 6X"
+            autocomplete="off"
+            list="produtoSugestoes"
+          />
         </div>
       </div>
 
@@ -266,8 +273,21 @@
         <label class="block fs-13 fw-700 text-muted uppercase mb-4 tracking-tight"
           >Qual produto o cliente queria? (opcional)</label
         >
-        <input id="desejadoInput" class="input" type="text" placeholder="Ex: Bota Ariat 42" autocomplete="off" />
+        <input
+          id="desejadoInput"
+          class="input"
+          type="text"
+          placeholder="Ex: Bota Ariat 42"
+          autocomplete="off"
+          list="produtoSugestoes"
+        />
+        <div id="desejadoHint" class="fs-12 text-muted mt-4" style="display: none">
+          📦 Vira relatório de compra — anote o que ele procurava.
+        </div>
       </div>
+
+      <!-- Autocomplete compartilhado: produtos que a loja já registrou -->
+      <datalist id="produtoSugestoes"></datalist>
 
       <button class="btn btn-danger btn-confirm-motivo" id="btnConfirmMotivo" onclick="confirmMotivo()" disabled>
         <i class="fa-solid fa-check"></i>

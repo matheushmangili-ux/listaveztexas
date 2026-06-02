@@ -350,7 +350,14 @@
       <h3 class="vendor-sheet-title">O que o cliente procurava?</h3>
       <label class="vendor-field">
         <span class="vendor-field-label">Produto desejado (opcional)</span>
-        <input type="text" id="vendorDesejadoInput" autocomplete="off" placeholder="Ex: Bota Ariat 42" />
+        <input
+          type="text"
+          id="vendorDesejadoInput"
+          autocomplete="off"
+          placeholder="Ex: Bota Ariat 42"
+          list="vendorProdutoSugestoes"
+        />
+        <datalist id="vendorProdutoSugestoes"></datalist>
       </label>
       <button type="button" class="vendor-btn-primary" id="btnDemandConfirm">
         <i class="fa-solid fa-check"></i> Finalizar

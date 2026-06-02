@@ -1337,9 +1337,34 @@ async function finalize(resultado, motivo, detalhe, produto, atendId, valor, con
 
 // ─── Motivos bottom sheet ───
 
+// ─── Demanda perdida: normalização + autocomplete ───
+function normalizeProduto(s) {
+  return (s || '').trim().replace(/\s+/g, ' ') || null;
+}
+let _produtoSugestoesLoaded = false;
+async function loadProdutoSugestoes() {
+  if (_produtoSugestoesLoaded) return;
+  _produtoSugestoesLoaded = true;
+  const dl = document.getElementById('produtoSugestoes');
+  if (!dl) return;
+  try {
+    const { data, error } = await _ctx.sb.rpc('get_demand_suggestions', { p_limit: 60 });
+    if (error || !data) return;
+    const esc = (s) =>
+      String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    dl.innerHTML = data
+      .filter((r) => r.produto)
+      .map((r) => `<option value="${esc(r.produto)}"></option>`)
+      .join('');
+  } catch (_e) {
+    _produtoSugestoesLoaded = false; // permite tentar de novo na próxima abertura
+  }
+}
+
 function openMotivos() {
   document.getElementById('motivoOverlay').classList.add('open');
   document.getElementById('motivoSheet').classList.add('open');
+  loadProdutoSugestoes();
   document
     .getElementById('motivoList')
     ?.querySelectorAll('.motivo-option')
@@ -1350,6 +1375,8 @@ function openMotivos() {
   if (desejadoField) desejadoField.style.display = 'none';
   const desejadoInput = document.getElementById('desejadoInput');
   if (desejadoInput) desejadoInput.value = '';
+  const desejadoHint = document.getElementById('desejadoHint');
+  if (desejadoHint) desejadoHint.style.display = 'none';
   document.getElementById('btnConfirmMotivo').disabled = true;
   pendingOutcome = null;
   resetRupturaSelection();
@@ -1373,6 +1400,12 @@ async function selectMotivo(el) {
   // captura própria via catálogo/produto_ruptura).
   const desejadoField = document.getElementById('desejadoField');
   if (desejadoField) desejadoField.style.display = pendingOutcome === 'ruptura' ? 'none' : 'block';
+  // Nudge nos motivos de alta intenção (preço/indecisão): destaca + foca o campo
+  // de produto — é onde a demanda perdida vale ouro pra decisão de compra.
+  const highIntent = pendingOutcome === 'preco' || pendingOutcome === 'indecisao';
+  const desejadoHint = document.getElementById('desejadoHint');
+  if (desejadoHint) desejadoHint.style.display = highIntent ? 'block' : 'none';
+  if (highIntent) setTimeout(() => document.getElementById('desejadoInput')?.focus(), 50);
   document.getElementById('btnConfirmMotivo').disabled = false;
 
   if (pendingOutcome === 'ruptura') {
@@ -1406,13 +1439,13 @@ function confirmMotivo() {
       rupturaSel = getRupturaSelection();
       produto = rupturaSelectionToText(); // representação legível (backward compat com produto_ruptura TEXT)
     } else {
-      produto = document.getElementById('rupturaInput').value.trim() || null;
+      produto = normalizeProduto(document.getElementById('rupturaInput').value);
     }
   }
   const detalhe = pendingOutcome === 'outro' ? document.getElementById('outroInput').value.trim() : null;
-  // Demanda perdida: produto desejado (todos os motivos exceto ruptura).
+  // Demanda perdida: produto desejado (todos os motivos exceto ruptura), normalizado.
   const produtoDesejado =
-    pendingOutcome !== 'ruptura' ? document.getElementById('desejadoInput')?.value.trim() || null : null;
+    pendingOutcome !== 'ruptura' ? normalizeProduto(document.getElementById('desejadoInput')?.value) : null;
   const atendId = pendingAtendimentoId;
   const motivoSnap = pendingOutcome;
   closeMotivos();

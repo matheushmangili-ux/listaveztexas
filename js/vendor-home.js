@@ -510,7 +510,7 @@ function wireActions() {
   // Demand sheet (produto desejado na não-conversão)
   el.demandOverlay?.addEventListener('click', closeAllSheets);
   document.getElementById('btnDemandConfirm')?.addEventListener('click', () => {
-    onFinishAttendance('nao_convertido', el.demandInput?.value.trim() || null);
+    onFinishAttendance('nao_convertido', normalizeProduto(el.demandInput?.value));
   });
   document.getElementById('btnDemandSkip')?.addEventListener('click', () => {
     onFinishAttendance('nao_convertido', null);
@@ -571,10 +571,35 @@ function openOutcomeSheet() {
   el.outcomeSheet.classList.remove('hidden');
 }
 
+// Demanda perdida: normalização + autocomplete (produtos que a loja já registrou)
+function normalizeProduto(s) {
+  return (s || '').trim().replace(/\s+/g, ' ') || null;
+}
+let _vendorSugestoesLoaded = false;
+async function loadVendorProdutoSugestoes() {
+  if (_vendorSugestoesLoaded) return;
+  _vendorSugestoesLoaded = true;
+  const dl = document.getElementById('vendorProdutoSugestoes');
+  if (!dl || !_sb) return;
+  try {
+    const { data, error } = await _sb.rpc('get_demand_suggestions', { p_limit: 60 });
+    if (error || !data) return;
+    const esc = (s) =>
+      String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    dl.innerHTML = data
+      .filter((r) => r.produto)
+      .map((r) => `<option value="${esc(r.produto)}"></option>`)
+      .join('');
+  } catch (_e) {
+    _vendorSugestoesLoaded = false;
+  }
+}
+
 function openDemandSheet() {
   el.outcomeOverlay.classList.add('hidden');
   el.outcomeSheet.classList.add('hidden');
   if (el.demandInput) el.demandInput.value = '';
+  loadVendorProdutoSugestoes();
   el.demandOverlay.classList.remove('hidden');
   el.demandSheet.classList.remove('hidden');
 }
