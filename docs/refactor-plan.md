@@ -57,6 +57,23 @@
 - **Risco:** MÉDIO — cascata CSS é traiçoeira; precisa render before/after
   (harness) nas 4 superfícies. Fazer um seletor por vez, verificando.
 
+- **✅ Feito (2026-06-02) — fatia verificada:** `.t-header-kpi-value` (estava em
+  **4** blocos: base + modernization v2 + grupo tabular-nums + bloco "weight
+  700→600") e `.t-header-kpi-label` (2 blocos) **fundidos no bloco base** do
+  `tablet.v52.css`. Confirmado no harness de preview que o computed style
+  (color, font, weight 600, letter-spacing, tabular-nums, opacity) ficou
+  **byte-idêntico** antes/depois (`diff: {}`).
+- **Pendente (próxima sessão, com calma):** dissolver o resto das camadas
+  `MODERNIZATION LAYER v2/v3` em `tablet.v52.css` (1959–2296),
+  `dashboard.v52.css` (2300–2989) e `vendor.v52.css` (3316–3719). NÃO é um
+  "merge cego": a análise (seletores definidos 3–4× por arquivo: `.t-header`,
+  `.service-panel`, `.ranking-card`, `.kpi-value`, `.queue-item`, `.btn`,
+  `.input`, etc.) mistura **overrides reais** com **variantes legítimas**
+  (`@media`, `[data-theme='light']`, `:hover`). Cada seletor precisa: separar
+  contexto (at-rule/tema/estado) → calcular cascata final → merge → verificar
+  before/after por tema E por breakpoint. Alto trabalho, baixo ganho perto do
+  launch — adiado de propósito.
+
 ---
 
 ## P2 — Baixo valor / cosmético (quando sobrar tempo)

@@ -147,19 +147,24 @@
 .t-header-kpi + .t-header-kpi {
   border-left: 1px solid var(--border-subtle);
 }
+/* R3: bloco único — valores finais já incluem o que as antigas "modernization
+   layers" re-tocavam (tabular-nums, letter-spacing, weight 600, opacity). */
 .t-header-kpi-value {
   color: var(--text-primary);
   font-size: 17px;
   font-family: var(--font-mono);
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
 }
 .t-header-kpi-label {
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   color: var(--text-muted);
+  opacity: 0.7;
 }
 /* Conversão: barra fina como "underline" do bloco (não um elemento avulso ao
    lado que engordava só esse KPI). Cor vem do JS (semântica por faixa). */
@@ -1961,14 +1966,7 @@
   background: var(--bg-card);
   border-bottom-color: rgba(255, 255, 255, 0.06);
 }
-.t-header-kpi-value {
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
-}
-.t-header-kpi-label {
-  letter-spacing: 0.1em;
-  opacity: 0.7;
-}
+/* R3: .t-header-kpi-value/-label desta camada foram fundidos no bloco base. */
 
 /* Queue items — micro-lift + sombra premium */
 .queue-item {
@@ -2129,7 +2127,6 @@
 }
 .timer-display,
 .atend-timer,
-.t-header-kpi-value,
 .footer-title-count,
 .currency-wrap input {
   font-variant-numeric: tabular-nums;
@@ -2251,12 +2248,7 @@
     0 4px 12px rgba(15, 23, 42, 0.1);
 }
 
-/* Typography weight 700\u2192600 (labels/values) com letter-spacing pro dashboard-feel */
-.t-header-kpi-value {
-  color: var(--text-primary);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
+/* Typography weight 700\u2192600 nos nomes (R3: .t-header-kpi-value fundido no base). */
 .queue-item-name,
 .fc-name,
 .atend-name {
