@@ -5,6 +5,7 @@
 
 import { getSupabase } from '/js/supabase-config.js';
 import { renderState } from '/js/ui.js';
+import { escapeHtml, toast } from '/js/utils.js';
 
 const sb = getSupabase();
 
@@ -50,7 +51,7 @@ function renderSuggestions() {
     (s, i) => `
     <button type="button" data-suggest="${i}" style="padding:10px;background:var(--surface);border:1px solid var(--border-subtle);border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;text-align:left">
       <i class="fa-solid ${s.icon}" style="color:var(--success)"></i>
-      <span>${esc(s.title)}<br><span style="font-size:10px;color:var(--text-muted);font-weight:400">${s.reward_xp} XP</span></span>
+      <span>${escapeHtml(s.title)}<br><span style="font-size:10px;color:var(--text-muted);font-weight:400">${s.reward_xp} XP</span></span>
     </button>
   `
   ).join('');
@@ -191,8 +192,8 @@ function renderItem(m) {
       <div style="display:flex;align-items:start;gap:10px;justify-content:space-between">
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-            <i class="fa-solid ${esc(m.icon || 'fa-bullseye')}" style="color:var(--success)"></i>
-            <strong style="font-size:13px;color:var(--text)">${esc(m.title)}</strong>
+            <i class="fa-solid ${escapeHtml(m.icon || 'fa-bullseye')}" style="color:var(--success)"></i>
+            <strong style="font-size:13px;color:var(--text)">${escapeHtml(m.title)}</strong>
             ${!m.active ? '<span style="font-size:9px;font-weight:800;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase">INATIVA</span>' : ''}
           </div>
           <div style="font-size:11px;color:var(--text-muted)">${goalLabel}: ${m.goal_value} · Recompensa: ${m.reward_xp} XP</div>
@@ -214,31 +215,6 @@ function showError(msg) {
     box.style.display = 'none';
     return;
   }
-  box.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="margin-right:6px"></i>' + esc(msg);
+  box.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="margin-right:6px"></i>' + escapeHtml(msg);
   box.style.display = 'block';
-}
-
-function esc(s) {
-  return String(s || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-function toast(msg, kind) {
-  if (typeof window.showToast === 'function') {
-    window.showToast(msg, kind);
-    return;
-  }
-  const c = document.getElementById('toastContainer');
-  if (!c) {
-    alert(msg);
-    return;
-  }
-  const el = document.createElement('div');
-  el.textContent = msg;
-  el.style.cssText = `background:${kind === 'error' ? 'var(--danger)' : 'var(--success)'};color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;margin-top:8px;box-shadow:0 4px 12px rgba(0,0,0,0.2)`;
-  c.appendChild(el);
-  setTimeout(() => el.remove(), 3500);
 }

@@ -4,6 +4,7 @@
 // ============================================
 
 import { getSupabase } from '/js/supabase-config.js';
+import { escapeHtml, toast } from '/js/utils.js';
 
 const sb = getSupabase();
 const DEFAULTS = {
@@ -121,29 +122,4 @@ function showError(msg) {
   }
   box.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="margin-right:6px"></i>' + escapeHtml(msg);
   box.style.display = 'block';
-}
-
-function escapeHtml(s) {
-  return String(s || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-function toast(msg, kind) {
-  if (typeof window.showToast === 'function') {
-    window.showToast(msg, kind);
-    return;
-  }
-  const c = document.getElementById('toastContainer');
-  if (!c) {
-    alert(msg);
-    return;
-  }
-  const el = document.createElement('div');
-  el.textContent = msg;
-  el.style.cssText = `background:${kind === 'error' ? 'var(--danger)' : 'var(--success)'};color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;margin-top:8px;box-shadow:0 4px 12px rgba(0,0,0,0.2)`;
-  c.appendChild(el);
-  setTimeout(() => el.remove(), 3500);
 }

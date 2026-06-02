@@ -180,30 +180,6 @@
 .sidebar-spacer {
   flex: 1;
 }
-.sidebar-info {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 12px 12px;
-  margin-bottom: 8px;
-  background: var(--bg-elevated);
-  border-radius: 10px;
-  border: 1px solid var(--border-subtle);
-}
-.sidebar-info-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 11px;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-.sidebar-info-row i {
-  font-size: 10px;
-  width: 14px;
-  text-align: center;
-  opacity: 0.7;
-}
 .sidebar-footer {
   display: flex;
   flex-direction: column;
@@ -353,45 +329,6 @@
 }
 .kpi-card--hero .kpi-label {
   color: var(--text-secondary);
-}
-
-/* ─── Stripe-style KPI layout: head + main (value/compare + sparkline) ─── */
-.kpi-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-.kpi-main {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 12px;
-}
-.kpi-main-left {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-.kpi-spark {
-  flex-shrink: 0;
-  width: 80px;
-  height: 36px;
-}
-.kpi-spark--xl {
-  width: 140px;
-  height: 52px;
-}
-@media (max-width: 900px) {
-  .kpi-spark--xl {
-    width: 100px;
-    height: 42px;
-  }
-  .kpi-spark {
-    width: 64px;
-    height: 30px;
-  }
 }
 
 /* ─── Card Fade-in Animation ─── */

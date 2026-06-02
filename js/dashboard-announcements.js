@@ -6,6 +6,7 @@
 
 import { getSupabase } from '/js/supabase-config.js';
 import { renderState } from '/js/ui.js';
+import { escapeHtml, toast } from '/js/utils.js';
 
 const sb = getSupabase();
 let _items = [];
@@ -241,14 +242,6 @@ function showError(msg) {
 }
 
 // ─── Utils ───
-function escapeHtml(s) {
-  return String(s || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
 function formatDate(iso) {
   try {
     const d = new Date(iso);
@@ -261,23 +254,5 @@ function formatDate(iso) {
     });
   } catch {
     return '';
-  }
-}
-
-function toast(msg, kind) {
-  // Reusa o toast system do dashboard se existir, senão alert.
-  if (typeof window.showToast === 'function') {
-    window.showToast(msg, kind);
-  } else {
-    const c = document.getElementById('toastContainer');
-    if (!c) {
-      alert(msg);
-      return;
-    }
-    const el = document.createElement('div');
-    el.textContent = msg;
-    el.style.cssText = `background:${kind === 'error' ? 'var(--danger)' : 'var(--success)'};color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;margin-top:8px;box-shadow:0 4px 12px rgba(0,0,0,0.2)`;
-    c.appendChild(el);
-    setTimeout(() => el.remove(), 3500);
   }
 }
