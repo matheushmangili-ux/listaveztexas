@@ -1041,6 +1041,18 @@
           <select id="vmSector" class="input" style="padding: 0 12px"></select>
         </div>
         <div class="form-group">
+          <label class="form-label">Telefone (WhatsApp)</label>
+          <input
+            id="vmPhone"
+            class="input"
+            type="tel"
+            inputmode="tel"
+            placeholder="(00) 00000-0000"
+            maxlength="20"
+            autocomplete="off"
+          />
+        </div>
+        <div class="form-group">
           <label class="form-label">PIN (4 dígitos)</label>
           <input
             id="vmPin"
@@ -1188,6 +1200,35 @@
       </div>
     </div>
 
+    <!-- Modal: enviar acesso por WhatsApp (após criar/resetar login) -->
+    <div class="modal-overlay" id="vendorShareModal">
+      <div class="modal-box" style="max-width: 440px">
+        <h3><i class="fa-brands fa-whatsapp" style="color: #25d366"></i> Enviar acesso pro vendedor</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin: 4px 0 12px">
+          Mensagem pronta com o link, o passo a passo de instalação e o login. Revise e envie.
+        </p>
+        <textarea
+          id="vmShareMsg"
+          class="input"
+          rows="13"
+          readonly
+          style="font-size: 12px; line-height: 1.5; resize: vertical; width: 100%; font-family: var(--font-body)"
+        ></textarea>
+        <div id="vmSharePhoneHint" style="font-size: 11px; color: var(--text-muted); margin-top: 8px"></div>
+        <div class="modal-actions" style="margin-top: 14px">
+          <button class="btn btn-ghost" onclick="copyShareMsg()"><i class="fa-solid fa-copy"></i> Copiar</button>
+          <button
+            class="btn btn-primary"
+            id="vmShareWaBtn"
+            style="background: #25d366; border-color: #25d366; color: #0d1117"
+          >
+            <i class="fa-brands fa-whatsapp"></i> Enviar por WhatsApp
+          </button>
+        </div>
+        <button class="btn btn-ghost" onclick="closeShareModal()" style="width: 100%; margin-top: 8px">Fechar</button>
+      </div>
+    </div>
+
     <!-- Modal Canal/Evento -->
     <div class="modal-overlay" id="canalModal" style="display: none">
       <div class="modal-box" style="max-width: 380px">
@@ -1240,7 +1281,7 @@
       let vendedores = [];
       let tenantSectors = [];
       const VENDOR_SETTINGS_COLUMNS =
-        'id,nome,apelido,status,posicao_fila,ativo,created_at,updated_at,tenant_id,setor,foto_url,auth_user_id,avatar_config';
+        'id,nome,apelido,status,posicao_fila,ativo,created_at,updated_at,tenant_id,setor,foto_url,auth_user_id,avatar_config,telefone';
 
       (async function init() {
         tenant = await loadTenant();
@@ -1576,6 +1617,7 @@
         document.getElementById('vendorModalTitle').textContent = 'Adicionar Vendedor';
         document.getElementById('vendorEditId').value = '';
         document.getElementById('vmName').value = '';
+        document.getElementById('vmPhone').value = '';
         document.getElementById('vmPin').value = '';
         document.getElementById('vmPin').placeholder = '0000';
         populateSectorSelect('');
@@ -1590,6 +1632,7 @@
         document.getElementById('vendorModalTitle').textContent = 'Editar Vendedor';
         document.getElementById('vendorEditId').value = id;
         document.getElementById('vmName').value = v.nome;
+        document.getElementById('vmPhone').value = v.telefone || '';
         document.getElementById('vmPin').value = '';
         document.getElementById('vmPin').placeholder = 'Novo PIN';
         populateSectorSelect(v.setor);
@@ -1608,6 +1651,70 @@
         document.getElementById('vendorModal').classList.remove('open');
       };
 
+      // ─── Enviar acesso do vendedor por WhatsApp ───
+      const VENDOR_APP_URL = 'https://listaveztexas.vercel.app/vendor.html';
+
+      function normalizePhoneBR(raw) {
+        let d = String(raw || '').replace(/\D/g, '');
+        if (!d) return '';
+        d = d.replace(/^0+/, '');
+        if (d.startsWith('55') && d.length >= 12) return d; // já internacional
+        if (d.length === 10 || d.length === 11) return '55' + d; // DDD + número BR
+        return d; // fallback: usa como veio
+      }
+
+      function buildVendorWelcomeMsg({ nome, loja, email, senha }) {
+        const primeiro = (nome || '').trim().split(/\s+/)[0] || '';
+        return [
+          `Oi ${primeiro}! 👋`,
+          ``,
+          `Seu acesso ao app *minhavez Vendedor*${loja ? ' da ' + loja : ''} está pronto. 🎉`,
+          ``,
+          `📲 *Como instalar no celular:*`,
+          `1) Abra este link no navegador (Chrome no Android / Safari no iPhone):`,
+          VENDOR_APP_URL,
+          `2) Toque no menu do navegador (⋮ no Android, ⬆️ no iPhone)`,
+          `3) Escolha *"Adicionar à tela inicial"*`,
+          `4) Abra o app *minhavez Vendedor* pela tela inicial`,
+          ``,
+          `🔑 *Seu login:*`,
+          `E-mail: ${email}`,
+          `Senha: ${senha}`,
+          ``,
+          `🔔 Ao entrar, ative as notificações pra avisar quando for a sua vez.`
+        ].join('\n');
+      }
+
+      let _shareData = null;
+      function openVendorShareModal(data) {
+        _shareData = data;
+        document.getElementById('vmShareMsg').value = buildVendorWelcomeMsg(data);
+        const phone = normalizePhoneBR(data.telefone);
+        document.getElementById('vmSharePhoneHint').textContent = phone
+          ? `Vai abrir a conversa com ${data.telefone}.`
+          : 'Sem telefone cadastrado — o WhatsApp abre pra você escolher o contato (a mensagem já vai pronta).';
+        document.getElementById('vendorShareModal').classList.add('open');
+      }
+      window.closeShareModal = function () {
+        document.getElementById('vendorShareModal').classList.remove('open');
+        _shareData = null;
+      };
+      window.copyShareMsg = function () {
+        navigator.clipboard
+          .writeText(document.getElementById('vmShareMsg').value)
+          .then(() => toast('Mensagem copiada!', 'success'))
+          .catch(() => toast('Erro ao copiar', 'error'));
+      };
+      document.getElementById('vmShareWaBtn')?.addEventListener('click', () => {
+        const msg = document.getElementById('vmShareMsg').value;
+        const phone = _shareData ? normalizePhoneBR(_shareData.telefone) : '';
+        const url = (phone ? `https://wa.me/${phone}` : 'https://wa.me/') + `?text=${encodeURIComponent(msg)}`;
+        window.open(url, '_blank');
+      });
+      document.getElementById('vendorShareModal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeShareModal();
+      });
+
       function populateSectorSelect(selected) {
         document.getElementById('vmSector').innerHTML = tenantSectors
           .map((s) => {
@@ -1621,6 +1728,7 @@
         const id = document.getElementById('vendorEditId').value;
         const nome = document.getElementById('vmName').value.trim();
         const setor = document.getElementById('vmSector').value;
+        const telefone = document.getElementById('vmPhone').value.trim();
         const pin = document.getElementById('vmPin').value.trim();
 
         if (!nome) {
@@ -1662,7 +1770,7 @@
           let vendedorId = id;
           if (id) {
             // Update
-            const update = { nome, setor };
+            const update = { nome, setor, telefone: telefone || null };
             if (pin) update.pin = pin;
             const { error } = await sb.from('vendedores').update(update).eq('id', id).eq('tenant_id', tenantId);
             if (error) throw error;
@@ -1672,6 +1780,7 @@
             const insert = {
               nome,
               setor,
+              telefone: telefone || null,
               tenant_id: tenantId,
               status: 'fora',
               posicao_fila: maxPos
@@ -1716,6 +1825,22 @@
           if (createLoginChecked) toast('Login criado com sucesso', 'success');
           if (_vmResetRequested && resetPass) toast('Senha atualizada', 'success');
 
+          // Monta o compartilhamento de credenciais ANTES do reload (no reset de
+          // senha precisamos do email atual, que vive no array antes de recarregar).
+          let _share = null;
+          if (createLoginChecked) {
+            _share = { nome, loja: tenant?.nome_loja || '', email: loginEmail, senha: loginPass, telefone };
+          } else if (_vmResetRequested && resetPass) {
+            const existing = vendedores.find((x) => x.id === vendedorId);
+            _share = {
+              nome,
+              loja: tenant?.nome_loja || '',
+              email: existing?._auth_email || '',
+              senha: resetPass,
+              telefone
+            };
+          }
+
           // Reload
           const { data } = await sb
             .from('vendedores')
@@ -1726,6 +1851,7 @@
           renderVendorList();
           populatePlan();
           closeVendorModal();
+          if (_share) openVendorShareModal(_share);
         } catch (e) {
           const isLimit = /LIMITE_PLANO/.test(e.message || '');
           toast(
