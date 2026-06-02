@@ -194,11 +194,28 @@ Auditado em 2026-06-02: o item está **obsoleto**. A realidade em produção:
 - **Conclusão:** nada a fazer. Se um dia quiser trocar Groq→Gemini, é tarefa
   separada e opcional.
 
-### P1-C · Painel admin de VM Missions
+### P1-C · ~~Painel admin de VM Missions~~ — ✅ JÁ CONSTRUÍDO (premissa desatualizada)
 
-- UI no dashboard pra criar/atribuir tarefas de VM (briefing, checklist, refs);
-  remove a flag de P0-3.
-- **Esforço:** Médio.
+Auditado em 2026-06-02: o painel **já existe e está completo** (construído no
+"improve do V.M" anterior). Realidade:
+
+- **Admin (`dashboard-vm.js` + `#vmModal`):** 3 abas — **Criar Tarefa** (título,
+  descrição, categoria, prioridade, prazo, XP, até 5 fotos de referência,
+  builder de checklist) → `admin_create_vm_task`; **Acompanhar** (barras de
+  compliance + revisão aprovar/rejeitar/ajuste por submissão) →
+  `admin_get_vm_tasks`/`admin_get_task_submissions`/`admin_review_task_submission`;
+  **Fotos Livres** (fila de revisão). Acessível pelo link "VM Photos" da sidebar.
+- **Vendedor (`vendor-vm.js`):** abas Tarefas/Minhas/Galeria, `vendor_get_my_vm_tasks`,
+  cards com badge/urgência, empty states. **Sem flag escondendo.**
+- **DB:** tabelas `vm_tasks/_references/_checklist/_assignments/_responses` +
+  6 RPCs admin, todas em produção.
+- **Único gap é operacional:** `vm_tasks = 0` (ninguém criou tarefa ainda); a aba
+  do vendedor mostra empty state até a primeira tarefa ser criada — comportamento
+  esperado, não bug.
+- **P0-3 flags:** não existe camada de feature-flag no código. IA e VM foram
+  shipadas direto (ambas funcionando), então não há flag a remover.
+- **Conclusão:** nada a fazer no código. Ação é operacional: o lojista cria a
+  primeira tarefa de VM.
 
 ### P1-D · Testes críticos
 
