@@ -1270,7 +1270,8 @@ export async function loadPauseStats(range) {
         ? new Date(r.fim).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
         : '—';
       const dur = Math.round(r.duracao_min || 0);
-      const motLabel = motivoLabels[r.motivo] || r.motivo || '—';
+      let motLabel = motivoLabels[r.motivo] || r.motivo || '—';
+      if (r.detalhe) motLabel += ` · ${r.detalhe}`; // detalhe da pausa (ex.: operacional → atividade)
       const motIcon = motivoIcons[r.motivo] || 'fa-ellipsis';
       const motColor = motivoColors[r.motivo] || '#64748b';
       const durColor = emPausa ? 'var(--warning)' : dur > 60 ? 'var(--danger)' : 'var(--text-primary)';

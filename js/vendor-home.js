@@ -80,6 +80,9 @@ function grabRefs() {
   el.pausaOverlay = document.getElementById('pausaOverlay');
   el.pausaSheet = document.getElementById('pausaSheet');
 
+  el.opOverlay = document.getElementById('opOverlay');
+  el.opSheet = document.getElementById('opSheet');
+
   el.aiTipsOverlay = document.getElementById('aiTipsOverlay');
   el.aiTipsSheet = document.getElementById('aiTipsSheet');
   el.aiTipsBody = document.getElementById('aiTipsSheetBody');
@@ -516,9 +519,18 @@ function wireActions() {
     onFinishAttendance('nao_convertido', null);
   });
 
-  // Pausa buttons
+  // Pausa buttons. "Operacional" abre o sub-sheet de atividade; os outros vão direto.
   el.pausaSheet.querySelectorAll('.vendor-pausa-btn').forEach((btn) => {
-    btn.addEventListener('click', () => onGoPausa(btn.dataset.motivo));
+    btn.addEventListener('click', () => {
+      if (btn.dataset.motivo === 'operacional') openOpSheet();
+      else onGoPausa(btn.dataset.motivo);
+    });
+  });
+
+  // Operacional sub-sheet: cada atividade vira o detalhe da pausa.
+  el.opOverlay?.addEventListener('click', closeAllSheets);
+  el.opSheet?.querySelectorAll('.vendor-pausa-btn').forEach((btn) => {
+    btn.addEventListener('click', () => onGoPausa('operacional', btn.dataset.op));
   });
 
   // Overlays fecham bottom sheets
@@ -604,6 +616,13 @@ function openDemandSheet() {
   el.demandSheet.classList.remove('hidden');
 }
 
+function openOpSheet() {
+  el.pausaOverlay.classList.add('hidden');
+  el.pausaSheet.classList.add('hidden');
+  el.opOverlay.classList.remove('hidden');
+  el.opSheet.classList.remove('hidden');
+}
+
 function openPausaSheet() {
   if (!_ctx) return;
   if (_ctx.status === 'em_atendimento') {
@@ -623,6 +642,8 @@ function closeAllSheets() {
   el.demandSheet?.classList.add('hidden');
   el.pausaOverlay.classList.add('hidden');
   el.pausaSheet.classList.add('hidden');
+  el.opOverlay?.classList.add('hidden');
+  el.opSheet?.classList.add('hidden');
 }
 
 // ─── Action handlers ───
@@ -739,10 +760,10 @@ async function onCancelAttendance() {
   }
 }
 
-async function onGoPausa(motivo) {
+async function onGoPausa(motivo, detalhe) {
   closeAllSheets();
   try {
-    const { error } = await _sb.rpc('vendor_go_pausa', { p_motivo: motivo });
+    const { error } = await _sb.rpc('vendor_go_pausa', { p_motivo: motivo, p_detalhe: detalhe || null });
     if (error) throw error;
     await loadContext();
     renderAll();
