@@ -306,6 +306,9 @@ function renderMainCard() {
   }
 }
 
+// "Sou o próximo da fila?" derivado do rank denso (não do posicao_fila cru).
+let _amINext = false;
+
 async function renderIdle() {
   if (!_ctx) return;
   el.idleCard.classList.remove('hidden');
@@ -318,37 +321,47 @@ async function renderIdle() {
     el.btnStart.classList.add('hidden');
     el.btnStartPref.classList.add('hidden');
     el.queuePeek.innerHTML = '';
+    _amINext = false;
     return;
   }
 
-  el.bigPos.textContent = String(pos);
-  if (pos === 1) {
-    el.bigPos.classList.add('next-pulse');
-    el.bigLabel.textContent = 'É a sua vez!';
-    el.btnStart.classList.remove('hidden');
-  } else {
-    el.bigPos.classList.remove('next-pulse');
-    el.bigLabel.textContent = pos - 1 === 1 ? '1 pessoa na sua frente' : pos - 1 + ' pessoas na sua frente';
-    el.btnStart.classList.add('hidden');
-  }
-
-  // Peek da fila (top 3 do setor do vendedor)
-  const { data } = await _sb
+  // posicao_fila é um contador monotônico (max+1 ao finalizar/cadastrar), NÃO um
+  // rank 1..N — então a posição mostrada e o "na frente" vêm do RANK DENSO da fila
+  // viva do setor, nunca do valor cru (senão um número grande vira "22 na frente").
+  const { data: filaData } = await _sb
     .from('vendedores')
     .select('id, nome, apelido, posicao_fila')
     .eq('tenant_id', _ctx.tenant_id)
     .eq('setor', _ctx.setor || 'loja')
     .eq('status', 'disponivel')
     .not('posicao_fila', 'is', null)
-    .order('posicao_fila')
-    .limit(3);
+    .order('posicao_fila');
 
-  el.queuePeek.innerHTML = (data || [])
-    .map((v) => {
+  const queue = filaData || [];
+  const myIdx = queue.findIndex((v) => v.id === _ctx.vendedor_id);
+  const rank = myIdx >= 0 ? myIdx + 1 : queue.length || 1; // fallback: fim da fila
+  const ahead = Math.max(0, rank - 1);
+  _amINext = ahead === 0;
+
+  el.bigPos.textContent = String(rank);
+  if (_amINext) {
+    el.bigPos.classList.add('next-pulse');
+    el.bigLabel.textContent = 'É a sua vez!';
+    el.btnStart.classList.remove('hidden');
+  } else {
+    el.bigPos.classList.remove('next-pulse');
+    el.bigLabel.textContent = ahead === 1 ? '1 pessoa na sua frente' : ahead + ' pessoas na sua frente';
+    el.btnStart.classList.add('hidden');
+  }
+
+  // Peek da fila (top 3 do setor) com rank denso (#1, #2, #3)
+  el.queuePeek.innerHTML = queue
+    .slice(0, 3)
+    .map((v, i) => {
       const isSelf = v.id === _ctx.vendedor_id;
       const name = isSelf ? 'Você' : v.apelido || v.nome;
       return `<div class="peek-item${isSelf ? ' self' : ''}">
-        <span class="peek-pos">#${v.posicao_fila}</span>
+        <span class="peek-pos">#${i + 1}</span>
         <span class="peek-name">${escape(name)}</span>
       </div>`;
     })
@@ -651,7 +664,7 @@ let _pendingPreferencial = false;
 
 function onStartAttendance(preferencial) {
   // Regular: só quem tá no #1
-  if (!preferencial && _ctx.posicao_fila !== 1) {
+  if (!preferencial && !_amINext) {
     window._vendorToast('Você não é o próximo da fila', 'error');
     return;
   }
