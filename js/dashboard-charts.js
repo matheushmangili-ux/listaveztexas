@@ -1185,6 +1185,14 @@ export async function loadDemandReport(range) {
       const motivoLabel = DEMAND_MOTIVO_LABELS[r.motivo] || r.motivo || '—';
       const noun = Number(r.total) === 1 ? 'vez' : 'vezes';
       const valor = Number(r.valor_estimado || 0);
+      const tot = Number(r.total);
+      const rec = Number(r.recentes || 0);
+      // "↑ subindo": maioria dos pedidos na 2ª metade do período (momentum →
+      // sinal de compra). Threshold evita ruído em amostra pequena.
+      const rising = tot >= 4 && rec >= 2 && rec * 2 > tot;
+      const trendBadge = rising
+        ? ` <span style="color:var(--success);font-weight:700;font-size:9px"><i class="fa-solid fa-arrow-trend-up"></i> subindo</span>`
+        : '';
       // R$ é o headline (escala da perda); qtd vira subtexto. Sem valor (ticket
       // mediano 0), cai no badge de contagem simples.
       const right =
@@ -1197,7 +1205,7 @@ export async function loadDemandReport(range) {
       return `<div class="rupture-item">
         <div>
           <div style="font-weight:600;font-size:13px">${escapeHtml(r.produto)}</div>
-          <div style="font-size:10px;color:var(--text-muted)">${escapeHtml(motivoLabel)}</div>
+          <div style="font-size:10px;color:var(--text-muted)">${escapeHtml(motivoLabel)}${trendBadge}</div>
         </div>
         ${right}
       </div>`;
@@ -1208,11 +1216,12 @@ export async function loadDemandReport(range) {
 // Export CSV da demanda perdida. Separador ';' + BOM UTF-8 → Excel BR abre com acento certo.
 window._dashDemandExport = function () {
   if (!_demandData || _demandData.length === 0) return;
-  const head = ['Produto', 'Motivo', 'Pedidos', 'Valor estimado perdido (R$)'];
+  const head = ['Produto', 'Motivo', 'Pedidos', 'Recentes (2a metade)', 'Valor estimado perdido (R$)'];
   const rows = _demandData.map((r) => [
     r.produto,
     DEMAND_MOTIVO_LABELS[r.motivo] || r.motivo || '',
     r.total,
+    r.recentes || 0,
     Math.round(Number(r.valor_estimado || 0))
   ]);
   const cell = (v) => `"${String(v).replace(/"/g, '""')}"`;
