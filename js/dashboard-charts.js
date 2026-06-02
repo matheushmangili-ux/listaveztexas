@@ -1147,6 +1147,11 @@ const DEMAND_MOTIVO_LABELS = {
   outro: 'Outro'
 };
 
+let _demandData = [];
+
+const fmtBRL = (n) =>
+  Number(n || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+
 export async function loadDemandReport(range) {
   const sb = _ctx.sb;
   const card = document.getElementById('demandCard');
@@ -1161,26 +1166,67 @@ export async function loadDemandReport(range) {
   });
   if (error || !data || data.length === 0) {
     card.style.display = 'none';
+    _demandData = [];
     return;
   }
   card.style.display = '';
-  const total = data.reduce((acc, r) => acc + Number(r.total), 0);
-  if (counter) counter.textContent = `${total} ${total === 1 ? 'PEDIDO' : 'PEDIDOS'}`;
+  _demandData = data;
+  const totalPedidos = data.reduce((acc, r) => acc + Number(r.total), 0);
+  const totalValor = data.reduce((acc, r) => acc + Number(r.valor_estimado || 0), 0);
+  if (counter) {
+    counter.textContent =
+      totalValor > 0
+        ? `${totalPedidos} ${totalPedidos === 1 ? 'PEDIDO' : 'PEDIDOS'} · ~${fmtBRL(totalValor)} PERDIDO`
+        : `${totalPedidos} ${totalPedidos === 1 ? 'PEDIDO' : 'PEDIDOS'}`;
+  }
 
   list.innerHTML = data
     .map((r) => {
       const motivoLabel = DEMAND_MOTIVO_LABELS[r.motivo] || r.motivo || '—';
       const noun = Number(r.total) === 1 ? 'vez' : 'vezes';
+      const valor = Number(r.valor_estimado || 0);
+      // R$ é o headline (escala da perda); qtd vira subtexto. Sem valor (ticket
+      // mediano 0), cai no badge de contagem simples.
+      const right =
+        valor > 0
+          ? `<div style="text-align:right;flex-shrink:0">
+               <div style="font-weight:700;font-size:13px;color:var(--danger)">${fmtBRL(valor)}</div>
+               <div style="font-size:10px;color:var(--text-muted)">${r.total} ${noun}</div>
+             </div>`
+          : `<div class="rupture-count">${r.total}</div>`;
       return `<div class="rupture-item">
         <div>
           <div style="font-weight:600;font-size:13px">${escapeHtml(r.produto)}</div>
-          <div style="font-size:10px;color:var(--text-muted)">${escapeHtml(motivoLabel)} · ${r.total} ${noun}</div>
+          <div style="font-size:10px;color:var(--text-muted)">${escapeHtml(motivoLabel)}</div>
         </div>
-        <div class="rupture-count">${r.total}</div>
+        ${right}
       </div>`;
     })
     .join('');
 }
+
+// Export CSV da demanda perdida. Separador ';' + BOM UTF-8 → Excel BR abre com acento certo.
+window._dashDemandExport = function () {
+  if (!_demandData || _demandData.length === 0) return;
+  const head = ['Produto', 'Motivo', 'Pedidos', 'Valor estimado perdido (R$)'];
+  const rows = _demandData.map((r) => [
+    r.produto,
+    DEMAND_MOTIVO_LABELS[r.motivo] || r.motivo || '',
+    r.total,
+    Math.round(Number(r.valor_estimado || 0))
+  ]);
+  const cell = (v) => `"${String(v).replace(/"/g, '""')}"`;
+  const csv = [head, ...rows].map((row) => row.map(cell).join(';')).join('\r\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'demanda-perdida.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
 
 // ─── Pause Log (semantic cards) ───
 export async function loadPauseStats(range) {

@@ -222,20 +222,34 @@
                     "
                   ></span>
                 </h3>
-                <button
-                  class="collapse-btn"
-                  id="collapseBtn-demanda"
-                  type="button"
-                  aria-label="Recolher/expandir Demanda Perdida"
-                  aria-expanded="true"
-                  aria-controls="collapseBody-demanda"
-                  onclick="
-                    event.stopPropagation();
-                    toggleSection('demanda');
-                  "
-                >
-                  <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
-                </button>
+                <div style="display: flex; gap: 8px; align-items: center">
+                  <button
+                    class="collapse-btn"
+                    type="button"
+                    title="Exportar CSV"
+                    aria-label="Exportar demanda perdida em CSV"
+                    onclick="
+                      event.stopPropagation();
+                      window._dashDemandExport && window._dashDemandExport();
+                    "
+                  >
+                    <i class="fa-solid fa-file-csv" aria-hidden="true"></i>
+                  </button>
+                  <button
+                    class="collapse-btn"
+                    id="collapseBtn-demanda"
+                    type="button"
+                    aria-label="Recolher/expandir Demanda Perdida"
+                    aria-expanded="true"
+                    aria-controls="collapseBody-demanda"
+                    onclick="
+                      event.stopPropagation();
+                      toggleSection('demanda');
+                    "
+                  >
+                    <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                  </button>
+                </div>
               </div>
               <div class="chart-card-body" id="collapseBody-demanda" style="margin-top: 16px">
                 <div id="demandList"></div>

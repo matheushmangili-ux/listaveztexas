@@ -41,10 +41,19 @@ Objetivo: subir a **taxa de captura** e a **qualidade do dado**.
 
 ## P1 — Camada de decisão (o moat de verdade)
 
-### P1-1 · Valor perdido (R$)
+### P1-1 · Valor perdido (R$) — ✅ FEITO (2026-06-02)
 
-- No `get_demand_report`, agregar `SUM(valor estimado)` — ticket médio do tenant ×
-  qtd (ou um campo de valor estimado). Card mostra "~R$ X perdido em <produto>".
+- `get_demand_report` (migração `sql/54`) retorna `valor_estimado` = **ticket
+  MEDIANO** do tenant (vendas 180d) × qtd. **Mediana, não média** — a média estava
+  destruída por outlier de digitação (prod: média R$3.926 vs mediana R$800, com um
+  valor_venda de R$142.960). Card mostra R$ por linha (headline em danger) + total
+  no header ("~R$ X perdido").
+
+### P1-4 · Export CSV — ✅ FEITO (2026-06-02)
+
+- Botão "Exportar CSV" no header do card (`window._dashDemandExport`): baixa
+  produto;motivo;pedidos;valor (separador `;` + BOM UTF-8 → Excel BR lê acento).
+  Verificado no harness.
 
 ### P1-2 · Tendência no tempo
 
