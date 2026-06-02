@@ -117,50 +117,69 @@
   opacity: 0.6;
   white-space: nowrap;
 }
+/* Cluster esquerdo: marca + stats ao vivo juntos (não flutuando no centro) */
+.t-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+/* KPIs como UM módulo segmentado (3 blocos de peso igual, com divisores) —
+   dá a moldura que faltava e casa com os action-cards à direita. */
 .t-header-kpis {
-  flex: 1;
-  justify-content: center;
+  display: flex;
+  align-items: stretch;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
   min-width: 0;
 }
 .t-header-kpi {
   display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.t-header-kpi i {
-  font-size: 15px;
-  color: var(--accent-bright);
-}
-.t-header-kpi-body {
-  display: flex;
   flex-direction: column;
-  line-height: 1.2;
+  justify-content: center;
+  gap: 1px;
+  padding: 5px 14px;
+  position: relative;
+  white-space: nowrap;
+}
+.t-header-kpi + .t-header-kpi {
+  border-left: 1px solid var(--border-subtle);
 }
 .t-header-kpi-value {
   color: var(--text-primary);
-  font-size: 18px;
+  font-size: 17px;
   font-family: var(--font-mono);
   font-weight: 700;
+  line-height: 1.1;
 }
 .t-header-kpi-label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: var(--text-muted);
 }
+/* Conversão: barra fina como "underline" do bloco (não um elemento avulso ao
+   lado que engordava só esse KPI). Cor vem do JS (semântica por faixa). */
+.t-header-kpi--conv {
+  padding-bottom: 8px;
+}
 .conv-bar-track {
-  width: 60px;
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.15);
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 4px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border-medium);
   overflow: hidden;
-  flex-shrink: 0;
-  margin-left: 4px;
 }
 .conv-bar-fill {
   height: 100%;
   width: 0%;
-  border-radius: 3px;
+  border-radius: 2px;
   background: var(--accent);
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }

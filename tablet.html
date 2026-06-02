@@ -67,33 +67,26 @@
     <div class="tablet-layout">
       <!-- HEADER -->
       <header class="t-header">
-        <div class="flex-center gap-8 shrink-0">
-          <mv-logo size="S" wordmark class="t-header-logo"></mv-logo>
-          <span id="appVersion" class="mono fs-9 t-header-version"></span>
-        </div>
-        <div id="headerKpis" class="flex-center gap-16 mono fw-700 t-header-kpis">
-          <div class="t-header-kpi" title="Atendimentos finalizados">
-            <i class="fa-solid fa-users"></i>
-            <div class="t-header-kpi-body">
+        <div class="t-header-left">
+          <div class="flex-center gap-8 shrink-0">
+            <mv-logo size="S" wordmark class="t-header-logo"></mv-logo>
+            <span id="appVersion" class="mono fs-9 t-header-version"></span>
+          </div>
+          <div id="headerKpis" class="t-header-kpis mono fw-700">
+            <div class="t-header-kpi" title="Atendimentos finalizados">
               <span id="statAtend" class="t-header-kpi-value">0</span>
               <span class="t-header-kpi-label">Atendidos</span>
             </div>
-          </div>
-          <div class="t-header-kpi" title="Vendas concretizadas">
-            <i class="fa-solid fa-bag-shopping"></i>
-            <div class="t-header-kpi-body">
+            <div class="t-header-kpi" title="Vendas concretizadas">
               <span id="statVendas" class="t-header-kpi-value">0</span>
               <span class="t-header-kpi-label">Vendas</span>
             </div>
-          </div>
-          <div class="t-header-kpi" title="Taxa de conversão">
-            <i class="fa-solid fa-chart-line"></i>
-            <div class="t-header-kpi-body">
+            <div class="t-header-kpi t-header-kpi--conv" title="Taxa de conversão">
               <span id="statConv" class="t-header-kpi-value">0%</span>
               <span class="t-header-kpi-label">Conversão</span>
-            </div>
-            <div class="conv-bar-track">
-              <div id="convBar" class="conv-bar-fill"></div>
+              <div class="conv-bar-track">
+                <div id="convBar" class="conv-bar-fill"></div>
+              </div>
             </div>
           </div>
         </div>
