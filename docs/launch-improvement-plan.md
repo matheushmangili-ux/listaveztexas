@@ -148,9 +148,13 @@ MCP, `demand_capture_p1a`):
   (esconde se vazio).
 - **Verificado:** lint + 102 testes; lógica do relatório rodada sobre dados reais
   (produtos de ruptura já aparecem). Card renderizado no harness (harmonia ok).
-- **Follow-up:** captura no **mobile do vendedor** (`vendor_finish_attendance`
-  não foi alterada — segue sem `produto_desejado`; ruptura do vendor ainda entra
-  no relatório via `produto_ruptura`).
+- **Follow-up — ✅ FEITO (2026-06-02):** captura no **mobile do vendedor**.
+  `vendor_finish_attendance` ganhou `p_produto_desejado` (migração `sql/52`,
+  `vendor_demand_capture_p1a`, hook XP preservado). No app do vendedor, tocar
+  "Não converteu" abre uma folha leve "O que o cliente procurava?" com campo
+  opcional + botões Finalizar/Pular (sem taxonomia de motivo — o vendedor no chão
+  prioriza velocidade; o produto é o que importa pro estoque). Verificado: lint +
+  102 testes; folha renderizada no harness. SW cache 165.
 
 ---
 

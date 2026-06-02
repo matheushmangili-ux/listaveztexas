@@ -321,6 +321,21 @@
       </div>
     </div>
 
+    <!-- Bottom sheet: Demanda perdida (produto desejado) — só na não-conversão -->
+    <div class="vendor-sheet-overlay hidden" id="demandOverlay"></div>
+    <div class="vendor-sheet hidden" id="demandSheet">
+      <div class="vendor-sheet-handle"></div>
+      <h3 class="vendor-sheet-title">O que o cliente procurava?</h3>
+      <label class="vendor-field">
+        <span class="vendor-field-label">Produto desejado (opcional)</span>
+        <input type="text" id="vendorDesejadoInput" autocomplete="off" placeholder="Ex: Bota Ariat 42" />
+      </label>
+      <button type="button" class="vendor-btn-primary" id="btnDemandConfirm">
+        <i class="fa-solid fa-check"></i> Finalizar
+      </button>
+      <button type="button" class="vendor-btn-ghost" id="btnDemandSkip">Pular</button>
+    </div>
+
     <!-- Bottom sheet: Pausa (motivos) -->
     <div class="vendor-sheet-overlay hidden" id="pausaOverlay"></div>
     <div class="vendor-sheet hidden" id="pausaSheet">

@@ -73,6 +73,10 @@ function grabRefs() {
   el.outcomeOverlay = document.getElementById('outcomeOverlay');
   el.outcomeSheet = document.getElementById('outcomeSheet');
 
+  el.demandOverlay = document.getElementById('demandOverlay');
+  el.demandSheet = document.getElementById('demandSheet');
+  el.demandInput = document.getElementById('vendorDesejadoInput');
+
   el.pausaOverlay = document.getElementById('pausaOverlay');
   el.pausaSheet = document.getElementById('pausaSheet');
 
@@ -493,9 +497,23 @@ function wireActions() {
     btn.addEventListener('click', () => onMoreAction(btn.dataset.action));
   });
 
-  // Outcome buttons
+  // Outcome buttons. Não-conversão abre a captura de demanda (produto desejado);
+  // venda/troca finalizam direto.
   el.outcomeSheet.querySelectorAll('.vendor-outcome-btn').forEach((btn) => {
-    btn.addEventListener('click', () => onFinishAttendance(btn.dataset.outcome));
+    btn.addEventListener('click', () => {
+      const outcome = btn.dataset.outcome;
+      if (outcome === 'nao_convertido') openDemandSheet();
+      else onFinishAttendance(outcome);
+    });
+  });
+
+  // Demand sheet (produto desejado na não-conversão)
+  el.demandOverlay?.addEventListener('click', closeAllSheets);
+  document.getElementById('btnDemandConfirm')?.addEventListener('click', () => {
+    onFinishAttendance('nao_convertido', el.demandInput?.value.trim() || null);
+  });
+  document.getElementById('btnDemandSkip')?.addEventListener('click', () => {
+    onFinishAttendance('nao_convertido', null);
   });
 
   // Pausa buttons
@@ -553,6 +571,14 @@ function openOutcomeSheet() {
   el.outcomeSheet.classList.remove('hidden');
 }
 
+function openDemandSheet() {
+  el.outcomeOverlay.classList.add('hidden');
+  el.outcomeSheet.classList.add('hidden');
+  if (el.demandInput) el.demandInput.value = '';
+  el.demandOverlay.classList.remove('hidden');
+  el.demandSheet.classList.remove('hidden');
+}
+
 function openPausaSheet() {
   if (!_ctx) return;
   if (_ctx.status === 'em_atendimento') {
@@ -568,6 +594,8 @@ function closeAllSheets() {
   el.canalSheet.classList.add('hidden');
   el.outcomeOverlay.classList.add('hidden');
   el.outcomeSheet.classList.add('hidden');
+  el.demandOverlay?.classList.add('hidden');
+  el.demandSheet?.classList.add('hidden');
   el.pausaOverlay.classList.add('hidden');
   el.pausaSheet.classList.add('hidden');
 }
@@ -634,7 +662,7 @@ async function onRefresh() {
   }
 }
 
-async function onFinishAttendance(resultado) {
+async function onFinishAttendance(resultado, produtoDesejado) {
   closeAllSheets();
   try {
     const { error } = await _sb.rpc('vendor_finish_attendance', {
@@ -644,7 +672,8 @@ async function onFinishAttendance(resultado) {
       p_motivo: null,
       p_detalhe: null,
       p_produto: null,
-      p_fidelizado: false
+      p_fidelizado: false,
+      p_produto_desejado: produtoDesejado || null
     });
     if (error) throw error;
     _atendId = null;
