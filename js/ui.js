@@ -44,6 +44,23 @@ export function renderState(target, kind, opts = {}) {
 }
 
 /**
+ * Show/hide an inline error box by id, with a warning icon. Falsy msg hides/clears it.
+ * @param {string} elementId - id da box de erro (ex.: 'annError')
+ * @param {string} [msg]
+ */
+export function setErrorBox(elementId, msg) {
+  const box = document.getElementById(elementId);
+  if (!box) return;
+  if (!msg) {
+    box.style.display = 'none';
+    box.textContent = '';
+    return;
+  }
+  box.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="margin-right:6px"></i>' + escapeHtml(msg);
+  box.style.display = 'block';
+}
+
+/**
  * Create a modal overlay with content.
  * @param {string} id - Unique ID for the modal
  * @param {string} content - HTML content

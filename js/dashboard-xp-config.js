@@ -4,7 +4,8 @@
 // ============================================
 
 import { getSupabase } from '/js/supabase-config.js';
-import { escapeHtml, toast } from '/js/utils.js';
+import { setErrorBox } from '/js/ui.js';
+import { toast } from '/js/utils.js';
 
 const sb = getSupabase();
 const DEFAULTS = {
@@ -113,13 +114,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function showError(msg) {
-  const box = document.getElementById('xpCfgError');
-  if (!box) return;
-  if (!msg) {
-    box.style.display = 'none';
-    box.textContent = '';
-    return;
-  }
-  box.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="margin-right:6px"></i>' + escapeHtml(msg);
-  box.style.display = 'block';
+  setErrorBox('xpCfgError', msg);
 }

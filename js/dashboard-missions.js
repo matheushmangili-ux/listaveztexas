@@ -4,7 +4,7 @@
 // ============================================
 
 import { getSupabase } from '/js/supabase-config.js';
-import { renderState } from '/js/ui.js';
+import { renderState, setErrorBox } from '/js/ui.js';
 import { escapeHtml, toast } from '/js/utils.js';
 
 const sb = getSupabase();
@@ -209,12 +209,5 @@ function renderItem(m) {
 }
 
 function showError(msg) {
-  const box = document.getElementById('missionError');
-  if (!box) return;
-  if (!msg) {
-    box.style.display = 'none';
-    return;
-  }
-  box.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="margin-right:6px"></i>' + escapeHtml(msg);
-  box.style.display = 'block';
+  setErrorBox('missionError', msg);
 }
