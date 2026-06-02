@@ -1663,26 +1663,36 @@
         return d; // fallback: usa como veio
       }
 
-      function buildVendorWelcomeMsg({ nome, loja, email, senha }) {
+      function buildVendorWelcomeMsg({ nome, loja, email, senha, slug, pin }) {
         const primeiro = (nome || '').trim().split(/\s+/)[0] || '';
-        return [
+        const link = slug ? `${VENDOR_APP_URL}?loja=${encodeURIComponent(slug)}` : VENDOR_APP_URL;
+        const linhas = [
           `Oi ${primeiro}! 👋`,
           ``,
           `Seu acesso ao app *minhavez Vendedor*${loja ? ' da ' + loja : ''} está pronto. 🎉`,
           ``,
           `📲 *Como instalar no celular:*`,
           `1) Abra este link no navegador (Chrome no Android / Safari no iPhone):`,
-          VENDOR_APP_URL,
+          link,
           `2) Toque no menu do navegador (⋮ no Android, ⬆️ no iPhone)`,
           `3) Escolha *"Adicionar à tela inicial"*`,
           `4) Abra o app *minhavez Vendedor* pela tela inicial`,
-          ``,
-          `🔑 *Seu login:*`,
-          `E-mail: ${email}`,
-          `Senha: ${senha}`,
-          ``,
-          `🔔 Ao entrar, ative as notificações pra avisar quando for a sua vez.`
-        ].join('\n');
+          ``
+        ];
+        if (pin) {
+          linhas.push(
+            `🔑 *Pra entrar é só o seu PIN:*`,
+            `PIN: ${pin}`,
+            ``,
+            `Se preferir, dá pra entrar com email e senha:`,
+            `E-mail: ${email}`,
+            `Senha: ${senha}`
+          );
+        } else {
+          linhas.push(`🔑 *Seu login:*`, `E-mail: ${email}`, `Senha: ${senha}`);
+        }
+        linhas.push(``, `🔔 Ao entrar, ative as notificações pra avisar quando for a sua vez.`);
+        return linhas.join('\n');
       }
 
       let _shareData = null;
@@ -1828,8 +1838,17 @@
           // Monta o compartilhamento de credenciais ANTES do reload (no reset de
           // senha precisamos do email atual, que vive no array antes de recarregar).
           let _share = null;
+          const _slug = tenant?.slug || '';
           if (createLoginChecked) {
-            _share = { nome, loja: tenant?.nome_loja || '', email: loginEmail, senha: loginPass, telefone };
+            _share = {
+              nome,
+              loja: tenant?.nome_loja || '',
+              email: loginEmail,
+              senha: loginPass,
+              telefone,
+              slug: _slug,
+              pin
+            };
           } else if (_vmResetRequested && resetPass) {
             const existing = vendedores.find((x) => x.id === vendedorId);
             _share = {
@@ -1837,7 +1856,9 @@
               loja: tenant?.nome_loja || '',
               email: existing?._auth_email || '',
               senha: resetPass,
-              telefone
+              telefone,
+              slug: _slug,
+              pin
             };
           }
 

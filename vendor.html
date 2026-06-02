@@ -63,26 +63,48 @@
           </div>
           <span class="vendor-brand-sub">VENDEDOR</span>
         </div>
-        <form id="loginForm" class="vendor-login-form">
+        <!-- Login por PIN (padrão) -->
+        <form id="pinForm" class="vendor-login-form">
+          <div id="pinLojaLabel" class="vendor-pin-loja hidden"></div>
+          <label class="vendor-field">
+            <span class="vendor-field-label">PIN de acesso</span>
+            <input
+              type="text"
+              id="loginPin"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              maxlength="4"
+              placeholder="••••"
+              class="vendor-pin-input"
+            />
+          </label>
+          <label class="vendor-field hidden" id="pinLojaField">
+            <span class="vendor-field-label">Código da loja</span>
+            <input type="text" id="loginLoja" autocomplete="off" placeholder="ex: texas-center" />
+          </label>
+          <button type="submit" class="vendor-btn-primary" id="btnLoginPin">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i> Entrar
+          </button>
+          <button type="button" class="vendor-login-switch" id="switchToEmail">Entrar com email e senha</button>
+        </form>
+
+        <!-- Login por email (alternativa) -->
+        <form id="loginForm" class="vendor-login-form hidden">
           <label class="vendor-field">
             <span class="vendor-field-label">Email</span>
-            <input
-              type="email"
-              id="loginEmail"
-              autocomplete="email"
-              required
-              placeholder="vendedorteste@texascenter.com.br"
-            />
+            <input type="email" id="loginEmail" autocomplete="email" placeholder="vendedorteste@texascenter.com.br" />
           </label>
           <label class="vendor-field">
             <span class="vendor-field-label">Senha</span>
-            <input type="password" id="loginPassword" autocomplete="current-password" required />
+            <input type="password" id="loginPassword" autocomplete="current-password" />
           </label>
           <button type="submit" class="vendor-btn-primary" id="btnLogin">
             <i class="fa-solid fa-arrow-right-to-bracket"></i> Entrar
           </button>
-          <p id="loginError" class="vendor-login-error hidden"></p>
+          <button type="button" class="vendor-login-switch" id="switchToPin">Entrar com PIN</button>
         </form>
+
+        <p id="loginError" class="vendor-login-error hidden"></p>
       </div>
     </div>
 

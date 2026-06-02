@@ -199,6 +199,45 @@ body {
   margin: 0;
 }
 
+/* ─── Login por PIN ─── */
+/* Especificidade .vendor-field input.X pra vencer o `.vendor-field input` base. */
+.vendor-field input.vendor-pin-input {
+  text-align: center;
+  font-size: 28px;
+  font-family: var(--font-mono, monospace);
+  letter-spacing: 12px;
+  font-weight: 700;
+  padding-left: 28px; /* compensa o letter-spacing pra centralizar */
+}
+.vendor-field input.vendor-pin-input::placeholder {
+  letter-spacing: 10px;
+  color: var(--vendor-border);
+}
+.vendor-pin-loja {
+  font-size: 12px;
+  color: var(--vendor-text-dim);
+  text-align: center;
+  margin-bottom: -4px;
+}
+.vendor-pin-loja strong {
+  color: var(--vendor-text);
+  text-transform: capitalize;
+}
+.vendor-login-switch {
+  background: none;
+  border: none;
+  color: var(--vendor-accent);
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px;
+  text-align: center;
+}
+.vendor-login-switch:hover {
+  text-decoration: underline;
+}
+
 /* ─── Home screen ─── */
 .vendor-header {
   display: flex;
