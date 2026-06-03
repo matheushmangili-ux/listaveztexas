@@ -232,10 +232,10 @@ function renderHeader() {
   // Avatar: pixel-art DiceBear → foto_url → iniciais
   const avatarUrl = buildAvatarUrl(_ctx.avatar_config);
   if (avatarUrl) {
-    el.headerAvatar.innerHTML = `<img src="${escape(avatarUrl)}" alt="${escape(nome)}">`;
+    el.headerAvatar.innerHTML = `<img src="${escape(avatarUrl)}" alt="${escape(nome)}" decoding="async">`;
     el.headerAvatar.classList.add('has-avatar');
   } else if (_ctx.foto_url) {
-    el.headerAvatar.innerHTML = `<img src="${escape(_ctx.foto_url)}" alt="${escape(nome)}">`;
+    el.headerAvatar.innerHTML = `<img src="${escape(_ctx.foto_url)}" alt="${escape(nome)}" decoding="async">`;
     el.headerAvatar.classList.remove('has-avatar');
   } else {
     el.headerAvatar.textContent = initials(nome);
@@ -434,8 +434,29 @@ function stopPausaSinceTimer() {
 }
 
 // ─── Realtime ───
+// Coalesce rajadas de eventos realtime num único reload. A re-normalização de
+// fila (vendor_start_attendance) dispara N updates de vendedores de uma vez — sem
+// isso cada um viraria um loadContext()+render no app de TODO vendedor da loja
+// (storm de RPC/render → o "pesado" no celular).
+function debounce(fn, ms) {
+  let t = null;
+  return () => {
+    if (t) clearTimeout(t);
+    t = setTimeout(() => {
+      t = null;
+      fn();
+    }, ms);
+  };
+}
+
 function subscribeRealtime() {
   if (_realtimeChannel) _sb.removeChannel(_realtimeChannel);
+
+  const reloadCtx = debounce(async () => {
+    await loadContext();
+    renderAll();
+  }, 350);
+  const reloadStats = debounce(() => loadStats(), 350);
 
   _realtimeChannel = _sb
     .channel('vendor-' + _ctx.vendedor_id)
@@ -447,11 +468,9 @@ function subscribeRealtime() {
         table: 'vendedores',
         filter: 'tenant_id=eq.' + _ctx.tenant_id
       },
-      async () => {
-        // Qualquer mudança de vendedor do tenant pode afetar a posição na fila
-        await loadContext();
-        renderAll();
-      }
+      // Qualquer mudança de vendedor do tenant pode afetar a posição na fila.
+      // Debounced: re-normalização dispara N updates → 1 loadContext só.
+      reloadCtx
     )
     .on(
       'postgres_changes',
@@ -461,8 +480,8 @@ function subscribeRealtime() {
         table: 'atendimentos',
         filter: 'tenant_id=eq.' + _ctx.tenant_id
       },
-      async (payload) => {
-        await loadStats();
+      (payload) => {
+        reloadStats();
         // Se o atendimento é do próprio vendedor e foi finalizado, dispara refresh de XP/missões/conquistas
         // pra capturar XP creditado pelo tablet (admin finaliza → vendor app precisa refletir)
         const row = payload?.new || payload?.old;
