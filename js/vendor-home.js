@@ -16,7 +16,6 @@ import {
 } from './vendor-achievements.js';
 import { initAvatar, unmountAvatar, buildAvatarUrl } from './vendor-avatar.js';
 import { initVm, unmountVm, refreshVm } from './vendor-vm.js';
-import { callAI } from './ai-assist.js';
 
 let _sb = null;
 let _ctx = null; // resultado de get_my_vendedor_context()
@@ -109,6 +108,13 @@ const SAIDA_META = {
   outro: { icon: 'fa-ellipsis', label: 'Outro' }
 };
 
+// Roda fn quando a thread principal estiver ociosa (após o 1º paint). timeout
+// garante que não fica pra trás; fallback pra Safari antigo sem requestIdleCallback.
+function runWhenIdle(fn) {
+  if (typeof requestIdleCallback === 'function') requestIdleCallback(fn, { timeout: 1500 });
+  else setTimeout(fn, 200);
+}
+
 // ─── Public API ───
 export async function initHome(sb) {
   _sb = sb;
@@ -122,18 +128,18 @@ export async function initHome(sb) {
     renderAll();
     subscribeRealtime();
     setupPushNotifications();
-    // Comunicados/corridas — independente, falha silenciosa
-    initAnnouncements(_sb, _ctx).catch((err) => console.warn('[announcements] init falhou:', err));
-    // XP + níveis — independente, falha silenciosa
+    // Essenciais do header (XP strip + avatar) — imediato.
     initXp(_sb).catch((err) => console.warn('[xp] init falhou:', err));
-    // Missões diárias — independente, falha silenciosa
-    initMissions(_sb).catch((err) => console.warn('[missions] init falhou:', err));
-    // Conquistas — independente, falha silenciosa
-    initAchievements(_sb).catch((err) => console.warn('[achievements] init falhou:', err));
-    // Avatar RPG — independente, falha silenciosa
     initAvatar(_sb, _ctx).catch((err) => console.warn('[avatar] init falhou:', err));
-    // VM Photos — independente, falha silenciosa
-    initVm(_sb, _ctx).catch((err) => console.warn('[vm] init falhou:', err));
+    // Secundários (conteúdo de aba + badges): rodam após o 1º paint pra não
+    // competir com a interatividade da home — tira o bind de DOM + as queries do
+    // caminho crítico. Cada um falha em silêncio.
+    runWhenIdle(() => {
+      initAnnouncements(_sb, _ctx).catch((err) => console.warn('[announcements] init falhou:', err));
+      initMissions(_sb).catch((err) => console.warn('[missions] init falhou:', err));
+      initAchievements(_sb).catch((err) => console.warn('[achievements] init falhou:', err));
+      initVm(_sb, _ctx).catch((err) => console.warn('[vm] init falhou:', err));
+    });
   } catch (err) {
     console.error('[initHome] erro:', err);
     window._vendorToast('Erro ao carregar: ' + (err?.message || err), 'error');
@@ -1052,6 +1058,8 @@ async function onAiTips() {
   const atend = parseInt(el.statAtend?.textContent || '0');
   const conv = parseInt(el.statConv?.textContent || '0');
 
+  // ai-assist só é usado aqui (dica sob demanda) → import dinâmico tira do boot.
+  const { callAI } = await import('./ai-assist.js');
   const result = await callAI(
     _sb,
     'vendor-tips',
