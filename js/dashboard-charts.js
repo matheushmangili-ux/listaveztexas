@@ -1650,19 +1650,28 @@ export async function loadTrend(range) {
   const sb = _ctx.sb;
   const tenantId = _ctx.tenantId;
 
-  // Para trend, usar range mínimo de 7 dias para ter contexto visual
+  // Janela do trend. Dia relativo único (Hoje/Ontem) vira 7 dias de contexto —
+  // 1 barra é inútil num gráfico de "evolução". CUSTOM respeita o filtro (era o
+  // bug: o gráfico não acompanhava o dia/mês escolhido); só se for 1 dia mostra
+  // 7 dias TERMINANDO no dia escolhido.
   let trendRange = range;
-  if (
-    _ctx.currentPeriod === PERIODS.HOJE ||
-    _ctx.currentPeriod === PERIODS.ONTEM ||
-    _ctx.currentPeriod === PERIODS.CUSTOM
-  ) {
+  if (_ctx.currentPeriod === PERIODS.HOJE || _ctx.currentPeriod === PERIODS.ONTEM) {
     const end = new Date();
     end.setDate(end.getDate() + 1);
     end.setHours(0, 0, 0, 0);
     const start = new Date(end);
     start.setDate(start.getDate() - 7);
     trendRange = { start: start.toISOString(), end: end.toISOString() };
+  } else if (_ctx.currentPeriod === PERIODS.CUSTOM) {
+    const cs = new Date(range.start);
+    const ce = new Date(range.end);
+    if (ce - cs < 36 * 3600 * 1000) {
+      // ~1 dia → 7 dias de contexto terminando no dia escolhido
+      const start = new Date(ce);
+      start.setDate(start.getDate() - 7);
+      trendRange = { start: start.toISOString(), end: range.end };
+    }
+    // senão (range/mês): usa o range como está → o gráfico acompanha o filtro
   }
   const { data, error } = await sb.rpc('get_daily_trend', { p_inicio: trendRange.start, p_fim: trendRange.end });
   if (error) {
@@ -1747,7 +1756,7 @@ export async function loadTrend(range) {
     yaxis: [
       {
         seriesName: 'Atendimentos',
-        labels: { style: { fontSize: '10px', fontWeight: 500 } },
+        labels: { formatter: (v) => Math.round(v), style: { fontSize: '10px', fontWeight: 500 } },
         forceNiceScale: true,
         min: 0
       },
