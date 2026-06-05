@@ -353,8 +353,8 @@ function renderCalendar() {
   }
   grid.innerHTML = html;
 
-  if (_calStep === 0) hint.textContent = 'Clique no dia inicial';
-  else hint.textContent = 'Clique no dia final';
+  if (_calStep === 0) hint.textContent = 'Escolha o dia (ou “Mês inteiro”)';
+  else hint.textContent = 'Clique no dia final — ou “Aplicar” pra só esse dia';
 }
 
 window.calPick = function (dateStr) {
@@ -414,6 +414,7 @@ window.toggleCalendar = function (e) {
   _calPickEnd = customRangeEnd;
   if (_calPickStart && _calPickEnd) _calStep = 0;
   pop.style.display = 'block';
+  _ensureCalExtras(pop);
   renderCalendar();
   document.querySelectorAll('#periodTabs button').forEach((b) => {
     b.classList.toggle('active', b.dataset.period === 'custom');
@@ -448,6 +449,42 @@ window.calClear = function () {
   document.getElementById('customRangeLabel').style.display = 'none';
   renderCalendar();
 };
+
+// Atalho "Mês inteiro": filtra o mês que está sendo visto (dia 1 → último dia).
+window.calPickMonth = function () {
+  _calJustClicked = true;
+  const last = new Date(_calViewYear, _calViewMonth + 1, 0).getDate();
+  _calPickStart = _dateStr(_calViewYear, _calViewMonth, 1);
+  _calPickEnd = _dateStr(_calViewYear, _calViewMonth, last);
+  _calStep = 0;
+  renderCalendar();
+  applyCalendarRange();
+};
+
+// "Aplicar" a seleção atual. Só o dia inicial escolhido → vira "um dia só".
+window.calApplySingle = function () {
+  _calJustClicked = true;
+  if (!_calPickStart) return;
+  if (!_calPickEnd) _calPickEnd = _calPickStart;
+  _calStep = 0;
+  applyCalendarRange();
+};
+
+// Injeta os atalhos "Mês inteiro" + "Aplicar" no rodapé do calendário (1x).
+// Lógica compartilhada aqui (o popover existe nos 3 dashboards) → DRY, sem editar
+// 3 HTMLs.
+function _ensureCalExtras(pop) {
+  if (!pop || pop.querySelector('.cal-extras')) return;
+  const footer = pop.querySelector('.cal-footer');
+  if (!footer) return;
+  const row = document.createElement('div');
+  row.className = 'cal-extras';
+  row.style.cssText = 'display:flex;gap:8px;margin-top:10px';
+  row.innerHTML =
+    '<button type="button" onclick="calPickMonth()" style="flex:1;padding:9px;border:1px solid var(--border-medium);border-radius:8px;background:transparent;color:var(--text-primary);font-size:12px;font-weight:600;cursor:pointer"><i class="fa-solid fa-calendar-week" style="margin-right:6px;opacity:.7"></i>Mês inteiro</button>' +
+    '<button type="button" onclick="calApplySingle()" style="flex:1;padding:9px;border:none;border-radius:8px;background:var(--accent);color:var(--accent-ink,#fff);font-size:12px;font-weight:700;cursor:pointer">Aplicar</button>';
+  footer.insertAdjacentElement('afterend', row);
+}
 
 let _calJustClicked = false;
 document.addEventListener('click', function (e) {
