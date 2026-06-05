@@ -1698,15 +1698,43 @@ export async function loadTrend(range) {
   if (emptyTrend) emptyTrend.style.display = 'none';
 
   const todayStr = new Date().toISOString().split('T')[0];
-  const todayIdx = data.findIndex((d) => d.dia === todayStr);
-  const xLabels = data.map((d, i) => {
-    const dt = new Date(d.dia + 'T12:00:00');
-    const label = dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-    return i === todayIdx ? label + ' \u2605' : label;
-  });
-  const atend = data.map((d) => d.total_atendimentos);
-  const vendas = data.map((d) => d.total_vendas);
-  const conv = data.map((d) => d.taxa_conversao || 0);
+
+  // #4 \u2014 per\u00edodo longo (> 16 dias, ex.: m\u00eas) agrega em semanas (chunks de 7) pra
+  // n\u00e3o virar 30 barrinhas com scroll lateral. Per\u00edodo curto segue di\u00e1rio.
+  const aggregated = data.length > 16;
+  let rows = data;
+  if (aggregated) {
+    rows = [];
+    for (let i = 0; i < data.length; i += 7) {
+      const chunk = data.slice(i, i + 7);
+      const at = chunk.reduce((s, d) => s + (d.total_atendimentos || 0), 0);
+      const ve = chunk.reduce((s, d) => s + (d.total_vendas || 0), 0);
+      rows.push({
+        dia: chunk[0].dia,
+        total_atendimentos: at,
+        total_vendas: ve,
+        taxa_conversao: at > 0 ? Math.round((ve / at) * 100) : 0
+      });
+    }
+  }
+
+  // T\u00edtulo do card reflete a granularidade (di\u00e1ria \u00d7 semanal). Mant\u00e9m o \u00edcone.
+  const _trendH3 = document.querySelector('#chartTrend')?.closest('.chart-card')?.querySelector('h3');
+  if (_trendH3) {
+    const _icon = _trendH3.querySelector('i');
+    _trendH3.textContent = '';
+    if (_icon) _trendH3.appendChild(_icon);
+    _trendH3.appendChild(
+      document.createTextNode(aggregated ? ' Evolu\u00e7\u00e3o Semanal' : ' Evolu\u00e7\u00e3o Di\u00e1ria')
+    );
+  }
+
+  const todayIdx = aggregated ? -1 : rows.findIndex((d) => d.dia === todayStr);
+  const _fmtDM = (s) => new Date(s + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  const xLabels = rows.map((d, i) => (i === todayIdx ? _fmtDM(d.dia) + ' \u2605' : _fmtDM(d.dia)));
+  const atend = rows.map((d) => d.total_atendimentos);
+  const vendas = rows.map((d) => d.total_vendas);
+  const conv = rows.map((d) => d.taxa_conversao || 0);
 
   // Meta line for conversion
   const metaConv = parseInt(lsGetMeta('meta_conversao', tenantId) || DEFAULT_METAS.conversao);
@@ -1729,8 +1757,30 @@ export async function loadTrend(range) {
             color: '#a8b1ff',
             padding: { left: 4, right: 4, top: 2, bottom: 2 }
           },
-          position: 'right',
-          offsetX: -8
+          position: 'left',
+          offsetX: 4
+        }
+      }
+    ];
+  }
+  // #3 — hoje é dia EM CURSO: a barra baixa não é "dia ruim". Marca como parcial.
+  if (todayIdx >= 0) {
+    annotations.xaxis = [
+      {
+        x: xLabels[todayIdx],
+        borderColor: 'rgba(168, 177, 255,.4)',
+        strokeDashArray: 3,
+        label: {
+          text: 'parcial',
+          orientation: 'horizontal',
+          position: 'top',
+          style: {
+            fontSize: '9px',
+            fontWeight: 700,
+            background: 'rgba(168, 177, 255,.14)',
+            color: '#a8b1ff',
+            padding: { left: 5, right: 5, top: 2, bottom: 2 }
+          }
         }
       }
     ];
@@ -1774,7 +1824,7 @@ export async function loadTrend(range) {
     stroke: { width: [0, 0, 2.5], curve: ['straight', 'straight', 'smooth'] },
     fill: {
       type: ['solid', 'solid', 'gradient'],
-      opacity: [0.85, 0.5, 1],
+      opacity: [0.9, 0.72, 1],
       gradient: {
         shade: 'light',
         type: 'vertical',
