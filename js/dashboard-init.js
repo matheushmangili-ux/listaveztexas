@@ -415,6 +415,7 @@ window.toggleCalendar = function (e) {
   if (_calPickStart && _calPickEnd) _calStep = 0;
   pop.style.display = 'block';
   _ensureCalExtras(pop);
+  _positionCalPopover(pop);
   renderCalendar();
   document.querySelectorAll('#periodTabs button').forEach((b) => {
     b.classList.toggle('active', b.dataset.period === 'custom');
@@ -449,6 +450,23 @@ window.calClear = function () {
   document.getElementById('customRangeLabel').style.display = 'none';
   renderCalendar();
 };
+
+// Posiciona o popover ANCORADO ao chip do calendário. O #calendarPopover é irmão
+// da topbar (não filho do chip), então o CSS `top:100%;left:0` o jogava pro rodapé
+// do container / fora da tela — por isso "não abria". position:fixed + rect do chip
+// resolve, e mantém DRY (vale pros 3 dashboards).
+function _positionCalPopover(pop) {
+  const chip = document.querySelector('#periodTabs [data-period="custom"]');
+  if (!chip) return;
+  const r = chip.getBoundingClientRect();
+  const popW = pop.offsetWidth || 280;
+  let left = Math.round(r.right - popW); // alinha pela direita do chip (tabs à direita)
+  left = Math.max(8, Math.min(left, window.innerWidth - popW - 8)); // não sai da tela
+  pop.style.position = 'fixed';
+  pop.style.top = Math.round(r.bottom) + 'px'; // o gap vem do margin-top:6px do CSS
+  pop.style.left = left + 'px';
+  pop.style.right = 'auto';
+}
 
 // Atalho "Mês inteiro": filtra o mês que está sendo visto (dia 1 → último dia).
 window.calPickMonth = function () {
