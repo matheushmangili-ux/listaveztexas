@@ -72,9 +72,20 @@ function grabRefs() {
   el.outcomeOverlay = document.getElementById('outcomeOverlay');
   el.outcomeSheet = document.getElementById('outcomeSheet');
 
+  el.motivoOverlay = document.getElementById('motivoOverlay');
+  el.motivoSheet = document.getElementById('motivoSheet');
+
   el.demandOverlay = document.getElementById('demandOverlay');
   el.demandSheet = document.getElementById('demandSheet');
   el.demandInput = document.getElementById('vendorDesejadoInput');
+
+  el.leadOverlay = document.getElementById('leadOverlay');
+  el.leadSheet = document.getElementById('leadSheet');
+  el.leadNomeInput = document.getElementById('leadNomeInput');
+  el.leadTelInput = document.getElementById('leadTelInput');
+  el.leadProdutoInput = document.getElementById('leadProdutoInput');
+  el.leadConsent = document.getElementById('leadConsent');
+  el.btnLeadConfirm = document.getElementById('btnLeadConfirm');
 
   el.pausaOverlay = document.getElementById('pausaOverlay');
   el.pausaSheet = document.getElementById('pausaSheet');
@@ -538,23 +549,55 @@ function wireActions() {
     btn.addEventListener('click', () => onMoreAction(btn.dataset.action));
   });
 
-  // Outcome buttons. Não-conversão abre a captura de demanda (produto desejado);
-  // venda/troca finalizam direto.
+  // Outcome buttons. Não-conversão abre o passo de MOTIVO (obrigatório) antes de
+  // qualquer coisa; venda/troca finalizam direto.
   el.outcomeSheet.querySelectorAll('.vendor-outcome-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const outcome = btn.dataset.outcome;
-      if (outcome === 'nao_convertido') openDemandSheet();
+      if (outcome === 'nao_convertido') openMotivoSheet();
       else onFinishAttendance(outcome);
     });
   });
 
-  // Demand sheet (produto desejado na não-conversão)
+  // Motivo da não-conversão (obrigatório). "Só olhando" (e lojas sem captura) vão
+  // pra folha de produto; alta intenção em loja com captura vai pra folha de lead.
+  el.motivoOverlay?.addEventListener('click', closeAllSheets);
+  el.motivoSheet?.querySelectorAll('.vendor-pausa-btn').forEach((btn) => {
+    btn.addEventListener('click', () => onMotivoPick(btn.dataset.motivo));
+  });
+
+  // Demand sheet (produto desejado — não-conversão sem captura de lead)
   el.demandOverlay?.addEventListener('click', closeAllSheets);
   document.getElementById('btnDemandConfirm')?.addEventListener('click', () => {
-    onFinishAttendance('nao_convertido', normalizeProduto(el.demandInput?.value));
+    onFinishAttendance('nao_convertido', {
+      motivo: _pendingMotivo,
+      produtoDesejado: normalizeProduto(el.demandInput?.value)
+    });
   });
   document.getElementById('btnDemandSkip')?.addEventListener('click', () => {
-    onFinishAttendance('nao_convertido', null);
+    onFinishAttendance('nao_convertido', { motivo: _pendingMotivo });
+  });
+
+  // Lead sheet (captura obrigatória na não-conversão de alta intenção)
+  el.leadOverlay?.addEventListener('click', closeAllSheets);
+  el.leadNomeInput?.addEventListener('input', updateLeadBtnState);
+  el.leadTelInput?.addEventListener('input', () => {
+    el.leadTelInput.value = maskTelefone(el.leadTelInput.value);
+    updateLeadBtnState();
+  });
+  document.getElementById('btnLeadBack')?.addEventListener('click', () => {
+    el.leadOverlay?.classList.add('hidden');
+    el.leadSheet?.classList.add('hidden');
+    openMotivoSheet();
+  });
+  el.btnLeadConfirm?.addEventListener('click', () => {
+    onFinishAttendance('nao_convertido', {
+      motivo: _pendingMotivo,
+      produtoDesejado: normalizeProduto(el.leadProdutoInput?.value),
+      clienteNome: (el.leadNomeInput?.value || '').trim(),
+      clienteTelefone: telDigits(el.leadTelInput?.value),
+      contatoAutorizado: !!el.leadConsent?.checked
+    });
   });
 
   // Pausa buttons. "Operacional" abre o sub-sheet de atividade; os outros vão direto.
@@ -645,9 +688,72 @@ async function loadVendorProdutoSugestoes() {
   }
 }
 
+let _pendingMotivo = null;
+
+function openMotivoSheet() {
+  el.outcomeOverlay.classList.add('hidden');
+  el.outcomeSheet.classList.add('hidden');
+  el.leadOverlay?.classList.add('hidden');
+  el.leadSheet?.classList.add('hidden');
+  el.demandOverlay?.classList.add('hidden');
+  el.demandSheet?.classList.add('hidden');
+  _pendingMotivo = null;
+  el.motivoOverlay.classList.remove('hidden');
+  el.motivoSheet.classList.remove('hidden');
+}
+
+// Roteia o motivo escolhido. "Só olhando" = baixa intenção (sem lead). Alta
+// intenção (preço/indecisão/ruptura/outro) abre a folha de lead SÓ se a loja
+// exige captura; senão cai na folha de produto (o motivo ainda é gravado).
+function onMotivoPick(motivo) {
+  _pendingMotivo = motivo;
+  const altaIntencao = motivo !== 'so_olhando';
+  if (altaIntencao && _ctx?.exige_captura_lead) openLeadSheet(motivo);
+  else openDemandSheet();
+}
+
+// Telefone BR: (DD) 9XXXX-XXXX. Guarda só dígitos no banco (bom pro wa.me da F1).
+function telDigits(v) {
+  return (v || '').replace(/\D/g, '').slice(0, 11);
+}
+function maskTelefone(v) {
+  const d = telDigits(v);
+  if (d.length <= 2) return d ? '(' + d : '';
+  if (d.length <= 6) return '(' + d.slice(0, 2) + ') ' + d.slice(2);
+  if (d.length <= 10) return '(' + d.slice(0, 2) + ') ' + d.slice(2, 6) + '-' + d.slice(6);
+  return '(' + d.slice(0, 2) + ') ' + d.slice(2, 7) + '-' + d.slice(7);
+}
+function updateLeadBtnState() {
+  if (!el.btnLeadConfirm) return;
+  const nomeOk = (el.leadNomeInput?.value || '').trim().length >= 2;
+  const telOk = telDigits(el.leadTelInput?.value).length >= 10;
+  el.btnLeadConfirm.disabled = !(nomeOk && telOk);
+}
+
+function showLeadSheet() {
+  el.leadOverlay.classList.remove('hidden');
+  el.leadSheet.classList.remove('hidden');
+}
+function openLeadSheet(motivo) {
+  _pendingMotivo = motivo;
+  el.outcomeOverlay.classList.add('hidden');
+  el.outcomeSheet.classList.add('hidden');
+  el.motivoOverlay?.classList.add('hidden');
+  el.motivoSheet?.classList.add('hidden');
+  if (el.leadNomeInput) el.leadNomeInput.value = '';
+  if (el.leadTelInput) el.leadTelInput.value = '';
+  if (el.leadProdutoInput) el.leadProdutoInput.value = '';
+  if (el.leadConsent) el.leadConsent.checked = true;
+  loadVendorProdutoSugestoes();
+  updateLeadBtnState();
+  showLeadSheet();
+}
+
 function openDemandSheet() {
   el.outcomeOverlay.classList.add('hidden');
   el.outcomeSheet.classList.add('hidden');
+  el.motivoOverlay?.classList.add('hidden');
+  el.motivoSheet?.classList.add('hidden');
   if (el.demandInput) el.demandInput.value = '';
   loadVendorProdutoSugestoes();
   el.demandOverlay.classList.remove('hidden');
@@ -676,8 +782,12 @@ function closeAllSheets() {
   el.canalSheet.classList.add('hidden');
   el.outcomeOverlay.classList.add('hidden');
   el.outcomeSheet.classList.add('hidden');
+  el.motivoOverlay?.classList.add('hidden');
+  el.motivoSheet?.classList.add('hidden');
   el.demandOverlay?.classList.add('hidden');
   el.demandSheet?.classList.add('hidden');
+  el.leadOverlay?.classList.add('hidden');
+  el.leadSheet?.classList.add('hidden');
   el.pausaOverlay.classList.add('hidden');
   el.pausaSheet.classList.add('hidden');
   el.opOverlay?.classList.add('hidden');
@@ -746,18 +856,22 @@ async function onRefresh() {
   }
 }
 
-async function onFinishAttendance(resultado, produtoDesejado) {
+async function onFinishAttendance(resultado, opts) {
+  opts = opts || {};
   closeAllSheets();
   try {
     const { error } = await _sb.rpc('vendor_finish_attendance', {
       p_atend_id: _atendId,
       p_resultado: resultado,
       p_valor: null,
-      p_motivo: null,
+      p_motivo: opts.motivo || null,
       p_detalhe: null,
       p_produto: null,
       p_fidelizado: false,
-      p_produto_desejado: produtoDesejado || null
+      p_produto_desejado: opts.produtoDesejado || null,
+      p_cliente_nome: opts.clienteNome || null,
+      p_cliente_telefone: opts.clienteTelefone || null,
+      p_contato_autorizado: !!opts.contatoAutorizado
     });
     if (error) throw error;
     _atendId = null;
@@ -774,6 +888,13 @@ async function onFinishAttendance(resultado, produtoDesejado) {
     // Checa conquistas desbloqueáveis (non-blocking)
     refreshAchievements().catch((err) => console.warn('[achievements] refresh pós-finish falhou:', err));
   } catch (err) {
+    // Defesa: se o servidor barrou por falta de lead (loja exige captura), reabre
+    // a folha de lead com o que já foi digitado — em vez de um toast genérico.
+    if (String(err?.message || '').includes('LEAD_OBRIGATORIO')) {
+      window._vendorToast('Preencha nome e telefone pra recuperar a venda', 'error');
+      if (_pendingMotivo) showLeadSheet();
+      return;
+    }
     window._vendorToast(err?.message || 'Erro ao finalizar', 'error');
   }
 }

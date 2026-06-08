@@ -124,8 +124,27 @@ Cada fase: migração via MCP + lint + 102 testes + harness onde for visual.
 
 ## 7. Status de execução
 
-- **F0** — migração `sql/59-vendor-lead-capture.sql` escrita (colunas + flag +
-  `vendor_finish_attendance` com enforcement). **Pendente de aplicar** (Supabase
-  MCP desconectado em 2026-06-08; aplicar via reconexão ou SQL Editor). UI do
-  vendor (motivo + folha de lead) vem assim que a migração estiver no ar (pra
-  testar contra a RPC real).
+- **F0 — ENTREGUE (2026-06-08).** Migrações aplicadas em produção via MCP e
+  verificadas:
+  - `sql/59-vendor-lead-capture.sql` (migration `vendor_lead_capture_f0`): colunas
+    `cliente_nome` / `cliente_telefone` / `contato_autorizado`, flag
+    `tenants.exige_captura_lead` (ON pro Texas Center), índice `idx_atend_leads`,
+    `vendor_finish_attendance` 15-arg com gate `LEAD_OBRIGATORIO` (hook XP intacto,
+    sem overload fantasma).
+  - `sql/60-vendor-context-lead-flag.sql` (migration `vendor_context_lead_flag`):
+    `get_my_vendedor_context()` passa a devolver `exige_captura_lead` pro app
+    decidir quando forçar a captura (grants anon/authenticated/service_role
+    recriados).
+  - **UI do vendor:** "Não converteu" → folha de **motivo** (obrigatória). "Só
+    olhando" (e lojas sem captura) caem na folha de produto; alta intenção
+    (preço/indecisão/ruptura/outro) em loja com captura abre a folha de **lead**
+    (nome, telefone com máscara BR, produto com autocomplete, consentimento), com
+    o botão "Finalizar e voltar pra fila" travado até nome + telefone válidos.
+    Telefone é gravado só com dígitos (pronto pro `wa.me` da F1). Defesa: se o
+    servidor barrar com `LEAD_OBRIGATORIO`, a folha reabre com o que foi digitado.
+  - **Verificação:** prettier + eslint + 102 testes verdes; folhas conferidas no
+    DOM via harness; SW cache 181 → 182.
+- **F1 — Recuperação (próxima):** tela "Leads Perdidos" (dashboard + app) +
+  WhatsApp 1-toque + `get_lost_leads`. É o que vira receita.
+- **F2 — Polimento:** dedupe de telefone, métrica de recuperação, toggle opt-in
+  em Configurações, marcar lead como recuperado.

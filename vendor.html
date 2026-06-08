@@ -345,7 +345,28 @@
       </div>
     </div>
 
-    <!-- Bottom sheet: Demanda perdida (produto desejado) — só na não-conversão -->
+    <!-- Bottom sheet: Motivo da não-conversão (obrigatório, 1º passo) -->
+    <div class="vendor-sheet-overlay hidden" id="motivoOverlay"></div>
+    <div class="vendor-sheet hidden" id="motivoSheet">
+      <div class="vendor-sheet-handle"></div>
+      <h3 class="vendor-sheet-title vendor-sheet-title--warning">
+        <i class="fa-solid fa-circle-question"></i>Por que não fechou?
+      </h3>
+      <p class="vendor-sheet-hint">Ajuda a loja a recuperar a venda depois.</p>
+      <div class="vendor-pausa-list">
+        <button class="vendor-pausa-btn" data-motivo="preco"><i class="fa-solid fa-tag"></i> Preço</button>
+        <button class="vendor-pausa-btn" data-motivo="indecisao">
+          <i class="fa-solid fa-hourglass-half"></i> Indecisão
+        </button>
+        <button class="vendor-pausa-btn" data-motivo="so_olhando"><i class="fa-solid fa-eye"></i> Só olhando</button>
+        <button class="vendor-pausa-btn" data-motivo="ruptura">
+          <i class="fa-solid fa-box-open"></i> Não tinha o produto
+        </button>
+        <button class="vendor-pausa-btn" data-motivo="outro"><i class="fa-solid fa-ellipsis"></i> Outro</button>
+      </div>
+    </div>
+
+    <!-- Bottom sheet: Demanda perdida (produto desejado) — "só olhando" / loja sem captura -->
     <div class="vendor-sheet-overlay hidden" id="demandOverlay"></div>
     <div class="vendor-sheet hidden" id="demandSheet">
       <div class="vendor-sheet-handle"></div>
@@ -365,6 +386,51 @@
         <i class="fa-solid fa-check"></i> Finalizar
       </button>
       <button type="button" class="vendor-btn-ghost" id="btnDemandSkip">Pular</button>
+    </div>
+
+    <!-- Bottom sheet: Captura de lead (não-conversão de alta intenção, opt-in da loja) -->
+    <div class="vendor-sheet-overlay hidden" id="leadOverlay"></div>
+    <div class="vendor-sheet hidden" id="leadSheet">
+      <div class="vendor-sheet-handle"></div>
+      <h3 class="vendor-sheet-title vendor-sheet-title--info">
+        <i class="fa-solid fa-user-plus"></i>Quase! Vamos recuperar essa venda
+      </h3>
+      <p class="vendor-sheet-hint">
+        Anote o contato pra loja chamar o cliente depois. Sem nome e telefone, você não volta pra fila.
+      </p>
+      <label class="vendor-field">
+        <span class="vendor-field-label">Nome do cliente</span>
+        <input type="text" id="leadNomeInput" autocomplete="off" placeholder="Ex: João Silva" />
+      </label>
+      <label class="vendor-field">
+        <span class="vendor-field-label">Telefone / WhatsApp</span>
+        <input
+          type="tel"
+          id="leadTelInput"
+          inputmode="numeric"
+          autocomplete="off"
+          placeholder="(00) 00000-0000"
+          maxlength="16"
+        />
+      </label>
+      <label class="vendor-field">
+        <span class="vendor-field-label">Produto desejado (opcional)</span>
+        <input
+          type="text"
+          id="leadProdutoInput"
+          autocomplete="off"
+          placeholder="Ex: Bota Ariat 42"
+          list="vendorProdutoSugestoes"
+        />
+      </label>
+      <label class="vendor-consent">
+        <input type="checkbox" id="leadConsent" checked />
+        <span>Cliente autorizou contato no WhatsApp</span>
+      </label>
+      <button type="button" class="vendor-btn-primary" id="btnLeadConfirm" disabled>
+        <i class="fa-solid fa-check"></i> Finalizar e voltar pra fila
+      </button>
+      <button type="button" class="vendor-btn-ghost" id="btnLeadBack">Voltar</button>
     </div>
 
     <!-- Bottom sheet: Pausa (motivos) -->

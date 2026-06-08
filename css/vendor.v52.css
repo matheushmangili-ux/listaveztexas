@@ -785,6 +785,40 @@ body {
   font-weight: 700;
 }
 
+/* Dica curta abaixo do título (motivo da não-conversão / captura de lead) */
+.vendor-sheet-hint {
+  margin: -8px 0 16px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--vendor-text-dim);
+}
+
+/* Consentimento LGPD na captura de lead — linha tocável (≥48px) */
+.vendor-consent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 13px 16px;
+  min-height: 48px;
+  background: var(--vendor-card);
+  border: 1px solid var(--vendor-border);
+  border-radius: 12px;
+  color: var(--vendor-text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.vendor-consent input[type='checkbox'] {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  accent-color: var(--vendor-accent);
+  cursor: pointer;
+}
+
 /* Canal grid */
 .vendor-canal-grid {
   display: grid;
