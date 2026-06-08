@@ -144,7 +144,17 @@ Cada fase: migração via MCP + lint + 102 testes + harness onde for visual.
     servidor barrar com `LEAD_OBRIGATORIO`, a folha reabre com o que foi digitado.
   - **Verificação:** prettier + eslint + 102 testes verdes; folhas conferidas no
     DOM via harness; SW cache 181 → 182.
-- **F1 — Recuperação (próxima):** tela "Leads Perdidos" (dashboard + app) +
-  WhatsApp 1-toque + `get_lost_leads`. É o que vira receita.
-- **F2 — Polimento:** dedupe de telefone, métrica de recuperação, toggle opt-in
-  em Configurações, marcar lead como recuperado.
+- **F1 — ENTREGUE (2026-06-08).** Recuperação nos dois lados (decisão #4):
+  - `sql/61` (lost_leads_report): `get_lost_leads(inicio, fim, limit)` pro
+    dashboard (lojista), via `get_my_tenant_id`, com nome do vendedor.
+  - `sql/62` (vendor_my_lost_leads): `get_my_lost_leads(limit)` pro app do
+    vendedor, via `auth.uid()`.
+  - **Dashboard:** card "Leads Perdidos" no Operacional + botão WhatsApp 1-toque
+    (mensagem pronta de recuperação). **Vendor:** item "Clientes pra recuperar"
+    no menu Mais → folha com a lista + WhatsApp. Telefone formatado pra exibir,
+    `wa.me` com nome + produto na mensagem.
+  - **Verificação:** E2E transacional em produção (insere lead sintético →
+    lê pelas 2 RPCs → `ROLLBACK`) confirmou os dois caminhos (vendedor "Manoel"
+    resolvido no JOIN) + zero vazamento; prettier/eslint/102 testes verdes.
+- **F2 — Polimento (próxima):** dedupe de telefone, métrica de recuperação,
+  toggle opt-in em Configurações, marcar lead como recuperado.

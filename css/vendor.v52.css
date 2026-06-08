@@ -819,6 +819,86 @@ body {
   cursor: pointer;
 }
 
+/* Meus Leads (F1) — clientes capturados pra recuperar */
+.vendor-leads-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 52vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.vendor-lead-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--vendor-card);
+  border: 1px solid var(--vendor-border);
+  border-radius: 12px;
+}
+.vendor-lead-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.vendor-lead-info strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--vendor-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vendor-lead-info span {
+  font-size: 12px;
+  color: var(--vendor-text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vendor-lead-info small {
+  font-size: 11px;
+  color: var(--vendor-text-dim);
+  opacity: 0.85;
+}
+.vendor-lead-wa {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(37, 211, 102, 0.14);
+  color: #25d366;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition:
+    background 0.15s,
+    transform 0.1s ease;
+}
+.vendor-lead-wa:active {
+  transform: scale(0.94);
+  background: rgba(37, 211, 102, 0.24);
+}
+.vendor-leads-empty {
+  text-align: center;
+  padding: 28px 16px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--vendor-text-dim);
+}
+.vendor-leads-empty .fa-solid {
+  display: block;
+  font-size: 22px;
+  margin-bottom: 8px;
+  color: var(--vendor-success);
+  opacity: 0.5;
+}
+
 /* Canal grid */
 .vendor-canal-grid {
   display: grid;

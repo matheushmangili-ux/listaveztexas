@@ -274,6 +274,13 @@
             <span>Personalizar aparência</span>
           </div>
         </button>
+        <button class="vendor-more-item" data-action="leads">
+          <i class="fa-solid fa-user-clock"></i>
+          <div class="vendor-more-text">
+            <strong>Clientes pra recuperar</strong>
+            <span>Leads que você anotou</span>
+          </div>
+        </button>
         <button class="vendor-more-item danger" data-action="logout">
           <i class="fa-solid fa-right-from-bracket"></i>
           <div class="vendor-more-text">
@@ -282,6 +289,19 @@
           </div>
         </button>
       </div>
+    </div>
+
+    <!-- Bottom sheet: Meus Leads (clientes capturados pra recuperar) -->
+    <div class="vendor-sheet-overlay hidden" id="vendorLeadsOverlay"></div>
+    <div class="vendor-sheet hidden" id="vendorLeadsSheet">
+      <div class="vendor-sheet-handle"></div>
+      <h3 class="vendor-sheet-title vendor-sheet-title--info">
+        <i class="fa-solid fa-user-clock"></i>Clientes pra recuperar
+      </h3>
+      <p class="vendor-sheet-hint">
+        Os contatos que você anotou. Chame no WhatsApp quando o produto chegar ou tiver condição.
+      </p>
+      <div id="vendorLeadsList" class="vendor-leads-list"></div>
     </div>
 
     <!-- Bottom sheet: Conquistas -->

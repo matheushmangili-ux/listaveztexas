@@ -103,6 +103,9 @@ function grabRefs() {
   el.tabBadgeVm = document.getElementById('tabBadgeVm');
   el.moreOverlay = document.getElementById('moreOverlay');
   el.moreSheet = document.getElementById('moreSheet');
+  el.vendorLeadsOverlay = document.getElementById('vendorLeadsOverlay');
+  el.vendorLeadsSheet = document.getElementById('vendorLeadsSheet');
+  el.vendorLeadsList = document.getElementById('vendorLeadsList');
   el.primaryActions = document.getElementById('primaryActions');
 
   el.pushPromptCard = document.getElementById('pushPromptCard');
@@ -548,6 +551,7 @@ function wireActions() {
   el.moreSheet?.querySelectorAll('[data-action]').forEach((btn) => {
     btn.addEventListener('click', () => onMoreAction(btn.dataset.action));
   });
+  el.vendorLeadsOverlay?.addEventListener('click', closeVendorLeadsSheet);
 
   // Outcome buttons. Não-conversão abre o passo de MOTIVO (obrigatório) antes de
   // qualquer coisa; venda/troca finalizam direto.
@@ -1129,6 +1133,9 @@ function onMoreAction(action) {
       case 'avatar':
         window._vendorAvatarOpen?.();
         break;
+      case 'leads':
+        openVendorLeadsSheet();
+        break;
       case 'logout':
         window._vendorLogout && window._vendorLogout();
         break;
@@ -1140,6 +1147,80 @@ function onMoreAction(action) {
 function _openSheetById(sheetId, overlayId) {
   document.getElementById(overlayId)?.classList.remove('hidden');
   document.getElementById(sheetId)?.classList.remove('hidden');
+}
+
+// ─── Meus Leads (F1: o vendedor recupera os contatos que ele capturou) ───
+const VENDOR_MOTIVO_LABELS = {
+  preco: 'Preço',
+  ruptura: 'Não tinha',
+  indecisao: 'Indecisão',
+  so_olhando: 'Só olhando',
+  outro: 'Outro'
+};
+
+function _fmtTelBR(d) {
+  const s = String(d || '').replace(/\D/g, '');
+  if (s.length === 11) return `(${s.slice(0, 2)}) ${s.slice(2, 7)}-${s.slice(7)}`;
+  if (s.length === 10) return `(${s.slice(0, 2)}) ${s.slice(2, 6)}-${s.slice(6)}`;
+  return d || '';
+}
+
+// wa.me com mensagem pronta. Telefone guardado só com dígitos → prefixa 55.
+function _leadWaUrl(tel, nome, produto) {
+  const d = String(tel || '').replace(/\D/g, '');
+  const fone = d.length >= 12 ? d : '55' + d;
+  const primeiro = (nome || '').trim().split(/\s+/)[0] || '';
+  const prod = produto ? ` procurando ${produto}` : '';
+  const msg = `Oi ${primeiro}! 👋 Você passou aqui na loja${prod}. Deu tudo certo na sua busca ou posso te ajudar a encontrar?`;
+  return `https://wa.me/${fone}?text=${encodeURIComponent(msg)}`;
+}
+
+function closeVendorLeadsSheet() {
+  el.vendorLeadsOverlay?.classList.add('hidden');
+  el.vendorLeadsSheet?.classList.add('hidden');
+}
+
+async function openVendorLeadsSheet() {
+  const list = el.vendorLeadsList;
+  if (!list) return;
+  const esc = (s) =>
+    String(s == null ? '' : s).replace(
+      /[&<>"]/g,
+      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]
+    );
+  list.innerHTML = '<div class="vendor-leads-empty">Carregando…</div>';
+  el.vendorLeadsOverlay?.classList.remove('hidden');
+  el.vendorLeadsSheet?.classList.remove('hidden');
+  try {
+    const { data, error } = await _sb.rpc('get_my_lost_leads', { p_limit: 30 });
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      list.innerHTML =
+        '<div class="vendor-leads-empty"><i class="fa-solid fa-circle-check"></i>Nenhum cliente pendente. Quando você anotar um contato numa não-conversão, ele aparece aqui pra você recuperar.</div>';
+      return;
+    }
+    list.innerHTML = data
+      .map((r) => {
+        const motivo = VENDOR_MOTIVO_LABELS[r.motivo] || r.motivo || '—';
+        const prod = r.produto ? esc(r.produto) : 'sem produto';
+        const quando = new Date(r.quando).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+        const url = _leadWaUrl(r.cliente_telefone, r.cliente_nome, r.produto);
+        return `<div class="vendor-lead-item">
+          <div class="vendor-lead-info">
+            <strong>${esc(r.cliente_nome || 'Cliente')}</strong>
+            <span>${prod} · ${esc(motivo)}</span>
+            <small>${esc(_fmtTelBR(r.cliente_telefone))} · ${quando}</small>
+          </div>
+          <a class="vendor-lead-wa" href="${url}" target="_blank" rel="noopener" aria-label="Chamar ${esc(r.cliente_nome || 'cliente')} no WhatsApp">
+            <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
+          </a>
+        </div>`;
+      })
+      .join('');
+  } catch (err) {
+    list.innerHTML = '<div class="vendor-leads-empty">Não consegui carregar agora. Tente de novo.</div>';
+    console.warn('[leads] erro ao carregar:', err);
+  }
 }
 
 function updateTabBadges() {
