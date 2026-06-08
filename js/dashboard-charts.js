@@ -519,6 +519,7 @@ export async function loadAll() {
     ['ruptures', loadRuptures(range)],
     ['ruptureImpact', loadRuptureImpact(range)],
     ['demand', loadDemandReport(range)],
+    ['leads', loadLostLeads(range)],
     ['pauseStats', loadPauseStats(range)],
     ['floor', loadFloor()],
     ['scatter', loadScatter(range, cachedRanking)],
@@ -1235,6 +1236,72 @@ window._dashDemandExport = function () {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+};
+
+// ─── Leads Perdidos (F1: recuperação) ───
+// Lê get_lost_leads (nao_convertido + contato_autorizado capturados na F0).
+// Card só existe no operacional; esconde se vazio. WhatsApp 1-toque por item.
+let _leadsData = [];
+
+const fmtTelBR = (d) => {
+  const s = String(d || '').replace(/\D/g, '');
+  if (s.length === 11) return `(${s.slice(0, 2)}) ${s.slice(2, 7)}-${s.slice(7)}`;
+  if (s.length === 10) return `(${s.slice(0, 2)}) ${s.slice(2, 6)}-${s.slice(6)}`;
+  return d || '';
+};
+
+export async function loadLostLeads(range) {
+  const sb = _ctx.sb;
+  const card = document.getElementById('leadsCard');
+  const list = document.getElementById('leadsList');
+  const counter = document.getElementById('leadsCount');
+  if (!card || !list) return;
+
+  const { data, error } = await sb.rpc('get_lost_leads', {
+    p_inicio: range.start,
+    p_fim: range.end,
+    p_limit: 50
+  });
+  if (error || !data || data.length === 0) {
+    card.style.display = 'none';
+    _leadsData = [];
+    return;
+  }
+  card.style.display = '';
+  _leadsData = data;
+  if (counter) counter.textContent = `${data.length} ${data.length === 1 ? 'LEAD' : 'LEADS'}`;
+
+  list.innerHTML = data
+    .map((r, i) => {
+      const motivoLabel = DEMAND_MOTIVO_LABELS[r.motivo] || r.motivo || '—';
+      const prod = r.produto ? escapeHtml(r.produto) : '<span style="opacity:.55">sem produto</span>';
+      const quando = new Date(r.quando).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      return `<div class="rupture-item">
+        <div style="min-width:0">
+          <div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(r.cliente_nome || 'Cliente')}</div>
+          <div style="font-size:11px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${prod} · ${escapeHtml(motivoLabel)}</div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:2px">${escapeHtml(fmtTelBR(r.cliente_telefone))} · ${escapeHtml(r.vendedor || '—')} · ${quando}</div>
+        </div>
+        <button class="lead-wa-btn" type="button" onclick="window._dashLeadWhatsapp(${i})" title="Chamar no WhatsApp" aria-label="Chamar ${escapeHtml(r.cliente_nome || 'cliente')} no WhatsApp">
+          <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
+        </button>
+      </div>`;
+    })
+    .join('');
+}
+
+// Abre o WhatsApp com mensagem pronta de recuperação. Telefone guardado só com
+// dígitos (DDD+número) na F0 → prefixa 55 se não vier com DDI.
+window._dashLeadWhatsapp = function (i) {
+  const r = _leadsData[i];
+  if (!r) return;
+  const tel = String(r.cliente_telefone || '').replace(/\D/g, '');
+  if (!tel) return;
+  const nome = (r.cliente_nome || '').trim().split(/\s+/)[0] || '';
+  const prod = r.produto ? ` procurando ${r.produto}` : '';
+  const msg = `Oi ${nome}! 👋 Vi que você passou aqui na loja${prod}. Deu tudo certo na sua busca ou posso te ajudar a encontrar?`;
+  const fone = tel.length >= 12 ? tel : '55' + tel;
+  window.open(`https://wa.me/${fone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
 };
 
 // ─── Pause Log (semantic cards) ───

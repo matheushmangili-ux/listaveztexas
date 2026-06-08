@@ -255,6 +255,41 @@
                 <div id="demandList"></div>
               </div>
             </div>
+            <div class="chart-card" id="leadsCard" style="display: none">
+              <div class="chart-card-header" onclick="toggleSection('leads')">
+                <h3>
+                  <i class="fa-solid fa-user-clock" style="margin-right: 6px; color: var(--accent)"></i>Leads Perdidos —
+                  Clientes pra Recuperar
+                  <span
+                    id="leadsCount"
+                    style="
+                      margin-left: 8px;
+                      font-size: 10px;
+                      font-weight: 700;
+                      color: var(--text-muted);
+                      letter-spacing: 0.08em;
+                    "
+                  ></span>
+                </h3>
+                <button
+                  class="collapse-btn"
+                  id="collapseBtn-leads"
+                  type="button"
+                  aria-label="Recolher/expandir Leads Perdidos"
+                  aria-expanded="true"
+                  aria-controls="collapseBody-leads"
+                  onclick="
+                    event.stopPropagation();
+                    toggleSection('leads');
+                  "
+                >
+                  <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                </button>
+              </div>
+              <div class="chart-card-body" id="collapseBody-leads" style="margin-top: 16px">
+                <div id="leadsList"></div>
+              </div>
+            </div>
             <div class="chart-card">
               <div class="chart-card-header" onclick="toggleSection('pausas')">
                 <h3>

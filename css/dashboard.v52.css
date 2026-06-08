@@ -978,6 +978,32 @@
   text-align: center;
 }
 
+/* Botão WhatsApp 1-toque nos Leads Perdidos (verde da marca WhatsApp) */
+.lead-wa-btn {
+  flex-shrink: 0;
+  margin-left: 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(37, 211, 102, 0.12);
+  color: #25d366;
+  font-size: 17px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.15s,
+    transform 0.1s ease;
+}
+.lead-wa-btn:hover {
+  background: rgba(37, 211, 102, 0.2);
+}
+.lead-wa-btn:active {
+  transform: scale(0.94);
+}
+
 /* ─── Pause Log ─── */
 .pause-log {
   display: flex;
