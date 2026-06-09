@@ -156,5 +156,13 @@ Cada fase: migração via MCP + lint + 102 testes + harness onde for visual.
   - **Verificação:** E2E transacional em produção (insere lead sintético →
     lê pelas 2 RPCs → `ROLLBACK`) confirmou os dois caminhos (vendedor "Manoel"
     resolvido no JOIN) + zero vazamento; prettier/eslint/102 testes verdes.
-- **F2 — Polimento (próxima):** dedupe de telefone, métrica de recuperação,
-  toggle opt-in em Configurações, marcar lead como recuperado.
+- **F2-A — ENTREGUE (2026-06-09):** marcar lead como "recuperado" (fecha o loop).
+  `sql/63` (lead_recuperado): colunas `lead_recuperado`/`lead_recuperado_em` +
+  `mark_lead_recuperado` (via `get_my_tenant_id`, serve lojista e vendedor);
+  `get_lost_leads` passa a trazer o flag (pendentes primeiro, inclui recuperados
+  pra contar) e `get_my_lost_leads` some os já recuperados. Dashboard: contador
+  "X pra recuperar · Y recuperados" + botão marcar/desmarcar, item recuperado
+  esmaecido. Vendor: botão "já recuperei" tira o lead da lista. E2E transacional
+  confirmou (vendedor_pendentes 0 · dash recuperado true). prettier/eslint/102 ok.
+- **F2-B — restante:** toggle opt-in (`exige_captura_lead`) em Configurações +
+  dedupe de telefone na captura.

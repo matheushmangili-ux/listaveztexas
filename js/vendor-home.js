@@ -1214,12 +1214,33 @@ async function openVendorLeadsSheet() {
           <a class="vendor-lead-wa" href="${url}" target="_blank" rel="noopener" aria-label="Chamar ${esc(r.cliente_nome || 'cliente')} no WhatsApp">
             <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
           </a>
+          <button class="vendor-lead-done" type="button" data-atend="${esc(r.atend_id)}" title="Já recuperei" aria-label="Marcar ${esc(r.cliente_nome || 'cliente')} como recuperado">
+            <i class="fa-solid fa-check" aria-hidden="true"></i>
+          </button>
         </div>`;
       })
       .join('');
+    list.querySelectorAll('.vendor-lead-done').forEach((b) => {
+      b.addEventListener('click', () => onMarkVendorLeadRecuperado(b.dataset.atend));
+    });
   } catch (err) {
     list.innerHTML = '<div class="vendor-leads-empty">Não consegui carregar agora. Tente de novo.</div>';
     console.warn('[leads] erro ao carregar:', err);
+  }
+}
+
+// Marca o lead como recuperado (o vendedor já chamou o cliente) e recarrega a
+// folha — o recuperado some da lista (server filtra lead_recuperado=false).
+async function onMarkVendorLeadRecuperado(atendId) {
+  if (!atendId) return;
+  try {
+    const { error } = await _sb.rpc('mark_lead_recuperado', { p_atend_id: atendId, p_recuperado: true });
+    if (error) throw error;
+    window._vendorToast?.('Boa! Cliente recuperado 🎉', 'success');
+    openVendorLeadsSheet();
+  } catch (err) {
+    window._vendorToast?.('Não consegui marcar agora', 'error');
+    console.warn('[leads] mark recuperado falhou:', err);
   }
 }
 

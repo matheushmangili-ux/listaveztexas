@@ -978,16 +978,21 @@
   text-align: center;
 }
 
-/* Botão WhatsApp 1-toque nos Leads Perdidos (verde da marca WhatsApp) */
-.lead-wa-btn {
+/* Ações dos Leads Perdidos: WhatsApp 1-toque + marcar recuperado */
+.lead-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   flex-shrink: 0;
   margin-left: 10px;
+}
+.lead-wa-btn,
+.lead-check-btn {
+  flex-shrink: 0;
   width: 40px;
   height: 40px;
   border-radius: 10px;
   border: 1px solid var(--border-subtle);
-  background: rgba(37, 211, 102, 0.12);
-  color: #25d366;
   font-size: 17px;
   cursor: pointer;
   display: flex;
@@ -995,13 +1000,35 @@
   justify-content: center;
   transition:
     background 0.15s,
+    color 0.15s,
+    border-color 0.15s,
     transform 0.1s ease;
+}
+/* WhatsApp (verde da marca) */
+.lead-wa-btn {
+  background: rgba(37, 211, 102, 0.12);
+  color: #25d366;
 }
 .lead-wa-btn:hover {
   background: rgba(37, 211, 102, 0.2);
 }
-.lead-wa-btn:active {
+/* Marcar recuperado (neutro → success no hover; is-done = recuperado) */
+.lead-check-btn {
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+.lead-check-btn:hover,
+.lead-check-btn.is-done {
+  color: var(--success);
+  border-color: var(--success);
+}
+.lead-wa-btn:active,
+.lead-check-btn:active {
   transform: scale(0.94);
+}
+.rupture-item.is-recovered {
+  opacity: 0.6;
 }
 
 /* ─── Pause Log ─── */

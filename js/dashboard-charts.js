@@ -1240,8 +1240,10 @@ window._dashDemandExport = function () {
 
 // ─── Leads Perdidos (F1: recuperação) ───
 // Lê get_lost_leads (nao_convertido + contato_autorizado capturados na F0).
-// Card só existe no operacional; esconde se vazio. WhatsApp 1-toque por item.
+// Card só existe no operacional; esconde se vazio. WhatsApp 1-toque + marcar
+// recuperado (F2-A) por item. _leadsRange guarda o período pra recarregar.
 let _leadsData = [];
+let _leadsRange = null;
 
 const fmtTelBR = (d) => {
   const s = String(d || '').replace(/\D/g, '');
@@ -1256,6 +1258,7 @@ export async function loadLostLeads(range) {
   const list = document.getElementById('leadsList');
   const counter = document.getElementById('leadsCount');
   if (!card || !list) return;
+  _leadsRange = range;
 
   const { data, error } = await sb.rpc('get_lost_leads', {
     p_inicio: range.start,
@@ -1269,22 +1272,37 @@ export async function loadLostLeads(range) {
   }
   card.style.display = '';
   _leadsData = data;
-  if (counter) counter.textContent = `${data.length} ${data.length === 1 ? 'LEAD' : 'LEADS'}`;
+  const recuperados = data.filter((r) => r.recuperado).length;
+  const pendentes = data.length - recuperados;
+  if (counter) {
+    counter.textContent =
+      `${pendentes} PRA RECUPERAR` +
+      (recuperados > 0 ? ` · ${recuperados} RECUPERADO${recuperados === 1 ? '' : 'S'}` : '');
+  }
 
   list.innerHTML = data
     .map((r, i) => {
       const motivoLabel = DEMAND_MOTIVO_LABELS[r.motivo] || r.motivo || '—';
       const prod = r.produto ? escapeHtml(r.produto) : '<span style="opacity:.55">sem produto</span>';
       const quando = new Date(r.quando).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-      return `<div class="rupture-item">
+      const nome = escapeHtml(r.cliente_nome || 'Cliente');
+      const actions = r.recuperado
+        ? `<button class="lead-check-btn is-done" type="button" onclick="window._dashLeadMarkRecuperado(${i}, false)" title="Voltar pra pendente" aria-label="Desfazer recuperado de ${nome}">
+            <i class="fa-solid fa-check" aria-hidden="true"></i>
+          </button>`
+        : `<button class="lead-wa-btn" type="button" onclick="window._dashLeadWhatsapp(${i})" title="Chamar no WhatsApp" aria-label="Chamar ${nome} no WhatsApp">
+            <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
+          </button>
+          <button class="lead-check-btn" type="button" onclick="window._dashLeadMarkRecuperado(${i}, true)" title="Marcar como recuperado" aria-label="Marcar ${nome} como recuperado">
+            <i class="fa-solid fa-check" aria-hidden="true"></i>
+          </button>`;
+      return `<div class="rupture-item${r.recuperado ? ' is-recovered' : ''}">
         <div style="min-width:0">
-          <div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(r.cliente_nome || 'Cliente')}</div>
+          <div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${nome}</div>
           <div style="font-size:11px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${prod} · ${escapeHtml(motivoLabel)}</div>
           <div style="font-size:10px;color:var(--text-muted);margin-top:2px">${escapeHtml(fmtTelBR(r.cliente_telefone))} · ${escapeHtml(r.vendedor || '—')} · ${quando}</div>
         </div>
-        <button class="lead-wa-btn" type="button" onclick="window._dashLeadWhatsapp(${i})" title="Chamar no WhatsApp" aria-label="Chamar ${escapeHtml(r.cliente_nome || 'cliente')} no WhatsApp">
-          <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
-        </button>
+        <div class="lead-actions">${actions}</div>
       </div>`;
     })
     .join('');
@@ -1302,6 +1320,22 @@ window._dashLeadWhatsapp = function (i) {
   const msg = `Oi ${nome}! 👋 Vi que você passou aqui na loja${prod}. Deu tudo certo na sua busca ou posso te ajudar a encontrar?`;
   const fone = tel.length >= 12 ? tel : '55' + tel;
   window.open(`https://wa.me/${fone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
+};
+
+// Marca/desmarca o lead como recuperado e recarrega a lista (pendentes primeiro).
+window._dashLeadMarkRecuperado = async function (i, recuperado) {
+  const r = _leadsData[i];
+  if (!r || !r.atend_id) return;
+  try {
+    const { error } = await _ctx.sb.rpc('mark_lead_recuperado', {
+      p_atend_id: r.atend_id,
+      p_recuperado: !!recuperado
+    });
+    if (error) throw error;
+    if (_leadsRange) await loadLostLeads(_leadsRange);
+  } catch (e) {
+    console.error('[leads] mark recuperado falhou:', e);
+  }
 };
 
 // ─── Pause Log (semantic cards) ───
