@@ -164,5 +164,11 @@ Cada fase: migração via MCP + lint + 102 testes + harness onde for visual.
   "X pra recuperar · Y recuperados" + botão marcar/desmarcar, item recuperado
   esmaecido. Vendor: botão "já recuperei" tira o lead da lista. E2E transacional
   confirmou (vendedor_pendentes 0 · dash recuperado true). prettier/eslint/102 ok.
-- **F2-B — restante:** toggle opt-in (`exige_captura_lead`) em Configurações +
-  dedupe de telefone na captura.
+- **F2-B — ENTREGUE (2026-06-09):** toggle opt-in em Configurações → Geral (seção
+  "Recuperação de Leads") que grava `tenants.exige_captura_lead` na hora (caminho
+  RLS do lojista já provado pelo nome_loja; UPDATE/SELECT da coluna confirmados
+  pro `authenticated`). Switch reaproveitável `.mv-switch`.
+- **Dedupe de telefone — DEFERIDO (decisão sênior):** o mesmo cliente voltando 2×
+  é **sinal de intenção**, não ruído — bloquear/mesclar esconderia recompra e
+  subnotificaria a demanda. Reavaliar só se aparecer spam real (ex.: vendedor
+  digitando o mesmo número pra burlar o gate).

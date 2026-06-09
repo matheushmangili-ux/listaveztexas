@@ -540,6 +540,69 @@
         border-color: var(--accent);
         color: var(--accent);
       }
+      /* Política de captura de lead (F2-B) — linha + toggle */
+      .lead-policy-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        cursor: pointer;
+      }
+      .lead-policy-text {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .lead-policy-text strong {
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+      .lead-policy-text span {
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--text-muted);
+      }
+      .mv-switch {
+        position: relative;
+        flex-shrink: 0;
+        display: inline-flex;
+        margin-top: 2px;
+      }
+      .mv-switch input {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        margin: 0;
+        cursor: pointer;
+      }
+      .mv-switch-track {
+        width: 46px;
+        height: 26px;
+        border-radius: 999px;
+        background: var(--border-strong, rgba(128, 128, 128, 0.4));
+        display: inline-flex;
+        align-items: center;
+        padding: 3px;
+        transition: background 0.15s;
+      }
+      .mv-switch-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+        transition: transform 0.15s;
+      }
+      .mv-switch input:checked + .mv-switch-track {
+        background: var(--accent);
+      }
+      .mv-switch input:checked + .mv-switch-track .mv-switch-thumb {
+        transform: translateX(20px);
+      }
+      .mv-switch input:focus-visible + .mv-switch-track {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
     </style>
     <script src="/js/components/mv-logo.js" defer></script>
   </head>
@@ -670,6 +733,28 @@
               <button class="btn btn-primary" onclick="saveStoreSettings()" style="width: 100%">
                 <i class="fa-solid fa-floppy-disk"></i> Salvar alterações
               </button>
+            </div>
+
+            <!-- Recuperação de Leads (F2-B: opt-in da captura na não-conversão) -->
+            <div class="settings-section">
+              <h2><i class="fa-solid fa-user-clock"></i> Recuperação de Leads</h2>
+              <div class="settings-card">
+                <label class="lead-policy-row">
+                  <div class="lead-policy-text">
+                    <strong>Exigir contato na não-conversão</strong>
+                    <span>
+                      Quando o vendedor marca "não converteu" por preço, indecisão, ruptura ou outro, ele precisa anotar
+                      nome e telefone do cliente antes de voltar pra fila. Os contatos viram a lista
+                      <strong>Leads Perdidos</strong>, pra recuperar a venda no WhatsApp. ("Só olhando" nunca pede
+                      contato.)
+                    </span>
+                  </div>
+                  <span class="mv-switch">
+                    <input type="checkbox" id="settLeadCapture" onchange="saveLeadCapturePolicy(this.checked)" />
+                    <span class="mv-switch-track"><span class="mv-switch-thumb"></span></span>
+                  </span>
+                </label>
+              </div>
             </div>
 
             <!-- Dashboard -->
@@ -1314,6 +1399,7 @@
 
         // Populate UI
         document.getElementById('settStoreName').value = tenant.nome_loja || '';
+        document.getElementById('settLeadCapture').checked = !!tenant.exige_captura_lead;
         const color = tenant.cor_primaria || '#a8b1ff';
         document.getElementById('settColor').value = color;
         document.getElementById('settColorText').value = color;
@@ -1421,6 +1507,19 @@
         }
         toast('Configurações salvas!', 'success');
         applyBranding({ ...tenant, nome_loja: name, cor_primaria: isElite ? color : tenant.cor_primaria });
+      };
+
+      // Política de captura de lead (F2-B) — salva na hora ao alternar o toggle.
+      window.saveLeadCapturePolicy = async function (enabled) {
+        const toggle = document.getElementById('settLeadCapture');
+        const { error } = await sb.from('tenants').update({ exige_captura_lead: !!enabled }).eq('id', tenantId);
+        if (error) {
+          toast('Erro ao salvar: ' + error.message, 'error');
+          if (toggle) toggle.checked = !enabled; // reverte o toggle
+          return;
+        }
+        tenant.exige_captura_lead = !!enabled;
+        toast(enabled ? 'Captura de lead ativada' : 'Captura de lead desativada', 'success');
       };
 
       // Links
