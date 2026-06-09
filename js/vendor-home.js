@@ -141,6 +141,7 @@ export async function initHome(sb) {
     await Promise.all([loadCanais(), loadStats()]);
     renderAll();
     subscribeRealtime();
+    bindVisibilityResync();
     setupPushNotifications();
     // Essenciais do header (XP strip + avatar) — imediato.
     initXp(_sb).catch((err) => console.warn('[xp] init falhou:', err));
@@ -348,16 +349,31 @@ async function renderIdle() {
   // posicao_fila é um contador monotônico (max+1 ao finalizar/cadastrar), NÃO um
   // rank 1..N — então a posição mostrada e o "na frente" vêm do RANK DENSO da fila
   // viva do setor, nunca do valor cru (senão um número grande vira "22 na frente").
-  const { data: filaData } = await _sb
-    .from('vendedores')
-    .select('id, nome, apelido, posicao_fila')
-    .eq('tenant_id', _ctx.tenant_id)
-    .eq('setor', _ctx.setor || 'loja')
-    .eq('status', 'disponivel')
-    .not('posicao_fila', 'is', null)
-    .order('posicao_fila');
+  // Fila viva do setor + atendimentos ABERTOS do turno, em paralelo. A guarda dos
+  // ativos espelha o tablet (a fonte correta): quem tem atendimento aberto NÃO
+  // entra na fila mesmo que o status no banco ainda diga 'disponivel' (corrida ao
+  // iniciar/finalizar — o resíduo do bug do "duplicado"). Sem isso o vendor conta
+  // um fantasma na frente e a posição não bate com a do tablet.
+  const [{ data: filaData }, { data: abertos }] = await Promise.all([
+    _sb
+      .from('vendedores')
+      .select('id, nome, apelido, posicao_fila')
+      .eq('tenant_id', _ctx.tenant_id)
+      .eq('setor', _ctx.setor || 'loja')
+      .eq('status', 'disponivel')
+      .not('posicao_fila', 'is', null)
+      .order('posicao_fila'),
+    _ctx.turno_aberto_id
+      ? _sb
+          .from('atendimentos')
+          .select('vendedor_id')
+          .eq('turno_id', _ctx.turno_aberto_id)
+          .eq('resultado', 'em_andamento')
+      : Promise.resolve({ data: [] })
+  ]);
 
-  const queue = filaData || [];
+  const ativos = new Set((abertos || []).map((a) => a.vendedor_id));
+  const queue = (filaData || []).filter((v) => !ativos.has(v.id));
   const myIdx = queue.findIndex((v) => v.id === _ctx.vendedor_id);
   const rank = myIdx >= 0 ? myIdx + 1 : queue.length || 1; // fallback: fim da fila
   const ahead = Math.max(0, rank - 1);
@@ -467,6 +483,35 @@ function debounce(fn, ms) {
       fn();
     }, ms);
   };
+}
+
+// Re-sincroniza contexto/fila/stats quando o app volta do segundo plano (ou a
+// rede volta). No mobile o websocket de realtime pausa em background → a posição
+// na fila congelaria até o próximo evento, e o tablet (kiosk sempre ligado)
+// pareceria o único certo. Guarda contra reentrância e só roda se a aba está
+// visível e logada.
+let _visibilityBound = false;
+let _resyncing = false;
+async function resyncNow() {
+  if (_resyncing || !_ctx) return;
+  _resyncing = true;
+  try {
+    await loadContext();
+    await loadStats();
+    renderAll();
+  } catch (e) {
+    console.warn('[vendor] resync ao focar falhou:', e);
+  } finally {
+    _resyncing = false;
+  }
+}
+function bindVisibilityResync() {
+  if (_visibilityBound) return;
+  _visibilityBound = true;
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') resyncNow();
+  });
+  window.addEventListener('online', resyncNow);
 }
 
 function subscribeRealtime() {
