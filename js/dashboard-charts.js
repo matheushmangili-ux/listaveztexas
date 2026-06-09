@@ -526,7 +526,8 @@ export async function loadAll() {
     ['tempoMeta', loadTempoMeta(range, cachedRanking)],
     ['trend', loadTrend(range)],
     ['preferenciais', loadPreferenciais(range)],
-    ['origem', loadOrigem(range)]
+    ['origem', loadOrigem(range)],
+    ['canalFill', loadCanalFillRate(range)]
   ];
   const results = await Promise.allSettled(loaders.map(([, p]) => p));
   results.forEach((r, i) => {
@@ -2063,6 +2064,31 @@ export async function loadOrigem(range) {
       }
     })
   );
+}
+
+// % de atendimentos COM canal informado (métrica do teste "vendor-only": com o
+// tablet fora, o canal vira auto-report do vendedor — isto mede se o dado segura).
+// Fonte própria porque get_canal_stats só conta quem TEM canal. Cor por faixa.
+export async function loadCanalFillRate(range) {
+  const box = document.getElementById('canalFillRate');
+  if (!box) return;
+  const { data, error } = await _ctx.sb.rpc('get_canal_fill_rate', {
+    p_inicio: range.start,
+    p_fim: range.end
+  });
+  const row = Array.isArray(data) ? data[0] : data;
+  const total = Number(row?.total || 0);
+  if (error || total === 0) {
+    box.style.display = 'none';
+    return;
+  }
+  const com = Number(row?.com_canal || 0);
+  const pct = Math.round((com / total) * 100);
+  box.style.color = pct >= 80 ? 'var(--success)' : pct >= 50 ? 'var(--warning)' : 'var(--danger)';
+  box.style.display = '';
+  box.innerHTML =
+    `<i class="fa-solid fa-clipboard-check" aria-hidden="true"></i> <strong>${pct}%</strong> dos atendimentos com canal informado ` +
+    `<span style="opacity:.6;font-weight:400">(${com}/${total})</span>`;
 }
 
 // ─── Chart section tabs ───
