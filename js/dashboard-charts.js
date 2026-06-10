@@ -1579,7 +1579,8 @@ export async function loadTempoMeta(range, cachedData) {
       style: { fontSize: '11px', fontWeight: 700, colors: [chartColors().datalabel] }
     },
     legend: { show: false },
-    tooltip: { y: { formatter: (v) => Math.round(v) + ' min' } }
+    // formatTempo: >60min vira "1h 23min" — consistente com KPIs e log de pausas
+    tooltip: { y: { formatter: (v) => formatTempo(v) } }
   });
 }
 

@@ -103,7 +103,13 @@ screenshot quando o renderer colaborar) + bump SW + push autorizado.
 - [x] D1 — fundação dos charts (2026-06-10: preset rico aditivo c/
       reduced-motion, animate só na 1ª render, skeleton de chart, hover
       consolidado — CSSOM confirma 1 light + 1 dark + a regra do expand-btn)
-- [ ] D2 — tooltips & hovers
+- [x] D2 — tooltips & hovers (2026-06-10). Escopo HONESTO após reler as
+      configs: trend/hourly/heros já tinham tooltips bem pensados (shared c/
+      formatter por série; hero fixed topRight) — o que faltava neles era o
+      theme, que a D1 resolveu no preset. Entregue de fato: hover nas listas
+      (.rupture-item — pause-log já tinha), tooltip do tempoMeta em formatTempo
+      ("1h 30min"), e a unificação de theme via D1. Crosshair global descartado
+      (deep-merge em xaxis arriscaria clobber das configs por chart).
 - [ ] D3 — KPIs
 - [ ] D4 — sidebar
 - [ ] D5 — a11y + extras

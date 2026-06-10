@@ -991,6 +991,11 @@
   justify-content: space-between;
   padding: 10px 12px;
   border-bottom: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition);
+}
+.rupture-item:hover {
+  background: var(--bg-hover);
 }
 .rupture-item:last-child {
   border-bottom: none;
