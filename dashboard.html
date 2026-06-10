@@ -41,6 +41,7 @@
     <script type="module" src="/js/analytics.js"></script>
     <script src="/js/components/mv-logo.js" defer></script>
     <script src="/js/components/mv-sidebar.js" defer></script>
+    <script src="/js/components/mv-topbar.js" defer></script>
   </head>
   <body>
     <div class="dash-layout">
@@ -59,110 +60,7 @@
 
       <!-- Main content -->
       <div class="dash-main">
-        <!-- Topbar Stripe: Overview title + period chips + theme toggle -->
-        <div class="topbar-stripe">
-          <h1 class="topbar-title">Visão Geral</h1>
-          <div class="topbar-actions">
-            <div class="period-tabs" id="periodTabs" role="tablist">
-              <button data-period="hoje" class="active" onclick="setPeriod('hoje')">Hoje</button>
-              <button data-period="ontem" onclick="setPeriod('ontem')">Ontem</button>
-              <button data-period="semana" onclick="setPeriod('semana')">Semana</button>
-              <button data-period="mes" onclick="setPeriod('mes')">Mês</button>
-              <button
-                data-period="custom"
-                onclick="toggleCalendar(event)"
-                title="Período personalizado"
-                style="position: relative"
-              >
-                <i class="fa-solid fa-calendar-days icon-sm"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-        <!-- Subhead: tenant + city + last updated + next sync -->
-        <div class="topbar-subhead" id="topbarSubhead">
-          <span id="subheadTenant">—</span>
-          <span class="sub-sep">·</span>
-          <span id="subheadCity"><i class="fa-solid fa-location-dot"></i> —</span>
-          <span class="sub-sep">·</span>
-          <span>Atualizado há <span id="subheadUpdated">--</span></span>
-          <span
-            id="customRangeLabel"
-            style="display: none; margin-left: 12px; color: var(--accent); font-weight: 600"
-          ></span>
-        </div>
-        <!-- Calendar Popover (float absolute, anchored ao chip do calendário) -->
-        <div id="calendarPopover" class="cal-popover" style="display: none">
-          <div class="cal-header">
-            <button class="cal-nav" onclick="calNav(-1)" aria-label="M\u00eas anterior" type="button">
-              <i class="fa-solid fa-chevron-left"></i>
-            </button>
-            <span id="calMonthLabel" class="cal-month-label"></span>
-            <button class="cal-nav" onclick="calNav(1)" aria-label="Pr\u00f3ximo m\u00eas" type="button">
-              <i class="fa-solid fa-chevron-right"></i>
-            </button>
-          </div>
-          <div class="cal-weekdays">
-            <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
-          </div>
-          <div class="cal-grid" id="calGrid"></div>
-          <div class="cal-footer">
-            <span id="calSelectionHint" class="cal-hint">Clique no dia inicial</span>
-            <button class="cal-clear" onclick="calClear()">Limpar</button>
-          </div>
-        </div>
-        <!-- Filter row: Setor + Vendedor + Export -->
-        <div class="topbar-filter-card">
-          <div class="filter-bar">
-            <label>Setor:</label>
-            <select id="filterSetor" onchange="onSetorChange()">
-              <option value="">Todos os setores</option>
-            </select>
-            <label>Vendedor:</label>
-            <select id="filterVendedor">
-              <option value="">Todos os vendedores</option>
-            </select>
-            <button class="filter-apply-btn" onclick="applyFilters()" title="Aplicar filtros">
-              <i class="fa-solid fa-filter"></i> Aplicar
-            </button>
-            <button
-              class="filter-clear-btn"
-              id="filterClearBtn"
-              onclick="clearFilters()"
-              title="Limpar filtros"
-              style="display: none"
-            >
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-          </div>
-          <div class="export-dropdown" id="exportDropdown">
-            <button
-              class="filter-apply-btn"
-              onclick="document.getElementById('exportMenu').classList.toggle('open')"
-              title="Exportar dados"
-            >
-              <i class="fa-solid fa-file-export"></i> Exportar
-            </button>
-            <div id="exportMenu" class="export-menu">
-              <button
-                onclick="
-                  exportCSV();
-                  document.getElementById('exportMenu').classList.remove('open');
-                "
-              >
-                <i class="fa-solid fa-file-csv icon-success"></i> CSV
-              </button>
-              <button
-                onclick="
-                  exportPDF();
-                  document.getElementById('exportMenu').classList.remove('open');
-                "
-              >
-                <i class="fa-solid fa-file-pdf icon-danger"></i> PDF
-              </button>
-            </div>
-          </div>
-        </div>
+        <mv-topbar page-title="Visão Geral"></mv-topbar>
 
         <!-- Status Marquee -->
         <div id="statusMarquee" class="status-marquee">
