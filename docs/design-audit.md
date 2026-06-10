@@ -121,3 +121,27 @@
 | **5** | B4 (fatiar charts.js) + G6 (hierarquia dashboard)                  | M/L     | manutenção barata + leitura executiva |
 
 Cada leva: lint + 102 testes + harness visual + bump SW + push autorizado.
+
+### Status de execução (2026-06-10) — TODAS ENTREGUES
+
+- **L1 ✅** (`3e175cb`): type scale no tokens + vendor varrido (157 decl.) +
+  Apex pinado `5.14.0`. G4 verificado: o app **já cumpria** a política de emoji
+  (achados eram WhatsApp/toast/medalha) — nada removido, vale pra código novo.
+- **L2 ✅** (`98637ab`): dashboards/styles na escala (app: 447 → ~37 font-size
+  crus, todos intencionais), radius exato em token + `--radius-pill`; miolo
+  10/12px deferido pra passada com screenshot-diff (anotado no tokens.css).
+  Anatomia `.item-*` + `.card-kicker` nos templates de Rupturas/Demanda/Leads.
+- **L3 ✅** (`2e836ce`): `<mv-topbar>` (−318 linhas de markup colado 3×),
+  eventos delegados (sem `onclick=`), fix a11y do aria-label com `ês`
+  literal que o leitor de tela lia cru.
+- **L4 ✅** (`4847039`): settings modular (2303 → 792 linhas) — e a extração
+  expôs um **bug real**: o botão de billing usava globals que só existem nos
+  dashboards (ReferenceError desde sempre); corrigido. `.empty-state` único.
+  Guardas no pre-push: ratchet de hex (141) + trava de bump do SW.
+- **L5 ✅**: B4-lite — `js/dashboard-cards.js` (Demanda/Leads/CanalFill, os
+  cards que crescem com as features; 243 l) com re-export compat — 23 exports
+  do charts preservados. Pausas/Rupturas **ficam** no charts de propósito
+  (dependem de BRAND_PALETTE/formatTempo; mover criaria ciclo de import).
+  G6 verificado **já-adequado**: pós-"Opção C" o overview tem 7 cards numa
+  seção e `setChartTab` é stub; o operacional já colapsa por card. Mudar a IA
+  na marra seria regressão de decisão de produto, não polish.
