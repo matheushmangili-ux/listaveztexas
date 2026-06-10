@@ -70,6 +70,10 @@
   Quina e respiro consistentes são 50% do "parece produto".
 - **G4 · Política de emoji**: só em toast/celebração (level-up, lead recuperado).
   Labels, títulos e mensagens fixas usam ícone (FA solid) ou nada.
+  _Verificado na leva 1 (2026-06-10): o app JÁ cumpre — os achados eram conteúdo
+  de mensagem WhatsApp (👋, vai pro cliente), toasts (⭐🎉), push (🎯) e medalhas
+  de ranking (🥇🥈🥉 — iconografia de gamificação intencional). Nenhuma remoção;
+  a política vale pra código novo._
 - **G5 · Empty states padronizados**: um padrão único (ícone ghost + título +
   ação) — hoje cada card tem o seu, uns com ícone, outros não.
 - **G6 · Hierarquia do dashboard** (anti "parede de cards"): linha de KPIs →

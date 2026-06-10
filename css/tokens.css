@@ -101,6 +101,22 @@
   --font-mono: 'Inter Tight', system-ui, -apple-system, sans-serif;
   --font-display: 'Inter Tight', system-ui, sans-serif;
 
+  /* Type scale (G1 do design-audit) — fonte única de font-size no app.
+     Data-dense ops app: passos de 1px no miolo (10–14) são intencionais, como
+     Linear/Stripe. <10px fica fora (é dimensionamento de ícone/dot, não texto);
+     display one-off (32/36/48/72) fica raw no uso. Tamanhos novos SEMPRE via
+     token — px cru de font-size em CSS novo é regressão. */
+  --text-2xs: 10px; /* kicker/badge — uppercase + tracking */
+  --text-xs: 11px; /* label, hint, meta */
+  --text-sm: 12px; /* texto secundário */
+  --text-base: 13px; /* corpo padrão */
+  --text-md: 14px; /* corpo enfatizado, botão */
+  --text-lg: 16px; /* input (≥16 evita zoom iOS), título de card */
+  --text-xl: 18px; /* título de folha/seção */
+  --text-2xl: 20px; /* número destacado, ícone grande */
+  --text-3xl: 22px; /* stat médio */
+  --text-4xl: 28px; /* número hero */
+
   /* Radius */
   --radius: 14px;
   --radius-sm: 8px;
