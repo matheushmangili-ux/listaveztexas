@@ -1004,8 +1004,7 @@ export async function loadRanking(range, cachedData) {
   }
   const data = cachedData;
   if (!data || data.length === 0) {
-    body.innerHTML =
-      '<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text-muted)">Sem dados no período</div>';
+    body.innerHTML = '<div class="empty-state empty-state--span">Sem dados no período</div>';
     return;
   }
 
@@ -1082,7 +1081,7 @@ export async function loadRuptures(range) {
   }
   if (!data || data.length === 0) {
     el.innerHTML =
-      '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px"><i class="fa-solid fa-check-circle" style="font-size:20px;margin-bottom:8px;display:block;color:var(--success);opacity:.4"></i>Nenhuma ruptura registrada</div>';
+      '<div class="empty-state"><i class="fa-solid fa-check-circle" aria-hidden="true"></i>Nenhuma ruptura registrada</div>';
     return;
   }
   el.innerHTML = data
@@ -1348,7 +1347,7 @@ export async function loadPauseStats(range) {
   if (!el) return;
   if (error || !data || data.length === 0) {
     el.innerHTML =
-      '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px"><i class="fa-solid fa-check-circle" style="font-size:20px;margin-bottom:8px;display:block;color:var(--success);opacity:.4"></i>Nenhuma pausa registrada</div>';
+      '<div class="empty-state"><i class="fa-solid fa-check-circle" aria-hidden="true"></i>Nenhuma pausa registrada</div>';
     return;
   }
   const motivoLabels = {

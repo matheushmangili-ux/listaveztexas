@@ -3,7 +3,7 @@
 // Uso: node scripts/gen-icons.mjs
 
 import { Resvg } from '@resvg/resvg-js';
-import { writeFileSync, readFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 

@@ -978,6 +978,26 @@
   text-align: center;
 }
 
+/* ─── Empty state padrão (G5 do design-audit) ───
+   Um padrão único pros cards sem dado: ícone ghost + frase. O modificador
+   --span ocupa a linha inteira em containers grid. */
+.empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-muted);
+  font-size: var(--text-base);
+}
+.empty-state > i {
+  display: block;
+  font-size: var(--text-2xl);
+  margin-bottom: 8px;
+  color: var(--success);
+  opacity: 0.4;
+}
+.empty-state--span {
+  grid-column: 1 / -1;
+}
+
 /* ─── Anatomia de item de lista (G2 do design-audit) ───
    Linhas dos cards Demanda/Leads (e futuros): substitui os estilos inline dos
    templates JS por classes. Ellipsis exige min-width:0 no filho flex (.item-main). */
