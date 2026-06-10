@@ -110,6 +110,17 @@ screenshot quando o renderer colaborar) + bump SW + push autorizado.
       (.rupture-item — pause-log já tinha), tooltip do tempoMeta em formatTempo
       ("1h 30min"), e a unificação de theme via D1. Crosshair global descartado
       (deep-merge em xaxis arriscaria clobber das configs por chart).
-- [ ] D3 — KPIs
-- [ ] D4 — sidebar
-- [ ] D5 — a11y + extras
+- [x] D3 — KPIs (2026-06-10): inversão semântica nos deltas (não convertidos e
+      tempo médio caindo agora ficam VERDES — antes subiam verdes, errado) +
+      tooltip "vs. período anterior: X → Y" nos 6. tnum já era global (body) e
+      o skeleton de KPI era CSS morto (não aplicado nem nos heros) — countUp já
+      suaviza; não implantado.
+- [x] D4 — sidebar (2026-06-10): tooltip CSS-only no rail colapsado (11 itens,
+      hover E foco), :focus-visible nos links, backdrop do drawer mobile com
+      fecho por clique-fora e ESC (injetado pelo componente, inerte no desktop).
+      Transição de largura já existia (grid 0.22s) — verificado, não refeito.
+- [x] D5 — a11y + extras (2026-06-10): role="img" + aria-label automático em
+      todo chart-box (via renderChart, sem editar 3 HTMLs), showChartError no
+      padrão .empty-state (+ modificador --error), botão "Baixar PNG" no modal
+      de expand (dataURI scale 2 — lojista manda no WhatsApp). Lazy-render
+      deferido (medir antes).

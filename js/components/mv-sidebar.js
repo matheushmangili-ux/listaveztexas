@@ -52,6 +52,7 @@
           <button
             type="button"
             class="sidebar-link sidebar-dropdown-trigger sidebar-link--active"
+            data-tip="Dashboard"
             aria-expanded="true"
             onclick="window.toggleDashDropdown && window.toggleDashDropdown()"
           >
@@ -65,12 +66,12 @@
             ${sublink('operacional', 'dashboard-operacional.html', 'Operacional', activeView === 'operacional')}
           </div>
         </div>
-        <a id="linkTablet" href="#" class="sidebar-link">
+        <a id="linkTablet" href="#" class="sidebar-link" data-tip="Tablet">
           <i class="fa-solid fa-tablet-screen-button"></i>
           <span>Tablet</span>
         </a>
         <a
-          id="linkAnnouncements"
+          id="linkAnnouncements" data-tip="Comunicados"
           href="#"
           class="sidebar-link"
           onclick="event.preventDefault(); window._dashAnnouncementsOpen && window._dashAnnouncementsOpen();"
@@ -79,7 +80,7 @@
           <span>Comunicados</span>
         </a>
         <a
-          id="linkXpConfig"
+          id="linkXpConfig" data-tip="Gamificação"
           href="#"
           class="sidebar-link"
           onclick="event.preventDefault(); window._dashXpConfigOpen && window._dashXpConfigOpen();"
@@ -88,7 +89,7 @@
           <span>Gamificação</span>
         </a>
         <a
-          id="linkMissions"
+          id="linkMissions" data-tip="Missões"
           href="#"
           class="sidebar-link"
           onclick="event.preventDefault(); window._dashMissionsOpen && window._dashMissionsOpen();"
@@ -97,7 +98,7 @@
           <span>Missões</span>
         </a>
         <a
-          id="linkVm"
+          id="linkVm" data-tip="VM Photos"
           href="#"
           class="sidebar-link"
           onclick="event.preventDefault(); window._dashVmOpen && window._dashVmOpen();"
@@ -106,7 +107,7 @@
           <span>VM Photos</span>
         </a>
         <a
-          id="linkAi"
+          id="linkAi" data-tip="IA Assist"
           href="#"
           class="sidebar-link"
           onclick="event.preventDefault(); window._dashAiOpen && window._dashAiOpen();"
@@ -114,7 +115,7 @@
           <i class="fa-solid fa-wand-magic-sparkles"></i>
           <span>IA Assist</span>
         </a>
-        <a id="linkSettings" href="#" class="sidebar-link">
+        <a id="linkSettings" href="#" class="sidebar-link" data-tip="Configurações">
           <i class="fa-solid fa-gear"></i>
           <span>Configurações</span>
         </a>
@@ -126,6 +127,7 @@
       <div class="sidebar-footer">
         <button
           class="sidebar-link sidebar-collapse-btn"
+          data-tip="Expandir/Recolher"
           type="button"
           onclick="window.toggleSidebarCollapse && window.toggleSidebarCollapse()"
           aria-label="Recolher menu"
@@ -134,11 +136,11 @@
           <i class="fa-solid fa-angles-left"></i>
           <span>Recolher</span>
         </button>
-        <button class="sidebar-link" onclick="window.minhavezTour?.start('dashboard')" aria-label="Rever tour">
+        <button class="sidebar-link" data-tip="Rever tour" onclick="window.minhavezTour?.start('dashboard')" aria-label="Rever tour">
           <i class="fa-solid fa-circle-question"></i>
           <span>Rever tour</span>
         </button>
-        <button class="sidebar-link sidebar-link--danger" onclick="handleLogout()" aria-label="Sair">
+        <button class="sidebar-link sidebar-link--danger" data-tip="Sair" onclick="handleLogout()" aria-label="Sair">
           <i class="fa-solid fa-right-from-bracket"></i>
           <span>Sair</span>
         </button>
@@ -162,6 +164,16 @@
       // Substitui o <mv-sidebar> pelo <aside> real: DOM final idêntico ao inline
       // antigo, sem wrapper que quebraria o flex do .dash-layout.
       this.replaceWith(aside);
+
+      // Drawer mobile (D4): backdrop fecha no clique fora; ESC também. O
+      // backdrop é inerte fora do breakpoint (CSS só o ativa em <=768px).
+      const backdrop = document.createElement('div');
+      backdrop.className = 'sidebar-backdrop';
+      backdrop.addEventListener('click', () => aside.classList.remove('open'));
+      aside.insertAdjacentElement('afterend', backdrop);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') aside.classList.remove('open');
+      });
     }
   }
 

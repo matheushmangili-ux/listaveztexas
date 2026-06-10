@@ -265,12 +265,11 @@ function chartColors() {
 function showChartError(el, key) {
   if (!el) return;
   el.innerHTML =
-    '<div style="display:flex;align-items:center;justify-content:center;height:100%;min-height:200px;color:var(--text-muted);font-size:12px;text-align:center;padding:20px">' +
-    '<div><i class="fa-solid fa-triangle-exclamation" style="font-size:24px;margin-bottom:8px;opacity:.6"></i>' +
-    '<div>Erro ao renderizar gráfico</div>' +
-    '<div style="font-size:10px;opacity:.6;margin-top:4px">' +
+    '<div class="empty-state empty-state--error"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>' +
+    'Erro ao renderizar gráfico' +
+    '<div class="item-end-sub" style="margin-top:4px">' +
     key +
-    '</div></div></div>';
+    '</div></div>';
 }
 
 // Preset global dos charts (D1 do dashboard-polish). ADITIVO: só preenche o que
@@ -323,6 +322,10 @@ function renderChart(key, selector, options) {
     if (card) {
       const title = card.querySelector('h3')?.textContent?.trim().replace(/\s+/g, ' ') || key;
       ensureExpandBtn(card, key, title);
+      // A11y (D5): leitor de tela anuncia o gráfico em vez de pular o SVG
+      const box = el.closest('.chart-box') || el;
+      box.setAttribute('role', 'img');
+      box.setAttribute('aria-label', 'Gráfico: ' + title);
     }
   }
   const type = options.chart && options.chart.type;
@@ -390,6 +393,35 @@ export function expandChart(key, title) {
   const titleEl = document.getElementById('chartExpandTitle');
   if (!modal || !body) return;
   if (titleEl) titleEl.textContent = title || 'Detalhe';
+
+  // "Baixar PNG" (D5): injetado uma vez no header do modal; lê a instância do
+  // chart NO CLIQUE (body._expandedChart é setado mais abaixo, no render).
+  let pngBtn = document.getElementById('chartExpandPng');
+  if (!pngBtn && titleEl) {
+    pngBtn = document.createElement('button');
+    pngBtn.id = 'chartExpandPng';
+    pngBtn.type = 'button';
+    pngBtn.className = 'collapse-btn';
+    pngBtn.title = 'Baixar PNG';
+    pngBtn.setAttribute('aria-label', 'Baixar gráfico em PNG');
+    pngBtn.innerHTML = '<i class="fa-solid fa-download" aria-hidden="true"></i>';
+    titleEl.insertAdjacentElement('afterend', pngBtn);
+  }
+  if (pngBtn) {
+    pngBtn.onclick = async () => {
+      try {
+        const inst = body._expandedChart;
+        if (!inst) return;
+        const { imgURI } = await inst.dataURI({ scale: 2 });
+        const a = document.createElement('a');
+        a.href = imgURI;
+        a.download = (title || 'grafico').toLowerCase().replace(/[^a-z0-9]+/gi, '-') + '.png';
+        a.click();
+      } catch (e) {
+        console.warn('[expand] dataURI falhou:', e);
+      }
+    };
+  }
 
   // Limpa instancia anterior (se houver) antes de re-renderizar
   if (body._expandedChart) {
@@ -660,20 +692,24 @@ export async function loadKPIs(range, prevRange) {
     const el = document.getElementById(id);
     if (el) el.textContent = v;
   };
-  const setDelta = (id, now, before) => {
+  // invert=true: queda é BOA (não convertidos, tempo médio) — a seta segue a
+  // direção real, mas a COR segue o significado (D3 do dashboard-polish).
+  const setDelta = (id, now, before, invert = false) => {
     const el = document.getElementById(id);
     if (!el) return;
+    el.title = 'vs. período anterior: ' + (before ?? 0) + ' → ' + (now ?? 0);
     if (!before) {
       el.textContent = now > 0 ? '↑ novo' : '';
       el.classList.remove('up', 'down');
-      if (now > 0) el.classList.add('up');
+      if (now > 0) el.classList.add(invert ? 'down' : 'up');
       return;
     }
     const pct = ((now - before) / before) * 100;
     const arrow = pct >= 0 ? '↑' : '↓';
+    const good = invert ? pct < 0 : pct >= 0;
     el.textContent = arrow + ' ' + Math.abs(pct).toFixed(0) + '%';
-    el.classList.toggle('up', pct >= 0);
-    el.classList.toggle('down', pct < 0);
+    el.classList.toggle('up', good);
+    el.classList.toggle('down', !good);
   };
   const tNow = d.total_atendimentos || 0;
   const tPrev = p.total_atendimentos || 0;
@@ -688,10 +724,10 @@ export async function loadKPIs(range, prevRange) {
   setText('kpiConvNow', convAtual + '%');
   setText('kpiConvPrev', convAnterior + '%');
   setDelta('kpiConvDelta', convAtual, convAnterior);
-  // Secondary deltas (loss, pref, time)
-  setDelta('kpiLossDelta', d.total_nao_convertido || 0, p.total_nao_convertido || 0);
+  // Secondary deltas (loss, pref, time) — loss e tempo invertidos: cair é bom
+  setDelta('kpiLossDelta', d.total_nao_convertido || 0, p.total_nao_convertido || 0, true);
   setDelta('kpiPrefDelta', prefCurr, prefPrev);
-  setDelta('kpiTimeDelta', d.tempo_medio_min || 0, p.tempo_medio_min || 0);
+  setDelta('kpiTimeDelta', d.tempo_medio_min || 0, p.tempo_medio_min || 0, true);
 
   // ─── KPI Sparklines (Conversão + Tempo) ───
   // Sparklines are populated from trend data in loadTrend()
