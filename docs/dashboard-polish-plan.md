@@ -100,7 +100,9 @@ screenshot quando o renderer colaborar) + bump SW + push autorizado.
 
 ## 4. Status
 
-- [ ] D1 — fundação dos charts
+- [x] D1 — fundação dos charts (2026-06-10: preset rico aditivo c/
+      reduced-motion, animate só na 1ª render, skeleton de chart, hover
+      consolidado — CSSOM confirma 1 light + 1 dark + a regra do expand-btn)
 - [ ] D2 — tooltips & hovers
 - [ ] D3 — KPIs
 - [ ] D4 — sidebar

@@ -230,6 +230,8 @@ function donutConfig({ labels, values, colors, total, centerLabel, tooltipFn, ev
 export function initDashboardCharts(ctx) {
   _ctx = ctx;
   initDashboardCards(ctx);
+  // Skeleton de chart (D1): shimmer até o primeiro loadAll terminar.
+  document.querySelectorAll('.chart-box').forEach((b) => b.classList.add('is-loading'));
   // Tabs foram removidos (Op\u00e7\u00e3o C): todas as sections renderizam linearmente.
   // Stub setChartTab pra compat com c\u00f3digo antigo que ainda possa chamar.
   window.setChartTab = () => {};
@@ -271,11 +273,40 @@ function showChartError(el, key) {
     '</div></div></div>';
 }
 
+// Preset global dos charts (D1 do dashboard-polish). ADITIVO: só preenche o que
+// o chart não declarou — config específica sempre vence. Exceção: reduced-motion
+// desliga animação SEMPRE (o reset CSS global não alcança animação JS do Apex).
 function applyChartDefaults(options) {
+  const c = chartColors();
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!options.chart) options.chart = {};
   options.chart.fontFamily = options.chart.fontFamily || "'Inter Tight', system-ui, sans-serif";
   if (!options.chart.toolbar) options.chart.toolbar = { show: false };
-  if (!options.chart.animations) options.chart.animations = { enabled: true, easing: 'easeinout', speed: 600 };
+  if (!options.chart.animations) {
+    options.chart.animations = {
+      enabled: !reduced,
+      easing: 'easeinout',
+      speed: 400,
+      animateGradually: { enabled: false },
+      dynamicAnimation: { enabled: !reduced, speed: 300 }
+    };
+  } else if (reduced) {
+    options.chart.animations.enabled = false;
+  }
+  // Grid padrão por token — mesmo respiro e cor em todos os charts.
+  if (!options.grid) {
+    options.grid = { borderColor: c.grid, strokeDashArray: 3, padding: { left: 8, right: 8 } };
+  }
+  // Tooltip theme casa com o tema atual (charts com custom function mantêm a sua).
+  if (!options.tooltip) options.tooltip = {};
+  if (!options.tooltip.theme) options.tooltip.theme = isDarkTheme() ? 'dark' : 'light';
+  // Hover/active sutis no lugar do darken agressivo default do Apex.
+  if (!options.states) {
+    options.states = {
+      hover: { filter: { type: 'lighten', value: 0.04 } },
+      active: { allowMultipleDataPointsSelection: false, filter: { type: 'darken', value: 0.12 } }
+    };
+  }
 }
 
 // ApexCharts helper — reusa o chart existente quando possível (updateOptions)
@@ -296,10 +327,11 @@ function renderChart(key, selector, options) {
   }
   const type = options.chart && options.chart.type;
 
-  // Fast path: reusa chart existente com mesmo tipo
+  // Fast path: reusa chart existente com mesmo tipo. animate=false: anima só na
+  // PRIMEIRA render — update de período/realtime troca o dado sem "dançar" (D1).
   if (charts[key] && chartTypes[key] === type) {
     try {
-      charts[key].updateOptions(options, false, true, true);
+      charts[key].updateOptions(options, false, false, true);
       return charts[key];
     } catch (err) {
       console.warn('[renderChart:' + key + '] updateOptions falhou, recriando:', err?.message || err);
@@ -540,6 +572,8 @@ export async function loadAll() {
       console.error('[dashboard.loadAll:' + loaders[i][0] + '] falhou:', r.reason);
     }
   });
+  // Fim do skeleton (D1): dados chegaram (ou falharam com erro visível).
+  document.querySelectorAll('.chart-box.is-loading').forEach((b) => b.classList.remove('is-loading'));
   _ctx.updateTimestamp();
 }
 
