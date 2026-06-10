@@ -24,7 +24,7 @@ body {
      de largura — assumimos isso ao aposentar o JetBrains Mono (Inter Tight só). */
   font-feature-settings: 'ss01', 'cv11', 'tnum';
   overflow-x: hidden;
-  font-size: 14px;
+  font-size: var(--text-md);
   line-height: 1.5;
   letter-spacing: -0.005em;
 }
@@ -143,25 +143,25 @@ h3,
   font-size: 9px;
 }
 .fs-10 {
-  font-size: 10px;
+  font-size: var(--text-2xs);
 }
 .fs-11 {
-  font-size: 11px;
+  font-size: var(--text-xs);
 }
 .fs-12 {
-  font-size: 12px;
+  font-size: var(--text-sm);
 }
 .fs-13 {
-  font-size: 13px;
+  font-size: var(--text-base);
 }
 .fs-14 {
-  font-size: 14px;
+  font-size: var(--text-md);
 }
 .fs-16 {
-  font-size: 16px;
+  font-size: var(--text-lg);
 }
 .fs-18 {
-  font-size: 18px;
+  font-size: var(--text-xl);
 }
 
 .uppercase {
@@ -234,7 +234,7 @@ h3,
   border-radius: 10px;
   font-family: var(--font-body);
   font-weight: 600;
-  font-size: 13px;
+  font-size: var(--text-base);
   cursor: pointer;
   transition:
     background-color var(--transition),
@@ -307,7 +307,7 @@ h3,
   border-radius: 10px;
   color: var(--text-primary);
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: var(--text-md);
   font-weight: 500;
   outline: none;
   transition: border-color var(--transition);
@@ -386,7 +386,7 @@ h3,
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-weight: 700;
-  font-size: 12px;
+  font-size: var(--text-sm);
   flex-shrink: 0;
 }
 
@@ -397,7 +397,7 @@ h3,
   gap: 5px;
   padding: 3px 8px;
   border-radius: var(--radius-sm);
-  font-size: 10px;
+  font-size: var(--text-2xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -503,7 +503,7 @@ h3,
   background: rgba(168, 177, 255, 0.06);
 }
 .motivo-option i {
-  font-size: 18px;
+  font-size: var(--text-xl);
   width: 24px;
   text-align: center;
 }
@@ -521,7 +521,7 @@ h3,
   margin-bottom: 6px;
 }
 .kpi-label {
-  font-size: 11px;
+  font-size: var(--text-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -532,7 +532,7 @@ h3,
   gap: 6px;
 }
 .kpi-label i {
-  font-size: 13px;
+  font-size: var(--text-base);
   opacity: 0.5;
 }
 /* Variation badge pills — harmonizados mint/coral */
@@ -636,11 +636,11 @@ h3,
 @media (min-width: 768px) and (max-width: 1280px) {
   .btn {
     min-height: 48px;
-    font-size: 14px;
+    font-size: var(--text-md);
   }
   .input {
     min-height: 48px;
-    font-size: 15px;
+    font-size: var(--text-lg);
   }
   .queue-item {
     padding: 14px 16px;
@@ -649,30 +649,30 @@ h3,
   .queue-position {
     width: 32px;
     height: 32px;
-    font-size: 13px;
+    font-size: var(--text-base);
   }
   .motivo-option {
     padding: 18px 20px;
     min-height: 56px;
   }
   .motivo-option i {
-    font-size: 20px;
+    font-size: var(--text-2xl);
   }
   .timer-display {
     font-size: 56px;
   }
   .outcome-btn {
     min-height: 64px;
-    font-size: 14px;
+    font-size: var(--text-md);
   }
   .outcome-btn i {
-    font-size: 18px;
+    font-size: var(--text-xl);
   }
   .kpi-value {
     font-size: 36px;
   }
   .kpi-label {
-    font-size: 12px;
+    font-size: var(--text-sm);
   }
 }
 
@@ -680,17 +680,17 @@ h3,
 @media (max-width: 767px) {
   .btn {
     min-height: 44px;
-    font-size: 13px;
+    font-size: var(--text-base);
   }
   .input {
     min-height: 44px;
-    font-size: 14px;
+    font-size: var(--text-md);
   }
   .timer-display {
     font-size: 40px;
   }
   .kpi-value {
-    font-size: 28px;
+    font-size: var(--text-4xl);
   }
   .queue-item {
     padding: 10px 12px;
@@ -699,7 +699,7 @@ h3,
   .queue-position {
     width: 26px;
     height: 26px;
-    font-size: 11px;
+    font-size: var(--text-xs);
   }
   .motivo-option {
     padding: 14px 16px;
@@ -785,7 +785,7 @@ h3,
 }
 .introjs-tooltiptext {
   color: var(--text-primary, #fafafa) !important;
-  font-size: 14px !important;
+  font-size: var(--text-md) !important;
   line-height: 1.55 !important;
   padding: 18px 18px 12px !important;
 }
@@ -817,7 +817,7 @@ h3,
   border-radius: 8px !important;
   padding: 8px 14px !important;
   font-weight: 500 !important;
-  font-size: 13px !important;
+  font-size: var(--text-base) !important;
   text-shadow: none !important;
   font-family: var(--font-body, 'Inter Tight', sans-serif) !important;
   transition: all 0.18s ease !important;
@@ -851,7 +851,7 @@ h3,
   background: transparent !important;
   border: none !important;
   color: var(--text-muted, #71717a) !important;
-  font-size: 20px !important;
+  font-size: var(--text-2xl) !important;
   font-weight: 300 !important;
   padding: 4px 8px !important;
   line-height: 1 !important;
@@ -928,13 +928,13 @@ a:focus-visible,
   margin-bottom: 4px;
 }
 .empty-state__title {
-  font-size: 14px;
+  font-size: var(--text-md);
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.01em;
 }
 .empty-state__prose {
-  font-size: 13px;
+  font-size: var(--text-base);
   color: var(--text-secondary);
   line-height: 1.5;
   max-width: 280px;
@@ -944,13 +944,13 @@ a:focus-visible,
   gap: 6px;
 }
 .empty-state--compact .empty-state__icon {
-  font-size: 22px;
+  font-size: var(--text-3xl);
 }
 .empty-state--compact .empty-state__title {
-  font-size: 13px;
+  font-size: var(--text-base);
 }
 .empty-state--compact .empty-state__prose {
-  font-size: 12px;
+  font-size: var(--text-sm);
 }
 
 @keyframes shimmerPulse {

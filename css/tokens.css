@@ -121,6 +121,10 @@
   --radius: 14px;
   --radius-sm: 8px;
   --radius-lg: 20px;
+  --radius-pill: 999px;
+  /* Nota (G3 do design-audit): o miolo de fato do app é 10/12px (~70 usos) —
+     consolidar pra escala oficial é passada dedicada com screenshot-diff, não
+     varredura cega. Aqui só os matches exatos viraram token. */
 
   /* Touch / transitions */
   --touch-min: 48px;

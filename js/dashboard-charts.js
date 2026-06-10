@@ -1127,9 +1127,9 @@ export async function loadRuptureImpact(range) {
       const noun = r.total_rupturas === 1 ? 'registro' : 'registros';
       const sub = marca ? `${marca} · ${r.total_rupturas} ${noun}` : `${r.total_rupturas} ${noun}`;
       return `<div class="rupture-item">
-        <div>
-          <div style="font-weight:600;font-size:13px">${escapeHtml(r.produto)}</div>
-          <div style="font-size:10px;color:var(--text-muted)">${sub}</div>
+        <div class="item-main">
+          <div class="item-title">${escapeHtml(r.produto)}</div>
+          <div class="item-meta">${sub}</div>
         </div>
         <div class="rupture-count">${r.total_rupturas}</div>
       </div>`;
@@ -1193,21 +1193,21 @@ export async function loadDemandReport(range) {
       // sinal de compra). Threshold evita ruído em amostra pequena.
       const rising = tot >= 4 && rec >= 2 && rec * 2 > tot;
       const trendBadge = rising
-        ? ` <span style="color:var(--success);font-weight:700;font-size:9px"><i class="fa-solid fa-arrow-trend-up"></i> subindo</span>`
+        ? ` <span class="item-trend"><i class="fa-solid fa-arrow-trend-up"></i> subindo</span>`
         : '';
       // R$ é o headline (escala da perda); qtd vira subtexto. Sem valor (ticket
       // mediano 0), cai no badge de contagem simples.
       const right =
         valor > 0
-          ? `<div style="text-align:right;flex-shrink:0">
-               <div style="font-weight:700;font-size:13px;color:var(--danger)">${fmtBRL(valor)}</div>
-               <div style="font-size:10px;color:var(--text-muted)">${r.total} ${noun}</div>
+          ? `<div class="item-end">
+               <div class="item-end-value">${fmtBRL(valor)}</div>
+               <div class="item-end-sub">${r.total} ${noun}</div>
              </div>`
           : `<div class="rupture-count">${r.total}</div>`;
       return `<div class="rupture-item">
-        <div>
-          <div style="font-weight:600;font-size:13px">${escapeHtml(r.produto)}</div>
-          <div style="font-size:10px;color:var(--text-muted)">${escapeHtml(motivoLabel)}${trendBadge}</div>
+        <div class="item-main">
+          <div class="item-title">${escapeHtml(r.produto)}</div>
+          <div class="item-meta">${escapeHtml(motivoLabel)}${trendBadge}</div>
         </div>
         ${right}
       </div>`;
@@ -1298,10 +1298,10 @@ export async function loadLostLeads(range) {
             <i class="fa-solid fa-check" aria-hidden="true"></i>
           </button>`;
       return `<div class="rupture-item${r.recuperado ? ' is-recovered' : ''}">
-        <div style="min-width:0">
-          <div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${nome}</div>
-          <div style="font-size:11px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${prod} · ${escapeHtml(motivoLabel)}</div>
-          <div style="font-size:10px;color:var(--text-muted);margin-top:2px">${escapeHtml(fmtTelBR(r.cliente_telefone))} · ${escapeHtml(r.vendedor || '—')} · ${quando}</div>
+        <div class="item-main">
+          <div class="item-title">${nome}</div>
+          <div class="item-sub">${prod} · ${escapeHtml(motivoLabel)}</div>
+          <div class="item-meta">${escapeHtml(fmtTelBR(r.cliente_telefone))} · ${escapeHtml(r.vendedor || '—')} · ${quando}</div>
         </div>
         <div class="lead-actions">${actions}</div>
       </div>`;
