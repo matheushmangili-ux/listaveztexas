@@ -86,7 +86,9 @@ async function refreshMyVms() {
   }
 }
 
+let _galleryLoading = false;
 async function loadGallery() {
+  _galleryLoading = true;
   try {
     const { data, error } = await _sb.rpc('get_vm_gallery', { p_limit: 30, p_offset: 0 });
     if (error) throw error;
@@ -94,6 +96,8 @@ async function loadGallery() {
   } catch (err) {
     console.warn('[vm] gallery falhou:', err);
     _gallery = [];
+  } finally {
+    _galleryLoading = false;
   }
 }
 
@@ -174,11 +178,23 @@ function renderSheetBody() {
   `;
 
   body.querySelectorAll('.vm-tab').forEach((btn) => {
-    btn.addEventListener('click', async () => {
+    btn.addEventListener('click', () => {
       _activeVmTab = btn.dataset.tab;
-      if (_activeVmTab === 'gallery' && _gallery.length === 0) await loadGallery();
-      if (_activeVmTab === 'tasks') await refreshVmTasks();
+      // Render IMEDIATO com o cache (a espera de RPC aqui era a "lentidão" do
+      // menu); atualiza em background e re-renderiza só se a aba não mudou.
+      // Flag ANTES do render: 1ª entrada na galeria mostra "carregando", não
+      // um falso "nenhuma foto".
+      if (_activeVmTab === 'gallery' && _gallery.length === 0) _galleryLoading = true;
       renderSheetBody();
+      if (_activeVmTab === 'gallery') {
+        loadGallery().then(() => {
+          if (_activeVmTab === 'gallery') renderSheetBody();
+        });
+      } else if (_activeVmTab === 'tasks') {
+        refreshVmTasks().then(() => {
+          if (_activeVmTab === 'tasks') renderSheetBody();
+        });
+      }
     });
   });
 
@@ -546,7 +562,7 @@ function renderMyList() {
         const st = STATUS_LABELS[v.status] || STATUS_LABELS.pending;
         const cat = VM_CATEGORIES.find((c) => c.id === v.category);
         return `<div class="vm-grid-item">
-      <img src="${esc(v.photo_url)}" alt="VM" class="vm-thumb" loading="lazy">
+      <img src="${esc(v.photo_url)}" alt="VM" class="vm-thumb" loading="lazy" decoding="async">
       <div class="vm-grid-meta">
         <span class="vm-status-badge ${st.cls}">${st.label}</span>
         <span class="vm-cat-tag"><i class="fa-solid ${cat?.icon || 'fa-image'}"></i> ${esc(cat?.label || v.category)}</span>
@@ -562,6 +578,15 @@ function renderGalleryList() {
   const area = document.getElementById('vmListArea');
   if (!area) return;
   if (_gallery.length === 0) {
+    // 1ª entrada na aba: o fetch roda em background — mostra "carregando" em
+    // vez de um falso "nenhuma foto" que pisca e troca.
+    if (_galleryLoading) {
+      area.innerHTML = `<div class="empty-state empty-state--compact">
+        <i class="fa-solid fa-spinner fa-spin empty-state__icon"></i>
+        <div class="empty-state__prose">Carregando galeria…</div>
+      </div>`;
+      return;
+    }
     area.innerHTML = `<div class="empty-state empty-state--compact">
       <i class="fa-solid fa-images empty-state__icon"></i>
       <div class="empty-state__prose">Nenhuma foto aprovada ainda.</div>
@@ -575,7 +600,7 @@ function renderGalleryList() {
         const cat = VM_CATEGORIES.find((c) => c.id === v.category);
         const nome = v.vendor_apelido || v.vendor_nome || '';
         return `<div class="vm-grid-item">
-      <img src="${esc(v.photo_url)}" alt="VM" class="vm-thumb" loading="lazy">
+      <img src="${esc(v.photo_url)}" alt="VM" class="vm-thumb" loading="lazy" decoding="async">
       <div class="vm-grid-meta">
         <span class="vm-cat-tag"><i class="fa-solid ${cat?.icon || 'fa-image'}"></i> ${esc(cat?.label || v.category)}</span>
         <span class="vm-author">${esc(nome)}</span>
