@@ -305,10 +305,17 @@ async function _executeAtendimento(vendedorId, canalOrigemId) {
     toast((v.apelido || v.nome) + ' não está na fila (status: ' + v.status + ')', 'warning');
     return;
   }
-  // Se não é o primeiro da fila, é atendimento preferencial
+  // Se não é o primeiro da fila, é atendimento preferencial. Mesmo invariante
+  // do renderQueue: quem tem atendimento ABERTO não conta como fila — um
+  // fantasma (status preso em disponivel) no topo marcava todo mundo como
+  // preferencial, mesmo sendo a vez da pessoa.
   const setor = v.setor || 'loja';
+  const activeIds = new Set((_ctx.activeAtendimentos || []).map((a) => a.vendedor_id));
   const fila = _ctx.vendedores
-    .filter((x) => (x.setor || 'loja') === setor && x.status === 'disponivel' && x.posicao_fila != null)
+    .filter(
+      (x) =>
+        (x.setor || 'loja') === setor && x.status === 'disponivel' && x.posicao_fila != null && !activeIds.has(x.id)
+    )
     .sort((a, b) => a.posicao_fila - b.posicao_fila);
   const isPreferencial = fila.length > 0 && fila[0].id !== vendedorId;
   // Salvar posição original para restaurar se cancelar
@@ -767,9 +774,19 @@ async function cancelarAtendimento(atendId) {
       return;
     }
 
-    // Deletar atendimento (foi engano, não conta)
+    // Deletar atendimento (foi engano, não conta) — via RPC SECURITY DEFINER:
+    // o DELETE direto era bloqueado EM SILÊNCIO pela RLS pra conta da recepção
+    // (policy exige manager) → atendimento sobrevivia, vendedor voltava pra
+    // fila e nascia o fantasma que marcava todo mundo como preferencial.
+    // Se nada foi apagado, ABORTA antes de mexer na fila.
     _ctx.markLocal();
-    await _ctx.sb.from('atendimentos').delete().eq('id', atendId);
+    const { data: cancelou, error: errDel } = await _ctx.sb.rpc('tablet_cancelar_atendimento', {
+      p_atend_id: atendId
+    });
+    if (errDel || !cancelou) {
+      toast('Não foi possível cancelar' + (errDel ? ': ' + errDel.message : ' (atendimento não encontrado)'), 'error');
+      return;
+    }
 
     // Devolver vendedor à posição original (ou 1º se não tiver salva)
     const setor = v.setor || 'loja';
