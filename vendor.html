@@ -178,8 +178,11 @@
 
         <section id="homeOffCard" class="vendor-big-card vendor-card-off hidden">
           <div class="vendor-off-icon"><i class="fa-solid fa-moon"></i></div>
-          <div class="vendor-off-label">Fora do turno</div>
+          <div class="vendor-off-label" id="offLabel">Fora do turno</div>
           <div class="vendor-off-sub" id="offSub">Aguardando a abertura do turno</div>
+          <button class="vendor-btn-primary hidden" id="btnJoinQueue" type="button">
+            <i class="fa-solid fa-right-to-bracket"></i> Entrar na fila
+          </button>
         </section>
 
         <section class="vendor-primary-actions" id="primaryActions">
@@ -463,6 +466,9 @@
         <button class="vendor-pausa-btn" data-motivo="banheiro"><i class="fa-solid fa-restroom"></i> Banheiro</button>
         <button class="vendor-pausa-btn" data-motivo="operacional">
           <i class="fa-solid fa-wrench"></i> Operacional
+        </button>
+        <button class="vendor-pausa-btn" data-motivo="finalizar">
+          <i class="fa-solid fa-door-open"></i> Finalizar o dia
         </button>
         <button class="vendor-pausa-btn" data-motivo="outro"><i class="fa-solid fa-ellipsis"></i> Outro</button>
       </div>

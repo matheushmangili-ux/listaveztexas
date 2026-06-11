@@ -40,6 +40,8 @@ function grabRefs() {
   el.attendingCard = document.getElementById('homeAttendingCard');
   el.pausaCard = document.getElementById('homePausaCard');
   el.offCard = document.getElementById('homeOffCard');
+  el.offLabel = document.getElementById('offLabel');
+  el.btnJoinQueue = document.getElementById('btnJoinQueue');
 
   el.bigPos = document.getElementById('bigPos');
   el.bigLabel = document.getElementById('bigLabel');
@@ -307,7 +309,9 @@ function renderMainCard() {
 
   if (!_ctx.turno_aberto_id) {
     el.offCard.classList.remove('hidden');
+    if (el.offLabel) el.offLabel.textContent = 'Fora do turno';
     el.offSub.textContent = 'Aguardando a abertura do turno pela recepção';
+    el.btnJoinQueue?.classList.add('hidden');
     return;
   }
 
@@ -322,8 +326,12 @@ function renderMainCard() {
       renderPausa();
       break;
     default:
+      // 'fora' com turno aberto (saiu por almoço/finalizar/outro — regra do
+      // tablet): o vendedor volta sozinho pelo botão, sem depender da recepção.
       el.offCard.classList.remove('hidden');
-      el.offSub.textContent = 'Peça pra recepção te colocar na fila';
+      if (el.offLabel) el.offLabel.textContent = 'Fora da fila';
+      el.offSub.textContent = 'Você não está na fila no momento';
+      el.btnJoinQueue?.classList.remove('hidden');
   }
 }
 
@@ -582,6 +590,9 @@ function wireActions() {
   el.btnFinish.addEventListener('click', () => openOutcomeSheet());
   el.btnCancel.addEventListener('click', onCancelAttendance);
   el.btnReturn.addEventListener('click', onReturnFromPausa);
+  // "Entrar na fila" do card fora: a RPC de retorno não exige status 'pausa' —
+  // serve pra voltar de almoço/finalizar/outro (regra do tablet) sem recepção.
+  el.btnJoinQueue?.addEventListener('click', onReturnFromPausa);
   el.btnPausa.addEventListener('click', () => openPausaSheet());
   el.btnRefresh.addEventListener('click', onRefresh);
   el.aiTipsOverlay?.addEventListener('click', closeAiTips);
@@ -975,9 +986,13 @@ async function onGoPausa(motivo, detalhe) {
     if (error) throw error;
     await loadContext();
     renderAll();
-    window._vendorToast('Entrou em pausa', 'info');
+    // Regra do tablet: banheiro/operacional = pausa; almoço/finalizar/outro =
+    // fora da fila — o toast conta o que aconteceu de verdade.
+    if (motivo === 'finalizar') window._vendorToast('Expediente encerrado — até a próxima! 👋', 'success');
+    else if (motivo === 'banheiro' || motivo === 'operacional') window._vendorToast('Entrou em pausa', 'info');
+    else window._vendorToast('Saída registrada — você saiu da fila', 'info');
   } catch (err) {
-    window._vendorToast(err?.message || 'Erro ao entrar em pausa', 'error');
+    window._vendorToast(err?.message || 'Erro ao registrar saída', 'error');
   }
 }
 
