@@ -903,6 +903,14 @@ let _lastActivity = Date.now();
   );
 });
 timers.session = setInterval(() => {
+  // Kiosk: com TURNO ABERTO o tablet é display da operação — ficar 30min sem
+  // toque é normal (etapa vendor-first) e deslogar aqui "quebrava" a recepção
+  // sem ninguém entender ("a lista da vez não carrega"). O timeout de
+  // inatividade só vale com a loja fechada (sem turno).
+  if (state.turno) {
+    _lastActivity = Date.now();
+    return;
+  }
   if (Date.now() - _lastActivity > SESSION_TIMEOUT_TABLET) {
     toast('Sessão expirada por inatividade', 'warning');
     setTimeout(() => logout(), TOAST_SHORT);
