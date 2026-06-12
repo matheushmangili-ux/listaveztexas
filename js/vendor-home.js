@@ -2,6 +2,7 @@
 // minhavez Vendedor — Home screen + real-time + actions
 // ============================================
 
+import { initSync, publishSync } from '/js/mv-sync.js';
 import { initAnnouncements, unmountAnnouncements, refreshAnnouncements } from './vendor-announcements.js';
 import { initXp, unmountXp, refreshAfterAtendimento as refreshXp } from './vendor-xp.js';
 import {
@@ -523,64 +524,27 @@ function bindVisibilityResync() {
 }
 
 function subscribeRealtime() {
-  if (_realtimeChannel) _sb.removeChannel(_realtimeChannel);
-
   const reloadCtx = debounce(async () => {
     await loadContext();
     renderAll();
   }, 350);
   const reloadStats = debounce(() => loadStats(), 350);
 
-  _realtimeChannel = _sb
-    .channel('vendor-' + _ctx.vendedor_id)
-    .on(
-      'postgres_changes',
-      {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'vendedores',
-        filter: 'tenant_id=eq.' + _ctx.tenant_id
-      },
-      // Qualquer mudança de vendedor do tenant pode afetar a posição na fila.
-      // Debounced: re-normalização dispara N updates → 1 loadContext só.
-      reloadCtx
-    )
-    .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'atendimentos',
-        filter: 'tenant_id=eq.' + _ctx.tenant_id
-      },
-      (payload) => {
-        reloadStats();
-        // Se o atendimento é do próprio vendedor e foi finalizado, dispara refresh de XP/missões/conquistas
-        // pra capturar XP creditado pelo tablet (admin finaliza → vendor app precisa refletir)
-        const row = payload?.new || payload?.old;
-        const isMine = row && row.vendedor_id === _ctx.vendedor_id;
-        const wasFinalized = payload?.new && payload.new.resultado && payload.new.resultado !== 'em_andamento';
-        if (isMine && wasFinalized) {
-          refreshXp().catch((err) => console.warn('[xp] refresh via realtime falhou:', err));
-          refreshMissions().catch((err) => console.warn('[missions] refresh via realtime falhou:', err));
-          refreshAchievements().catch((err) => console.warn('[achievements] refresh via realtime falhou:', err));
-        }
-      }
-    )
-    .on(
-      'postgres_changes',
-      {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'vendor_xp_events',
-        filter: 'vendor_id=eq.' + _ctx.vendedor_id
-      },
-      async () => {
-        // XP creditado direto (ex: bonus manual, evento sem atendimento): reflete já na UI
-        refreshXp().catch((err) => console.warn('[xp] refresh via xp_events falhou:', err));
-      }
-    )
-    .subscribe();
+  // Broadcast (mv-sync) no lugar de postgres_changes — o decodificador de WAL
+  // saturou o free tier no incidente de 2026-06-11. Outro client agiu →
+  // recarrega contexto/stats (debounced). A subscription de vendor_xp_events
+  // foi removida: a tabela nunca esteve na publication (era código morto) e o
+  // XP do próprio finish já é refrescado nos action handlers.
+  _realtimeChannel = initSync(_sb, _ctx.tenant_id, (p) => {
+    reloadCtx();
+    reloadStats();
+    // Atendimento MEU finalizado por outro client (ex.: tablet) → XP/missões
+    if (p && p.kind === 'atend' && p.vendedorId === _ctx.vendedor_id && p.finalizado) {
+      refreshXp().catch((err) => console.warn('[xp] refresh via sync falhou:', err));
+      refreshMissions().catch((err) => console.warn('[missions] refresh via sync falhou:', err));
+      refreshAchievements().catch((err) => console.warn('[achievements] refresh via sync falhou:', err));
+    }
+  });
 }
 
 // ─── Actions wiring ───
@@ -885,6 +849,7 @@ async function callStartAttendance(canalId) {
     _pendingPreferencial = false;
     await loadContext();
     renderAll();
+    publishSync({ kind: 'fila' });
     window._vendorToast(wasPref ? 'Atendimento preferencial iniciado ⭐' : 'Atendimento iniciado', 'success');
   } catch (err) {
     _pendingPreferencial = false;
@@ -940,6 +905,7 @@ async function onFinishAttendance(resultado, opts) {
     await loadContext();
     await loadStats();
     renderAll();
+    publishSync({ kind: 'atend', vendedorId: _ctx.vendedor_id, finalizado: true });
     window._vendorToast('Atendimento finalizado', 'success');
     // Atualiza XP + dispara toast/level up se ganhou pontos (non-blocking)
     refreshXp().catch((err) => console.warn('[xp] refresh pós-finish falhou:', err));
@@ -973,6 +939,7 @@ async function onCancelAttendance() {
     stopAttendingTimer();
     await loadContext();
     renderAll();
+    publishSync({ kind: 'fila' });
     window._vendorToast('Atendimento cancelado', 'info');
   } catch (err) {
     window._vendorToast(err?.message || 'Erro ao cancelar', 'error');
@@ -986,6 +953,7 @@ async function onGoPausa(motivo, detalhe) {
     if (error) throw error;
     await loadContext();
     renderAll();
+    publishSync({ kind: 'fila' });
     // Regra do tablet: banheiro/operacional = pausa; almoço/finalizar/outro =
     // fora da fila — o toast conta o que aconteceu de verdade.
     if (motivo === 'finalizar') window._vendorToast('Expediente encerrado — até a próxima! 👋', 'success');
@@ -1003,6 +971,7 @@ async function onReturnFromPausa() {
     stopPausaSinceTimer();
     await loadContext();
     renderAll();
+    publishSync({ kind: 'fila' });
     window._vendorToast('Voltou pra fila', 'success');
   } catch (err) {
     window._vendorToast(err?.message || 'Erro ao voltar', 'error');

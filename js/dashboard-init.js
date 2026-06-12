@@ -4,6 +4,7 @@
 // ============================================
 
 import { getSupabase } from '/js/supabase-config.js';
+import { initSync, publishSync } from '/js/mv-sync.js';
 import { requireRole, logout, getTenantId } from '/js/auth.js';
 import {
   todayRange,
@@ -691,6 +692,7 @@ window.toggleVendedor = async function (id, isAtivo) {
     return;
   }
   toast(isAtivo ? 'Vendedor desativado' : 'Vendedor ativado', 'success');
+  publishSync({ kind: 'fila' });
   loadVendedores();
   loadFloor();
 };
@@ -707,6 +709,7 @@ window.deleteVendedor = async function (id, nome) {
     return;
   }
   toast('Vendedor desativado — histórico preservado', 'success');
+  publishSync({ kind: 'fila' });
   await loadVendedores();
   loadFloor();
 };
@@ -916,19 +919,13 @@ function debouncedReloadAtendimentos() {
     }
   }, 800);
 }
-let _dashboardRtChannel = sb
-  .channel(`dashboard-sync-${tenantId || 'default'}`)
-  .on(
-    'postgres_changes',
-    { event: '*', schema: 'public', table: 'vendedores', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined },
-    () => debouncedReloadVendedores()
-  )
-  .on(
-    'postgres_changes',
-    { event: '*', schema: 'public', table: 'atendimentos', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined },
-    () => debouncedReloadAtendimentos()
-  )
-  .subscribe();
+// Broadcast (mv-sync) no lugar de postgres_changes — o decodificador de WAL
+// saturou o free tier no incidente de 2026-06-11. Tablet/vendor publicam ao
+// agir; o dashboard recarrega (debounced).
+let _dashboardRtChannel = initSync(sb, tenantId, () => {
+  debouncedReloadVendedores();
+  debouncedReloadAtendimentos();
+});
 
 // Cleanup realtime subscription ao sair da página
 window.addEventListener('beforeunload', () => {

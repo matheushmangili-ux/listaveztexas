@@ -3,7 +3,7 @@
 // Network-first para HTML e APIs — sempre pega a versão mais fresca
 // Web Push listener pro minhavez Vendedor
 // Bump CACHE_VERSION a cada deploy
-const CACHE_VERSION = '199';
+const CACHE_VERSION = '200';
 const CACHE_NAME = 'minhavez-v' + CACHE_VERSION;
 const STATIC_ASSETS = [
   '/tablet.html',
@@ -27,6 +27,7 @@ const STATIC_ASSETS = [
   '/js/components/mv-loader.js',
   '/assets/logo/mv-chevron-primary.svg',
   '/js/constants.js',
+  '/js/mv-sync.js',
   '/js/utils.js',
   '/js/supabase-config.js',
   '/js/tenant.js',

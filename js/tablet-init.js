@@ -4,6 +4,7 @@
 // ============================================
 
 import { getSupabase } from '/js/supabase-config.js';
+import { initSync, publishSync } from '/js/mv-sync.js';
 import { requireRole, logout, getTenantId } from '/js/auth.js';
 import { SAIDA_COLORS, toast, initTheme, toggleTheme, escapeHtml } from '/js/utils.js';
 import { loadTenant, applyBranding, tenantPath } from '/js/tenant.js';
@@ -186,6 +187,10 @@ function markLocal() {
   timers.localAction = setTimeout(() => {
     ui.localAction = false;
   }, LOCAL_ACTION_DEBOUNCE);
+  // markLocal é o choke point de TODA ação local do tablet → publica o sync
+  // (debounced; 600ms dá tempo do write chegar no banco antes dos outros lerem).
+  clearTimeout(timers.syncPub);
+  timers.syncPub = setTimeout(() => publishSync({ kind: 'fila', origem: 'tablet' }), 600);
 }
 
 window.setSetor = function (setor) {
@@ -917,32 +922,23 @@ timers.session = setInterval(() => {
   }
 }, SESSION_CHECK_INTERVAL);
 
-// ─── Realtime (debounced, ignora ação local) ───
-const _rtChannelName = `tablet-sync-${tenantId || 'default'}`;
-let _rtChannel = sb
-  .channel(_rtChannelName)
-  .on(
-    'postgres_changes',
-    { event: '*', schema: 'public', table: 'vendedores', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined },
-    () => {
-      if (ui.localAction) return;
-      clearTimeout(timers.rtVend);
-      timers.rtVend = setTimeout(loadVendedores, RT_VENDEDOR_DEBOUNCE);
-    }
-  )
-  .on(
-    'postgres_changes',
-    { event: '*', schema: 'public', table: 'atendimentos', filter: tenantId ? `tenant_id=eq.${tenantId}` : undefined },
-    () => {
-      if (ui.localAction) return;
-      clearTimeout(timers.rtAtend);
-      timers.rtAtend = setTimeout(() => {
-        updateQuickStats();
-        checkActiveAtendimentos();
-      }, RT_VENDEDOR_DEBOUNCE);
-    }
-  )
-  .subscribe((status) => {
+// ─── Realtime via Broadcast (mv-sync) — sem decodificador de WAL ───
+// postgres_changes saiu (incidente 2026-06-11: decoder saturou o free tier);
+// o sync agora é Broadcast: outro client agiu → este recarrega (debounced).
+let _rtChannel = initSync(
+  sb,
+  tenantId,
+  () => {
+    if (ui.localAction) return;
+    clearTimeout(timers.rtVend);
+    timers.rtVend = setTimeout(loadVendedores, RT_VENDEDOR_DEBOUNCE);
+    clearTimeout(timers.rtAtend);
+    timers.rtAtend = setTimeout(() => {
+      updateQuickStats();
+      checkActiveAtendimentos();
+    }, RT_VENDEDOR_DEBOUNCE);
+  },
+  (status) => {
     if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
       const banner = document.getElementById('offlineBanner');
       if (banner) banner.style.display = 'flex';
@@ -957,7 +953,8 @@ let _rtChannel = sb
       if (banner) banner.style.display = 'none';
       ui._rtRetries = 0;
     }
-  });
+  }
+);
 
 // ─── Auto-sync: recarrega dados a cada 30s (funciona sempre, independente de tab/app switch) ───
 // Sem catch, uma falha de rede no interval virava unhandled rejection — agora loga e segue.
